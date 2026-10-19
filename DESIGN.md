@@ -73,11 +73,39 @@ The story is taught through survival. Chapters run in order. The first unfinishe
 | 9 | The Overgrown Plot | Reach Farming 2 (opens plot two) | 3 pumpkin seeds |
 | 10 | A Clean Start | Repair to Patched and tidy once | 40 Cleaning XP |
 | 11 | Feed Yourself Through the Cold | Harvest 10 crops | 60 Farming XP |
-| 12 | Something Sweeter | Harvest a pumpkin (Farming 3) | 2 pumpkin seeds |
-| 13 | Clear the Stain | Cleanse the house once | 40 Cleaning XP |
-| 14 | A Home Worth Keeping | Restore the farmhouse fully | 60 Cleaning XP |
+| 12 | Coin for Seed | Sell 5 items at the stall | 30 coins |
+| 13 | Something Sweeter | Harvest a pumpkin (Farming 3) | 2 pumpkin seeds |
+| 14 | Clear the Stain | Cleanse the house once | 40 Cleaning XP |
+| 15 | A Home Worth Keeping | Restore the farmhouse fully | 60 Cleaning XP |
 
 Saves from before this change reset chapter progress. Stat-based achievements re-check from saved stats, so some rewards may be paid again.
+
+## Money and the stall
+
+- Coins are the money. The HUD shows them, and they're saved.
+- The **stall** sits on the path east of the house. It is open **06:00 to 18:00**. Walk up to it and press Space to trade.
+- The stall **only buys what you carry**. Take crops or fish out of storage first.
+- Sell prices: crops 4 each, fish 6 each, meals 8 each.
+- Buy seeds: 5 turnip seeds for 15 coins, or 3 pumpkin seeds for 30 coins at Farming 3.
+
+## Pack, bags, and storage
+
+- The **pack** holds crops, fish, and meals. Seeds have their own pouch and don't count. Materials are uncapped for now.
+- The pack starts at **20 slots**. The Inventory panel shows space used and the next bag.
+- **Bags** (bought with coins, fiber, wood, and Carpentry level):
+
+| Bag | Slots added | Cost | Carpentry |
+|---|---|---|---|
+| Satchel | +10 | 40 coins, 4 fiber | 1 |
+| Haversack | +10 | 120 coins, 4 wood, 8 fiber | 3 |
+| Backpack | +10 | 300 coins, 8 wood, 12 fiber | 5 |
+
+- **Root cellar** (built from the House panel, stores **30 crops**): 25 coins, 4 wood, 2 fiber, Carpentry 1. Stand at it and press Space to store or take crops. Nothing spoils in the cellar. Harvesting puts crops in the pack first. If the pack is full, they go to the cellar. If both are full, you can't harvest.
+- **Cooler** (built from the House panel, stores **10 fish**): 40 coins, 4 wood, 4 fiber, Carpentry 2. Fish kept in the cooler don't spoil. Stand at it and press Space to store or take fish.
+- **Fish spoil:** any fish still in the pack at the end of the day are lost. The end-of-day message says how many. Storing fish in the cooler is the only way to keep them overnight.
+- **Full pack while fishing:** if the pack is full and the cooler has room, a catch goes straight into the cooler. If neither has room, the line reels in with a message.
+
+Later preservation (smokehouse, dehydrating, canning, fermenting) is planned but not built.
 
 ## Achievements
 
@@ -165,7 +193,7 @@ Achievements track stats and never reset. Each pays a small reward. Earning all 
 ## Saving
 
 - The game saves **only** when you sleep in bed or collapse at 03:00.
-- Saved: day, skill XP, inventory (including meals), materials, stats, story chapters done, achievements done, selected seed, lantern tier, house stage, tidy/mend/cleanse days, sanity and sanity penalty, crops (with kind), brush piles, **player position**, whether you were **inside the house**, and the **open panel**.
+- Saved: day, skill XP, inventory (including meals), coins, bag upgrades, root cellar and cooler (built, and what they hold), materials, stats, story chapters done, achievements done, selected seed, lantern tier, house stage, tidy/mend/cleanse days, sanity and sanity penalty, crops (with kind), brush piles, **player position**, whether you were **inside the house**, and the **open panel**.
 - Quitting mid-day loses that day's progress since the last save. Position and panel are saved at the same moment, so they reflect the last sleep or collapse.
 
 ## Deferred
