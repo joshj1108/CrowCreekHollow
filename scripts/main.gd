@@ -363,8 +363,8 @@ const TILE_COLORS := {
 	Tile.DESK: Color("6b5a2e"),
 	Tile.FALLOW: Color("4d5a32"),
 	Tile.STALL: Color("b5793d"),
-	Tile.CELLAR: Color("4a3f5c"),
-	Tile.COOLER: Color("5b8fa8"),
+	Tile.CELLAR: Color("a88ad0"),
+	Tile.COOLER: Color("7fc4e0"),
 	Tile.GATE: Color("8f7a4f"),
 }
 
@@ -529,7 +529,13 @@ func _draw() -> void:
 	for y in INT_H:
 		for x in INT_W:
 			var kind: int = interior[y][x]
-			draw_rect(_tile_rect(INT_ORIGIN + Vector2i(x, y)), TILE_COLORS[kind])
+			var cell := _tile_rect(INT_ORIGIN + Vector2i(x, y))
+			draw_rect(cell, TILE_COLORS[kind])
+			# Storage is labeled so it's easy to find in the house.
+			if kind == Tile.COOLER or kind == Tile.CELLAR:
+				draw_rect(cell, Color(1, 1, 1, 0.8), false, 2.0)
+				var label := "Cooler" if kind == Tile.COOLER else "Cellar"
+				draw_string(ThemeDB.fallback_font, cell.position + Vector2(2, PX * 0.6), label, HORIZONTAL_ALIGNMENT_LEFT, -1, 11, Color(0.05, 0.03, 0.02))
 
 	for pos in crops:
 		var crop: Dictionary = crops[pos]
@@ -1119,7 +1125,7 @@ func _house_rows() -> Array:
 	})
 	rows.append({"section": "Storage"})
 	if cellar_built:
-		rows.append({"name": "Root cellar", "value": "built, holds %d crops" % CELLAR_CAP})
+		rows.append({"name": "Root cellar", "value": "built, holds %d crops. Stand at it in the house and press Space." % CELLAR_CAP})
 	else:
 		rows.append({
 			"name": "Build a root cellar (holds %d crops)" % CELLAR_CAP,
@@ -1129,7 +1135,7 @@ func _house_rows() -> Array:
 			"enabled": _can_afford(CELLAR_COST),
 		})
 	if cooler_built:
-		rows.append({"name": "Cooler", "value": "built, keeps %d fish fresh" % COOLER_CAP})
+		rows.append({"name": "Cooler", "value": "built, keeps %d fish fresh. Stand at it in the house and press Space." % COOLER_CAP})
 	else:
 		rows.append({
 			"name": "Build a cooler (keeps %d fish fresh)" % COOLER_CAP,
