@@ -102,8 +102,8 @@ Saves from before this change reset chapter progress. Stat-based achievements re
 | Haversack | +10 | 120 coins, 4 wood, 8 fiber | 3 |
 | Backpack | +10 | 300 coins, 8 wood, 12 fiber | 5 |
 
-- **Root cellar** (built from the House panel, stores **30 crops**): 25 coins, 4 wood, 2 fiber, Carpentry 1. Stand at it and press Space to store or take crops. Nothing spoils in the cellar. Storing is always manual: harvests go to the pack, and a harvest is refused if the pack is full.
-- **Cooler** (built from the House panel, stores **10 fish**): 40 coins, 4 wood, 4 fiber, Carpentry 2. Fish kept in the cooler don't spoil. Stand at it and press Space to store or take fish.
+- **Root cellar** (built from the House panel, stores **30 crops**): 25 coins, 4 wood, 2 fiber, Carpentry 1. They sit on the farm beside the house, so you can see them from the homestead. Stand beside the cellar, facing it, and press Space to store or take crops. Nothing spoils in the cellar. Storing is always manual: harvests go to the pack, and a harvest is refused if the pack is full.
+- **Cooler** (built from the House panel, stores **10 fish**): 40 coins, 4 wood, 4 fiber, Carpentry 2. Fish kept in the cooler don't spoil. Stand beside the cooler, facing it, and press Space to store or take fish.
 - **Fish spoil:** any fish still in the pack at the end of the day are lost. The end-of-day message says how many. Storing fish in the cooler is the only way to keep them overnight.
 - **Full pack:** storage is always manual. A full pack stops harvesting and fishing with a message. Store fish in the cooler, or sell or cook them, to keep going.
 

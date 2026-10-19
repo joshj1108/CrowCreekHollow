@@ -102,8 +102,8 @@ const CELLAR_CAP := 30
 const COOLER_CAP := 10
 const CELLAR_COST := {"wood": 4, "fiber": 2, "coins": 25, "level": 1}
 const COOLER_COST := {"wood": 4, "fiber": 4, "coins": 40, "level": 2}
-const INT_CELLAR := Vector2i(10, 5)   # interior tiles, local to the house
-const INT_COOLER := Vector2i(3, 5)
+const CELLAR_IX := Vector2i(24, 7)   # farm tiles, local to the farm, beside the house
+const COOLER_IX := Vector2i(33, 7)
 # The stall sells what you carry and buys seeds. It is open 06:00 to 18:00.
 const STALL_IX := 22
 const STALL_IY := 9
@@ -524,7 +524,12 @@ func _draw() -> void:
 	for y in MAP_H:
 		for x in MAP_W:
 			var tile: int = map[y][x]
-			draw_rect(_tile_rect(Vector2i(x, y)), TILE_COLORS[tile])
+			var cell := _tile_rect(Vector2i(x, y))
+			draw_rect(cell, TILE_COLORS[tile])
+			if tile == Tile.CELLAR or tile == Tile.COOLER:
+				draw_rect(cell, Color(1, 1, 1, 0.8), false, 2.0)
+				var label := "Cooler" if tile == Tile.COOLER else "Cellar"
+				draw_string(ThemeDB.fallback_font, cell.position + Vector2(2, PX * 0.6), label, HORIZONTAL_ALIGNMENT_LEFT, -1, 11, Color(0.05, 0.03, 0.02))
 
 	for y in INT_H:
 		for x in INT_W:
@@ -656,7 +661,17 @@ func _build_map() -> void:
 
 
 # The interior is a fixed layout. Rooms open up as the house is repaired.
+# The cellar and cooler are farm tiles beside the house, so they show on the map.
+func _apply_storage_tiles() -> void:
+	if cellar_built:
+		map[CELLAR_IX.y + BORDER_Y][CELLAR_IX.x + BORDER_X] = Tile.CELLAR
+	if cooler_built:
+		map[COOLER_IX.y + BORDER_Y][COOLER_IX.x + BORDER_X] = Tile.COOLER
+	queue_redraw()
+
+
 func _build_interior() -> void:
+	_apply_storage_tiles()
 	interior = []
 	for y in INT_H:
 		var row: Array = []
@@ -666,10 +681,6 @@ func _build_interior() -> void:
 
 	_fill_interior(1, 5, 12, 7, Tile.FLOOR)   # the hall, always open
 	_set_interior(6, 8, Tile.EXIT)            # back out to the farm
-	if cooler_built:
-		_set_interior(INT_COOLER.x, INT_COOLER.y, Tile.COOLER)
-	if cellar_built:
-		_set_interior(INT_CELLAR.x, INT_CELLAR.y, Tile.CELLAR)
 
 	# The bedroom and its bed are open from the start.
 	_fill_interior(1, 1, 4, 4, Tile.FLOOR)
@@ -1125,7 +1136,7 @@ func _house_rows() -> Array:
 	})
 	rows.append({"section": "Storage"})
 	if cellar_built:
-		rows.append({"name": "Root cellar", "value": "built, holds %d crops. Stand at it in the house and press Space." % CELLAR_CAP})
+		rows.append({"name": "Root cellar", "value": "built, holds %d crops. Stand beside it, facing it, and press Space." % CELLAR_CAP})
 	else:
 		rows.append({
 			"name": "Build a root cellar (holds %d crops)" % CELLAR_CAP,
@@ -1135,7 +1146,7 @@ func _house_rows() -> Array:
 			"enabled": _can_afford(CELLAR_COST),
 		})
 	if cooler_built:
-		rows.append({"name": "Cooler", "value": "built, keeps %d fish fresh. Stand at it in the house and press Space." % COOLER_CAP})
+		rows.append({"name": "Cooler", "value": "built, keeps %d fish fresh. Stand beside it, facing it, and press Space." % COOLER_CAP})
 	else:
 		rows.append({
 			"name": "Build a cooler (keeps %d fish fresh)" % COOLER_CAP,
@@ -1244,6 +1255,12 @@ func _interact() -> void:
 		return
 	if kind == Tile.STALL:
 		_open_stall()
+		return
+	if kind == Tile.CELLAR:
+		_toggle_tab("Cellar")
+		return
+	if kind == Tile.COOLER:
+		_toggle_tab("Cooler")
 		return
 	if kind == Tile.FALLOW:
 		_show_message("Overgrown. Reach Farming level 2 to clear this plot.")
@@ -1632,10 +1649,10 @@ func _build_storage(which: String) -> void:
 	_pay(cost)
 	if which == "cellar":
 		cellar_built = true
-		_show_message("The root cellar is dug. It holds %d crops." % CELLAR_CAP)
+		_show_message("The root cellar is dug beside the house. It holds %d crops." % CELLAR_CAP)
 	else:
 		cooler_built = true
-		_show_message("The cooler is built. It keeps %d fish fresh." % COOLER_CAP)
+		_show_message("The cooler is built beside the house. It keeps %d fish fresh." % COOLER_CAP)
 	_build_interior()
 	queue_redraw()
 
