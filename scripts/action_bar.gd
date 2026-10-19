@@ -79,7 +79,7 @@ func _ready() -> void:
 
 	var close_button := Button.new()
 	close_button.text = "Close"
-	close_button.focus_mode = Control.FOCUS_NONE
+	close_button.focus_mode = Control.FOCUS_ALL
 	_style_button(close_button, false)
 	close_button.pressed.connect(_on_action_pressed.bind("close"))
 	header.add_child(close_button)
@@ -105,6 +105,8 @@ func show_panel(tab: String, rows: Array) -> void:
 		child.queue_free()
 	for row in rows:
 		rows_box.add_child(_build_row(row))
+	# Highlight the first usable button so a gamepad can reach it.
+	call_deferred("_focus_first_button")
 
 
 func hide_panel() -> void:
@@ -158,7 +160,7 @@ func _build_row(data: Dictionary) -> Control:
 	if data.has("button"):
 		var button := Button.new()
 		button.text = str(data["button"])
-		button.focus_mode = Control.FOCUS_NONE
+		button.focus_mode = Control.FOCUS_ALL
 		button.disabled = not bool(data.get("enabled", true))
 		_style_button(button, false)
 		button.pressed.connect(_on_action_pressed.bind(str(data.get("action", ""))))
