@@ -938,7 +938,8 @@ func _leave_house() -> void:
 func _set_bounds() -> void:
 	if inside:
 		player.min_pos = _tile_center(INT_ORIGIN.x + 1, INT_ORIGIN.y + 1)
-		player.max_pos = _tile_center(INT_ORIGIN.x + INT_W - 2, INT_ORIGIN.y + INT_H - 2)
+		# The bottom row holds the exit mat, so the player's clamp must reach it.
+		player.max_pos = _tile_center(INT_ORIGIN.x + INT_W - 2, INT_ORIGIN.y + INT_H - 1)
 		camera.limit_left = INT_ORIGIN.x * PX
 		camera.limit_top = INT_ORIGIN.y * PX
 		camera.limit_right = (INT_ORIGIN.x + INT_W) * PX
