@@ -12,9 +12,9 @@ A top-down farming game with heavy psychological horror, built in Godot 4.7.
 ## Controls (Stardew-style)
 
 - Move: WASD or arrow keys
-- Use, plant, harvest, gather, sleep, tidy, cleanse, or read: Space / Enter (face the tile)
+- Use, plant, harvest, gather, sleep, tidy, cleanse, cook, or read: Space / Enter (face the tile)
 - Walk into the farmhouse door to go inside. Walk onto the exit mat to leave.
-- Action bar (click or key): Skills K, Inventory I, Gear G, Quests Q, House H, Settings
+- Action bar (click or key): Skills K, Inventory I, Gear G, Quests Q, House H, Achievements J, Settings
 - Esc opens Settings, or closes it if it's already open
 - Farming and gathering pause while a panel is open
 
@@ -56,28 +56,45 @@ A top-down farming game with heavy psychological horror, built in Godot 4.7.
 - If you aren't in bed by **03:00**, you collapse. The day ends, the game saves, and your **sanity limit drops by 5 permanently**. A cleanse can recover it (see Sanity).
 - Crops grow one stage per day, and brush piles respawn each morning. Thicket piles appear at Bushcrafting 3.
 
-## Quests (homestead)
+## Story chapters
 
-Quests run in order. The first unfinished quest is shown at the top of the Quests panel as the **Next goal**, with a progress bar. Each quest pays a reward once.
+The story is taught through survival. Chapters run in order. The first unfinished one is the **Current chapter** at the top of the Quests panel, with its narrative beat. Each chapter pays a reward once, then the next one opens. The rest of the story is deferred.
 
-| # | Quest | Goal | Reward |
+| # | Chapter | Goal | Reward |
 |---|---|---|---|
-| 1 | Break ground | Plant 3 seeds | 5 turnip seeds |
-| 2 | First harvest | Harvest 1 crop | 50 Farming XP |
-| 3 | Gather from the brush | Gather from 3 brush piles | 2 wood, 2 fiber |
-| 4 | Patch the walls | Repair the house to Boarded | 2 wood, 2 fiber |
-| 5 | Light the way | Build a Tin Lantern | 3 turnip seeds |
-| 6 | Sleep under your own roof | Sleep in the bed | 40 Carpentry XP |
-| 7 | A clean start | Repair to Patched and tidy once | 40 Cleaning XP |
-| 8 | A second plot | Reach Farming 2 (opens plot two) | 3 pumpkin seeds |
-| 9 | Ten harvests | Harvest 10 crops | 60 Farming XP |
-| 10 | Angler's start | Catch 3 fish | 40 Fishing XP |
-| 11 | Carpenter's apprentice | Mend 6 boards | 3 wood, 3 fiber |
-| 12 | Pumpkin patch | Reach Farming 3 (unlocks pumpkins) | 2 pumpkin seeds |
-| 13 | Clear the stain | Cleanse the house once | 40 Cleaning XP |
-| 14 | A home worth keeping | Restore the farmhouse fully | 60 Cleaning XP |
+| 1 | Unfamiliar Ground | Plant 3 seeds | 5 turnip seeds |
+| 2 | Food Takes Time | Harvest 1 crop | 50 Farming XP |
+| 3 | Wood Before Walls | Gather from 3 brush piles | 2 wood, 2 fiber |
+| 4 | Hold the Door | Repair the house to Boarded | 2 wood, 2 fiber |
+| 5 | Work the Pond | Catch 3 fish | 40 Fishing XP |
+| 6 | A Fire and a Pan | Cook a meal | 30 Cooking XP |
+| 7 | Light the Way | Build a Tin Lantern | 3 turnip seeds |
+| 8 | Sleep Under Your Own Roof | Sleep in the bed before 03:00 | 40 Carpentry XP |
+| 9 | The Overgrown Plot | Reach Farming 2 (opens plot two) | 3 pumpkin seeds |
+| 10 | A Clean Start | Repair to Patched and tidy once | 40 Cleaning XP |
+| 11 | Feed Yourself Through the Cold | Harvest 10 crops | 60 Farming XP |
+| 12 | Something Sweeter | Harvest a pumpkin (Farming 3) | 2 pumpkin seeds |
+| 13 | Clear the Stain | Cleanse the house once | 40 Cleaning XP |
+| 14 | A Home Worth Keeping | Restore the farmhouse fully | 60 Cleaning XP |
 
-The story questline is on hold until the homestead stage is solid.
+Saves from before this change reset chapter progress. Stat-based achievements re-check from saved stats, so some rewards may be paid again.
+
+## Achievements
+
+Achievements are a tiered list toward 100% completion, shown in the Achievements panel (J, or the right stick click on a gamepad). The panel shows overall completion at the top, then four tiers with their own counts:
+
+- **Tier I: Settler** (9): first steps such as planting, catching, cooking, sleeping, and a first repair.
+- **Tier II: Homesteader** (9): steady use of the systems, such as 10 harvests, mending, and level 2 skills.
+- **Tier III: Keeper** (9): full restoration, pumpkins, cleansing, and level 3 skills.
+- **Tier IV: Hollow Hand** (9): mastery. Level 5 skills, 100 harvests, 50 meals, and finishing the story.
+
+Achievements track stats and never reset. Each pays a small reward. Earning all 36 gives 100%.
+
+## Cooking
+
+- Cooking is a skill (`Level = 1 + XP / 100`).
+- In the Inventory panel, **Cook a fish** uses 1 fish and 1 wood for 1 meal (15 XP). **Cook crops** uses 2 crops and 1 wood for 1 meal (10 XP).
+- **Eat a meal** uses one meal for +8 sanity.
 
 ## Farming and crops
 
@@ -115,6 +132,7 @@ The story questline is on hold until the homestead stage is solid.
   - **Bushcrafting:** gathering a brush pile gives 10 XP. Level 3 adds three thicket piles.
   - **Carpentry:** each house repair gives 30 XP. Mending a board (1 wood, 1 fiber, from the House panel) gives 15 XP, capped at 2 mends per day so the house can't be finished in one day. Training to level 2 takes about 3 days, and level 3 takes about a week.
   - **Cleaning:** each daily tidy gives 20 XP. At Cleaning 2, a tidy also gives +5 sanity. Cleaning 3 unlocks the cleanse.
+  - **Cooking:** cooking a fish gives 15 XP and cooking crops gives 10 XP. See Cooking above.
   - **Fishing:** face a sparkling spot on the pond edge and press Space. Each catch gives 15 XP, and the chance rises 2% per level. Spots move every 12 seconds. There are 3 spots, with one more at Fishing 3 and another at Fishing 5.
 - Levels will unlock new areas, tools, and fortifications.
 
@@ -147,13 +165,12 @@ The story questline is on hold until the homestead stage is solid.
 ## Saving
 
 - The game saves **only** when you sleep in bed or collapse at 03:00.
-- Saved: day, skill XP, inventory, materials, stats, quests done, selected seed, lantern tier, house stage, tidy/mend/cleanse days, sanity and sanity penalty, crops (with kind), brush piles, **player position**, whether you were **inside the house**, and the **open panel**.
+- Saved: day, skill XP, inventory (including meals), materials, stats, story chapters done, achievements done, selected seed, lantern tier, house stage, tidy/mend/cleanse days, sanity and sanity penalty, crops (with kind), brush piles, **player position**, whether you were **inside the house**, and the **open panel**.
 - Quitting mid-day loses that day's progress since the last save. Position and panel are saved at the same moment, so they reflect the last sleep or collapse.
 
 ## Deferred
 
-- The story: beats, mystery, and horror escalation. Waiting until the homestead is solid.
-- Sound and display settings (listed in Settings as coming later).
+- The story beyond the survival chapters: mystery and horror escalation.
 
 ## Open decisions
 

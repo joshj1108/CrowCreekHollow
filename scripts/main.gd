@@ -84,40 +84,104 @@ const CROPS := {
 	"pumpkin": {"seed": "pumpkin_seeds", "yield": 3, "xp": 40, "colors": ["9fd27a", "d98a35", "c26a1f", "f2a13a"]},
 }
 const PUMPKIN_LEVEL := 3
+const XP_COOK_FISH := 15
+const XP_COOK_CROPS := 10
+const COOK_CROP_COUNT := 2
+const COOK_WOOD := 1         # wood burned per meal
+const MEAL_SANITY := 8.0     # sanity restored by eating a meal
 
-# Quests run in order. The first is the Next goal. Each reads a stat and pays once.
-const QUESTS := [
-	{"id": "plot", "title": "Break ground", "text": "Plant 3 seeds on the tilled soil.",
-		"stat": "planted", "goal": 3, "reward": {"seeds": 5}},
-	{"id": "harvest", "title": "First harvest", "text": "Harvest one ripe crop.",
-		"stat": "harvested", "goal": 1, "reward": {"skill": "Farming", "xp": 50}},
-	{"id": "brush", "title": "Gather from the brush", "text": "Gather from 3 brush piles.",
-		"stat": "gathered", "goal": 3, "reward": {"wood": 2, "fiber": 2}},
-	{"id": "patch", "title": "Patch the walls", "text": "Repair the farmhouse to Boarded.",
-		"stat": "house_stage", "goal": 1, "reward": {"wood": 2, "fiber": 2}},
-	{"id": "light", "title": "Light the way", "text": "Build a Tin Lantern.",
-		"stat": "lantern_tier", "goal": 1, "reward": {"seeds": 3}},
-	{"id": "bed", "title": "Sleep under your own roof", "text": "Sleep in the bedroom bed before 03:00.",
-		"stat": "slept", "goal": 1, "reward": {"skill": "Carpentry", "xp": 40}},
-	{"id": "tidy", "title": "A clean start", "text": "Repair the house to Patched and tidy it once.",
-		"stat": "tidied", "goal": 1, "reward": {"skill": "Cleaning", "xp": 40}},
-	{"id": "second_plot", "title": "A second plot", "text": "Reach Farming level 2 to clear the overgrown plot.",
-		"stat": "farming_level", "goal": 2, "reward": {"pumpkin_seeds": 3}},
-	{"id": "ten_harvests", "title": "Ten harvests", "text": "Harvest 10 crops.",
-		"stat": "harvested", "goal": 10, "reward": {"skill": "Farming", "xp": 60}},
-	{"id": "angler", "title": "Angler's start", "text": "Catch 3 fish at the pond.",
-		"stat": "fished", "goal": 3, "reward": {"skill": "Fishing", "xp": 40}},
-	{"id": "apprentice", "title": "Carpenter's apprentice", "text": "Mend 6 boards.",
-		"stat": "mended", "goal": 6, "reward": {"wood": 3, "fiber": 3}},
-	{"id": "pumpkin_patch", "title": "Pumpkin patch", "text": "Reach Farming level 3 to plant pumpkins.",
-		"stat": "farming_level", "goal": 3, "reward": {"pumpkin_seeds": 2}},
-	{"id": "stain", "title": "Clear the stain", "text": "Cleanse the house once.",
-		"stat": "cleansed", "goal": 1, "reward": {"skill": "Cleaning", "xp": 40}},
-	{"id": "home", "title": "A home worth keeping", "text": "Restore the farmhouse fully.",
-		"stat": "house_stage", "goal": 3, "reward": {"skill": "Cleaning", "xp": 60}},
+# Story chapters run in order. The first unfinished one is the Current chapter.
+# "story" is the narrative beat, "text" the goal, and "stat" what it reads.
+const STORY := [
+	{"id": "ground", "title": "Unfamiliar Ground",
+		"story": "You wake at the edge of Hallowvale with a hoe and a few seeds. The farmhouse is rotting, the pond is still, and nothing here will feed you unless you put it in the ground.",
+		"text": "Plant 3 seeds on the tilled soil.", "stat": "planted", "goal": 3, "reward": {"seeds": 5}},
+	{"id": "first_crop", "title": "Food Takes Time",
+		"story": "Seeds need days to become food. Each night they grow a stage. Come back when something is ripe, and take it.",
+		"text": "Harvest one ripe crop.", "stat": "harvested", "goal": 1, "reward": {"skill": "Farming", "xp": 50}},
+	{"id": "wood", "title": "Wood Before Walls",
+		"story": "The brush piles around the homestead hide wood and fiber. The house will need both before it can keep the cold out.",
+		"text": "Gather from 3 brush piles.", "stat": "gathered", "goal": 3, "reward": {"wood": 2, "fiber": 2}},
+	{"id": "hold_door", "title": "Hold the Door",
+		"story": "The walls are open to the wind. Board them up so the house can hold a night.",
+		"text": "Repair the farmhouse to Boarded.", "stat": "house_stage", "goal": 1, "reward": {"wood": 2, "fiber": 2}},
+	{"id": "pond", "title": "Work the Pond",
+		"story": "The pond is the only other food on the land. Its fish move in the shallows. Face a sparkling spot and press Space to try for one.",
+		"text": "Catch 3 fish.", "stat": "caught", "goal": 3, "reward": {"skill": "Fishing", "xp": 40}},
+	{"id": "cook", "title": "A Fire and a Pan",
+		"story": "Raw fish sits badly on an empty stomach. Burn a little wood under a pan and cook one of your catches into a meal.",
+		"text": "Cook a meal from a fish or crops.", "stat": "cooked", "goal": 1, "reward": {"skill": "Cooking", "xp": 30}},
+	{"id": "light", "title": "Light the Way",
+		"story": "The night here is longer than the day, and it is not empty. A lantern keeps the dark a little further off.",
+		"text": "Build a Tin Lantern.", "stat": "lantern_tier", "goal": 1, "reward": {"seeds": 3}},
+	{"id": "bed", "title": "Sleep Under Your Own Roof",
+		"story": "Your body can only work so long. The bed is in the bedroom. Reach it before 03:00, or the night takes you where you stand.",
+		"text": "Sleep in the bed before 03:00.", "stat": "slept", "goal": 1, "reward": {"skill": "Carpentry", "xp": 40}},
+	{"id": "second_plot", "title": "The Overgrown Plot",
+		"story": "The second plot is choked with weeds. Clearing it takes more skill than you have yet.",
+		"text": "Reach Farming level 2.", "stat": "level_Farming", "goal": 2, "reward": {"pumpkin_seeds": 3}},
+	{"id": "tidy", "title": "A Clean Start",
+		"story": "The house holds the dust of whoever lived here before. Patch it, then tidy it, so it begins to feel like yours.",
+		"text": "Repair the house to Patched and tidy once.", "stat": "tidied", "goal": 1, "reward": {"skill": "Cleaning", "xp": 40}},
+	{"id": "winter_store", "title": "Feed Yourself Through the Cold",
+		"story": "One crop will not last. Harvest enough to keep a store against the long nights.",
+		"text": "Harvest 10 crops.", "stat": "harvested", "goal": 10, "reward": {"skill": "Farming", "xp": 60}},
+	{"id": "pumpkin", "title": "Something Sweeter",
+		"story": "Pumpkins need more skill than turnips. Reach Farming level 3 and bring one in from the field.",
+		"text": "Harvest a pumpkin.", "stat": "pumpkins", "goal": 1, "reward": {"pumpkin_seeds": 2}},
+	{"id": "stain", "title": "Clear the Stain",
+		"story": "Something in the house has stained the air. Burn an offering of crops and open the windows.",
+		"text": "Cleanse the house once.", "stat": "cleansed", "goal": 1, "reward": {"skill": "Cleaning", "xp": 40}},
+	{"id": "home", "title": "A Home Worth Keeping",
+		"story": "The house is not finished yet, but it could be. Restore it fully and it will hold against the dark.",
+		"text": "Restore the farmhouse fully.", "stat": "house_stage", "goal": 3, "reward": {"skill": "Cleaning", "xp": 60}},
 ]
 
-const SKILLS := ["Farming", "Bushcrafting", "Carpentry", "Cleaning", "Fishing"]
+# Achievements are a tiered list toward 100% completion. Each one tracks a stat.
+const ACHIEVEMENT_TIERS := ["Tier I: Settler", "Tier II: Homesteader", "Tier III: Keeper", "Tier IV: Hollow Hand"]
+const ACHIEVEMENTS := [
+	{"id": "first_seeds", "title": "First Seeds", "text": "Plant a seed.", "tier": 0, "stat": "planted", "goal": 1, "reward": {"seeds": 2}},
+	{"id": "first_fruit", "title": "First Fruit", "text": "Harvest a crop.", "tier": 0, "stat": "harvested", "goal": 1, "reward": {"seeds": 2}},
+	{"id": "brush_clear", "title": "Brush Clearer", "text": "Gather from 3 brush piles.", "tier": 0, "stat": "gathered", "goal": 3, "reward": {"wood": 2, "fiber": 2}},
+	{"id": "first_catch", "title": "Hook and Line", "text": "Catch a fish.", "tier": 0, "stat": "caught", "goal": 1, "reward": {"seeds": 2}},
+	{"id": "first_meal", "title": "Warm Meal", "text": "Cook a meal.", "tier": 0, "stat": "cooked", "goal": 1, "reward": {"seeds": 2}},
+	{"id": "first_sleep", "title": "Sleeper", "text": "Sleep in your bed.", "tier": 0, "stat": "slept", "goal": 1, "reward": {"seeds": 2}},
+	{"id": "tin_light", "title": "Tin Light", "text": "Build a Tin Lantern.", "tier": 0, "stat": "lantern_tier", "goal": 1, "reward": {"seeds": 2}},
+	{"id": "boarded", "title": "Boarded Up", "text": "Repair the house to Boarded.", "tier": 0, "stat": "house_stage", "goal": 1, "reward": {"wood": 2, "fiber": 2}},
+	{"id": "first_tidy", "title": "Tidy Hands", "text": "Tidy the house once.", "tier": 0, "stat": "tidied", "goal": 1, "reward": {"seeds": 2}},
+
+	{"id": "ten_harvests", "title": "Ten Harvests", "text": "Harvest 10 crops.", "tier": 1, "stat": "harvested", "goal": 10, "reward": {"wood": 2, "fiber": 2}},
+	{"id": "carpenter", "title": "Carpenter's Hand", "text": "Mend 6 boards.", "tier": 1, "stat": "mended", "goal": 6, "reward": {"wood": 2, "fiber": 2}},
+	{"id": "good_catch", "title": "Good Catch", "text": "Catch 10 fish.", "tier": 1, "stat": "caught", "goal": 10, "reward": {"wood": 2, "fiber": 2}},
+	{"id": "meal_plan", "title": "Meal Planner", "text": "Eat 5 meals.", "tier": 1, "stat": "eaten", "goal": 5, "reward": {"wood": 2, "fiber": 2}},
+	{"id": "patched", "title": "Patched Up", "text": "Repair the house to Patched.", "tier": 1, "stat": "house_stage", "goal": 2, "reward": {"wood": 2, "fiber": 2}},
+	{"id": "brass_light", "title": "Brass Light", "text": "Build a Brass Lantern.", "tier": 1, "stat": "lantern_tier", "goal": 2, "reward": {"wood": 2, "fiber": 2}},
+	{"id": "farmer_2", "title": "Growing Hands", "text": "Reach Farming level 2.", "tier": 1, "stat": "level_Farming", "goal": 2, "reward": {"wood": 2, "fiber": 2}},
+	{"id": "bush_3", "title": "Thicket Walker", "text": "Reach Bushcrafting level 3.", "tier": 1, "stat": "level_Bushcrafting", "goal": 3, "reward": {"wood": 2, "fiber": 2}},
+	{"id": "cleaner", "title": "Clean Air", "text": "Tidy the house 5 times.", "tier": 1, "stat": "tidied", "goal": 5, "reward": {"wood": 2, "fiber": 2}},
+
+	{"id": "restored", "title": "Restored", "text": "Restore the farmhouse fully.", "tier": 2, "stat": "house_stage", "goal": 3, "reward": {"wood": 3, "fiber": 3}},
+	{"id": "pumpkin_grower", "title": "Pumpkin Grower", "text": "Harvest 3 pumpkins.", "tier": 2, "stat": "pumpkins", "goal": 3, "reward": {"wood": 3, "fiber": 3}},
+	{"id": "cleansed", "title": "Cleansed", "text": "Cleanse the house once.", "tier": 2, "stat": "cleansed", "goal": 1, "reward": {"wood": 3, "fiber": 3}},
+	{"id": "fishmonger", "title": "Fishmonger", "text": "Catch 30 fish.", "tier": 2, "stat": "caught", "goal": 30, "reward": {"wood": 3, "fiber": 3}},
+	{"id": "carpenter_3", "title": "Tradesman", "text": "Reach Carpentry level 3.", "tier": 2, "stat": "level_Carpentry", "goal": 3, "reward": {"wood": 3, "fiber": 3}},
+	{"id": "fisher_3", "title": "Patient Angler", "text": "Reach Fishing level 3.", "tier": 2, "stat": "level_Fishing", "goal": 3, "reward": {"wood": 3, "fiber": 3}},
+	{"id": "hollow_light", "title": "Hollow Light", "text": "Build a Hollow Lantern.", "tier": 2, "stat": "lantern_tier", "goal": 3, "reward": {"wood": 3, "fiber": 3}},
+	{"id": "survivor", "title": "Survivor", "text": "Sleep in your bed 10 times.", "tier": 2, "stat": "slept", "goal": 10, "reward": {"wood": 3, "fiber": 3}},
+	{"id": "watcher", "title": "Field Watcher", "text": "Live through 5 nights of events.", "tier": 2, "stat": "events", "goal": 5, "reward": {"wood": 3, "fiber": 3}},
+
+	{"id": "hundred_harvests", "title": "Full Barns", "text": "Harvest 100 crops.", "tier": 3, "stat": "harvested", "goal": 100, "reward": {"seeds": 5, "pumpkin_seeds": 2}},
+	{"id": "master_farmer", "title": "Master Farmer", "text": "Reach Farming level 5.", "tier": 3, "stat": "level_Farming", "goal": 5, "reward": {"seeds": 5, "pumpkin_seeds": 2}},
+	{"id": "master_carpenter", "title": "Master Carpenter", "text": "Reach Carpentry level 5.", "tier": 3, "stat": "level_Carpentry", "goal": 5, "reward": {"seeds": 5, "pumpkin_seeds": 2}},
+	{"id": "master_fisher", "title": "Master Angler", "text": "Reach Fishing level 5.", "tier": 3, "stat": "level_Fishing", "goal": 5, "reward": {"seeds": 5, "pumpkin_seeds": 2}},
+	{"id": "master_cook", "title": "Master Cook", "text": "Reach Cooking level 5.", "tier": 3, "stat": "level_Cooking", "goal": 5, "reward": {"seeds": 5, "pumpkin_seeds": 2}},
+	{"id": "feast", "title": "Feast", "text": "Eat 50 meals.", "tier": 3, "stat": "eaten", "goal": 50, "reward": {"seeds": 5, "pumpkin_seeds": 2}},
+	{"id": "cleansed_five", "title": "Clean Conscience", "text": "Cleanse the house 5 times.", "tier": 3, "stat": "cleansed", "goal": 5, "reward": {"seeds": 5, "pumpkin_seeds": 2}},
+	{"id": "lasting", "title": "Lasting", "text": "Sleep in your bed 30 times.", "tier": 3, "stat": "slept", "goal": 30, "reward": {"seeds": 5, "pumpkin_seeds": 2}},
+	{"id": "story_end", "title": "Story Complete", "text": "Finish every story chapter.", "tier": 3, "stat": "story", "goal": 14, "reward": {"seeds": 5, "pumpkin_seeds": 2}},
+]
+
+const SKILLS := ["Farming", "Bushcrafting", "Carpentry", "Cleaning", "Fishing", "Cooking"]
 const XP_PLANT := 5
 const XP_GATHER := 10
 const XP_REPAIR := 30
@@ -189,11 +253,13 @@ var plot_two_open := false
 var clock := 0.0
 var current_hour := START_HOUR
 var day := 1
-var skill_xp := {"Farming": 0, "Bushcrafting": 0, "Carpentry": 0, "Cleaning": 0, "Fishing": 0}
-var inventory := {"seeds": STARTING_SEEDS, "pumpkin_seeds": 0, "crops": 0, "fish": 0}
+var skill_xp := {"Farming": 0, "Bushcrafting": 0, "Carpentry": 0, "Cleaning": 0, "Fishing": 0, "Cooking": 0}
+var inventory := {"seeds": STARTING_SEEDS, "pumpkin_seeds": 0, "crops": 0, "fish": 0, "meals": 0}
 var materials := {"wood": 0, "fiber": 0, "resin": 0}
 var stats := {"planted": 0, "harvested": 0, "gathered": 0, "slept": 0, "tidied": 0,
-	"fished": 0, "mended": 0, "cleansed": 0}
+	"fished": 0, "caught": 0, "mended": 0, "cleansed": 0, "cooked": 0, "eaten": 0,
+	"pumpkins": 0, "collapses": 0, "events": 0}
+var achievements_done := {}     # achievement id -> true
 var quests_done := {}               # quest id -> true
 var selected_seed := "turnip"
 var lantern_tier := 0               # 0 = none built yet
@@ -264,7 +330,8 @@ func _process(delta: float) -> void:
 
 	_check_doors()
 	_check_unlocks()
-	_check_quests()
+	_check_story()
+	_check_achievements()
 	_update_fish_spots(delta)
 
 	var minutes := int(fmod(current_hour, 1.0) * 60.0)
@@ -361,6 +428,7 @@ func _setup_input() -> void:
 	_ensure_action("inventory", [KEY_I], [JOY_BUTTON_X])
 	_ensure_action("gear", [KEY_G], [JOY_BUTTON_LEFT_SHOULDER])
 	_ensure_action("quests", [KEY_Q], [JOY_BUTTON_RIGHT_SHOULDER])
+	_ensure_action("achievements", [KEY_J], [JOY_BUTTON_RIGHT_STICK])
 	_ensure_action("house", [KEY_H], [JOY_BUTTON_BACK])
 	_ensure_action("settings", [KEY_ESCAPE], [JOY_BUTTON_START])
 	_ensure_action("close_panel", [], [JOY_BUTTON_B])
@@ -564,6 +632,8 @@ func _handle_keys() -> void:
 		_toggle_tab("Gear")
 	if Input.is_action_just_pressed("quests"):
 		_toggle_tab("Quests")
+	if Input.is_action_just_pressed("achievements"):
+		_toggle_tab("Achievements")
 	if Input.is_action_just_pressed("house"):
 		_toggle_tab("House")
 	# Esc or Start opens Settings, or closes it if it's already open.
@@ -603,6 +673,12 @@ func _on_panel_action(action_id: String) -> void:
 			_advance_lantern()
 		"switch_seed":
 			_switch_seed()
+		"cook_fish":
+			_cook_fish()
+		"cook_crops":
+			_cook_crops()
+		"eat_meal":
+			_eat_meal()
 
 
 func _refresh_panel() -> void:
@@ -616,6 +692,8 @@ func _refresh_panel() -> void:
 			rows = _gear_rows()
 		"Quests":
 			rows = _quest_rows()
+		"Achievements":
+			rows = _achievement_rows()
 		"House":
 			rows = _house_rows()
 		"Settings":
@@ -631,7 +709,7 @@ func _skill_rows() -> Array:
 			"value": "%d XP" % skill_xp[skill],
 			"progress": float(skill_xp[skill] % 100) / 100.0,
 		})
-	rows.append({"note": "Farming grows crops. Bushcrafting gathers wood, fiber, and resin. Carpentry trains by mending boards and repairing the house. Cleaning tidies it. Fishing works the sparkling spots at the pond."})
+	rows.append({"note": "Farming grows crops. Bushcrafting gathers wood, fiber, and resin. Carpentry trains by mending boards and repairing the house. Cleaning tidies it. Fishing works the sparkling spots at the pond. Cooking turns catches and crops into meals."})
 	return rows
 
 
@@ -653,6 +731,29 @@ func _inventory_rows() -> Array:
 	rows.append({"name": "Pumpkin seeds", "value": str(inventory["pumpkin_seeds"])})
 	rows.append({"name": "Harvested crops", "value": str(inventory["crops"])})
 	rows.append({"name": "Fish", "value": str(inventory["fish"])})
+	rows.append({"section": "Cooking"})
+	rows.append({"name": "Meals ready", "value": str(inventory["meals"])})
+	rows.append({
+		"name": "Cook a fish",
+		"value": "1 fish, 1 wood: +%d Cooking XP" % XP_COOK_FISH,
+		"button": "Cook",
+		"action": "cook_fish",
+		"enabled": _can_cook_fish(),
+	})
+	rows.append({
+		"name": "Cook crops",
+		"value": "%d crops, 1 wood: +%d Cooking XP" % [COOK_CROP_COUNT, XP_COOK_CROPS],
+		"button": "Cook",
+		"action": "cook_crops",
+		"enabled": _can_cook_crops(),
+	})
+	rows.append({
+		"name": "Eat a meal",
+		"value": "+%d sanity" % int(MEAL_SANITY),
+		"button": "Eat",
+		"action": "eat_meal",
+		"enabled": int(inventory["meals"]) > 0,
+	})
 	rows.append({"section": "Materials"})
 	rows.append({"name": "Wood", "value": str(materials["wood"])})
 	rows.append({"name": "Fiber", "value": str(materials["fiber"])})
@@ -686,30 +787,37 @@ func _gear_rows() -> Array:
 
 func _quest_rows() -> Array:
 	var rows: Array = []
-	var next_quest: Variant = null
-	for q in QUESTS:
+	var current: Variant = null
+	for q in STORY:
 		if not quests_done.has(q["id"]):
-			next_quest = q
+			current = q
 			break
-	if next_quest != null:
-		rows.append({"section": "Next goal"})
-		rows.append(_quest_row(next_quest))
-	rows.append({"section": "All quests"})
-	for q in QUESTS:
-		rows.append(_quest_row(q))
+	if current != null:
+		rows.append({"section": "Current chapter"})
+		rows.append(_quest_row(current, true))
+	else:
+		rows.append({"note": "You have reached the end of the story for now. More chapters are coming."})
+	rows.append({"section": "Chapters"})
+	for q in STORY:
+		rows.append(_quest_row(q, false))
 	return rows
 
 
-func _quest_row(q: Dictionary) -> Dictionary:
+func _quest_row(q: Dictionary, expanded: bool) -> Dictionary:
 	var done: bool = quests_done.has(q["id"])
-	var value := _stat_value(q["stat"])
-	var shown := mini(value, q["goal"])
+	var shown := mini(_stat_value(q["stat"]), q["goal"])
+	var note := "%s  Reward: %s" % [q["text"], _reward_text(q["reward"])]
+	if expanded:
+		note = "%s\n%s" % [q["story"], note]
 	return {
 		"name": "%s%s" % [q["title"], "   (done)" if done else ""],
 		"value": "%d/%d" % [shown, q["goal"]],
 		"progress": float(shown) / float(q["goal"]),
-		"note": "%s  Reward: %s" % [q["text"], _reward_text(q["reward"])],
+		"note": note,
 	}
+
+
+
 
 
 func _house_rows() -> Array:
@@ -769,6 +877,7 @@ func _settings_rows() -> Array:
 		{"name": "Inventory", "value": "I"},
 		{"name": "Gear", "value": "G"},
 		{"name": "Quests", "value": "Q"},
+		{"name": "Achievements", "value": "J"},
 		{"name": "House", "value": "H"},
 		{"name": "Settings", "value": "Esc"},
 		{"section": "Gamepad"},
@@ -777,6 +886,7 @@ func _settings_rows() -> Array:
 		{"name": "Close panel", "value": "B"},
 		{"name": "Skills / Inventory", "value": "Y / X"},
 		{"name": "Gear / Quests", "value": "Left / Right bumper"},
+		{"name": "Achievements", "value": "Right stick click"},
 		{"name": "House", "value": "Back / View"},
 		{"name": "Settings", "value": "Start"},
 		{"note": "While a panel is open, the D-pad or left stick moves between its buttons, and A presses the highlighted one."},
@@ -873,6 +983,8 @@ func _harvest(tile: Vector2i) -> void:
 	crops.erase(tile)
 	stats["harvested"] += 1
 	inventory["crops"] += CROPS[kind]["yield"]
+	if kind == "pumpkin":
+		stats["pumpkins"] += 1
 	var xp: int = CROPS[kind]["xp"]
 	if kind == "pumpkin":
 		inventory["pumpkin_seeds"] += 1
@@ -957,11 +1069,96 @@ func _fish(tile: Vector2i) -> void:
 	var chance := 0.6 + 0.02 * float(_level("Fishing") - 1)
 	if randf() < chance:
 		inventory["fish"] += 1
+		stats["caught"] += 1
 		_grant_xp("Fishing", XP_FISH)
 		_show_message("You land a fish. +%d Fishing XP" % XP_FISH)
 	else:
 		_show_message("Nothing bit. The fish scattered.")
 
+
+# --- Cooking -----------------------------------------------------------------
+
+func _can_cook_fish() -> bool:
+	return int(inventory["fish"]) > 0 and int(materials["wood"]) >= COOK_WOOD
+
+
+func _cook_fish() -> void:
+	if not _can_cook_fish():
+		_show_message("You need a fish and a piece of wood to cook.")
+		return
+	inventory["fish"] -= 1
+	materials["wood"] -= COOK_WOOD
+	inventory["meals"] += 1
+	stats["cooked"] += 1
+	_grant_xp("Cooking", XP_COOK_FISH)
+	_show_message("You cook the fish over a small fire. +%d Cooking XP" % XP_COOK_FISH)
+
+
+func _can_cook_crops() -> bool:
+	return int(inventory["crops"]) >= COOK_CROP_COUNT and int(materials["wood"]) >= COOK_WOOD
+
+
+func _cook_crops() -> void:
+	if not _can_cook_crops():
+		_show_message("You need %d crops and a piece of wood to cook." % COOK_CROP_COUNT)
+		return
+	inventory["crops"] -= COOK_CROP_COUNT
+	materials["wood"] -= COOK_WOOD
+	inventory["meals"] += 1
+	stats["cooked"] += 1
+	_grant_xp("Cooking", XP_COOK_CROPS)
+	_show_message("You stew the crops into a meal. +%d Cooking XP" % XP_COOK_CROPS)
+
+
+func _eat_meal() -> void:
+	if int(inventory["meals"]) <= 0:
+		_show_message("You have nothing to eat.")
+		return
+	inventory["meals"] -= 1
+	stats["eaten"] += 1
+	_change_sanity(MEAL_SANITY)
+	_show_message("You eat a warm meal. Your mind steadies a little.")
+
+
+# --- Achievements ------------------------------------------------------------
+
+func _achievement_rows() -> Array:
+	var total := ACHIEVEMENTS.size()
+	var done_count := achievements_done.size()
+	var rows: Array = [
+		{"section": "Completion"},
+		{
+			"name": "Achievements",
+			"value": "%d/%d  (%d%%)" % [done_count, total, int(100.0 * done_count / total)],
+			"progress": float(done_count) / float(total),
+		},
+	]
+	if done_count == total:
+		rows.append({"note": "Every achievement earned. Hallowvale has nothing left to teach you."})
+	for tier in ACHIEVEMENT_TIERS.size():
+		var in_tier: Array = []
+		for a in ACHIEVEMENTS:
+			if a["tier"] == tier:
+				in_tier.append(a)
+		var tier_done := 0
+		for a in in_tier:
+			if achievements_done.has(a["id"]):
+				tier_done += 1
+		rows.append({"section": "%s   %d/%d" % [ACHIEVEMENT_TIERS[tier], tier_done, in_tier.size()]})
+		for a in in_tier:
+			rows.append(_achievement_row(a))
+	return rows
+
+
+func _achievement_row(a: Dictionary) -> Dictionary:
+	var done: bool = achievements_done.has(a["id"])
+	var shown := mini(_stat_value(a["stat"]), a["goal"])
+	return {
+		"name": "%s%s" % [a["title"], "   (done)" if done else ""],
+		"value": "%d/%d" % [shown, a["goal"]],
+		"progress": float(shown) / float(a["goal"]),
+		"note": "%s  Reward: %s" % [a["text"], _reward_text(a["reward"])],
+	}
 
 # --- Repairs and mending ----------------------------------------------------
 
@@ -1031,6 +1228,7 @@ func _try_sleep() -> void:
 # Missing the bed by 03:00 ends the day, and the sanity limit drops for good.
 func _collapse() -> void:
 	sanity_penalty += COLLAPSE_SANITY_PENALTY
+	stats["collapses"] += 1
 	sanity = minf(sanity, _sanity_max())
 	_end_day("You collapse before reaching your bed. Something in your mind gives way.")
 
@@ -1127,19 +1325,33 @@ func _stat_value(stat: String) -> int:
 			return house_stage
 		"lantern_tier":
 			return lantern_tier
-		"farming_level":
-			return _level("Farming")
+		"story":
+			return quests_done.size()
+	if stat.begins_with("level_"):
+		return _level(stat.trim_prefix("level_"))
 	return int(stats.get(stat, 0))
 
 
-func _check_quests() -> void:
-	for q in QUESTS:
+# Story chapters run in order, so only the first unfinished one can complete.
+func _check_story() -> void:
+	for q in STORY:
 		if quests_done.has(q["id"]):
 			continue
-		if _stat_value(q["stat"]) >= q["goal"]:
-			quests_done[q["id"]] = true
-			_grant_reward(q["reward"])
-			_show_message("Quest complete: %s. Reward: %s" % [q["title"], _reward_text(q["reward"])])
+		if _stat_value(q["stat"]) < q["goal"]:
+			break
+		quests_done[q["id"]] = true
+		_grant_reward(q["reward"])
+		_show_message("Chapter complete: %s. Reward: %s" % [q["title"], _reward_text(q["reward"])])
+
+
+func _check_achievements() -> void:
+	for a in ACHIEVEMENTS:
+		if achievements_done.has(a["id"]):
+			continue
+		if _stat_value(a["stat"]) >= a["goal"]:
+			achievements_done[a["id"]] = true
+			_grant_reward(a["reward"])
+			_show_message("Achievement: %s. Reward: %s" % [a["title"], _reward_text(a["reward"])])
 
 
 func _grant_reward(reward: Dictionary) -> void:
@@ -1194,6 +1406,7 @@ func _low_sanity_boost() -> float:
 
 func _trigger_night_event() -> void:
 	event_fired_day = day
+	stats["events"] += 1
 	var ev: Dictionary = NIGHT_EVENTS[(day * 3) % NIGHT_EVENTS.size()]
 	match ev["shadow"]:
 		"field":
@@ -1281,6 +1494,8 @@ func _save_game() -> void:
 		"materials": materials,
 		"stats": stats,
 		"quests_done": quests_done,
+		"achievements_done": achievements_done,
+		"story_version": 2,
 		"selected_seed": selected_seed,
 		"lantern_tier": lantern_tier,
 		"house_stage": house_stage,
@@ -1315,7 +1530,11 @@ func _load_game() -> bool:
 	_merge_ints(inventory, data.get("inventory"))
 	_merge_ints(materials, data.get("materials"))
 	_merge_ints(stats, data.get("stats"))
-	quests_done = data.get("quests_done", {})
+	# Saves before version 2 used the old quest list, so their progress is reset.
+	# Stat-based achievements re-check from saved stats on the next frame.
+	var story_v := int(data.get("story_version", 1))
+	quests_done = data.get("quests_done", {}) if story_v >= 2 else {}
+	achievements_done = data.get("achievements_done", {}) if story_v >= 2 else {}
 	selected_seed = str(data.get("selected_seed", "turnip"))
 	lantern_tier = int(data.get("lantern_tier", 0))
 	house_stage = int(data.get("house_stage", 0))
