@@ -1,9 +1,9 @@
 extends Node2D
 
-## The farm and farmhouse: planting, bushcrafting, skills, inventory, gear,
-## lantern tiers, sanity, the early homestead quests, night events, the walk-in
-## house, the minimap, the action bar, the day clock, and save/load.
-## The day runs 06:00 to 03:00. Sleep in bed to save and end the day.
+## The farm and farmhouse: two plots, turnips and pumpkins, bushcrafting,
+## fishing, skills, inventory, gear, lantern tiers, sanity and its cure, quests,
+## night events, the walk-in house, the minimap, the action bar, the day clock,
+## and save/load. The day runs 06:00 to 03:00. Sleep in bed to save and end the day.
 ## Placeholder art is drawn in code; no external assets yet.
 
 const TILE_SIZE := 16
@@ -27,6 +27,10 @@ const HOUSE_H := 5
 const HOUSE_DOOR_IX := HOUSE_IX + 2
 const HOUSE_DOOR_IY := HOUSE_IY + HOUSE_H - 1
 
+# The first plot is open from the start. The second is overgrown until Farming 2.
+const PLOT_ONE := Rect2i(4, 4, 8, 6)     # inner x, y, width, height
+const PLOT_TWO := Rect2i(4, 14, 8, 6)
+
 # The walk-in interior sits below the farm, out of view of it.
 const INT_W := 14
 const INT_H := 9
@@ -35,8 +39,11 @@ const INT_ORIGIN := Vector2i(0, MAP_H + 4)
 # Brush piles for bushcrafting, in inner coordinates. They respawn each morning.
 const BRUSH_SPOTS := [
 	Vector2i(16, 3), Vector2i(22, 15), Vector2i(30, 14),
-	Vector2i(8, 16), Vector2i(35, 6), Vector2i(18, 20),
+	Vector2i(2, 18), Vector2i(35, 6), Vector2i(18, 20),
 ]
+# Extra piles that appear once Bushcrafting reaches level 3.
+const THICKET_SPOTS := [Vector2i(4, 21), Vector2i(12, 21), Vector2i(26, 20)]
+const THICKET_LEVEL := 3
 
 # Time runs from 06:00 to 03:00 the next morning (hours 6 to 27).
 const DAY_LENGTH := 240.0   # real seconds for a full day
@@ -71,7 +78,14 @@ const LANTERN_TIERS := [
 ]
 const LANTERN_FLICKER_TIER := 3
 
-# Early homestead quests. Each reads a stat and pays out a reward once.
+# Crops. Turnips are the starter crop. Pumpkins need Farming 3 and yield more.
+const CROPS := {
+	"turnip": {"seed": "seeds", "yield": 1, "xp": 25, "colors": ["8fd16b", "4f9a3a", "2f7a2a", "e8b440"]},
+	"pumpkin": {"seed": "pumpkin_seeds", "yield": 3, "xp": 40, "colors": ["9fd27a", "d98a35", "c26a1f", "f2a13a"]},
+}
+const PUMPKIN_LEVEL := 3
+
+# Quests run in order. The first is the Next goal. Each reads a stat and pays once.
 const QUESTS := [
 	{"id": "plot", "title": "Break ground", "text": "Plant 3 seeds on the tilled soil.",
 		"stat": "planted", "goal": 3, "reward": {"seeds": 5}},
@@ -87,18 +101,35 @@ const QUESTS := [
 		"stat": "slept", "goal": 1, "reward": {"skill": "Carpentry", "xp": 40}},
 	{"id": "tidy", "title": "A clean start", "text": "Repair the house to Patched and tidy it once.",
 		"stat": "tidied", "goal": 1, "reward": {"skill": "Cleaning", "xp": 40}},
+	{"id": "second_plot", "title": "A second plot", "text": "Reach Farming level 2 to clear the overgrown plot.",
+		"stat": "farming_level", "goal": 2, "reward": {"pumpkin_seeds": 3}},
+	{"id": "ten_harvests", "title": "Ten harvests", "text": "Harvest 10 crops.",
+		"stat": "harvested", "goal": 10, "reward": {"skill": "Farming", "xp": 60}},
+	{"id": "angler", "title": "Angler's start", "text": "Catch 3 fish at the pond.",
+		"stat": "fished", "goal": 3, "reward": {"skill": "Fishing", "xp": 40}},
+	{"id": "apprentice", "title": "Carpenter's apprentice", "text": "Mend 6 boards.",
+		"stat": "mended", "goal": 6, "reward": {"wood": 3, "fiber": 3}},
+	{"id": "pumpkin_patch", "title": "Pumpkin patch", "text": "Reach Farming level 3 to plant pumpkins.",
+		"stat": "farming_level", "goal": 3, "reward": {"pumpkin_seeds": 2}},
+	{"id": "stain", "title": "Clear the stain", "text": "Cleanse the house once.",
+		"stat": "cleansed", "goal": 1, "reward": {"skill": "Cleaning", "xp": 40}},
+	{"id": "home", "title": "A home worth keeping", "text": "Restore the farmhouse fully.",
+		"stat": "house_stage", "goal": 3, "reward": {"skill": "Cleaning", "xp": 60}},
 ]
 
 const SKILLS := ["Farming", "Bushcrafting", "Carpentry", "Cleaning", "Fishing"]
 const XP_PLANT := 5
-const XP_HARVEST := 25
 const XP_GATHER := 10
 const XP_REPAIR := 30
 const XP_TIDY := 20
+const TIDY_CLEANING_BONUS := 5     # extra sanity from a tidy at Cleaning 2
 const XP_MEND := 15
 const MEND_WOOD := 1
 const MEND_FIBER := 1
 const MEND_DAILY_LIMIT := 2   # keeps Carpentry training to a few days per level
+const CLEANSE_LEVEL := 3      # Cleaning level needed to cleanse the house
+const CLEANSE_CROPS := 2      # crops offered per cleanse
+const CLEANSE_RELIEF := 5     # sanity limit restored per cleanse
 const XP_FISH := 15
 const FISH_SPOT_COUNT := 3
 const FISH_SPOT_SECONDS := 12.0   # how often the sparkling fishing spots move
@@ -109,7 +140,7 @@ const SANITY_MAX := 100.0
 const LOW_SANITY := 30.0
 const SLEEP_SANITY := 25.0
 const TIDY_SANITY := 10.0
-const COLLAPSE_SANITY_PENALTY := 5   # permanent cap reduction, curable later
+const COLLAPSE_SANITY_PENALTY := 5   # permanent cap reduction, curable with a cleanse
 const SAVE_PATH := "user://hallowvale_save.json"
 
 # Night events: picked by day so the nights vary. "shadow" says where it appears.
@@ -120,7 +151,7 @@ const NIGHT_EVENTS := [
 	{"message": "The field is quiet tonight. Too quiet.", "shadow": "none", "sanity": -3},
 ]
 
-enum Tile { TREE, GRASS, SOIL, PATH, WATER, HOUSE, DOOR, FLOOR, WALL, EXIT, BED, STATION, DESK }
+enum Tile { TREE, GRASS, SOIL, PATH, WATER, HOUSE, DOOR, FLOOR, WALL, EXIT, BED, STATION, DESK, FALLOW }
 
 const BLOCKING := [Tile.TREE, Tile.WATER, Tile.HOUSE, Tile.WALL, Tile.BED, Tile.STATION, Tile.DESK]
 
@@ -138,14 +169,9 @@ const TILE_COLORS := {
 	Tile.BED: Color("8a4a4a"),
 	Tile.STATION: Color("4f6b7a"),
 	Tile.DESK: Color("6b5a2e"),
+	Tile.FALLOW: Color("4d5a32"),
 }
 
-const CROP_COLORS := [
-	Color("8fd16b"),  # seed
-	Color("4f9a3a"),  # sprout
-	Color("2f7a2a"),  # growing
-	Color("e8b440"),  # ready
-]
 const BUSH_COLOR := Color("3d6b2a")
 
 const DAY_TINT := Color(1, 1, 1)
@@ -153,25 +179,29 @@ const NIGHT_TINT := Color("3a3f6e")
 
 var map: Array = []                 # farm tiles, [y][x]
 var interior: Array = []            # house tiles, [y][x], local to INT_ORIGIN
-var crops := {}                     # Vector2i world tile -> growth stage
+var crops := {}                     # Vector2i world tile -> {"stage": int, "kind": String}
 var brush := {}                     # Vector2i world tile -> true while unharvested
-var clock := 0.0
-var current_hour := START_HOUR
-var day := 1
-var skill_xp := {"Farming": 0, "Bushcrafting": 0, "Carpentry": 0, "Cleaning": 0, "Fishing": 0}
-var inventory := {"seeds": STARTING_SEEDS, "crops": 0, "fish": 0}
-var materials := {"wood": 0, "fiber": 0, "resin": 0}
-var stats := {"planted": 0, "harvested": 0, "gathered": 0, "slept": 0, "tidied": 0, "fished": 0}
 var pond_edges: Array = []          # water tiles with land beside them
 var fish_spots: Array = []          # the currently sparkling spots
 var fish_timer := 0.0
 var fish_layer: Node2D
+var plot_two_open := false
+var clock := 0.0
+var current_hour := START_HOUR
+var day := 1
+var skill_xp := {"Farming": 0, "Bushcrafting": 0, "Carpentry": 0, "Cleaning": 0, "Fishing": 0}
+var inventory := {"seeds": STARTING_SEEDS, "pumpkin_seeds": 0, "crops": 0, "fish": 0}
+var materials := {"wood": 0, "fiber": 0, "resin": 0}
+var stats := {"planted": 0, "harvested": 0, "gathered": 0, "slept": 0, "tidied": 0,
+	"fished": 0, "mended": 0, "cleansed": 0}
 var quests_done := {}               # quest id -> true
+var selected_seed := "turnip"
 var lantern_tier := 0               # 0 = none built yet
 var house_stage := 0
 var tidied_day := 0
 var mend_day := 0                   # the day the mend count applies to
 var mends_today := 0
+var cleanse_day := 0
 var sanity := SANITY_MAX
 var sanity_penalty := 0             # permanent cap reduction from collapsing
 var inside := false                 # standing in the farmhouse interior
@@ -180,6 +210,12 @@ var event_fired_day := 0            # the day the night event last happened
 var tonight_shadow := Vector2i(-1, -1)
 var shadow_tile := Vector2i.ZERO    # where the field shadow sits
 var message_timer := 0.0
+
+# Set by loading, applied once the world exists.
+var saved_pos := Vector2.ZERO
+var has_saved_pos := false
+var saved_inside := false
+var saved_panel := ""
 
 var action_bar: ActionBar
 var minimap: Minimap
@@ -204,6 +240,7 @@ func _ready() -> void:
 	_build_action_bar()
 	_update_shadow_tile()
 	if loaded:
+		_restore_saved_state()
 		_show_message("Welcome back. Day %d." % day)
 
 
@@ -226,6 +263,7 @@ func _process(delta: float) -> void:
 	_update_sanity(darkness, delta)
 
 	_check_doors()
+	_check_unlocks()
 	_check_quests()
 	_update_fish_spots(delta)
 
@@ -262,10 +300,12 @@ func _draw() -> void:
 			draw_rect(_tile_rect(INT_ORIGIN + Vector2i(x, y)), TILE_COLORS[kind])
 
 	for pos in crops:
-		var stage: int = crops[pos]
+		var crop: Dictionary = crops[pos]
+		var colors: Array = CROPS[crop["kind"]]["colors"]
+		var stage: int = crop["stage"]
 		var center := _tile_center(pos.x, pos.y)
 		var size := PX * (0.2 + 0.2 * stage)
-		draw_rect(Rect2(center - Vector2.ONE * size * 0.5, Vector2.ONE * size), CROP_COLORS[stage])
+		draw_rect(Rect2(center - Vector2.ONE * size * 0.5, Vector2.ONE * size), Color(colors[stage]))
 
 	for pos in brush:
 		var center := _tile_center(pos.x, pos.y)
@@ -342,8 +382,10 @@ func _build_map() -> void:
 				t = Tile.GRASS
 				if iy == INNER_H / 2 or ix == INNER_W / 2:
 					t = Tile.PATH
-				if ix >= 4 and ix < 12 and iy >= 4 and iy < 10:
+				if PLOT_ONE.has_point(Vector2i(ix, iy)):
 					t = Tile.SOIL
+				if PLOT_TWO.has_point(Vector2i(ix, iy)):
+					t = Tile.FALLOW   # cleared once Farming reaches level 2
 				if ix >= INNER_W - 6 and iy >= INNER_H - 6:
 					t = Tile.WATER
 				if ix >= HOUSE_IX and ix < HOUSE_IX + HOUSE_W and iy >= HOUSE_IY and iy < HOUSE_IY + HOUSE_H:
@@ -391,12 +433,13 @@ func _respawn_brush() -> void:
 	brush.clear()
 	for spot in BRUSH_SPOTS:
 		brush[_world_tile(spot.x, spot.y)] = true
+	if _level("Bushcrafting") >= THICKET_LEVEL:
+		for spot in THICKET_SPOTS:
+			brush[_world_tile(spot.x, spot.y)] = true
 	queue_redraw()
 
 
 func _build_world() -> void:
-	# Tiles and the house are drawn by this node's _draw(). The player and
-	# camera are created here so they draw above the map.
 	# The fishing spots are drawn on their own layer, under the player.
 	fish_layer = Node2D.new()
 	fish_layer.draw.connect(_draw_fish_spots)
@@ -476,6 +519,18 @@ func _make_label(parent: Node, pos: Vector2, font_size: int) -> Label:
 	return label
 
 
+# Applies what loading saved: position, indoors or not, and the open panel.
+func _restore_saved_state() -> void:
+	_check_unlocks()
+	if has_saved_pos:
+		player.position = saved_pos
+	if saved_inside:
+		inside = true
+	_set_bounds()
+	if saved_panel != "":
+		_toggle_tab(saved_panel)
+
+
 func _update_minimap() -> void:
 	# Indoors the minimap shows the house, since the player isn't on the farm.
 	var player_tile: Vector2 = Vector2(HOUSE_DOOR_IX + BORDER_X, HOUSE_DOOR_IY + BORDER_Y) if inside else player.position / PX
@@ -521,10 +576,14 @@ func _on_panel_action(action_id: String) -> void:
 			_repair_house()
 		"mend":
 			_mend_house()
+		"cleanse":
+			_cleanse_house()
 		"tidy":
 			_tidy_house()
 		"advance_lantern":
 			_advance_lantern()
+		"switch_seed":
+			_switch_seed()
 
 
 func _refresh_panel() -> void:
@@ -553,21 +612,33 @@ func _skill_rows() -> Array:
 			"value": "%d XP" % skill_xp[skill],
 			"progress": float(skill_xp[skill] % 100) / 100.0,
 		})
-	rows.append({"note": "Bushcrafting gathers wood, fiber, and resin from brush piles. Carpentry trains by mending boards and repairing the house. Cleaning tidies it. Fishing works the sparkling spots at the pond."})
+	rows.append({"note": "Farming grows crops. Bushcrafting gathers wood, fiber, and resin. Carpentry trains by mending boards and repairing the house. Cleaning tidies it. Fishing works the sparkling spots at the pond."})
 	return rows
 
 
 func _inventory_rows() -> Array:
-	return [
-		{"section": "Seeds and crops"},
-		{"name": "Seeds", "value": str(inventory["seeds"])},
-		{"name": "Harvested crops", "value": str(inventory["crops"])},
-		{"name": "Fish", "value": str(inventory["fish"])},
-		{"section": "Materials"},
-		{"name": "Wood", "value": str(materials["wood"])},
-		{"name": "Fiber", "value": str(materials["fiber"])},
-		{"name": "Resin", "value": str(materials["resin"])},
+	var rows: Array = [
+		{"section": "Planting"},
+		{"name": "Planting with", "value": _seed_label(selected_seed)},
 	]
+	if _level("Farming") >= PUMPKIN_LEVEL:
+		rows.append({
+			"name": "Switch seed",
+			"value": "Turnip or Pumpkin",
+			"button": "Switch",
+			"action": "switch_seed",
+			"enabled": true,
+		})
+	rows.append({"section": "Seeds and crops"})
+	rows.append({"name": "Turnip seeds", "value": str(inventory["seeds"])})
+	rows.append({"name": "Pumpkin seeds", "value": str(inventory["pumpkin_seeds"])})
+	rows.append({"name": "Harvested crops", "value": str(inventory["crops"])})
+	rows.append({"name": "Fish", "value": str(inventory["fish"])})
+	rows.append({"section": "Materials"})
+	rows.append({"name": "Wood", "value": str(materials["wood"])})
+	rows.append({"name": "Fiber", "value": str(materials["fiber"])})
+	rows.append({"name": "Resin", "value": str(materials["resin"])})
+	return rows
 
 
 func _gear_rows() -> Array:
@@ -596,17 +667,30 @@ func _gear_rows() -> Array:
 
 func _quest_rows() -> Array:
 	var rows: Array = []
+	var next_quest: Variant = null
 	for q in QUESTS:
-		var done: bool = quests_done.has(q["id"])
-		var value := _stat_value(q["stat"])
-		var shown := mini(value, q["goal"])
-		rows.append({
-			"name": "%s%s" % [q["title"], "   (done)" if done else ""],
-			"value": "%d/%d" % [shown, q["goal"]],
-			"progress": float(shown) / float(q["goal"]),
-		})
-		rows.append({"note": "%s  Reward: %s" % [q["text"], _reward_text(q["reward"])]})
+		if not quests_done.has(q["id"]):
+			next_quest = q
+			break
+	if next_quest != null:
+		rows.append({"section": "Next goal"})
+		rows.append(_quest_row(next_quest))
+	rows.append({"section": "All quests"})
+	for q in QUESTS:
+		rows.append(_quest_row(q))
 	return rows
+
+
+func _quest_row(q: Dictionary) -> Dictionary:
+	var done: bool = quests_done.has(q["id"])
+	var value := _stat_value(q["stat"])
+	var shown := mini(value, q["goal"])
+	return {
+		"name": "%s%s" % [q["title"], "   (done)" if done else ""],
+		"value": "%d/%d" % [shown, q["goal"]],
+		"progress": float(shown) / float(q["goal"]),
+		"note": "%s  Reward: %s" % [q["text"], _reward_text(q["reward"])],
+	}
 
 
 func _house_rows() -> Array:
@@ -633,6 +717,13 @@ func _house_rows() -> Array:
 	rows.append({"section": "Rest"})
 	rows.append({"note": "The bed is in the bedroom. Walk there and press Space from 18:00 to save and end the day. If you aren't in bed by 03:00 you collapse, and your sanity limit drops permanently."})
 	rows.append({"name": "Sanity limit", "value": "%d of %d" % [_sanity_max(), int(SANITY_MAX)]})
+	rows.append({
+		"name": "Cleanse the house",
+		"value": "%d crops, Cleaning %d, once a day: +%d limit" % [CLEANSE_CROPS, CLEANSE_LEVEL, CLEANSE_RELIEF],
+		"button": "Cleanse",
+		"action": "cleanse",
+		"enabled": _can_cleanse(),
+	})
 	rows.append({
 		"name": "Tidy",
 		"value": "once a day",
@@ -662,12 +753,32 @@ func _settings_rows() -> Array:
 		{"name": "House", "value": "H"},
 		{"name": "Settings", "value": "Esc"},
 		{"section": "Saving"},
-		{"note": "Progress saves only when you sleep, or when you collapse at 03:00. Quitting during the day loses what happened since the last save."},
+		{"note": "Progress saves only when you sleep, or when you collapse at 03:00. The save includes your position and open panel."},
 		{"note": "Sound and display options are coming later."},
 	]
 
 
-# --- Farming, gathering, and the house ---------------------------------------
+# --- Farming ----------------------------------------------------------------
+
+func _seed_label(kind: String) -> String:
+	return "Pumpkin" if kind == "pumpkin" else "Turnip"
+
+
+func _switch_seed() -> void:
+	selected_seed = "turnip" if selected_seed == "pumpkin" else "pumpkin"
+	_show_message("You'll plant %s seeds now." % _seed_label(selected_seed).to_lower())
+
+
+# Opens the second plot once Farming reaches level 2. It stays open afterward.
+func _check_unlocks() -> void:
+	if plot_two_open or _level("Farming") < 2:
+		return
+	plot_two_open = true
+	for y in range(PLOT_TWO.position.y, PLOT_TWO.end.y):
+		for x in range(PLOT_TWO.position.x, PLOT_TWO.end.x):
+			map[y + BORDER_Y][x + BORDER_X] = Tile.SOIL
+	queue_redraw()
+
 
 func _interact() -> void:
 	var tile := _tile_in_front()
@@ -697,92 +808,50 @@ func _interact() -> void:
 	if kind == Tile.HOUSE:
 		_toggle_tab("House")
 		return
+	if kind == Tile.FALLOW:
+		_show_message("Overgrown. Reach Farming level 2 to clear this plot.")
+		return
 	if kind != Tile.SOIL:
 		return
 
 	if crops.has(tile):
-		if crops[tile] >= MAX_STAGE:
-			crops.erase(tile)
-			inventory["crops"] += 1
-			inventory["seeds"] += 1
-			stats["harvested"] += 1
-			_grant_xp("Farming", XP_HARVEST)
-			_show_message("Harvested a crop and kept a seed. +%d Farming XP" % XP_HARVEST)
+		if crops[tile]["stage"] >= MAX_STAGE:
+			_harvest(tile)
 		else:
 			_show_message("It isn't ready yet.")
-	elif inventory["seeds"] > 0:
-		inventory["seeds"] -= 1
-		crops[tile] = 0
-		stats["planted"] += 1
-		_grant_xp("Farming", XP_PLANT)
-		_show_message("Planted a seed. +%d Farming XP" % XP_PLANT)
 	else:
-		_show_message("You have no seeds. Harvest a crop to get more.")
+		_plant(tile)
 
 	queue_redraw()
 
 
-# --- Fishing -----------------------------------------------------------------
-
-# Water tiles that touch land. Fishing spots are picked from these.
-func _find_pond_edges() -> void:
-	pond_edges = []
-	for y in MAP_H:
-		for x in MAP_W:
-			if map[y][x] != Tile.WATER:
-				continue
-			for d in [Vector2i.LEFT, Vector2i.RIGHT, Vector2i.UP, Vector2i.DOWN]:
-				var n: Vector2i = Vector2i(x, y) + d
-				if _in_bounds(n) and map[n.y][n.x] == Tile.GRASS:
-					pond_edges.append(Vector2i(x, y))
-					break
-
-
-# Every FISH_SPOT_SECONDS, the sparkling spots move to new places on the pond edge.
-func _update_fish_spots(delta: float) -> void:
-	fish_timer -= delta
-	if fish_timer <= 0.0:
-		fish_timer = FISH_SPOT_SECONDS
-		fish_spots.clear()
-		for i in FISH_SPOT_COUNT:
-			if pond_edges.is_empty():
-				break
-			var pick: Vector2i = pond_edges.pick_random()
-			if not fish_spots.has(pick):
-				fish_spots.append(pick)
-		queue_redraw_fish()
-	# The sparkle pulses, so the layer redraws every frame.
-	queue_redraw_fish()
+func _plant(tile: Vector2i) -> void:
+	var kind := selected_seed
+	if kind == "pumpkin" and _level("Farming") < PUMPKIN_LEVEL:
+		kind = "turnip"
+	var seed_key: String = CROPS[kind]["seed"]
+	if inventory[seed_key] <= 0:
+		_show_message("You're out of %s seeds." % _seed_label(kind).to_lower())
+		return
+	inventory[seed_key] -= 1
+	crops[tile] = {"stage": 0, "kind": kind}
+	stats["planted"] += 1
+	_grant_xp("Farming", XP_PLANT)
+	_show_message("Planted %s. +%d Farming XP" % [_seed_label(kind).to_lower(), XP_PLANT])
 
 
-func queue_redraw_fish() -> void:
-	if fish_layer != null:
-		fish_layer.queue_redraw()
-
-
-func _draw_fish_spots() -> void:
-	var t := Time.get_ticks_msec() / 1000.0
-	for i in fish_spots.size():
-		var c := _tile_center(fish_spots[i].x, fish_spots[i].y)
-		var pulse := 0.75 + 0.25 * sin(t * 5.0 + i)
-		fish_layer.draw_circle(c, PX * 0.22 * pulse, Color(0.85, 0.97, 1.0, 0.3))
-		var r := PX * 0.28 * pulse
-		var star := Color(1.0, 1.0, 0.75, 0.95)
-		fish_layer.draw_line(c + Vector2(-r, 0), c + Vector2(r, 0), star, 2.0)
-		fish_layer.draw_line(c + Vector2(0, -r), c + Vector2(0, r), star, 2.0)
-
-
-func _fish(tile: Vector2i) -> void:
-	# Each try uses up the spot. The fish scatter or the spot goes quiet.
-	fish_spots.erase(tile)
-	var chance := 0.6 + 0.02 * float(_level("Fishing") - 1)
-	if randf() < chance:
-		inventory["fish"] += 1
-		stats["fished"] += 1
-		_grant_xp("Fishing", XP_FISH)
-		_show_message("You land a fish. +%d Fishing XP" % XP_FISH)
+func _harvest(tile: Vector2i) -> void:
+	var kind: String = crops[tile]["kind"]
+	crops.erase(tile)
+	stats["harvested"] += 1
+	inventory["crops"] += CROPS[kind]["yield"]
+	var xp: int = CROPS[kind]["xp"]
+	if kind == "pumpkin":
+		inventory["pumpkin_seeds"] += 1
 	else:
-		_show_message("Nothing bit. The fish scattered.")
+		inventory["seeds"] += 1
+	_grant_xp("Farming", xp)
+	_show_message("Harvested %s for %d crops. +%d Farming XP" % [_seed_label(kind).to_lower(), CROPS[kind]["yield"], xp])
 
 
 func _read_desk() -> void:
@@ -802,6 +871,71 @@ func _gather(tile: Vector2i) -> void:
 	_show_message("Gathered %s from the brush. +%d Bushcrafting XP" % [found, XP_GATHER])
 	queue_redraw()
 
+
+# --- Fishing ----------------------------------------------------------------
+
+# Water tiles that touch land. Fishing spots are picked from these.
+func _find_pond_edges() -> void:
+	pond_edges = []
+	for y in MAP_H:
+		for x in MAP_W:
+			if map[y][x] != Tile.WATER:
+				continue
+			for d in [Vector2i.LEFT, Vector2i.RIGHT, Vector2i.UP, Vector2i.DOWN]:
+				var n: Vector2i = Vector2i(x, y) + d
+				if _in_bounds(n) and map[n.y][n.x] == Tile.GRASS:
+					pond_edges.append(Vector2i(x, y))
+					break
+
+
+# Fishing level 3 and up adds spots: one more at 3, another at 5.
+func _fish_spot_count() -> int:
+	return FISH_SPOT_COUNT + (_level("Fishing") - 1) / 2
+
+
+# Every FISH_SPOT_SECONDS, the sparkling spots move to new places on the pond edge.
+func _update_fish_spots(delta: float) -> void:
+	fish_timer -= delta
+	if fish_timer <= 0.0:
+		fish_timer = FISH_SPOT_SECONDS
+		fish_spots.clear()
+		for i in _fish_spot_count():
+			if pond_edges.is_empty():
+				break
+			var pick: Vector2i = pond_edges.pick_random()
+			if not fish_spots.has(pick):
+				fish_spots.append(pick)
+	# The sparkle pulses, so the layer redraws every frame.
+	if fish_layer != null:
+		fish_layer.queue_redraw()
+
+
+func _draw_fish_spots() -> void:
+	var t := Time.get_ticks_msec() / 1000.0
+	for i in fish_spots.size():
+		var c := _tile_center(fish_spots[i].x, fish_spots[i].y)
+		var pulse := 0.75 + 0.25 * sin(t * 5.0 + i)
+		fish_layer.draw_circle(c, PX * 0.22 * pulse, Color(0.85, 0.97, 1.0, 0.3))
+		var r := PX * 0.28 * pulse
+		var star := Color(1.0, 1.0, 0.75, 0.95)
+		fish_layer.draw_line(c + Vector2(-r, 0), c + Vector2(r, 0), star, 2.0)
+		fish_layer.draw_line(c + Vector2(0, -r), c + Vector2(0, r), star, 2.0)
+
+
+func _fish(tile: Vector2i) -> void:
+	# Each try uses up the spot. The fish scatter or the spot goes quiet.
+	fish_spots.erase(tile)
+	stats["fished"] += 1
+	var chance := 0.6 + 0.02 * float(_level("Fishing") - 1)
+	if randf() < chance:
+		inventory["fish"] += 1
+		_grant_xp("Fishing", XP_FISH)
+		_show_message("You land a fish. +%d Fishing XP" % XP_FISH)
+	else:
+		_show_message("Nothing bit. The fish scattered.")
+
+
+# --- Repairs and mending ----------------------------------------------------
 
 func _can_repair() -> bool:
 	if house_stage >= MAX_STAGE:
@@ -826,8 +960,6 @@ func _repair_house() -> void:
 	queue_redraw()
 
 
-# Mending boards is repeatable Carpentry training, so the house can progress
-# without waiting on quest rewards.
 func _mends_left() -> int:
 	var used := mends_today if mend_day == day else 0
 	return MEND_DAILY_LIMIT - used
@@ -837,6 +969,8 @@ func _can_mend() -> bool:
 	return _mends_left() > 0 and materials["wood"] >= MEND_WOOD and materials["fiber"] >= MEND_FIBER
 
 
+# Mending boards is repeatable Carpentry training, capped per day so the house
+# can't be finished in one day.
 func _mend_house() -> void:
 	if _mends_left() <= 0:
 		_show_message("You've mended all you can today. Come back tomorrow.")
@@ -850,6 +984,7 @@ func _mend_house() -> void:
 	mends_today += 1
 	materials["wood"] -= MEND_WOOD
 	materials["fiber"] -= MEND_FIBER
+	stats["mended"] += 1
 	_grant_xp("Carpentry", XP_MEND)
 	_show_message("You mend a board. +%d Carpentry XP" % XP_MEND)
 
@@ -883,9 +1018,31 @@ func _tidy_house() -> void:
 	tidied_day = day
 	stats["tidied"] += 1
 	_grant_xp("Cleaning", XP_TIDY)
-	_change_sanity(TIDY_SANITY)
+	var bonus := TIDY_CLEANING_BONUS if _level("Cleaning") >= 2 else 0
+	_change_sanity(TIDY_SANITY + bonus)
 	_show_message("You tidy the house. The air feels a little lighter. +%d Cleaning XP" % XP_TIDY)
 
+
+# Cleansing offers crops to the house to lift the permanent sanity penalty.
+func _can_cleanse() -> bool:
+	return sanity_penalty > 0 and cleanse_day != day \
+		and _level("Cleaning") >= CLEANSE_LEVEL \
+		and inventory["crops"] >= CLEANSE_CROPS
+
+
+func _cleanse_house() -> void:
+	if not _can_cleanse():
+		_show_message("Cleansing needs Cleaning %d, %d crops, and one try a day." % [CLEANSE_LEVEL, CLEANSE_CROPS])
+		return
+	inventory["crops"] -= CLEANSE_CROPS
+	cleanse_day = day
+	sanity_penalty = maxi(0, sanity_penalty - CLEANSE_RELIEF)
+	sanity = minf(sanity, _sanity_max())
+	stats["cleansed"] += 1
+	_show_message("You burn the offering and open the windows. Your limit recovers by %d." % CLEANSE_RELIEF)
+
+
+# --- Lanterns ---------------------------------------------------------------
 
 func _can_advance_lantern() -> bool:
 	if lantern_tier >= LANTERN_TIERS.size():
@@ -942,6 +1099,8 @@ func _stat_value(stat: String) -> int:
 			return house_stage
 		"lantern_tier":
 			return lantern_tier
+		"farming_level":
+			return _level("Farming")
 	return int(stats.get(stat, 0))
 
 
@@ -958,6 +1117,8 @@ func _check_quests() -> void:
 func _grant_reward(reward: Dictionary) -> void:
 	if reward.has("seeds"):
 		inventory["seeds"] += reward["seeds"]
+	if reward.has("pumpkin_seeds"):
+		inventory["pumpkin_seeds"] += reward["pumpkin_seeds"]
 	for mat in ["wood", "fiber", "resin"]:
 		if reward.has(mat):
 			materials[mat] += reward[mat]
@@ -968,7 +1129,9 @@ func _grant_reward(reward: Dictionary) -> void:
 func _reward_text(reward: Dictionary) -> String:
 	var parts: Array = []
 	if reward.has("seeds"):
-		parts.append("%d seeds" % reward["seeds"])
+		parts.append("%d turnip seeds" % reward["seeds"])
+	if reward.has("pumpkin_seeds"):
+		parts.append("%d pumpkin seeds" % reward["pumpkin_seeds"])
 	for mat in ["wood", "fiber", "resin"]:
 		if reward.has(mat):
 			parts.append("%d %s" % [reward[mat], mat])
@@ -1021,7 +1184,7 @@ func _end_day(base: String, leave_house: bool = true) -> void:
 	if inside and leave_house:
 		_leave_house()
 	for pos in crops.keys():
-		crops[pos] = min(crops[pos] + 1, MAX_STAGE)
+		crops[pos]["stage"] = min(crops[pos]["stage"] + 1, MAX_STAGE)
 	day += 1
 	clock = 0.0
 	tonight_shadow = Vector2i(-1, -1)
@@ -1090,14 +1253,19 @@ func _save_game() -> void:
 		"materials": materials,
 		"stats": stats,
 		"quests_done": quests_done,
+		"selected_seed": selected_seed,
 		"lantern_tier": lantern_tier,
 		"house_stage": house_stage,
 		"tidied_day": tidied_day,
 		"mend_day": mend_day,
 		"mends_today": mends_today,
+		"cleanse_day": cleanse_day,
 		"event_fired_day": event_fired_day,
 		"sanity": sanity,
 		"sanity_penalty": sanity_penalty,
+		"player_pos": [player.position.x, player.position.y],
+		"inside": inside,
+		"open_tab": open_tab,
 		"crops": _crops_to_array(),
 		"brush": _brush_to_array(),
 	}
@@ -1120,18 +1288,29 @@ func _load_game() -> bool:
 	_merge_ints(materials, data.get("materials"))
 	_merge_ints(stats, data.get("stats"))
 	quests_done = data.get("quests_done", {})
+	selected_seed = str(data.get("selected_seed", "turnip"))
 	lantern_tier = int(data.get("lantern_tier", 0))
 	house_stage = int(data.get("house_stage", 0))
 	tidied_day = int(data.get("tidied_day", 0))
 	mend_day = int(data.get("mend_day", 0))
 	mends_today = int(data.get("mends_today", 0))
+	cleanse_day = int(data.get("cleanse_day", 0))
 	event_fired_day = int(data.get("event_fired_day", 0))
 	sanity_penalty = int(data.get("sanity_penalty", 0))
 	sanity = float(data.get("sanity", SANITY_MAX))
+	saved_inside = bool(data.get("inside", false))
+	saved_panel = str(data.get("open_tab", ""))
+	var pos: Variant = data.get("player_pos", null)
+	if typeof(pos) == TYPE_ARRAY and pos.size() == 2:
+		saved_pos = Vector2(float(pos[0]), float(pos[1]))
+		has_saved_pos = true
 
+	# Rebuild the interior so the saved house stage shows the right rooms.
+	# Crops and brush are restored here, after the map exists.
 	crops.clear()
 	for c in data.get("crops", []):
-		crops[Vector2i(int(c["x"]), int(c["y"]))] = int(c["stage"])
+		var kind := str(c.get("kind", "turnip"))
+		crops[Vector2i(int(c["x"]), int(c["y"]))] = {"stage": int(c["stage"]), "kind": kind}
 	brush.clear()
 	for b in data.get("brush", []):
 		brush[Vector2i(int(b[0]), int(b[1]))] = true
@@ -1149,7 +1328,8 @@ func _merge_ints(target: Dictionary, saved: Variant) -> void:
 func _crops_to_array() -> Array:
 	var arr: Array = []
 	for pos in crops:
-		arr.append({"x": pos.x, "y": pos.y, "stage": crops[pos]})
+		var crop: Dictionary = crops[pos]
+		arr.append({"x": pos.x, "y": pos.y, "stage": crop["stage"], "kind": crop["kind"]})
 	return arr
 
 
