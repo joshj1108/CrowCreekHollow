@@ -12,7 +12,7 @@ A top-down farming game with heavy psychological horror, built in Godot 4.7.
 ## Controls (Stardew-style)
 
 - Move: WASD or arrow keys
-- Use, plant, harvest, gather, sleep, tidy, cleanse, cook, talk, fight, or read: Space / Enter (face the tile)
+- Use, plant, harvest, gather, sleep, tidy, cleanse, cook, talk, swing, or read: Space / Enter (face the tile)
 - Walk into the farmhouse door to go inside. Walk onto the exit mat to leave.
 - Action bar (click or key): Skills K, Inventory I, Gear G, Quests Q, House H, Achievements J, Settings
 - Esc opens Settings, or closes it if it's already open
@@ -198,18 +198,49 @@ Achievements track stats and never reset. Each pays a small reward. Earning all 
 - Saved: day, skill XP, inventory (including meals), coins, bag upgrades, root cellar and cooler (built, and what they hold), materials, stats, story chapters done, achievements done, selected seed, lantern tier, house stage, tidy/mend/cleanse days, sanity and sanity penalty, crops (with kind), brush piles, **player position**, whether you were **inside the house**, and the **open panel**.
 - Quitting mid-day loses that day's progress since the last save. Position and panel are saved at the same moment, so they reflect the last sleep or collapse.
 
-## The road to Lowmere (guardian)
+## The roads: Lowmere and Ashford
 
-The homestead is your base. Past the east end of the farm path is a gate onto the road to **Lowmere**, a small village that needs a guardian.
+The homestead is your base. Past the east end of the farm path is a gate onto the road to **Lowmere**. East of Lowmere, the road continues to **Ashford**.
 
-- **Daytime only.** Walk the road between 06:00 and 18:00. At dusk the gate pushes you back, and if you're in Lowmere when night falls, you're driven home.
-- **Sleep and storage stay at the homestead.** You can't sleep in Lowmere.
-- **Villagers** (Mara the Reeve, Tomas the Baker, Elsie) talk with you when you face them and press Space. What they say depends on how far the guardian quests have come.
-- **Hollows** gather in the clearing east of the village wood. They respawn each morning. Face one and press Space to fight. Each exchange is a tick: you strike, then it may strike back. Moving away breaks off the fight.
-- **Combat** is a skill (`Level = 1 + XP / 100`). Each hit gives 4 XP and each kill gives 20 XP. Your max HP is 10 plus Combat level − 1. A meal heals 4 HP, and sleeping restores full HP.
-- **Losing a fight** sends you home, shaken. You lose 10 sanity and wake at full HP.
+- **Daytime only.** Walk the roads between 06:00 and 18:00. At dusk a gate pushes you back, and if night falls while you're in a village, you're driven home.
+- **Sleep and storage stay at the homestead.** You can't sleep in a village.
+- **Villagers** talk with you when you face them and press Space. Their lines change as the guardian quests advance.
+  - Lowmere: Mara the Reeve, Tomas the Baker (takes a cooked meal), Elsie.
+  - Ashford: Harrow the Miller (takes five crops for flour), Wren.
 
-Guardian quests (in the Quests panel, under Guardian of Lowmere) run in order:
+## Combat (real time)
+
+Combat happens while you move, in the style of Stardew Valley.
+
+- **Swing:** press Space to swing your right-hand weapon in the direction you face. A swing reaches 1.5 tiles in a forward arc and has a 0.5 second cooldown. Villagers still take priority: if one is in front, Space talks to them.
+- **Foes roam** their area and wander when you're far away. They **chase** you when you're within their aggro range. Each foe has a contact attack on a cooldown.
+  - **Hollow** (Lowmere wood): 6 HP, slow, 2 damage, aggro 3 tiles.
+  - **Stalker** (the Ashford road): 10 HP, fast, 3 damage, aggro 4.5 tiles, drops resin.
+- **Damage:** a swing deals your weapon's damage plus a random bonus of up to half your Combat level. Foe hits are reduced by your total armor defense, with a minimum of 1.
+- **Invulnerability:** after you're hit, you have 0.9 seconds of safety and you're knocked back a little.
+- **Kills** give Combat XP (20 for hollows, 30 for stalkers) and sometimes a material drop: fiber from hollows, resin from stalkers.
+- **Combat** is a skill (`Level = 1 + XP / 100`). Each hit gives 4 XP. Max HP is 10 plus Combat level − 1.
+- A meal heals 4 HP. Sleeping restores full HP. Losing all HP sends you home, shaken, with a 10 sanity penalty.
+
+## Gear and crafting
+
+The Gear panel has nine slots: Back (your bag), Head, Neck, Left hand (lantern), Chest, Right hand (weapon), Wrist, Legs, and Feet. Neck and Legs are still locked.
+
+Gear is crafted from the Gear panel with wood, fiber, and resin. Crafting equips the piece at once and replaces whatever was in that slot.
+
+| Piece | Slot | Effect | Bushcrafting | Cost |
+|---|---|---|---|---|
+| Hoe | Right hand | 1 damage (starting) | 1 | free |
+| Sharpened stick | Right hand | 2 damage | 2 | 2 wood, 1 fiber |
+| Hunting knife | Right hand | 3 damage | 4 | 2 wood, 2 resin |
+| Resin cap | Head | +1 defense | 2 | 2 resin, 2 fiber |
+| Fiber wraps | Wrist | +1 defense | 1 | 3 fiber |
+| Bark wrap | Chest | +2 defense | 3 | 3 wood, 3 fiber |
+| Bark boots | Feet | +1 defense | 3 | 2 wood, 2 fiber |
+
+Crafting gives 10 Bushcrafting XP.
+
+Quests in the Quests panel, under Guardian of Lowmere, run in order:
 
 | # | Quest | Goal | Reward |
 |---|---|---|---|
@@ -217,8 +248,11 @@ Guardian quests (in the Quests panel, under Guardian of Lowmere) run in order:
 | 2 | The First Horror | Defeat 3 hollows | 60 Combat XP |
 | 3 | Bread for Tomas | Bring a meal to Tomas | 40 coins |
 | 4 | Hold the Road | Defeat 10 hollows in total | 80 coins, 3 pumpkin seeds |
+| 5 | The Road East | Reach Ashford | 50 coins |
+| 6 | Flour for the Mill | Give 5 crops to Harrow | 60 coins, 2 pumpkin seeds |
+| 7 | Stalkers on the Road | Defeat 5 stalkers | 120 Combat XP |
 
-This is the first slice. Later: more villages and roads, more creatures, armor and weapons for the empty gear slots, and combat-based guardian quests.
+Later: more villages and roads, more creatures, armor for the locked slots, and guardian quests that need combat or exploration.
 
 ## Deferred
 

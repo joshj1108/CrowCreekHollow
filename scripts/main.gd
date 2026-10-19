@@ -123,13 +123,48 @@ const VILLAGE_HOUSES := [Rect2i(4, 3, 5, 4), Rect2i(13, 2, 6, 4), Rect2i(8, 14, 
 const VILLAGE_WATER := Rect2i(19, 13, 2, 2)
 # Hollows gather in the clearing east of the village wood. They respawn each morning.
 const HOLLOW_SPAWNS := [Vector2i(28, 9), Vector2i(31, 13), Vector2i(33, 8)]
-const HOLLOW_HP := 6
-const FIGHT_TICK := 1.2
 const XP_HIT := 4
 const XP_KILL := 20
 const BASE_HP := 10
 const HEAL_MEAL := 4
-const NPCS := [
+const HOMESTEAD_ARRIVE := Vector2i(BORDER_X + INNER_W - 3, BORDER_Y + INNER_H / 2)
+const SWING_TIME := 0.3       # seconds the swing is shown
+const SWING_COOLDOWN := 0.5
+const SWING_REACH := 1.5      # tiles
+const SWING_ARC := 0.3        # how far off straight ahead a foe can be and still be hit
+const INVULN_TIME := 0.9      # seconds of safety after a hit
+# Foes roam their area and chase when you come close. Stats are per kind.
+const FOES := {
+	"hollow": {"hp": 6, "speed": 26.0, "chase": 52.0, "dmg": 2, "aggro": 3.0, "cool": 1.2, "color": "1a1020", "xp": 20, "drop": "fiber"},
+	"stalker": {"hp": 10, "speed": 36.0, "chase": 84.0, "dmg": 3, "aggro": 4.5, "cool": 1.0, "color": "3a2a4a", "xp": 30, "drop": "resin"},
+}
+const STALKER_SPAWNS := [Vector2i(26, 8), Vector2i(29, 12), Vector2i(31, 7)]
+const ASHFORD_HOUSES := [Rect2i(5, 3, 6, 5), Rect2i(14, 13, 5, 4)]
+const ASHFORD_WATER := Rect2i(22, 4, 3, 3)
+const ASHFORD_NPCS := [
+	{"id": "harrow", "name": "Harrow the Miller", "pos": Vector2i(12, 9), "color": "d8d0b0", "lines": [
+		"The mill has stopped turning. The stones need grinding, and the millers have gone to the wood.",
+		"Strange things came down the road at dusk. They move faster than anything from Lowmere.",
+		"Bring me five crops and I'll grind flour. The mill will turn again.",
+		"The wheel turns! Thank you, guardian. Ashford owes you more than flour.",
+	]},
+	{"id": "wren", "name": "Wren", "pos": Vector2i(20, 11), "color": "b6e0a0", "lines": [
+		"Careful on the road. Stalkers don't wait for you to see them.",
+		"They chased me all the way to the bridge. I still hear them at night.",
+		"The mill is the heart of Ashford. Harrow is stubborn, but he's right.",
+		"You've given us back the road. We won't forget it.",
+	]},
+]
+# Gear you can craft with wood, fiber, and resin. Crafting equips the piece at once.
+const GEAR_ITEMS := {
+	"hoe": {"name": "Hoe", "slot": "hand_r", "dmg": 1, "def": 0, "level": 1, "cost": {}},
+	"sharpened_stick": {"name": "Sharpened stick", "slot": "hand_r", "dmg": 2, "def": 0, "level": 2, "cost": {"wood": 2, "fiber": 1}},
+	"hunting_knife": {"name": "Hunting knife", "slot": "hand_r", "dmg": 3, "def": 0, "level": 4, "cost": {"wood": 2, "resin": 2}},
+	"resin_cap": {"name": "Resin cap", "slot": "head", "dmg": 0, "def": 1, "level": 2, "cost": {"resin": 2, "fiber": 2}},
+	"fiber_wraps": {"name": "Fiber wraps", "slot": "wrist", "dmg": 0, "def": 1, "level": 1, "cost": {"fiber": 3}},
+	"bark_wrap": {"name": "Bark wrap", "slot": "chest", "dmg": 0, "def": 2, "level": 3, "cost": {"wood": 3, "fiber": 3}},
+	"bark_boots": {"name": "Bark boots", "slot": "feet", "dmg": 0, "def": 1, "level": 3, "cost": {"wood": 2, "fiber": 2}},
+}const NPCS := [
 	{"id": "mara", "name": "Mara the Reeve", "pos": Vector2i(8, 9), "color": "e0c48c", "lines": [
 		"Welcome to Lowmere. Few of us still stand. Talk with the others and see how they fare.",
 		"The hollow ones came out of the wood at dusk. Keep them out of the fields.",
@@ -162,6 +197,15 @@ const GUARDIAN_QUESTS := [
 	{"id": "hold_road", "title": "Hold the Road",
 		"story": "The road to Lowmere is only safe while someone walks it. Keep the clearing quiet, and the village can sleep at night.",
 		"text": "Defeat 10 hollow ones in total.", "stat": "defeated", "goal": 10, "reward": {"coins": 80, "pumpkin_seeds": 3}},
+	{"id": "ashford", "title": "The Road East",
+		"story": "Beyond the wood, the road runs on to Ashford, where the mill has stopped turning. Walk it in daylight and see what has happened there.",
+		"text": "Reach Ashford.", "stat": "visited", "goal": 1, "reward": {"coins": 50}},
+	{"id": "flour", "title": "Flour for the Mill",
+		"story": "Harrow the miller will grind grain for anyone who brings him food for the hands that work the stones. Five crops would keep the mill turning another week.",
+		"text": "Give 5 crops to Harrow.", "stat": "crops_given", "goal": 5, "reward": {"coins": 60, "pumpkin_seeds": 2}},
+	{"id": "stalkers", "title": "Stalkers on the Road",
+		"story": "Faster things hunt the road beyond Lowmere. They are quick and their claws are long. Only strikes will stop them.",
+		"text": "Defeat 5 stalkers.", "stat": "stalkers", "goal": 5, "reward": {"skill": "Combat", "xp": 120}},
 ]
 
 # Story chapters run in order. The first unfinished one is the Current chapter.
@@ -328,10 +372,11 @@ const BUSH_COLOR := Color("3d6b2a")
 const DAY_TINT := Color(1, 1, 1)
 const NIGHT_TINT := Color("3a3f6e")
 
-enum Zone { HOMESTEAD, VILLAGE }
+enum Zone { HOMESTEAD, VILLAGE, ASHFORD }
 
 var map: Array = []                 # farm tiles, [y][x]
 var village_map: Array = []         # Lowmere tiles, [y][x]
+var ashford_map: Array = []         # Ashford tiles, [y][x]
 var interior: Array = []            # house tiles, [y][x], local to INT_ORIGIN
 var crops := {}                     # Vector2i world tile -> {"stage": int, "kind": String}
 var brush := {}                     # Vector2i world tile -> true while unharvested
@@ -350,7 +395,7 @@ var materials := {"wood": 0, "fiber": 0, "resin": 0}
 var stats := {"planted": 0, "harvested": 0, "gathered": 0, "slept": 0, "tidied": 0,
 	"fished": 0, "caught": 0, "mended": 0, "cleansed": 0, "cooked": 0, "eaten": 0,
 	"pumpkins": 0, "collapses": 0, "events": 0, "sold": 0, "spoiled": 0,
-	"talks": 0, "defeated": 0, "delivered": 0}
+	"talks": 0, "defeated": 0, "delivered": 0, "stalkers": 0, "visited": 0, "crops_given": 0}
 var achievements_done := {}     # achievement id -> true
 var quests_done := {}               # quest id -> true
 var selected_seed := "turnip"
@@ -376,11 +421,14 @@ var cellar_stock := 0          # crops in the root cellar
 var cooler_stock := 0          # fish in the cooler
 var zone: int = Zone.HOMESTEAD
 var saved_zone := 0
-var hollows := {}              # tile -> {"hp": int}, in Lowmere
 var hp := BASE_HP
-var fight_tile := NO_SPOT
-var fight_timer := 0.0
 var guardian_done := {}        # guardian quest id -> true
+var foes: Array = []           # enemies in the current village, rebuilt on each visit
+var swing_cool := 0.0
+var swing_time := 0.0
+var swing_dir := Vector2.DOWN
+var invuln := 0.0
+var equipment := {"hand_r": "hoe", "head": "", "neck": "", "chest": "", "wrist": "", "legs": "", "feet": ""}
 
 # Set by loading, applied once the world exists.
 var saved_pos := Vector2.ZERO
@@ -402,11 +450,11 @@ func _ready() -> void:
 	_setup_input()
 	_build_map()
 	_build_village_map()
+	_build_ashford_map()
 	_find_pond_edges()
 	var loaded := _load_game()
 	if not loaded:
 		_respawn_brush()
-	_spawn_hollows()
 	_build_interior()
 	_build_world()
 	_build_hud()
@@ -442,8 +490,8 @@ func _process(delta: float) -> void:
 	_check_guardian()
 	_update_fish_spots(delta)
 	_update_fishing(delta)
-	_update_fight(delta)
-	if zone == Zone.VILLAGE and current_hour >= STALL_CLOSE_HOUR:
+	_update_foes(delta)
+	if _in_village() and current_hour >= STALL_CLOSE_HOUR:
 		_go_home("Night falls. You are driven back to the homestead.")
 	fish_layer.visible = zone == Zone.HOMESTEAD
 
@@ -469,7 +517,7 @@ func _process(delta: float) -> void:
 
 
 func _draw() -> void:
-	if zone == Zone.VILLAGE:
+	if _in_village():
 		_draw_village()
 		return
 	for y in MAP_H:
@@ -731,6 +779,8 @@ func _make_label(parent: Node, pos: Vector2, font_size: int) -> Label:
 func _restore_saved_state() -> void:
 	_check_unlocks()
 	zone = saved_zone
+	if _in_village():
+		_spawn_foes()
 	hp = clampi(hp, 1, max_hp())
 	if has_saved_pos:
 		player.position = saved_pos
@@ -742,9 +792,9 @@ func _restore_saved_state() -> void:
 
 
 func _update_minimap() -> void:
-	if zone == Zone.VILLAGE:
+	if _in_village():
 		var village_tile: Vector2 = player.position / PX
-		minimap.update_view(village_map, TILE_COLORS, [], village_tile, Vector2i(-1, -1))
+		minimap.update_view(_zone_map(), TILE_COLORS, [], village_tile, Vector2i(-1, -1))
 		return
 	# Indoors the minimap shows the house, since the player isn't on the farm.
 	var player_tile: Vector2 = Vector2(HOUSE_DOOR_IX + BORDER_X, HOUSE_DOOR_IY + BORDER_Y) if inside else player.position / PX
@@ -788,6 +838,9 @@ func _close_panel() -> void:
 
 
 func _on_panel_action(action_id: String) -> void:
+	if action_id.begins_with("craft:"):
+		_craft_gear(action_id.trim_prefix("craft:"))
+		return
 	match action_id:
 		"close":
 			_close_panel()
@@ -955,8 +1008,27 @@ func _gear_rows() -> Array:
 			"action": "advance_lantern",
 			"enabled": _can_advance_lantern(),
 		})
-	rows.append({"note": "A lantern lights a ring around you in the dark. Each tier needs more Bushcrafting and better materials."})
+	rows.append({"section": "Craft and equip"})
+	for id in GEAR_ITEMS.keys():
+		if id == "hoe":
+			continue
+		var item: Dictionary = GEAR_ITEMS[id]
+		rows.append({
+			"name": "%s  (%s)" % [item["name"], str(item["slot"]).replace("_", " ")],
+			"value": "%s, Bushcrafting %d" % [_price_text_items(item["cost"]), int(item["level"])],
+			"button": "Make",
+			"action": "craft:" + str(id),
+			"enabled": _can_craft(str(id)),
+		})
+	rows.append({"note": "Crafted gear equips at once and replaces what was worn in that slot. Armor cuts damage from foes. Weapons decide how hard you hit."})
 	return rows
+
+
+func _price_text_items(cost: Dictionary) -> String:
+	var parts: Array = []
+	for mat in cost.keys():
+		parts.append("%d %s" % [int(cost[mat]), mat])
+	return ", ".join(parts) if parts.size() > 0 else "free"
 
 
 func _quest_rows() -> Array:
@@ -1126,7 +1198,7 @@ func _check_unlocks() -> void:
 
 
 func _interact() -> void:
-	if zone == Zone.VILLAGE:
+	if _in_village():
 		_interact_village()
 		return
 	if _is_fishing():
@@ -1735,53 +1807,72 @@ func _gear_cells() -> Array:
 		lantern = {"color": "ffd38a", "label": current["name"], "tip": "Left hand: %s, ring %.1f tiles" % [current["name"], current["radius"]]}
 	return [
 		{"color": "7a5a3a", "label": bag_name, "tip": "Back: %s, %d pack slots" % [bag_name, _pack_capacity()]},
-		{"locked": true, "label": "Head", "tip": "Not available yet"},
+		_slot_cell("head", "Head"),
 		{"locked": true, "label": "Neck", "tip": "Not available yet"},
 		lantern,
-		{"locked": true, "label": "Chest", "tip": "Not available yet"},
-		{"color": "8a8f96", "label": "Hoe", "tip": "Right hand: hoe, equipped"},
-		{"locked": true, "label": "Wrist", "tip": "Not available yet"},
+		_slot_cell("chest", "Chest"),
+		_slot_cell("hand_r", "Right hand"),
+		_slot_cell("wrist", "Wrist"),
 		{"locked": true, "label": "Legs", "tip": "Not available yet"},
-		{"locked": true, "label": "Feet", "tip": "Not available yet"},
+		_slot_cell("feet", "Feet"),
 	]
 
 
 # --- Lowmere and the road ---------------------------------------------------
 
 func _build_village_map() -> void:
-	village_map = []
+	village_map = _build_zone_map(VILLAGE_HOUSES, VILLAGE_WATER, 26, true)
+
+
+func _build_ashford_map() -> void:
+	ashford_map = _build_zone_map(ASHFORD_HOUSES, ASHFORD_WATER, 24, false)
+
+
+# A village is a grass field with a road along row 10, a west gate to the
+# previous place, and an east gate to the next one when there is one.
+func _build_zone_map(houses: Array, water: Rect2i, wood_x: int, east_gate: bool) -> Array:
+	var out: Array = []
 	for y in VILLAGE_H:
 		var row: Array = []
 		for x in VILLAGE_W:
 			var t := Tile.GRASS
-			if x == 0 or y == 0 or y == VILLAGE_H - 1:
+			if x == 0 or y == 0 or y == VILLAGE_H - 1 or x == VILLAGE_W - 1:
 				t = Tile.TREE
-			if y == VILLAGE_GATE.y and x < 26:
+			if x >= wood_x and (x * 7 + y * 3) % 11 == 0:
+				t = Tile.TREE
+			if y == VILLAGE_GATE.y:
 				t = Tile.PATH
-			if x >= 26 and (x * 7 + y * 3) % 11 == 0:
-				t = Tile.TREE
 			row.append(t)
-		village_map.append(row)
-	for rect in VILLAGE_HOUSES:
+		out.append(row)
+	for rect in houses:
 		for y in range(rect.position.y, rect.end.y):
 			for x in range(rect.position.x, rect.end.x):
-				village_map[y][x] = Tile.HOUSE
-	for y in range(VILLAGE_WATER.position.y, VILLAGE_WATER.end.y):
-		for x in range(VILLAGE_WATER.position.x, VILLAGE_WATER.end.x):
-			village_map[y][x] = Tile.WATER
-	village_map[VILLAGE_GATE.y][VILLAGE_GATE.x] = Tile.GATE
+				out[y][x] = Tile.HOUSE
+	for y in range(water.position.y, water.end.y):
+		for x in range(water.position.x, water.end.x):
+			out[y][x] = Tile.WATER
+	out[VILLAGE_GATE.y][0] = Tile.GATE
+	if east_gate:
+		out[VILLAGE_GATE.y][VILLAGE_W - 1] = Tile.GATE
+	return out
 
 
-func _spawn_hollows() -> void:
-	hollows.clear()
-	for spot in HOLLOW_SPAWNS:
-		hollows[spot] = {"hp": HOLLOW_HP}
-	queue_redraw()
+func _in_village() -> bool:
+	return zone != Zone.HOMESTEAD
+
+
+func _zone_map() -> Array:
+	return ashford_map if zone == Zone.ASHFORD else village_map
+
+
+func _zone_npcs() -> Array:
+	return ASHFORD_NPCS if zone == Zone.ASHFORD else NPCS
 
 
 func _npc_index(tile: Vector2i) -> int:
-	for i in NPCS.size():
-		if NPCS[i]["pos"] == tile:
+	var npcs := _zone_npcs()
+	for i in npcs.size():
+		if npcs[i]["pos"] == tile:
 			return i
 	return -1
 
@@ -1790,43 +1881,36 @@ func max_hp() -> int:
 	return BASE_HP + _level("Combat") - 1
 
 
-func _go_village() -> void:
-	# The road is walked in daylight only. At dusk the gate pushes you back.
-	if current_hour >= STALL_CLOSE_HOUR:
-		player.position += Vector2(-PX, 0)
-		_show_message("The road to Lowmere is dark. Walk it in daylight.")
-		return
-	zone = Zone.VILLAGE
-	_stop_fishing("")
-	_stop_fight("")
-	player.position = _tile_center(VILLAGE_ARRIVE.x, VILLAGE_ARRIVE.y)
-	_set_bounds()
-	queue_redraw()
-	_show_message("You walk the road to Lowmere.")
-
-
 func _go_home(reason: String) -> void:
-	zone = Zone.HOMESTEAD
+	_enter_zone(Zone.HOMESTEAD, HOMESTEAD_ARRIVE, reason)
+
+
+func _enter_zone(z: int, arrive: Vector2i, reason: String) -> void:
+	zone = z
 	_stop_fishing("")
-	_stop_fight("")
-	player.position = _tile_center(BORDER_X + INNER_W - 3, BORDER_Y + INNER_H / 2)
+	swing_time = 0.0
+	if zone == Zone.ASHFORD:
+		stats["visited"] += 1
+	_spawn_foes()
+	player.position = _tile_center(arrive.x, arrive.y)
 	_set_bounds()
 	queue_redraw()
 	if reason != "":
 		_show_message(reason)
 
 
+# Walking the road is daylight only. At dusk the gate pushes you back.
+func _refuse_gate(tile: Vector2i) -> void:
+	player.position += Vector2(PX if tile.x == 0 else -PX, 0)
+	_show_message("The road is dark. Walk it in daylight.")
+
+
 func _interact_village() -> void:
-	if fight_tile != NO_SPOT:
-		_stop_fight("You step back from the hollow.")
-		return
-	var tile := _tile_in_front()
-	if hollows.has(tile):
-		_start_fight(tile)
-		return
-	var idx := _npc_index(tile)
+	var idx := _npc_index(_tile_in_front())
 	if idx >= 0:
-		_talk(NPCS[idx])
+		_talk(_zone_npcs()[idx])
+		return
+	_swing()
 
 
 func _talk(npc: Dictionary) -> void:
@@ -1837,59 +1921,16 @@ func _talk(npc: Dictionary) -> void:
 		stats["delivered"] += 1
 		_show_message("Tomas: Bread and thanks. The village eats tonight.")
 		return
+	if npc["id"] == "harrow" and int(inventory["crops"]) >= 5 and int(stats["crops_given"]) < 5:
+		inventory["crops"] -= 5
+		stats["crops_given"] += 5
+		_show_message("Harrow: Five crops. The wheel will turn again.")
+		return
 	var stage := mini(guardian_done.size(), lines.size() - 1)
 	_show_message("%s: %s" % [npc["name"], lines[stage]])
 
 
-func _start_fight(tile: Vector2i) -> void:
-	fight_tile = tile
-	fight_timer = 0.0
-	_show_message("A hollow turns toward you. Hold your ground.")
-
-
-func _stop_fight(reason: String) -> void:
-	fight_tile = NO_SPOT
-	if reason != "":
-		_show_message(reason)
-	queue_redraw()
-
-
 # Each tick, you swing and the hollow answers. Moving away breaks the fight.
-func _update_fight(delta: float) -> void:
-	if fight_tile == NO_SPOT:
-		return
-	var moved := Input.get_vector("move_left", "move_right", "move_up", "move_down") != Vector2.ZERO
-	if moved or open_tab != "" or zone != Zone.VILLAGE or _tile_in_front() != fight_tile or not hollows.has(fight_tile):
-		_stop_fight("You break off the fight.")
-		return
-	fight_timer -= delta
-	if fight_timer > 0.0:
-		return
-	fight_timer = FIGHT_TICK
-	var combat := _level("Combat")
-	var hollow: Dictionary = hollows[fight_tile]
-	if randf() < 0.6 + 0.03 * float(combat - 1):
-		var dmg := randi_range(1, 2 + combat / 3)
-		hollow["hp"] = int(hollow["hp"]) - dmg
-		_grant_xp("Combat", XP_HIT)
-		if int(hollow["hp"]) <= 0:
-			hollows.erase(fight_tile)
-			stats["defeated"] += 1
-			_grant_xp("Combat", XP_KILL)
-			_stop_fight("The hollow crumbles to ash. +%d Combat XP" % XP_KILL)
-			return
-		_show_message("You strike the hollow for %d." % dmg)
-	else:
-		_show_message("You miss.")
-	if randf() < 0.5:
-		hp -= randi_range(1, 2)
-		if hp <= 0:
-			_fallen()
-			return
-		_show_message("The hollow lashes out. HP %d/%d" % [hp, max_hp()])
-	queue_redraw()
-
-
 # Losing a fight sends you home, shaken. You're back at full health by morning.
 func _fallen() -> void:
 	_change_sanity(-10.0)
@@ -1909,19 +1950,216 @@ func _check_guardian() -> void:
 
 
 func _draw_village() -> void:
+	var tiles := _zone_map()
 	for y in VILLAGE_H:
 		for x in VILLAGE_W:
-			draw_rect(_tile_rect(Vector2i(x, y)), TILE_COLORS[village_map[y][x]])
-	for npc in NPCS:
+			draw_rect(_tile_rect(Vector2i(x, y)), TILE_COLORS[tiles[y][x]])
+	for npc in _zone_npcs():
 		var c := _tile_center(npc["pos"].x, npc["pos"].y)
 		draw_circle(c, PX * 0.3, Color(str(npc["color"])))
-	for tile in hollows:
-		var c := _tile_center(tile.x, tile.y)
-		draw_circle(c, PX * 0.32, Color("1a1020"))
-		draw_circle(c + Vector2(-5, -4), 2.5, Color(0.9, 0.1, 0.1))
-		draw_circle(c + Vector2(5, -4), 2.5, Color(0.9, 0.1, 0.1))
-		var frac := float(hollows[tile]["hp"]) / float(HOLLOW_HP)
-		draw_rect(Rect2(c + Vector2(-PX * 0.3, -PX * 0.5), Vector2(PX * 0.6 * frac, 3)), Color("c24a4a"))
+	for foe in foes:
+		var pos: Vector2 = foe["pos"]
+		var st: Dictionary = FOES[foe["kind"]]
+		var body := Color(str(st["color"]))
+		if float(foe["flash"]) > 0.0:
+			body = Color("e8e0d0")
+		draw_circle(pos, PX * 0.32, body)
+		draw_circle(pos + Vector2(-5, -4), 2.5, Color(0.9, 0.1, 0.1))
+		draw_circle(pos + Vector2(5, -4), 2.5, Color(0.9, 0.1, 0.1))
+		var frac := float(foe["hp"]) / float(st["hp"])
+		draw_rect(Rect2(pos + Vector2(-PX * 0.3, -PX * 0.5), Vector2(PX * 0.6 * frac, 3)), Color("c24a4a"))
+	if swing_time > 0.0:
+		draw_arc(player.position, SWING_REACH * PX, swing_dir.angle() - 0.9, swing_dir.angle() + 0.9, 12, Color(1, 1, 0.8, 0.8), 3.0)
+
+
+# --- Foes and combat ----------------------------------------------------------
+
+func _new_foe(kind: String, tile: Vector2i) -> Dictionary:
+	var center := _tile_center(tile.x, tile.y)
+	return {
+		"kind": kind, "pos": center, "home": center,
+		"hp": int(FOES[kind]["hp"]), "cool": 0.0, "dir": Vector2.ZERO,
+		"wander_t": 0.0, "flash": 0.0,
+	}
+
+
+func _spawn_foes() -> void:
+	foes = []
+	if zone == Zone.VILLAGE:
+		for spot in HOLLOW_SPAWNS:
+			foes.append(_new_foe("hollow", spot))
+	elif zone == Zone.ASHFORD:
+		for spot in STALKER_SPAWNS:
+			foes.append(_new_foe("stalker", spot))
+	queue_redraw()
+
+
+func _update_foes(delta: float) -> void:
+	swing_cool = maxf(0.0, swing_cool - delta)
+	swing_time = maxf(0.0, swing_time - delta)
+	invuln = maxf(0.0, invuln - delta)
+	if not _in_village():
+		player.modulate = Color.WHITE
+		return
+	player.modulate = Color(1.0, 0.55, 0.55) if invuln > 0.0 else Color.WHITE
+	for foe in foes:
+		var st: Dictionary = FOES[foe["kind"]]
+		foe["cool"] = maxf(0.0, float(foe["cool"]) - delta)
+		foe["flash"] = maxf(0.0, float(foe["flash"]) - delta)
+		var pos: Vector2 = foe["pos"]
+		var to_player: Vector2 = player.position - pos
+		var dist := to_player.length()
+		if dist < float(st["aggro"]) * PX:
+			_move_foe(foe, to_player.normalized() * float(st["chase"]) * delta)
+			if dist < PX * 0.6 and float(foe["cool"]) <= 0.0:
+				foe["cool"] = float(st["cool"])
+				_foe_attack(foe)
+		else:
+			foe["wander_t"] = float(foe["wander_t"]) - delta
+			if float(foe["wander_t"]) <= 0.0:
+				foe["wander_t"] = randf_range(1.0, 3.0)
+				foe["dir"] = Vector2.from_angle(randf() * TAU) if randf() < 0.7 else Vector2.ZERO
+			var wander_dir: Vector2 = foe["dir"]
+			var home: Vector2 = foe["home"]
+			if pos.distance_to(home) > PX * 2.5:
+				wander_dir = (home - pos).normalized()
+			_move_foe(foe, wander_dir * float(st["speed"]) * delta)
+	queue_redraw()
+
+
+# Moves one axis at a time so a foe slides along walls.
+func _move_foe(foe: Dictionary, step: Vector2) -> void:
+	var pos: Vector2 = foe["pos"]
+	var nx := pos + Vector2(step.x, 0)
+	if _foe_free(nx):
+		pos = nx
+	var ny := pos + Vector2(0, step.y)
+	if _foe_free(ny):
+		pos = ny
+	foe["pos"] = pos
+
+
+func _foe_free(p: Vector2) -> bool:
+	var t := Vector2i(floori(p.x / PX), floori(p.y / PX))
+	return not BLOCKING.has(_kind_at(t)) and _npc_index(t) == -1
+
+
+func _foe_attack(foe: Dictionary) -> void:
+	if invuln > 0.0:
+		return
+	var st: Dictionary = FOES[foe["kind"]]
+	var dmg := maxi(1, int(st["dmg"]) - _defense())
+	hp -= dmg
+	invuln = INVULN_TIME
+	# Knock the player back a little, if there's room.
+	var away: Vector2 = (player.position - foe["pos"]).normalized()
+	var np: Vector2 = player.position + away * PX * 0.5
+	if not _is_blocked_world(np):
+		player.position = np
+	if hp <= 0:
+		_fallen()
+		return
+	_show_message("The %s strikes you for %d. HP %d/%d" % [str(foe["kind"]).capitalize(), dmg, hp, max_hp()])
+
+
+func _swing() -> void:
+	if swing_cool > 0.0:
+		return
+	swing_cool = SWING_COOLDOWN
+	swing_time = SWING_TIME
+	swing_dir = player.facing
+	var dmg := _weapon_damage()
+	var combat := _level("Combat")
+	var hit_any := false
+	for foe in foes.duplicate():
+		var to_foe: Vector2 = foe["pos"] - player.position
+		if to_foe.length() > SWING_REACH * PX:
+			continue
+		if to_foe.normalized().dot(swing_dir) < SWING_ARC:
+			continue
+		var amount := dmg + randi_range(0, combat / 2)
+		foe["hp"] = int(foe["hp"]) - amount
+		foe["flash"] = 0.2
+		hit_any = true
+		_grant_xp("Combat", XP_HIT)
+		if int(foe["hp"]) <= 0:
+			_kill_foe(foe)
+		else:
+			_show_message("You hit the %s for %d." % [str(foe["kind"]), amount])
+	if not hit_any:
+		_show_message("You swing at empty air.")
+	queue_redraw()
+
+
+func _kill_foe(foe: Dictionary) -> void:
+	var st: Dictionary = FOES[foe["kind"]]
+	foes.erase(foe)
+	stats["defeated"] += 1
+	if foe["kind"] == "stalker":
+		stats["stalkers"] += 1
+	_grant_xp("Combat", int(st["xp"]))
+	var note := "+%d Combat XP" % int(st["xp"])
+	var drop := str(st["drop"])
+	if randf() < 0.6:
+		materials[drop] += 1
+		note += ", 1 %s" % drop
+	_show_message("The %s falls. %s" % [str(foe["kind"]), note])
+
+
+func _weapon_damage() -> int:
+	var item := str(equipment["hand_r"])
+	if item == "":
+		return 1
+	return int(GEAR_ITEMS[item]["dmg"])
+
+
+func _defense() -> int:
+	var total := 0
+	for slot in equipment.keys():
+		var item := str(equipment[slot])
+		if item != "":
+			total += int(GEAR_ITEMS[item]["def"])
+	return total
+
+
+# --- Gear crafting -----------------------------------------------------------
+
+func _can_craft(id: String) -> bool:
+	var item: Dictionary = GEAR_ITEMS[id]
+	if str(equipment[item["slot"]]) == id:
+		return false
+	if _level("Bushcrafting") < int(item["level"]):
+		return false
+	var cost: Dictionary = item["cost"]
+	for mat in cost.keys():
+		if int(materials[mat]) < int(cost[mat]):
+			return false
+	return true
+
+
+func _craft_gear(id: String) -> void:
+	if not _can_craft(id):
+		_show_message("You don't have the materials, or Bushcrafting is too low for that.")
+		return
+	var item: Dictionary = GEAR_ITEMS[id]
+	var cost: Dictionary = item["cost"]
+	for mat in cost.keys():
+		materials[mat] -= int(cost[mat])
+	equipment[item["slot"]] = id
+	_grant_xp("Bushcrafting", 10)
+	_show_message("You fashion a %s and equip it. +10 Bushcrafting XP" % item["name"])
+
+
+func _slot_cell(slot: String, label: String) -> Dictionary:
+	var id := str(equipment[slot])
+	if id == "":
+		return {"empty": true, "label": label, "tip": "%s: empty" % label}
+	var item: Dictionary = GEAR_ITEMS[id]
+	var color := "8a8f96" if slot == "hand_r" else "9c8362"
+	return {
+		"color": color, "label": item["name"],
+		"tip": "%s: %s. Damage %d, defense %d" % [label, item["name"], int(item["dmg"]), int(item["def"])],
+	}
 
 
 # --- Repairs and mending ----------------------------------------------------
@@ -1980,7 +2218,7 @@ func _mend_house() -> void:
 
 # Sleeping only happens at the bed, from 18:00 until 03:00.
 func _try_sleep() -> void:
-	if zone == Zone.VILLAGE:
+	if _in_village():
 		_show_message("You can only sleep in your own bed, at the homestead.")
 		return
 	if current_hour < SLEEP_HOUR:
@@ -2193,10 +2431,9 @@ func _trigger_night_event() -> void:
 
 # Ends the day and saves. Both sleeping and collapsing come through here.
 func _end_day(base: String, leave_house: bool = true) -> void:
-	if zone == Zone.VILLAGE:
+	if _in_village():
 		_go_home("")
 	hp = max_hp()
-	_spawn_hollows()
 	if inside and leave_house:
 		_leave_house()
 	# Fish left in the pack spoil overnight. The cooler keeps them.
@@ -2226,17 +2463,30 @@ func _update_shadow_tile() -> void:
 # --- Walking into and out of the house --------------------------------------
 
 func _check_doors() -> void:
-	var kind := _kind_at(_player_tile())
-	if zone == Zone.VILLAGE:
-		if kind == Tile.GATE:
-			_go_home("You walk back to the homestead.")
+	var tile := _player_tile()
+	var kind := _kind_at(tile)
+	if _in_village():
+		if kind != Tile.GATE:
+			return
+		if current_hour >= STALL_CLOSE_HOUR:
+			_refuse_gate(tile)
+			return
+		if tile.x == 0 and zone == Zone.VILLAGE:
+			_enter_zone(Zone.HOMESTEAD, HOMESTEAD_ARRIVE, "You walk back to the homestead.")
+		elif tile.x == 0:
+			_enter_zone(Zone.VILLAGE, Vector2i(VILLAGE_W - 3, VILLAGE_GATE.y), "You walk back to Lowmere.")
+		elif zone == Zone.VILLAGE:
+			_enter_zone(Zone.ASHFORD, VILLAGE_ARRIVE, "You walk the road east to Ashford.")
 		return
 	if not inside and kind == Tile.DOOR:
 		_enter_house()
 	elif inside and kind == Tile.EXIT:
 		_leave_house()
 	elif not inside and kind == Tile.GATE:
-		_go_village()
+		if current_hour >= STALL_CLOSE_HOUR:
+			_refuse_gate(tile)
+		else:
+			_enter_zone(Zone.VILLAGE, VILLAGE_ARRIVE, "You walk the road to Lowmere.")
 
 
 func _enter_house() -> void:
@@ -2253,7 +2503,7 @@ func _leave_house() -> void:
 
 
 func _set_bounds() -> void:
-	if zone == Zone.VILLAGE:
+	if _in_village():
 		player.min_pos = _tile_center(0, 1)
 		player.max_pos = _tile_center(VILLAGE_W - 1, VILLAGE_H - 2)
 		camera.limit_left = 0
@@ -2291,6 +2541,7 @@ func _save_game() -> void:
 		"zone": zone,
 		"hp": hp,
 		"guardian_done": guardian_done,
+		"equipment": equipment,
 		"money": money,
 		"bag_tier": bag_tier,
 		"cellar_built": cellar_built,
@@ -2354,6 +2605,11 @@ func _load_game() -> bool:
 	saved_zone = int(data.get("zone", 0))
 	hp = int(data.get("hp", BASE_HP))
 	guardian_done = data.get("guardian_done", {})
+	var saved_eq: Variant = data.get("equipment", {})
+	if typeof(saved_eq) == TYPE_DICTIONARY:
+		for slot in equipment.keys():
+			if saved_eq.has(slot):
+				equipment[slot] = str(saved_eq[slot])
 	event_fired_day = int(data.get("event_fired_day", 0))
 	sanity_penalty = int(data.get("sanity_penalty", 0))
 	sanity = float(data.get("sanity", SANITY_MAX))
@@ -2442,10 +2698,10 @@ func _in_interior(tile: Vector2i) -> bool:
 
 # The tile kind at a world tile: the interior if it's inside the house, else the farm.
 func _kind_at(tile: Vector2i) -> int:
-	if zone == Zone.VILLAGE:
+	if _in_village():
 		if tile.x < 0 or tile.y < 0 or tile.x >= VILLAGE_W or tile.y >= VILLAGE_H:
 			return Tile.TREE
-		return village_map[tile.y][tile.x]
+		return _zone_map()[tile.y][tile.x]
 	if _in_interior(tile):
 		return interior[tile.y - INT_ORIGIN.y][tile.x - INT_ORIGIN.x]
 	if not _in_bounds(tile):
@@ -2457,8 +2713,8 @@ func _is_blocked_world(p: Vector2) -> bool:
 	var t := Vector2i(floori(p.x / PX), floori(p.y / PX))
 	if BLOCKING.has(_kind_at(t)):
 		return true
-	if zone == Zone.VILLAGE:
-		return hollows.has(t) or _npc_index(t) != -1
+	if _in_village():
+		return _npc_index(t) != -1
 	return not inside and brush.has(t)
 
 
