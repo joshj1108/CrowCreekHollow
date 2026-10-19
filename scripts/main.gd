@@ -95,6 +95,9 @@ const XP_HARVEST := 25
 const XP_GATHER := 10
 const XP_REPAIR := 30
 const XP_TIDY := 20
+const XP_MEND := 15
+const MEND_WOOD := 1
+const MEND_FIBER := 1
 const XP_FISH := 15
 const FISH_SPOT_COUNT := 3
 const FISH_SPOT_SECONDS := 12.0   # how often the sparkling fishing spots move
@@ -513,6 +516,8 @@ func _on_panel_action(action_id: String) -> void:
 			_close_panel()
 		"repair":
 			_repair_house()
+		"mend":
+			_mend_house()
 		"tidy":
 			_tidy_house()
 		"advance_lantern":
@@ -545,7 +550,7 @@ func _skill_rows() -> Array:
 			"value": "%d XP" % skill_xp[skill],
 			"progress": float(skill_xp[skill] % 100) / 100.0,
 		})
-	rows.append({"note": "Bushcrafting gathers wood, fiber, and resin from brush piles. Carpentry repairs the house. Cleaning tidies it. Fishing works the sparkling spots at the pond."})
+	rows.append({"note": "Bushcrafting gathers wood, fiber, and resin from brush piles. Carpentry trains by mending boards and repairing the house. Cleaning tidies it. Fishing works the sparkling spots at the pond."})
 	return rows
 
 
@@ -615,6 +620,13 @@ func _house_rows() -> Array:
 			"action": "repair",
 			"enabled": _can_repair(),
 		})
+	rows.append({
+		"name": "Mend a board",
+		"value": "%d wood, %d fiber: +%d Carpentry XP" % [MEND_WOOD, MEND_FIBER, XP_MEND],
+		"button": "Mend",
+		"action": "mend",
+		"enabled": _can_mend(),
+	})
 	rows.append({"section": "Rest"})
 	rows.append({"note": "The bed is in the bedroom. Walk there and press Space from 18:00 to save and end the day. If you aren't in bed by 03:00 you collapse, and your sanity limit drops permanently."})
 	rows.append({"name": "Sanity limit", "value": "%d of %d" % [_sanity_max(), int(SANITY_MAX)]})
@@ -809,6 +821,22 @@ func _repair_house() -> void:
 	_build_interior()
 	_show_message("Repaired. The farmhouse is now %s. +%d Carpentry XP" % [STAGE_NAMES[house_stage], XP_REPAIR])
 	queue_redraw()
+
+
+# Mending boards is repeatable Carpentry training, so the house can progress
+# without waiting on quest rewards.
+func _can_mend() -> bool:
+	return materials["wood"] >= MEND_WOOD and materials["fiber"] >= MEND_FIBER
+
+
+func _mend_house() -> void:
+	if not _can_mend():
+		_show_message("You need %d wood and %d fiber to mend a board." % [MEND_WOOD, MEND_FIBER])
+		return
+	materials["wood"] -= MEND_WOOD
+	materials["fiber"] -= MEND_FIBER
+	_grant_xp("Carpentry", XP_MEND)
+	_show_message("You mend a board. +%d Carpentry XP" % XP_MEND)
 
 
 # Sleeping only happens at the bed, from 18:00 until 03:00.
