@@ -11,6 +11,7 @@ const TABS := [
 	{"name": "Skills", "key": "K"},
 	{"name": "Inventory", "key": "I"},
 	{"name": "Gear", "key": "G"},
+	{"name": "Quests", "key": "Q"},
 	{"name": "House", "key": "H"},
 	{"name": "Settings", "key": "Esc"},
 ]

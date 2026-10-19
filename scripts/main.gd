@@ -1,8 +1,9 @@
 extends Node2D
 
 ## The farm and farmhouse: planting, bushcrafting, skills, inventory, gear,
-## lantern tiers, sanity, night events, the walk-in house, the minimap,
-## the action bar, the day/night clock, and save/load.
+## lantern tiers, sanity, the early homestead quests, night events, the walk-in
+## house, the minimap, the action bar, the day clock, and save/load.
+## The day runs 06:00 to 03:00. Sleep in bed to save and end the day.
 ## Placeholder art is drawn in code; no external assets yet.
 
 const TILE_SIZE := 16
@@ -37,10 +38,12 @@ const BRUSH_SPOTS := [
 	Vector2i(8, 16), Vector2i(35, 6), Vector2i(18, 20),
 ]
 
-const DAY_LENGTH := 240.0   # real seconds for the 06:00 -> 24:00 stretch
+# Time runs from 06:00 to 03:00 the next morning (hours 6 to 27).
+const DAY_LENGTH := 240.0   # real seconds for a full day
 const START_HOUR := 6.0
+const DAY_END_HOUR := 27.0  # 03:00. Missing bed by then means collapsing.
 const DUSK_HOUR := 19.0
-const SLEEP_HOUR := 18.0
+const SLEEP_HOUR := 18.0    # the bed can be used from 18:00 onward
 const EVENT_HOUR := 22.0
 
 const MAX_STAGE := 3        # 0 = seed, 3 = ready to harvest
@@ -52,7 +55,7 @@ const REPAIR_COSTS := [
 	{"wood": 8, "fiber": 6, "level": 3},
 ]
 const HOUSE_FEATURES := [
-	{"stage": 1, "text": "Bedroom opens: sleep in the bed to end the day"},
+	{"stage": 1, "text": "Bedroom opens: the bed is where you sleep and save"},
 	{"stage": 2, "text": "Parlor opens: tidy at the station for Cleaning XP"},
 	{"stage": 3, "text": "Study opens, and a restored house softens the night"},
 ]
@@ -68,6 +71,24 @@ const LANTERN_TIERS := [
 ]
 const LANTERN_FLICKER_TIER := 3
 
+# Early homestead quests. Each reads a stat and pays out a reward once.
+const QUESTS := [
+	{"id": "plot", "title": "Break ground", "text": "Plant 3 seeds on the tilled soil.",
+		"stat": "planted", "goal": 3, "reward": {"seeds": 5}},
+	{"id": "harvest", "title": "First harvest", "text": "Harvest one ripe crop.",
+		"stat": "harvested", "goal": 1, "reward": {"skill": "Farming", "xp": 50}},
+	{"id": "brush", "title": "Gather from the brush", "text": "Gather from 3 brush piles.",
+		"stat": "gathered", "goal": 3, "reward": {"wood": 2, "fiber": 2}},
+	{"id": "patch", "title": "Patch the walls", "text": "Repair the farmhouse to Boarded.",
+		"stat": "house_stage", "goal": 1, "reward": {"wood": 2, "fiber": 2}},
+	{"id": "light", "title": "Light the way", "text": "Build a Tin Lantern.",
+		"stat": "lantern_tier", "goal": 1, "reward": {"seeds": 3}},
+	{"id": "bed", "title": "Sleep under your own roof", "text": "Sleep in the bedroom bed before 03:00.",
+		"stat": "slept", "goal": 1, "reward": {"skill": "Carpentry", "xp": 40}},
+	{"id": "tidy", "title": "A clean start", "text": "Repair the house to Patched and tidy it once.",
+		"stat": "tidied", "goal": 1, "reward": {"skill": "Cleaning", "xp": 40}},
+]
+
 const SKILLS := ["Farming", "Bushcrafting", "Carpentry", "Cleaning"]
 const XP_PLANT := 5
 const XP_HARVEST := 25
@@ -80,7 +101,8 @@ const MESSAGE_SECONDS := 3.0
 const SANITY_MAX := 100.0
 const LOW_SANITY := 30.0
 const SLEEP_SANITY := 25.0
-const AUTOSAVE_SECONDS := 30.0
+const TIDY_SANITY := 10.0
+const COLLAPSE_SANITY_PENALTY := 5   # permanent cap reduction, curable later
 const SAVE_PATH := "user://hallowvale_save.json"
 
 # Night events: picked by day so the nights vary. "shadow" says where it appears.
@@ -90,13 +112,6 @@ const NIGHT_EVENTS := [
 	{"message": "A figure watches from the dark beside the house.", "shadow": "house", "sanity": -15},
 	{"message": "The field is quiet tonight. Too quiet.", "shadow": "none", "sanity": -3},
 ]
-
-# One-off story beats, shown on the morning of the given day.
-const STORY_BEATS := {
-	3: "A letter is wedged under the door. It reads: 'You can't stay out here forever.' It's in your handwriting.",
-	7: "The farmhouse door was open this morning. You're sure you locked it.",
-	12: "Fresh footprints circle the house and stop beneath the study window.",
-}
 
 enum Tile { TREE, GRASS, SOIL, PATH, WATER, HOUSE, DOOR, FLOOR, WALL, EXIT, BED, STATION, DESK }
 
@@ -139,17 +154,19 @@ var day := 1
 var skill_xp := {"Farming": 0, "Bushcrafting": 0, "Carpentry": 0, "Cleaning": 0}
 var inventory := {"seeds": STARTING_SEEDS, "crops": 0}
 var materials := {"wood": 0, "fiber": 0, "resin": 0}
-var lantern_tier := 0              # 0 = none built yet
+var stats := {"planted": 0, "harvested": 0, "gathered": 0, "slept": 0, "tidied": 0}
+var quests_done := {}               # quest id -> true
+var lantern_tier := 0               # 0 = none built yet
 var house_stage := 0
 var tidied_day := 0
 var sanity := SANITY_MAX
-var inside := false                # standing in the farmhouse interior
-var open_tab := ""                 # "" when the action bar panel is closed
-var event_fired_day := 0           # the day the night event last happened
+var sanity_penalty := 0             # permanent cap reduction from collapsing
+var inside := false                 # standing in the farmhouse interior
+var open_tab := ""                  # "" when the action bar panel is closed
+var event_fired_day := 0            # the day the night event last happened
 var tonight_shadow := Vector2i(-1, -1)
-var shadow_tile := Vector2i.ZERO   # where the field shadow sits
+var shadow_tile := Vector2i.ZERO    # where the field shadow sits
 var message_timer := 0.0
-var autosave_timer := 0.0
 
 var action_bar: ActionBar
 var minimap: Minimap
@@ -176,18 +193,12 @@ func _ready() -> void:
 		_show_message("Welcome back. Day %d." % day)
 
 
-func _notification(what: int) -> void:
-	if what == NOTIFICATION_WM_CLOSE_REQUEST:
-		_save_game()
-		get_tree().quit()
-
-
 func _process(delta: float) -> void:
 	clock += delta
-	current_hour = START_HOUR + clock / DAY_LENGTH * 18.0
+	current_hour = START_HOUR + clock / DAY_LENGTH * (DAY_END_HOUR - START_HOUR)
 
-	if current_hour >= 24.0:
-		_end_day("Morning.")
+	if current_hour >= DAY_END_HOUR:
+		_collapse()
 		return
 
 	if current_hour >= EVENT_HOUR and event_fired_day != day:
@@ -201,9 +212,11 @@ func _process(delta: float) -> void:
 	_update_sanity(darkness, delta)
 
 	_check_doors()
+	_check_quests()
 
 	var minutes := int(fmod(current_hour, 1.0) * 60.0)
-	hud_label.text = "Day %d   %02d:%02d   Sanity %d" % [day, int(current_hour), minutes, int(sanity)]
+	hud_label.text = "Day %d   %02d:%02d   Sanity %d/%d" % [
+		day, int(fmod(current_hour, 24.0)), minutes, int(sanity), _sanity_max()]
 
 	_handle_keys()
 
@@ -215,11 +228,6 @@ func _process(delta: float) -> void:
 		_refresh_panel()
 
 	_update_minimap()
-
-	autosave_timer += delta
-	if autosave_timer >= AUTOSAVE_SECONDS:
-		autosave_timer = 0.0
-		_save_game()
 
 	if message_timer > 0.0:
 		message_timer -= delta
@@ -295,6 +303,7 @@ func _setup_input() -> void:
 	_ensure_action("inventory", [KEY_I])
 	_ensure_action("gear", [KEY_G])
 	_ensure_action("house", [KEY_H])
+	_ensure_action("quests", [KEY_Q])
 
 
 func _ensure_action(action: String, keys: Array) -> void:
@@ -462,6 +471,8 @@ func _handle_keys() -> void:
 		_toggle_tab("Inventory")
 	if Input.is_action_just_pressed("gear"):
 		_toggle_tab("Gear")
+	if Input.is_action_just_pressed("quests"):
+		_toggle_tab("Quests")
 	if Input.is_action_just_pressed("house"):
 		_toggle_tab("House")
 	# Esc opens Settings, or closes it if it's already open.
@@ -488,8 +499,6 @@ func _on_panel_action(action_id: String) -> void:
 			_close_panel()
 		"repair":
 			_repair_house()
-		"sleep":
-			_sleep()
 		"tidy":
 			_tidy_house()
 		"advance_lantern":
@@ -505,6 +514,8 @@ func _refresh_panel() -> void:
 			rows = _inventory_rows()
 		"Gear":
 			rows = _gear_rows()
+		"Quests":
+			rows = _quest_rows()
 		"House":
 			rows = _house_rows()
 		"Settings":
@@ -560,6 +571,21 @@ func _gear_rows() -> Array:
 	return rows
 
 
+func _quest_rows() -> Array:
+	var rows: Array = []
+	for q in QUESTS:
+		var done: bool = quests_done.has(q["id"])
+		var value := _stat_value(q["stat"])
+		var shown := mini(value, q["goal"])
+		rows.append({
+			"name": "%s%s" % [q["title"], "   (done)" if done else ""],
+			"value": "%d/%d" % [shown, q["goal"]],
+			"progress": float(shown) / float(q["goal"]),
+		})
+		rows.append({"note": "%s  Reward: %s" % [q["text"], _reward_text(q["reward"])]})
+	return rows
+
+
 func _house_rows() -> Array:
 	var rows: Array = [
 		{"section": "Condition"},
@@ -574,14 +600,9 @@ func _house_rows() -> Array:
 			"action": "repair",
 			"enabled": _can_repair(),
 		})
-	rows.append({"section": "Actions"})
-	rows.append({
-		"name": "Sleep",
-		"value": "from %02d:00" % int(SLEEP_HOUR),
-		"button": "Sleep",
-		"action": "sleep",
-		"enabled": _can_sleep(),
-	})
+	rows.append({"section": "Rest"})
+	rows.append({"note": "The bed is in the bedroom. Walk there and press Space from 18:00 to save and end the day. If you aren't in bed by 03:00 you collapse, and your sanity limit drops permanently."})
+	rows.append({"name": "Sanity limit", "value": "%d of %d" % [_sanity_max(), int(SANITY_MAX)]})
 	rows.append({
 		"name": "Tidy",
 		"value": "once a day",
@@ -603,14 +624,15 @@ func _settings_rows() -> Array:
 	return [
 		{"section": "Controls"},
 		{"name": "Move", "value": "WASD or arrow keys"},
-		{"name": "Use, plant, harvest, gather", "value": "Space or Enter"},
+		{"name": "Use, plant, harvest, gather, sleep", "value": "Space or Enter"},
 		{"name": "Skills", "value": "K"},
 		{"name": "Inventory", "value": "I"},
 		{"name": "Gear", "value": "G"},
+		{"name": "Quests", "value": "Q"},
 		{"name": "House", "value": "H"},
 		{"name": "Settings", "value": "Esc"},
 		{"section": "Saving"},
-		{"note": "Progress saves automatically every 30 seconds, at the end of each day, and when you close the game."},
+		{"note": "Progress saves only when you sleep, or when you collapse at 03:00. Quitting during the day loses what happened since the last save."},
 		{"note": "Sound and display options are coming later."},
 	]
 
@@ -625,7 +647,7 @@ func _interact() -> void:
 	if inside:
 		match _kind_at(tile):
 			Tile.BED:
-				_sleep()
+				_try_sleep()
 			Tile.STATION:
 				_tidy_house()
 			Tile.DESK:
@@ -648,6 +670,7 @@ func _interact() -> void:
 			crops.erase(tile)
 			inventory["crops"] += 1
 			inventory["seeds"] += 1
+			stats["harvested"] += 1
 			_grant_xp("Farming", XP_HARVEST)
 			_show_message("Harvested a crop and kept a seed. +%d Farming XP" % XP_HARVEST)
 		else:
@@ -655,6 +678,7 @@ func _interact() -> void:
 	elif inventory["seeds"] > 0:
 		inventory["seeds"] -= 1
 		crops[tile] = 0
+		stats["planted"] += 1
 		_grant_xp("Farming", XP_PLANT)
 		_show_message("Planted a seed. +%d Farming XP" % XP_PLANT)
 	else:
@@ -664,13 +688,14 @@ func _interact() -> void:
 
 
 func _read_desk() -> void:
-	_show_message("Old letters, all in your handwriting. Each one ends the same way: 'Don't let it in.'")
+	_show_message("A desk covered in seed catalogs and unpaid bills.")
 
 
 func _gather(tile: Vector2i) -> void:
 	brush.erase(tile)
 	materials["wood"] += 1
 	materials["fiber"] += 1
+	stats["gathered"] += 1
 	var found := "wood and fiber"
 	if randf() < 0.34:
 		materials["resin"] += 1
@@ -703,16 +728,21 @@ func _repair_house() -> void:
 	queue_redraw()
 
 
-func _can_sleep() -> bool:
-	return house_stage >= 1 and current_hour >= SLEEP_HOUR
-
-
-func _sleep() -> void:
-	if not _can_sleep():
-		_show_message("You can sleep once the bedroom is open and it's evening.")
+# Sleeping only happens at the bed, from 18:00 until 03:00.
+func _try_sleep() -> void:
+	if current_hour < SLEEP_HOUR:
+		_show_message("You aren't tired yet. The bed will be there after 18:00.")
 		return
+	stats["slept"] += 1
 	_change_sanity(SLEEP_SANITY)
 	_end_day("You sleep through the night.")
+
+
+# Missing the bed by 03:00 ends the day, and the sanity limit drops for good.
+func _collapse() -> void:
+	sanity_penalty += COLLAPSE_SANITY_PENALTY
+	sanity = minf(sanity, _sanity_max())
+	_end_day("You collapse before reaching your bed. Something in your mind gives way.")
 
 
 func _can_tidy() -> bool:
@@ -724,8 +754,9 @@ func _tidy_house() -> void:
 		_show_message("The house is already tidy for today.")
 		return
 	tidied_day = day
+	stats["tidied"] += 1
 	_grant_xp("Cleaning", XP_TIDY)
-	_change_sanity(10.0)
+	_change_sanity(TIDY_SANITY)
 	_show_message("You tidy the house. The air feels a little lighter. +%d Cleaning XP" % XP_TIDY)
 
 
@@ -776,10 +807,57 @@ func _night_relief() -> float:
 	return minf(relief, 0.9)
 
 
+# --- Quests ------------------------------------------------------------------
+
+func _stat_value(stat: String) -> int:
+	match stat:
+		"house_stage":
+			return house_stage
+		"lantern_tier":
+			return lantern_tier
+	return int(stats.get(stat, 0))
+
+
+func _check_quests() -> void:
+	for q in QUESTS:
+		if quests_done.has(q["id"]):
+			continue
+		if _stat_value(q["stat"]) >= q["goal"]:
+			quests_done[q["id"]] = true
+			_grant_reward(q["reward"])
+			_show_message("Quest complete: %s. Reward: %s" % [q["title"], _reward_text(q["reward"])])
+
+
+func _grant_reward(reward: Dictionary) -> void:
+	if reward.has("seeds"):
+		inventory["seeds"] += reward["seeds"]
+	for mat in ["wood", "fiber", "resin"]:
+		if reward.has(mat):
+			materials[mat] += reward[mat]
+	if reward.has("xp"):
+		_grant_xp(reward["skill"], reward["xp"])
+
+
+func _reward_text(reward: Dictionary) -> String:
+	var parts: Array = []
+	if reward.has("seeds"):
+		parts.append("%d seeds" % reward["seeds"])
+	for mat in ["wood", "fiber", "resin"]:
+		if reward.has(mat):
+			parts.append("%d %s" % [reward[mat], mat])
+	if reward.has("xp"):
+		parts.append("%d %s XP" % [reward["xp"], reward["skill"]])
+	return ", ".join(parts)
+
+
 # --- Sanity and night events ------------------------------------------------
 
+func _sanity_max() -> float:
+	return SANITY_MAX - sanity_penalty
+
+
 func _change_sanity(amount: float) -> void:
-	sanity = clampf(sanity + amount, 0.0, SANITY_MAX)
+	sanity = clampf(sanity + amount, 0.0, _sanity_max())
 
 
 func _update_sanity(darkness: float, delta: float) -> void:
@@ -811,6 +889,7 @@ func _trigger_night_event() -> void:
 	queue_redraw()
 
 
+# Ends the day and saves. Both sleeping and collapsing come through here.
 func _end_day(base: String) -> void:
 	if inside:
 		_leave_house()
@@ -821,10 +900,7 @@ func _end_day(base: String) -> void:
 	tonight_shadow = Vector2i(-1, -1)
 	_respawn_brush()
 	_update_shadow_tile()
-	var message := "%s Your crops grew overnight." % base
-	if STORY_BEATS.has(day):
-		message += " " + STORY_BEATS[day]
-	_show_message(message)
+	_show_message("%s Your crops grew overnight." % base)
 	_save_game()
 	queue_redraw()
 
@@ -881,15 +957,17 @@ func _set_bounds() -> void:
 func _save_game() -> void:
 	var data := {
 		"day": day,
-		"clock": clock,
 		"skill_xp": skill_xp,
 		"inventory": inventory,
 		"materials": materials,
+		"stats": stats,
+		"quests_done": quests_done,
 		"lantern_tier": lantern_tier,
 		"house_stage": house_stage,
 		"tidied_day": tidied_day,
 		"event_fired_day": event_fired_day,
 		"sanity": sanity,
+		"sanity_penalty": sanity_penalty,
 		"crops": _crops_to_array(),
 		"brush": _brush_to_array(),
 	}
@@ -907,14 +985,16 @@ func _load_game() -> bool:
 	var data: Dictionary = parsed
 
 	day = int(data.get("day", 1))
-	clock = float(data.get("clock", 0.0))
 	_merge_ints(skill_xp, data.get("skill_xp"))
 	_merge_ints(inventory, data.get("inventory"))
 	_merge_ints(materials, data.get("materials"))
+	_merge_ints(stats, data.get("stats"))
+	quests_done = data.get("quests_done", {})
 	lantern_tier = int(data.get("lantern_tier", 0))
 	house_stage = int(data.get("house_stage", 0))
 	tidied_day = int(data.get("tidied_day", 0))
 	event_fired_day = int(data.get("event_fired_day", 0))
+	sanity_penalty = int(data.get("sanity_penalty", 0))
 	sanity = float(data.get("sanity", SANITY_MAX))
 
 	crops.clear()
