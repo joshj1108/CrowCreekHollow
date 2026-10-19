@@ -127,6 +127,8 @@ func _focus_first_button() -> void:
 
 
 func _build_row(data: Dictionary) -> Control:
+	if data.has("grid"):
+		return _build_grid(data)
 	if data.has("section"):
 		var heading := Label.new()
 		heading.text = str(data["section"]).to_upper()
@@ -177,6 +179,50 @@ func _build_row(data: Dictionary) -> Control:
 		block.add_child(bar)
 
 	return block
+
+
+# A grid of item slots, like a bag or equipment panel. Each cell is a dict:
+# color (hex, optional), label, tip, count (optional), empty, or locked.
+func _build_grid(data: Dictionary) -> Control:
+	var grid := GridContainer.new()
+	grid.columns = int(data.get("columns", 5))
+	grid.add_theme_constant_override("h_separation", 6)
+	grid.add_theme_constant_override("v_separation", 6)
+	for cell in data["grid"]:
+		grid.add_child(_build_cell(cell))
+	return grid
+
+
+func _build_cell(cell: Dictionary) -> Control:
+	var empty := bool(cell.get("empty", false))
+	var locked := bool(cell.get("locked", false))
+	var filled := not empty and not locked
+	var bg := COL_BUTTON_DISABLED
+	if filled:
+		bg = Color(str(cell.get("color", "8a6a3a")))
+	var panel := PanelContainer.new()
+	panel.custom_minimum_size = Vector2(56, 56)
+	panel.tooltip_text = str(cell.get("tip", ""))
+	panel.add_theme_stylebox_override("panel", _box(bg, COL_BORDER if filled else Color("3d3024"), 2, 4, 2))
+
+	var label := Label.new()
+	label.text = str(cell.get("label", ""))
+	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	label.add_theme_font_size_override("font_size", 12)
+	label.add_theme_color_override("font_color", COL_TEXT if filled else COL_MUTED)
+	panel.add_child(label)
+
+	if cell.has("count"):
+		var count := Label.new()
+		count.text = str(cell["count"])
+		count.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+		count.vertical_alignment = VERTICAL_ALIGNMENT_BOTTOM
+		count.add_theme_font_size_override("font_size", 13)
+		count.add_theme_color_override("font_color", COL_ACCENT)
+		panel.add_child(count)
+	return panel
 
 
 func _set_active(tab: String) -> void:

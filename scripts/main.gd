@@ -797,6 +797,7 @@ func _inventory_rows() -> Array:
 	var rows: Array = [
 		{"section": "Pack"},
 		{"name": "Coins", "value": str(money)},
+		{"grid": _pack_cells(), "columns": 5},
 		{
 			"name": "Pack space",
 			"value": "%d/%d" % [_pack_used(), _pack_capacity()],
@@ -812,7 +813,9 @@ func _inventory_rows() -> Array:
 			"action": "upgrade_bag",
 			"enabled": _can_upgrade_bag(),
 		})
-	rows.append({"note": "Crops, fish, and meals count against the pack. Seeds have their own pouch, and materials are uncapped for now."})
+	rows.append({"note": "Crops, fish, and meals fill the pack. Seeds have their own pouch, and materials are uncapped for now."})
+	rows.append({"section": "Seed pouch"})
+	rows.append({"grid": _seed_cells(), "columns": 5})
 	rows.append({"section": "Planting"})
 	rows.append({"name": "Planting with", "value": _seed_label(selected_seed)})
 	if _level("Farming") >= PUMPKIN_LEVEL:
@@ -823,13 +826,7 @@ func _inventory_rows() -> Array:
 			"action": "switch_seed",
 			"enabled": true,
 		})
-	rows.append({"section": "Seeds and crops"})
-	rows.append({"name": "Turnip seeds", "value": str(inventory["seeds"])})
-	rows.append({"name": "Pumpkin seeds", "value": str(inventory["pumpkin_seeds"])})
-	rows.append({"name": "Harvested crops", "value": str(inventory["crops"])})
-	rows.append({"name": "Fish", "value": str(inventory["fish"])})
 	rows.append({"section": "Cooking"})
-	rows.append({"name": "Meals ready", "value": str(inventory["meals"])})
 	rows.append({
 		"name": "Cook a fish",
 		"value": "1 fish, 1 wood: +%d Cooking XP" % XP_COOK_FISH,
@@ -846,7 +843,7 @@ func _inventory_rows() -> Array:
 	})
 	rows.append({
 		"name": "Eat a meal",
-		"value": "+%d sanity" % int(MEAL_SANITY),
+		"value": "%d ready, +%d sanity" % [int(inventory["meals"]), int(MEAL_SANITY)],
 		"button": "Eat",
 		"action": "eat_meal",
 		"enabled": int(inventory["meals"]) > 0,
@@ -860,8 +857,8 @@ func _inventory_rows() -> Array:
 
 func _gear_rows() -> Array:
 	var rows: Array = [
-		{"section": "Tools"},
-		{"name": "Hoe", "value": "equipped"},
+		{"section": "Equipped"},
+		{"grid": _gear_cells(), "columns": 3},
 		{"section": "Lantern"},
 	]
 	if lantern_tier == 0:
@@ -1606,6 +1603,44 @@ func _cooler_rows() -> Array:
 			"enabled": cooler_stock > 0 and _pack_free() > 0,
 		},
 		{"note": "Fish in your pack spoil overnight. Fish kept here do not."},
+	]
+
+
+# --- Slot grids for the pack, seed pouch, and equipment ---------------------
+
+func _pack_cells() -> Array:
+	var cells: Array = []
+	for i in int(inventory["crops"]):
+		cells.append({"color": "8fd16b", "label": "Crop", "tip": "Harvested crop"})
+	for i in int(inventory["fish"]):
+		cells.append({"color": "6fb8d9", "label": "Fish", "tip": "Fish. Spoils overnight unless stored in the cooler."})
+	for i in int(inventory["meals"]):
+		cells.append({"color": "e0a050", "label": "Meal", "tip": "Cooked meal. Eat it for sanity."})
+	while cells.size() < _pack_capacity():
+		cells.append({"empty": true, "tip": "Empty slot"})
+	return cells
+
+
+func _seed_cells() -> Array:
+	return [
+		{"color": "a8d46f", "label": "Turnip", "count": str(inventory["seeds"]), "tip": "Turnip seeds. Kept in the seed pouch."},
+		{"color": "d98a35", "label": "Pumpkin", "count": str(inventory["pumpkin_seeds"]), "tip": "Pumpkin seeds. Farming %d to plant." % PUMPKIN_LEVEL},
+	]
+
+
+func _gear_cells() -> Array:
+	var bag_name := "Pack" if bag_tier == 0 else str(BAG_TIERS[bag_tier - 1]["name"])
+	var light: Dictionary = {"empty": true, "label": "Light", "tip": "No lantern built yet"}
+	if lantern_tier > 0:
+		var current: Dictionary = LANTERN_TIERS[lantern_tier - 1]
+		light = {"color": "ffd38a", "label": current["name"], "tip": "Light: %s, ring %.1f tiles" % [current["name"], current["radius"]]}
+	return [
+		{"locked": true, "label": "Head", "tip": "Not available yet"},
+		{"color": "7a5a3a", "label": "Back: " + bag_name, "tip": "%s, %d pack slots" % [bag_name, _pack_capacity()]},
+		light,
+		{"color": "8a8f96", "label": "Hoe", "tip": "Hand: hoe, equipped"},
+		{"locked": true, "label": "Body", "tip": "Not available yet"},
+		{"locked": true, "label": "Feet", "tip": "Not available yet"},
 	]
 
 
