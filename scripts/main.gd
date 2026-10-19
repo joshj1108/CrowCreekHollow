@@ -1,8 +1,8 @@
 extends Node2D
 
-## The farm: planting, bushcrafting, the farmhouse, skills (Farming,
-## Bushcrafting, Carpentry, Cleaning), inventory, gear, settings, minimap,
-## the RuneScape-style action bar, the day/night clock, and a first night event.
+## The farm and farmhouse: planting, bushcrafting, skills, inventory, gear,
+## lantern tiers, sanity, night events, the walk-in house, the minimap,
+## the action bar, the day/night clock, and save/load.
 ## Placeholder art is drawn in code; no external assets yet.
 
 const TILE_SIZE := 16
@@ -18,11 +18,18 @@ const MAP_W := INNER_W + BORDER_X * 2
 const MAP_H := INNER_H + BORDER_Y * 2
 
 # Farmhouse footprint in inner coordinates. It starts at its full final size
-# in a decrepit state; repairs change its condition and unlock features.
+# in a decrepit state; repairs change its condition and unlock rooms.
 const HOUSE_IX := 26
 const HOUSE_IY := 3
 const HOUSE_W := 6
 const HOUSE_H := 5
+const HOUSE_DOOR_IX := HOUSE_IX + 2
+const HOUSE_DOOR_IY := HOUSE_IY + HOUSE_H - 1
+
+# The walk-in interior sits below the farm, out of view of it.
+const INT_W := 14
+const INT_H := 9
+const INT_ORIGIN := Vector2i(0, MAP_H + 4)
 
 # Brush piles for bushcrafting, in inner coordinates. They respawn each morning.
 const BRUSH_SPOTS := [
@@ -45,16 +52,21 @@ const REPAIR_COSTS := [
 	{"wood": 8, "fiber": 6, "level": 3},
 ]
 const HOUSE_FEATURES := [
-	{"stage": 1, "text": "Sleep in bed to end the day early"},
-	{"stage": 2, "text": "Tidy the house for Cleaning XP"},
-	{"stage": 3, "text": "A restored house softens the night"},
+	{"stage": 1, "text": "Bedroom opens: sleep in the bed to end the day"},
+	{"stage": 2, "text": "Parlor opens: tidy at the station for Cleaning XP"},
+	{"stage": 3, "text": "Study opens, and a restored house softens the night"},
 ]
 const HOUSE_WALLS := [Color("4a3a2e"), Color("6b5340"), Color("8a6a4c"), Color("b08a5e")]
 const HOUSE_ROOFS := [Color("2d2620"), Color("4a3a2c"), Color("6b4b33"), Color("8c5a3c")]
+const HOUSE_RELIEF := 0.2   # night darkness reduction once the house is restored
 
-const LANTERN_COST := {"wood": 2, "fiber": 2, "level": 2}  # level = Bushcrafting
-const LANTERN_RADIUS_TILES := 2.5   # light ring around the player
-const HOUSE_RELIEF := 0.2
+# Lantern tiers. Each entry is the next thing to build, in order.
+const LANTERN_TIERS := [
+	{"name": "Tin Lantern", "radius": 2.5, "wood": 2, "fiber": 2, "resin": 0, "level": 2},
+	{"name": "Brass Lantern", "radius": 4.0, "wood": 4, "fiber": 4, "resin": 2, "level": 4},
+	{"name": "Hollow Lantern", "radius": 6.0, "wood": 6, "fiber": 6, "resin": 4, "level": 6},
+]
+const LANTERN_FLICKER_TIER := 3
 
 const SKILLS := ["Farming", "Bushcrafting", "Carpentry", "Cleaning"]
 const XP_PLANT := 5
@@ -65,8 +77,30 @@ const XP_TIDY := 20
 
 const STARTING_SEEDS := 5
 const MESSAGE_SECONDS := 3.0
+const SANITY_MAX := 100.0
+const LOW_SANITY := 30.0
+const SLEEP_SANITY := 25.0
+const AUTOSAVE_SECONDS := 30.0
+const SAVE_PATH := "user://hallowvale_save.json"
 
-enum Tile { TREE, GRASS, SOIL, PATH, WATER, HOUSE }
+# Night events: picked by day so the nights vary. "shadow" says where it appears.
+const NIGHT_EVENTS := [
+	{"message": "Something stands at the edge of the field.", "shadow": "field", "sanity": -5},
+	{"message": "Three slow knocks sound against the house wall.", "shadow": "house", "sanity": -10},
+	{"message": "A figure watches from the dark beside the house.", "shadow": "house", "sanity": -15},
+	{"message": "The field is quiet tonight. Too quiet.", "shadow": "none", "sanity": -3},
+]
+
+# One-off story beats, shown on the morning of the given day.
+const STORY_BEATS := {
+	3: "A letter is wedged under the door. It reads: 'You can't stay out here forever.' It's in your handwriting.",
+	7: "The farmhouse door was open this morning. You're sure you locked it.",
+	12: "Fresh footprints circle the house and stop beneath the study window.",
+}
+
+enum Tile { TREE, GRASS, SOIL, PATH, WATER, HOUSE, DOOR, FLOOR, WALL, EXIT, BED, STATION, DESK }
+
+const BLOCKING := [Tile.TREE, Tile.WATER, Tile.HOUSE, Tile.WALL, Tile.BED, Tile.STATION, Tile.DESK]
 
 const TILE_COLORS := {
 	Tile.TREE: Color("2f4f2f"),
@@ -75,6 +109,13 @@ const TILE_COLORS := {
 	Tile.PATH: Color("c9a66b"),
 	Tile.WATER: Color("3f6fa8"),
 	Tile.HOUSE: Color("6b5340"),
+	Tile.DOOR: Color("24180f"),
+	Tile.FLOOR: Color("5a4634"),
+	Tile.WALL: Color("2a211a"),
+	Tile.EXIT: Color("3a2e22"),
+	Tile.BED: Color("8a4a4a"),
+	Tile.STATION: Color("4f6b7a"),
+	Tile.DESK: Color("6b5a2e"),
 }
 
 const CROP_COLORS := [
@@ -88,22 +129,27 @@ const BUSH_COLOR := Color("3d6b2a")
 const DAY_TINT := Color(1, 1, 1)
 const NIGHT_TINT := Color("3a3f6e")
 
-var map: Array = []
-var crops := {}                    # Vector2i world tile -> growth stage
-var brush := {}                    # Vector2i world tile -> true while unharvested
+var map: Array = []                 # farm tiles, [y][x]
+var interior: Array = []            # house tiles, [y][x], local to INT_ORIGIN
+var crops := {}                     # Vector2i world tile -> growth stage
+var brush := {}                     # Vector2i world tile -> true while unharvested
 var clock := 0.0
 var current_hour := START_HOUR
 var day := 1
 var skill_xp := {"Farming": 0, "Bushcrafting": 0, "Carpentry": 0, "Cleaning": 0}
 var inventory := {"seeds": STARTING_SEEDS, "crops": 0}
-var materials := {"wood": 0, "fiber": 0}
-var has_lantern := false
+var materials := {"wood": 0, "fiber": 0, "resin": 0}
+var lantern_tier := 0              # 0 = none built yet
 var house_stage := 0
 var tidied_day := 0
+var sanity := SANITY_MAX
+var inside := false                # standing in the farmhouse interior
 var open_tab := ""                 # "" when the action bar panel is closed
 var event_fired_day := 0           # the day the night event last happened
-var shadow_tile := Vector2i.ZERO
+var tonight_shadow := Vector2i(-1, -1)
+var shadow_tile := Vector2i.ZERO   # where the field shadow sits
 var message_timer := 0.0
+var autosave_timer := 0.0
 
 var action_bar: ActionBar
 var minimap: Minimap
@@ -111,17 +157,29 @@ var canvas_modulate: CanvasModulate
 var hud_label: Label
 var message_label: Label
 var player    # Node2D with player.gd attached
+var camera: Camera2D
 var lantern_light: PointLight2D
 
 
 func _ready() -> void:
 	_setup_input()
 	_build_map()
-	_respawn_brush()
+	var loaded := _load_game()
+	if not loaded:
+		_respawn_brush()
+	_build_interior()
 	_build_world()
 	_build_hud()
 	_build_action_bar()
 	_update_shadow_tile()
+	if loaded:
+		_show_message("Welcome back. Day %d." % day)
+
+
+func _notification(what: int) -> void:
+	if what == NOTIFICATION_WM_CLOSE_REQUEST:
+		_save_game()
+		get_tree().quit()
 
 
 func _process(delta: float) -> void:
@@ -129,21 +187,23 @@ func _process(delta: float) -> void:
 	current_hour = START_HOUR + clock / DAY_LENGTH * 18.0
 
 	if current_hour >= 24.0:
-		_end_day("Morning. Your crops grew overnight.")
+		_end_day("Morning.")
 		return
 
 	if current_hour >= EVENT_HOUR and event_fired_day != day:
-		event_fired_day = day
-		_show_message("Something stands at the edge of the field.")
-		queue_redraw()
+		_trigger_night_event()
 
 	var darkness := smoothstep(DUSK_HOUR, DUSK_HOUR + 2.0, current_hour)
 	darkness *= 1.0 - _night_relief()
+	darkness = clampf(darkness + _low_sanity_boost(), 0.0, 1.0)
 	canvas_modulate.color = DAY_TINT.lerp(NIGHT_TINT, darkness)
-	# The lantern lights a small ring around the player, only when it's dark.
-	lantern_light.enabled = has_lantern and darkness > 0.05
+	_update_lantern(darkness)
+	_update_sanity(darkness, delta)
 
-	hud_label.text = "Day %d   %02d:%02d" % [day, int(current_hour), int(fmod(current_hour, 1.0) * 60.0)]
+	_check_doors()
+
+	var minutes := int(fmod(current_hour, 1.0) * 60.0)
+	hud_label.text = "Day %d   %02d:%02d   Sanity %d" % [day, int(current_hour), minutes, int(sanity)]
 
 	_handle_keys()
 
@@ -156,6 +216,11 @@ func _process(delta: float) -> void:
 
 	_update_minimap()
 
+	autosave_timer += delta
+	if autosave_timer >= AUTOSAVE_SECONDS:
+		autosave_timer = 0.0
+		_save_game()
+
 	if message_timer > 0.0:
 		message_timer -= delta
 		if message_timer <= 0.0:
@@ -167,6 +232,11 @@ func _draw() -> void:
 		for x in MAP_W:
 			var tile: int = map[y][x]
 			draw_rect(_tile_rect(Vector2i(x, y)), TILE_COLORS[tile])
+
+	for y in INT_H:
+		for x in INT_W:
+			var kind: int = interior[y][x]
+			draw_rect(_tile_rect(INT_ORIGIN + Vector2i(x, y)), TILE_COLORS[kind])
 
 	for pos in crops:
 		var stage: int = crops[pos]
@@ -181,8 +251,8 @@ func _draw() -> void:
 
 	_draw_house()
 
-	if event_fired_day == day:
-		var s := _tile_center(shadow_tile.x, shadow_tile.y)
+	if tonight_shadow.x >= 0:
+		var s := _tile_center(tonight_shadow.x, tonight_shadow.y)
 		draw_circle(s, PX * 0.6, Color(0.02, 0.01, 0.05, 0.9))
 		draw_circle(s + Vector2(-8, -6), 3, Color(0.9, 0.1, 0.1))
 		draw_circle(s + Vector2(8, -6), 3, Color(0.9, 0.1, 0.1))
@@ -196,9 +266,9 @@ func _draw_house() -> void:
 	draw_rect(rect, HOUSE_WALLS[stage])
 	draw_rect(Rect2(rect.position, Vector2(rect.size.x, PX * 1.4)), HOUSE_ROOFS[stage])
 
-	# Door in the middle of the bottom wall.
-	var door_pos := rect.position + Vector2(rect.size.x * 0.5 - PX * 0.5, rect.size.y - PX * 1.3)
-	draw_rect(Rect2(door_pos, Vector2(PX, PX * 1.3)), Color("24180f"))
+	# The door fills the bottom-middle tile of the footprint.
+	var door_pos := rect.position + Vector2(2 * PX, (HOUSE_H - 1) * PX)
+	draw_rect(Rect2(door_pos, Vector2(PX, PX)), Color("24180f"))
 
 	# Windows on either side of the door. Boarded until the house is patched.
 	for wx in [0.15, 0.7]:
@@ -212,6 +282,8 @@ func _draw_house() -> void:
 	if stage == 0:
 		draw_rect(Rect2(rect.end.x - PX * 2.2, rect.position.y + 6, PX * 1.4, PX * 0.9), Color("0d0a08"))
 
+
+# --- Setup -------------------------------------------------------------------
 
 func _setup_input() -> void:
 	_ensure_action("move_up", [KEY_W, KEY_UP])
@@ -252,8 +324,43 @@ func _build_map() -> void:
 					t = Tile.WATER
 				if ix >= HOUSE_IX and ix < HOUSE_IX + HOUSE_W and iy >= HOUSE_IY and iy < HOUSE_IY + HOUSE_H:
 					t = Tile.HOUSE
+				if ix == HOUSE_DOOR_IX and iy == HOUSE_DOOR_IY:
+					t = Tile.DOOR
 			row.append(t)
 		map.append(row)
+
+
+# The interior is a fixed layout. Rooms open up as the house is repaired.
+func _build_interior() -> void:
+	interior = []
+	for y in INT_H:
+		var row: Array = []
+		for x in INT_W:
+			row.append(Tile.WALL)
+		interior.append(row)
+
+	_fill_interior(1, 5, 12, 7, Tile.FLOOR)   # the hall, always open
+	_set_interior(6, 8, Tile.EXIT)            # back out to the farm
+
+	if house_stage >= 1:
+		_fill_interior(1, 1, 4, 4, Tile.FLOOR)
+		_set_interior(2, 1, Tile.BED)
+	if house_stage >= 2:
+		_fill_interior(9, 1, 12, 4, Tile.FLOOR)
+		_set_interior(11, 1, Tile.STATION)
+	if house_stage >= 3:
+		_fill_interior(5, 1, 8, 4, Tile.FLOOR)
+		_set_interior(6, 1, Tile.DESK)
+
+
+func _fill_interior(x0: int, y0: int, x1: int, y1: int, kind: int) -> void:
+	for y in range(y0, y1 + 1):
+		for x in range(x0, x1 + 1):
+			interior[y][x] = kind
+
+
+func _set_interior(x: int, y: int, kind: int) -> void:
+	interior[y][x] = kind
 
 
 func _respawn_brush() -> void:
@@ -269,26 +376,21 @@ func _build_world() -> void:
 	player = Node2D.new()
 	player.set_script(load("res://scripts/player.gd"))
 	player.position = _tile_center(BORDER_X + INNER_W / 2, BORDER_Y + INNER_H / 2)
-	player.min_pos = _tile_center(BORDER_X, BORDER_Y)
-	player.max_pos = _tile_center(BORDER_X + INNER_W - 1, BORDER_Y + INNER_H - 1)
 	player.is_blocked = _is_blocked_world
 	add_child(player)
 	_build_lantern_light()
 
-	var camera := Camera2D.new()
+	camera = Camera2D.new()
 	camera.enabled = true
-	camera.limit_left = 0
-	camera.limit_top = 0
-	camera.limit_right = MAP_W * PX
-	camera.limit_bottom = MAP_H * PX
 	player.add_child(camera)
+	_set_bounds()
 
 	canvas_modulate = CanvasModulate.new()
 	add_child(canvas_modulate)
 
 
 func _build_lantern_light() -> void:
-	# A soft white-to-black radial gradient, tinted warm and scaled to the ring radius.
+	# A soft white-to-black radial gradient, tinted warm. Its size follows the lantern tier.
 	var gradient := Gradient.new()
 	gradient.set_color(0, Color.WHITE)
 	gradient.set_color(1, Color.BLACK)
@@ -302,11 +404,11 @@ func _build_lantern_light() -> void:
 
 	lantern_light = PointLight2D.new()
 	lantern_light.texture = texture
-	lantern_light.texture_scale = LANTERN_RADIUS_TILES * PX / 128.0
 	lantern_light.color = Color("ffd38a")
 	lantern_light.energy = 1.0
 	lantern_light.enabled = false
 	player.add_child(lantern_light)
+	_apply_lantern_radius()
 
 
 func _build_hud() -> void:
@@ -315,6 +417,8 @@ func _build_hud() -> void:
 
 	hud_label = _make_label(layer, Vector2(16, 12), 24)
 	message_label = _make_label(layer, Vector2(16, 100), 20)
+	message_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	message_label.custom_minimum_size = Vector2(620, 0)
 
 	minimap = Minimap.new()
 	var mini_size := Vector2(MAP_W, MAP_H) * Minimap.PX_PER_TILE
@@ -344,8 +448,9 @@ func _make_label(parent: Node, pos: Vector2, font_size: int) -> Label:
 
 
 func _update_minimap() -> void:
-	var shadow := shadow_tile if event_fired_day == day else Vector2i(-1, -1)
-	minimap.update_view(map, TILE_COLORS, brush.keys(), player.position / PX, shadow)
+	# Indoors the minimap shows the house, since the player isn't on the farm.
+	var player_tile := Vector2(HOUSE_DOOR_IX + BORDER_X, HOUSE_DOOR_IY + BORDER_Y) if inside else player.position / PX
+	minimap.update_view(map, TILE_COLORS, brush.keys(), player_tile, tonight_shadow)
 
 
 # --- Input and panels --------------------------------------------------------
@@ -387,8 +492,8 @@ func _on_panel_action(action_id: String) -> void:
 			_sleep()
 		"tidy":
 			_tidy_house()
-		"craft_lantern":
-			_craft_lantern()
+		"advance_lantern":
+			_advance_lantern()
 
 
 func _refresh_panel() -> void:
@@ -415,7 +520,7 @@ func _skill_rows() -> Array:
 			"value": "%d XP" % skill_xp[skill],
 			"progress": float(skill_xp[skill] % 100) / 100.0,
 		})
-	rows.append({"note": "Bushcrafting gathers wood and fiber from brush piles. Carpentry repairs the house. Cleaning tidies it."})
+	rows.append({"note": "Bushcrafting gathers wood, fiber, and resin from brush piles. Carpentry repairs the house. Cleaning tidies it."})
 	return rows
 
 
@@ -427,6 +532,7 @@ func _inventory_rows() -> Array:
 		{"section": "Materials"},
 		{"name": "Wood", "value": str(materials["wood"])},
 		{"name": "Fiber", "value": str(materials["fiber"])},
+		{"name": "Resin", "value": str(materials["resin"])},
 	]
 
 
@@ -434,18 +540,23 @@ func _gear_rows() -> Array:
 	var rows: Array = [
 		{"section": "Tools"},
 		{"name": "Hoe", "value": "equipped"},
+		{"section": "Lantern"},
 	]
-	if has_lantern:
-		rows.append({"name": "Lantern", "value": "owned"})
+	if lantern_tier == 0:
+		rows.append({"name": "Lantern", "value": "not built"})
 	else:
+		var current: Dictionary = LANTERN_TIERS[lantern_tier - 1]
+		rows.append({"name": current["name"], "value": "light ring %.1f tiles" % current["radius"]})
+	if lantern_tier < LANTERN_TIERS.size():
+		var upcoming: Dictionary = LANTERN_TIERS[lantern_tier]
 		rows.append({
-			"name": "Lantern",
-			"value": _cost_text(LANTERN_COST),
-			"button": "Craft",
-			"action": "craft_lantern",
-			"enabled": _can_craft_lantern(),
+			"name": "Next: %s" % upcoming["name"],
+			"value": _cost_text(upcoming),
+			"button": "Build" if lantern_tier == 0 else "Upgrade",
+			"action": "advance_lantern",
+			"enabled": _can_advance_lantern(),
 		})
-	rows.append({"note": "A lantern softens the night. Bushcrafting teaches you how to build one."})
+	rows.append({"note": "A lantern lights a ring around you in the dark. Each tier needs more Bushcrafting and better materials."})
 	return rows
 
 
@@ -498,6 +609,8 @@ func _settings_rows() -> Array:
 		{"name": "Gear", "value": "G"},
 		{"name": "House", "value": "H"},
 		{"name": "Settings", "value": "Esc"},
+		{"section": "Saving"},
+		{"note": "Progress saves automatically every 30 seconds, at the end of each day, and when you close the game."},
 		{"note": "Sound and display options are coming later."},
 	]
 
@@ -507,6 +620,16 @@ func _settings_rows() -> Array:
 func _interact() -> void:
 	var tile := _tile_in_front()
 	if not _in_bounds(tile):
+		return
+
+	if inside:
+		match _kind_at(tile):
+			Tile.BED:
+				_sleep()
+			Tile.STATION:
+				_tidy_house()
+			Tile.DESK:
+				_read_desk()
 		return
 
 	if brush.has(tile):
@@ -540,12 +663,20 @@ func _interact() -> void:
 	queue_redraw()
 
 
+func _read_desk() -> void:
+	_show_message("Old letters, all in your handwriting. Each one ends the same way: 'Don't let it in.'")
+
+
 func _gather(tile: Vector2i) -> void:
 	brush.erase(tile)
 	materials["wood"] += 1
 	materials["fiber"] += 1
+	var found := "wood and fiber"
+	if randf() < 0.34:
+		materials["resin"] += 1
+		found = "wood, fiber, and resin"
 	_grant_xp("Bushcrafting", XP_GATHER)
-	_show_message("Gathered wood and fiber from the brush. +%d Bushcrafting XP" % XP_GATHER)
+	_show_message("Gathered %s from the brush. +%d Bushcrafting XP" % [found, XP_GATHER])
 	queue_redraw()
 
 
@@ -567,6 +698,7 @@ func _repair_house() -> void:
 	materials["fiber"] -= cost["fiber"]
 	house_stage += 1
 	_grant_xp("Carpentry", XP_REPAIR)
+	_build_interior()
 	_show_message("Repaired. The farmhouse is now %s. +%d Carpentry XP" % [STAGE_NAMES[house_stage], XP_REPAIR])
 	queue_redraw()
 
@@ -577,9 +709,10 @@ func _can_sleep() -> bool:
 
 func _sleep() -> void:
 	if not _can_sleep():
-		_show_message("You can sleep once the house is boarded and it's evening.")
+		_show_message("You can sleep once the bedroom is open and it's evening.")
 		return
-	_end_day("You sleep through the night. Your crops grew overnight.")
+	_change_sanity(SLEEP_SANITY)
+	_end_day("You sleep through the night.")
 
 
 func _can_tidy() -> bool:
@@ -592,51 +725,227 @@ func _tidy_house() -> void:
 		return
 	tidied_day = day
 	_grant_xp("Cleaning", XP_TIDY)
+	_change_sanity(10.0)
 	_show_message("You tidy the house. The air feels a little lighter. +%d Cleaning XP" % XP_TIDY)
 
 
-func _can_craft_lantern() -> bool:
-	return not has_lantern \
-		and materials["wood"] >= LANTERN_COST["wood"] \
-		and materials["fiber"] >= LANTERN_COST["fiber"] \
-		and _level("Bushcrafting") >= LANTERN_COST["level"]
+func _can_advance_lantern() -> bool:
+	if lantern_tier >= LANTERN_TIERS.size():
+		return false
+	var t: Dictionary = LANTERN_TIERS[lantern_tier]
+	return materials["wood"] >= t["wood"] \
+		and materials["fiber"] >= t["fiber"] \
+		and materials["resin"] >= t["resin"] \
+		and _level("Bushcrafting") >= t["level"]
 
 
-func _craft_lantern() -> void:
-	if not _can_craft_lantern():
-		_show_message("You need %s to craft a lantern." % _cost_text(LANTERN_COST))
+func _advance_lantern() -> void:
+	if not _can_advance_lantern():
+		_show_message("You need %s for the next lantern." % _cost_text(LANTERN_TIERS[lantern_tier]))
 		return
-	materials["wood"] -= LANTERN_COST["wood"]
-	materials["fiber"] -= LANTERN_COST["fiber"]
-	has_lantern = true
-	_show_message("You craft a lantern. A ring of light now follows you through the dark.")
+	var t: Dictionary = LANTERN_TIERS[lantern_tier]
+	materials["wood"] -= t["wood"]
+	materials["fiber"] -= t["fiber"]
+	materials["resin"] -= t["resin"]
+	lantern_tier += 1
+	_apply_lantern_radius()
+	_show_message("You build a %s. Its light reaches %.1f tiles." % [t["name"], t["radius"]])
+
+
+func _apply_lantern_radius() -> void:
+	if lantern_tier == 0:
+		return
+	var radius: float = LANTERN_TIERS[lantern_tier - 1]["radius"]
+	lantern_light.texture_scale = radius * PX / 128.0
+
+
+func _update_lantern(darkness: float) -> void:
+	lantern_light.enabled = lantern_tier > 0 and darkness > 0.05
+	if lantern_tier >= LANTERN_FLICKER_TIER:
+		var t := Time.get_ticks_msec() / 1000.0
+		lantern_light.energy = 0.9 + 0.08 * sin(t * 9.0) + randf_range(-0.03, 0.03)
+	else:
+		lantern_light.energy = 1.0
 
 
 func _night_relief() -> float:
-	# Only the house dims the night overall. The lantern lights a ring instead.
+	# The restored house dims the night overall. The lantern lights a ring instead.
 	var relief := 0.0
 	if house_stage >= 3:
 		relief += HOUSE_RELIEF
 	return minf(relief, 0.9)
 
 
-func _end_day(message: String) -> void:
-	# Crops grow one stage overnight and brush piles come back.
+# --- Sanity and night events ------------------------------------------------
+
+func _change_sanity(amount: float) -> void:
+	sanity = clampf(sanity + amount, 0.0, SANITY_MAX)
+
+
+func _update_sanity(darkness: float, delta: float) -> void:
+	var rate := 0.02                 # slow recovery outdoors in daylight
+	if inside:
+		rate = 0.1                   # the house is shelter
+	elif darkness > 0.5:
+		rate = -0.05                 # the dark wears on you
+	_change_sanity(rate * delta)
+
+
+func _low_sanity_boost() -> float:
+	# Low sanity makes everything darker, a visible warning.
+	return maxf(0.0, (LOW_SANITY - sanity) / LOW_SANITY) * 0.25
+
+
+func _trigger_night_event() -> void:
+	event_fired_day = day
+	var ev: Dictionary = NIGHT_EVENTS[(day * 3) % NIGHT_EVENTS.size()]
+	match ev["shadow"]:
+		"field":
+			tonight_shadow = shadow_tile
+		"house":
+			tonight_shadow = _world_tile(HOUSE_IX + HOUSE_W, HOUSE_IY + 1)
+		_:
+			tonight_shadow = Vector2i(-1, -1)
+	_change_sanity(ev["sanity"])
+	_show_message(ev["message"])
+	queue_redraw()
+
+
+func _end_day(base: String) -> void:
+	if inside:
+		_leave_house()
 	for pos in crops.keys():
 		crops[pos] = min(crops[pos] + 1, MAX_STAGE)
 	day += 1
 	clock = 0.0
+	tonight_shadow = Vector2i(-1, -1)
 	_respawn_brush()
 	_update_shadow_tile()
+	var message := "%s Your crops grew overnight." % base
+	if STORY_BEATS.has(day):
+		message += " " + STORY_BEATS[day]
 	_show_message(message)
+	_save_game()
 	queue_redraw()
 
 
 func _update_shadow_tile() -> void:
-	# The shadow creeps closer to the farm each night.
+	# The field shadow creeps closer to the farm each night.
 	var x := BORDER_X + INNER_W - 2 - (day - 1) * 2
 	x = max(x, BORDER_X + 14)
 	shadow_tile = Vector2i(x, BORDER_Y + INNER_H / 2 - 4)
+
+
+# --- Walking into and out of the house --------------------------------------
+
+func _check_doors() -> void:
+	var kind := _kind_at(_player_tile())
+	if not inside and kind == Tile.DOOR:
+		_enter_house()
+	elif inside and kind == Tile.EXIT:
+		_leave_house()
+
+
+func _enter_house() -> void:
+	inside = true
+	player.position = _tile_center(INT_ORIGIN.x + 6, INT_ORIGIN.y + 6)
+	_set_bounds()
+	_show_message("You step inside. The air is cold and smells of old wood.")
+
+
+func _leave_house() -> void:
+	inside = false
+	player.position = _tile_center(BORDER_X + HOUSE_DOOR_IX, BORDER_Y + HOUSE_DOOR_IY + 1)
+	_set_bounds()
+
+
+func _set_bounds() -> void:
+	if inside:
+		player.min_pos = _tile_center(INT_ORIGIN.x + 1, INT_ORIGIN.y + 1)
+		player.max_pos = _tile_center(INT_ORIGIN.x + INT_W - 2, INT_ORIGIN.y + INT_H - 2)
+		camera.limit_left = INT_ORIGIN.x * PX
+		camera.limit_top = INT_ORIGIN.y * PX
+		camera.limit_right = (INT_ORIGIN.x + INT_W) * PX
+		camera.limit_bottom = (INT_ORIGIN.y + INT_H) * PX
+	else:
+		player.min_pos = _tile_center(BORDER_X, BORDER_Y)
+		player.max_pos = _tile_center(BORDER_X + INNER_W - 1, BORDER_Y + INNER_H - 1)
+		camera.limit_left = 0
+		camera.limit_top = 0
+		camera.limit_right = MAP_W * PX
+		camera.limit_bottom = MAP_H * PX
+
+
+# --- Save and load ----------------------------------------------------------
+
+func _save_game() -> void:
+	var data := {
+		"day": day,
+		"clock": clock,
+		"skill_xp": skill_xp,
+		"inventory": inventory,
+		"materials": materials,
+		"lantern_tier": lantern_tier,
+		"house_stage": house_stage,
+		"tidied_day": tidied_day,
+		"event_fired_day": event_fired_day,
+		"sanity": sanity,
+		"crops": _crops_to_array(),
+		"brush": _brush_to_array(),
+	}
+	var file := FileAccess.open(SAVE_PATH, FileAccess.WRITE)
+	if file != null:
+		file.store_string(JSON.stringify(data))
+
+
+func _load_game() -> bool:
+	if not FileAccess.file_exists(SAVE_PATH):
+		return false
+	var parsed: Variant = JSON.parse_string(FileAccess.get_file_as_string(SAVE_PATH))
+	if typeof(parsed) != TYPE_DICTIONARY:
+		return false
+	var data: Dictionary = parsed
+
+	day = int(data.get("day", 1))
+	clock = float(data.get("clock", 0.0))
+	_merge_ints(skill_xp, data.get("skill_xp"))
+	_merge_ints(inventory, data.get("inventory"))
+	_merge_ints(materials, data.get("materials"))
+	lantern_tier = int(data.get("lantern_tier", 0))
+	house_stage = int(data.get("house_stage", 0))
+	tidied_day = int(data.get("tidied_day", 0))
+	event_fired_day = int(data.get("event_fired_day", 0))
+	sanity = float(data.get("sanity", SANITY_MAX))
+
+	crops.clear()
+	for c in data.get("crops", []):
+		crops[Vector2i(int(c["x"]), int(c["y"]))] = int(c["stage"])
+	brush.clear()
+	for b in data.get("brush", []):
+		brush[Vector2i(int(b[0]), int(b[1]))] = true
+	return true
+
+
+func _merge_ints(target: Dictionary, saved: Variant) -> void:
+	if typeof(saved) != TYPE_DICTIONARY:
+		return
+	for key in target.keys():
+		if saved.has(key):
+			target[key] = int(saved[key])
+
+
+func _crops_to_array() -> Array:
+	var arr: Array = []
+	for pos in crops:
+		arr.append({"x": pos.x, "y": pos.y, "stage": crops[pos]})
+	return arr
+
+
+func _brush_to_array() -> Array:
+	var arr: Array = []
+	for pos in brush:
+		arr.append([pos.x, pos.y])
+	return arr
 
 
 # --- Helpers -----------------------------------------------------------------
@@ -650,12 +959,16 @@ func _grant_xp(skill: String, amount: int) -> void:
 
 
 func _cost_text(cost: Dictionary) -> String:
-	return "%d wood, %d fiber, Bushcrafting %d" % [cost["wood"], cost["fiber"], cost["level"]]
+	var parts := ["%d wood" % cost["wood"], "%d fiber" % cost["fiber"]]
+	if cost.get("resin", 0) > 0:
+		parts.append("%d resin" % cost["resin"])
+	parts.append("Bushcrafting %d" % cost["level"])
+	return ", ".join(parts)
 
 
 func _show_message(text: String) -> void:
 	message_label.text = text
-	message_timer = MESSAGE_SECONDS
+	message_timer = MESSAGE_SECONDS + text.length() / 30.0
 
 
 func _tile_in_front() -> Vector2i:
@@ -663,18 +976,33 @@ func _tile_in_front() -> Vector2i:
 	return Vector2i(floori(p.x / PX), floori(p.y / PX))
 
 
+func _player_tile() -> Vector2i:
+	return Vector2i(floori(player.position.x / PX), floori(player.position.y / PX))
+
+
 func _in_bounds(tile: Vector2i) -> bool:
 	return tile.x >= 0 and tile.y >= 0 and tile.x < MAP_W and tile.y < MAP_H
 
 
+func _in_interior(tile: Vector2i) -> bool:
+	return tile.x >= INT_ORIGIN.x and tile.x < INT_ORIGIN.x + INT_W \
+		and tile.y >= INT_ORIGIN.y and tile.y < INT_ORIGIN.y + INT_H
+
+
+# The tile kind at a world tile: the interior if it's inside the house, else the farm.
+func _kind_at(tile: Vector2i) -> int:
+	if _in_interior(tile):
+		return interior[tile.y - INT_ORIGIN.y][tile.x - INT_ORIGIN.x]
+	if not _in_bounds(tile):
+		return Tile.TREE
+	return map[tile.y][tile.x]
+
+
 func _is_blocked_world(p: Vector2) -> bool:
 	var t := Vector2i(floori(p.x / PX), floori(p.y / PX))
-	if not _in_bounds(t):
+	if BLOCKING.has(_kind_at(t)):
 		return true
-	var kind: int = map[t.y][t.x]
-	if kind == Tile.TREE or kind == Tile.WATER or kind == Tile.HOUSE:
-		return true
-	return brush.has(t)
+	return not inside and brush.has(t)
 
 
 func _world_tile(ix: int, iy: int) -> Vector2i:
