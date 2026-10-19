@@ -73,13 +73,12 @@ The story questline is on hold until the homestead stage is solid.
 | Patched | 5 | 4 | 2 |
 | Restored | 8 | 6 | 3 |
 
-- Rooms inside open as the house is repaired:
+- The hall and bedroom are open from the start, so the bed is usable right away. Other rooms open as the house is repaired:
   - **Hall:** open from the start, with the exit mat.
-  - **Bedroom (Boarded):** the bed. Sleeping here saves and ends the day.
+  - **Bedroom:** open from the start. The bed saves and ends the day.
   - **Parlor (Patched):** a cleaning station. Tidy once a day for Cleaning XP.
   - **Study (Restored):** a desk.
 - A restored house softens the night overall.
-- Before the house is boarded there's no bed, so every night ends in a collapse until the first repair.
 
 ## Skills (RuneScape-style)
 
@@ -106,7 +105,7 @@ The story questline is on hold until the homestead stage is solid.
 ## Sanity and horror
 
 - Sanity runs from 0 to a maximum that drops with each collapse. It shows in the HUD as `Sanity current/max`.
-- Outdoors in the dark, sanity drains slowly. Indoors it recovers. Tidying gives +10, and sleeping gives +25.
+- Outdoors in the dark, sanity drains slowly. Indoors it recovers, faster once the house is boarded. Tidying gives +10, and sleeping gives +25.
 - Below 30 sanity, the whole screen gets darker.
 - Night events vary by day and change sanity:
   - Something at the edge of the field (−5)

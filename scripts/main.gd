@@ -55,7 +55,7 @@ const REPAIR_COSTS := [
 	{"wood": 8, "fiber": 6, "level": 3},
 ]
 const HOUSE_FEATURES := [
-	{"stage": 1, "text": "Bedroom opens: the bed is where you sleep and save"},
+	{"stage": 1, "text": "Boarded: the walls hold, and sanity recovers faster indoors"},
 	{"stage": 2, "text": "Parlor opens: tidy at the station for Cleaning XP"},
 	{"stage": 3, "text": "Study opens, and a restored house softens the night"},
 ]
@@ -351,9 +351,9 @@ func _build_interior() -> void:
 	_fill_interior(1, 5, 12, 7, Tile.FLOOR)   # the hall, always open
 	_set_interior(6, 8, Tile.EXIT)            # back out to the farm
 
-	if house_stage >= 1:
-		_fill_interior(1, 1, 4, 4, Tile.FLOOR)
-		_set_interior(2, 1, Tile.BED)
+	# The bedroom and its bed are open from the start.
+	_fill_interior(1, 1, 4, 4, Tile.FLOOR)
+	_set_interior(2, 1, Tile.BED)
 	if house_stage >= 2:
 		_fill_interior(9, 1, 12, 4, Tile.FLOOR)
 		_set_interior(11, 1, Tile.STATION)
@@ -863,7 +863,7 @@ func _change_sanity(amount: float) -> void:
 func _update_sanity(darkness: float, delta: float) -> void:
 	var rate := 0.02                 # slow recovery outdoors in daylight
 	if inside:
-		rate = 0.1                   # the house is shelter
+		rate = 0.1 + (0.05 if house_stage >= 1 else 0.0)   # the house is shelter
 	elif darkness > 0.5:
 		rate = -0.05                 # the dark wears on you
 	_change_sanity(rate * delta)
