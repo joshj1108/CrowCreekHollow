@@ -1628,18 +1628,24 @@ func _seed_cells() -> Array:
 	]
 
 
+# Nine slots in three rows: back, head, neck / left hand, chest, right hand /
+# wrist, legs, feet. The bag sits in Back, the lantern in the left hand, and
+# the hoe in the right hand. The rest are locked until they have items.
 func _gear_cells() -> Array:
 	var bag_name := "Pack" if bag_tier == 0 else str(BAG_TIERS[bag_tier - 1]["name"])
-	var light: Dictionary = {"empty": true, "label": "Light", "tip": "No lantern built yet"}
+	var lantern: Dictionary = {"empty": true, "label": "Left hand", "tip": "Left hand: no lantern built yet"}
 	if lantern_tier > 0:
 		var current: Dictionary = LANTERN_TIERS[lantern_tier - 1]
-		light = {"color": "ffd38a", "label": current["name"], "tip": "Light: %s, ring %.1f tiles" % [current["name"], current["radius"]]}
+		lantern = {"color": "ffd38a", "label": current["name"], "tip": "Left hand: %s, ring %.1f tiles" % [current["name"], current["radius"]]}
 	return [
+		{"color": "7a5a3a", "label": bag_name, "tip": "Back: %s, %d pack slots" % [bag_name, _pack_capacity()]},
 		{"locked": true, "label": "Head", "tip": "Not available yet"},
-		{"color": "7a5a3a", "label": "Back: " + bag_name, "tip": "%s, %d pack slots" % [bag_name, _pack_capacity()]},
-		light,
-		{"color": "8a8f96", "label": "Hoe", "tip": "Hand: hoe, equipped"},
-		{"locked": true, "label": "Body", "tip": "Not available yet"},
+		{"locked": true, "label": "Neck", "tip": "Not available yet"},
+		lantern,
+		{"locked": true, "label": "Chest", "tip": "Not available yet"},
+		{"color": "8a8f96", "label": "Hoe", "tip": "Right hand: hoe, equipped"},
+		{"locked": true, "label": "Wrist", "tip": "Not available yet"},
+		{"locked": true, "label": "Legs", "tip": "Not available yet"},
 		{"locked": true, "label": "Feet", "tip": "Not available yet"},
 	]
 

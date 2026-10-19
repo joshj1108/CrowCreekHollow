@@ -93,7 +93,7 @@ Saves from before this change reset chapter progress. Stat-based achievements re
 - The **pack** holds crops, fish, and meals. Seeds have their own pouch and don't count. Materials are uncapped for now.
 - The pack starts at **20 slots**. The Inventory panel shows it as a grid of slots, one per unit, like a bag in World of Warcraft or Old School RuneScape. Filled slots show what they hold, and empty slots are dark. The next bag is listed under the grid.
 - The seed pouch is a small grid with a count on each seed type.
-- The Gear panel is a paper-doll grid: Head, Back (your bag), Light (your lantern), Hand (hoe), and locked Body and Feet slots for later.
+- The Gear panel is a paper-doll grid of nine slots: Back (your bag), Head, Neck, Left hand (lantern), Chest, Right hand (hoe), Wrist, Legs, and Feet. Only Back, Left hand, and Right hand are in use now. The other six are locked until armor and jewelry exist.
 - **Bags** (bought with coins, fiber, wood, and Carpentry level):
 
 | Bag | Slots added | Cost | Carpentry |
