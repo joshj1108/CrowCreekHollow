@@ -1985,6 +1985,9 @@ func _draw_village() -> void:
 	for npc in _zone_npcs():
 		var c := _tile_center(npc["pos"].x, npc["pos"].y)
 		draw_circle(c, PX * 0.3, Color(str(npc["color"])))
+		# Name above each villager, using the first name only to keep it short.
+		var first_name := str(npc["name"]).split(" ")[0]
+		draw_string(ThemeDB.fallback_font, c + Vector2(-PX * 1.5, -PX * 0.6), first_name, HORIZONTAL_ALIGNMENT_CENTER, PX * 3, 12, Color(1, 0.97, 0.88))
 	for foe in foes:
 		var pos: Vector2 = foe["pos"]
 		var st: Dictionary = FOES[foe["kind"]]
