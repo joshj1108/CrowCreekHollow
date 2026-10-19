@@ -1,7 +1,7 @@
 extends Node2D
 
-## Milestone 1: farm map, player, planting/harvest, Farming XP,
-## day/night clock, a first night event, and HUD.
+## Farm, player, planting/harvest, Farming XP, inventory, gear, settings,
+## the RuneScape-style action bar, day/night clock, and a first night event.
 ## Placeholder art is drawn in code; no external assets yet.
 
 const TILE_SIZE := 16
@@ -26,7 +26,15 @@ const EVENT_HOUR := 22.0
 const MAX_STAGE := 3        # 0 = seed, 3 = ready to harvest
 const FARM_XP_PER_PLANT := 5
 const FARM_XP_PER_HARVEST := 25
+const STARTING_SEEDS := 5
 const MESSAGE_SECONDS := 3.0
+
+const GEAR_LINES := [
+	"Hoe: Basic (equipped)",
+	"Watering Can: not owned",
+	"Lantern: not owned",
+	"Cleaning Rag: not owned",
+]
 
 enum Tile { TREE, GRASS, SOIL, PATH, WATER }
 
@@ -53,14 +61,15 @@ var crops := {}             # Vector2i tile -> growth stage (0..MAX_STAGE)
 var clock := 0.0
 var day := 1
 var farm_xp := 0
+var inventory := {"seeds": STARTING_SEEDS, "crops": 0}
+var open_tab := ""          # "" when the action bar panel is closed
 var event_fired_day := 0    # the day the night event last happened
 var shadow_tile := Vector2i.ZERO
 var message_timer := 0.0
-var skills_open := false
 
+var action_bar: ActionBar
 var canvas_modulate: CanvasModulate
 var hud_label: Label
-var skills_label: Label
 var message_label: Label
 var player    # Node2D with player.gd attached
 
@@ -70,6 +79,7 @@ func _ready() -> void:
 	_build_map()
 	_build_world()
 	_build_hud()
+	_build_action_bar()
 	_update_shadow_tile()
 
 
@@ -93,11 +103,14 @@ func _process(delta: float) -> void:
 	var m := int(fmod(hour, 1.0) * 60.0)
 	hud_label.text = "Day %d   %02d:%02d" % [day, h, m]
 
-	if Input.is_action_just_pressed("use"):
+	_handle_panel_keys()
+
+	# Farming is paused while a panel is open, so reading doesn't plant seeds.
+	if Input.is_action_just_pressed("use") and open_tab == "":
 		_interact()
-	if Input.is_action_just_pressed("skills"):
-		skills_open = not skills_open
-		_refresh_skills()
+
+	if open_tab != "":
+		_refresh_panel()
 
 	if message_timer > 0.0:
 		message_timer -= delta
@@ -131,6 +144,8 @@ func _setup_input() -> void:
 	_ensure_action("move_right", [KEY_D, KEY_RIGHT])
 	_ensure_action("use", [KEY_SPACE, KEY_ENTER])
 	_ensure_action("skills", [KEY_K])
+	_ensure_action("inventory", [KEY_I])
+	_ensure_action("gear", [KEY_G])
 
 
 func _ensure_action(action: String, keys: Array) -> void:
@@ -193,8 +208,13 @@ func _build_hud() -> void:
 	add_child(layer)
 
 	hud_label = _make_label(layer, Vector2(16, 12), 24)
-	skills_label = _make_label(layer, Vector2(16, 60), 20)
-	message_label = _make_label(layer, Vector2(16, 660), 20)
+	message_label = _make_label(layer, Vector2(16, 100), 20)
+
+
+func _build_action_bar() -> void:
+	action_bar = ActionBar.new()
+	add_child(action_bar)
+	action_bar.tab_pressed.connect(_toggle_tab)
 
 
 func _make_label(parent: Node, pos: Vector2, font_size: int) -> Label:
@@ -205,6 +225,58 @@ func _make_label(parent: Node, pos: Vector2, font_size: int) -> Label:
 	return label
 
 
+func _handle_panel_keys() -> void:
+	if Input.is_action_just_pressed("skills"):
+		_toggle_tab("Skills")
+	if Input.is_action_just_pressed("inventory"):
+		_toggle_tab("Inventory")
+	if Input.is_action_just_pressed("gear"):
+		_toggle_tab("Gear")
+	if Input.is_action_just_pressed("ui_cancel") and open_tab != "":
+		_close_panel()
+
+
+func _toggle_tab(tab: String) -> void:
+	if open_tab == tab:
+		_close_panel()
+	else:
+		open_tab = tab
+		_refresh_panel()
+
+
+func _close_panel() -> void:
+	open_tab = ""
+	action_bar.hide_panel()
+
+
+func _refresh_panel() -> void:
+	match open_tab:
+		"Skills":
+			var level := _farm_level()
+			var progress := float(farm_xp % 100) / 100.0
+			var body := "Farming: Level %d  (%d XP)\n\nCarpentry: locked\nForaging: locked\nCleaning: locked" % [level, farm_xp]
+			action_bar.show_panel("Skills", body, progress)
+		"Inventory":
+			var body := "Seeds: %d\nHarvested crops: %d\n\nPlant seeds on tilled soil. Each harvest returns a seed and a crop." % [inventory.seeds, inventory.crops]
+			action_bar.show_panel("Inventory", body)
+		"Gear":
+			action_bar.show_panel("Gear", "\n".join(GEAR_LINES))
+		"Settings":
+			var controls := "\n".join([
+				"Move: WASD or arrow keys",
+				"Use, plant, or harvest: Space or Enter",
+				"Skills: K    Inventory: I    Gear: G",
+				"Close panel: Esc",
+				"",
+				"Sound and display options are coming later.",
+			])
+			action_bar.show_panel("Settings", controls)
+
+
+func _farm_level() -> int:
+	return 1 + farm_xp / 100
+
+
 func _interact() -> void:
 	var tile := _tile_in_front()
 	if not _in_bounds(tile) or map[tile.y][tile.x] != Tile.SOIL:
@@ -213,17 +285,21 @@ func _interact() -> void:
 	if crops.has(tile):
 		if crops[tile] >= MAX_STAGE:
 			crops.erase(tile)
+			inventory.crops += 1
+			inventory.seeds += 1
 			farm_xp += FARM_XP_PER_HARVEST
-			_show_message("Harvested. +%d Farming XP" % FARM_XP_PER_HARVEST)
+			_show_message("Harvested a crop and kept a seed. +%d Farming XP" % FARM_XP_PER_HARVEST)
 		else:
 			_show_message("It isn't ready yet.")
-	else:
+	elif inventory.seeds > 0:
+		inventory.seeds -= 1
 		crops[tile] = 0
 		farm_xp += FARM_XP_PER_PLANT
 		_show_message("Planted a seed. +%d Farming XP" % FARM_XP_PER_PLANT)
+	else:
+		_show_message("You have no seeds. Harvest a crop to get more.")
 
 	queue_redraw()
-	_refresh_skills()
 
 
 func _tile_in_front() -> Vector2i:
@@ -251,14 +327,6 @@ func _update_shadow_tile() -> void:
 	var x := BORDER_X + INNER_W - 2 - (day - 1) * 2
 	x = max(x, BORDER_X + 14)
 	shadow_tile = Vector2i(x, BORDER_Y + INNER_H / 2 - 4)
-
-
-func _refresh_skills() -> void:
-	if not skills_open:
-		skills_label.text = ""
-		return
-	var level := 1 + farm_xp / 100
-	skills_label.text = "Skills\nFarming  Lv %d  (%d XP)" % [level, farm_xp]
 
 
 func _show_message(text: String) -> void:

@@ -12,9 +12,9 @@ A top-down farming game with heavy psychological horror, built in Godot 4.7.
 
 - Move: WASD or arrow keys
 - Use tool / interact with the tile you face: Space / Enter
-- Skills panel: K
+- Action bar along the bottom (click or key): Skills K, Inventory I, Gear G, Settings
+- Esc closes an open panel. Farming pauses while a panel is open.
 - Switch tool: number keys or scroll (planned)
-- Inventory menu: I (planned)
 
 ## Art
 
@@ -50,6 +50,8 @@ A top-down farming game with heavy psychological horror, built in Godot 4.7.
 - [x] Day/night clock with a tinted night and an on-screen HUD
 - [x] Planting and harvest on tilled soil, with crops that grow overnight
 - [x] Farming XP and a skills panel (K)
+- [x] Action bar with Skills, Inventory, Gear, and Settings panels
+- [x] Seeds and harvested crops in the inventory (planting uses a seed; harvest returns one)
 - [x] One night event (creeping shadow)
 
 ## Open decisions
