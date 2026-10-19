@@ -89,12 +89,15 @@ const QUESTS := [
 		"stat": "tidied", "goal": 1, "reward": {"skill": "Cleaning", "xp": 40}},
 ]
 
-const SKILLS := ["Farming", "Bushcrafting", "Carpentry", "Cleaning"]
+const SKILLS := ["Farming", "Bushcrafting", "Carpentry", "Cleaning", "Fishing"]
 const XP_PLANT := 5
 const XP_HARVEST := 25
 const XP_GATHER := 10
 const XP_REPAIR := 30
 const XP_TIDY := 20
+const XP_FISH := 15
+const FISH_SPOT_COUNT := 3
+const FISH_SPOT_SECONDS := 12.0   # how often the sparkling fishing spots move
 
 const STARTING_SEEDS := 5
 const MESSAGE_SECONDS := 3.0
@@ -151,10 +154,14 @@ var brush := {}                     # Vector2i world tile -> true while unharves
 var clock := 0.0
 var current_hour := START_HOUR
 var day := 1
-var skill_xp := {"Farming": 0, "Bushcrafting": 0, "Carpentry": 0, "Cleaning": 0}
-var inventory := {"seeds": STARTING_SEEDS, "crops": 0}
+var skill_xp := {"Farming": 0, "Bushcrafting": 0, "Carpentry": 0, "Cleaning": 0, "Fishing": 0}
+var inventory := {"seeds": STARTING_SEEDS, "crops": 0, "fish": 0}
 var materials := {"wood": 0, "fiber": 0, "resin": 0}
-var stats := {"planted": 0, "harvested": 0, "gathered": 0, "slept": 0, "tidied": 0}
+var stats := {"planted": 0, "harvested": 0, "gathered": 0, "slept": 0, "tidied": 0, "fished": 0}
+var pond_edges: Array = []          # water tiles with land beside them
+var fish_spots: Array = []          # the currently sparkling spots
+var fish_timer := 0.0
+var fish_layer: Node2D
 var quests_done := {}               # quest id -> true
 var lantern_tier := 0               # 0 = none built yet
 var house_stage := 0
@@ -181,6 +188,7 @@ var lantern_light: PointLight2D
 func _ready() -> void:
 	_setup_input()
 	_build_map()
+	_find_pond_edges()
 	var loaded := _load_game()
 	if not loaded:
 		_respawn_brush()
@@ -213,6 +221,7 @@ func _process(delta: float) -> void:
 
 	_check_doors()
 	_check_quests()
+	_update_fish_spots(delta)
 
 	var minutes := int(fmod(current_hour, 1.0) * 60.0)
 	hud_label.text = "Day %d   %02d:%02d   Sanity %d/%d" % [
@@ -382,6 +391,11 @@ func _respawn_brush() -> void:
 func _build_world() -> void:
 	# Tiles and the house are drawn by this node's _draw(). The player and
 	# camera are created here so they draw above the map.
+	# The fishing spots are drawn on their own layer, under the player.
+	fish_layer = Node2D.new()
+	fish_layer.draw.connect(_draw_fish_spots)
+	add_child(fish_layer)
+
 	player = Node2D.new()
 	player.set_script(load("res://scripts/player.gd"))
 	player.position = _tile_center(BORDER_X + INNER_W / 2, BORDER_Y + INNER_H / 2)
@@ -531,7 +545,7 @@ func _skill_rows() -> Array:
 			"value": "%d XP" % skill_xp[skill],
 			"progress": float(skill_xp[skill] % 100) / 100.0,
 		})
-	rows.append({"note": "Bushcrafting gathers wood, fiber, and resin from brush piles. Carpentry repairs the house. Cleaning tidies it."})
+	rows.append({"note": "Bushcrafting gathers wood, fiber, and resin from brush piles. Carpentry repairs the house. Cleaning tidies it. Fishing works the sparkling spots at the pond."})
 	return rows
 
 
@@ -540,6 +554,7 @@ func _inventory_rows() -> Array:
 		{"section": "Seeds and crops"},
 		{"name": "Seeds", "value": str(inventory["seeds"])},
 		{"name": "Harvested crops", "value": str(inventory["crops"])},
+		{"name": "Fish", "value": str(inventory["fish"])},
 		{"section": "Materials"},
 		{"name": "Wood", "value": str(materials["wood"])},
 		{"name": "Fiber", "value": str(materials["fiber"])},
@@ -641,7 +656,8 @@ func _settings_rows() -> Array:
 
 func _interact() -> void:
 	var tile := _tile_in_front()
-	if not _in_bounds(tile):
+	# Interior tiles sit outside the farm's bounds, so accept either area.
+	if not _in_bounds(tile) and not _in_interior(tile):
 		return
 
 	if inside:
@@ -652,6 +668,10 @@ func _interact() -> void:
 				_tidy_house()
 			Tile.DESK:
 				_read_desk()
+		return
+
+	if fish_spots.has(tile):
+		_fish(tile)
 		return
 
 	if brush.has(tile):
@@ -685,6 +705,69 @@ func _interact() -> void:
 		_show_message("You have no seeds. Harvest a crop to get more.")
 
 	queue_redraw()
+
+
+# --- Fishing -----------------------------------------------------------------
+
+# Water tiles that touch land. Fishing spots are picked from these.
+func _find_pond_edges() -> void:
+	pond_edges = []
+	for y in MAP_H:
+		for x in MAP_W:
+			if map[y][x] != Tile.WATER:
+				continue
+			for d in [Vector2i.LEFT, Vector2i.RIGHT, Vector2i.UP, Vector2i.DOWN]:
+				var n: Vector2i = Vector2i(x, y) + d
+				if _in_bounds(n) and map[n.y][n.x] == Tile.GRASS:
+					pond_edges.append(Vector2i(x, y))
+					break
+
+
+# Every FISH_SPOT_SECONDS, the sparkling spots move to new places on the pond edge.
+func _update_fish_spots(delta: float) -> void:
+	fish_timer -= delta
+	if fish_timer <= 0.0:
+		fish_timer = FISH_SPOT_SECONDS
+		fish_spots.clear()
+		for i in FISH_SPOT_COUNT:
+			if pond_edges.is_empty():
+				break
+			var pick: Vector2i = pond_edges.pick_random()
+			if not fish_spots.has(pick):
+				fish_spots.append(pick)
+		queue_redraw_fish()
+	# The sparkle pulses, so the layer redraws every frame.
+	queue_redraw_fish()
+
+
+func queue_redraw_fish() -> void:
+	if fish_layer != null:
+		fish_layer.queue_redraw()
+
+
+func _draw_fish_spots() -> void:
+	var t := Time.get_ticks_msec() / 1000.0
+	for i in fish_spots.size():
+		var c := _tile_center(fish_spots[i].x, fish_spots[i].y)
+		var pulse := 0.75 + 0.25 * sin(t * 5.0 + i)
+		fish_layer.draw_circle(c, PX * 0.22 * pulse, Color(0.85, 0.97, 1.0, 0.3))
+		var r := PX * 0.28 * pulse
+		var star := Color(1.0, 1.0, 0.75, 0.95)
+		fish_layer.draw_line(c + Vector2(-r, 0), c + Vector2(r, 0), star, 2.0)
+		fish_layer.draw_line(c + Vector2(0, -r), c + Vector2(0, r), star, 2.0)
+
+
+func _fish(tile: Vector2i) -> void:
+	# Each try uses up the spot. The fish scatter or the spot goes quiet.
+	fish_spots.erase(tile)
+	var chance := 0.6 + 0.02 * float(_level("Fishing") - 1)
+	if randf() < chance:
+		inventory["fish"] += 1
+		stats["fished"] += 1
+		_grant_xp("Fishing", XP_FISH)
+		_show_message("You land a fish. +%d Fishing XP" % XP_FISH)
+	else:
+		_show_message("Nothing bit. The fish scattered.")
 
 
 func _read_desk() -> void:
@@ -735,7 +818,8 @@ func _try_sleep() -> void:
 		return
 	stats["slept"] += 1
 	_change_sanity(SLEEP_SANITY)
-	_end_day("You sleep through the night.")
+	# Sleeping keeps you in bed, so the house is not left.
+	_end_day("You sleep through the night.", false)
 
 
 # Missing the bed by 03:00 ends the day, and the sanity limit drops for good.
@@ -890,8 +974,8 @@ func _trigger_night_event() -> void:
 
 
 # Ends the day and saves. Both sleeping and collapsing come through here.
-func _end_day(base: String) -> void:
-	if inside:
+func _end_day(base: String, leave_house: bool = true) -> void:
+	if inside and leave_house:
 		_leave_house()
 	for pos in crops.keys():
 		crops[pos] = min(crops[pos] + 1, MAX_STAGE)

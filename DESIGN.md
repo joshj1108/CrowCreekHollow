@@ -87,6 +87,7 @@ The story questline is on hold until the homestead stage is solid.
   - **Bushcrafting:** gathering a brush pile gives 10 XP.
   - **Carpentry:** each house repair gives 30 XP.
   - **Cleaning:** each daily tidy gives 20 XP.
+  - **Fishing:** face a sparkling spot on the pond edge and press Space. Each catch gives 15 XP, and the chance rises 2% per level. Spots move every 12 seconds.
 - Levels will unlock new areas, tools, and fortifications.
 
 ## Survival (bushcrafting and lanterns)
