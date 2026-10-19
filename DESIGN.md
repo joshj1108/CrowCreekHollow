@@ -12,7 +12,7 @@ A top-down farming game with heavy psychological horror, built in Godot 4.7.
 ## Controls (Stardew-style)
 
 - Move: WASD or arrow keys
-- Use, plant, harvest, gather, sleep, tidy, cleanse, cook, or read: Space / Enter (face the tile)
+- Use, plant, harvest, gather, sleep, tidy, cleanse, cook, talk, fight, or read: Space / Enter (face the tile)
 - Walk into the farmhouse door to go inside. Walk onto the exit mat to leave.
 - Action bar (click or key): Skills K, Inventory I, Gear G, Quests Q, House H, Achievements J, Settings
 - Esc opens Settings, or closes it if it's already open
@@ -197,6 +197,28 @@ Achievements track stats and never reset. Each pays a small reward. Earning all 
 - The game saves **only** when you sleep in bed or collapse at 03:00.
 - Saved: day, skill XP, inventory (including meals), coins, bag upgrades, root cellar and cooler (built, and what they hold), materials, stats, story chapters done, achievements done, selected seed, lantern tier, house stage, tidy/mend/cleanse days, sanity and sanity penalty, crops (with kind), brush piles, **player position**, whether you were **inside the house**, and the **open panel**.
 - Quitting mid-day loses that day's progress since the last save. Position and panel are saved at the same moment, so they reflect the last sleep or collapse.
+
+## The road to Lowmere (guardian)
+
+The homestead is your base. Past the east end of the farm path is a gate onto the road to **Lowmere**, a small village that needs a guardian.
+
+- **Daytime only.** Walk the road between 06:00 and 18:00. At dusk the gate pushes you back, and if you're in Lowmere when night falls, you're driven home.
+- **Sleep and storage stay at the homestead.** You can't sleep in Lowmere.
+- **Villagers** (Mara the Reeve, Tomas the Baker, Elsie) talk with you when you face them and press Space. What they say depends on how far the guardian quests have come.
+- **Hollows** gather in the clearing east of the village wood. They respawn each morning. Face one and press Space to fight. Each exchange is a tick: you strike, then it may strike back. Moving away breaks off the fight.
+- **Combat** is a skill (`Level = 1 + XP / 100`). Each hit gives 4 XP and each kill gives 20 XP. Your max HP is 10 plus Combat level − 1. A meal heals 4 HP, and sleeping restores full HP.
+- **Losing a fight** sends you home, shaken. You lose 10 sanity and wake at full HP.
+
+Guardian quests (in the Quests panel, under Guardian of Lowmere) run in order:
+
+| # | Quest | Goal | Reward |
+|---|---|---|---|
+| 1 | Meet the Village | Talk with villagers (3 conversations) | 20 coins |
+| 2 | The First Horror | Defeat 3 hollows | 60 Combat XP |
+| 3 | Bread for Tomas | Bring a meal to Tomas | 40 coins |
+| 4 | Hold the Road | Defeat 10 hollows in total | 80 coins, 3 pumpkin seeds |
+
+This is the first slice. Later: more villages and roads, more creatures, armor and weapons for the empty gear slots, and combat-based guardian quests.
 
 ## Deferred
 

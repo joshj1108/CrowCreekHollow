@@ -114,6 +114,56 @@ const SELL_MEAL := 8
 const SEED_TURNIP_PRICE := 3    # per seed, sold in packs of 5
 const SEED_PUMPKIN_PRICE := 10  # per seed, sold in packs of 3
 
+# The road east of the farm leads to Lowmere. It is walked in daylight only.
+const VILLAGE_W := 36
+const VILLAGE_H := 20
+const VILLAGE_GATE := Vector2i(0, 10)
+const VILLAGE_ARRIVE := Vector2i(2, 10)
+const VILLAGE_HOUSES := [Rect2i(4, 3, 5, 4), Rect2i(13, 2, 6, 4), Rect2i(8, 14, 5, 4)]
+const VILLAGE_WATER := Rect2i(19, 13, 2, 2)
+# Hollows gather in the clearing east of the village wood. They respawn each morning.
+const HOLLOW_SPAWNS := [Vector2i(28, 9), Vector2i(31, 13), Vector2i(33, 8)]
+const HOLLOW_HP := 6
+const FIGHT_TICK := 1.2
+const XP_HIT := 4
+const XP_KILL := 20
+const BASE_HP := 10
+const HEAL_MEAL := 4
+const NPCS := [
+	{"id": "mara", "name": "Mara the Reeve", "pos": Vector2i(8, 9), "color": "e0c48c", "lines": [
+		"Welcome to Lowmere. Few of us still stand. Talk with the others and see how they fare.",
+		"The hollow ones came out of the wood at dusk. Keep them out of the fields.",
+		"Tomas has been asking after you. He's been without bread for days.",
+		"You've made Lowmere a little safer. Keep walking the road by day.",
+	]},
+	{"id": "tomas", "name": "Tomas the Baker", "pos": Vector2i(16, 11), "color": "c98f5a", "lines": [
+		"The ovens are cold and the flour is gone. If you ever have a warm meal to spare...",
+		"Those things don't care that we're hungry. Keep your strength up.",
+		"Bring me something cooked, and I'll see that the village eats tonight.",
+		"Thank you. I've not seen a warm loaf in weeks.",
+	]},
+	{"id": "elsie", "name": "Elsie", "pos": Vector2i(22, 9), "color": "a3c9e0", "lines": [
+		"Don't go into the wood after dark. That's where they come from.",
+		"I saw one by the wood's edge. It had no face, only eyes.",
+		"The clearing east of the wood is where they gather. Go slow.",
+		"Papa says you're the guardian now. I'm glad it's you.",
+	]},
+]
+const GUARDIAN_QUESTS := [
+	{"id": "meet", "title": "Meet the Village",
+		"story": "Lowmere is small and frightened. Its people have heard the things in the wood at night. Learn their names, and they'll trust you with their troubles.",
+		"text": "Talk with the villagers. (3 conversations)", "stat": "talks", "goal": 3, "reward": {"coins": 20}},
+	{"id": "first_horror", "title": "The First Horror",
+		"story": "The hollow ones gather in the clearing east of the wood. Each one is hollow and slow, but they don't stop. Face one and press Space to fight it.",
+		"text": "Defeat 3 hollow ones.", "stat": "defeated", "goal": 3, "reward": {"skill": "Combat", "xp": 60}},
+	{"id": "bread", "title": "Bread for Tomas",
+		"story": "Tomas has no flour and no fire to bake with. A cooked meal from your homestead would mean the world to him.",
+		"text": "Bring a meal to Tomas.", "stat": "delivered", "goal": 1, "reward": {"coins": 40}},
+	{"id": "hold_road", "title": "Hold the Road",
+		"story": "The road to Lowmere is only safe while someone walks it. Keep the clearing quiet, and the village can sleep at night.",
+		"text": "Defeat 10 hollow ones in total.", "stat": "defeated", "goal": 10, "reward": {"coins": 80, "pumpkin_seeds": 3}},
+]
+
 # Story chapters run in order. The first unfinished one is the Current chapter.
 # "story" is the narrative beat, "text" the goal, and "stat" what it reads.
 const STORY := [
@@ -208,7 +258,7 @@ const ACHIEVEMENTS := [
 	{"id": "story_end", "title": "Story Complete", "text": "Finish every story chapter.", "tier": 3, "stat": "story", "goal": 15, "reward": {"seeds": 5, "pumpkin_seeds": 2}},
 ]
 
-const SKILLS := ["Farming", "Bushcrafting", "Carpentry", "Cleaning", "Fishing", "Cooking"]
+const SKILLS := ["Farming", "Bushcrafting", "Carpentry", "Cleaning", "Fishing", "Cooking", "Combat"]
 const XP_PLANT := 5
 const XP_GATHER := 10
 const XP_REPAIR := 30
@@ -248,7 +298,7 @@ const NIGHT_EVENTS := [
 	{"message": "The field is quiet tonight. Too quiet.", "shadow": "none", "sanity": -3},
 ]
 
-enum Tile { TREE, GRASS, SOIL, PATH, WATER, HOUSE, DOOR, FLOOR, WALL, EXIT, BED, STATION, DESK, FALLOW, STALL, CELLAR, COOLER }
+enum Tile { TREE, GRASS, SOIL, PATH, WATER, HOUSE, DOOR, FLOOR, WALL, EXIT, BED, STATION, DESK, FALLOW, STALL, CELLAR, COOLER, GATE }
 
 const BLOCKING := [Tile.TREE, Tile.WATER, Tile.HOUSE, Tile.WALL, Tile.BED, Tile.STATION, Tile.DESK, Tile.STALL, Tile.CELLAR, Tile.COOLER]
 
@@ -270,6 +320,7 @@ const TILE_COLORS := {
 	Tile.STALL: Color("b5793d"),
 	Tile.CELLAR: Color("4a3f5c"),
 	Tile.COOLER: Color("5b8fa8"),
+	Tile.GATE: Color("8f7a4f"),
 }
 
 const BUSH_COLOR := Color("3d6b2a")
@@ -277,7 +328,10 @@ const BUSH_COLOR := Color("3d6b2a")
 const DAY_TINT := Color(1, 1, 1)
 const NIGHT_TINT := Color("3a3f6e")
 
+enum Zone { HOMESTEAD, VILLAGE }
+
 var map: Array = []                 # farm tiles, [y][x]
+var village_map: Array = []         # Lowmere tiles, [y][x]
 var interior: Array = []            # house tiles, [y][x], local to INT_ORIGIN
 var crops := {}                     # Vector2i world tile -> {"stage": int, "kind": String}
 var brush := {}                     # Vector2i world tile -> true while unharvested
@@ -290,12 +344,13 @@ var plot_two_open := false
 var clock := 0.0
 var current_hour := START_HOUR
 var day := 1
-var skill_xp := {"Farming": 0, "Bushcrafting": 0, "Carpentry": 0, "Cleaning": 0, "Fishing": 0, "Cooking": 0}
+var skill_xp := {"Farming": 0, "Bushcrafting": 0, "Carpentry": 0, "Cleaning": 0, "Fishing": 0, "Cooking": 0, "Combat": 0}
 var inventory := {"seeds": STARTING_SEEDS, "pumpkin_seeds": 0, "crops": 0, "fish": 0, "meals": 0}
 var materials := {"wood": 0, "fiber": 0, "resin": 0}
 var stats := {"planted": 0, "harvested": 0, "gathered": 0, "slept": 0, "tidied": 0,
 	"fished": 0, "caught": 0, "mended": 0, "cleansed": 0, "cooked": 0, "eaten": 0,
-	"pumpkins": 0, "collapses": 0, "events": 0, "sold": 0, "spoiled": 0}
+	"pumpkins": 0, "collapses": 0, "events": 0, "sold": 0, "spoiled": 0,
+	"talks": 0, "defeated": 0, "delivered": 0}
 var achievements_done := {}     # achievement id -> true
 var quests_done := {}               # quest id -> true
 var selected_seed := "turnip"
@@ -319,6 +374,13 @@ var cellar_built := false
 var cooler_built := false
 var cellar_stock := 0          # crops in the root cellar
 var cooler_stock := 0          # fish in the cooler
+var zone: int = Zone.HOMESTEAD
+var saved_zone := 0
+var hollows := {}              # tile -> {"hp": int}, in Lowmere
+var hp := BASE_HP
+var fight_tile := NO_SPOT
+var fight_timer := 0.0
+var guardian_done := {}        # guardian quest id -> true
 
 # Set by loading, applied once the world exists.
 var saved_pos := Vector2.ZERO
@@ -339,10 +401,12 @@ var lantern_light: PointLight2D
 func _ready() -> void:
 	_setup_input()
 	_build_map()
+	_build_village_map()
 	_find_pond_edges()
 	var loaded := _load_game()
 	if not loaded:
 		_respawn_brush()
+	_spawn_hollows()
 	_build_interior()
 	_build_world()
 	_build_hud()
@@ -375,12 +439,17 @@ func _process(delta: float) -> void:
 	_check_unlocks()
 	_check_story()
 	_check_achievements()
+	_check_guardian()
 	_update_fish_spots(delta)
 	_update_fishing(delta)
+	_update_fight(delta)
+	if zone == Zone.VILLAGE and current_hour >= STALL_CLOSE_HOUR:
+		_go_home("Night falls. You are driven back to the homestead.")
+	fish_layer.visible = zone == Zone.HOMESTEAD
 
 	var minutes := int(fmod(current_hour, 1.0) * 60.0)
-	hud_label.text = "Day %d   %02d:%02d   Sanity %d/%d   Coins %d" % [
-		day, int(fmod(current_hour, 24.0)), minutes, int(sanity), _sanity_max(), money]
+	hud_label.text = "Day %d   %02d:%02d   Sanity %d/%d   Coins %d   HP %d/%d" % [
+		day, int(fmod(current_hour, 24.0)), minutes, int(sanity), _sanity_max(), money, hp, max_hp()]
 
 	_handle_keys()
 
@@ -400,6 +469,9 @@ func _process(delta: float) -> void:
 
 
 func _draw() -> void:
+	if zone == Zone.VILLAGE:
+		_draw_village()
+		return
 	for y in MAP_H:
 		for x in MAP_W:
 			var tile: int = map[y][x]
@@ -518,6 +590,8 @@ func _build_map() -> void:
 					t = Tile.WATER
 				if ix >= HOUSE_IX and ix < HOUSE_IX + HOUSE_W and iy >= HOUSE_IY and iy < HOUSE_IY + HOUSE_H:
 					t = Tile.HOUSE
+				if ix == INNER_W - 1 and iy == INNER_H / 2:
+					t = Tile.GATE
 				if ix == STALL_IX and iy == STALL_IY:
 					t = Tile.STALL
 				if ix == HOUSE_DOOR_IX and iy == HOUSE_DOOR_IY:
@@ -656,6 +730,8 @@ func _make_label(parent: Node, pos: Vector2, font_size: int) -> Label:
 # Applies what loading saved: position, indoors or not, and the open panel.
 func _restore_saved_state() -> void:
 	_check_unlocks()
+	zone = saved_zone
+	hp = clampi(hp, 1, max_hp())
 	if has_saved_pos:
 		player.position = saved_pos
 	if saved_inside:
@@ -666,6 +742,10 @@ func _restore_saved_state() -> void:
 
 
 func _update_minimap() -> void:
+	if zone == Zone.VILLAGE:
+		var village_tile: Vector2 = player.position / PX
+		minimap.update_view(village_map, TILE_COLORS, [], village_tile, Vector2i(-1, -1))
+		return
 	# Indoors the minimap shows the house, since the player isn't on the farm.
 	var player_tile: Vector2 = Vector2(HOUSE_DOOR_IX + BORDER_X, HOUSE_DOOR_IY + BORDER_Y) if inside else player.position / PX
 	minimap.update_view(map, TILE_COLORS, brush.keys(), player_tile, tonight_shadow)
@@ -789,7 +869,7 @@ func _skill_rows() -> Array:
 			"value": "%d XP" % skill_xp[skill],
 			"progress": float(skill_xp[skill] % 100) / 100.0,
 		})
-	rows.append({"note": "Farming grows crops. Bushcrafting gathers wood, fiber, and resin. Carpentry trains by mending boards and repairing the house. Cleaning tidies it. Fishing works the sparkling spots at the pond. Cooking turns catches and crops into meals."})
+	rows.append({"note": "Farming grows crops. Bushcrafting gathers wood, fiber, and resin. Carpentry trains by mending boards and repairing the house. Cleaning tidies it. Fishing works the sparkling spots at the pond. Cooking turns catches and crops into meals. Combat is earned guarding Lowmere."})
 	return rows
 
 
@@ -893,6 +973,18 @@ func _quest_rows() -> Array:
 		rows.append({"note": "You have reached the end of the story for now. More chapters are coming."})
 	rows.append({"section": "Chapters"})
 	for q in STORY:
+		rows.append(_quest_row(q, false))
+	rows.append({"section": "Guardian of Lowmere"})
+	var guardian_current: Variant = null
+	for q in GUARDIAN_QUESTS:
+		if not guardian_done.has(q["id"]):
+			guardian_current = q
+			break
+	if guardian_current != null:
+		rows.append(_quest_row(guardian_current, true))
+	else:
+		rows.append({"note": "Lowmere is safe for now."})
+	for q in GUARDIAN_QUESTS:
 		rows.append(_quest_row(q, false))
 	return rows
 
@@ -1034,6 +1126,9 @@ func _check_unlocks() -> void:
 
 
 func _interact() -> void:
+	if zone == Zone.VILLAGE:
+		_interact_village()
+		return
 	if _is_fishing():
 		_stop_fishing("You reel in your line.")
 		return
@@ -1299,7 +1394,8 @@ func _eat_meal() -> void:
 	inventory["meals"] -= 1
 	stats["eaten"] += 1
 	_change_sanity(MEAL_SANITY)
-	_show_message("You eat a warm meal. Your mind steadies a little.")
+	hp = mini(max_hp(), hp + HEAL_MEAL)
+	_show_message("You eat a warm meal. Your mind steadies. HP %d/%d" % [hp, max_hp()])
 
 
 # --- Achievements ------------------------------------------------------------
@@ -1650,6 +1746,184 @@ func _gear_cells() -> Array:
 	]
 
 
+# --- Lowmere and the road ---------------------------------------------------
+
+func _build_village_map() -> void:
+	village_map = []
+	for y in VILLAGE_H:
+		var row: Array = []
+		for x in VILLAGE_W:
+			var t := Tile.GRASS
+			if x == 0 or y == 0 or y == VILLAGE_H - 1:
+				t = Tile.TREE
+			if y == VILLAGE_GATE.y and x < 26:
+				t = Tile.PATH
+			if x >= 26 and (x * 7 + y * 3) % 11 == 0:
+				t = Tile.TREE
+			row.append(t)
+		village_map.append(row)
+	for rect in VILLAGE_HOUSES:
+		for y in range(rect.position.y, rect.end.y):
+			for x in range(rect.position.x, rect.end.x):
+				village_map[y][x] = Tile.HOUSE
+	for y in range(VILLAGE_WATER.position.y, VILLAGE_WATER.end.y):
+		for x in range(VILLAGE_WATER.position.x, VILLAGE_WATER.end.x):
+			village_map[y][x] = Tile.WATER
+	village_map[VILLAGE_GATE.y][VILLAGE_GATE.x] = Tile.GATE
+
+
+func _spawn_hollows() -> void:
+	hollows.clear()
+	for spot in HOLLOW_SPAWNS:
+		hollows[spot] = {"hp": HOLLOW_HP}
+	queue_redraw()
+
+
+func _npc_index(tile: Vector2i) -> int:
+	for i in NPCS.size():
+		if NPCS[i]["pos"] == tile:
+			return i
+	return -1
+
+
+func max_hp() -> int:
+	return BASE_HP + _level("Combat") - 1
+
+
+func _go_village() -> void:
+	# The road is walked in daylight only. At dusk the gate pushes you back.
+	if current_hour >= STALL_CLOSE_HOUR:
+		player.position += Vector2(-PX, 0)
+		_show_message("The road to Lowmere is dark. Walk it in daylight.")
+		return
+	zone = Zone.VILLAGE
+	_stop_fishing("")
+	_stop_fight("")
+	player.position = _tile_center(VILLAGE_ARRIVE.x, VILLAGE_ARRIVE.y)
+	_set_bounds()
+	queue_redraw()
+	_show_message("You walk the road to Lowmere.")
+
+
+func _go_home(reason: String) -> void:
+	zone = Zone.HOMESTEAD
+	_stop_fishing("")
+	_stop_fight("")
+	player.position = _tile_center(BORDER_X + INNER_W - 3, BORDER_Y + INNER_H / 2)
+	_set_bounds()
+	queue_redraw()
+	if reason != "":
+		_show_message(reason)
+
+
+func _interact_village() -> void:
+	if fight_tile != NO_SPOT:
+		_stop_fight("You step back from the hollow.")
+		return
+	var tile := _tile_in_front()
+	if hollows.has(tile):
+		_start_fight(tile)
+		return
+	var idx := _npc_index(tile)
+	if idx >= 0:
+		_talk(NPCS[idx])
+
+
+func _talk(npc: Dictionary) -> void:
+	stats["talks"] += 1
+	var lines: Array = npc["lines"]
+	if npc["id"] == "tomas" and int(inventory["meals"]) > 0 and int(stats["delivered"]) == 0:
+		inventory["meals"] -= 1
+		stats["delivered"] += 1
+		_show_message("Tomas: Bread and thanks. The village eats tonight.")
+		return
+	var stage := mini(guardian_done.size(), lines.size() - 1)
+	_show_message("%s: %s" % [npc["name"], lines[stage]])
+
+
+func _start_fight(tile: Vector2i) -> void:
+	fight_tile = tile
+	fight_timer = 0.0
+	_show_message("A hollow turns toward you. Hold your ground.")
+
+
+func _stop_fight(reason: String) -> void:
+	fight_tile = NO_SPOT
+	if reason != "":
+		_show_message(reason)
+	queue_redraw()
+
+
+# Each tick, you swing and the hollow answers. Moving away breaks the fight.
+func _update_fight(delta: float) -> void:
+	if fight_tile == NO_SPOT:
+		return
+	var moved := Input.get_vector("move_left", "move_right", "move_up", "move_down") != Vector2.ZERO
+	if moved or open_tab != "" or zone != Zone.VILLAGE or _tile_in_front() != fight_tile or not hollows.has(fight_tile):
+		_stop_fight("You break off the fight.")
+		return
+	fight_timer -= delta
+	if fight_timer > 0.0:
+		return
+	fight_timer = FIGHT_TICK
+	var combat := _level("Combat")
+	var hollow: Dictionary = hollows[fight_tile]
+	if randf() < 0.6 + 0.03 * float(combat - 1):
+		var dmg := randi_range(1, 2 + combat / 3)
+		hollow["hp"] = int(hollow["hp"]) - dmg
+		_grant_xp("Combat", XP_HIT)
+		if int(hollow["hp"]) <= 0:
+			hollows.erase(fight_tile)
+			stats["defeated"] += 1
+			_grant_xp("Combat", XP_KILL)
+			_stop_fight("The hollow crumbles to ash. +%d Combat XP" % XP_KILL)
+			return
+		_show_message("You strike the hollow for %d." % dmg)
+	else:
+		_show_message("You miss.")
+	if randf() < 0.5:
+		hp -= randi_range(1, 2)
+		if hp <= 0:
+			_fallen()
+			return
+		_show_message("The hollow lashes out. HP %d/%d" % [hp, max_hp()])
+	queue_redraw()
+
+
+# Losing a fight sends you home, shaken. You're back at full health by morning.
+func _fallen() -> void:
+	_change_sanity(-10.0)
+	hp = max_hp()
+	_go_home("You collapse in the wood. You wake at the homestead, shaken. Sanity -10.")
+
+
+func _check_guardian() -> void:
+	for q in GUARDIAN_QUESTS:
+		if guardian_done.has(q["id"]):
+			continue
+		if _stat_value(q["stat"]) < q["goal"]:
+			break
+		guardian_done[q["id"]] = true
+		_grant_reward(q["reward"])
+		_show_message("Guardian quest complete: %s. Reward: %s" % [q["title"], _reward_text(q["reward"])])
+
+
+func _draw_village() -> void:
+	for y in VILLAGE_H:
+		for x in VILLAGE_W:
+			draw_rect(_tile_rect(Vector2i(x, y)), TILE_COLORS[village_map[y][x]])
+	for npc in NPCS:
+		var c := _tile_center(npc["pos"].x, npc["pos"].y)
+		draw_circle(c, PX * 0.3, Color(str(npc["color"])))
+	for tile in hollows:
+		var c := _tile_center(tile.x, tile.y)
+		draw_circle(c, PX * 0.32, Color("1a1020"))
+		draw_circle(c + Vector2(-5, -4), 2.5, Color(0.9, 0.1, 0.1))
+		draw_circle(c + Vector2(5, -4), 2.5, Color(0.9, 0.1, 0.1))
+		var frac := float(hollows[tile]["hp"]) / float(HOLLOW_HP)
+		draw_rect(Rect2(c + Vector2(-PX * 0.3, -PX * 0.5), Vector2(PX * 0.6 * frac, 3)), Color("c24a4a"))
+
+
 # --- Repairs and mending ----------------------------------------------------
 
 func _can_repair() -> bool:
@@ -1706,6 +1980,9 @@ func _mend_house() -> void:
 
 # Sleeping only happens at the bed, from 18:00 until 03:00.
 func _try_sleep() -> void:
+	if zone == Zone.VILLAGE:
+		_show_message("You can only sleep in your own bed, at the homestead.")
+		return
 	if current_hour < SLEEP_HOUR:
 		_show_message("You aren't tired yet. The bed will be there after 18:00.")
 		return
@@ -1916,6 +2193,10 @@ func _trigger_night_event() -> void:
 
 # Ends the day and saves. Both sleeping and collapsing come through here.
 func _end_day(base: String, leave_house: bool = true) -> void:
+	if zone == Zone.VILLAGE:
+		_go_home("")
+	hp = max_hp()
+	_spawn_hollows()
 	if inside and leave_house:
 		_leave_house()
 	# Fish left in the pack spoil overnight. The cooler keeps them.
@@ -1946,10 +2227,16 @@ func _update_shadow_tile() -> void:
 
 func _check_doors() -> void:
 	var kind := _kind_at(_player_tile())
+	if zone == Zone.VILLAGE:
+		if kind == Tile.GATE:
+			_go_home("You walk back to the homestead.")
+		return
 	if not inside and kind == Tile.DOOR:
 		_enter_house()
 	elif inside and kind == Tile.EXIT:
 		_leave_house()
+	elif not inside and kind == Tile.GATE:
+		_go_village()
 
 
 func _enter_house() -> void:
@@ -1966,6 +2253,14 @@ func _leave_house() -> void:
 
 
 func _set_bounds() -> void:
+	if zone == Zone.VILLAGE:
+		player.min_pos = _tile_center(0, 1)
+		player.max_pos = _tile_center(VILLAGE_W - 1, VILLAGE_H - 2)
+		camera.limit_left = 0
+		camera.limit_top = 0
+		camera.limit_right = VILLAGE_W * PX
+		camera.limit_bottom = VILLAGE_H * PX
+		return
 	if inside:
 		player.min_pos = _tile_center(INT_ORIGIN.x + 1, INT_ORIGIN.y + 1)
 		# The bottom row holds the exit mat, so the player's clamp must reach it.
@@ -1993,6 +2288,9 @@ func _save_game() -> void:
 		"materials": materials,
 		"stats": stats,
 		"quests_done": quests_done,
+		"zone": zone,
+		"hp": hp,
+		"guardian_done": guardian_done,
 		"money": money,
 		"bag_tier": bag_tier,
 		"cellar_built": cellar_built,
@@ -2053,6 +2351,9 @@ func _load_game() -> bool:
 	cooler_built = bool(data.get("cooler_built", false))
 	cellar_stock = int(data.get("cellar_stock", 0))
 	cooler_stock = int(data.get("cooler_stock", 0))
+	saved_zone = int(data.get("zone", 0))
+	hp = int(data.get("hp", BASE_HP))
+	guardian_done = data.get("guardian_done", {})
 	event_fired_day = int(data.get("event_fired_day", 0))
 	sanity_penalty = int(data.get("sanity_penalty", 0))
 	sanity = float(data.get("sanity", SANITY_MAX))
@@ -2141,6 +2442,10 @@ func _in_interior(tile: Vector2i) -> bool:
 
 # The tile kind at a world tile: the interior if it's inside the house, else the farm.
 func _kind_at(tile: Vector2i) -> int:
+	if zone == Zone.VILLAGE:
+		if tile.x < 0 or tile.y < 0 or tile.x >= VILLAGE_W or tile.y >= VILLAGE_H:
+			return Tile.TREE
+		return village_map[tile.y][tile.x]
 	if _in_interior(tile):
 		return interior[tile.y - INT_ORIGIN.y][tile.x - INT_ORIGIN.x]
 	if not _in_bounds(tile):
@@ -2152,6 +2457,8 @@ func _is_blocked_world(p: Vector2) -> bool:
 	var t := Vector2i(floori(p.x / PX), floori(p.y / PX))
 	if BLOCKING.has(_kind_at(t)):
 		return true
+	if zone == Zone.VILLAGE:
+		return hollows.has(t) or _npc_index(t) != -1
 	return not inside and brush.has(t)
 
 
