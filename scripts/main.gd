@@ -536,7 +536,11 @@ func _draw() -> void:
 			var kind: int = interior[y][x]
 			var cell := _tile_rect(INT_ORIGIN + Vector2i(x, y))
 			draw_rect(cell, TILE_COLORS[kind])
-			# Storage is labeled so it's easy to find in the house.
+			# Furniture is labeled in the house so it's easy to tell apart.
+			if kind == Tile.BED or kind == Tile.STATION or kind == Tile.DESK:
+				var furniture := "Bed" if kind == Tile.BED else ("Cleaning" if kind == Tile.STATION else "Desk")
+				draw_string(ThemeDB.fallback_font, cell.position + Vector2(2, PX * 0.6), furniture, HORIZONTAL_ALIGNMENT_LEFT, -1, 11, Color(0.95, 0.9, 0.78))
+			# Storage is labeled so it's easy to find.
 			if kind == Tile.COOLER or kind == Tile.CELLAR:
 				draw_rect(cell, Color(1, 1, 1, 0.8), false, 2.0)
 				var label := "Cooler" if kind == Tile.COOLER else "Cellar"
