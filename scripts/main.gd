@@ -164,7 +164,8 @@ const GEAR_ITEMS := {
 	"fiber_wraps": {"name": "Fiber wraps", "slot": "wrist", "dmg": 0, "def": 1, "level": 1, "cost": {"fiber": 3}},
 	"bark_wrap": {"name": "Bark wrap", "slot": "chest", "dmg": 0, "def": 2, "level": 3, "cost": {"wood": 3, "fiber": 3}},
 	"bark_boots": {"name": "Bark boots", "slot": "feet", "dmg": 0, "def": 1, "level": 3, "cost": {"wood": 2, "fiber": 2}},
-}const NPCS := [
+}
+const NPCS := [
 	{"id": "mara", "name": "Mara the Reeve", "pos": Vector2i(8, 9), "color": "e0c48c", "lines": [
 		"Welcome to Lowmere. Few of us still stand. Talk with the others and see how they fare.",
 		"The hollow ones came out of the wood at dusk. Keep them out of the fields.",
