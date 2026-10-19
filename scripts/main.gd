@@ -1109,16 +1109,11 @@ func _plant(tile: Vector2i) -> void:
 func _harvest(tile: Vector2i) -> void:
 	var kind: String = crops[tile]["kind"]
 	var yield_count: int = CROPS[kind]["yield"]
-	var where := ""
-	if _pack_free() >= yield_count:
-		inventory["crops"] += yield_count
-		where = "your pack"
-	elif cellar_built and cellar_stock + yield_count <= CELLAR_CAP:
-		cellar_stock += yield_count
-		where = "the root cellar"
-	else:
-		_show_message("Your pack is full, and the cellar has no room. Sell crops or store them first.")
+	# Harvests go to the pack only. Storing in the cellar is up to the player.
+	if _pack_free() < yield_count:
+		_show_message("Your pack is full. Store crops in the root cellar, or sell them.")
 		return
+	inventory["crops"] += yield_count
 	crops.erase(tile)
 	stats["harvested"] += 1
 	if kind == "pumpkin":
@@ -1128,7 +1123,7 @@ func _harvest(tile: Vector2i) -> void:
 		inventory["seeds"] += 1
 	var xp: int = CROPS[kind]["xp"]
 	_grant_xp("Farming", xp)
-	_show_message("Harvested %s for %d crops, put in %s. +%d Farming XP" % [_seed_label(kind).to_lower(), yield_count, where, xp])
+	_show_message("Harvested %s for %d crops. +%d Farming XP" % [_seed_label(kind).to_lower(), yield_count, xp])
 
 
 func _read_desk() -> void:
@@ -1203,6 +1198,9 @@ func _is_fishing() -> bool:
 
 
 func _start_fishing(tile: Vector2i) -> void:
+	if _pack_free() < 1:
+		_show_message("Your pack is full. Store fish in the cooler, or sell or cook them first.")
+		return
 	fishing_tile = tile
 	fish_timer = FISH_TICK_SECONDS
 	_show_message("You cast your line. Stay put and keep fishing.")
@@ -1227,8 +1225,8 @@ func _update_fishing(delta: float) -> void:
 	if fish_timer > 0.0:
 		return
 	fish_timer = FISH_TICK_SECONDS
-	if _pack_free() < 1 and not (cooler_built and cooler_stock < COOLER_CAP):
-		_stop_fishing("Your pack is full, and the cooler has no room. Sell, cook, or store something first.")
+	if _pack_free() < 1:
+		_stop_fishing("Your pack is full. Store fish in the cooler, or sell or cook them.")
 		return
 	_fish_roll()
 
@@ -1256,13 +1254,9 @@ func _fish_roll() -> void:
 	var chance := clampf(FISH_BASE_CHANCE + FISH_CHANCE_PER_LEVEL * float(_level("Fishing") - 1), 0.0, FISH_CHANCE_CAP)
 	if randf() < chance:
 		stats["caught"] += 1
+		inventory["fish"] += 1
 		_grant_xp("Fishing", XP_FISH)
-		if _pack_free() >= 1:
-			inventory["fish"] += 1
-			_show_message("You hook a fish! +%d Fishing XP" % XP_FISH)
-		else:
-			cooler_stock += 1
-			_show_message("You hook a fish and keep it cold in the cooler. +%d Fishing XP" % XP_FISH)
+		_show_message("You hook a fish! +%d Fishing XP" % XP_FISH)
 	else:
 		_show_message("Nothing yet. Keep still.")
 
