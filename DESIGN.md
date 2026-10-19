@@ -133,7 +133,7 @@ Achievements track stats and never reset. Each pays a small reward. Earning all 
   - **Carpentry:** each house repair gives 30 XP. Mending a board (1 wood, 1 fiber, from the House panel) gives 15 XP, capped at 2 mends per day so the house can't be finished in one day. Training to level 2 takes about 3 days, and level 3 takes about a week.
   - **Cleaning:** each daily tidy gives 20 XP. At Cleaning 2, a tidy also gives +5 sanity. Cleaning 3 unlocks the cleanse.
   - **Cooking:** cooking a fish gives 15 XP and cooking crops gives 10 XP. See Cooking above.
-  - **Fishing:** face a sparkling spot on the pond edge and press Space. Each catch gives 15 XP, and the chance rises 2% per level. Spots move every 12 seconds. There are 3 spots, with one more at Fishing 3 and another at Fishing 5.
+  - **Fishing:** face a sparkling spot on the pond edge and press Space to start fishing it, like RuneScape. While you keep still and face the spot, you roll for a catch every 3 seconds. The chance starts at 50% and rises 3% per level, up to 90%. Each catch gives 15 XP. Each spot stays active for 15 to 30 seconds, then goes quiet and a new spot appears elsewhere on the pond edge. There are 3 spots, with one more at Fishing 3 and another at Fishing 5. Moving, going inside, opening a panel, or pressing Space again reels the line in.
 - Levels will unlock new areas, tools, and fortifications.
 
 ## Survival (bushcrafting and lanterns)

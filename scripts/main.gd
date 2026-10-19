@@ -196,7 +196,13 @@ const CLEANSE_CROPS := 2      # crops offered per cleanse
 const CLEANSE_RELIEF := 5     # sanity limit restored per cleanse
 const XP_FISH := 15
 const FISH_SPOT_COUNT := 3
-const FISH_SPOT_SECONDS := 12.0   # how often the sparkling fishing spots move
+const FISH_SPOT_MIN_LIFE := 15.0   # seconds a spot stays active before it moves
+const FISH_SPOT_MAX_LIFE := 30.0
+const FISH_TICK_SECONDS := 3.0     # one catch roll per tick while fishing
+const FISH_BASE_CHANCE := 0.5      # chance to catch on a tick at Fishing 1
+const FISH_CHANCE_PER_LEVEL := 0.03
+const FISH_CHANCE_CAP := 0.9
+const NO_SPOT := Vector2i(-1, -1)
 
 const STARTING_SEEDS := 5
 const MESSAGE_SECONDS := 3.0
@@ -246,7 +252,8 @@ var interior: Array = []            # house tiles, [y][x], local to INT_ORIGIN
 var crops := {}                     # Vector2i world tile -> {"stage": int, "kind": String}
 var brush := {}                     # Vector2i world tile -> true while unharvested
 var pond_edges: Array = []          # water tiles with land beside them
-var fish_spots: Array = []          # the currently sparkling spots
+var fish_spots: Dictionary = {}        # tile -> seconds left before the spot moves
+var fishing_tile := NO_SPOT            # the spot being fished, or NO_SPOT
 var fish_timer := 0.0
 var fish_layer: Node2D
 var plot_two_open := false
@@ -333,6 +340,7 @@ func _process(delta: float) -> void:
 	_check_story()
 	_check_achievements()
 	_update_fish_spots(delta)
+	_update_fishing(delta)
 
 	var minutes := int(fmod(current_hour, 1.0) * 60.0)
 	hud_label.text = "Day %d   %02d:%02d   Sanity %d/%d" % [
@@ -919,6 +927,9 @@ func _check_unlocks() -> void:
 
 
 func _interact() -> void:
+	if _is_fishing():
+		_stop_fishing("You reel in your line.")
+		return
 	var tile := _tile_in_front()
 	# Interior tiles sit outside the farm's bounds, so accept either area.
 	if not _in_bounds(tile) and not _in_interior(tile):
@@ -935,7 +946,7 @@ func _interact() -> void:
 		return
 
 	if fish_spots.has(tile):
-		_fish(tile)
+		_start_fishing(tile)
 		return
 
 	if brush.has(tile):
@@ -1033,47 +1044,94 @@ func _fish_spot_count() -> int:
 	return FISH_SPOT_COUNT + (_level("Fishing") - 1) / 2
 
 
-# Every FISH_SPOT_SECONDS, the sparkling spots move to new places on the pond edge.
 func _update_fish_spots(delta: float) -> void:
-	fish_timer -= delta
-	if fish_timer <= 0.0:
-		fish_timer = FISH_SPOT_SECONDS
-		fish_spots.clear()
-		for i in _fish_spot_count():
-			if pond_edges.is_empty():
-				break
-			var pick: Vector2i = pond_edges.pick_random()
-			if not fish_spots.has(pick):
-				fish_spots.append(pick)
-	# The sparkle pulses, so the layer redraws every frame.
+	# Each spot runs down its life. When it goes quiet, it moves to a new place.
+	for tile in fish_spots.keys():
+		fish_spots[tile] -= delta
+		if fish_spots[tile] <= 0.0:
+			fish_spots.erase(tile)
+			if tile == fishing_tile:
+				_stop_fishing("The fish have moved on from your spot.")
+	# Refill up to the count for the current Fishing level.
+	while fish_spots.size() < _fish_spot_count() and _spawn_fish_spot():
+		pass
+	# The sparkle pulses and fades, so the layer redraws every frame.
 	if fish_layer != null:
 		fish_layer.queue_redraw()
 
 
+func _spawn_fish_spot() -> bool:
+	var options: Array = []
+	for edge in pond_edges:
+		if not fish_spots.has(edge):
+			options.append(edge)
+	if options.is_empty():
+		return false
+	var pick: Vector2i = options.pick_random()
+	fish_spots[pick] = randf_range(FISH_SPOT_MIN_LIFE, FISH_SPOT_MAX_LIFE)
+	return true
+
+
+func _is_fishing() -> bool:
+	return fishing_tile != NO_SPOT
+
+
+func _start_fishing(tile: Vector2i) -> void:
+	fishing_tile = tile
+	fish_timer = FISH_TICK_SECONDS
+	_show_message("You cast your line. Stay put and keep fishing.")
+
+
+func _stop_fishing(reason: String) -> void:
+	fishing_tile = NO_SPOT
+	if reason != "":
+		_show_message(reason)
+
+
+# While fishing, roll for a catch every tick. Moving, going inside, or
+# opening a panel reels the line in.
+func _update_fishing(delta: float) -> void:
+	if not _is_fishing():
+		return
+	var moved := Input.get_vector("move_left", "move_right", "move_up", "move_down") != Vector2.ZERO
+	if moved or inside or open_tab != "" or _tile_in_front() != fishing_tile:
+		_stop_fishing("You reel in your line.")
+		return
+	fish_timer -= delta
+	if fish_timer > 0.0:
+		return
+	fish_timer = FISH_TICK_SECONDS
+	_fish_roll()
+
+
 func _draw_fish_spots() -> void:
 	var t := Time.get_ticks_msec() / 1000.0
-	for i in fish_spots.size():
-		var c := _tile_center(fish_spots[i].x, fish_spots[i].y)
+	var i := 0
+	for tile in fish_spots:
+		var c := _tile_center(tile.x, tile.y)
+		# Spots fade out over their last four seconds before they move.
+		var fade := clampf(float(fish_spots[tile]) / 4.0, 0.0, 1.0)
 		var pulse := 0.75 + 0.25 * sin(t * 5.0 + i)
-		fish_layer.draw_circle(c, PX * 0.22 * pulse, Color(0.85, 0.97, 1.0, 0.3))
+		fish_layer.draw_circle(c, PX * 0.22 * pulse, Color(0.85, 0.97, 1.0, 0.3 * fade))
 		var r := PX * 0.28 * pulse
-		var star := Color(1.0, 1.0, 0.75, 0.95)
+		var star := Color(1.0, 1.0, 0.75, 0.95 * fade)
 		fish_layer.draw_line(c + Vector2(-r, 0), c + Vector2(r, 0), star, 2.0)
 		fish_layer.draw_line(c + Vector2(0, -r), c + Vector2(0, r), star, 2.0)
+		if tile == fishing_tile:
+			fish_layer.draw_arc(c, PX * 0.45, 0.0, TAU, 24, Color(0.7, 0.9, 1.0, 0.8), 2.0)
+		i += 1
 
 
-func _fish(tile: Vector2i) -> void:
-	# Each try uses up the spot. The fish scatter or the spot goes quiet.
-	fish_spots.erase(tile)
+func _fish_roll() -> void:
 	stats["fished"] += 1
-	var chance := 0.6 + 0.02 * float(_level("Fishing") - 1)
+	var chance := clampf(FISH_BASE_CHANCE + FISH_CHANCE_PER_LEVEL * float(_level("Fishing") - 1), 0.0, FISH_CHANCE_CAP)
 	if randf() < chance:
 		inventory["fish"] += 1
 		stats["caught"] += 1
 		_grant_xp("Fishing", XP_FISH)
-		_show_message("You land a fish. +%d Fishing XP" % XP_FISH)
+		_show_message("You hook a fish! +%d Fishing XP" % XP_FISH)
 	else:
-		_show_message("Nothing bit. The fish scattered.")
+		_show_message("Nothing yet. Keep still.")
 
 
 # --- Cooking -----------------------------------------------------------------
