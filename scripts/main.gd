@@ -90,6 +90,30 @@ const COOK_CROP_COUNT := 2
 const COOK_WOOD := 1         # wood burned per meal
 const MEAL_SANITY := 8.0     # sanity restored by eating a meal
 
+# Pack: crops, fish, and meals share the pack. Seeds have their own pouch.
+const BAG_BASE := 20
+const BAG_TIERS := [
+	{"name": "Satchel", "slots": 10, "coins": 40, "wood": 0, "fiber": 4, "level": 1},
+	{"name": "Haversack", "slots": 10, "coins": 120, "wood": 4, "fiber": 8, "level": 3},
+	{"name": "Backpack", "slots": 10, "coins": 300, "wood": 8, "fiber": 12, "level": 5},
+]
+# Storage: the root cellar keeps crops, the cooler keeps fish from spoiling.
+const CELLAR_CAP := 30
+const COOLER_CAP := 10
+const CELLAR_COST := {"wood": 4, "fiber": 2, "coins": 25, "level": 1}
+const COOLER_COST := {"wood": 4, "fiber": 4, "coins": 40, "level": 2}
+const INT_CELLAR := Vector2i(10, 5)   # interior tiles, local to the house
+const INT_COOLER := Vector2i(3, 5)
+# The stall sells what you carry and buys seeds. It is open 06:00 to 18:00.
+const STALL_IX := 22
+const STALL_IY := 9
+const STALL_CLOSE_HOUR := 18.0
+const SELL_CROP := 4
+const SELL_FISH := 6
+const SELL_MEAL := 8
+const SEED_TURNIP_PRICE := 3    # per seed, sold in packs of 5
+const SEED_PUMPKIN_PRICE := 10  # per seed, sold in packs of 3
+
 # Story chapters run in order. The first unfinished one is the Current chapter.
 # "story" is the narrative beat, "text" the goal, and "stat" what it reads.
 const STORY := [
@@ -126,6 +150,9 @@ const STORY := [
 	{"id": "winter_store", "title": "Feed Yourself Through the Cold",
 		"story": "One crop will not last. Harvest enough to keep a store against the long nights.",
 		"text": "Harvest 10 crops.", "stat": "harvested", "goal": 10, "reward": {"skill": "Farming", "xp": 60}},
+	{"id": "first_sale", "title": "Coin for Seed",
+		"story": "The stall on the path buys what the land gives you. Coins buy seeds, bags, and the rooms the homestead will need. Sell five items to learn how it works.",
+		"text": "Sell 5 items at the stall.", "stat": "sold", "goal": 5, "reward": {"coins": 30}},
 	{"id": "pumpkin", "title": "Something Sweeter",
 		"story": "Pumpkins need more skill than turnips. Reach Farming level 3 and bring one in from the field.",
 		"text": "Harvest a pumpkin.", "stat": "pumpkins", "goal": 1, "reward": {"pumpkin_seeds": 2}},
@@ -178,7 +205,7 @@ const ACHIEVEMENTS := [
 	{"id": "feast", "title": "Feast", "text": "Eat 50 meals.", "tier": 3, "stat": "eaten", "goal": 50, "reward": {"seeds": 5, "pumpkin_seeds": 2}},
 	{"id": "cleansed_five", "title": "Clean Conscience", "text": "Cleanse the house 5 times.", "tier": 3, "stat": "cleansed", "goal": 5, "reward": {"seeds": 5, "pumpkin_seeds": 2}},
 	{"id": "lasting", "title": "Lasting", "text": "Sleep in your bed 30 times.", "tier": 3, "stat": "slept", "goal": 30, "reward": {"seeds": 5, "pumpkin_seeds": 2}},
-	{"id": "story_end", "title": "Story Complete", "text": "Finish every story chapter.", "tier": 3, "stat": "story", "goal": 14, "reward": {"seeds": 5, "pumpkin_seeds": 2}},
+	{"id": "story_end", "title": "Story Complete", "text": "Finish every story chapter.", "tier": 3, "stat": "story", "goal": 15, "reward": {"seeds": 5, "pumpkin_seeds": 2}},
 ]
 
 const SKILLS := ["Farming", "Bushcrafting", "Carpentry", "Cleaning", "Fishing", "Cooking"]
@@ -221,9 +248,9 @@ const NIGHT_EVENTS := [
 	{"message": "The field is quiet tonight. Too quiet.", "shadow": "none", "sanity": -3},
 ]
 
-enum Tile { TREE, GRASS, SOIL, PATH, WATER, HOUSE, DOOR, FLOOR, WALL, EXIT, BED, STATION, DESK, FALLOW }
+enum Tile { TREE, GRASS, SOIL, PATH, WATER, HOUSE, DOOR, FLOOR, WALL, EXIT, BED, STATION, DESK, FALLOW, STALL, CELLAR, COOLER }
 
-const BLOCKING := [Tile.TREE, Tile.WATER, Tile.HOUSE, Tile.WALL, Tile.BED, Tile.STATION, Tile.DESK]
+const BLOCKING := [Tile.TREE, Tile.WATER, Tile.HOUSE, Tile.WALL, Tile.BED, Tile.STATION, Tile.DESK, Tile.STALL, Tile.CELLAR, Tile.COOLER]
 
 const TILE_COLORS := {
 	Tile.TREE: Color("2f4f2f"),
@@ -240,6 +267,9 @@ const TILE_COLORS := {
 	Tile.STATION: Color("4f6b7a"),
 	Tile.DESK: Color("6b5a2e"),
 	Tile.FALLOW: Color("4d5a32"),
+	Tile.STALL: Color("b5793d"),
+	Tile.CELLAR: Color("4a3f5c"),
+	Tile.COOLER: Color("5b8fa8"),
 }
 
 const BUSH_COLOR := Color("3d6b2a")
@@ -265,7 +295,7 @@ var inventory := {"seeds": STARTING_SEEDS, "pumpkin_seeds": 0, "crops": 0, "fish
 var materials := {"wood": 0, "fiber": 0, "resin": 0}
 var stats := {"planted": 0, "harvested": 0, "gathered": 0, "slept": 0, "tidied": 0,
 	"fished": 0, "caught": 0, "mended": 0, "cleansed": 0, "cooked": 0, "eaten": 0,
-	"pumpkins": 0, "collapses": 0, "events": 0}
+	"pumpkins": 0, "collapses": 0, "events": 0, "sold": 0, "spoiled": 0}
 var achievements_done := {}     # achievement id -> true
 var quests_done := {}               # quest id -> true
 var selected_seed := "turnip"
@@ -283,6 +313,12 @@ var event_fired_day := 0            # the day the night event last happened
 var tonight_shadow := Vector2i(-1, -1)
 var shadow_tile := Vector2i.ZERO    # where the field shadow sits
 var message_timer := 0.0
+var money := 0
+var bag_tier := 0               # bag upgrades bought
+var cellar_built := false
+var cooler_built := false
+var cellar_stock := 0          # crops in the root cellar
+var cooler_stock := 0          # fish in the cooler
 
 # Set by loading, applied once the world exists.
 var saved_pos := Vector2.ZERO
@@ -343,8 +379,8 @@ func _process(delta: float) -> void:
 	_update_fishing(delta)
 
 	var minutes := int(fmod(current_hour, 1.0) * 60.0)
-	hud_label.text = "Day %d   %02d:%02d   Sanity %d/%d" % [
-		day, int(fmod(current_hour, 24.0)), minutes, int(sanity), _sanity_max()]
+	hud_label.text = "Day %d   %02d:%02d   Sanity %d/%d   Coins %d" % [
+		day, int(fmod(current_hour, 24.0)), minutes, int(sanity), _sanity_max(), money]
 
 	_handle_keys()
 
@@ -482,6 +518,8 @@ func _build_map() -> void:
 					t = Tile.WATER
 				if ix >= HOUSE_IX and ix < HOUSE_IX + HOUSE_W and iy >= HOUSE_IY and iy < HOUSE_IY + HOUSE_H:
 					t = Tile.HOUSE
+				if ix == STALL_IX and iy == STALL_IY:
+					t = Tile.STALL
 				if ix == HOUSE_DOOR_IX and iy == HOUSE_DOOR_IY:
 					t = Tile.DOOR
 			row.append(t)
@@ -499,6 +537,10 @@ func _build_interior() -> void:
 
 	_fill_interior(1, 5, 12, 7, Tile.FLOOR)   # the hall, always open
 	_set_interior(6, 8, Tile.EXIT)            # back out to the farm
+	if cooler_built:
+		_set_interior(INT_COOLER.x, INT_COOLER.y, Tile.COOLER)
+	if cellar_built:
+		_set_interior(INT_CELLAR.x, INT_CELLAR.y, Tile.CELLAR)
 
 	# The bedroom and its bed are open from the start.
 	_fill_interior(1, 1, 4, 4, Tile.FLOOR)
@@ -687,6 +729,30 @@ func _on_panel_action(action_id: String) -> void:
 			_cook_crops()
 		"eat_meal":
 			_eat_meal()
+		"sell_crops":
+			_sell("crops")
+		"sell_fish":
+			_sell("fish")
+		"sell_meals":
+			_sell("meals")
+		"buy_turnip":
+			_buy_seeds("turnip")
+		"buy_pumpkin":
+			_buy_seeds("pumpkin")
+		"upgrade_bag":
+			_upgrade_bag()
+		"build_cellar":
+			_build_storage("cellar")
+		"build_cooler":
+			_build_storage("cooler")
+		"store_crops":
+			_store_crops()
+		"take_crops":
+			_take_crops()
+		"store_fish":
+			_store_fish()
+		"take_fish":
+			_take_fish()
 
 
 func _refresh_panel() -> void:
@@ -702,6 +768,12 @@ func _refresh_panel() -> void:
 			rows = _quest_rows()
 		"Achievements":
 			rows = _achievement_rows()
+		"Trade":
+			rows = _trade_rows()
+		"Cellar":
+			rows = _cellar_rows()
+		"Cooler":
+			rows = _cooler_rows()
 		"House":
 			rows = _house_rows()
 		"Settings":
@@ -723,9 +795,26 @@ func _skill_rows() -> Array:
 
 func _inventory_rows() -> Array:
 	var rows: Array = [
-		{"section": "Planting"},
-		{"name": "Planting with", "value": _seed_label(selected_seed)},
+		{"section": "Pack"},
+		{"name": "Coins", "value": str(money)},
+		{
+			"name": "Pack space",
+			"value": "%d/%d" % [_pack_used(), _pack_capacity()],
+			"progress": float(_pack_used()) / float(_pack_capacity()),
+		},
 	]
+	if bag_tier < BAG_TIERS.size():
+		var tier: Dictionary = BAG_TIERS[bag_tier]
+		rows.append({
+			"name": "Next bag: %s (+%d slots)" % [tier["name"], tier["slots"]],
+			"value": _price_text(tier),
+			"button": "Upgrade",
+			"action": "upgrade_bag",
+			"enabled": _can_upgrade_bag(),
+		})
+	rows.append({"note": "Crops, fish, and meals count against the pack. Seeds have their own pouch, and materials are uncapped for now."})
+	rows.append({"section": "Planting"})
+	rows.append({"name": "Planting with", "value": _seed_label(selected_seed)})
 	if _level("Farming") >= PUMPKIN_LEVEL:
 		rows.append({
 			"name": "Switch seed",
@@ -866,6 +955,27 @@ func _house_rows() -> Array:
 		"action": "tidy",
 		"enabled": _can_tidy(),
 	})
+	rows.append({"section": "Storage"})
+	if cellar_built:
+		rows.append({"name": "Root cellar", "value": "built, holds %d crops" % CELLAR_CAP})
+	else:
+		rows.append({
+			"name": "Build a root cellar (holds %d crops)" % CELLAR_CAP,
+			"value": _price_text(CELLAR_COST),
+			"button": "Build",
+			"action": "build_cellar",
+			"enabled": _can_afford(CELLAR_COST),
+		})
+	if cooler_built:
+		rows.append({"name": "Cooler", "value": "built, keeps %d fish fresh" % COOLER_CAP})
+	else:
+		rows.append({
+			"name": "Build a cooler (keeps %d fish fresh)" % COOLER_CAP,
+			"value": _price_text(COOLER_COST),
+			"button": "Build",
+			"action": "build_cooler",
+			"enabled": _can_afford(COOLER_COST),
+		})
 	rows.append({"section": "Features"})
 	for feature in HOUSE_FEATURES:
 		var unlocked: bool = house_stage >= feature["stage"]
@@ -943,6 +1053,10 @@ func _interact() -> void:
 				_tidy_house()
 			Tile.DESK:
 				_read_desk()
+			Tile.CELLAR:
+				_toggle_tab("Cellar")
+			Tile.COOLER:
+				_toggle_tab("Cooler")
 		return
 
 	if fish_spots.has(tile):
@@ -956,6 +1070,9 @@ func _interact() -> void:
 	var kind: int = map[tile.y][tile.x]
 	if kind == Tile.HOUSE:
 		_toggle_tab("House")
+		return
+	if kind == Tile.STALL:
+		_open_stall()
 		return
 	if kind == Tile.FALLOW:
 		_show_message("Overgrown. Reach Farming level 2 to clear this plot.")
@@ -991,18 +1108,27 @@ func _plant(tile: Vector2i) -> void:
 
 func _harvest(tile: Vector2i) -> void:
 	var kind: String = crops[tile]["kind"]
+	var yield_count: int = CROPS[kind]["yield"]
+	var where := ""
+	if _pack_free() >= yield_count:
+		inventory["crops"] += yield_count
+		where = "your pack"
+	elif cellar_built and cellar_stock + yield_count <= CELLAR_CAP:
+		cellar_stock += yield_count
+		where = "the root cellar"
+	else:
+		_show_message("Your pack is full, and the cellar has no room. Sell crops or store them first.")
+		return
 	crops.erase(tile)
 	stats["harvested"] += 1
-	inventory["crops"] += CROPS[kind]["yield"]
 	if kind == "pumpkin":
 		stats["pumpkins"] += 1
-	var xp: int = CROPS[kind]["xp"]
-	if kind == "pumpkin":
 		inventory["pumpkin_seeds"] += 1
 	else:
 		inventory["seeds"] += 1
+	var xp: int = CROPS[kind]["xp"]
 	_grant_xp("Farming", xp)
-	_show_message("Harvested %s for %d crops. +%d Farming XP" % [_seed_label(kind).to_lower(), CROPS[kind]["yield"], xp])
+	_show_message("Harvested %s for %d crops, put in %s. +%d Farming XP" % [_seed_label(kind).to_lower(), yield_count, where, xp])
 
 
 func _read_desk() -> void:
@@ -1101,6 +1227,9 @@ func _update_fishing(delta: float) -> void:
 	if fish_timer > 0.0:
 		return
 	fish_timer = FISH_TICK_SECONDS
+	if _pack_free() < 1 and not (cooler_built and cooler_stock < COOLER_CAP):
+		_stop_fishing("Your pack is full, and the cooler has no room. Sell, cook, or store something first.")
+		return
 	_fish_roll()
 
 
@@ -1126,10 +1255,14 @@ func _fish_roll() -> void:
 	stats["fished"] += 1
 	var chance := clampf(FISH_BASE_CHANCE + FISH_CHANCE_PER_LEVEL * float(_level("Fishing") - 1), 0.0, FISH_CHANCE_CAP)
 	if randf() < chance:
-		inventory["fish"] += 1
 		stats["caught"] += 1
 		_grant_xp("Fishing", XP_FISH)
-		_show_message("You hook a fish! +%d Fishing XP" % XP_FISH)
+		if _pack_free() >= 1:
+			inventory["fish"] += 1
+			_show_message("You hook a fish! +%d Fishing XP" % XP_FISH)
+		else:
+			cooler_stock += 1
+			_show_message("You hook a fish and keep it cold in the cooler. +%d Fishing XP" % XP_FISH)
 	else:
 		_show_message("Nothing yet. Keep still.")
 
@@ -1217,6 +1350,270 @@ func _achievement_row(a: Dictionary) -> Dictionary:
 		"progress": float(shown) / float(a["goal"]),
 		"note": "%s  Reward: %s" % [a["text"], _reward_text(a["reward"])],
 	}
+
+# --- Pack and bags -----------------------------------------------------------
+
+func _pack_used() -> int:
+	return int(inventory["crops"]) + int(inventory["fish"]) + int(inventory["meals"])
+
+
+func _pack_capacity() -> int:
+	var cap := BAG_BASE
+	for i in bag_tier:
+		cap += int(BAG_TIERS[i]["slots"])
+	return cap
+
+
+func _pack_free() -> int:
+	return _pack_capacity() - _pack_used()
+
+
+func _can_upgrade_bag() -> bool:
+	return bag_tier < BAG_TIERS.size() and _can_afford(BAG_TIERS[bag_tier])
+
+
+func _upgrade_bag() -> void:
+	if not _can_upgrade_bag():
+		_show_message("You can't afford the next bag yet. Needs %s." % _price_text(BAG_TIERS[bag_tier]))
+		return
+	var tier: Dictionary = BAG_TIERS[bag_tier]
+	_pay(tier)
+	bag_tier += 1
+	_show_message("You get a %s. Your pack now holds %d items." % [tier["name"], _pack_capacity()])
+
+
+# --- Money and costs ---------------------------------------------------------
+
+func _can_afford(cost: Dictionary) -> bool:
+	return money >= int(cost.get("coins", 0)) \
+		and int(materials["wood"]) >= int(cost.get("wood", 0)) \
+		and int(materials["fiber"]) >= int(cost.get("fiber", 0)) \
+		and _level("Carpentry") >= int(cost.get("level", 1))
+
+
+func _pay(cost: Dictionary) -> void:
+	money -= int(cost.get("coins", 0))
+	materials["wood"] -= int(cost.get("wood", 0))
+	materials["fiber"] -= int(cost.get("fiber", 0))
+
+
+func _price_text(cost: Dictionary) -> String:
+	var parts: Array = []
+	if int(cost.get("coins", 0)) > 0:
+		parts.append("%d coins" % int(cost["coins"]))
+	if int(cost.get("wood", 0)) > 0:
+		parts.append("%d wood" % int(cost["wood"]))
+	if int(cost.get("fiber", 0)) > 0:
+		parts.append("%d fiber" % int(cost["fiber"]))
+	parts.append("Carpentry %d" % int(cost.get("level", 1)))
+	return ", ".join(parts)
+
+
+# --- Stall -------------------------------------------------------------------
+
+func _open_stall() -> void:
+	if current_hour >= STALL_CLOSE_HOUR:
+		_show_message("The stall is shut for the night. It opens at 06:00.")
+		return
+	_toggle_tab("Trade")
+
+
+func _sell(kind: String) -> void:
+	var count := int(inventory[kind])
+	if count <= 0:
+		_show_message("You have nothing to sell.")
+		return
+	var price := SELL_CROP
+	if kind == "fish":
+		price = SELL_FISH
+	elif kind == "meals":
+		price = SELL_MEAL
+	inventory[kind] = 0
+	money += count * price
+	stats["sold"] += count
+	_show_message("Sold %d for %d coins." % [count, count * price])
+
+
+func _buy_seeds(kind: String) -> void:
+	if kind == "pumpkin":
+		if _level("Farming") < PUMPKIN_LEVEL:
+			_show_message("Pumpkin seeds need Farming level %d." % PUMPKIN_LEVEL)
+			return
+		var pumpkin_total := SEED_PUMPKIN_PRICE * 3
+		if money < pumpkin_total:
+			_show_message("Three pumpkin seeds cost %d coins." % pumpkin_total)
+			return
+		money -= pumpkin_total
+		inventory["pumpkin_seeds"] += 3
+		_show_message("You buy 3 pumpkin seeds for %d coins." % pumpkin_total)
+		return
+	var turnip_total := SEED_TURNIP_PRICE * 5
+	if money < turnip_total:
+		_show_message("Five turnip seeds cost %d coins." % turnip_total)
+		return
+	money -= turnip_total
+	inventory["seeds"] += 5
+	_show_message("You buy 5 turnip seeds for %d coins." % turnip_total)
+
+
+# --- Storage -----------------------------------------------------------------
+
+func _build_storage(which: String) -> void:
+	var cost: Dictionary = CELLAR_COST if which == "cellar" else COOLER_COST
+	if not _can_afford(cost):
+		_show_message("You can't build that yet. Needs %s." % _price_text(cost))
+		return
+	_pay(cost)
+	if which == "cellar":
+		cellar_built = true
+		_show_message("The root cellar is dug. It holds %d crops." % CELLAR_CAP)
+	else:
+		cooler_built = true
+		_show_message("The cooler is built. It keeps %d fish fresh." % COOLER_CAP)
+	_build_interior()
+	queue_redraw()
+
+
+func _store_crops() -> void:
+	var amount := mini(int(inventory["crops"]), CELLAR_CAP - cellar_stock)
+	if amount <= 0:
+		_show_message("Nothing to store, or the cellar is full.")
+		return
+	inventory["crops"] -= amount
+	cellar_stock += amount
+	_show_message("You store %d crops in the cellar." % amount)
+
+
+func _take_crops() -> void:
+	var amount := mini(cellar_stock, _pack_free())
+	if amount <= 0:
+		_show_message("Your pack is full, or the cellar is empty.")
+		return
+	cellar_stock -= amount
+	inventory["crops"] += amount
+	_show_message("You take %d crops from the cellar." % amount)
+
+
+func _store_fish() -> void:
+	var amount := mini(int(inventory["fish"]), COOLER_CAP - cooler_stock)
+	if amount <= 0:
+		_show_message("Nothing to store, or the cooler is full.")
+		return
+	inventory["fish"] -= amount
+	cooler_stock += amount
+	_show_message("You store %d fish in the cooler." % amount)
+
+
+func _take_fish() -> void:
+	var amount := mini(cooler_stock, _pack_free())
+	if amount <= 0:
+		_show_message("Your pack is full, or the cooler is empty.")
+		return
+	cooler_stock -= amount
+	inventory["fish"] += amount
+	_show_message("You take %d fish from the cooler." % amount)
+
+
+# --- Trade, cellar, and cooler panels ------------------------------------------
+
+func _trade_rows() -> Array:
+	var turnip_pack := SEED_TURNIP_PRICE * 5
+	var pumpkin_pack := SEED_PUMPKIN_PRICE * 3
+	return [
+		{"section": "Purse"},
+		{"name": "Coins", "value": str(money)},
+		{"section": "Sell from your pack"},
+		{
+			"name": "Crops (%d each)" % SELL_CROP,
+			"value": "%d held" % int(inventory["crops"]),
+			"button": "Sell all",
+			"action": "sell_crops",
+			"enabled": int(inventory["crops"]) > 0,
+		},
+		{
+			"name": "Fish (%d each)" % SELL_FISH,
+			"value": "%d held" % int(inventory["fish"]),
+			"button": "Sell all",
+			"action": "sell_fish",
+			"enabled": int(inventory["fish"]) > 0,
+		},
+		{
+			"name": "Meals (%d each)" % SELL_MEAL,
+			"value": "%d held" % int(inventory["meals"]),
+			"button": "Sell all",
+			"action": "sell_meals",
+			"enabled": int(inventory["meals"]) > 0,
+		},
+		{"section": "Buy seeds"},
+		{
+			"name": "Turnip seeds (%d each)" % SEED_TURNIP_PRICE,
+			"value": "5 for %d coins" % turnip_pack,
+			"button": "Buy 5",
+			"action": "buy_turnip",
+			"enabled": money >= turnip_pack,
+		},
+		{
+			"name": "Pumpkin seeds (%d each)" % SEED_PUMPKIN_PRICE,
+			"value": "3 for %d coins, Farming %d" % [pumpkin_pack, PUMPKIN_LEVEL],
+			"button": "Buy 3",
+			"action": "buy_pumpkin",
+			"enabled": _level("Farming") >= PUMPKIN_LEVEL and money >= pumpkin_pack,
+		},
+		{"note": "The stall is open from 06:00 to 18:00. It only buys what you carry, so take crops or fish out of storage first."},
+	]
+
+
+func _cellar_rows() -> Array:
+	return [
+		{"section": "Root cellar"},
+		{
+			"name": "Crops stored",
+			"value": "%d/%d" % [cellar_stock, CELLAR_CAP],
+			"progress": float(cellar_stock) / float(CELLAR_CAP),
+		},
+		{
+			"name": "Store crops from your pack",
+			"value": "%d in pack" % int(inventory["crops"]),
+			"button": "Store",
+			"action": "store_crops",
+			"enabled": int(inventory["crops"]) > 0 and cellar_stock < CELLAR_CAP,
+		},
+		{
+			"name": "Take crops into your pack",
+			"value": "%d free slots" % _pack_free(),
+			"button": "Take",
+			"action": "take_crops",
+			"enabled": cellar_stock > 0 and _pack_free() > 0,
+		},
+		{"note": "Crops keep here. Nothing spoils in the cellar."},
+	]
+
+
+func _cooler_rows() -> Array:
+	return [
+		{"section": "Cooler"},
+		{
+			"name": "Fish stored",
+			"value": "%d/%d" % [cooler_stock, COOLER_CAP],
+			"progress": float(cooler_stock) / float(COOLER_CAP),
+		},
+		{
+			"name": "Store fish from your pack",
+			"value": "%d in pack" % int(inventory["fish"]),
+			"button": "Store",
+			"action": "store_fish",
+			"enabled": int(inventory["fish"]) > 0 and cooler_stock < COOLER_CAP,
+		},
+		{
+			"name": "Take fish into your pack",
+			"value": "%d free slots" % _pack_free(),
+			"button": "Take",
+			"action": "take_fish",
+			"enabled": cooler_stock > 0 and _pack_free() > 0,
+		},
+		{"note": "Fish in your pack spoil overnight. Fish kept here do not."},
+	]
+
 
 # --- Repairs and mending ----------------------------------------------------
 
@@ -1420,6 +1817,8 @@ func _grant_reward(reward: Dictionary) -> void:
 	for mat in ["wood", "fiber", "resin"]:
 		if reward.has(mat):
 			materials[mat] += reward[mat]
+	if reward.has("coins"):
+		money += reward["coins"]
 	if reward.has("xp"):
 		_grant_xp(reward["skill"], reward["xp"])
 
@@ -1433,6 +1832,8 @@ func _reward_text(reward: Dictionary) -> String:
 	for mat in ["wood", "fiber", "resin"]:
 		if reward.has(mat):
 			parts.append("%d %s" % [reward[mat], mat])
+	if reward.has("coins"):
+		parts.append("%d coins" % reward["coins"])
 	if reward.has("xp"):
 		parts.append("%d %s XP" % [reward["xp"], reward["skill"]])
 	return ", ".join(parts)
@@ -1482,6 +1883,11 @@ func _trigger_night_event() -> void:
 func _end_day(base: String, leave_house: bool = true) -> void:
 	if inside and leave_house:
 		_leave_house()
+	# Fish left in the pack spoil overnight. The cooler keeps them.
+	var spoiled := int(inventory["fish"])
+	inventory["fish"] = 0
+	stats["spoiled"] += spoiled
+	var spoil_note := (" %d fish spoiled in your pack overnight." % spoiled) if spoiled > 0 else ""
 	for pos in crops.keys():
 		crops[pos]["stage"] = min(crops[pos]["stage"] + 1, MAX_STAGE)
 	day += 1
@@ -1489,7 +1895,7 @@ func _end_day(base: String, leave_house: bool = true) -> void:
 	tonight_shadow = Vector2i(-1, -1)
 	_respawn_brush()
 	_update_shadow_tile()
-	_show_message("%s Your crops grew overnight." % base)
+	_show_message("%s Your crops grew overnight.%s" % [base, spoil_note])
 	_save_game()
 	queue_redraw()
 
@@ -1552,6 +1958,12 @@ func _save_game() -> void:
 		"materials": materials,
 		"stats": stats,
 		"quests_done": quests_done,
+		"money": money,
+		"bag_tier": bag_tier,
+		"cellar_built": cellar_built,
+		"cooler_built": cooler_built,
+		"cellar_stock": cellar_stock,
+		"cooler_stock": cooler_stock,
 		"achievements_done": achievements_done,
 		"story_version": 2,
 		"selected_seed": selected_seed,
@@ -1600,6 +2012,12 @@ func _load_game() -> bool:
 	mend_day = int(data.get("mend_day", 0))
 	mends_today = int(data.get("mends_today", 0))
 	cleanse_day = int(data.get("cleanse_day", 0))
+	money = int(data.get("money", 0))
+	bag_tier = int(data.get("bag_tier", 0))
+	cellar_built = bool(data.get("cellar_built", false))
+	cooler_built = bool(data.get("cooler_built", false))
+	cellar_stock = int(data.get("cellar_stock", 0))
+	cooler_stock = int(data.get("cooler_stock", 0))
 	event_fired_day = int(data.get("event_fired_day", 0))
 	sanity_penalty = int(data.get("sanity_penalty", 0))
 	sanity = float(data.get("sanity", SANITY_MAX))
