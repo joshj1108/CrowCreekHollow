@@ -458,7 +458,7 @@ func _make_label(parent: Node, pos: Vector2, font_size: int) -> Label:
 
 func _update_minimap() -> void:
 	# Indoors the minimap shows the house, since the player isn't on the farm.
-	var player_tile := Vector2(HOUSE_DOOR_IX + BORDER_X, HOUSE_DOOR_IY + BORDER_Y) if inside else player.position / PX
+	var player_tile: Vector2 = Vector2(HOUSE_DOOR_IX + BORDER_X, HOUSE_DOOR_IY + BORDER_Y) if inside else player.position / PX
 	minimap.update_view(map, TILE_COLORS, brush.keys(), player_tile, tonight_shadow)
 
 
