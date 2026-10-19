@@ -85,7 +85,7 @@ The story questline is on hold until the homestead stage is solid.
 - Four skills, each with XP and levels (`Level = 1 + XP / 100`):
   - **Farming:** planting gives 5 XP, harvesting gives 25 XP.
   - **Bushcrafting:** gathering a brush pile gives 10 XP.
-  - **Carpentry:** each house repair gives 30 XP. Mending a board (1 wood, 1 fiber, from the House panel) gives 15 XP and can be repeated, so you can always train toward the level a repair needs.
+  - **Carpentry:** each house repair gives 30 XP. Mending a board (1 wood, 1 fiber, from the House panel) gives 15 XP, capped at 2 mends per day so the house can't be finished in one day. Training to level 2 takes about 3 days, and level 3 takes about a week.
   - **Cleaning:** each daily tidy gives 20 XP.
   - **Fishing:** face a sparkling spot on the pond edge and press Space. Each catch gives 15 XP, and the chance rises 2% per level. Spots move every 12 seconds.
 - Levels will unlock new areas, tools, and fortifications.

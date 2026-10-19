@@ -98,6 +98,7 @@ const XP_TIDY := 20
 const XP_MEND := 15
 const MEND_WOOD := 1
 const MEND_FIBER := 1
+const MEND_DAILY_LIMIT := 2   # keeps Carpentry training to a few days per level
 const XP_FISH := 15
 const FISH_SPOT_COUNT := 3
 const FISH_SPOT_SECONDS := 12.0   # how often the sparkling fishing spots move
@@ -169,6 +170,8 @@ var quests_done := {}               # quest id -> true
 var lantern_tier := 0               # 0 = none built yet
 var house_stage := 0
 var tidied_day := 0
+var mend_day := 0                   # the day the mend count applies to
+var mends_today := 0
 var sanity := SANITY_MAX
 var sanity_penalty := 0             # permanent cap reduction from collapsing
 var inside := false                 # standing in the farmhouse interior
@@ -622,7 +625,7 @@ func _house_rows() -> Array:
 		})
 	rows.append({
 		"name": "Mend a board",
-		"value": "%d wood, %d fiber: +%d Carpentry XP" % [MEND_WOOD, MEND_FIBER, XP_MEND],
+		"value": "%d wood, %d fiber: +%d XP (%d left today)" % [MEND_WOOD, MEND_FIBER, XP_MEND, _mends_left()],
 		"button": "Mend",
 		"action": "mend",
 		"enabled": _can_mend(),
@@ -825,14 +828,26 @@ func _repair_house() -> void:
 
 # Mending boards is repeatable Carpentry training, so the house can progress
 # without waiting on quest rewards.
+func _mends_left() -> int:
+	var used := mends_today if mend_day == day else 0
+	return MEND_DAILY_LIMIT - used
+
+
 func _can_mend() -> bool:
-	return materials["wood"] >= MEND_WOOD and materials["fiber"] >= MEND_FIBER
+	return _mends_left() > 0 and materials["wood"] >= MEND_WOOD and materials["fiber"] >= MEND_FIBER
 
 
 func _mend_house() -> void:
+	if _mends_left() <= 0:
+		_show_message("You've mended all you can today. Come back tomorrow.")
+		return
 	if not _can_mend():
 		_show_message("You need %d wood and %d fiber to mend a board." % [MEND_WOOD, MEND_FIBER])
 		return
+	if mend_day != day:
+		mend_day = day
+		mends_today = 0
+	mends_today += 1
 	materials["wood"] -= MEND_WOOD
 	materials["fiber"] -= MEND_FIBER
 	_grant_xp("Carpentry", XP_MEND)
@@ -1078,6 +1093,8 @@ func _save_game() -> void:
 		"lantern_tier": lantern_tier,
 		"house_stage": house_stage,
 		"tidied_day": tidied_day,
+		"mend_day": mend_day,
+		"mends_today": mends_today,
 		"event_fired_day": event_fired_day,
 		"sanity": sanity,
 		"sanity_penalty": sanity_penalty,
@@ -1106,6 +1123,8 @@ func _load_game() -> bool:
 	lantern_tier = int(data.get("lantern_tier", 0))
 	house_stage = int(data.get("house_stage", 0))
 	tidied_day = int(data.get("tidied_day", 0))
+	mend_day = int(data.get("mend_day", 0))
+	mends_today = int(data.get("mends_today", 0))
 	event_fired_day = int(data.get("event_fired_day", 0))
 	sanity_penalty = int(data.get("sanity_penalty", 0))
 	sanity = float(data.get("sanity", SANITY_MAX))
