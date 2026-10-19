@@ -53,7 +53,7 @@ const HOUSE_WALLS := [Color("4a3a2e"), Color("6b5340"), Color("8a6a4c"), Color("
 const HOUSE_ROOFS := [Color("2d2620"), Color("4a3a2c"), Color("6b4b33"), Color("8c5a3c")]
 
 const LANTERN_COST := {"wood": 2, "fiber": 2, "level": 2}  # level = Bushcrafting
-const LANTERN_RELIEF := 0.3
+const LANTERN_RADIUS_TILES := 2.5   # light ring around the player
 const HOUSE_RELIEF := 0.2
 
 const SKILLS := ["Farming", "Bushcrafting", "Carpentry", "Cleaning"]
@@ -111,6 +111,7 @@ var canvas_modulate: CanvasModulate
 var hud_label: Label
 var message_label: Label
 var player    # Node2D with player.gd attached
+var lantern_light: PointLight2D
 
 
 func _ready() -> void:
@@ -139,6 +140,8 @@ func _process(delta: float) -> void:
 	var darkness := smoothstep(DUSK_HOUR, DUSK_HOUR + 2.0, current_hour)
 	darkness *= 1.0 - _night_relief()
 	canvas_modulate.color = DAY_TINT.lerp(NIGHT_TINT, darkness)
+	# The lantern lights a small ring around the player, only when it's dark.
+	lantern_light.enabled = has_lantern and darkness > 0.05
 
 	hud_label.text = "Day %d   %02d:%02d" % [day, int(current_hour), int(fmod(current_hour, 1.0) * 60.0)]
 
@@ -270,6 +273,7 @@ func _build_world() -> void:
 	player.max_pos = _tile_center(BORDER_X + INNER_W - 1, BORDER_Y + INNER_H - 1)
 	player.is_blocked = _is_blocked_world
 	add_child(player)
+	_build_lantern_light()
 
 	var camera := Camera2D.new()
 	camera.enabled = true
@@ -281,6 +285,28 @@ func _build_world() -> void:
 
 	canvas_modulate = CanvasModulate.new()
 	add_child(canvas_modulate)
+
+
+func _build_lantern_light() -> void:
+	# A soft white-to-black radial gradient, tinted warm and scaled to the ring radius.
+	var gradient := Gradient.new()
+	gradient.set_color(0, Color.WHITE)
+	gradient.set_color(1, Color.BLACK)
+	var texture := GradientTexture2D.new()
+	texture.gradient = gradient
+	texture.fill = GradientTexture2D.FILL_RADIAL
+	texture.fill_from = Vector2(0.5, 0.5)
+	texture.fill_to = Vector2(1.0, 0.5)
+	texture.width = 256
+	texture.height = 256
+
+	lantern_light = PointLight2D.new()
+	lantern_light.texture = texture
+	lantern_light.texture_scale = LANTERN_RADIUS_TILES * PX / 128.0
+	lantern_light.color = Color("ffd38a")
+	lantern_light.energy = 1.0
+	lantern_light.enabled = false
+	player.add_child(lantern_light)
 
 
 func _build_hud() -> void:
@@ -583,13 +609,12 @@ func _craft_lantern() -> void:
 	materials["wood"] -= LANTERN_COST["wood"]
 	materials["fiber"] -= LANTERN_COST["fiber"]
 	has_lantern = true
-	_show_message("You craft a lantern. The night feels less close.")
+	_show_message("You craft a lantern. A ring of light now follows you through the dark.")
 
 
 func _night_relief() -> float:
+	# Only the house dims the night overall. The lantern lights a ring instead.
 	var relief := 0.0
-	if has_lantern:
-		relief += LANTERN_RELIEF
 	if house_stage >= 3:
 		relief += HOUSE_RELIEF
 	return minf(relief, 0.9)

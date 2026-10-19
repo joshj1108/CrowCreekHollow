@@ -68,7 +68,8 @@ A top-down farming game with heavy psychological horror, built in Godot 4.7.
 ## Survival (bushcrafting)
 
 - Brush piles on the farm give wood and fiber. They respawn each morning.
-- A **lantern** (Gear panel, needs Bushcrafting 2) softens the night.
+- A **lantern** (Gear panel, needs Bushcrafting 2) lights a small ring around the player at night. Only the ring is lit, not the whole screen.
+- Planned: lantern upgrades with higher Bushcrafting and better materials, each giving a larger ring.
 - No hunger or thirst. Survival comes from gathering, building, and keeping shelter.
 
 ## Day and night
