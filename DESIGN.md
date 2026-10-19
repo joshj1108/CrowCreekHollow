@@ -18,6 +18,15 @@ A top-down farming game with heavy psychological horror, built in Godot 4.7.
 - Esc opens Settings, or closes it if it's already open
 - Farming and gathering pause while a panel is open
 
+## Gamepad (Xbox layout)
+
+- Move: left stick or D-pad (0.3 deadzone)
+- Use, plant, harvest, gather, sleep: A
+- Close the open panel: B
+- Inventory X, Skills Y, Gear left bumper, Quests right bumper, House Back/View, Settings Start
+- While a panel is open, the D-pad or left stick moves focus between its buttons, and A presses the highlighted one. The first usable button is highlighted when a panel opens.
+- Keyboard and gamepad share the same actions, so both work at once.
+
 ## Action bar
 
 - Tab buttons along the bottom. A panel opens above the bar for the active tab.

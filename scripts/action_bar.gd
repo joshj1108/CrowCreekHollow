@@ -113,6 +113,16 @@ func hide_panel() -> void:
 	_set_active("")
 
 
+func _focus_first_button() -> void:
+	for block in rows_box.get_children():
+		for child in block.get_children():
+			if child is HBoxContainer:
+				for button in child.get_children():
+					if button is Button and not button.disabled:
+						button.grab_focus()
+						return
+
+
 func _build_row(data: Dictionary) -> Control:
 	if data.has("section"):
 		var heading := Label.new()

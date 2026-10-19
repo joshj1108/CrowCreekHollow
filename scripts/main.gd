@@ -349,25 +349,41 @@ func _draw_house() -> void:
 # --- Setup -------------------------------------------------------------------
 
 func _setup_input() -> void:
-	_ensure_action("move_up", [KEY_W, KEY_UP])
-	_ensure_action("move_down", [KEY_S, KEY_DOWN])
-	_ensure_action("move_left", [KEY_A, KEY_LEFT])
-	_ensure_action("move_right", [KEY_D, KEY_RIGHT])
-	_ensure_action("use", [KEY_SPACE, KEY_ENTER])
-	_ensure_action("skills", [KEY_K])
-	_ensure_action("inventory", [KEY_I])
-	_ensure_action("gear", [KEY_G])
-	_ensure_action("house", [KEY_H])
-	_ensure_action("quests", [KEY_Q])
+	# Keyboard, with gamepad bindings alongside each action.
+	_ensure_action("move_up", [KEY_W, KEY_UP], [JOY_BUTTON_DPAD_UP], [[JOY_AXIS_LEFT_Y, -1.0]])
+	_ensure_action("move_down", [KEY_S, KEY_DOWN], [JOY_BUTTON_DPAD_DOWN], [[JOY_AXIS_LEFT_Y, 1.0]])
+	_ensure_action("move_left", [KEY_A, KEY_LEFT], [JOY_BUTTON_DPAD_LEFT], [[JOY_AXIS_LEFT_X, -1.0]])
+	_ensure_action("move_right", [KEY_D, KEY_RIGHT], [JOY_BUTTON_DPAD_RIGHT], [[JOY_AXIS_LEFT_X, 1.0]])
+	for move in ["move_up", "move_down", "move_left", "move_right"]:
+		InputMap.action_set_deadzone(move, 0.3)
+	_ensure_action("use", [KEY_SPACE, KEY_ENTER], [JOY_BUTTON_A])
+	_ensure_action("skills", [KEY_K], [JOY_BUTTON_Y])
+	_ensure_action("inventory", [KEY_I], [JOY_BUTTON_X])
+	_ensure_action("gear", [KEY_G], [JOY_BUTTON_LEFT_SHOULDER])
+	_ensure_action("quests", [KEY_Q], [JOY_BUTTON_RIGHT_SHOULDER])
+	_ensure_action("house", [KEY_H], [JOY_BUTTON_BACK])
+	_ensure_action("settings", [KEY_ESCAPE], [JOY_BUTTON_START])
+	_ensure_action("close_panel", [], [JOY_BUTTON_B])
 
 
-func _ensure_action(action: String, keys: Array) -> void:
+# Adds keys, gamepad buttons, and stick directions to an action. Each axis entry
+# is [axis, direction], where direction is -1.0 or 1.0 along that axis.
+func _ensure_action(action: String, keys: Array, buttons: Array = [], axes: Array = []) -> void:
 	if not InputMap.has_action(action):
 		InputMap.add_action(action)
 	for k in keys:
 		var ev := InputEventKey.new()
 		ev.physical_keycode = k
 		InputMap.action_add_event(action, ev)
+	for b in buttons:
+		var pad := InputEventJoypadButton.new()
+		pad.button_index = b
+		InputMap.action_add_event(action, pad)
+	for entry in axes:
+		var motion := InputEventJoypadMotion.new()
+		motion.axis = entry[0]
+		motion.axis_value = entry[1]
+		InputMap.action_add_event(action, motion)
 
 
 func _build_map() -> void:
@@ -550,9 +566,12 @@ func _handle_keys() -> void:
 		_toggle_tab("Quests")
 	if Input.is_action_just_pressed("house"):
 		_toggle_tab("House")
-	# Esc opens Settings, or closes it if it's already open.
-	if Input.is_action_just_pressed("ui_cancel"):
+	# Esc or Start opens Settings, or closes it if it's already open.
+	if Input.is_action_just_pressed("settings"):
 		_toggle_tab("Settings")
+	# B closes whatever panel is open.
+	if Input.is_action_just_pressed("close_panel") and open_tab != "":
+		_close_panel()
 
 
 func _toggle_tab(tab: String) -> void:
@@ -752,6 +771,15 @@ func _settings_rows() -> Array:
 		{"name": "Quests", "value": "Q"},
 		{"name": "House", "value": "H"},
 		{"name": "Settings", "value": "Esc"},
+		{"section": "Gamepad"},
+		{"name": "Move", "value": "Left stick or D-pad"},
+		{"name": "Use, plant, harvest, gather, sleep", "value": "A"},
+		{"name": "Close panel", "value": "B"},
+		{"name": "Skills / Inventory", "value": "Y / X"},
+		{"name": "Gear / Quests", "value": "Left / Right bumper"},
+		{"name": "House", "value": "Back / View"},
+		{"name": "Settings", "value": "Start"},
+		{"note": "While a panel is open, the D-pad or left stick moves between its buttons, and A presses the highlighted one."},
 		{"section": "Saving"},
 		{"note": "Progress saves only when you sleep, or when you collapse at 03:00. The save includes your position and open panel."},
 		{"note": "Sound and display options are coming later."},
