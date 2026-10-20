@@ -148,6 +148,10 @@ const SEASON_EVENTS := [
 		"text": "The soil is soft after the winter. Crops that were watered grow an extra stage."},
 	{"id": "planting_fair", "title": "Planting Fair", "month": "April", "day": 20, "span": 1, "effect": "fair",
 		"text": "The village sends five turnip seeds for the plots. Plant them while the ground is warm."},
+	{"id": "all_hallows", "title": "All Hallows", "month": "October", "day": 31, "span": 1, "effect": "ward",
+		"text": "Lanterns are lit along the road for the longest-feared night of the year. The dark costs less sanity tonight."},
+	{"id": "winter_feast", "title": "Winter Feast", "month": "January", "day": 1, "span": 1, "effect": "feast",
+		"text": "The neighbours bring a feast against the cold: two meals and a bandage go in your pack."},
 	{"id": "midsummer_heat", "title": "Midsummer Heat", "month": "June", "day": 21, "span": 3, "effect": "heat",
 		"text": "A dry heat settles over the valley for three days. The sky stays clear, so the crops need watering every morning."},
 ]
@@ -717,7 +721,7 @@ var tool_tier := {"hatchet": 0, "pick": 0, "rod": 0}     # 0 = none; higher tier
 var grove_felled := {}
 var quarry := {}                                   # Ashford quarry rocks, village tile -> true
 var rocks := {}                                  # world tile -> true for unbroken rocks
-var stats := {"planted": 0, "harvested": 0, "gathered": 0, "slept": 0, "tidied": 0,
+var stats := {"jobs": 0, "planted": 0, "harvested": 0, "gathered": 0, "slept": 0, "tidied": 0,
 	"fished": 0, "caught": 0, "mended": 0, "cleansed": 0, "cooked": 0, "eaten": 0,
 	"pumpkins": 0, "collapses": 0, "events": 0, "sold": 0, "spoiled": 0,
 	"talks": 0, "defeated": 0, "delivered": 0, "stalkers": 0, "visited": 0, "crops_given": 0, "preserved": 0, "felled": 0, "mined": 0,
@@ -742,6 +746,18 @@ var hen_pos: Array = []           # each hen's place in the coop, in tiles from 
 var hen_goal: Array = []          # where each hen is walking to
 var hen_wait: Array = []          # seconds before a hen picks its next spot
 var hens := 0
+# The daily job: one delivery a day, rotating through these. Turn the items in for coins and XP.
+const JOBS := [
+	{"id": "crops", "name": "Deliver crops", "need": {"crops": 3}, "coins": 30, "skill": "Farming", "xp": 12},
+	{"id": "fish", "name": "Deliver fish", "need": {"fish": 2}, "coins": 26, "skill": "Fishing", "xp": 12},
+	{"id": "wood", "name": "Deliver wood", "need": {"wood": 6}, "coins": 24, "skill": "Forestry", "xp": 12},
+	{"id": "stone", "name": "Deliver stone", "need": {"stone": 4}, "coins": 22, "skill": "Mining", "xp": 12},
+	{"id": "resin", "name": "Deliver resin", "need": {"resin": 3}, "coins": 20, "skill": "Bushcrafting", "xp": 12},
+	{"id": "meals", "name": "Deliver meals", "need": {"meals": 2}, "coins": 34, "skill": "Cooking", "xp": 12},
+	{"id": "preserved", "name": "Deliver preserves", "need": {"smoked": 1, "dried": 1}, "coins": 40, "skill": "Cooking", "xp": 16},
+]
+var job_done_day := -1   # the last day the daily job was turned in
+
 var hens_fed_day := -1              # the last day the hens were fed
 var hen_unfed_days := 0
 var goat_layer: Node2D              # the goats in the barn yard, drawn on their own layer
@@ -1899,6 +1915,9 @@ func _on_panel_action(action_id: String) -> void:
 		gear_selected = action_id.trim_prefix("gear_pick:")
 		_refresh_panel()
 		return
+	if action_id == "job":
+		_do_job()
+		return
 	if action_id == "use_bandage":
 		_use_bandage()
 		return
@@ -2702,6 +2721,7 @@ func _house_rows() -> Array:
 				row["enabled"] = chore["enabled"]
 		rows.append(row)
 	rows.append({"note": "Each chore left undone adds 1 wear overnight. A night with every chore done brings back %d sanity." % WELL_KEPT_SANITY})
+	rows.append_array(_job_rows())
 	rows.append({"section": "Upkeep"})
 	rows.append({"name": "Wear", "value": "%d of %d" % [wear, WEAR_MAX], "progress": float(wear) / float(WEAR_MAX)})
 	rows.append({"note": "The house wears a little each night. Mending, tidying, and repairs bring it down. At %d wear, rain ruins a crop overnight. At %d, a fox can get into the coop. A third plot opens at Farming %d once the house is Patched." % [WEAR_RUNDOWN, WEAR_FOX, PLOT_THREE_LEVEL]})
@@ -5532,6 +5552,57 @@ func _feed_hens() -> void:
 
 
 # The day's chores. Each is done or not. Chores left undone wear the house overnight.
+func _job_today() -> Dictionary:
+	return JOBS[day % JOBS.size()]
+
+
+func _job_need_text(job: Dictionary) -> String:
+	var parts: Array = []
+	for item in job["need"].keys():
+		parts.append("%d %s" % [int(job["need"][item]), str(item).replace("_", " ")])
+	return ", ".join(parts)
+
+
+func _can_do_job() -> bool:
+	if job_done_day == day:
+		return false
+	var job := _job_today()
+	for item in job["need"].keys():
+		if _held(str(item)) < int(job["need"][item]):
+			return false
+	return true
+
+
+func _do_job() -> void:
+	if not _can_do_job():
+		_show_message("You don't have what the job asks for, or you've done it today.")
+		return
+	var job := _job_today()
+	for item in job["need"].keys():
+		var n := int(job["need"][item])
+		if materials.has(str(item)):
+			materials[item] -= n
+		else:
+			inventory[item] -= n
+	money += int(job["coins"])
+	_grant_xp(str(job["skill"]), int(job["xp"]))
+	job_done_day = day
+	stats["jobs"] += 1
+	play_sfx("coin")
+	_show_message("Job done: %s. +%d coins, +%d %s XP" % [str(job["name"]).to_lower(), int(job["coins"]), int(job["xp"]), job["skill"]])
+
+
+func _job_rows() -> Array:
+	var job := _job_today()
+	var done := job_done_day == day
+	var detail := "Done for today." if done else "Needs %s. Pays %d coins and %d %s XP." % [_job_need_text(job), int(job["coins"]), int(job["xp"]), job["skill"]]
+	var row := {"name": str(job["name"]), "value": detail, "enabled": _can_do_job()}
+	if not done:
+		row["button"] = "Deliver"
+		row["action"] = "job"
+	return [{"section": "Daily job"}, row, {"note": "One job a day, separate from the chores. It doesn't add wear to the house."}]
+
+
 func _chore_list() -> Array:
 	var chores: Array = []
 	chores.append({"name": "Tidy the house", "detail": "+%d XP, once a day" % XP_TIDY, "done": tidied_day == day, "button": "Tidy", "action": "tidy", "enabled": _can_tidy()})
@@ -5607,6 +5678,9 @@ func _begin_day_events() -> String:
 			_change_sanity(10.0)
 		elif ev["effect"] == "fair":
 			inventory["seeds"] += 5
+		elif ev["effect"] == "feast":
+			inventory["meals"] += 2
+			inventory["bandage"] += 1
 		note += " %s: %s" % [ev["title"], ev["text"]]
 	return note
 
@@ -5894,7 +5968,7 @@ func _update_sanity(darkness: float, delta: float) -> void:
 	if inside:
 		rate = 0.1 + (0.05 if house_stage >= 1 else 0.0)   # the house is shelter
 	elif darkness > 0.5:
-		rate = -0.05                 # the dark wears on you
+		rate = -0.05 * (0.5 if _event_active("ward") else 1.0)   # the dark wears on you; lanterns ward it on All Hallows
 	_change_sanity(rate * delta)
 
 
@@ -5914,7 +5988,7 @@ func _trigger_night_event() -> void:
 			tonight_shadow = _world_tile(HOUSE_IX + HOUSE_W, HOUSE_IY + 1)
 		_:
 			tonight_shadow = Vector2i(-1, -1)
-	var hit: float = float(ev["sanity"]) * (2.0 if _event_active("dread") else 1.0)
+	var hit: float = float(ev["sanity"]) * (2.0 if _event_active("dread") else 1.0) * (0.5 if _event_active("ward") else 1.0)
 	_change_sanity(hit)
 	_show_message(ev["message"])
 	queue_redraw()
@@ -6085,6 +6159,7 @@ func _save_game() -> void:
 		"lantern_tier": lantern_tier,
 		"house_stage": house_stage,
 		"tidied_day": tidied_day,
+		"job_done_day": job_done_day,
 		"mend_day": mend_day,
 		"mends_today": mends_today,
 		"cleanse_day": cleanse_day,
@@ -6154,6 +6229,7 @@ func _load_game() -> bool:
 	lantern_tier = int(data.get("lantern_tier", 0))
 	house_stage = int(data.get("house_stage", 0))
 	tidied_day = int(data.get("tidied_day", 0))
+	job_done_day = int(data.get("job_done_day", -1))
 	mend_day = int(data.get("mend_day", 0))
 	mends_today = int(data.get("mends_today", 0))
 	cleanse_day = int(data.get("cleanse_day", 0))

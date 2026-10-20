@@ -100,6 +100,13 @@ Each year has a few dated events. When one starts, the morning message announces
 | Planting Fair | Apr 20 | 1 day | Five turnip seeds when it starts |
 | Midsummer Heat | Jun 21 | 3 days | Every day is sunny |
 
+- **All Hallows** (October 31): lanterns are lit along the road, so the dark costs half the usual sanity that night.
+- **Winter Feast** (January 1): two meals and a bandage go into the pack.
+
+## Daily job
+
+- The House panel (H) has one **daily job**, separate from the chores so skipping it adds no wear. It rotates each day through crops, fish, wood, stone, resin, meals, and preserves. Each asks for a few of those items, which are used up when you deliver them. Delivering pays coins and XP in the job's skill, and only one delivery counts per day.
+
 ## Music
 
 - **Music** is a lo-fi loop (`audio/dreary_loop.ogg`) that starts on the title screen and loops quietly.
