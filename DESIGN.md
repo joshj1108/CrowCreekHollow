@@ -218,6 +218,13 @@ The house is drawn in four stages that match its repair level. **Decrepit** has 
 - The field shadow creeps closer each night.
 - **Collapse penalty:** missing the bed by 03:00 lowers the sanity limit by 5 permanently. A **cleanse** (see Farmhouse) lifts it by 5 per use, once a day.
 
+## Tutorial tips
+
+- A new game starts with tips for moving, the menus, and growing food. They show one at a time in a card at the bottom of the screen, each for about 16 seconds. Press B to dismiss one. A tip waits while a panel is open.
+- Later tips appear as the player reaches each part of the farm: sleeping after 17:00, chores, repairs, buildings, and quests from day 2, hens once a coop stands, the cellar, smelting and preserving once the furnace or smokehouse is built, and the mine from day 3.
+- Each tip shows once. The Settings menu lists the tips already seen under **Tips**, so they can be read again.
+- Saves keep the seen tips. Saves from before tips existed count the whole tutorial as seen, so it doesn't flood them.
+
 ## Saving
 
 - The game opens on a **start screen**: **Continue** (the most recently saved slot), **New Game**, **Load Game**, **Settings** (the controls list), and **Quit**. The world is built only after you choose.

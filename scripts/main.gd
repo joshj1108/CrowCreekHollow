@@ -117,6 +117,22 @@ const EVENT_HOUR := 22.0
 
 const MAX_STAGE := 3        # 0 = seed, 3 = ready to harvest
 const STAGE_NAMES := ["Decrepit", "Boarded", "Patched", "Restored"]
+# The tutorial: short tips that appear one at a time as the player reaches each part of the farm.
+# Each shows once, and the Settings menu keeps the ones already seen. When the condition is met, see _tip_ready.
+const TIPS := [
+	{"id": "move", "title": "Moving and using things", "text": "Walk with WASD or the arrow keys. Press Space to plant, harvest, gather, and use whatever you face."},
+	{"id": "menus", "title": "Menus", "text": "K Skills, I Inventory, G Gear, C Craft, Q Quests, H House, U Buildings, J Achievements. Esc opens Settings, and time stops while it's open."},
+	{"id": "farm", "title": "Growing food", "text": "Face a soil tile and press Space to plant a seed. Crops ripen over days. Face a ripe crop and press Space to harvest it."},
+	{"id": "sleep", "title": "Sleeping", "text": "Walk to the bed in the bedroom and press Space from 18:00 to save and end the day. Stay up past 03:00 and you collapse, which lowers your sanity limit."},
+	{"id": "chores", "title": "Keeping house", "text": "The house wears down a little each night. Tidy it and mend a board each day from the House menu (H). Chores you skip add wear."},
+	{"id": "repair", "title": "Repairing the farmhouse", "text": "Repair the house from the House menu (H). Each stage restores it inside and out, and unlocks rooms and features."},
+	{"id": "buildings", "title": "Buildings", "text": "Build the workshop, coop, and barn from the Buildings menu (U). Pick a spot on open grass, press Space to place it, and B to cancel."},
+	{"id": "quests", "title": "Quests", "text": "The Quests menu (Q) lists what the farm asks of you. Press Details on a quest to read its story."},
+	{"id": "hens", "title": "Hens", "text": "Stand beside the coop, facing it, and press Space to buy and feed hens. A fed hen lays an egg each morning."},
+	{"id": "cellar", "title": "Storing crops", "text": "Stand beside the root cellar and press Space to store or take crops. Nothing spoils in the cellar."},
+	{"id": "smelt", "title": "Smelting and preserving", "text": "Stand beside the furnace and press Space to smelt ore into bars. The smokehouse preserves food, and the cooler keeps fish fresh."},
+	{"id": "cave", "title": "The mine", "text": "The cave is at the west edge of the farm. Each day it lays out differently, with ore to mine and creatures to watch for."},
+]
 # Cost to reach the next house stage, and the Carpentry level it needs.
 const REPAIR_COSTS := [
 	{"wood": 3, "fiber": 2, "level": 1},
@@ -496,6 +512,15 @@ const COLLAPSE_SANITY_PENALTY := 5   # permanent cap reduction, curable with a c
 var save_slot := 1                  # which save slot this game reads and writes
 var world_started := false         # false while the start screen is up
 var title_menu: TitleMenu
+var tips_seen: Dictionary = {}     # tip id -> true, once it has been shown
+var tip_queue: Array = []          # tip ids waiting their turn
+var tip_showing := ""              # the tip on screen now, or ""
+var tip_timer := 0.0
+var tip_cooldown := 0.0
+var tip_check_timer := 0.0
+var tip_panel: PanelContainer
+var tip_title_label: Label
+var tip_body_label: Label
 
 # Night events: picked by day so the nights vary. "shadow" says where it appears.
 const NIGHT_EVENTS := [
@@ -685,6 +710,7 @@ func _on_title_start(mode: String, slot: int) -> void:
 	_build_interior()
 	_build_world()
 	_build_hud()
+	_build_tip_panel()
 	_build_action_bar()
 	_update_shadow_tile()
 	if loaded:
@@ -715,6 +741,7 @@ func _process(delta: float) -> void:
 		_handle_keys()
 		_refresh_panel()
 		return
+	_update_tips(delta)
 	clock += delta
 	_update_hens(delta)
 	current_hour = START_HOUR + clock / DAY_LENGTH * (DAY_END_HOUR - START_HOUR)
@@ -1288,6 +1315,125 @@ func _update_minimap() -> void:
 	minimap.update_view(map, TILE_COLORS, brush.keys(), player_tile, tonight_shadow)
 
 
+# --- Tutorial tips ----------------------------------------------------------
+
+# Each tip has a trigger. Tips are checked once a second and queue up, then show one at a time
+# while nothing else is open. A tip shows once, and its text stays in the Settings menu.
+func _tip_ready(id: String) -> bool:
+	match id:
+		"move", "menus", "farm":
+			return true
+		"sleep":
+			return current_hour >= 17.0
+		"chores", "repair", "buildings", "quests":
+			return day >= 2
+		"hens":
+			return coop_built
+		"cave":
+			return day >= 3
+		"smelt":
+			return furnace_built or smokehouse_built
+		"cellar":
+			return cellar_built
+	return false
+
+
+func _update_tips(delta: float) -> void:
+	tip_check_timer -= delta
+	if tip_check_timer <= 0.0:
+		tip_check_timer = 1.0
+		for tip in TIPS:
+			var id: String = tip["id"]
+			if not tips_seen.has(id) and not tip_queue.has(id) and id != tip_showing and _tip_ready(id):
+				tip_queue.append(id)
+	if tip_showing != "":
+		tip_timer -= delta
+		if tip_timer <= 0.0:
+			_hide_tip()
+		return
+	tip_cooldown = maxf(tip_cooldown - delta, 0.0)
+	if tip_queue.size() > 0 and tip_cooldown <= 0.0 and open_tab == "" and placing == "":
+		_show_tip(str(tip_queue.pop_front()))
+
+
+func _show_tip(id: String) -> void:
+	var tip := _tip_data(id)
+	tip_showing = id
+	tips_seen[id] = true
+	tip_timer = 16.0
+	tip_title_label.text = str(tip["title"])
+	tip_body_label.text = str(tip["text"])
+	tip_panel.visible = true
+
+
+func _hide_tip() -> void:
+	tip_showing = ""
+	tip_panel.visible = false
+	tip_cooldown = 1.5
+
+
+func _tip_data(id: String) -> Dictionary:
+	for tip in TIPS:
+		if str(tip["id"]) == id:
+			return tip
+	return {"title": "", "text": ""}
+
+
+# The card sits at the bottom of the screen, clear of the top-left messages and the minimap.
+func _build_tip_panel() -> void:
+	var host := message_label.get_parent() as Control
+	tip_panel = PanelContainer.new()
+	var sb := StyleBoxFlat.new()
+	sb.bg_color = Color(0.08, 0.06, 0.04, 0.92)
+	sb.border_color = Color("8a6a3a")
+	sb.set_border_width_all(2)
+	sb.set_corner_radius_all(6)
+	sb.set_content_margin_all(12)
+	tip_panel.add_theme_stylebox_override("panel", sb)
+	tip_panel.set_anchors_preset(Control.PRESET_CENTER_BOTTOM)
+	tip_panel.grow_horizontal = Control.GROW_DIRECTION_BOTH
+	tip_panel.grow_vertical = Control.GROW_DIRECTION_BEGIN
+	tip_panel.offset_left = -290
+	tip_panel.offset_right = 290
+	tip_panel.offset_top = -90
+	tip_panel.offset_bottom = -90
+	tip_panel.custom_minimum_size = Vector2(580, 0)
+	tip_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	tip_panel.visible = false
+	var box := VBoxContainer.new()
+	box.add_theme_constant_override("separation", 6)
+	tip_panel.add_child(box)
+	tip_title_label = Label.new()
+	tip_title_label.add_theme_font_size_override("font_size", 18)
+	tip_title_label.add_theme_color_override("font_color", Color("d8b050"))
+	box.add_child(tip_title_label)
+	tip_body_label = Label.new()
+	tip_body_label.autowrap_mode = TextServer.AUTOWRAP_WORD
+	tip_body_label.custom_minimum_size = Vector2(556, 0)
+	tip_body_label.add_theme_font_size_override("font_size", 15)
+	tip_body_label.add_theme_color_override("font_color", Color("e8dcc0"))
+	box.add_child(tip_body_label)
+	var hint := Label.new()
+	hint.text = "B to dismiss. Tips are kept in Settings."
+	hint.add_theme_font_size_override("font_size", 12)
+	hint.add_theme_color_override("font_color", Color("9a8a6a"))
+	box.add_child(hint)
+	host.add_child(tip_panel)
+
+
+# The seen tips, for the Settings menu.
+func _tip_rows() -> Array:
+	var rows: Array = [{"section": "Tips"}]
+	var any := false
+	for tip in TIPS:
+		if tips_seen.has(tip["id"]):
+			rows.append({"name": tip["title"], "value": tip["text"]})
+			any = true
+	if not any:
+		rows.append({"note": "Tips appear as you reach each part of the farm. The first ones show as soon as you start."})
+	return rows
+
+
 # --- Input and panels --------------------------------------------------------
 
 func _handle_keys() -> void:
@@ -1310,6 +1456,9 @@ func _handle_keys() -> void:
 	# Esc or Start opens Settings, or closes it if it's already open.
 	if Input.is_action_just_pressed("settings"):
 		_toggle_tab("Settings")
+	# B dismisses a tip when nothing else is open.
+	if Input.is_action_just_pressed("close_panel") and tip_showing != "" and open_tab == "" and placing == "":
+		_hide_tip()
 	# B closes whatever panel is open.
 	if Input.is_action_just_pressed("close_panel") and open_tab != "":
 		_close_panel()
@@ -1480,7 +1629,7 @@ func _refresh_panel() -> void:
 		"Barn":
 			rows = _barn_rows()
 		"Settings":
-			rows = _settings_rows()
+			rows = _settings_rows() + _tip_rows()
 	action_bar.show_panel(open_tab, rows)
 
 
@@ -4744,6 +4893,7 @@ func _save_game() -> void:
 		"hens": hens,
 		"hens_fed_day": hens_fed_day,
 		"hen_unfed_days": hen_unfed_days,
+		"tips_seen": tips_seen.keys(),
 	}
 	var file := FileAccess.open(_save_path(), FileAccess.WRITE)
 	if file != null:
@@ -4835,6 +4985,14 @@ func _load_game() -> bool:
 	hens = int(data.get("hens", 0))
 	hens_fed_day = int(data.get("hens_fed_day", -1))
 	hen_unfed_days = int(data.get("hen_unfed_days", 0))
+	if data.has("tips_seen"):
+		tips_seen = {}
+		for id in data["tips_seen"]:
+			tips_seen[str(id)] = true
+	else:
+		# Saves from before tips existed have seen the tutorial already, so it doesn't flood them.
+		for tip in TIPS:
+			tips_seen[str(tip["id"])] = true
 	if data.has("cave_mined"):
 		cave_mined.clear()
 		for c in data["cave_mined"]:
