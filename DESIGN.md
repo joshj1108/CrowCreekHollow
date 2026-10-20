@@ -276,9 +276,15 @@ Each gathering skill has its own tool. The tool's material sets what it can brea
 | Skill | Gathered from | Tool | Gives |
 |---|---|---|---|
 | Bushcrafting (existing) | Brush piles, thickets | None | Wood, fiber, resin |
-| Forestry | Trees on the farm edge and in the Lowmere wood | Hatchet | Wood, hardwood (tool handles, smithing fuel) |
+| Forestry | Trees on the farm edge and in the Lowmere wood | Hatchet | Wood, hardwood |
 | Mining | Rocks on the farm, the Ashford quarry | Pick | Stone; copper and iron ore |
 | Smithing | A furnace built from the House panel | None | Bars from ore and wood; metal gear and tools from bars |
+
+**Hardwood is a key material.** It goes into tool handles and smithing fuel, and into the weapons and gear below.
+
+- **Shields** (offhand) are made from hardwood and metal.
+- **Bows and crossbows** (ranged, right hand) are made from hardwood. Crossbows also need metal parts. Both need ammunition, which is not designed yet.
+- **Wands and staves** (magic) are made from hardwood once magic exists. Magic is not designed yet.
 
 **Ore never comes from the farm.** Copper and iron come from the Ashford quarry only.
 
@@ -293,6 +299,8 @@ Each gathering skill has its own tool. The tool's material sets what it can brea
 4. The Ashford quarry, with iron ore and the top metal tier.
 
 Levels here are placeholders and will be tuned once the systems exist.
+
+**Open conflict:** the left hand holds the lantern, but a shield also belongs in the offhand. Either the shield gets its own slot, or the lantern moves elsewhere. This needs a decision before shields are built.
 
 ## Deferred
 
