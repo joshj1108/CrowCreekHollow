@@ -52,6 +52,12 @@ const ROCK_SPOTS := [Vector2i(14, 6), Vector2i(17, 10), Vector2i(27, 17), Vector
 const XP_MINE := 12
 const ORE_CHANCE := 0.15
 const ORE_MINING_LEVEL := 2
+# A campsite is set up in the wider land from wood and fiber. It is safe from foes
+# within a few tiles, and you can rest there from 18:00 like a bed.
+const CAMP_COST := {"wood": 4, "fiber": 3}
+const CAMP_LEVEL := 2
+const CAMP_SAFE_RADIUS := 3.0
+const NO_CAMP := Vector2i(-1, -1)
 # Quarry rocks in Ashford, in village tiles. They yield copper ore from Mining 3,
 # and iron ore from Mining 5 with a copper pick or better.
 const ASHFORD_QUARRY := [Vector2i(26, 16), Vector2i(30, 18), Vector2i(34, 15), Vector2i(9, 17)]
@@ -422,9 +428,9 @@ const NIGHT_EVENTS := [
 	{"message": "The field is quiet tonight. Too quiet.", "shadow": "none", "sanity": -3},
 ]
 
-enum Tile { TREE, GRASS, SOIL, PATH, WATER, HOUSE, DOOR, FLOOR, WALL, EXIT, BED, STATION, DESK, FALLOW, STALL, CELLAR, COOLER, GATE, SMOKEHOUSE, FURNACE, PORTAL }
+enum Tile { TREE, GRASS, SOIL, PATH, WATER, HOUSE, DOOR, FLOOR, WALL, EXIT, BED, STATION, DESK, FALLOW, STALL, CELLAR, COOLER, GATE, SMOKEHOUSE, FURNACE, PORTAL, CAMP }
 
-const BLOCKING := [Tile.TREE, Tile.WATER, Tile.HOUSE, Tile.WALL, Tile.BED, Tile.STATION, Tile.DESK, Tile.STALL, Tile.CELLAR, Tile.COOLER, Tile.SMOKEHOUSE, Tile.FURNACE]
+const BLOCKING := [Tile.TREE, Tile.WATER, Tile.HOUSE, Tile.WALL, Tile.BED, Tile.STATION, Tile.DESK, Tile.STALL, Tile.CELLAR, Tile.COOLER, Tile.SMOKEHOUSE, Tile.FURNACE, Tile.CAMP]
 
 const TILE_COLORS := {
 	Tile.TREE: Color("2f4f2f"),
@@ -448,6 +454,7 @@ const TILE_COLORS := {
 	Tile.SMOKEHOUSE: Color("9a5a3a"),
 	Tile.FURNACE: Color("5c5c66"),
 	Tile.PORTAL: Color("6a4fc0"),
+	Tile.CAMP: Color("d07a30"),
 }
 
 const BUSH_COLOR := Color("3d6b2a")
@@ -459,6 +466,7 @@ enum Zone { HOMESTEAD, VILLAGE, ASHFORD, WILDS }
 
 var map: Array = []                 # farm tiles, [y][x]
 var world := PackedByteArray()      # the whole land, index y * WORLD_W + x
+var campsite := NO_CAMP             # the one campsite, in world tiles
 
 var interior: Array = []            # house tiles, [y][x], local to INT_ORIGIN
 var crops := {}                     # Vector2i world tile -> {"stage": int, "kind": String}
@@ -582,7 +590,7 @@ func _process(delta: float) -> void:
 	_update_foes(delta)
 	_update_shots(delta)
 	_update_region()
-	if _in_village() and current_hour >= STALL_CLOSE_HOUR:
+	if _in_village() and current_hour >= STALL_CLOSE_HOUR and not _at_campsite():
 		_go_home("Night falls. You are driven back to the homestead.")
 	fish_layer.visible = zone == Zone.HOMESTEAD
 
@@ -987,6 +995,9 @@ func _on_panel_action(action_id: String) -> void:
 	if action_id.begins_with("smelt:"):
 		_smelt(action_id.trim_prefix("smelt:"))
 		return
+	if action_id == "camp":
+		_place_campsite()
+		return
 	if action_id == "build_furnace":
 		_build_furnace()
 		return
@@ -1167,6 +1178,16 @@ func _gear_rows() -> Array:
 			"action": "advance_lantern",
 			"enabled": _can_advance_lantern(),
 		})
+	if _in_village():
+		rows.append({"section": "Campsite"})
+		rows.append({
+			"name": "Set up camp here",
+			"value": "%d wood, %d fiber, Bushcrafting %d. Face open ground." % [int(CAMP_COST["wood"]), int(CAMP_COST["fiber"]), CAMP_LEVEL],
+			"button": "Camp",
+			"action": "camp",
+			"enabled": _can_camp(),
+		})
+		rows.append({"note": "A campsite is safe from foes. Rest there from 18:00 like a bed. It saves the game and ends the day. Setting up a new camp moves the old one."})
 	rows.append({"section": "Tools"})
 	for kind in ["hatchet", "pick"]:
 		var tiers: Array = TOOL_TIERS[kind]
@@ -2392,6 +2413,59 @@ func _stamp_village(origin: Vector2i, local: Array) -> void:
 			world[(origin.y + y) * WORLD_W + origin.x + x] = k
 
 
+# --- Campsites ----------------------------------------------------------------
+
+func _can_camp() -> bool:
+	return _level("Bushcrafting") >= CAMP_LEVEL and _has_materials(CAMP_COST)
+
+
+func _place_campsite() -> void:
+	if not _in_village():
+		_show_message("A campsite goes in the wider land, away from the homestead.")
+		return
+	var tile := _tile_in_front()
+	var kind := _kind_at(tile)
+	if (kind != Tile.GRASS and kind != Tile.PATH) or _npc_index(tile) != -1:
+		_show_message("Face open ground to set up camp.")
+		return
+	if not _can_camp():
+		_show_message("You need %d wood, %d fiber, and Bushcrafting %d to set up camp." % [int(CAMP_COST["wood"]), int(CAMP_COST["fiber"]), CAMP_LEVEL])
+		return
+	for mat in CAMP_COST.keys():
+		materials[mat] -= int(CAMP_COST[mat])
+	if campsite != NO_CAMP:
+		world[campsite.y * WORLD_W + campsite.x] = Tile.GRASS
+	campsite = tile
+	_apply_campsite()
+	_grant_xp("Bushcrafting", 15)
+	_save_game()
+	_show_message("You set up camp. Rest there from 18:00. +15 Bushcrafting XP")
+	queue_redraw()
+
+
+func _apply_campsite() -> void:
+	if campsite != NO_CAMP:
+		world[campsite.y * WORLD_W + campsite.x] = Tile.CAMP
+
+
+func _near_campsite(tile: Vector2i) -> bool:
+	return campsite != NO_CAMP and Vector2(tile - campsite).length() <= CAMP_SAFE_RADIUS
+
+
+func _at_campsite() -> bool:
+	return _in_village() and _near_campsite(_player_tile())
+
+
+# Resting at the campsite works like sleeping in the bed, but the world is kept.
+func _rest_at_camp() -> void:
+	if current_hour < SLEEP_HOUR:
+		_show_message("You aren't tired yet. You can rest at the camp after 18:00.")
+		return
+	stats["slept"] += 1
+	_change_sanity(SLEEP_SANITY)
+	_end_day("You rest by the campsite through the night.", false)
+
+
 # --- Slot grids for the pack, seed pouch, and equipment ---------------------
 
 func _pack_cells() -> Array:
@@ -2565,6 +2639,9 @@ func _interact_village() -> void:
 	if zone == Zone.ASHFORD and quarry.has(_tile_in_front()):
 		_quarry(_tile_in_front())
 		return
+	if campsite != NO_CAMP and _tile_in_front() == campsite:
+		_rest_at_camp()
+		return
 	_swing()
 
 
@@ -2715,10 +2792,12 @@ func _move_foe(foe: Dictionary, step: Vector2) -> void:
 
 func _foe_free(p: Vector2) -> bool:
 	var t := Vector2i(floori(p.x / PX), floori(p.y / PX))
-	return not BLOCKING.has(_kind_at(t)) and _npc_index(t) == -1
+	return not BLOCKING.has(_kind_at(t)) and _npc_index(t) == -1 and not _near_campsite(t)
 
 
 func _foe_attack(foe: Dictionary) -> void:
+	if _at_campsite():
+		return
 	if invuln > 0.0:
 		return
 	var st: Dictionary = FOES[foe["kind"]]
@@ -3109,7 +3188,8 @@ func _trigger_night_event() -> void:
 
 # Ends the day and saves. Both sleeping and collapsing come through here.
 func _end_day(base: String, leave_house: bool = true) -> void:
-	if _in_village():
+	# Resting at a campsite keeps you in the wider land. Everywhere else in the world sends you home.
+	if _in_village() and not _at_campsite():
 		_go_home("")
 	hp = max_hp()
 	if inside and leave_house:
@@ -3209,6 +3289,7 @@ func _save_game() -> void:
 		"quests_done": quests_done,
 		"zone": zone,
 		"world_version": 1,
+		"campsite": [campsite.x, campsite.y],
 		"hp": hp,
 		"guardian_done": guardian_done,
 		"equipment": equipment,
@@ -3281,6 +3362,10 @@ func _load_game() -> bool:
 	smokehouse_built = bool(data.get("smokehouse_built", false))
 	furnace_built = bool(data.get("furnace_built", false))
 	saved_zone = int(data.get("zone", 0)) if int(data.get("world_version", 0)) >= 1 else 0
+	var saved_camp: Variant = data.get("campsite", null)
+	if typeof(saved_camp) == TYPE_ARRAY and saved_camp.size() == 2:
+		campsite = Vector2i(int(saved_camp[0]), int(saved_camp[1]))
+		_apply_campsite()
 	hp = int(data.get("hp", BASE_HP))
 	guardian_done = data.get("guardian_done", {})
 	var saved_eq: Variant = data.get("equipment", {})

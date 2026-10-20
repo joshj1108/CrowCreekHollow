@@ -214,7 +214,7 @@ Achievements track stats and never reset. Each pays a small reward. Earning all 
 - The **world is 768 by 912 tiles**, generated from a fixed seed with forest, lakes, and open ground. Its edge is a line of trees.
 - **Lowmere** and **Ashford** are stamped into the world along a road. The road runs from the portal, through Lowmere, and east to Ashford.
 - You enter each village by walking into its area, and that sets its region. Hollows gather in Lowmere, and stalkers wait on the Ashford road. The open land has no foes yet.
-- **Night:** from 18:00 the world sends you back to the homestead. The campsite exception comes later.
+- **Night:** from 18:00 the world sends you back to the homestead, unless you are at your campsite.
 - The world draws only the tiles near the camera, so the full size stays fast.
 
 
@@ -268,16 +268,16 @@ Quests in the Quests panel, under Guardian of Lowmere, run in order:
 
 Later: more villages and roads, more creatures, and guardian quests that need combat or exploration. Defense stacks across slots, so a full set can turn most hits into single points of damage. That needs a playtest before it is tuned.
 
-## The world (planned)
+## Campsites
 
-- **Size:** the world is 768 by 912 tiles, the same as the full RuneScape Classic map (16 by 19 sectors of 48 tiles). It is at the same tile scale as the farm.
-- **The farm is separate.** The homestead stays a self-contained base for farming, storage and sleep. The rest of the land is the world, and you travel between them through a **portal**.
-- **Our own map.** The world is generated from a seed, with forest, water, roads and clearings. We don't use Jagex's map data, which we only measured.
-- **Rendering:** the world is stored in chunks, and only the chunks near the camera are drawn, so the full size stays fast.
-- **Villages and roads:** the world is rebuilt to fit Lowmere and Ashford inside the full map. Their layouts can change to suit it.
-- **Nighttime:** the restriction stays. At night you're sent back to the farm, the same as now.
-- **Portal:** on the farm's east side, where the road to Lowmere starts today. Walking through it takes you into the world.
-- **Campsites:** you can build a campsite somewhere in the world from materials. A campsite is completely safe. It saves the game, and you use it the same way as a bed: from 18:00 onward, and it advances the day.
+A campsite lets you stay out in the wider land overnight. It is built, not placed by the map.
+
+- **Setting up:** from the Gear panel's Campsite section, while in the world. Face open ground (grass or path) and press Camp. It costs 4 wood and 3 fiber, needs Bushcrafting 2, and gives 15 Bushcrafting XP.
+- **One at a time:** setting up a new campsite moves your camp. The old tile goes back to grass.
+- **Safe:** foes cannot attack you while you stand at the campsite, and they will not enter within 3 tiles of it.
+- **Resting:** face the campsite and interact with it from 18:00, as you would a bed. It saves the game, advances the day, and keeps you in the wider land. The dusk rule does not send you home from it.
+- **Saved:** the campsite is kept with the game and returns when you load.
+- The homestead keeps its own bed, which still works only at the homestead.
 
 ## Forestry and tools
 
