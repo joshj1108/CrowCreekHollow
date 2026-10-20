@@ -467,6 +467,7 @@ enum Zone { HOMESTEAD, VILLAGE, ASHFORD, WILDS }
 var map: Array = []                 # farm tiles, [y][x]
 var world := PackedByteArray()      # the whole land, index y * WORLD_W + x
 var campsite := NO_CAMP             # the one campsite, in world tiles
+var world_map_tex: Texture2D = null # the whole land as a small picture for the minimap
 
 var interior: Array = []            # house tiles, [y][x], local to INT_ORIGIN
 var crops := {}                     # Vector2i world tile -> {"stage": int, "kind": String}
@@ -927,18 +928,14 @@ func _restore_saved_state() -> void:
 
 func _update_minimap() -> void:
 	if _in_village():
-		# The world is far too big for the minimap, so show the area around the player.
-		var half := 20
-		var center := _player_tile()
-		var rows: Array = []
-		for y in range(center.y - half, center.y + half + 1):
-			var row: Array = []
-			for x in range(center.x - half, center.x + half + 1):
-				row.append(_kind_at(Vector2i(x, y)))
-			rows.append(row)
-		minimap.update_view(rows, TILE_COLORS, [], Vector2(half, half), Vector2i(-1, -1))
+		# In the world the minimap shows the whole land, with the player on it.
+		if world_map_tex == null:
+			_build_world_minimap()
+		_place_minimap(Vector2(WORLD_W, WORLD_H) * Minimap.WORLD_PX_PER_TILE)
+		minimap.update_world(world_map_tex, Vector2i(WORLD_W, WORLD_H), Vector2(_player_tile()) + Vector2(0.5, 0.5))
 		return
 	# Indoors the minimap shows the house, since the player isn't on the farm.
+	_place_minimap(Vector2(MAP_W, MAP_H) * Minimap.PX_PER_TILE)
 	var player_tile: Vector2 = Vector2(HOUSE_DOOR_IX + BORDER_X, HOUSE_DOOR_IY + BORDER_Y) if inside else player.position / PX
 	minimap.update_view(map, TILE_COLORS, brush.keys(), player_tile, tonight_shadow)
 
@@ -2401,16 +2398,48 @@ func _generate_world() -> void:
 	_stamp_village(LOWMERE_ORIGIN, _build_zone_map(VILLAGE_HOUSES, VILLAGE_WATER, 26, true))
 	_stamp_village(ASHFORD_ORIGIN, _build_zone_map(ASHFORD_HOUSES, ASHFORD_WATER, 24, false))
 	world[PORTAL_TILE.y * WORLD_W + PORTAL_TILE.x] = Tile.PORTAL
+	_build_world_minimap()
 
 
-# Copies a village's local tiles into the world. Its gates become road.
+# Copies a village's houses, water, gates and trees into the world. Its open ground and
+# its outer edge are left as the land already is, so the town sits in the forest
+# instead of inside a wall of trees. Its gates become road.
 func _stamp_village(origin: Vector2i, local: Array) -> void:
 	for y in VILLAGE_H:
 		for x in VILLAGE_W:
 			var k: int = local[y][x]
+			var edge := x == 0 or y == 0 or x == VILLAGE_W - 1 or y == VILLAGE_H - 1
 			if k == Tile.GATE:
 				k = Tile.PATH
+			elif k == Tile.GRASS or (k == Tile.TREE and edge):
+				continue
 			world[(origin.y + y) * WORLD_W + origin.x + x] = k
+
+
+# The whole land as a small picture for the minimap: one pixel per 4 tiles, each pixel
+# showing the tile at its centre. Rebuilt when the land changes (the campsite moves).
+func _build_world_minimap() -> void:
+	var step := int(round(1.0 / Minimap.WORLD_PX_PER_TILE))
+	var w := WORLD_W / step
+	var h := WORLD_H / step
+	var img := Image.create(w, h, false, Image.FORMAT_RGBA8)
+	for y in h:
+		for x in w:
+			var k: int = world[(y * step + step / 2) * WORLD_W + x * step + step / 2]
+			var c: Color = TILE_COLORS[k]
+			img.set_pixel(x, y, c)
+	world_map_tex = ImageTexture.create_from_image(img)
+
+
+# Sizes the minimap box for whichever map it is showing. Only changes when needed.
+func _place_minimap(mini_size: Vector2) -> void:
+	if minimap.custom_minimum_size == mini_size:
+		return
+	minimap.custom_minimum_size = mini_size
+	minimap.offset_left = -(mini_size.x + 12.0)
+	minimap.offset_right = -12.0
+	minimap.offset_top = 12.0
+	minimap.offset_bottom = 12.0 + mini_size.y
 
 
 # --- Campsites ----------------------------------------------------------------
@@ -2446,6 +2475,7 @@ func _place_campsite() -> void:
 func _apply_campsite() -> void:
 	if campsite != NO_CAMP:
 		world[campsite.y * WORLD_W + campsite.x] = Tile.CAMP
+		_build_world_minimap()
 
 
 func _near_campsite(tile: Vector2i) -> bool:

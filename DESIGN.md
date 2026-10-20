@@ -212,7 +212,8 @@ Achievements track stats and never reset. Each pays a small reward. Earning all 
 - The farm's **east gate is a portal**. Walking through it takes you into the world, at the portal stone's east side. The portal shuts at 18:00.
 - The **portal stone** in the world takes you back to the homestead.
 - The **world is 768 by 912 tiles**, generated from a fixed seed with forest, lakes, and open ground. Its edge is a line of trees.
-- **Lowmere** and **Ashford** are stamped into the world along a road. The road runs from the portal, through Lowmere, and east to Ashford.
+- **Lowmere** and **Ashford** are stamped into the world along a road. The road runs from the portal, through Lowmere, and east to Ashford. The towns have no walls: their houses, water and gates sit in the forest, and the road goes through their gates.
+- **The minimap** shows the whole land in the world, with you as a dot. On the farm it shows the farm as before.
 - You enter each village by walking into its area, and that sets its region. Hollows gather in Lowmere, and stalkers wait on the Ashford road. The open land has no foes yet.
 - **Night:** from 18:00 the world sends you back to the homestead, unless you are at your campsite.
 - The world draws only the tiles near the camera, so the full size stays fast.
