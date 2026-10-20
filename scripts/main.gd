@@ -1336,6 +1336,10 @@ func _refresh_panel() -> void:
 			rows = _house_rows()
 		"Buildings":
 			rows = _buildings_rows()
+		"Coop":
+			rows = _coop_rows()
+		"Barn":
+			rows = _barn_rows()
 		"Settings":
 			rows = _settings_rows()
 	action_bar.show_panel(open_tab, rows)
@@ -1621,33 +1625,15 @@ func _house_rows() -> Array:
 			row["value"] = "Done"
 		else:
 			row["value"] = str(chore["detail"])
-			row["button"] = chore["button"]
-			row["action"] = chore["action"]
-			row["enabled"] = chore["enabled"]
+			if str(chore["action"]) != "":
+				row["button"] = chore["button"]
+				row["action"] = chore["action"]
+				row["enabled"] = chore["enabled"]
 		rows.append(row)
 	rows.append({"note": "Each chore left undone adds 1 wear overnight. A night with every chore done brings back %d sanity." % WELL_KEPT_SANITY})
 	rows.append({"section": "Upkeep"})
 	rows.append({"name": "Wear", "value": "%d of %d" % [wear, WEAR_MAX], "progress": float(wear) / float(WEAR_MAX)})
 	rows.append({"note": "The house wears a little each night. Mending, tidying, and repairs bring it down. At %d wear, rain ruins a crop overnight. At %d, a fox can get into the coop. A third plot opens at Farming %d once the house is Patched." % [WEAR_RUNDOWN, WEAR_FOX, PLOT_THREE_LEVEL]})
-	rows.append({"section": "Livestock"})
-	if not coop_built:
-		rows.append({"note": "Hens live in a coop. Build one from the Buildings menu, U."})
-	else:
-		rows.append({
-			"name": "Hens",
-			"value": "%d of %d, %d coins each" % [hens, COOP_HENS_MAX, HEN_PRICE],
-			"button": "Buy hen",
-			"action": "buy_hen",
-			"enabled": _can_buy_hen(),
-		})
-		rows.append({
-			"name": "Feed hens",
-			"value": "%d crops, once a day" % (hens * HEN_FEED_CROPS),
-			"button": "Feed",
-			"action": "feed_hens",
-			"enabled": _can_feed_hens(),
-		})
-		rows.append({"note": "A fed hen lays an egg each morning, kept as a meal. Two unfed days in a row and a hen wanders off."})
 	rows.append({"section": "Rest"})
 	rows.append({"note": "The bed is in the bedroom. Walk there and press Space from 18:00 to save and end the day. If you aren't in bed by 03:00 you collapse, and your sanity limit drops permanently."})
 	rows.append({"name": "Sanity limit", "value": "%d of %d" % [_sanity_max(), int(SANITY_MAX)]})
@@ -1688,6 +1674,35 @@ func _house_rows() -> Array:
 			"value": "unlocked" if unlocked else "at %s" % STAGE_NAMES[feature["stage"]],
 		})
 	return rows
+
+
+# The coop panel: the hens are bought and fed here, not from the House panel.
+func _coop_rows() -> Array:
+	var rows: Array = [{"section": "Hens"}]
+	rows.append({
+		"name": "Hens",
+		"value": "%d of %d, %d coins each" % [hens, COOP_HENS_MAX, HEN_PRICE],
+		"button": "Buy hen",
+		"action": "buy_hen",
+		"enabled": _can_buy_hen(),
+	})
+	rows.append({
+		"name": "Feed hens",
+		"value": "%d crops, once a day" % (hens * HEN_FEED_CROPS),
+		"button": "Feed",
+		"action": "feed_hens",
+		"enabled": _can_feed_hens(),
+	})
+	rows.append({"note": "A fed hen lays an egg each morning, kept as a meal. Two unfed days in a row and a hen wanders off."})
+	return rows
+
+
+# The barn panel. Livestock aren't in the game yet, so for now it only says so.
+func _barn_rows() -> Array:
+	return [
+		{"section": "Livestock"},
+		{"note": "The barn is for livestock. Livestock are still to come, so for now it simply stands."},
+	]
 
 
 # The Buildings menu: the workshop, the coop, and the barn. Each one is placed on open grass.
@@ -1880,10 +1895,10 @@ func _interact() -> void:
 		_open_stall()
 		return
 	if kind == Tile.COOP:
-		_feed_hens()
+		_toggle_tab("Coop")
 		return
 	if kind == Tile.BARN:
-		_show_message("The barn is for livestock, which are still to come.")
+		_toggle_tab("Barn")
 		return
 	if kind == Tile.CELLAR:
 		_toggle_tab("Cellar")
@@ -4101,7 +4116,7 @@ func _confirm_placement() -> void:
 	if kind == "barn":
 		_show_message("The barn stands here now. Livestock will be kept here when they arrive.")
 	else:
-		_show_message("The coop stands here now. Stand beside it, facing it, and press Space to feed the hens.")
+		_show_message("The coop stands here now. Stand beside it, facing it, and press Space to tend the hens.")
 
 
 # A spot fits when all of its tiles are open grass, clear of crops, rocks, brush, fishing spots, and you.
@@ -4166,7 +4181,7 @@ func _chore_list() -> Array:
 	chores.append({"name": "Tidy the house", "detail": "+%d XP, once a day" % XP_TIDY, "done": tidied_day == day, "button": "Tidy", "action": "tidy", "enabled": _can_tidy()})
 	chores.append({"name": "Mend a board", "detail": "%d wood, %d fiber, +%d XP. %d left today" % [MEND_WOOD, MEND_FIBER, XP_MEND, _mends_left()], "done": mend_day == day and mends_today > 0, "button": "Mend", "action": "mend", "enabled": _can_mend()})
 	if hens > 0:
-		chores.append({"name": "Feed the hens", "detail": "%d crops" % (hens * HEN_FEED_CROPS), "done": hens_fed_day == day, "button": "Feed", "action": "feed_hens", "enabled": _can_feed_hens()})
+		chores.append({"name": "Feed the hens", "detail": "at the coop, %d crops" % (hens * HEN_FEED_CROPS), "done": hens_fed_day == day, "button": "", "action": "", "enabled": false})
 	return chores
 
 

@@ -396,11 +396,11 @@ A cave on the homestead, entered from the farm's west edge. It is the only place
 
 Keeping the homestead running is the daily work. Each part is at base level for now, to be deepened one project at a time.
 
-- **Chores:** each day has a short list, shown at the top of the House panel. Tidy the house and mend a board every day. Feed the hens too, once you have any. Each chore left undone adds 1 wear overnight. A night with every chore done brings back 5 sanity.
+- **Chores:** each day has a short list, shown at the top of the House panel. Tidy the house and mend a board every day. Once you have hens, feeding them is listed too, but it is done at the coop. Each chore left undone adds 1 wear overnight. A night with every chore done brings back 5 sanity.
 - **Wear:** the house wears by 1 each night, plus 1 for each chore left undone, up to 10. Mending a board takes 2 off, a tidy takes 1, and a repair takes 3. At wear 6 or more, rain ruins a random crop overnight. The Upkeep section of the House panel shows it.
 - **Buildings menu (U):** the workshop, the coop, and the barn are built and moved from here, not from the House panel. Each one is placed the same way: building it starts placement, a green or red preview follows the tile you face, and Space places it on open grass. A spot can't cover plots, crops, rocks, brush, fishing spots, or you. B cancels. The Move button relocates a standing building for free. A building that was paid for but never placed (older saves) shows Place instead.
-- **Coop:** 6 wood, 4 fiber, and Carpentry 2. A 2 by 2 building. Stand beside the coop, facing it, and press Space to feed the hens. The hens wander inside it, walking to a spot, pausing, and walking on.
-- **Barn:** 10 wood, 6 fiber, and Carpentry 4. A 3 by 2 building of red boards, for livestock. Livestock aren't in the game yet, so for now it simply stands. It is separate from the coop and doesn't change how many hens the coop holds.
+- **Coop:** 6 wood, 4 fiber, and Carpentry 2. A 2 by 2 building. Stand beside the coop, facing it, and press Space to open its panel, where you buy and feed the hens. The hens wander inside it, walking to a spot, pausing, and walking on.
+- **Barn:** 10 wood, 6 fiber, and Carpentry 4. A 3 by 2 building of red boards. Stand beside it, facing it, and press Space to open its panel. Livestock aren't in the game yet, so for now the panel only says so. It is separate from the coop and doesn't change how many hens the coop holds.
 - **Hens:** 12 coins each, up to four in the coop. Feed them once a day from your crops (1 crop per hen). Each fed hen lays an egg overnight, which goes into your pack as a meal, as far as there is room. Two unfed days in a row and a hen wanders off.
 - **Predators:** at wear 4 or more, a fox can get into the coop on a given night and take a hen.
 - **Third plot:** opens at Farming 4 once the house is Patched. It sits between the two paths, south of the first plot.
