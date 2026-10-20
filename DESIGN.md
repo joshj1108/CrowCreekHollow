@@ -233,7 +233,7 @@ Combat happens while you move, in the style of Stardew Valley.
 
 ## Gear and crafting
 
-The Gear panel has nine slots: Back (your bag), Head, Neck, Left hand (lantern), Chest, Right hand (weapon), Wrist, Legs, and Feet. Every slot takes gear now.
+The Gear panel has ten slots in four columns: Back (your bag), Head, Neck, Belt (lantern), Off hand (shield), Chest, Main hand (weapon), Wrist, Legs, and Feet. The lantern hangs from the belt, so the offhand is free for a shield.
 
 Gear is crafted from the Gear panel with wood, fiber, and resin. Crafting equips the piece at once and replaces whatever was in that slot.
 

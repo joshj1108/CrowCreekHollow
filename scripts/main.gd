@@ -446,7 +446,7 @@ var swing_cool := 0.0
 var swing_time := 0.0
 var swing_dir := Vector2.DOWN
 var invuln := 0.0
-var equipment := {"hand_r": "hoe", "head": "", "neck": "", "chest": "", "wrist": "", "legs": "", "feet": ""}
+var equipment := {"hand_r": "hoe", "offhand": "", "head": "", "neck": "", "chest": "", "wrist": "", "legs": "", "feet": ""}
 
 # Set by loading, applied once the world exists.
 var saved_pos := Vector2.ZERO
@@ -1043,7 +1043,7 @@ func _inventory_rows() -> Array:
 func _gear_rows() -> Array:
 	var rows: Array = [
 		{"section": "Equipped"},
-		{"grid": _gear_cells(), "columns": 3},
+		{"grid": _gear_cells(), "columns": 4},
 		{"section": "Lantern"},
 	]
 	if lantern_tier == 0:
@@ -1973,22 +1973,22 @@ func _seed_cells() -> Array:
 	]
 
 
-# Nine slots in three rows: back, head, neck / left hand, chest, right hand /
-# wrist, legs, feet. The bag sits in Back, the lantern in the left hand, and
-# the hoe in the right hand. Every slot takes gear.
+# Ten slots in four columns. The top row holds the back, head, neck, and belt.
+# The lantern hangs from the belt, so the offhand is free for a shield.
 func _gear_cells() -> Array:
 	var bag_name := "Pack" if bag_tier == 0 else str(BAG_TIERS[bag_tier - 1]["name"])
-	var lantern: Dictionary = {"empty": true, "label": "Left hand", "tip": "Left hand: no lantern built yet"}
+	var lantern: Dictionary = {"empty": true, "label": "Belt", "tip": "Belt: no lantern built yet"}
 	if lantern_tier > 0:
 		var current: Dictionary = LANTERN_TIERS[lantern_tier - 1]
-		lantern = {"color": "ffd38a", "label": current["name"], "tip": "Left hand: %s, ring %.1f tiles" % [current["name"], current["radius"]]}
+		lantern = {"color": "ffd38a", "label": current["name"], "tip": "Belt: %s, ring %.1f tiles" % [current["name"], current["radius"]]}
 	return [
 		{"color": "7a5a3a", "label": bag_name, "tip": "Back: %s, %d pack slots" % [bag_name, _pack_capacity()]},
 		_slot_cell("head", "Head"),
 		_slot_cell("neck", "Neck"),
 		lantern,
+		_slot_cell("offhand", "Off hand"),
 		_slot_cell("chest", "Chest"),
-		_slot_cell("hand_r", "Right hand"),
+		_slot_cell("hand_r", "Main hand"),
 		_slot_cell("wrist", "Wrist"),
 		_slot_cell("legs", "Legs"),
 		_slot_cell("feet", "Feet"),
