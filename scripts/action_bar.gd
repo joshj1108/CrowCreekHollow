@@ -10,6 +10,7 @@ signal tab_pressed(tab_name: String)
 var menu_frame: PanelContainer
 # Sections in these menus fold away, so a long list shows only its headings until one is opened.
 const COLLAPSIBLE_TABS := ["Settings"]
+const ALWAYS_OPEN_SECTIONS := ["Game"]   # sections that never fold, so their options are always visible
 var collapsed_sections := {}   # "tab|section" -> true while folded (folded is the default)
 var _last_tab := ""
 var _last_rows: Array = []
@@ -272,6 +273,11 @@ func _with_folds(tab: String, rows: Array) -> Array:
 		for item in group:
 			if not item.has("note"):
 				items += 1
+		if ALWAYS_OPEN_SECTIONS.has(str(row["section"])):
+			out.append(row)
+			out.append_array(group)
+			i = j
+			continue
 		var key := "%s|%s" % [tab, str(row["section"])]
 		var folded := bool(collapsed_sections.get(key, true))
 		out.append({"section_toggle": str(row["section"]), "key": key, "count": items, "folded": folded})

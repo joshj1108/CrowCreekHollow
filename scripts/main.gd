@@ -1732,7 +1732,7 @@ func _refresh_panel() -> void:
 		"Barn":
 			rows = _barn_rows()
 		"Settings":
-			rows = _settings_rows() + _game_rows() + _tip_rows()
+			rows = _settings_rows() + _tip_rows() + _game_rows()
 	action_bar.show_panel(open_tab, rows)
 
 
