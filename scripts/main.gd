@@ -104,6 +104,17 @@ const CELLAR_COST := {"wood": 4, "fiber": 2, "coins": 25, "level": 1}
 const COOLER_COST := {"wood": 4, "fiber": 4, "coins": 40, "level": 2}
 const CELLAR_IX := Vector2i(24, 7)   # farm tiles, local to the farm, beside the house
 const COOLER_IX := Vector2i(33, 7)
+const SMOKEHOUSE_IX := Vector2i(34, 4)
+const SMOKEHOUSE_COST := {"wood": 5, "fiber": 3, "coins": 60, "level": 3}
+# Preserving turns food into goods that keep in the pack. Each method needs a skill
+# level and makes one item per press at the smokehouse.
+const PRESERVED_KINDS := ["smoked", "dried", "canned", "fermented"]
+const PRESERVE := [
+	{"id": "smoke", "kind": "smoked", "short": "Smoked", "name": "Smoke a fish", "input": "fish", "count": 1, "wood": 1, "fiber": 0, "skill": "Cooking", "level": 2, "xp": 12, "price": 11, "color": "b5703a"},
+	{"id": "dry", "kind": "dried", "short": "Dried", "name": "Dry crops", "input": "crops", "count": 2, "wood": 0, "fiber": 0, "skill": "Farming", "level": 2, "xp": 10, "price": 9, "color": "d8c48a"},
+	{"id": "can", "kind": "canned", "short": "Canned", "name": "Can crops", "input": "crops", "count": 2, "wood": 0, "fiber": 1, "skill": "Cooking", "level": 3, "xp": 14, "price": 10, "color": "9fb7c9"},
+	{"id": "ferment", "kind": "fermented", "short": "Fermented", "name": "Ferment crops", "input": "crops", "count": 2, "wood": 1, "fiber": 0, "skill": "Cooking", "level": 4, "xp": 16, "price": 11, "color": "a6c26a"},
+]
 # The stall sells what you carry and buys seeds. It is open 06:00 to 18:00.
 const STALL_IX := 22
 const STALL_IY := 9
@@ -164,6 +175,10 @@ const GEAR_ITEMS := {
 	"fiber_wraps": {"name": "Fiber wraps", "slot": "wrist", "dmg": 0, "def": 1, "level": 1, "cost": {"fiber": 3}},
 	"bark_wrap": {"name": "Bark wrap", "slot": "chest", "dmg": 0, "def": 2, "level": 3, "cost": {"wood": 3, "fiber": 3}},
 	"bark_boots": {"name": "Bark boots", "slot": "feet", "dmg": 0, "def": 1, "level": 3, "cost": {"wood": 2, "fiber": 2}},
+	"twine_collar": {"name": "Twine collar", "slot": "neck", "dmg": 0, "def": 1, "level": 2, "cost": {"fiber": 3}},
+	"resin_amulet": {"name": "Resin amulet", "slot": "neck", "dmg": 0, "def": 2, "level": 5, "cost": {"resin": 3, "fiber": 2}},
+	"reed_leggings": {"name": "Reed leggings", "slot": "legs", "dmg": 0, "def": 1, "level": 1, "cost": {"fiber": 4}},
+	"bark_greaves": {"name": "Bark greaves", "slot": "legs", "dmg": 0, "def": 2, "level": 4, "cost": {"wood": 3, "fiber": 3}},
 }
 const NPCS := [
 	{"id": "mara", "name": "Mara the Reeve", "pos": Vector2i(8, 9), "color": "e0c48c", "lines": [
@@ -343,9 +358,9 @@ const NIGHT_EVENTS := [
 	{"message": "The field is quiet tonight. Too quiet.", "shadow": "none", "sanity": -3},
 ]
 
-enum Tile { TREE, GRASS, SOIL, PATH, WATER, HOUSE, DOOR, FLOOR, WALL, EXIT, BED, STATION, DESK, FALLOW, STALL, CELLAR, COOLER, GATE }
+enum Tile { TREE, GRASS, SOIL, PATH, WATER, HOUSE, DOOR, FLOOR, WALL, EXIT, BED, STATION, DESK, FALLOW, STALL, CELLAR, COOLER, GATE, SMOKEHOUSE }
 
-const BLOCKING := [Tile.TREE, Tile.WATER, Tile.HOUSE, Tile.WALL, Tile.BED, Tile.STATION, Tile.DESK, Tile.STALL, Tile.CELLAR, Tile.COOLER]
+const BLOCKING := [Tile.TREE, Tile.WATER, Tile.HOUSE, Tile.WALL, Tile.BED, Tile.STATION, Tile.DESK, Tile.STALL, Tile.CELLAR, Tile.COOLER, Tile.SMOKEHOUSE]
 
 const TILE_COLORS := {
 	Tile.TREE: Color("2f4f2f"),
@@ -366,6 +381,7 @@ const TILE_COLORS := {
 	Tile.CELLAR: Color("a88ad0"),
 	Tile.COOLER: Color("7fc4e0"),
 	Tile.GATE: Color("8f7a4f"),
+	Tile.SMOKEHOUSE: Color("9a5a3a"),
 }
 
 const BUSH_COLOR := Color("3d6b2a")
@@ -391,12 +407,12 @@ var clock := 0.0
 var current_hour := START_HOUR
 var day := 1
 var skill_xp := {"Farming": 0, "Bushcrafting": 0, "Carpentry": 0, "Cleaning": 0, "Fishing": 0, "Cooking": 0, "Combat": 0}
-var inventory := {"seeds": STARTING_SEEDS, "pumpkin_seeds": 0, "crops": 0, "fish": 0, "meals": 0}
+var inventory := {"seeds": STARTING_SEEDS, "pumpkin_seeds": 0, "crops": 0, "fish": 0, "meals": 0, "smoked": 0, "dried": 0, "canned": 0, "fermented": 0}
 var materials := {"wood": 0, "fiber": 0, "resin": 0}
 var stats := {"planted": 0, "harvested": 0, "gathered": 0, "slept": 0, "tidied": 0,
 	"fished": 0, "caught": 0, "mended": 0, "cleansed": 0, "cooked": 0, "eaten": 0,
 	"pumpkins": 0, "collapses": 0, "events": 0, "sold": 0, "spoiled": 0,
-	"talks": 0, "defeated": 0, "delivered": 0, "stalkers": 0, "visited": 0, "crops_given": 0}
+	"talks": 0, "defeated": 0, "delivered": 0, "stalkers": 0, "visited": 0, "crops_given": 0, "preserved": 0}
 var achievements_done := {}     # achievement id -> true
 var quests_done := {}               # quest id -> true
 var selected_seed := "turnip"
@@ -418,6 +434,7 @@ var money := 0
 var bag_tier := 0               # bag upgrades bought
 var cellar_built := false
 var cooler_built := false
+var smokehouse_built := false
 var cellar_stock := 0          # crops in the root cellar
 var cooler_stock := 0          # fish in the cooler
 var zone: int = Zone.HOMESTEAD
@@ -526,9 +543,9 @@ func _draw() -> void:
 			var tile: int = map[y][x]
 			var cell := _tile_rect(Vector2i(x, y))
 			draw_rect(cell, TILE_COLORS[tile])
-			if tile == Tile.CELLAR or tile == Tile.COOLER:
+			if tile == Tile.CELLAR or tile == Tile.COOLER or tile == Tile.SMOKEHOUSE:
 				draw_rect(cell, Color(1, 1, 1, 0.8), false, 2.0)
-				var label := "Cooler" if tile == Tile.COOLER else "Cellar"
+				var label := _storage_label(tile)
 				draw_string(ThemeDB.fallback_font, cell.position + Vector2(2, PX * 0.6), label, HORIZONTAL_ALIGNMENT_LEFT, -1, 11, Color(0.05, 0.03, 0.02))
 
 	for y in INT_H:
@@ -671,6 +688,8 @@ func _apply_storage_tiles() -> void:
 		map[CELLAR_IX.y + BORDER_Y][CELLAR_IX.x + BORDER_X] = Tile.CELLAR
 	if cooler_built:
 		map[COOLER_IX.y + BORDER_Y][COOLER_IX.x + BORDER_X] = Tile.COOLER
+	if smokehouse_built:
+		map[SMOKEHOUSE_IX.y + BORDER_Y][SMOKEHOUSE_IX.x + BORDER_X] = Tile.SMOKEHOUSE
 	queue_redraw()
 
 
@@ -860,6 +879,15 @@ func _close_panel() -> void:
 
 
 func _on_panel_action(action_id: String) -> void:
+	if action_id.begins_with("preserve:"):
+		_preserve(action_id.trim_prefix("preserve:"))
+		return
+	if action_id.begins_with("sell:"):
+		_sell(action_id.trim_prefix("sell:"))
+		return
+	if action_id == "build_smokehouse":
+		_build_smokehouse()
+		return
 	if action_id.begins_with("craft:"):
 		_craft_gear(action_id.trim_prefix("craft:"))
 		return
@@ -929,6 +957,8 @@ func _refresh_panel() -> void:
 			rows = _cellar_rows()
 		"Cooler":
 			rows = _cooler_rows()
+		"Smokehouse":
+			rows = _smokehouse_rows()
 		"House":
 			rows = _house_rows()
 		"Settings":
@@ -968,7 +998,7 @@ func _inventory_rows() -> Array:
 			"action": "upgrade_bag",
 			"enabled": _can_upgrade_bag(),
 		})
-	rows.append({"note": "Crops, fish, and meals fill the pack. Seeds have their own pouch, and materials are uncapped for now."})
+	rows.append({"note": "Crops, fish, meals, and preserved goods fill the pack. Seeds have their own pouch, and materials are uncapped for now."})
 	rows.append({"section": "Seed pouch"})
 	rows.append({"grid": _seed_cells(), "columns": 5})
 	rows.append({"section": "Planting"})
@@ -1159,6 +1189,16 @@ func _house_rows() -> Array:
 			"action": "build_cooler",
 			"enabled": _can_afford(COOLER_COST),
 		})
+	if smokehouse_built:
+		rows.append({"name": "Smokehouse", "value": "built. Stand beside it, facing it, and press Space to preserve food."})
+	else:
+		rows.append({
+			"name": "Build a smokehouse (smokes and preserves food)",
+			"value": _price_text(SMOKEHOUSE_COST),
+			"button": "Build",
+			"action": "build_smokehouse",
+			"enabled": _can_afford(SMOKEHOUSE_COST),
+		})
 	rows.append({"section": "Features"})
 	for feature in HOUSE_FEATURES:
 		var unlocked: bool = house_stage >= feature["stage"]
@@ -1265,6 +1305,9 @@ func _interact() -> void:
 		return
 	if kind == Tile.COOLER:
 		_toggle_tab("Cooler")
+		return
+	if kind == Tile.SMOKEHOUSE:
+		_toggle_tab("Smokehouse")
 		return
 	if kind == Tile.FALLOW:
 		_show_message("Overgrown. Reach Farming level 2 to clear this plot.")
@@ -1541,7 +1584,10 @@ func _achievement_row(a: Dictionary) -> Dictionary:
 # --- Pack and bags -----------------------------------------------------------
 
 func _pack_used() -> int:
-	return int(inventory["crops"]) + int(inventory["fish"]) + int(inventory["meals"])
+	var used := int(inventory["crops"]) + int(inventory["fish"]) + int(inventory["meals"])
+	for kind in PRESERVED_KINDS:
+		used += int(inventory[kind])
+	return used
 
 
 func _pack_capacity() -> int:
@@ -1615,6 +1661,9 @@ func _sell(kind: String) -> void:
 		price = SELL_FISH
 	elif kind == "meals":
 		price = SELL_MEAL
+	for entry in PRESERVE:
+		if entry["kind"] == kind:
+			price = int(entry["price"])
 	inventory[kind] = 0
 	money += count * price
 	stats["sold"] += count
@@ -1731,6 +1780,7 @@ func _trade_rows() -> Array:
 			"action": "sell_meals",
 			"enabled": int(inventory["meals"]) > 0,
 		},
+		] + _preserved_sell_rows() + [
 		{"section": "Buy seeds"},
 		{
 			"name": "Turnip seeds (%d each)" % SEED_TURNIP_PRICE,
@@ -1802,6 +1852,102 @@ func _cooler_rows() -> Array:
 	]
 
 
+# --- Smokehouse and preserving ---------------------------------------------
+
+func _build_smokehouse() -> void:
+	if not _can_afford(SMOKEHOUSE_COST):
+		_show_message("You can't build that yet. Needs %s." % _price_text(SMOKEHOUSE_COST))
+		return
+	_pay(SMOKEHOUSE_COST)
+	smokehouse_built = true
+	_build_interior()
+	_show_message("The smokehouse is built beside the house. Smoke fish and preserve crops there.")
+	queue_redraw()
+
+
+func _can_preserve(entry: Dictionary) -> bool:
+	if not smokehouse_built:
+		return false
+	if _level(str(entry["skill"])) < int(entry["level"]):
+		return false
+	if int(inventory[entry["input"]]) < int(entry["count"]):
+		return false
+	if int(materials["wood"]) < int(entry["wood"]):
+		return false
+	return int(materials["fiber"]) >= int(entry["fiber"])
+
+
+func _preserve(id: String) -> void:
+	if not smokehouse_built:
+		_show_message("Build a smokehouse from the House panel first.")
+		return
+	var entry: Dictionary = {}
+	for e in PRESERVE:
+		if e["id"] == id:
+			entry = e
+	if entry.is_empty():
+		return
+	if not _can_preserve(entry):
+		_show_message("You need %d %s, the materials, and %s %d." % [int(entry["count"]), entry["input"], entry["skill"], int(entry["level"])])
+		return
+	inventory[entry["input"]] -= int(entry["count"])
+	materials["wood"] -= int(entry["wood"])
+	materials["fiber"] -= int(entry["fiber"])
+	inventory[entry["kind"]] += 1
+	stats["preserved"] += 1
+	_grant_xp(str(entry["skill"]), int(entry["xp"]))
+	_show_message("You make a %s. +%d %s XP" % [str(entry["short"]).to_lower(), int(entry["xp"]), entry["skill"]])
+
+
+func _smokehouse_rows() -> Array:
+	var rows: Array = [
+		{"section": "Smokehouse"},
+		{"note": "Preserved goods keep in your pack, so nothing spoils. Stand beside the smokehouse, facing it, and press Space to open this panel."},
+	]
+	for entry in PRESERVE:
+		var needs: Array = ["%d %s" % [int(entry["count"]), entry["input"]]]
+		if int(entry["wood"]) > 0:
+			needs.append("%d wood" % int(entry["wood"]))
+		if int(entry["fiber"]) > 0:
+			needs.append("%d fiber" % int(entry["fiber"]))
+		rows.append({
+			"name": "%s (%s)" % [entry["name"], ", ".join(needs)],
+			"value": "%s %d, +%d XP, sells %d" % [entry["skill"], int(entry["level"]), int(entry["xp"]), int(entry["price"])],
+			"button": "Make",
+			"action": "preserve:" + str(entry["id"]),
+			"enabled": _can_preserve(entry),
+		})
+	rows.append({
+		"name": "Held",
+		"value": "smoked %d, dried %d, canned %d, fermented %d" % [int(inventory["smoked"]), int(inventory["dried"]), int(inventory["canned"]), int(inventory["fermented"])],
+	})
+	return rows
+
+
+func _preserved_sell_rows() -> Array:
+	var rows: Array = []
+	for entry in PRESERVE:
+		var held := int(inventory[entry["kind"]])
+		if held <= 0:
+			continue
+		rows.append({
+			"name": "%s (%d each)" % [entry["short"], int(entry["price"])],
+			"value": "%d held" % held,
+			"button": "Sell all",
+			"action": "sell:" + str(entry["kind"]),
+			"enabled": true,
+		})
+	return rows
+
+
+func _storage_label(tile: int) -> String:
+	if tile == Tile.COOLER:
+		return "Cooler"
+	if tile == Tile.SMOKEHOUSE:
+		return "Smoke"
+	return "Cellar"
+
+
 # --- Slot grids for the pack, seed pouch, and equipment ---------------------
 
 func _pack_cells() -> Array:
@@ -1812,6 +1958,9 @@ func _pack_cells() -> Array:
 		cells.append({"color": "6fb8d9", "label": "Fish", "tip": "Fish. Spoils overnight unless stored in the cooler."})
 	for i in int(inventory["meals"]):
 		cells.append({"color": "e0a050", "label": "Meal", "tip": "Cooked meal. Eat it for sanity."})
+	for entry in PRESERVE:
+		for _i in int(inventory[entry["kind"]]):
+			cells.append({"color": entry["color"], "label": entry["short"], "tip": "%s. Keeps in the pack." % entry["short"]})
 	while cells.size() < _pack_capacity():
 		cells.append({"empty": true, "tip": "Empty slot"})
 	return cells
@@ -1826,7 +1975,7 @@ func _seed_cells() -> Array:
 
 # Nine slots in three rows: back, head, neck / left hand, chest, right hand /
 # wrist, legs, feet. The bag sits in Back, the lantern in the left hand, and
-# the hoe in the right hand. The rest are locked until they have items.
+# the hoe in the right hand. Every slot takes gear.
 func _gear_cells() -> Array:
 	var bag_name := "Pack" if bag_tier == 0 else str(BAG_TIERS[bag_tier - 1]["name"])
 	var lantern: Dictionary = {"empty": true, "label": "Left hand", "tip": "Left hand: no lantern built yet"}
@@ -1836,12 +1985,12 @@ func _gear_cells() -> Array:
 	return [
 		{"color": "7a5a3a", "label": bag_name, "tip": "Back: %s, %d pack slots" % [bag_name, _pack_capacity()]},
 		_slot_cell("head", "Head"),
-		{"locked": true, "label": "Neck", "tip": "Not available yet"},
+		_slot_cell("neck", "Neck"),
 		lantern,
 		_slot_cell("chest", "Chest"),
 		_slot_cell("hand_r", "Right hand"),
 		_slot_cell("wrist", "Wrist"),
-		{"locked": true, "label": "Legs", "tip": "Not available yet"},
+		_slot_cell("legs", "Legs"),
 		_slot_cell("feet", "Feet"),
 	]
 
@@ -2579,6 +2728,7 @@ func _save_game() -> void:
 		"cooler_built": cooler_built,
 		"cellar_stock": cellar_stock,
 		"cooler_stock": cooler_stock,
+		"smokehouse_built": smokehouse_built,
 		"achievements_done": achievements_done,
 		"story_version": 2,
 		"selected_seed": selected_seed,
@@ -2633,6 +2783,7 @@ func _load_game() -> bool:
 	cooler_built = bool(data.get("cooler_built", false))
 	cellar_stock = int(data.get("cellar_stock", 0))
 	cooler_stock = int(data.get("cooler_stock", 0))
+	smokehouse_built = bool(data.get("smokehouse_built", false))
 	saved_zone = int(data.get("zone", 0))
 	hp = int(data.get("hp", BASE_HP))
 	guardian_done = data.get("guardian_done", {})

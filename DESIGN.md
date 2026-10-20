@@ -107,7 +107,16 @@ Saves from before this change reset chapter progress. Stat-based achievements re
 - **Fish spoil:** any fish still in the pack at the end of the day are lost. The end-of-day message says how many. Storing fish in the cooler is the only way to keep them overnight.
 - **Full pack:** storage is always manual. A full pack stops harvesting and fishing with a message. Store fish in the cooler, or sell or cook them, to keep going.
 
-Later preservation (smokehouse, dehydrating, canning, fermenting) is planned but not built.
+**Smokehouse** (built from the House panel, beside the house): 60 coins, 5 wood, 3 fiber, Carpentry 3. Stand beside it, facing it, and press Space to preserve food. Preserved goods live in the pack and never spoil overnight.
+
+| Method | Input | Needs | Makes | Sells | Skill |
+|---|---|---|---|---|---|
+| Smoke a fish | 1 fish | 1 wood | Smoked fish | 11 | Cooking 2 |
+| Dry crops | 2 crops | none | Dried crops | 9 | Farming 2 |
+| Can crops | 2 crops | 1 fiber | Canned crops | 10 | Cooking 3 |
+| Ferment crops | 2 crops | 1 wood | Fermented crops | 11 | Cooking 4 |
+
+Each press makes one item and gives XP in that skill. Preserved goods show in the pack and sell on the Trade panel.
 
 ## Achievements
 
@@ -195,7 +204,7 @@ Achievements track stats and never reset. Each pays a small reward. Earning all 
 ## Saving
 
 - The game saves **only** when you sleep in bed or collapse at 03:00.
-- Saved: day, skill XP, inventory (including meals), coins, bag upgrades, root cellar and cooler (built, and what they hold), materials, stats, story chapters done, achievements done, selected seed, lantern tier, house stage, tidy/mend/cleanse days, sanity and sanity penalty, crops (with kind), brush piles, **player position**, whether you were **inside the house**, and the **open panel**.
+- Saved: day, skill XP, inventory (including meals), coins, bag upgrades, root cellar, cooler, and smokehouse (built, and what they hold), materials, stats, story chapters done, achievements done, selected seed, lantern tier, house stage, tidy/mend/cleanse days, sanity and sanity penalty, crops (with kind), brush piles, **player position**, whether you were **inside the house**, and the **open panel**.
 - Quitting mid-day loses that day's progress since the last save. Position and panel are saved at the same moment, so they reflect the last sleep or collapse.
 
 ## The roads: Lowmere and Ashford
@@ -224,7 +233,7 @@ Combat happens while you move, in the style of Stardew Valley.
 
 ## Gear and crafting
 
-The Gear panel has nine slots: Back (your bag), Head, Neck, Left hand (lantern), Chest, Right hand (weapon), Wrist, Legs, and Feet. Neck and Legs are still locked.
+The Gear panel has nine slots: Back (your bag), Head, Neck, Left hand (lantern), Chest, Right hand (weapon), Wrist, Legs, and Feet. Every slot takes gear now.
 
 Gear is crafted from the Gear panel with wood, fiber, and resin. Crafting equips the piece at once and replaces whatever was in that slot.
 
@@ -237,6 +246,10 @@ Gear is crafted from the Gear panel with wood, fiber, and resin. Crafting equips
 | Fiber wraps | Wrist | +1 defense | 1 | 3 fiber |
 | Bark wrap | Chest | +2 defense | 3 | 3 wood, 3 fiber |
 | Bark boots | Feet | +1 defense | 3 | 2 wood, 2 fiber |
+| Twine collar | Neck | +1 defense | 2 | 3 fiber |
+| Resin amulet | Neck | +2 defense | 5 | 3 resin, 2 fiber |
+| Reed leggings | Legs | +1 defense | 1 | 4 fiber |
+| Bark greaves | Legs | +2 defense | 4 | 3 wood, 3 fiber |
 
 Crafting gives 10 Bushcrafting XP.
 
@@ -252,7 +265,7 @@ Quests in the Quests panel, under Guardian of Lowmere, run in order:
 | 6 | Flour for the Mill | Give 5 crops to Harrow | 60 coins, 2 pumpkin seeds |
 | 7 | Stalkers on the Road | Defeat 5 stalkers | 120 Combat XP |
 
-Later: more villages and roads, more creatures, armor for the locked slots, and guardian quests that need combat or exploration.
+Later: more villages and roads, more creatures, and guardian quests that need combat or exploration. Defense stacks across slots, so a full set can turn most hits into single points of damage. That needs a playtest before it is tuned.
 
 ## Deferred
 
