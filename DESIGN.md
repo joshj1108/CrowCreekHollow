@@ -40,7 +40,7 @@ A top-down farming game with heavy psychological horror, built in Godot 4.7.
 - Completed quests show their title struck through.
 - Settings sections fold. Each header shows its item count and opens with Enter or A, or a click, so only the headings show until you open one. Every section starts folded.
 - Each section lists its options as cards: name, value, and an optional button or progress bar. The Craft panel is the exception: it is a picture grid (see Gear and crafting). The other sections use the card layout.
-- **Settings pauses the day.** While it is open the clock stops, foes stand still, and the player can't move. Other sections don't pause.
+- **Any open menu pauses the day.** While any section is open (Skills, Inventory, Craft, Quests, shops, the bank, Settings, and the rest) the clock stops, foes stand still, and the player can't move. Closing the menu resumes the day where it left off.
 - Panels rebuild only when their content changes, so buttons don't disappear mid-click.
 - The open panel is saved and reopened on load.
 

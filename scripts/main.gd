@@ -971,8 +971,8 @@ func _process(delta: float) -> void:
 			queue_redraw()
 	if weather != null:
 		weather.visible = not inside and not in_cave
-	# Settings pauses the day: the clock stops, foes stand still, and only the menu responds.
-	player.paused = open_tab == "Settings"
+	# Any open menu pauses the day: the clock stops, foes stand still, and only the menu responds.
+	player.paused = open_tab != ""
 	placement_ghost.visible = placing != ""
 	if placing != "":
 		placement_ghost.queue_redraw()
@@ -1035,7 +1035,7 @@ func _process(delta: float) -> void:
 
 	_handle_keys()
 
-	# Farming and gathering pause while a panel is open.
+	# Farming and gathering pause while a panel is open (the day is already paused above).
 	if Input.is_action_just_pressed("use") and open_tab == "":
 		_interact()
 
