@@ -387,7 +387,8 @@ A cave on the homestead, entered from the farm's west edge. It is the only place
 
 Keeping the homestead running is the daily work. Each part is at base level for now, to be deepened one project at a time.
 
-- **Wear:** the house wears by 1 each night, up to 10. Mending a board takes 2 off, a tidy takes 1, and a repair takes 3. At wear 6 or more, rain ruins a random crop overnight. The Upkeep section of the House panel shows it.
+- **Chores:** each day has a short list, shown at the top of the House panel. Tidy the house and mend a board every day. Feed the hens too, once you have any. Each chore left undone adds 1 wear overnight. A night with every chore done brings back 5 sanity.
+- **Wear:** the house wears by 1 each night, plus 1 for each chore left undone, up to 10. Mending a board takes 2 off, a tidy takes 1, and a repair takes 3. At wear 6 or more, rain ruins a random crop overnight. The Upkeep section of the House panel shows it.
 - **Coop:** built from the House panel for 6 wood, 4 fiber, and Carpentry 2. It sits behind the house, not on the farm grid.
 - **Hens:** 12 coins each, up to four. Feed them once a day from your crops (1 crop per hen). Each fed hen lays an egg overnight, which goes into your pack as a meal, as far as there is room. Two unfed days in a row and a hen wanders off.
 - **Predators:** at wear 4 or more, a fox can get into the coop on a given night and take a hen.

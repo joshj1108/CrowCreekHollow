@@ -447,6 +447,7 @@ const WEAR_PER_NIGHT := 1
 const WEAR_MEND := 2
 const WEAR_TIDY := 1
 const WEAR_REPAIR := 3
+const WELL_KEPT_SANITY := 5    # sanity back for a night with every chore done
 const WEAR_RUNDOWN := 6       # at this wear, rain ruins a crop overnight
 const WEAR_FOX := 4           # at this wear, a fox can get into the coop
 # Livestock: hens in a coop behind the house. A fed hen lays an egg each morning.
@@ -1484,6 +1485,18 @@ func _house_rows() -> Array:
 		"action": "mend",
 		"enabled": _can_mend(),
 	})
+	rows.append({"section": "Today's chores"})
+	for chore in _chore_list():
+		var row := {"name": chore["name"]}
+		if bool(chore["done"]):
+			row["value"] = "Done"
+		else:
+			row["value"] = "To do"
+			row["button"] = chore["button"]
+			row["action"] = chore["action"]
+			row["enabled"] = chore["enabled"]
+		rows.append(row)
+	rows.append({"note": "Each chore left undone adds 1 wear overnight. A night with every chore done brings back %d sanity." % WELL_KEPT_SANITY})
 	rows.append({"section": "Upkeep"})
 	rows.append({"name": "Wear", "value": "%d of %d" % [wear, WEAR_MAX], "progress": float(wear) / float(WEAR_MAX)})
 	rows.append({"note": "The house wears a little each night. Mending, tidying, and repairs bring it down. At %d wear, rain ruins a crop overnight. At %d, a fox can get into the coop. A third plot opens at Farming %d once the house is Patched." % [WEAR_RUNDOWN, WEAR_FOX, PLOT_THREE_LEVEL]})
@@ -3831,11 +3844,30 @@ func _feed_hens() -> void:
 	_show_message("You feed the hens.")
 
 
+# The day's chores. Each is done or not. Chores left undone wear the house overnight.
+func _chore_list() -> Array:
+	var chores: Array = []
+	chores.append({"name": "Tidy the house", "done": tidied_day == day, "button": "Tidy", "action": "tidy", "enabled": _can_tidy()})
+	chores.append({"name": "Mend a board", "done": mend_day == day and mends_today > 0, "button": "Mend", "action": "mend", "enabled": _can_mend()})
+	if hens > 0:
+		chores.append({"name": "Feed the hens", "done": hens_fed_day == day, "button": "Feed", "action": "feed_hens", "enabled": _can_feed_hens()})
+	return chores
+
+
 # Runs at the end of each day, before the crops grow: the house wears, hens lay or leave,
 # and rain or a fox may strike. Returns a note for the morning message.
 func _settle_day() -> String:
 	var notes := ""
-	wear = mini(wear + WEAR_PER_NIGHT, WEAR_MAX)
+	var missed := 0
+	for chore in _chore_list():
+		if not bool(chore["done"]):
+			missed += 1
+	wear = mini(wear + WEAR_PER_NIGHT + missed, WEAR_MAX)
+	if missed > 0:
+		notes += " %d chore%s left undone, so the house wears faster." % [missed, "" if missed == 1 else "s"]
+	else:
+		_change_sanity(WELL_KEPT_SANITY)
+		notes += " The house is kept well, and you sleep easier. +%d sanity." % WELL_KEPT_SANITY
 	if hens > 0:
 		if hens_fed_day == day:
 			hen_unfed_days = 0
