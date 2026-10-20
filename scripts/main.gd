@@ -898,18 +898,23 @@ func _load_sfx() -> void:
 			sfx_streams[name] = load(path)
 	for i in 8:
 		var p := AudioStreamPlayer.new()
-		p.volume_db = -4.0
 		add_child(p)
 		sfx_players.append(p)
 
 
 # Plays one sound effect. A little random pitch keeps repeated sounds from sounding identical.
+# Loudness in decibels for each sound. Anything not listed plays at the default.
+const SFX_VOLUME := {"step": -16.0}
+const SFX_DEFAULT_VOLUME := -4.0
+
+
 func play_sfx(name: String, jitter: float = 0.0) -> void:
 	if not sfx_on or not sfx_streams.has(name) or sfx_players.is_empty():
 		return
 	var p: AudioStreamPlayer = sfx_players[sfx_next]
 	sfx_next = (sfx_next + 1) % sfx_players.size()
 	p.stream = sfx_streams[name]
+	p.volume_db = float(SFX_VOLUME.get(name, SFX_DEFAULT_VOLUME))
 	p.pitch_scale = 1.0 + randf_range(-jitter, jitter)
 	p.play()
 
