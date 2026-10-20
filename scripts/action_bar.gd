@@ -605,6 +605,14 @@ func _build_detail(recipe: Dictionary) -> Control:
 	desc.add_theme_color_override("font_color", COL_MUTED)
 	block.add_child(desc)
 
+	if recipe.has("progress"):
+		var bar := ProgressBar.new()
+		bar.show_percentage = false
+		bar.custom_minimum_size = Vector2(0, 8)
+		bar.value = clampf(float(recipe["progress"]), 0.0, 1.0) * 100.0
+		bar.add_theme_stylebox_override("background", _box(COL_TRACK, COL_TRACK, 0, 4, 0))
+		bar.add_theme_stylebox_override("fill", _box(COL_ACCENT, COL_ACCENT, 0, 4, 0))
+		block.add_child(bar)
 	var level_text := str(recipe.get("level_text", ""))
 	if level_text != "":
 		var level := Label.new()
@@ -815,6 +823,17 @@ class RecipeIcon extends Control:
 			"hoe":
 				draw_line(_pt(0.3, 0.95), _pt(0.7, 0.12), tint, 0.06 * _sz)
 				draw_colored_polygon(_poly([[0.5, 0.12], [0.92, 0.2], [0.86, 0.42], [0.5, 0.36]]), metal)
+			"hammer":
+				draw_line(_pt(0.3, 0.95), _pt(0.6, 0.4), tint, 0.07 * _sz)
+				draw_rect(Rect2(_pt(0.45, 0.12), Vector2(0.45, 0.28) * _sz), metal)
+			"broom":
+				draw_line(_pt(0.7, 0.08), _pt(0.42, 0.6), tint, 0.05 * _sz)
+				draw_colored_polygon(_poly([[0.3, 0.55], [0.56, 0.55], [0.72, 0.92], [0.14, 0.92]]), light)
+				draw_rect(Rect2(_pt(0.32, 0.52), Vector2(0.26, 0.08) * _sz), dark)
+			"anvil":
+				draw_rect(Rect2(_pt(0.1, 0.3), Vector2(0.8, 0.16) * _sz), metal)
+				draw_colored_polygon(_poly([[0.3, 0.46], [0.7, 0.46], [0.6, 0.7], [0.4, 0.7]]), metal)
+				draw_rect(Rect2(_pt(0.22, 0.7), Vector2(0.56, 0.16) * _sz), dark)
 			"crop":
 				draw_line(_pt(0.5, 0.95), _pt(0.5, 0.45), dark, 0.05 * _sz)
 				draw_colored_polygon(_ellipse(0.32, 0.36, 0.2, 0.12), light)

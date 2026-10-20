@@ -225,6 +225,7 @@ The house is drawn in four stages that match its repair level. **Decrepit** has 
 
 ## Skills (RuneScape-style)
 
+- The Skills panel (K) is a grid of ten picture tiles, each showing the skill's drawing and its level. Picking one fills the detail card with what trains the skill, its XP bar, and the XP left to the next level.
 - Ten skills, each with XP and levels. Each level costs more than the last: level 2 at 100 XP, level 3 at 300, level 4 at 600, level 5 at 1000, level 6 at 1500 (level L needs 50 × (L−1) × L XP in total):
   - **Farming:** planting gives 5 XP. Turnips give 25 XP and pumpkins give 40 XP on harvest. Level 2 opens plot two. Level 3 unlocks pumpkins.
   - **Bushcrafting:** gathering a brush pile gives 10 XP. Level 3 adds three thicket piles.

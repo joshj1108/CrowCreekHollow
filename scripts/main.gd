@@ -1876,6 +1876,10 @@ func _on_panel_action(action_id: String) -> void:
 		craft_tab = action_id.trim_prefix("craft_tab:")
 		_refresh_panel()
 		return
+	if action_id.begins_with("skill_pick:"):
+		skill_selected = action_id.trim_prefix("skill_pick:")
+		_refresh_panel()
+		return
 	if action_id.begins_with("gear_pick:"):
 		gear_selected = action_id.trim_prefix("gear_pick:")
 		_refresh_panel()
@@ -1988,16 +1992,56 @@ func _refresh_panel() -> void:
 	action_bar.show_panel(open_tab, rows)
 
 
+# Each skill's picture, color, and what trains it.
+const SKILL_INFO := {
+	"Farming": {"icon": "crop", "tint": "4f6b3a", "desc": "Grows crops. Planting, watering, and harvesting all train it. Level 3 unlocks pumpkin seeds."},
+	"Bushcrafting": {"icon": "fiber", "tint": "6b4a3a", "desc": "Gathers wood, fiber, and resin, and unlocks the early gear and lanterns."},
+	"Carpentry": {"icon": "hammer", "tint": "8a6a3a", "desc": "Trains by mending boards and repairing the house."},
+	"Cleaning": {"icon": "broom", "tint": "4a6b7a", "desc": "Tidies the house."},
+	"Fishing": {"icon": "fish", "tint": "3a5a7a", "desc": "Works the sparkling spots at the pond."},
+	"Cooking": {"icon": "bowl", "tint": "8a4f2a", "desc": "Turns catches and crops into meals and preserves."},
+	"Combat": {"icon": "sword", "tint": "6b3a3a", "desc": "Earned by guarding Lowmere and fighting foes."},
+	"Forestry": {"icon": "axe", "tint": "3f5a2a", "desc": "Fells trees for wood and hardwood."},
+	"Mining": {"icon": "pick", "tint": "5a5a5a", "desc": "Breaks rocks for stone and ore."},
+	"Smithing": {"icon": "anvil", "tint": "7a5a2a", "desc": "Turns ore into bars and metal gear."},
+}
+var skill_selected := ""   # the skill whose details show; remembered while the panel is open
+
+
 func _skill_rows() -> Array:
-	var rows: Array = []
+	var tiles: Array = []
 	for skill in SKILLS:
-		rows.append({
-			"name": "%s   Lv %d" % [skill, _level(skill)],
-			"value": "%d XP" % skill_xp[skill],
-			"progress": _level_progress(skill),
+		var info: Dictionary = SKILL_INFO[skill]
+		tiles.append({
+			"key": "skill:" + skill, "name": "%s\nLevel %d" % [skill, _level(skill)],
+			"icon": str(info["icon"]), "tint": str(info["tint"]), "enabled": true, "costs": [], "level_ok": true,
+			"desc": str(info["desc"]), "action": "",
 		})
-	rows.append({"note": "Farming grows crops. Bushcrafting gathers wood, fiber, and resin. Carpentry trains by mending boards and repairing the house. Cleaning tidies it. Fishing works the sparkling spots at the pond. Cooking turns catches and crops into meals. Forestry fells trees for wood and hardwood. Mining breaks rocks for stone and ore. Smithing turns ore into bars and metal gear." + (" Combat is earned guarding Lowmere." if WORLD_ENABLED else "")})
-	return rows
+	var chosen := _skill_chosen(tiles)
+	var marked: Array = []
+	for t in tiles:
+		var tile: Dictionary = t.duplicate()
+		tile["selected"] = str(t["key"]) == str(chosen["key"])
+		tile["action"] = "skill_pick:" + str(t["key"])
+		marked.append(tile)
+	# The detail card shows the XP bar and what is left to the next level.
+	var detail: Dictionary = chosen.duplicate()
+	var skill := str(chosen["key"]).trim_prefix("skill:")
+	var level := _level(skill)
+	detail["name"] = skill
+	detail["level_text"] = "Level %d. %d XP, %d more to level %d." % [level, int(skill_xp[skill]), _xp_for_level(level + 1) - int(skill_xp[skill]), level + 1]
+	detail["progress"] = _level_progress(skill)
+	return [
+		{"split": {"recipes": marked, "columns": 4, "detail": detail}},
+		{"note": "Skills grow by doing. Each action gives XP to the skill it trains. Levels unlock recipes, crops, and tools."},
+	]
+
+
+func _skill_chosen(tiles: Array) -> Dictionary:
+	for t in tiles:
+		if str(t["key"]) == skill_selected:
+			return t
+	return tiles[0] if not tiles.is_empty() else {}
 
 
 # The pack, seeds, and materials are a grid of picture tiles. Picking one shows its details beside the grid.
