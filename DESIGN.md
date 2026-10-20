@@ -80,6 +80,19 @@ The farmer is drawn in code. A straw hat with a band, a shirt under blue overall
 - Weather is drawn in `scripts/weather.gd` and hidden inside the farmhouse and the mine.
 - The weather of each day is saved. An older save with no weather gets a fresh roll on load.
 
+## Seasonal events
+
+Each year has a few dated events. When one starts, the morning message announces it, the HUD shows its name while it lasts, and it counts toward the event achievements.
+
+| Event | Date | Length | Effect |
+|---|---|---|---|
+| Harvest Moon | Sep 22 | 1 day | Two meals and +10 sanity when it starts |
+| First Frost | Nov 10 | 3 days | Warmth drains 60% faster outdoors |
+| The Longest Night | Dec 21 | 1 day | The night's sanity change is doubled |
+| Spring Thaw | Mar 1 | 2 days | Watered crops grow an extra stage |
+| Planting Fair | Apr 20 | 1 day | Five turnip seeds when it starts |
+| Midsummer Heat | Jun 21 | 3 days | Every day is sunny |
+
 ## Music
 
 - **Music** is a lo-fi loop (`audio/dreary_loop.ogg`) that starts on the title screen and loops quietly.
@@ -157,9 +170,9 @@ Achievements are a tiered list toward 100% completion, shown in the Achievements
 - **Tier III: Keeper** (9): full restoration, pumpkins, cleansing, and level 3 skills.
 - **Tier IV: Hollow Hand** (9): mastery. Level 5 skills, 100 harvests, 50 meals, and finishing the story.
 
-Achievements track stats and never reset. Each pays a small reward. Earning all 42 gives 100%.
+Achievements track stats and never reset. Each pays a small reward. Earning all 44 gives 100%.
 
-- New with the needs and well: **Cool Water** (drink from the pond or pump), **Hose Hand** (water a crop), **Working Pump** (repair the pump), **Garden Hose** (attach the hose), **Rain Keeps Them Green** (5 rainy days), and **Tender of the Plots** (water 50 crops).
+- New with the needs and well: **Cool Water** (drink from the pond or pump), **Hose Hand** (water a crop), **Working Pump** (repair the pump), **Garden Hose** (attach the hose), **Rain Keeps Them Green** (5 rainy days), and **Tender of the Plots** (water 50 crops). **Turning Seasons** (3 seasonal events) and **A Full Year** (6) count the events below.
 
 ## Cooking
 

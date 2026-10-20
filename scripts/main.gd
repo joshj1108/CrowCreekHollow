@@ -128,6 +128,23 @@ const WEATHER_NAMES := {
 	"rain": "Rain", "downpour": "Downpour", "snow": "Snow",
 }
 # The light over the farm for each kind of weather. Dark and grey weather is cooler.
+# Dated events through the year. Each starts on its month and day and lasts `span` days.
+# The effect is applied while the event is active, or once when it starts ("supper", "fair").
+const SEASON_EVENTS := [
+	{"id": "harvest_moon", "title": "Harvest Moon", "month": "September", "day": 22, "span": 1, "effect": "supper",
+		"text": "The neighbours leave a supper on your step. Two meals go in your pack, and the evening feels warmer."},
+	{"id": "first_frost", "title": "First Frost", "month": "November", "day": 10, "span": 3, "effect": "frost",
+		"text": "The grass is white at dawn. The cold bites harder outside for three days, so keep your warmth up."},
+	{"id": "longest_night", "title": "The Longest Night", "month": "December", "day": 21, "span": 1, "effect": "dread",
+		"text": "The shortest day of the year. The dark comes early and stays late, and whatever watches the field is closer tonight."},
+	{"id": "spring_thaw", "title": "Spring Thaw", "month": "March", "day": 1, "span": 2, "effect": "thaw",
+		"text": "The soil is soft after the winter. Crops that were watered grow an extra stage."},
+	{"id": "planting_fair", "title": "Planting Fair", "month": "April", "day": 20, "span": 1, "effect": "fair",
+		"text": "The village sends five turnip seeds for the plots. Plant them while the ground is warm."},
+	{"id": "midsummer_heat", "title": "Midsummer Heat", "month": "June", "day": 21, "span": 3, "effect": "heat",
+		"text": "A dry heat settles over the valley for three days. The sky stays clear, so the crops need watering every morning."},
+]
+
 # Body needs: food and water drain through the day, and warmth changes with the temperature.
 const FOOD_PER_HOUR := 2.4
 const WATER_PER_HOUR := 3.0
@@ -502,7 +519,9 @@ const ACHIEVEMENTS := [
 	{"id": "survivor", "title": "Survivor", "text": "Sleep in your bed 10 times.", "tier": 2, "stat": "slept", "goal": 10, "reward": {"wood": 3, "fiber": 3}},
 	{"id": "watcher", "title": "Field Watcher", "text": "Live through 5 nights of events.", "tier": 2, "stat": "events", "goal": 5, "reward": {"wood": 3, "fiber": 3}},
 	{"id": "waterer", "title": "Tender of the Plots", "text": "Water 50 crops with the hose.", "tier": 2, "stat": "watered", "goal": 50, "reward": {"wood": 3, "fiber": 3}},
+	{"id": "season_3", "title": "Turning Seasons", "text": "Live through 3 seasonal events.", "tier": 1, "stat": "events_seen", "goal": 3, "reward": {"wood": 2, "fiber": 2}},
 
+	{"id": "season_6", "title": "A Full Year", "text": "Live through 6 seasonal events.", "tier": 3, "stat": "events_seen", "goal": 6, "reward": {"seeds": 5}},
 	{"id": "hundred_harvests", "title": "Full Barns", "text": "Harvest 100 crops.", "tier": 3, "stat": "harvested", "goal": 100, "reward": {"seeds": 5, "pumpkin_seeds": 2}},
 	{"id": "master_farmer", "title": "Master Farmer", "text": "Reach Farming level 5.", "tier": 3, "stat": "level_Farming", "goal": 5, "reward": {"seeds": 5, "pumpkin_seeds": 2}},
 	{"id": "master_carpenter", "title": "Master Carpenter", "text": "Reach Carpentry level 5.", "tier": 3, "stat": "level_Carpentry", "goal": 5, "reward": {"seeds": 5, "pumpkin_seeds": 2}},
@@ -676,7 +695,7 @@ var stats := {"planted": 0, "harvested": 0, "gathered": 0, "slept": 0, "tidied":
 	"fished": 0, "caught": 0, "mended": 0, "cleansed": 0, "cooked": 0, "eaten": 0,
 	"pumpkins": 0, "collapses": 0, "events": 0, "sold": 0, "spoiled": 0,
 	"talks": 0, "defeated": 0, "delivered": 0, "stalkers": 0, "visited": 0, "crops_given": 0, "preserved": 0, "felled": 0, "mined": 0,
-	"drank": 0, "watered": 0, "pump": 0, "hose": 0, "rain_days": 0}
+	"drank": 0, "watered": 0, "pump": 0, "hose": 0, "rain_days": 0, "events_seen": 0}
 var achievements_done := {}     # achievement id -> true
 var quests_done := {}               # quest id -> true
 var selected_seed := "turnip"
@@ -936,8 +955,12 @@ func _process(delta: float) -> void:
 		bar.modulate = Color(1.0, 0.55, 0.5) if low and bar.value < 25.0 else Color.WHITE
 	needs_temp.text = "%d°F" % roundi(_temperature())
 	var date := _calendar_date(day)
-	hud_label.text = "Day %d, %s %d (%s)   %s   %02d:%02d   Sanity %d/%d   Coins %d   HP %d/%d" % [
-		day, MONTH_NAMES[date["month"]].substr(0, 3), date["day"], _season_of(date["month"]),
+	var event_name := ""
+	for ev in _active_events():
+		event_name = " · %s" % ev["title"]
+		break
+	hud_label.text = "Day %d, %s %d (%s)%s   %s   %02d:%02d   Sanity %d/%d   Coins %d   HP %d/%d" % [
+		day, MONTH_NAMES[date["month"]].substr(0, 3), date["day"], _season_of(date["month"]), event_name,
 		WEATHER_NAMES.get(weather_kind, "Overcast"), int(fmod(current_hour, 24.0)), minutes,
 		int(sanity), _sanity_max(), money, hp, max_hp()]
 
@@ -2829,7 +2852,8 @@ func _update_needs(dh: float) -> void:
 	elif temp >= COLD_TEMP:
 		warmth = minf(100.0, warmth + WARMTH_OUTDOORS * dh)
 	else:
-		warmth = maxf(0.0, warmth - (COLD_TEMP - temp) * WARMTH_LOSS * dh)
+		var frost := 1.6 if _event_active("frost") else 1.0
+		warmth = maxf(0.0, warmth - (COLD_TEMP - temp) * WARMTH_LOSS * frost * dh)
 	if food <= 0.0 or water <= 0.0 or warmth <= 0.0:
 		starve_timer += dh
 		if starve_timer >= NEED_HARM_HOURS:
@@ -4922,8 +4946,60 @@ func _season_of(month: int) -> String:
 	return "Autumn"
 
 
+# Day of the year for a month and day, counting from January 1st. Leap years are ignored.
+func _day_of_year(month: int, dom: int) -> int:
+	var total := 0
+	for m in month:
+		total += MONTH_DAYS[m]
+	return total + dom - 1
+
+
+# How many days into an event the current day is. Negative values mean the event is still to come.
+func _event_offset(ev: Dictionary) -> int:
+	var today := _calendar_date(day)
+	var now := _day_of_year(int(today["month"]), int(today["day"]))
+	var start := _day_of_year(MONTH_NAMES.find(ev["month"]), int(ev["day"]))
+	return posmod(now - start, 365)
+
+
+func _active_events() -> Array:
+	var out: Array = []
+	for ev in SEASON_EVENTS:
+		if _event_offset(ev) < int(ev["span"]):
+			out.append(ev)
+	return out
+
+
+func _event_active(effect: String) -> bool:
+	for ev in _active_events():
+		if ev["effect"] == effect:
+			return true
+	return false
+
+
+# Runs as a new day begins. Events that start today announce themselves and may give something once.
+func _begin_day_events() -> String:
+	var note := ""
+	for ev in _active_events():
+		if _event_offset(ev) != 0:
+			continue
+		stats["events_seen"] += 1
+		if ev["effect"] == "supper":
+			inventory["meals"] += 2
+			_change_sanity(10.0)
+		elif ev["effect"] == "fair":
+			inventory["seeds"] += 5
+		note += " %s: %s" % [ev["title"], ev["text"]]
+	return note
+
+
 # Picks the day's weather from the season's weights.
 func _roll_weather() -> void:
+	# Midsummer heat keeps the sky clear for its days.
+	if _event_active("heat"):
+		weather_kind = "sunny"
+		_apply_weather()
+		return
 	var season := _season_of(_calendar_date(day)["month"])
 	var weights: Dictionary = WEATHER_WEIGHTS[season]
 	var total := 0
@@ -5198,7 +5274,8 @@ func _trigger_night_event() -> void:
 			tonight_shadow = _world_tile(HOUSE_IX + HOUSE_W, HOUSE_IY + 1)
 		_:
 			tonight_shadow = Vector2i(-1, -1)
-	_change_sanity(ev["sanity"])
+	var hit: float = float(ev["sanity"]) * (2.0 if _event_active("dread") else 1.0)
+	_change_sanity(hit)
 	_show_message(ev["message"])
 	queue_redraw()
 
@@ -5225,7 +5302,8 @@ func _end_day(base: String, leave_house: bool = true) -> void:
 	var thirsty := 0
 	for pos in crops.keys():
 		if int(crops[pos].get("watered_day", 0)) == day:
-			crops[pos]["stage"] = min(crops[pos]["stage"] + 1, MAX_STAGE)
+			var bonus := 1 if _event_active("thaw") else 0
+			crops[pos]["stage"] = min(crops[pos]["stage"] + 1 + bonus, MAX_STAGE)
 		elif crops[pos]["stage"] < MAX_STAGE:
 			thirsty += 1
 	if thirsty > 0:
@@ -5235,12 +5313,13 @@ func _end_day(base: String, leave_house: bool = true) -> void:
 		well_water = WELL_CAPACITY
 	day += 1
 	_roll_weather()
+	var event_note := _begin_day_events()
 	clock = 0.0
 	tonight_shadow = Vector2i(-1, -1)
 	_respawn_brush()
 	_update_shadow_tile()
-	_show_message("%s Your crops grew overnight.%s%s The morning is %s." % [
-		base, spoil_note, upkeep_note, str(WEATHER_NAMES.get(weather_kind, "overcast")).to_lower()])
+	_show_message("%s Your crops grew overnight.%s%s The morning is %s.%s" % [
+		base, spoil_note, upkeep_note, str(WEATHER_NAMES.get(weather_kind, "overcast")).to_lower(), event_note])
 	_save_game()
 	queue_redraw()
 
