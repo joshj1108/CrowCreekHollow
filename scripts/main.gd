@@ -1827,9 +1827,10 @@ func _skill_rows() -> Array:
 func _inventory_rows() -> Array:
 	var rows: Array = [
 		{"section": "Body"},
-		{"name": "Food", "value": "%d of 100" % roundi(food), "progress": food / 100.0},
-		{"name": "Water", "value": "%d of 100" % roundi(water), "progress": water / 100.0},
-		{"name": "Warmth", "value": "%d of 100" % roundi(warmth), "progress": warmth / 100.0},
+		# Meters are rounded so the panel only rebuilds when a shown number changes.
+		{"name": "Food", "value": "%d of 100" % roundi(food), "progress": roundi(food) / 100.0},
+		{"name": "Water", "value": "%d of 100" % roundi(water), "progress": roundi(water) / 100.0},
+		{"name": "Warmth", "value": "%d of 100" % roundi(warmth), "progress": roundi(warmth) / 100.0},
 		{"name": "Outside", "value": "%d°F, %s" % [roundi(_temperature()), str(WEATHER_NAMES.get(weather_kind, "Overcast")).to_lower()]},
 		{
 			"name": "Eat a meal",

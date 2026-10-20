@@ -222,6 +222,9 @@ func show_panel(tab: String, rows: Array) -> void:
 	var key := JSON.stringify([tab, rows, collapsed_sections])
 	if panel.visible and key == _last_key:
 		return
+	# Hold the rebuild while the mouse button is down, so a press can finish on the button it started on.
+	if panel.visible and _pointer_held:
+		return
 	_last_key = key
 	_last_tab = tab
 	_last_rows = rows
@@ -535,6 +538,14 @@ func _box(bg: Color, border: Color, border_width: int, radius: int, margin: int)
 	sb.set_corner_radius_all(radius)
 	sb.set_content_margin_all(margin)
 	return sb
+
+
+var _pointer_held := false
+
+
+func _input(event: InputEvent) -> void:
+	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT:
+		_pointer_held = event.pressed
 
 
 func _on_menu_pressed() -> void:
