@@ -267,6 +267,33 @@ Quests in the Quests panel, under Guardian of Lowmere, run in order:
 
 Later: more villages and roads, more creatures, and guardian quests that need combat or exploration. Defense stacks across slots, so a full set can turn most hits into single points of damage. That needs a playtest before it is tuned.
 
+## Gathering and metal (planned)
+
+Bark is the starting tier and metal is the later one. Each bark piece has a metal piece for the same slot. The metal piece is better, needs Smithing, and takes that slot once you have it. Bark pieces stay craftable early on.
+
+Each gathering skill has its own tool. The tool's material sets what it can break.
+
+| Skill | Gathered from | Tool | Gives |
+|---|---|---|---|
+| Bushcrafting (existing) | Brush piles, thickets | None | Wood, fiber, resin |
+| Forestry | Trees on the farm edge and in the Lowmere wood | Hatchet | Wood, hardwood (tool handles, smithing fuel) |
+| Mining | Rocks on the farm, the Ashford quarry | Pick | Stone; copper and iron ore |
+| Smithing | A furnace built from the House panel | None | Bars from ore and wood; metal gear and tools from bars |
+
+**Ore never comes from the farm.** Copper and iron come from the Ashford quarry only.
+
+**Farm rocks** are cleared like brush piles and mostly give stone, which is worth little. From Mining 2 there is a small chance of copper ore instead.
+
+**Tool tiers:** a stone hatchet or pick (from farm stone) comes after the first tools. Copper tools come from Smithing, and iron tools after that. Trees need any hatchet. Hardwood needs a copper hatchet or better. Copper ore needs a pick. Iron ore needs a copper pick or better.
+
+**Build order:**
+1. Forestry, starting with a crude hatchet made from wood and fiber.
+2. Mining on farm rocks, which gives stone and the first pick.
+3. Smithing and the furnace, with copper bars and the first metal pieces.
+4. The Ashford quarry, with iron ore and the top metal tier.
+
+Levels here are placeholders and will be tuned once the systems exist.
+
 ## Deferred
 
 - The story beyond the survival chapters: mystery and horror escalation.
