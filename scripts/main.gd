@@ -710,6 +710,19 @@ func _save_path() -> String:
 
 
 # The Game section of Settings: leaving the farm for the start screen.
+func _stuck_rows() -> Array:
+	return [
+		{"section": "Stuck"},
+		{
+			"name": "Unstick me",
+			"value": "Cancels any placement and moves you to the path outside the farmhouse door",
+			"button": "Unstick",
+			"action": "unstick",
+			"enabled": true,
+		},
+	]
+
+
 func _game_rows() -> Array:
 	return [
 		{"section": "Game"},
@@ -1732,7 +1745,7 @@ func _refresh_panel() -> void:
 		"Barn":
 			rows = _barn_rows()
 		"Settings":
-			rows = _settings_rows() + _tip_rows() + _game_rows()
+			rows = _settings_rows() + _tip_rows() + _game_rows() + _stuck_rows()
 	action_bar.show_panel(open_tab, rows)
 
 
@@ -2184,14 +2197,6 @@ func _settings_rows() -> Array:
 		{"name": "Settings", "value": "Start"},
 		{"note": "On a gamepad, open Craft with the Open button on the Gear panel."},
 		{"note": "While a panel is open, the D-pad or left stick moves between its buttons, and A presses the highlighted one."},
-		{"section": "Stuck"},
-		{
-			"name": "Unstick me",
-			"value": "Cancels any placement and moves you to the path outside the farmhouse door",
-			"button": "Unstick",
-			"action": "unstick",
-			"enabled": true,
-		},
 		{"section": "Saving"},
 		{"note": "Progress saves only when you sleep, or when you collapse at 03:00. The save includes your position and open panel."},
 		{"note": "Sound and display options are coming later."},

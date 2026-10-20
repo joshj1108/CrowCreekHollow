@@ -10,7 +10,7 @@ signal tab_pressed(tab_name: String)
 var menu_frame: PanelContainer
 # Sections in these menus fold away, so a long list shows only its headings until one is opened.
 const COLLAPSIBLE_TABS := ["Settings"]
-const ALWAYS_OPEN_SECTIONS := ["Game"]   # sections that never fold, so their options are always visible
+const ALWAYS_OPEN_SECTIONS := ["Game", "Stuck"]   # sections that never fold, so their options are always visible
 var collapsed_sections := {}   # "tab|section" -> true while folded (folded is the default)
 var _last_tab := ""
 var _last_rows: Array = []
