@@ -273,11 +273,13 @@ Later: more villages and roads, more creatures, and guardian quests that need co
 - **The farm is separate.** The homestead stays a self-contained base for farming, storage and sleep. The rest of the land is the world, and you travel between them through a **portal**.
 - **Our own map.** The world is generated from a seed, with forest, water, roads and clearings. We don't use Jagex's map data, which we only measured.
 - **Rendering:** the world is stored in chunks, and only the chunks near the camera are drawn, so the full size stays fast.
-- **Villages and roads** (Lowmere and Ashford) become places in the world, not separate maps.
+- **Villages and roads:** the world is rebuilt to fit Lowmere and Ashford inside the full map. Their layouts can change to suit it.
+- **Nighttime:** the restriction stays. At night you're sent back to the farm, the same as now.
+- **Campsites:** you can set up a campsite somewhere in the world, built from materials. A campsite lets you stay in the world at night and save there. How it works after dark is still open.
 
 **Open decisions:**
-- Where the portal sits on the farm, and whether it works at night.
-- Whether Lowmere and Ashford keep their current layouts inside the world or are rebuilt.
+- Where the portal sits on the farm.
+- What a campsite does at night: whether it is safe from foes, and whether it saves the game or only holds your place.
 
 ## Forestry and tools
 
