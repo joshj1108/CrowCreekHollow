@@ -170,7 +170,7 @@ Achievements are a tiered list toward 100% completion, shown in the Achievements
 - **Tier III: Keeper** (9): full restoration, pumpkins, cleansing, and level 3 skills.
 - **Tier IV: Hollow Hand** (9): mastery. Level 5 skills, 100 harvests, 50 meals, and finishing the story.
 
-Achievements track stats and never reset. Each pays a small reward. Earning all 44 gives 100%.
+Achievements track stats and never reset. Each pays a small reward. Earning all 45 gives 100%. **Goat Keeper** is earned by buying a goat.
 
 - New with the needs and well: **Cool Water** (drink from the pond or pump), **Hose Hand** (water a crop), **Working Pump** (repair the pump), **Garden Hose** (attach the hose), **Rain Keeps Them Green** (5 rainy days), and **Tender of the Plots** (water 50 crops). **Turning Seasons** (3 seasonal events) and **A Full Year** (6) count the events below.
 
@@ -286,7 +286,7 @@ The house is drawn in four stages that match its repair level. **Decrepit** has 
 - There are **three save slots**. New Game asks for a slot, and a used slot takes two presses to overwrite. Load Game lists each slot with its day, coins, and house stage. Older single-slot saves become slot 1.
 - The game saves **only** when you sleep in bed or collapse at 03:00, to the slot you're playing.
 - The in-game Settings menu ends with a **Game** section that never folds. It holds **Music** (on or off), **Unstick me**, and **Quit to the main menu**. Quitting returns to the start screen without saving, and progress since the last sleep is lost. The slot you were playing stays selected. Sleeping is the only way to save.
-- Saved: day, skill XP, inventory (including meals), coins, bag upgrades, root cellar, cooler, and smokehouse (built, and what they hold), materials, stats, story chapters done, achievements done, selected seed, lantern tier, house stage, house wear, coop and hens, barn (built, and where it stands), tidy/mend/cleanse days, sanity and sanity penalty, crops (with kind), brush piles, **player position**, whether you were **inside the house**, and the **open panel**.
+- Saved: day, skill XP, inventory (including meals), coins, goats and their feeding, bag upgrades, root cellar, cooler, and smokehouse (built, and what they hold), materials, stats, story chapters done, achievements done, selected seed, lantern tier, house stage, house wear, coop and hens, barn (built, and where it stands), tidy/mend/cleanse days, sanity and sanity penalty, crops (with kind), brush piles, **player position**, whether you were **inside the house**, and the **open panel**.
 - Quitting mid-day loses that day's progress since the last save. Position and panel are saved at the same moment, so they reflect the last sleep or collapse.
 
 ## The world: the portal, the road, and the wilds
@@ -466,6 +466,9 @@ A cave on the homestead, entered from the farm's west edge. It is the only place
 - **Saving:** a save made in the cave returns you to the homestead when loaded.
 
 ## Upkeep, hens, and the third plot
+
+**Goats (the barn)** — The barn holds up to **3 goats**, bought for **45 coins** each from the Barn panel (stand beside the barn and press Space). Feed them **2 crops each, once a day**. A fed goat gives **1 milk each morning**, stored as a meal. Two unfed days in a row and a goat wanders off. Goats wander in the yard in front of the barn. Each goat that is unfed counts as a missed chore that night, like the hens.
+
 
 Keeping the homestead running is the daily work. Each part is at base level for now, to be deepened one project at a time.
 

@@ -193,6 +193,7 @@ const TIPS := [
 	{"id": "buildings", "title": "Buildings", "text": "Build the workshop, coop, and barn from the Buildings menu (U). Pick a spot on open grass, press Space to place it, and B to cancel."},
 	{"id": "quests", "title": "Quests", "text": "The Quests menu (Q) lists what the farm asks of you. Press Details on a quest to read its story."},
 	{"id": "hens", "title": "Hens", "text": "Stand beside the coop, facing it, and press Space to buy and feed hens. A fed hen lays an egg each morning."},
+	{"id": "goats", "title": "Goats", "text": "Build the barn from the Buildings menu, then stand beside it, facing it, and press Space to buy and feed goats. A fed goat gives milk each morning."},
 	{"id": "cellar", "title": "Storing crops", "text": "Stand beside the root cellar and press Space to store or take crops. Nothing spoils in the cellar."},
 	{"id": "smelt", "title": "Smelting and preserving", "text": "Stand beside the furnace and press Space to smelt ore into bars. The smokehouse preserves food, and the cooler keeps fish fresh."},
 	{"id": "needs", "title": "Food, water, and warmth", "text": "Food and water drain through the day, and warmth drops outside on cold days. Eat from the Inventory menu (I), drink from the pond, and warm up in the house. Sleep to be fully warm again."},
@@ -493,6 +494,7 @@ const ACHIEVEMENTS := [
 	{"id": "tin_light", "title": "Tin Light", "text": "Build a Tin Lantern.", "tier": 0, "stat": "lantern_tier", "goal": 1, "reward": {"seeds": 2}},
 	{"id": "boarded", "title": "Boarded Up", "text": "Repair the house to Boarded.", "tier": 0, "stat": "house_stage", "goal": 1, "reward": {"wood": 2, "fiber": 2}},
 	{"id": "first_tidy", "title": "Tidy Hands", "text": "Tidy the house once.", "tier": 0, "stat": "tidied", "goal": 1, "reward": {"seeds": 2}},
+	{"id": "goat_keeper", "title": "Goat Keeper", "text": "Buy a goat for the barn.", "tier": 0, "stat": "goats_bought", "goal": 1, "reward": {"seeds": 2}},
 	{"id": "first_drink", "title": "Cool Water", "text": "Drink from the pond or the pump.", "tier": 0, "stat": "drank", "goal": 1, "reward": {"seeds": 2}},
 	{"id": "first_water", "title": "Hose Hand", "text": "Water a crop with the hose.", "tier": 0, "stat": "watered", "goal": 1, "reward": {"seeds": 2}},
 
@@ -559,6 +561,10 @@ const BARN_COST := {"wood": 10, "fiber": 6, "level": 4}   # the barn is for live
 const HEN_PRICE := 12
 const HEN_FEED_CROPS := 1
 const HEN_LEAVE_DAYS := 2     # unfed this many days in a row, and a hen wanders off
+const BARN_GOATS_MAX := 3     # goats the barn holds
+const GOAT_PRICE := 45
+const GOAT_FEED_CROPS := 2    # crops per goat, once a day
+const GOAT_LEAVE_DAYS := 2    # unfed this many days in a row, and a goat wanders off
 const MEND_DAILY_LIMIT := 2   # keeps Carpentry training to a few days per level
 const CLEANSE_LEVEL := 3      # Cleaning level needed to cleanse the house
 const CLEANSE_CROPS := 2      # crops offered per cleanse
@@ -695,7 +701,7 @@ var stats := {"planted": 0, "harvested": 0, "gathered": 0, "slept": 0, "tidied":
 	"fished": 0, "caught": 0, "mended": 0, "cleansed": 0, "cooked": 0, "eaten": 0,
 	"pumpkins": 0, "collapses": 0, "events": 0, "sold": 0, "spoiled": 0,
 	"talks": 0, "defeated": 0, "delivered": 0, "stalkers": 0, "visited": 0, "crops_given": 0, "preserved": 0, "felled": 0, "mined": 0,
-	"drank": 0, "watered": 0, "pump": 0, "hose": 0, "rain_days": 0, "events_seen": 0}
+	"drank": 0, "watered": 0, "pump": 0, "hose": 0, "rain_days": 0, "events_seen": 0, "goats_bought": 0}
 var achievements_done := {}     # achievement id -> true
 var quests_done := {}               # quest id -> true
 var selected_seed := "turnip"
@@ -718,6 +724,13 @@ var hen_wait: Array = []          # seconds before a hen picks its next spot
 var hens := 0
 var hens_fed_day := -1              # the last day the hens were fed
 var hen_unfed_days := 0
+var goat_layer: Node2D              # the goats in the barn yard, drawn on their own layer
+var goat_pos: Array = []
+var goat_goal: Array = []
+var goat_wait: Array = []
+var goats := 0
+var goats_fed_day := -1
+var goat_unfed_days := 0
 var plot_three_open := false
 var cleanse_day := 0
 var sanity := SANITY_MAX
@@ -915,6 +928,7 @@ func _process(delta: float) -> void:
 	_update_tips(delta)
 	clock += delta
 	_update_hens(delta)
+	_update_goats(delta)
 	current_hour = START_HOUR + clock / DAY_LENGTH * (DAY_END_HOUR - START_HOUR)
 	_update_needs(delta * (DAY_END_HOUR - START_HOUR) / DAY_LENGTH)
 
@@ -1372,6 +1386,10 @@ func _build_world() -> void:
 	hen_layer.draw.connect(_draw_hen_layer)
 	hen_layer.visible = false
 	add_child(hen_layer)
+	goat_layer = Node2D.new()
+	goat_layer.draw.connect(_draw_goat_layer)
+	goat_layer.visible = false
+	add_child(goat_layer)
 
 	player = Node2D.new()
 	player.set_script(load("res://scripts/player.gd"))
@@ -1569,6 +1587,8 @@ func _tip_ready(id: String) -> bool:
 			return current_hour >= 12.0
 		"well":
 			return day >= 2
+		"goats":
+			return barn_built
 	return false
 
 
@@ -1775,6 +1795,10 @@ func _on_panel_action(action_id: String) -> void:
 		return
 	if action_id == "feed_hens":
 		_feed_hens()
+	if action_id == "buy_goat":
+		_buy_goat()
+	if action_id == "feed_goats":
+		_feed_goats()
 		return
 	if action_id == "build_smokehouse":
 		_build_smokehouse()
@@ -2256,10 +2280,23 @@ func _coop_rows() -> Array:
 
 # The barn panel. Livestock aren't in the game yet, so for now it only says so.
 func _barn_rows() -> Array:
-	return [
-		{"section": "Livestock"},
-		{"note": "The barn is for livestock. Livestock are still to come, so for now it simply stands."},
-	]
+	var rows: Array = [{"section": "Goats"}]
+	rows.append({
+		"name": "Goats",
+		"value": "%d of %d, %d coins each" % [goats, BARN_GOATS_MAX, GOAT_PRICE],
+		"button": "Buy goat",
+		"action": "buy_goat",
+		"enabled": _can_buy_goat(),
+	})
+	rows.append({
+		"name": "Feed goats",
+		"value": "%d crops, once a day" % (goats * GOAT_FEED_CROPS),
+		"button": "Feed",
+		"action": "feed_goats",
+		"enabled": _can_feed_goats(),
+	})
+	rows.append({"note": "A fed goat gives milk each morning, which you can drink as a meal. Two unfed days in a row and a goat wanders off."})
+	return rows
 
 
 # The Buildings menu: the workshop, the coop, and the barn. Each one is placed on open grass.
@@ -4899,6 +4936,43 @@ func _buy_hen() -> void:
 	_show_message("A hen settles into the coop.")
 
 
+func _can_buy_goat() -> bool:
+	return barn_built and goats < BARN_GOATS_MAX and money >= GOAT_PRICE
+
+
+func _buy_goat() -> void:
+	if not barn_built:
+		_show_message("Build the barn first.")
+		return
+	if goats >= BARN_GOATS_MAX:
+		_show_message("The barn holds %d goats." % BARN_GOATS_MAX)
+		return
+	if money < GOAT_PRICE:
+		_show_message("A goat costs %d coins." % GOAT_PRICE)
+		return
+	money -= GOAT_PRICE
+	goats += 1
+	stats["goats_bought"] += 1
+	queue_redraw()
+	_show_message("A goat trots into the barn yard.")
+
+
+func _can_feed_goats() -> bool:
+	return goats > 0 and goats_fed_day != day and int(inventory["crops"]) >= goats * GOAT_FEED_CROPS
+
+
+func _feed_goats() -> void:
+	if goats > 0 and goats_fed_day == day:
+		_show_message("The goats are fed for today.")
+		return
+	if not _can_feed_goats():
+		_show_message("The goats need %d crops." % (goats * GOAT_FEED_CROPS))
+		return
+	inventory["crops"] -= goats * GOAT_FEED_CROPS
+	goats_fed_day = day
+	_show_message("You feed the goats.")
+
+
 func _can_feed_hens() -> bool:
 	return hens > 0 and hens_fed_day != day and int(inventory["crops"]) >= hens * HEN_FEED_CROPS
 
@@ -4922,6 +4996,8 @@ func _chore_list() -> Array:
 	chores.append({"name": "Mend a board", "detail": "%d wood, %d fiber, +%d XP. %d left today" % [MEND_WOOD, MEND_FIBER, XP_MEND, _mends_left()], "done": mend_day == day and mends_today > 0, "button": "Mend", "action": "mend", "enabled": _can_mend()})
 	if hens > 0:
 		chores.append({"name": "Feed the hens", "detail": "at the coop, %d crops" % (hens * HEN_FEED_CROPS), "done": hens_fed_day == day, "button": "", "action": "", "enabled": false})
+	if goats > 0:
+		chores.append({"name": "Feed the goats", "detail": "at the barn, %d crops" % (goats * GOAT_FEED_CROPS), "done": goats_fed_day == day, "button": "", "action": "", "enabled": false})
 	return chores
 
 
@@ -5054,6 +5130,22 @@ func _settle_day() -> String:
 				hens -= 1
 				hen_unfed_days = 0
 				notes += " A hungry hen wandered off."
+	if goats > 0:
+		if goats_fed_day == day:
+			goat_unfed_days = 0
+			var room := maxi(0, _pack_capacity() - _pack_used())
+			var milk := mini(goats, room)
+			if milk > 0:
+				inventory["meals"] += milk
+				notes += " The goats gave %d milk%s to drink." % [milk, "" if milk == 1 else "s"]
+			if milk < goats:
+				notes += " Some milk spoiled for want of pack room."
+		else:
+			goat_unfed_days += 1
+			if goat_unfed_days >= GOAT_LEAVE_DAYS:
+				goats -= 1
+				goat_unfed_days = 0
+				notes += " A hungry goat wandered off."
 	if wear >= WEAR_FOX and hens > 0 and randf() < 0.5:
 		hens -= 1
 		notes += " A fox got into the coop and took a hen."
@@ -5472,6 +5564,9 @@ func _save_game() -> void:
 		"hens": hens,
 		"hens_fed_day": hens_fed_day,
 		"hen_unfed_days": hen_unfed_days,
+		"goats": goats,
+		"goats_fed_day": goats_fed_day,
+		"goat_unfed_days": goat_unfed_days,
 		"tips_seen": tips_seen.keys(),
 	}
 	var file := FileAccess.open(_save_path(), FileAccess.WRITE)
@@ -5572,6 +5667,9 @@ func _load_game() -> bool:
 	hens = int(data.get("hens", 0))
 	hens_fed_day = int(data.get("hens_fed_day", -1))
 	hen_unfed_days = int(data.get("hen_unfed_days", 0))
+	goats = int(data.get("goats", 0))
+	goats_fed_day = int(data.get("goats_fed_day", -1))
+	goat_unfed_days = int(data.get("goat_unfed_days", 0))
 	if data.has("tips_seen"):
 		tips_seen = {}
 		for id in data["tips_seen"]:
@@ -6030,6 +6128,52 @@ func _update_hens(delta: float) -> void:
 			hen_wait[i] = randf_range(1.0, 3.5)
 		hen_pos[i] = pos.move_toward(hen_goal[i], 0.45 * delta)
 	hen_layer.queue_redraw()
+
+
+# The goats are drawn on their own layer, from where each one stands in the yard below the barn.
+func _draw_goat_layer() -> void:
+	var center := Vector2(barn_tile.x + BARN_SIZE.x * 0.5, barn_tile.y + BARN_SIZE.y + 0.9) * PX
+	for i in goat_pos.size():
+		var c: Vector2 = center + goat_pos[i] * PX
+		var body := Color("efe6d2")
+		goat_layer.draw_colored_polygon(_goat_ellipse(c + Vector2(0, -PX * 0.05), PX * 0.3, PX * 0.19), body)
+		goat_layer.draw_circle(c + Vector2(PX * 0.28, -PX * 0.22), PX * 0.13, body)
+		goat_layer.draw_circle(c + Vector2(PX * 0.36, -PX * 0.28), PX * 0.03, Color("2a1f16"))
+		goat_layer.draw_line(c + Vector2(PX * 0.22, -PX * 0.32), c + Vector2(PX * 0.12, -PX * 0.42), Color("b8a888"), 2.0)
+		for leg in [-0.18, 0.12]:
+			goat_layer.draw_rect(Rect2(c.x + leg * PX - 1.5, c.y + PX * 0.1, 3, PX * 0.22), Color("b8a888"))
+
+
+func _goat_ellipse(center: Vector2, rx: float, ry: float) -> PackedVector2Array:
+	var pts := PackedVector2Array()
+	for i in 14:
+		var angle := TAU * float(i) / 14.0
+		pts.append(center + Vector2(cos(angle) * rx, sin(angle) * ry))
+	return pts
+
+
+# Goats wander a little in front of the barn, pausing between steps.
+func _update_goats(delta: float) -> void:
+	goat_layer.visible = barn_built and barn_tile.x >= 0 and goats > 0
+	if not goat_layer.visible:
+		return
+	while goat_pos.size() < goats:
+		var start := Vector2(randf_range(-1.1, 1.1), randf_range(-0.2, 0.6))
+		goat_pos.append(start)
+		goat_goal.append(start)
+		goat_wait.append(randf_range(0.0, 2.0))
+	while goat_pos.size() > goats:
+		goat_pos.pop_back()
+		goat_goal.pop_back()
+		goat_wait.pop_back()
+	for i in goats:
+		goat_wait[i] = float(goat_wait[i]) - delta
+		var pos: Vector2 = goat_pos[i]
+		if float(goat_wait[i]) <= 0.0 and pos.distance_to(goat_goal[i]) < 0.02:
+			goat_goal[i] = Vector2(randf_range(-1.1, 1.1), randf_range(-0.2, 0.6))
+			goat_wait[i] = randf_range(1.5, 4.0)
+		goat_pos[i] = pos.move_toward(goat_goal[i], 0.3 * delta)
+	goat_layer.queue_redraw()
 
 
 func _draw_tree(cell: Rect2, pos: Vector2i) -> void:
