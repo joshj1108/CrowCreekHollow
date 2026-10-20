@@ -128,6 +128,22 @@ const WEATHER_NAMES := {
 	"rain": "Rain", "downpour": "Downpour", "snow": "Snow",
 }
 # The light over the farm for each kind of weather. Dark and grey weather is cooler.
+# Body needs: food and water drain through the day, and warmth changes with the temperature.
+const FOOD_PER_HOUR := 2.4
+const WATER_PER_HOUR := 3.0
+const HOT_TEMP := 75.0           # above this, thirst grows faster
+const HOT_WATER_MULT := 1.6
+const COLD_TEMP := 50.0          # below this, being outdoors costs warmth
+const WARMTH_LOSS := 0.35        # warmth lost per hour for each degree below COLD_TEMP
+const WARMTH_OUTDOORS := 3.0     # warmth regained per hour outdoors in mild weather
+const WARMTH_INDOORS := 25.0     # warmth regained per hour in a patched or restored house
+const WARMTH_INDOORS_COLD := 10.0  # ... and in a decrepit or boarded one
+const NEED_HARM_HOURS := 2.0     # one HP lost every this many hours while a need is empty
+const MEAL_FOOD := 45.0
+const CROP_FOOD := 18.0
+const POND_WATER := 40.0
+const SEASON_TEMP := {"Winter": 40.0, "Spring": 51.0, "Summer": 67.0, "Autumn": 54.0}
+const WEATHER_TEMP := {"sunny": 6.0, "cloudy": 0.0, "fog": -2.0, "drizzle": -3.0, "rain": -4.0, "downpour": -6.0, "snow": -10.0}
 const WEATHER_LIGHT := {
 	"sunny": Color(1.0, 0.99, 0.96), "cloudy": Color(0.92, 0.94, 0.97), "fog": Color(0.9, 0.92, 0.94),
 	"drizzle": Color(0.88, 0.91, 0.95), "rain": Color(0.88, 0.91, 0.95), "downpour": Color(0.8, 0.84, 0.9),
@@ -155,6 +171,7 @@ const TIPS := [
 	{"id": "hens", "title": "Hens", "text": "Stand beside the coop, facing it, and press Space to buy and feed hens. A fed hen lays an egg each morning."},
 	{"id": "cellar", "title": "Storing crops", "text": "Stand beside the root cellar and press Space to store or take crops. Nothing spoils in the cellar."},
 	{"id": "smelt", "title": "Smelting and preserving", "text": "Stand beside the furnace and press Space to smelt ore into bars. The smokehouse preserves food, and the cooler keeps fish fresh."},
+	{"id": "needs", "title": "Food, water, and warmth", "text": "Food and water drain through the day, and warmth drops outside on cold days. Eat from the Inventory menu (I), drink from the pond, and warm up in the house. Sleep to be fully warm again."},
 	{"id": "cave", "title": "The mine", "text": "The cave is at the west edge of the farm. Each day it lays out differently, with ore to mine and creatures to watch for."},
 ]
 # Cost to reach the next house stage, and the Carpentry level it needs.
@@ -628,6 +645,10 @@ var plot_two_open := false
 var clock := 0.0
 var current_hour := START_HOUR
 var day := 1
+var food := 100.0
+var water := 100.0
+var warmth := 100.0
+var starve_timer := 0.0      # hours spent with an empty need, toward the next HP lost
 var weather_kind := ""       # today's weather, rolled each morning: see WEATHER_WEIGHTS
 var skill_xp := {"Farming": 0, "Bushcrafting": 0, "Carpentry": 0, "Cleaning": 0, "Fishing": 0, "Cooking": 0, "Combat": 0, "Forestry": 0, "Mining": 0, "Smithing": 0}
 var inventory := {"seeds": STARTING_SEEDS, "pumpkin_seeds": 0, "crops": 0, "fish": 0, "meals": 0, "smoked": 0, "dried": 0, "canned": 0, "fermented": 0}
@@ -704,6 +725,7 @@ var action_bar: ActionBar
 var minimap: Minimap
 var canvas_modulate: CanvasModulate
 var hud_label: Label
+var needs_label: Label
 var message_label: Label
 var player    # Node2D with player.gd attached
 var camera: Camera2D
@@ -855,6 +877,7 @@ func _process(delta: float) -> void:
 	clock += delta
 	_update_hens(delta)
 	current_hour = START_HOUR + clock / DAY_LENGTH * (DAY_END_HOUR - START_HOUR)
+	_update_needs(delta * (DAY_END_HOUR - START_HOUR) / DAY_LENGTH)
 
 	if current_hour >= DAY_END_HOUR:
 		_collapse()
@@ -885,6 +908,9 @@ func _process(delta: float) -> void:
 	fish_layer.visible = zone == Zone.HOMESTEAD
 
 	var minutes := int(fmod(current_hour, 1.0) * 60.0)
+	var low := food < 25.0 or water < 25.0 or warmth < 25.0
+	needs_label.text = "Food %d   Water %d   Warmth %d   %d°F" % [food, water, warmth, roundi(_temperature())]
+	needs_label.modulate = Color(1.0, 0.55, 0.5) if low else Color.WHITE
 	var date := _calendar_date(day)
 	hud_label.text = "Day %d, %s %d (%s)   %s   %02d:%02d   Sanity %d/%d   Coins %d   HP %d/%d" % [
 		day, MONTH_NAMES[date["month"]].substr(0, 3), date["day"], _season_of(date["month"]),
@@ -1341,6 +1367,7 @@ func _build_hud() -> void:
 	layer.add_child(hud_root)
 
 	hud_label = _make_label(hud_root, Vector2(16, 12), 24)
+	needs_label = _make_label(hud_root, Vector2(16, 48), 18)
 	message_label = _make_label(hud_root, Vector2(16, 100), 20)
 	message_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	message_label.custom_minimum_size = Vector2(620, 0)
@@ -1448,6 +1475,8 @@ func _tip_ready(id: String) -> bool:
 			return furnace_built or smokehouse_built
 		"cellar":
 			return cellar_built
+		"needs":
+			return current_hour >= 12.0
 	return false
 
 
@@ -1684,6 +1713,8 @@ func _on_panel_action(action_id: String) -> void:
 			_cook_crops()
 		"eat_meal":
 			_eat_meal()
+		"eat_crop":
+			_eat_crop()
 		"sell_crops":
 			_sell("crops")
 		"sell_fish":
@@ -1766,6 +1797,12 @@ func _skill_rows() -> Array:
 
 func _inventory_rows() -> Array:
 	var rows: Array = [
+		{"section": "Body"},
+		{"name": "Food", "value": "%d of 100" % roundi(food), "progress": food / 100.0},
+		{"name": "Water", "value": "%d of 100" % roundi(water), "progress": water / 100.0},
+		{"name": "Warmth", "value": "%d of 100" % roundi(warmth), "progress": warmth / 100.0},
+		{"name": "Outside", "value": "%d°F, %s" % [roundi(_temperature()), str(WEATHER_NAMES.get(weather_kind, "Overcast")).to_lower()]},
+		{"note": "Food and water drain through the day. Eat a meal or a crop to refill food, and drink from the pond to refill water. Warmth drains outdoors on cold days, refills in the house, and is full again after a night's sleep. An empty need costs HP."},
 		{"section": "Pack"},
 		{"name": "Coins", "value": str(money)},
 		{"grid": _pack_cells(), "columns": 5},
@@ -1800,10 +1837,17 @@ func _inventory_rows() -> Array:
 	rows.append({"section": "Meals"})
 	rows.append({
 		"name": "Eat a meal",
-		"value": "%d ready, +%d sanity" % [int(inventory["meals"]), int(MEAL_SANITY)],
+		"value": "%d ready, +%d sanity, +%d food" % [int(inventory["meals"]), int(MEAL_SANITY), int(MEAL_FOOD)],
 		"button": "Eat",
 		"action": "eat_meal",
 		"enabled": int(inventory["meals"]) > 0,
+	})
+	rows.append({
+		"name": "Eat a raw crop",
+		"value": "%d crops, +%d food" % [int(inventory["crops"]), int(CROP_FOOD)],
+		"button": "Eat",
+		"action": "eat_crop",
+		"enabled": int(inventory["crops"]) > 0,
 	})
 	rows.append({"section": "Materials"})
 	rows.append({"name": "Wood", "value": str(materials["wood"])})
@@ -2284,6 +2328,9 @@ func _interact() -> void:
 		return
 
 	var kind: int = map[tile.y][tile.x]
+	if kind == Tile.WATER:
+		_drink_pond()
+		return
 	if kind == Tile.TREE and GROVE_SPOTS.has(tile - Vector2i(BORDER_X, BORDER_Y)):
 		_chop(tile)
 		return
@@ -2540,7 +2587,67 @@ func _eat_meal() -> void:
 	stats["eaten"] += 1
 	_change_sanity(MEAL_SANITY)
 	hp = mini(max_hp(), hp + HEAL_MEAL)
-	_show_message("You eat a warm meal. Your mind steadies. HP %d/%d" % [hp, max_hp()])
+	food = minf(100.0, food + MEAL_FOOD)
+	_show_message("You eat a warm meal. Your mind steadies. Food %d/100, HP %d/%d" % [food, hp, max_hp()])
+
+
+func _eat_crop() -> void:
+	if int(inventory["crops"]) <= 0:
+		_show_message("You have no crops to eat.")
+		return
+	inventory["crops"] -= 1
+	food = minf(100.0, food + CROP_FOOD)
+	_show_message("You eat a raw crop. Food %d/100" % food)
+
+
+func _drink_pond() -> void:
+	if water >= 100.0:
+		_show_message("You're not thirsty.")
+		return
+	water = minf(100.0, water + POND_WATER)
+	_show_message("You drink from the pond. Cold and muddy, but it helps. Water %d/100" % water)
+
+
+# Needs are checked each hour. While one is empty, HP drains slowly. Sleeping in bed restores warmth.
+func _update_needs(dh: float) -> void:
+	var temp := _temperature()
+	var thirst := WATER_PER_HOUR * (HOT_WATER_MULT if temp >= HOT_TEMP else 1.0)
+	food = maxf(0.0, food - FOOD_PER_HOUR * dh)
+	water = maxf(0.0, water - thirst * dh)
+	if inside:
+		var gain := WARMTH_INDOORS if house_stage >= 2 else WARMTH_INDOORS_COLD
+		warmth = minf(100.0, warmth + gain * dh)
+	elif temp >= COLD_TEMP:
+		warmth = minf(100.0, warmth + WARMTH_OUTDOORS * dh)
+	else:
+		warmth = maxf(0.0, warmth - (COLD_TEMP - temp) * WARMTH_LOSS * dh)
+	if food <= 0.0 or water <= 0.0 or warmth <= 0.0:
+		starve_timer += dh
+		if starve_timer >= NEED_HARM_HOURS:
+			starve_timer -= NEED_HARM_HOURS
+			hp -= 1
+			_show_message(_empty_need_text())
+			if hp <= 0:
+				_fallen()
+	else:
+		starve_timer = 0.0
+
+
+func _empty_need_text() -> String:
+	if food <= 0.0:
+		return "You haven't eaten in too long. You feel weaker. HP %d/%d" % [hp, max_hp()]
+	if water <= 0.0:
+		return "Your throat is dry. You feel weaker. HP %d/%d" % [hp, max_hp()]
+	return "You're freezing, and your hands won't close. HP %d/%d" % [hp, max_hp()]
+
+
+# Temperature in Fahrenheit: the season's average, a daily swing that is coldest near dawn and warmest
+# in the evening, and the day's weather.
+func _temperature() -> float:
+	var season := _season_of(_calendar_date(day)["month"])
+	var base: float = SEASON_TEMP[season]
+	var swing := sin((current_hour - 12.0) / 24.0 * TAU)
+	return base + 7.0 * swing + float(WEATHER_TEMP.get(weather_kind, 0.0))
 
 
 # --- Achievements ------------------------------------------------------------
@@ -3853,6 +3960,7 @@ func _rest_at_camp() -> void:
 		return
 	stats["slept"] += 1
 	_change_sanity(SLEEP_SANITY)
+	warmth = 100.0
 	_end_day("You rest by the campsite through the night.", false)
 
 
@@ -4681,6 +4789,7 @@ func _try_sleep() -> void:
 		return
 	stats["slept"] += 1
 	_change_sanity(SLEEP_SANITY)
+	warmth = 100.0
 	# Sleeping keeps you in bed, so the house is not left.
 	_end_day("You sleep through the night.", false)
 
@@ -5000,6 +5109,10 @@ func _save_game() -> void:
 	var data := {
 		"day": day,
 		"weather_kind": weather_kind,
+		"food": food,
+		"water": water,
+		"warmth": warmth,
+		"starve_timer": starve_timer,
 		"skill_xp": skill_xp,
 		"inventory": inventory,
 		"materials": materials,
@@ -5071,6 +5184,10 @@ func _load_game() -> bool:
 
 	day = int(data.get("day", 1))
 	weather_kind = str(data.get("weather_kind", ""))
+	food = float(data.get("food", 100.0))
+	water = float(data.get("water", 100.0))
+	warmth = float(data.get("warmth", 100.0))
+	starve_timer = float(data.get("starve_timer", 0.0))
 	_merge_ints(skill_xp, data.get("skill_xp"))
 	_merge_ints(inventory, data.get("inventory"))
 	_merge_ints(materials, data.get("materials"))

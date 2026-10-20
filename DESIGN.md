@@ -66,7 +66,7 @@ The farmer is drawn in code. A straw hat with a band, a shirt under blue overall
 - Darkness starts at 19:00.
 - The bed can be used from **18:00 to 03:00**. Using it saves the game and ends the day.
 - If you aren't in bed by **03:00**, you collapse. The day ends, the game saves, and your **sanity limit drops by 5 permanently**. A cleanse can recover it (see Sanity).
-- Crops grow one stage per day, and brush piles respawn each morning. Thicket piles appear at Bushcrafting 3.
+- Crops grow one stage per day. Brush piles respawn each morning. Thicket piles appear at Bushcrafting 3.
 
 ## Calendar, seasons, and weather
 
@@ -222,7 +222,16 @@ The house is drawn in four stages that match its repair level. **Decrepit** has 
 | Brass Lantern | 4 tiles | 4 wood, 4 fiber, 2 resin | 4 |
 | Hollow Lantern | 6 tiles, flickers | 6 wood, 6 fiber, 4 resin | 6 |
 
-- No hunger or thirst.
+- Hunger and thirst are covered under Body needs below.
+
+## Body needs
+
+- Three meters run from 0 to 100: **Food**, **Water**, and **Warmth**. They show on a line under the top bar, in red when one is under 25, and in full in the Body section of the Inventory menu (I).
+- **Food** drains about 2.4 an hour, so it runs out in about two days. A **meal** gives +45 food (and its usual sanity), and a **raw crop** gives +18. Both are eaten from the Inventory's Meals section.
+- **Water** drains about 3 an hour, and 1.6 times faster on hot days (75°F and up). Face the **pond** and press Space to drink, for +40 water.
+- **Warmth** depends on the temperature. Outside it drains when it's below 50°F, faster the colder it gets. In mild weather it slowly refills. Inside the house it refills, faster once the house is patched. Sleeping in bed fills it to 100.
+- If any need is empty, you lose 1 HP every 2 hours until it's filled. Dropping to 0 HP collapses you at the homestead, as in the wilds.
+- **Temperature** is shown in °F. It's the season's average (winter 40, spring 51, summer 67, autumn 54), plus a daily swing of about 7 degrees, coldest near dawn and warmest in the evening, plus the day's weather (sun +6, overcast 0, fog −2, drizzle −3, rain −4, downpour −6, snow −10).
 
 ## Sanity and horror
 
