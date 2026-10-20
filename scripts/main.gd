@@ -1876,6 +1876,10 @@ func _on_panel_action(action_id: String) -> void:
 		craft_tab = action_id.trim_prefix("craft_tab:")
 		_refresh_panel()
 		return
+	if action_id.begins_with("inv_pick:"):
+		inventory_selected = action_id.trim_prefix("inv_pick:")
+		_refresh_panel()
+		return
 	if action_id.begins_with("craft_pick:"):
 		craft_selected = action_id.trim_prefix("craft_pick:")
 		_refresh_panel()
@@ -1992,38 +1996,43 @@ func _skill_rows() -> Array:
 	return rows
 
 
+# The pack, seeds, and materials are a grid of picture tiles. Picking one shows its details beside the grid.
+const MATERIAL_INFO := {
+	"wood": {"name": "Wood", "icon": "log", "tint": "6b4a3a", "desc": "Burned for cooking and used in most early crafts."},
+	"fiber": {"name": "Fiber", "icon": "fiber", "tint": "8a8a4a", "desc": "Plant fiber for wraps, leggings, and the hose."},
+	"resin": {"name": "Resin", "icon": "resin", "tint": "b5703a", "desc": "Sticky sap for caps, amulets, and the hose."},
+	"hardwood": {"name": "Hardwood", "icon": "log", "tint": "4a3426", "desc": "Dense wood for stronger gear and bolts."},
+	"stone": {"name": "Stone", "icon": "stone", "tint": "7a7a7a", "desc": "Rough stone from the quarry and the cave."},
+	"copper_ore": {"name": "Copper ore", "icon": "ore", "tint": "b87333", "desc": "Raw copper. Smelt it at the furnace."},
+	"iron_ore": {"name": "Iron ore", "icon": "ore", "tint": "6b6b6b", "desc": "Raw iron. Smelt it at the furnace."},
+	"copper_bar": {"name": "Copper bar", "icon": "bar", "tint": "c97f45", "desc": "Smelted copper, ready for smithing."},
+	"iron_bar": {"name": "Iron bar", "icon": "bar", "tint": "8d98a6", "desc": "Smelted iron, ready for smithing."},
+	"arrows": {"name": "Arrows", "icon": "arrow", "tint": "6b4a3a", "desc": "Ammunition for the bow. Each shot uses one."},
+	"bolts": {"name": "Bolts", "icon": "arrow", "tint": "6b6b6b", "desc": "Ammunition for ranged weapons. Each shot uses one."},
+}
+var inventory_selected := ""   # the pack item whose details show; remembered while the panel is open
+
+
 func _inventory_rows() -> Array:
-	var rows: Array = [
-		{"section": "Body"},
-		# Meters are rounded so the panel only rebuilds when a shown number changes.
-		{"name": "Food", "progress": roundi(food) / 100.0},
-		{"name": "Water", "progress": roundi(water) / 100.0},
-		{"name": "Warmth", "progress": roundi(warmth) / 100.0},
-		{"name": "Outside", "value": "%d°F, %s" % [roundi(_temperature()), str(WEATHER_NAMES.get(weather_kind, "Overcast")).to_lower()]},
-		{
-			"name": "Eat a meal",
-			"value": "%d ready. +%d food, +%d sanity" % [int(inventory["meals"]), int(MEAL_FOOD), int(MEAL_SANITY)],
-			"button": "Eat",
-			"action": "eat_meal",
-			"enabled": int(inventory["meals"]) > 0,
-		},
-		{
-			"name": "Eat a raw crop",
-			"value": "%d in the pack. +%d food" % [int(inventory["crops"]), int(CROP_FOOD)],
-			"button": "Eat",
-			"action": "eat_crop",
-			"enabled": int(inventory["crops"]) > 0,
-		},
-		{"note": "Food and water drain through the day. Drink from the pond or the pump to refill water. Warmth drains outdoors on cold days, refills in the house, and is full again after a night's sleep. An empty need costs HP."},
-		{"section": "Pack"},
-		{"name": "Coins", "value": str(money)},
-		{"grid": _pack_cells(), "columns": 5},
-		{
-			"name": "Pack space",
-			"value": "%d/%d" % [_pack_used(), _pack_capacity()],
-			"progress": float(_pack_used()) / float(_pack_capacity()),
-		},
-	]
+	var rows: Array = [{"section": "Pack"}]
+	var tiles := _inventory_tiles()
+	if tiles.is_empty():
+		rows.append({"note": "Nothing in the pack yet. Harvest, catch, or gather to fill it."})
+	else:
+		var marked: Array = []
+		var chosen := _inventory_chosen(tiles)
+		for t in tiles:
+			var tile: Dictionary = t.duplicate()
+			tile["selected"] = str(t["key"]) == str(chosen["key"])
+			tile["action"] = "inv_pick:" + str(t["key"])
+			marked.append(tile)
+		rows.append({"split": {"recipes": marked, "columns": 4, "detail": chosen}})
+	rows.append({"name": "Coins", "value": str(money)})
+	rows.append({
+		"name": "Pack space",
+		"value": "%d/%d" % [_pack_used(), _pack_capacity()],
+		"progress": float(_pack_used()) / float(_pack_capacity()),
+	})
 	if bag_tier < BAG_TIERS.size():
 		var tier: Dictionary = BAG_TIERS[bag_tier]
 		rows.append({
@@ -2034,8 +2043,13 @@ func _inventory_rows() -> Array:
 			"enabled": _can_upgrade_bag(),
 		})
 	rows.append({"note": "Crops, fish, meals, and preserved goods fill the pack. Seeds have their own pouch, and materials are uncapped for now."})
-	rows.append({"section": "Seed pouch"})
-	rows.append({"grid": _seed_cells(), "columns": 5})
+	rows.append({"section": "Body"})
+	# Meters are rounded so the panel only rebuilds when a shown number changes.
+	rows.append({"name": "Food", "progress": roundi(food) / 100.0})
+	rows.append({"name": "Water", "progress": roundi(water) / 100.0})
+	rows.append({"name": "Warmth", "progress": roundi(warmth) / 100.0})
+	rows.append({"name": "Outside", "value": "%d°F, %s" % [roundi(_temperature()), str(WEATHER_NAMES.get(weather_kind, "Overcast")).to_lower()]})
+	rows.append({"note": "Food and water drain through the day. Drink from the pond or the pump to refill water. Warmth drains outdoors on cold days, refills in the house, and is full again after a night's sleep. An empty need costs HP."})
 	rows.append({"section": "Planting"})
 	rows.append({"name": "Planting with", "value": _seed_label(selected_seed)})
 	var growing := crops.size()
@@ -2049,11 +2063,64 @@ func _inventory_rows() -> Array:
 			"action": "switch_seed",
 			"enabled": true,
 		})
-	rows.append({"section": "Materials"})
-	rows.append({"name": "Wood", "value": str(materials["wood"])})
-	rows.append({"name": "Fiber", "value": str(materials["fiber"])})
-	rows.append({"name": "Resin", "value": str(materials["resin"])})
 	return rows
+
+
+# One tile per stack in the pack, then the seed pouch, then the materials you hold.
+func _inventory_tiles() -> Array:
+	var tiles: Array = []
+	var n := int(inventory["crops"])
+	if n > 0:
+		tiles.append(_stack_tile("pack:crop", "Crop", "crop", "8fd16b", n, "in the pack",
+			"Harvested from the field. Eat it raw, or cook it for a better meal. Sells for %d coins." % SELL_CROP, "eat_crop", "Eat"))
+	n = int(inventory["fish"])
+	if n > 0:
+		tiles.append(_stack_tile("pack:fish", "Fish", "fish", "6fb8d9", n, "in the pack",
+			"Caught from the pond. Spoils overnight unless it is kept in the cooler. Sells for %d coins." % SELL_FISH, "", ""))
+	n = int(inventory["meals"])
+	if n > 0:
+		tiles.append(_stack_tile("pack:meal", "Meal", "bowl", "e0a050", n, "in the pack",
+			"A cooked meal. Restores %d food and %d sanity. Sells for %d coins." % [int(MEAL_FOOD), int(MEAL_SANITY), SELL_MEAL], "eat_meal", "Eat"))
+	for entry in PRESERVE:
+		n = int(inventory[entry["kind"]])
+		if n > 0:
+			tiles.append(_stack_tile("pack:" + str(entry["kind"]), str(entry["short"]), "jar", str(entry["color"]), n, "in the pack",
+				"Preserved food. Keeps in the pack. Sells for %d coins." % int(entry["price"]), "", ""))
+	var turnip_ok := true
+	tiles.append(_stack_tile("seed:turnip", "Turnip seeds", "seed", "a8d46f", int(inventory["seeds"]), "in the pouch",
+		"Planted in tilled soil. Kept in the seed pouch.", "", ""))
+	var pumpkin_ok := _level("Farming") >= PUMPKIN_LEVEL
+	var pumpkin := _stack_tile("seed:pumpkin", "Pumpkin seeds", "seed", "d98a35", int(inventory["pumpkin_seeds"]), "in the pouch",
+		"Larger harvest of three crops per plant. Needs Farming %d to plant." % PUMPKIN_LEVEL, "", "")
+	pumpkin["enabled"] = pumpkin_ok
+	pumpkin["level_ok"] = pumpkin_ok
+	if not pumpkin_ok:
+		pumpkin["level_text"] = "Needs Farming %d" % PUMPKIN_LEVEL
+	tiles.append(pumpkin)
+	for key in MATERIAL_INFO.keys():
+		n = int(materials.get(key, 0))
+		if n > 0:
+			var info: Dictionary = MATERIAL_INFO[key]
+			tiles.append(_stack_tile("mat:" + str(key), str(info["name"]), str(info["icon"]), str(info["tint"]), n, "held",
+				str(info["desc"]), "", ""))
+	return tiles
+
+
+func _stack_tile(key: String, name: String, icon: String, tint: String, count: int, unit: String, desc: String, action: String, button: String) -> Dictionary:
+	var tile := {
+		"key": key, "name": "%s x%d" % [name, count], "icon": icon, "tint": tint, "desc": desc,
+		"level_text": "%d %s" % [count, unit], "level_ok": true, "costs": [], "enabled": true, "action": action,
+	}
+	if button != "":
+		tile["button"] = button
+	return tile
+
+
+func _inventory_chosen(tiles: Array) -> Dictionary:
+	for t in tiles:
+		if str(t["key"]) == inventory_selected:
+			return t
+	return tiles[0] if not tiles.is_empty() else {}
 
 
 const CRAFT_TABS := [

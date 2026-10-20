@@ -141,7 +141,7 @@ Saves from before this change reset chapter progress. Stat-based achievements re
 ## Pack, bags, and storage
 
 - The **pack** holds crops, fish, and meals. Seeds have their own pouch and don't count. Materials are uncapped for now.
-- The pack starts at **20 slots**. The Inventory panel shows it as a grid of slots, one per unit, like a bag in World of Warcraft or Old School RuneScape. Filled slots show what they hold, and empty slots are dark. The next bag is listed under the grid.
+- The pack starts at **20 slots**. The Inventory panel (I) shows what you carry as a grid of picture tiles, one per kind with its count, like the Craft panel: the pack's crops, fish, meals, and preserved goods, then the seed pouch and the materials you hold. Picking a tile fills the detail card beside the grid, which holds the **Eat** button for crops and meals. The pack's slots used and the next bag are listed under the grid. The Body meters and the planting options sit below it.
 - The seed pouch is a small grid with a count on each seed type.
 - The Gear panel is a paper-doll grid of nine slots. The slots and crafting are described under Gear and crafting below.
 - **Bags** (bought with coins, fiber, wood, and Carpentry level):
@@ -260,7 +260,7 @@ The house is drawn in four stages that match its repair level. **Decrepit** has 
 
 ## Body needs
 
-- Three meters run from 0 to 100: **Food**, **Water**, and **Warmth**. They show on a line under the top bar, in red when one is under 25, and in full in the Body section of the Inventory menu (I).
+- Three meters run from 0 to 100: **Food**, **Water**, and **Warmth**. They show on a line under the top bar, in red when one is under 25, and in full in the Body section of the Inventory menu (I), below the pack.
 - **Food** drains about 2.4 an hour, so it runs out in about two days. A **meal** gives +45 food (and its usual sanity), and a **raw crop** gives +18. Both are eaten from the Inventory's Meals section.
 - **Water** drains about 3 an hour, and 1.6 times faster on hot days (75°F and up). Face the **pond** and press Space to drink, for +40 water.
 - **Warmth** depends on the temperature. Outside it drains when it's below 50°F, faster the colder it gets. In mild weather it slowly refills. Inside the house it refills, faster once the house is patched. Sleeping in bed fills it to 100.

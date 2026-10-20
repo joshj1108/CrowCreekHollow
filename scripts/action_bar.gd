@@ -635,14 +635,15 @@ func _build_detail(recipe: Dictionary) -> Control:
 			line.add_child(count)
 			costs.add_child(line)
 
-	var button := Button.new()
-	button.text = str(recipe.get("button", "Make"))
-	button.custom_minimum_size = Vector2(0, 40)
-	button.focus_mode = Control.FOCUS_ALL
-	button.disabled = not bool(recipe.get("enabled", false)) or str(recipe.get("action", "")) == ""
-	_style_button(button, false)
-	button.pressed.connect(_on_action_pressed.bind(str(recipe.get("action", ""))))
-	block.add_child(button)
+	if recipe.has("button"):
+		var button := Button.new()
+		button.text = str(recipe.get("button", "Make"))
+		button.custom_minimum_size = Vector2(0, 40)
+		button.focus_mode = Control.FOCUS_ALL
+		button.disabled = not bool(recipe.get("enabled", false)) or str(recipe.get("action", "")) == ""
+		_style_button(button, false)
+		button.pressed.connect(_on_action_pressed.bind(str(recipe.get("action", ""))))
+		block.add_child(button)
 	return card
 
 
@@ -725,6 +726,17 @@ class RecipeIcon extends Control:
 			out.append(_pt(pair[0], pair[1]))
 		return out
 
+	# An ellipse as a polygon, centred on (cx, cy) with radii rx and ry.
+	func _ellipse(cx: float, cy: float, rx: float, ry: float) -> PackedVector2Array:
+		var out := PackedVector2Array()
+		for i in range(24):
+			var a := TAU * float(i) / 24.0
+			out.append(_pt(cx + cos(a) * rx, cy + sin(a) * ry))
+		return out
+
+	func _rock() -> PackedVector2Array:
+		return _poly([[0.12, 0.7], [0.25, 0.3], [0.55, 0.15], [0.88, 0.35], [0.82, 0.78], [0.45, 0.88]])
+
 	func _draw() -> void:
 		_sz = minf(size.x, size.y)
 		_org = (size - Vector2(_sz, _sz)) * 0.5
@@ -795,6 +807,44 @@ class RecipeIcon extends Control:
 				draw_rect(Rect2(_pt(0.3, 0.36), Vector2(0.4, 0.5) * _sz), dark)
 				draw_circle(_pt(0.5, 0.6), 0.14 * _sz, Color("e8c060"))
 				draw_colored_polygon(_poly([[0.22, 0.38], [0.5, 0.12], [0.78, 0.38]]), tint)
+			"crop":
+				draw_line(_pt(0.5, 0.95), _pt(0.5, 0.45), dark, 0.05 * _sz)
+				draw_colored_polygon(_ellipse(0.32, 0.36, 0.2, 0.12), light)
+				draw_colored_polygon(_ellipse(0.68, 0.34, 0.2, 0.12), light)
+				draw_colored_polygon(_ellipse(0.5, 0.66, 0.24, 0.22), tint)
+			"fish":
+				draw_colored_polygon(_ellipse(0.42, 0.5, 0.36, 0.22), tint)
+				draw_colored_polygon(_poly([[0.72, 0.5], [0.98, 0.25], [0.98, 0.75]]), dark)
+				draw_circle(_pt(0.24, 0.45), 0.04 * _sz, dark)
+			"jar":
+				draw_rect(Rect2(_pt(0.3, 0.12), Vector2(0.4, 0.12) * _sz), metal)
+				draw_rect(Rect2(_pt(0.22, 0.22), Vector2(0.56, 0.7) * _sz), tint)
+				draw_rect(Rect2(_pt(0.3, 0.45), Vector2(0.4, 0.2) * _sz), light)
+			"seed":
+				draw_colored_polygon(_ellipse(0.5, 0.62, 0.3, 0.28), tint)
+				draw_colored_polygon(_poly([[0.4, 0.4], [0.6, 0.4], [0.5, 0.2]]), dark)
+				draw_circle(_pt(0.42, 0.62), 0.04 * _sz, light)
+				draw_circle(_pt(0.58, 0.66), 0.04 * _sz, light)
+			"log":
+				draw_rect(Rect2(_pt(0.2, 0.32), Vector2(0.6, 0.36) * _sz), tint)
+				draw_circle(_pt(0.2, 0.5), 0.18 * _sz, light)
+				draw_circle(_pt(0.2, 0.5), 0.08 * _sz, dark)
+			"fiber":
+				for x in [0.2, 0.4, 0.6, 0.8]:
+					draw_line(_pt(x, 0.9), _pt(x + 0.1, 0.1), tint, 0.05 * _sz)
+			"resin":
+				draw_colored_polygon(_ellipse(0.5, 0.56, 0.36, 0.3), tint)
+				draw_circle(_pt(0.4, 0.44), 0.08 * _sz, light)
+			"stone":
+				draw_colored_polygon(_rock(), tint)
+				draw_line(_pt(0.3, 0.45), _pt(0.5, 0.6), dark, 0.03 * _sz)
+			"ore":
+				draw_colored_polygon(_rock(), tint)
+				for sparkle in [[0.4, 0.5], [0.6, 0.62], [0.5, 0.36]]:
+					draw_circle(_pt(sparkle[0], sparkle[1]), 0.05 * _sz, light)
+			"bar":
+				draw_colored_polygon(_poly([[0.12, 0.62], [0.28, 0.34], [0.72, 0.34], [0.88, 0.62], [0.72, 0.74], [0.28, 0.74]]), tint)
+				draw_line(_pt(0.3, 0.42), _pt(0.7, 0.42), light, 0.04 * _sz)
 			_:
 				draw_circle(_pt(0.5, 0.5), 0.3 * _sz, tint)
 
