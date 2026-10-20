@@ -734,7 +734,11 @@ var action_bar: ActionBar
 var minimap: Minimap
 var canvas_modulate: CanvasModulate
 var hud_label: Label
-var needs_label: Label
+var needs_box: HBoxContainer
+var food_bar: ProgressBar
+var water_bar: ProgressBar
+var warmth_bar: ProgressBar
+var needs_temp: Label
 var message_label: Label
 var player    # Node2D with player.gd attached
 var camera: Camera2D
@@ -918,8 +922,12 @@ func _process(delta: float) -> void:
 
 	var minutes := int(fmod(current_hour, 1.0) * 60.0)
 	var low := food < 25.0 or water < 25.0 or warmth < 25.0
-	needs_label.text = "Food %d   Water %d   Warmth %d   %d°F" % [food, water, warmth, roundi(_temperature())]
-	needs_label.modulate = Color(1.0, 0.55, 0.5) if low else Color.WHITE
+	food_bar.value = food
+	water_bar.value = water
+	warmth_bar.value = warmth
+	for bar in [food_bar, water_bar, warmth_bar]:
+		bar.modulate = Color(1.0, 0.55, 0.5) if low and bar.value < 25.0 else Color.WHITE
+	needs_temp.text = "%d°F" % roundi(_temperature())
 	var date := _calendar_date(day)
 	hud_label.text = "Day %d, %s %d (%s)   %s   %02d:%02d   Sanity %d/%d   Coins %d   HP %d/%d" % [
 		day, MONTH_NAMES[date["month"]].substr(0, 3), date["day"], _season_of(date["month"]),
@@ -1383,7 +1391,15 @@ func _build_hud() -> void:
 	layer.add_child(hud_root)
 
 	hud_label = _make_label(hud_root, Vector2(16, 12), 24)
-	needs_label = _make_label(hud_root, Vector2(16, 48), 18)
+	# Food, water, and warmth as bars under the top line. The temperature sits at the end.
+	needs_box = HBoxContainer.new()
+	needs_box.position = Vector2(16, 50)
+	needs_box.add_theme_constant_override("separation", 18)
+	hud_root.add_child(needs_box)
+	food_bar = _make_need_bar("Food")
+	water_bar = _make_need_bar("Water")
+	warmth_bar = _make_need_bar("Warmth")
+	needs_temp = _make_label(needs_box, Vector2.ZERO, 18)
 	message_label = _make_label(hud_root, Vector2(16, 100), 20)
 	message_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	message_label.custom_minimum_size = Vector2(620, 0)
@@ -1423,6 +1439,34 @@ func _make_label(parent: Node, pos: Vector2, font_size: int) -> Label:
 	label.add_theme_constant_override("outline_size", 6)
 	parent.add_child(label)
 	return label
+
+
+# A small labelled bar for one body need. It fills from 0 to 100.
+func _make_need_bar(title: String) -> ProgressBar:
+	var holder := HBoxContainer.new()
+	holder.add_theme_constant_override("separation", 6)
+	needs_box.add_child(holder)
+	var name_label := _make_label(holder, Vector2.ZERO, 16)
+	name_label.text = title
+	var bar := ProgressBar.new()
+	bar.show_percentage = false
+	bar.min_value = 0.0
+	bar.max_value = 100.0
+	bar.custom_minimum_size = Vector2(110, 14)
+	bar.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	bar.add_theme_stylebox_override("background", _bar_box(Color(0.08, 0.06, 0.05, 0.85)))
+	bar.add_theme_stylebox_override("fill", _bar_box(Color("c9a24a")))
+	holder.add_child(bar)
+	return bar
+
+
+func _bar_box(color: Color) -> StyleBoxFlat:
+	var box := StyleBoxFlat.new()
+	box.bg_color = color
+	box.set_corner_radius_all(3)
+	box.border_color = Color(0.05, 0.04, 0.03, 0.9)
+	box.set_border_width_all(1)
+	return box
 
 
 # Applies what loading saved: position, indoors or not, and the open panel.
@@ -1828,9 +1872,9 @@ func _inventory_rows() -> Array:
 	var rows: Array = [
 		{"section": "Body"},
 		# Meters are rounded so the panel only rebuilds when a shown number changes.
-		{"name": "Food", "value": "%d of 100" % roundi(food), "progress": roundi(food) / 100.0},
-		{"name": "Water", "value": "%d of 100" % roundi(water), "progress": roundi(water) / 100.0},
-		{"name": "Warmth", "value": "%d of 100" % roundi(warmth), "progress": roundi(warmth) / 100.0},
+		{"name": "Food", "progress": roundi(food) / 100.0},
+		{"name": "Water", "progress": roundi(water) / 100.0},
+		{"name": "Warmth", "progress": roundi(warmth) / 100.0},
 		{"name": "Outside", "value": "%d°F, %s" % [roundi(_temperature()), str(WEATHER_NAMES.get(weather_kind, "Overcast")).to_lower()]},
 		{
 			"name": "Eat a meal",
