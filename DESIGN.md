@@ -300,7 +300,7 @@ Each gathering skill has its own tool. The tool's material sets what it can brea
 
 Levels here are placeholders and will be tuned once the systems exist.
 
-**Open conflict:** the left hand holds the lantern, but a shield also belongs in the offhand. Either the shield gets its own slot, or the lantern moves elsewhere. This needs a decision before shields are built.
+**Decided:** the offhand (left hand) is for the shield. The lantern moves to a **belt** slot, so it can be worn without taking a hand. The lantern keeps its light ring and upgrades as before. Moving it is a grid change to be made when shields are built.
 
 ## Deferred
 
