@@ -493,7 +493,9 @@ const LOW_SANITY := 30.0
 const SLEEP_SANITY := 25.0
 const TIDY_SANITY := 10.0
 const COLLAPSE_SANITY_PENALTY := 5   # permanent cap reduction, curable with a cleanse
-const SAVE_PATH := "user://hallowvale_save.json"
+var save_slot := 1                  # which save slot this game reads and writes
+var world_started := false         # false while the start screen is up
+var title_menu: TitleMenu
 
 # Night events: picked by day so the nights vary. "shadow" says where it appears.
 const NIGHT_EVENTS := [
@@ -662,7 +664,22 @@ func _ready() -> void:
 	_build_map()
 	_generate_world()
 	_find_pond_edges()
-	var loaded := _load_game()
+	# The start screen comes first. The world is built once the player picks Continue, New Game, or a slot.
+	title_menu = TitleMenu.new()
+	title_menu.settings_rows = _settings_rows()
+	title_menu.start_requested.connect(_on_title_start)
+	title_menu.quit_requested.connect(func() -> void: get_tree().quit())
+	add_child(title_menu)
+
+
+func _save_path() -> String:
+	return TitleMenu.slot_path(save_slot)
+
+
+# Starts the world from the start screen: Continue or Load Game read the slot, New Game starts fresh.
+func _on_title_start(mode: String, slot: int) -> void:
+	save_slot = slot
+	var loaded := mode != "new" and _load_game()
 	if not loaded:
 		_respawn_brush()
 	_build_interior()
@@ -673,9 +690,16 @@ func _ready() -> void:
 	if loaded:
 		_restore_saved_state()
 		_show_message("Welcome back. Day %d." % day)
+	else:
+		_show_message("A new season begins. Day 1.")
+	world_started = true
+	title_menu.queue_free()
+	title_menu = null
 
 
 func _process(delta: float) -> void:
+	if not world_started:
+		return
 	if not in_cave and not _in_village():
 		var cam := camera.get_screen_center_position()
 		var cam_tile := Vector2i(floori(cam.x / PX), floori(cam.y / PX))
@@ -745,6 +769,8 @@ func _process(delta: float) -> void:
 
 
 func _draw() -> void:
+	if not world_started:
+		return
 	if in_cave:
 		_draw_cave()
 		return
@@ -4719,15 +4745,15 @@ func _save_game() -> void:
 		"hens_fed_day": hens_fed_day,
 		"hen_unfed_days": hen_unfed_days,
 	}
-	var file := FileAccess.open(SAVE_PATH, FileAccess.WRITE)
+	var file := FileAccess.open(_save_path(), FileAccess.WRITE)
 	if file != null:
 		file.store_string(JSON.stringify(data))
 
 
 func _load_game() -> bool:
-	if not FileAccess.file_exists(SAVE_PATH):
+	if not FileAccess.file_exists(_save_path()):
 		return false
-	var parsed: Variant = JSON.parse_string(FileAccess.get_file_as_string(SAVE_PATH))
+	var parsed: Variant = JSON.parse_string(FileAccess.get_file_as_string(_save_path()))
 	if typeof(parsed) != TYPE_DICTIONARY:
 		return false
 	var data: Dictionary = parsed
