@@ -204,7 +204,7 @@ Achievements track stats and never reset. Each pays a small reward. Earning all 
 ## Saving
 
 - The game saves **only** when you sleep in bed or collapse at 03:00.
-- Saved: day, skill XP, inventory (including meals), coins, bag upgrades, root cellar, cooler, and smokehouse (built, and what they hold), materials, stats, story chapters done, achievements done, selected seed, lantern tier, house stage, tidy/mend/cleanse days, sanity and sanity penalty, crops (with kind), brush piles, **player position**, whether you were **inside the house**, and the **open panel**.
+- Saved: day, skill XP, inventory (including meals), coins, bag upgrades, root cellar, cooler, and smokehouse (built, and what they hold), materials, stats, story chapters done, achievements done, selected seed, lantern tier, house stage, house wear, coop and hens, tidy/mend/cleanse days, sanity and sanity penalty, crops (with kind), brush piles, **player position**, whether you were **inside the house**, and the **open panel**.
 - Quitting mid-day loses that day's progress since the last save. Position and panel are saved at the same moment, so they reflect the last sleep or collapse.
 
 ## The world: the portal, the road, and the wilds
@@ -382,6 +382,16 @@ A cave on the homestead, entered from the farm's west edge. It is the only place
 - **Ore:** copper and iron set into the rock walls. Copper needs a stone pick and Mining 2. Iron needs a copper pick and Mining 5, and only sits deeper in the cave. Each node gives one ore and 12 Mining XP. Broken nodes stay broken until the next day, and that holds through a save.
 - **Creatures:** ordinary animals, no supernatural ones. Three bats (fast, weak), two lizards (slow, tougher), and two snakes (quick, hard-hitting). They spawn away from the entrance, and each visit starts with them back in their places. Kills give Combat XP and a small chance of fiber or resin.
 - **Saving:** a save made in the cave returns you to the homestead when loaded.
+
+## Upkeep, hens, and the third plot
+
+Keeping the homestead running is the daily work. Each part is at base level for now, to be deepened one project at a time.
+
+- **Wear:** the house wears by 1 each night, up to 10. Mending a board takes 2 off, a tidy takes 1, and a repair takes 3. At wear 6 or more, rain ruins a random crop overnight. The Upkeep section of the House panel shows it.
+- **Coop:** built from the House panel for 6 wood, 4 fiber, and Carpentry 2. It sits behind the house, not on the farm grid.
+- **Hens:** 12 coins each, up to four. Feed them once a day from your crops (1 crop per hen). Each fed hen lays an egg overnight, which goes into your pack as a meal, as far as there is room. Two unfed days in a row and a hen wanders off.
+- **Predators:** at wear 4 or more, a fox can get into the coop on a given night and take a hen.
+- **Third plot:** opens at Farming 4 once the house is Patched. It sits between the two paths, south of the first plot.
 
 ## Deferred
 

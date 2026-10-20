@@ -30,6 +30,9 @@ const HOUSE_DOOR_IY := HOUSE_IY + HOUSE_H - 1
 # The first plot is open from the start. The second is overgrown until Farming 2.
 const PLOT_ONE := Rect2i(4, 4, 8, 6)     # inner x, y, width, height
 const PLOT_TWO := Rect2i(4, 14, 8, 6)
+# The third plot opens at Farming 4 once the house is Patched. It sits between the paths.
+const PLOT_THREE := Rect2i(14, 14, 5, 6)
+const PLOT_THREE_LEVEL := 4
 
 # The walk-in interior sits below the farm, out of view of it.
 const INT_W := 14
@@ -438,6 +441,20 @@ const TIDY_CLEANING_BONUS := 5     # extra sanity from a tidy at Cleaning 2
 const XP_MEND := 15
 const MEND_WOOD := 1
 const MEND_FIBER := 1
+# Upkeep: the house wears a little each night. Mending, tidying, and repairs bring it down.
+const WEAR_MAX := 10
+const WEAR_PER_NIGHT := 1
+const WEAR_MEND := 2
+const WEAR_TIDY := 1
+const WEAR_REPAIR := 3
+const WEAR_RUNDOWN := 6       # at this wear, rain ruins a crop overnight
+const WEAR_FOX := 4           # at this wear, a fox can get into the coop
+# Livestock: hens in a coop behind the house. A fed hen lays an egg each morning.
+const COOP_COST := {"wood": 6, "fiber": 4, "level": 2}
+const COOP_HENS_MAX := 4
+const HEN_PRICE := 12
+const HEN_FEED_CROPS := 1
+const HEN_LEAVE_DAYS := 2     # unfed this many days in a row, and a hen wanders off
 const MEND_DAILY_LIMIT := 2   # keeps Carpentry training to a few days per level
 const CLEANSE_LEVEL := 3      # Cleaning level needed to cleanse the house
 const CLEANSE_CROPS := 2      # crops offered per cleanse
@@ -555,6 +572,12 @@ var house_stage := 0
 var tidied_day := 0
 var mend_day := 0                   # the day the mend count applies to
 var mends_today := 0
+var wear := 0                       # house upkeep, 0 to WEAR_MAX
+var coop_built := false
+var hens := 0
+var hens_fed_day := -1              # the last day the hens were fed
+var hen_unfed_days := 0
+var plot_three_open := false
 var cleanse_day := 0
 var sanity := SANITY_MAX
 var sanity_penalty := 0             # permanent cap reduction from collapsing
@@ -813,6 +836,8 @@ func _build_map() -> void:
 					t = Tile.SOIL
 				if PLOT_TWO.has_point(Vector2i(ix, iy)):
 					t = Tile.FALLOW   # cleared once Farming reaches level 2
+				if PLOT_THREE.has_point(Vector2i(ix, iy)):
+					t = Tile.FALLOW   # cleared once Farming 4 and a Patched house
 				if ix >= INNER_W - 6 and iy >= INNER_H - 6:
 					t = Tile.WATER
 				if ix >= HOUSE_IX and ix < HOUSE_IX + HOUSE_W and iy >= HOUSE_IY and iy < HOUSE_IY + HOUSE_H:
@@ -1080,6 +1105,15 @@ func _on_panel_action(action_id: String) -> void:
 		return
 	if action_id == "build_furnace":
 		_build_furnace()
+		return
+	if action_id == "build_coop":
+		_build_coop()
+		return
+	if action_id == "buy_hen":
+		_buy_hen()
+		return
+	if action_id == "feed_hens":
+		_feed_hens()
 		return
 	if action_id == "build_smokehouse":
 		_build_smokehouse()
@@ -1450,6 +1484,34 @@ func _house_rows() -> Array:
 		"action": "mend",
 		"enabled": _can_mend(),
 	})
+	rows.append({"section": "Upkeep"})
+	rows.append({"name": "Wear", "value": "%d of %d" % [wear, WEAR_MAX], "progress": float(wear) / float(WEAR_MAX)})
+	rows.append({"note": "The house wears a little each night. Mending, tidying, and repairs bring it down. At %d wear, rain ruins a crop overnight. At %d, a fox can get into the coop. A third plot opens at Farming %d once the house is Patched." % [WEAR_RUNDOWN, WEAR_FOX, PLOT_THREE_LEVEL]})
+	rows.append({"section": "Livestock"})
+	if not coop_built:
+		rows.append({
+			"name": "Coop",
+			"value": "%d wood, %d fiber, Carpentry %d" % [int(COOP_COST["wood"]), int(COOP_COST["fiber"]), int(COOP_COST["level"])],
+			"button": "Build",
+			"action": "build_coop",
+			"enabled": _can_build_coop(),
+		})
+	else:
+		rows.append({
+			"name": "Hens",
+			"value": "%d of %d, %d coins each" % [hens, COOP_HENS_MAX, HEN_PRICE],
+			"button": "Buy hen",
+			"action": "buy_hen",
+			"enabled": _can_buy_hen(),
+		})
+		rows.append({
+			"name": "Feed hens",
+			"value": "%d crops, once a day" % (hens * HEN_FEED_CROPS),
+			"button": "Feed",
+			"action": "feed_hens",
+			"enabled": _can_feed_hens(),
+		})
+		rows.append({"note": "A fed hen lays an egg each morning, kept as a meal. Two unfed days in a row and a hen wanders off."})
 	rows.append({"section": "Rest"})
 	rows.append({"note": "The bed is in the bedroom. Walk there and press Space from 18:00 to save and end the day. If you aren't in bed by 03:00 you collapse, and your sanity limit drops permanently."})
 	rows.append({"name": "Sanity limit", "value": "%d of %d" % [_sanity_max(), int(SANITY_MAX)]})
@@ -1559,8 +1621,20 @@ func _switch_seed() -> void:
 	_show_message("You'll plant %s seeds now." % _seed_label(selected_seed).to_lower())
 
 
+# Opens the third plot once Farming reaches level 4 and the house is at least Patched.
+func _check_plot_three() -> void:
+	if plot_three_open or _level("Farming") < PLOT_THREE_LEVEL or house_stage < 2:
+		return
+	plot_three_open = true
+	for y in range(PLOT_THREE.position.y, PLOT_THREE.end.y):
+		for x in range(PLOT_THREE.position.x, PLOT_THREE.end.x):
+			map[y + BORDER_Y][x + BORDER_X] = Tile.SOIL
+	queue_redraw()
+
+
 # Opens the second plot once Farming reaches level 2. It stays open afterward.
 func _check_unlocks() -> void:
+	_check_plot_three()
 	if plot_two_open or _level("Farming") < 2:
 		return
 	plot_two_open = true
@@ -3674,6 +3748,8 @@ func _repair_house() -> void:
 	materials["wood"] -= cost["wood"]
 	materials["fiber"] -= cost["fiber"]
 	house_stage += 1
+	wear = maxi(0, wear - WEAR_REPAIR)
+	_check_plot_three()
 	_grant_xp("Carpentry", XP_REPAIR)
 	_build_interior()
 	_show_message("Repaired. The farmhouse is now %s. +%d Carpentry XP" % [STAGE_NAMES[house_stage], XP_REPAIR])
@@ -3705,8 +3781,85 @@ func _mend_house() -> void:
 	materials["wood"] -= MEND_WOOD
 	materials["fiber"] -= MEND_FIBER
 	stats["mended"] += 1
+	wear = maxi(0, wear - WEAR_MEND)
 	_grant_xp("Carpentry", XP_MEND)
 	_show_message("You mend a board. +%d Carpentry XP" % XP_MEND)
+
+
+func _can_build_coop() -> bool:
+	return not coop_built and _level("Carpentry") >= int(COOP_COST["level"]) \
+		and int(materials["wood"]) >= int(COOP_COST["wood"]) and int(materials["fiber"]) >= int(COOP_COST["fiber"])
+
+
+func _build_coop() -> void:
+	if not _can_build_coop():
+		_show_message("A coop needs %d wood, %d fiber, and Carpentry %d." % [int(COOP_COST["wood"]), int(COOP_COST["fiber"]), int(COOP_COST["level"])])
+		return
+	materials["wood"] -= int(COOP_COST["wood"])
+	materials["fiber"] -= int(COOP_COST["fiber"])
+	coop_built = true
+	_grant_xp("Carpentry", XP_REPAIR)
+	_show_message("You raise a coop behind the house. +%d Carpentry XP" % XP_REPAIR)
+
+
+func _can_buy_hen() -> bool:
+	return coop_built and hens < COOP_HENS_MAX and money >= HEN_PRICE
+
+
+func _buy_hen() -> void:
+	if not _can_buy_hen():
+		_show_message("A hen costs %d coins, and the coop holds %d." % [HEN_PRICE, COOP_HENS_MAX])
+		return
+	money -= HEN_PRICE
+	hens += 1
+	_show_message("A hen settles into the coop.")
+
+
+func _can_feed_hens() -> bool:
+	return hens > 0 and hens_fed_day != day and int(inventory["crops"]) >= hens * HEN_FEED_CROPS
+
+
+func _feed_hens() -> void:
+	if hens > 0 and hens_fed_day == day:
+		_show_message("The hens are fed for today.")
+		return
+	if not _can_feed_hens():
+		_show_message("The hens need %d crops." % (hens * HEN_FEED_CROPS))
+		return
+	inventory["crops"] -= hens * HEN_FEED_CROPS
+	hens_fed_day = day
+	_show_message("You feed the hens.")
+
+
+# Runs at the end of each day, before the crops grow: the house wears, hens lay or leave,
+# and rain or a fox may strike. Returns a note for the morning message.
+func _settle_day() -> String:
+	var notes := ""
+	wear = mini(wear + WEAR_PER_NIGHT, WEAR_MAX)
+	if hens > 0:
+		if hens_fed_day == day:
+			hen_unfed_days = 0
+			var room := maxi(0, _pack_capacity() - _pack_used())
+			var eggs := mini(hens, room)
+			if eggs > 0:
+				inventory["meals"] += eggs
+				notes += " The hens laid %d egg%s." % [eggs, "" if eggs == 1 else "s"]
+			if eggs < hens:
+				notes += " Some eggs spoiled for want of pack room."
+		else:
+			hen_unfed_days += 1
+			if hen_unfed_days >= HEN_LEAVE_DAYS:
+				hens -= 1
+				hen_unfed_days = 0
+				notes += " A hungry hen wandered off."
+	if wear >= WEAR_FOX and hens > 0 and randf() < 0.5:
+		hens -= 1
+		notes += " A fox got into the coop and took a hen."
+	if wear >= WEAR_RUNDOWN and not crops.is_empty():
+		var spot = crops.keys().pick_random()
+		crops.erase(spot)
+		notes += " Rain came through the roof and ruined a crop."
+	return notes
 
 
 # Sleeping only happens at the bed, from 18:00 until 03:00.
@@ -3741,6 +3894,7 @@ func _tidy_house() -> void:
 		return
 	tidied_day = day
 	stats["tidied"] += 1
+	wear = maxi(0, wear - WEAR_TIDY)
 	_grant_xp("Cleaning", XP_TIDY)
 	var bonus := TIDY_CLEANING_BONUS if _level("Cleaning") >= 2 else 0
 	_change_sanity(TIDY_SANITY + bonus)
@@ -3935,6 +4089,7 @@ func _end_day(base: String, leave_house: bool = true) -> void:
 	inventory["fish"] = 0
 	stats["spoiled"] += spoiled
 	var spoil_note := (" %d fish spoiled in your pack overnight." % spoiled) if spoiled > 0 else ""
+	var upkeep_note := _settle_day()
 	for pos in crops.keys():
 		crops[pos]["stage"] = min(crops[pos]["stage"] + 1, MAX_STAGE)
 	day += 1
@@ -3942,7 +4097,7 @@ func _end_day(base: String, leave_house: bool = true) -> void:
 	tonight_shadow = Vector2i(-1, -1)
 	_respawn_brush()
 	_update_shadow_tile()
-	_show_message("%s Your crops grew overnight.%s" % [base, spoil_note])
+	_show_message("%s Your crops grew overnight.%s%s" % [base, spoil_note, upkeep_note])
 	_save_game()
 	queue_redraw()
 
@@ -4077,6 +4232,11 @@ func _save_game() -> void:
 		"bank_coins": bank_coins,
 		"cave_mined": _tiles_to_array(cave_mined),
 		"cave_mined_day": cave_mined_day,
+		"wear": wear,
+		"coop_built": coop_built,
+		"hens": hens,
+		"hens_fed_day": hens_fed_day,
+		"hen_unfed_days": hen_unfed_days,
 	}
 	var file := FileAccess.open(SAVE_PATH, FileAccess.WRITE)
 	if file != null:
@@ -4160,6 +4320,11 @@ func _load_game() -> bool:
 	else:
 		_fill_rocks()
 	cave_mined_day = int(data.get("cave_mined_day", -1))
+	wear = int(data.get("wear", 0))
+	coop_built = bool(data.get("coop_built", false))
+	hens = int(data.get("hens", 0))
+	hens_fed_day = int(data.get("hens_fed_day", -1))
+	hen_unfed_days = int(data.get("hen_unfed_days", 0))
 	if data.has("cave_mined"):
 		cave_mined.clear()
 		for c in data["cave_mined"]:
