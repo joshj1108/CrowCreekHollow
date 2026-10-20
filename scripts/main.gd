@@ -55,6 +55,15 @@ const ORE_MINING_LEVEL := 2
 # Quarry rocks in Ashford, in village tiles. They yield copper ore from Mining 3,
 # and iron ore from Mining 5 with a copper pick or better.
 const ASHFORD_QUARRY := [Vector2i(26, 16), Vector2i(30, 18), Vector2i(34, 15), Vector2i(9, 17)]
+# The world: one generated land, 768 by 912 tiles, the full size of the original map.
+const WORLD_W := 768
+const WORLD_H := 912
+const WORLD_SEED := 20031
+const ROAD_Y := 450
+const PORTAL_TILE := Vector2i(352, 450)   # the stone that takes you back home
+const PORTAL_ARRIVE := Vector2i(354, 450) # where you step out of the farm's portal
+const LOWMERE_ORIGIN := Vector2i(380, 440)
+const ASHFORD_ORIGIN := Vector2i(470, 440)
 # Tool tiers. A hatchet fells trees. Hardwood needs a copper hatchet or better.
 const TOOL_TIERS := {
 	"hatchet": [
@@ -413,7 +422,7 @@ const NIGHT_EVENTS := [
 	{"message": "The field is quiet tonight. Too quiet.", "shadow": "none", "sanity": -3},
 ]
 
-enum Tile { TREE, GRASS, SOIL, PATH, WATER, HOUSE, DOOR, FLOOR, WALL, EXIT, BED, STATION, DESK, FALLOW, STALL, CELLAR, COOLER, GATE, SMOKEHOUSE, FURNACE }
+enum Tile { TREE, GRASS, SOIL, PATH, WATER, HOUSE, DOOR, FLOOR, WALL, EXIT, BED, STATION, DESK, FALLOW, STALL, CELLAR, COOLER, GATE, SMOKEHOUSE, FURNACE, PORTAL }
 
 const BLOCKING := [Tile.TREE, Tile.WATER, Tile.HOUSE, Tile.WALL, Tile.BED, Tile.STATION, Tile.DESK, Tile.STALL, Tile.CELLAR, Tile.COOLER, Tile.SMOKEHOUSE, Tile.FURNACE]
 
@@ -438,6 +447,7 @@ const TILE_COLORS := {
 	Tile.GATE: Color("8f7a4f"),
 	Tile.SMOKEHOUSE: Color("9a5a3a"),
 	Tile.FURNACE: Color("5c5c66"),
+	Tile.PORTAL: Color("6a4fc0"),
 }
 
 const BUSH_COLOR := Color("3d6b2a")
@@ -445,11 +455,11 @@ const BUSH_COLOR := Color("3d6b2a")
 const DAY_TINT := Color(1, 1, 1)
 const NIGHT_TINT := Color("3a3f6e")
 
-enum Zone { HOMESTEAD, VILLAGE, ASHFORD }
+enum Zone { HOMESTEAD, VILLAGE, ASHFORD, WILDS }
 
 var map: Array = []                 # farm tiles, [y][x]
-var village_map: Array = []         # Lowmere tiles, [y][x]
-var ashford_map: Array = []         # Ashford tiles, [y][x]
+var world := PackedByteArray()      # the whole land, index y * WORLD_W + x
+
 var interior: Array = []            # house tiles, [y][x], local to INT_ORIGIN
 var crops := {}                     # Vector2i world tile -> {"stage": int, "kind": String}
 var brush := {}                     # Vector2i world tile -> true while unharvested
@@ -468,7 +478,7 @@ var materials := {"wood": 0, "fiber": 0, "resin": 0, "hardwood": 0, "stone": 0, 
 var tool_tier := {"hatchet": 0, "pick": 0}     # 0 = none; higher tiers come from TOOL_TIERS
 var grove_felled := {}
 var quarry := {}                                   # Ashford quarry rocks, village tile -> true
-var rocks := {}                                  # world tile -> true for unbroken rocks                          # world tile -> true for trees cut today
+var rocks := {}                                  # world tile -> true for unbroken rocks
 var stats := {"planted": 0, "harvested": 0, "gathered": 0, "slept": 0, "tidied": 0,
 	"fished": 0, "caught": 0, "mended": 0, "cleansed": 0, "cooked": 0, "eaten": 0,
 	"pumpkins": 0, "collapses": 0, "events": 0, "sold": 0, "spoiled": 0,
@@ -529,8 +539,7 @@ var lantern_light: PointLight2D
 func _ready() -> void:
 	_setup_input()
 	_build_map()
-	_build_village_map()
-	_build_ashford_map()
+	_generate_world()
 	_find_pond_edges()
 	var loaded := _load_game()
 	if not loaded:
@@ -572,6 +581,7 @@ func _process(delta: float) -> void:
 	_update_fishing(delta)
 	_update_foes(delta)
 	_update_shots(delta)
+	_update_region()
 	if _in_village() and current_hour >= STALL_CLOSE_HOUR:
 		_go_home("Night falls. You are driven back to the homestead.")
 	fish_layer.visible = zone == Zone.HOMESTEAD
@@ -599,7 +609,7 @@ func _process(delta: float) -> void:
 
 func _draw() -> void:
 	if _in_village():
-		_draw_village()
+		_draw_world()
 		return
 	for y in MAP_H:
 		for x in MAP_W:
@@ -739,7 +749,7 @@ func _build_map() -> void:
 				if ix >= HOUSE_IX and ix < HOUSE_IX + HOUSE_W and iy >= HOUSE_IY and iy < HOUSE_IY + HOUSE_H:
 					t = Tile.HOUSE
 				if ix == INNER_W - 1 and iy == INNER_H / 2:
-					t = Tile.GATE
+					t = Tile.PORTAL
 				if ix == STALL_IX and iy == STALL_IY:
 					t = Tile.STALL
 				if ix == HOUSE_DOOR_IX and iy == HOUSE_DOOR_IY:
@@ -909,8 +919,16 @@ func _restore_saved_state() -> void:
 
 func _update_minimap() -> void:
 	if _in_village():
-		var village_tile: Vector2 = player.position / PX
-		minimap.update_view(_zone_map(), TILE_COLORS, [], village_tile, Vector2i(-1, -1))
+		# The world is far too big for the minimap, so show the area around the player.
+		var half := 20
+		var center := _player_tile()
+		var rows: Array = []
+		for y in range(center.y - half, center.y + half + 1):
+			var row: Array = []
+			for x in range(center.x - half, center.x + half + 1):
+				row.append(_kind_at(Vector2i(x, y)))
+			rows.append(row)
+		minimap.update_view(rows, TILE_COLORS, [], Vector2(half, half), Vector2i(-1, -1))
 		return
 	# Indoors the minimap shows the house, since the player isn't on the farm.
 	var player_tile: Vector2 = Vector2(HOUSE_DOOR_IX + BORDER_X, HOUSE_DOOR_IY + BORDER_Y) if inside else player.position / PX
@@ -2313,7 +2331,7 @@ func _shot_hits(foe: Dictionary, amount: int) -> void:
 func _fill_quarry() -> void:
 	quarry.clear()
 	for spot in ASHFORD_QUARRY:
-		quarry[spot] = true
+		quarry[ASHFORD_ORIGIN + spot] = true
 
 
 func _quarry(tile: Vector2i) -> void:
@@ -2330,6 +2348,48 @@ func _quarry(tile: Vector2i) -> void:
 	_grant_xp("Mining", XP_MINE)
 	_show_message("You work the quarry rock. +1 %s. +%d Mining XP" % [kind.replace("_", " "), XP_MINE])
 	queue_redraw()
+
+
+# --- The world ----------------------------------------------------------------
+
+# Builds the whole land from a seed: forest, lakes, and open ground, then stamps
+# Lowmere and Ashford in and lays the road between them and the portal.
+func _generate_world() -> void:
+	var forest := FastNoiseLite.new()
+	forest.seed = WORLD_SEED
+	forest.frequency = 0.02
+	forest.noise_type = FastNoiseLite.TYPE_SIMPLEX_SMOOTH
+	var lakes := FastNoiseLite.new()
+	lakes.seed = WORLD_SEED + 1
+	lakes.frequency = 0.03
+	lakes.noise_type = FastNoiseLite.TYPE_SIMPLEX_SMOOTH
+	world = PackedByteArray()
+	world.resize(WORLD_W * WORLD_H)
+	for y in WORLD_H:
+		for x in WORLD_W:
+			var t := Tile.GRASS
+			if x < 2 or y < 2 or x >= WORLD_W - 2 or y >= WORLD_H - 2:
+				t = Tile.TREE
+			elif lakes.get_noise_2d(x, y) > 0.55:
+				t = Tile.WATER
+			elif forest.get_noise_2d(x, y) > 0.35:
+				t = Tile.TREE
+			world[y * WORLD_W + x] = t
+	for x in range(PORTAL_TILE.x, ASHFORD_ORIGIN.x + VILLAGE_W):
+		world[ROAD_Y * WORLD_W + x] = Tile.PATH
+	_stamp_village(LOWMERE_ORIGIN, _build_zone_map(VILLAGE_HOUSES, VILLAGE_WATER, 26, true))
+	_stamp_village(ASHFORD_ORIGIN, _build_zone_map(ASHFORD_HOUSES, ASHFORD_WATER, 24, false))
+	world[PORTAL_TILE.y * WORLD_W + PORTAL_TILE.x] = Tile.PORTAL
+
+
+# Copies a village's local tiles into the world. Its gates become road.
+func _stamp_village(origin: Vector2i, local: Array) -> void:
+	for y in VILLAGE_H:
+		for x in VILLAGE_W:
+			var k: int = local[y][x]
+			if k == Tile.GATE:
+				k = Tile.PATH
+			world[(origin.y + y) * WORLD_W + origin.x + x] = k
 
 
 # --- Slot grids for the pack, seed pouch, and equipment ---------------------
@@ -2381,14 +2441,6 @@ func _gear_cells() -> Array:
 
 # --- Lowmere and the road ---------------------------------------------------
 
-func _build_village_map() -> void:
-	village_map = _build_zone_map(VILLAGE_HOUSES, VILLAGE_WATER, 26, true)
-
-
-func _build_ashford_map() -> void:
-	ashford_map = _build_zone_map(ASHFORD_HOUSES, ASHFORD_WATER, 24, false)
-
-
 # A village is a grass field with a road along row 10, a west gate to the
 # previous place, and an east gate to the next one when there is one.
 func _build_zone_map(houses: Array, water: Rect2i, wood_x: int, east_gate: bool) -> Array:
@@ -2418,22 +2470,40 @@ func _build_zone_map(houses: Array, water: Rect2i, wood_x: int, east_gate: bool)
 	return out
 
 
+# True in the world, outside the farm. Lowmere, Ashford, and the open land are all in the world.
 func _in_village() -> bool:
 	return zone != Zone.HOMESTEAD
 
 
-func _zone_map() -> Array:
-	return ashford_map if zone == Zone.ASHFORD else village_map
+func _region_origin() -> Vector2i:
+	if zone == Zone.ASHFORD:
+		return ASHFORD_ORIGIN
+	if zone == Zone.VILLAGE:
+		return LOWMERE_ORIGIN
+	return Vector2i.ZERO
+
+
+func _region_at(tile: Vector2i) -> int:
+	if Rect2i(LOWMERE_ORIGIN, Vector2i(VILLAGE_W, VILLAGE_H)).has_point(tile):
+		return Zone.VILLAGE
+	if Rect2i(ASHFORD_ORIGIN, Vector2i(VILLAGE_W, VILLAGE_H)).has_point(tile):
+		return Zone.ASHFORD
+	return Zone.WILDS
 
 
 func _zone_npcs() -> Array:
-	return ASHFORD_NPCS if zone == Zone.ASHFORD else NPCS
+	if zone == Zone.ASHFORD:
+		return ASHFORD_NPCS
+	if zone == Zone.VILLAGE:
+		return NPCS
+	return []
 
 
 func _npc_index(tile: Vector2i) -> int:
 	var npcs := _zone_npcs()
+	var local := tile - _region_origin()
 	for i in npcs.size():
-		if npcs[i]["pos"] == tile:
+		if npcs[i]["pos"] == local:
 			return i
 	return -1
 
@@ -2450,14 +2520,35 @@ func _enter_zone(z: int, arrive: Vector2i, reason: String) -> void:
 	zone = z
 	_stop_fishing("")
 	swing_time = 0.0
-	if zone == Zone.ASHFORD:
-		stats["visited"] += 1
-	_spawn_foes()
 	player.position = _tile_center(arrive.x, arrive.y)
+	_on_region_change()
 	_set_bounds()
 	queue_redraw()
 	if reason != "":
 		_show_message(reason)
+
+
+# Runs when the player moves between the farm, the open land, and the villages.
+func _on_region_change() -> void:
+	if zone == Zone.ASHFORD:
+		stats["visited"] += 1
+	_spawn_foes()
+
+
+# Keeps the region in step with where the player is walking in the world.
+func _update_region() -> void:
+	if not _in_village():
+		return
+	queue_redraw()
+	var z := _region_at(_player_tile())
+	if z == zone:
+		return
+	zone = z
+	_on_region_change()
+	if zone == Zone.VILLAGE:
+		_show_message("You come into Lowmere.")
+	elif zone == Zone.ASHFORD:
+		_show_message("You come into Ashford. Something watches from the road.")
 
 
 # Walking the road is daylight only. At dusk the gate pushes you back.
@@ -2513,17 +2604,28 @@ func _check_guardian() -> void:
 		_show_message("Guardian quest complete: %s. Reward: %s" % [q["title"], _reward_text(q["reward"])])
 
 
-func _draw_village() -> void:
-	var tiles := _zone_map()
-	for y in VILLAGE_H:
-		for x in VILLAGE_W:
-			draw_rect(_tile_rect(Vector2i(x, y)), TILE_COLORS[tiles[y][x]])
+func _draw_world() -> void:
+	# Only the tiles the camera can see are drawn, so the full-size world stays fast.
+	var view := get_viewport_rect().size / camera.zoom
+	var top_left := camera.get_screen_center_position() - view * 0.5
+	var x0 := clampi(floori(top_left.x / PX) - 1, 0, WORLD_W - 1)
+	var y0 := clampi(floori(top_left.y / PX) - 1, 0, WORLD_H - 1)
+	var x1 := clampi(ceili((top_left.x + view.x) / PX) + 1, 0, WORLD_W - 1)
+	var y1 := clampi(ceili((top_left.y + view.y) / PX) + 1, 0, WORLD_H - 1)
+	for y in range(y0, y1 + 1):
+		for x in range(x0, x1 + 1):
+			draw_rect(_tile_rect(Vector2i(x, y)), TILE_COLORS[world[y * WORLD_W + x]])
+	var origin := _region_origin()
 	for npc in _zone_npcs():
-		var c := _tile_center(npc["pos"].x, npc["pos"].y)
+		var c := _tile_center(origin.x + npc["pos"].x, origin.y + npc["pos"].y)
 		draw_circle(c, PX * 0.3, Color(str(npc["color"])))
 		# Name above each villager, using the first name only to keep it short.
 		var first_name := str(npc["name"]).split(" ")[0]
 		draw_string(ThemeDB.fallback_font, c + Vector2(-PX * 1.5, -PX * 0.6), first_name, HORIZONTAL_ALIGNMENT_CENTER, PX * 3, 12, Color(1, 0.97, 0.88))
+	for pos in quarry:
+		var qc := _tile_center(pos.x, pos.y)
+		draw_circle(qc, PX * 0.3, Color("6a6a4a"))
+		draw_circle(qc + Vector2(-5, -4), PX * 0.08, Color("c9b46a"))
 	for foe in foes:
 		var pos: Vector2 = foe["pos"]
 		var st: Dictionary = FOES[foe["kind"]]
@@ -2535,10 +2637,6 @@ func _draw_village() -> void:
 		draw_circle(pos + Vector2(5, -4), 2.5, Color(0.9, 0.1, 0.1))
 		var frac := float(foe["hp"]) / float(st["hp"])
 		draw_rect(Rect2(pos + Vector2(-PX * 0.3, -PX * 0.5), Vector2(PX * 0.6 * frac, 3)), Color("c24a4a"))
-	for pos in quarry:
-		var qc := _tile_center(pos.x, pos.y)
-		draw_circle(qc, PX * 0.3, Color("6a6a4a"))
-		draw_circle(qc + Vector2(-5, -4), PX * 0.08, Color("c9b46a"))
 	for shot in shots:
 		var shot_pos: Vector2 = shot["pos"]
 		var shot_vel: Vector2 = shot["vel"]
@@ -2560,12 +2658,13 @@ func _new_foe(kind: String, tile: Vector2i) -> Dictionary:
 
 func _spawn_foes() -> void:
 	foes = []
+	var origin := _region_origin()
 	if zone == Zone.VILLAGE:
 		for spot in HOLLOW_SPAWNS:
-			foes.append(_new_foe("hollow", spot))
+			foes.append(_new_foe("hollow", origin + spot))
 	elif zone == Zone.ASHFORD:
 		for spot in STALKER_SPAWNS:
-			foes.append(_new_foe("stalker", spot))
+			foes.append(_new_foe("stalker", origin + spot))
 	queue_redraw()
 
 
@@ -3045,27 +3144,18 @@ func _check_doors() -> void:
 	var tile := _player_tile()
 	var kind := _kind_at(tile)
 	if _in_village():
-		if kind != Tile.GATE:
-			return
-		if current_hour >= STALL_CLOSE_HOUR:
-			_refuse_gate(tile)
-			return
-		if tile.x == 0 and zone == Zone.VILLAGE:
-			_enter_zone(Zone.HOMESTEAD, HOMESTEAD_ARRIVE, "You walk back to the homestead.")
-		elif tile.x == 0:
-			_enter_zone(Zone.VILLAGE, Vector2i(VILLAGE_W - 3, VILLAGE_GATE.y), "You walk back to Lowmere.")
-		elif zone == Zone.VILLAGE:
-			_enter_zone(Zone.ASHFORD, VILLAGE_ARRIVE, "You walk the road east to Ashford.")
+		if kind == Tile.PORTAL and tile == PORTAL_TILE:
+			_enter_zone(Zone.HOMESTEAD, HOMESTEAD_ARRIVE, "You step back through the portal to the homestead.")
 		return
 	if not inside and kind == Tile.DOOR:
 		_enter_house()
 	elif inside and kind == Tile.EXIT:
 		_leave_house()
-	elif not inside and kind == Tile.GATE:
+	elif not inside and kind == Tile.PORTAL:
 		if current_hour >= STALL_CLOSE_HOUR:
 			_refuse_gate(tile)
 		else:
-			_enter_zone(Zone.VILLAGE, VILLAGE_ARRIVE, "You walk the road to Lowmere.")
+			_enter_zone(Zone.WILDS, PORTAL_ARRIVE, "You step through the portal into the wider land.")
 
 
 func _enter_house() -> void:
@@ -3083,12 +3173,12 @@ func _leave_house() -> void:
 
 func _set_bounds() -> void:
 	if _in_village():
-		player.min_pos = _tile_center(0, 1)
-		player.max_pos = _tile_center(VILLAGE_W - 1, VILLAGE_H - 2)
+		player.min_pos = _tile_center(1, 1)
+		player.max_pos = _tile_center(WORLD_W - 2, WORLD_H - 2)
 		camera.limit_left = 0
 		camera.limit_top = 0
-		camera.limit_right = VILLAGE_W * PX
-		camera.limit_bottom = VILLAGE_H * PX
+		camera.limit_right = WORLD_W * PX
+		camera.limit_bottom = WORLD_H * PX
 		return
 	if inside:
 		player.min_pos = _tile_center(INT_ORIGIN.x + 1, INT_ORIGIN.y + 1)
@@ -3118,6 +3208,7 @@ func _save_game() -> void:
 		"stats": stats,
 		"quests_done": quests_done,
 		"zone": zone,
+		"world_version": 1,
 		"hp": hp,
 		"guardian_done": guardian_done,
 		"equipment": equipment,
@@ -3189,7 +3280,7 @@ func _load_game() -> bool:
 	cooler_stock = int(data.get("cooler_stock", 0))
 	smokehouse_built = bool(data.get("smokehouse_built", false))
 	furnace_built = bool(data.get("furnace_built", false))
-	saved_zone = int(data.get("zone", 0))
+	saved_zone = int(data.get("zone", 0)) if int(data.get("world_version", 0)) >= 1 else 0
 	hp = int(data.get("hp", BASE_HP))
 	guardian_done = data.get("guardian_done", {})
 	var saved_eq: Variant = data.get("equipment", {})
@@ -3302,9 +3393,9 @@ func _in_interior(tile: Vector2i) -> bool:
 # The tile kind at a world tile: the interior if it's inside the house, else the farm.
 func _kind_at(tile: Vector2i) -> int:
 	if _in_village():
-		if tile.x < 0 or tile.y < 0 or tile.x >= VILLAGE_W or tile.y >= VILLAGE_H:
+		if tile.x < 0 or tile.y < 0 or tile.x >= WORLD_W or tile.y >= WORLD_H:
 			return Tile.TREE
-		return _zone_map()[tile.y][tile.x]
+		return world[tile.y * WORLD_W + tile.x]
 	if _in_interior(tile):
 		return interior[tile.y - INT_ORIGIN.y][tile.x - INT_ORIGIN.x]
 	if not _in_bounds(tile):

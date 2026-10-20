@@ -207,15 +207,16 @@ Achievements track stats and never reset. Each pays a small reward. Earning all 
 - Saved: day, skill XP, inventory (including meals), coins, bag upgrades, root cellar, cooler, and smokehouse (built, and what they hold), materials, stats, story chapters done, achievements done, selected seed, lantern tier, house stage, tidy/mend/cleanse days, sanity and sanity penalty, crops (with kind), brush piles, **player position**, whether you were **inside the house**, and the **open panel**.
 - Quitting mid-day loses that day's progress since the last save. Position and panel are saved at the same moment, so they reflect the last sleep or collapse.
 
-## The roads: Lowmere and Ashford
+## The world: the portal, the road, and the wilds
 
-The homestead is your base. Past the east end of the farm path is a gate onto the road to **Lowmere**. East of Lowmere, the road continues to **Ashford**.
+- The farm's **east gate is a portal**. Walking through it takes you into the world, at the portal stone's east side. The portal shuts at 18:00.
+- The **portal stone** in the world takes you back to the homestead.
+- The **world is 768 by 912 tiles**, generated from a fixed seed with forest, lakes, and open ground. Its edge is a line of trees.
+- **Lowmere** and **Ashford** are stamped into the world along a road. The road runs from the portal, through Lowmere, and east to Ashford.
+- You enter each village by walking into its area, and that sets its region. Hollows gather in Lowmere, and stalkers wait on the Ashford road. The open land has no foes yet.
+- **Night:** from 18:00 the world sends you back to the homestead. The campsite exception comes later.
+- The world draws only the tiles near the camera, so the full size stays fast.
 
-- **Daytime only.** Walk the roads between 06:00 and 18:00. At dusk a gate pushes you back, and if night falls while you're in a village, you're driven home.
-- **Sleep and storage stay at the homestead.** You can't sleep in a village.
-- **Villagers** talk with you when you face them and press Space. Their lines change as the guardian quests advance.
-  - Lowmere: Mara the Reeve, Tomas the Baker (takes a cooked meal), Elsie.
-  - Ashford: Harrow the Miller (takes five crops for flour), Wren.
 
 ## Combat (real time)
 
