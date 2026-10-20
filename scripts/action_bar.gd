@@ -350,7 +350,7 @@ func _build_cell(cell: Dictionary) -> Control:
 	if filled:
 		bg = Color(str(cell.get("color", "8a6a3a")))
 	var panel_box := PanelContainer.new()
-	panel_box.custom_minimum_size = Vector2(68, 68)
+	panel_box.custom_minimum_size = Vector2(78, 78)
 	panel_box.tooltip_text = str(cell.get("tip", ""))
 	panel_box.add_theme_stylebox_override("panel", _box(bg, COL_BORDER if filled else Color("3d3024"), 2, 6, 3))
 
@@ -359,7 +359,7 @@ func _build_cell(cell: Dictionary) -> Control:
 	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	label.add_theme_font_size_override("font_size", 12)
+	label.add_theme_font_size_override("font_size", 11)
 	label.add_theme_color_override("font_color", COL_TEXT if filled else COL_MUTED)
 	panel_box.add_child(label)
 

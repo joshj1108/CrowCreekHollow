@@ -1000,6 +1000,9 @@ func _make_label(parent: Node, pos: Vector2, font_size: int) -> Label:
 	var label := Label.new()
 	label.position = pos
 	label.add_theme_font_size_override("font_size", font_size)
+	# A dark outline keeps the text readable over grass, the house, and the dark.
+	label.add_theme_color_override("font_outline_color", Color(0.05, 0.04, 0.03, 0.92))
+	label.add_theme_constant_override("outline_size", 6)
 	parent.add_child(label)
 	return label
 
@@ -1484,20 +1487,13 @@ func _house_rows() -> Array:
 			"action": "repair",
 			"enabled": _can_repair(),
 		})
-	rows.append({
-		"name": "Mend a board",
-		"value": "%d wood, %d fiber: +%d XP (%d left today)" % [MEND_WOOD, MEND_FIBER, XP_MEND, _mends_left()],
-		"button": "Mend",
-		"action": "mend",
-		"enabled": _can_mend(),
-	})
 	rows.append({"section": "Today's chores"})
 	for chore in _chore_list():
 		var row := {"name": chore["name"]}
 		if bool(chore["done"]):
 			row["value"] = "Done"
 		else:
-			row["value"] = "To do"
+			row["value"] = str(chore["detail"])
 			row["button"] = chore["button"]
 			row["action"] = chore["action"]
 			row["enabled"] = chore["enabled"]
@@ -1540,13 +1536,6 @@ func _house_rows() -> Array:
 		"button": "Cleanse",
 		"action": "cleanse",
 		"enabled": _can_cleanse(),
-	})
-	rows.append({
-		"name": "Tidy",
-		"value": "once a day",
-		"button": "Tidy",
-		"action": "tidy",
-		"enabled": _can_tidy(),
 	})
 	rows.append({"section": "Storage"})
 	if cellar_built:
@@ -3853,10 +3842,10 @@ func _feed_hens() -> void:
 # The day's chores. Each is done or not. Chores left undone wear the house overnight.
 func _chore_list() -> Array:
 	var chores: Array = []
-	chores.append({"name": "Tidy the house", "done": tidied_day == day, "button": "Tidy", "action": "tidy", "enabled": _can_tidy()})
-	chores.append({"name": "Mend a board", "done": mend_day == day and mends_today > 0, "button": "Mend", "action": "mend", "enabled": _can_mend()})
+	chores.append({"name": "Tidy the house", "detail": "+%d XP, once a day" % XP_TIDY, "done": tidied_day == day, "button": "Tidy", "action": "tidy", "enabled": _can_tidy()})
+	chores.append({"name": "Mend a board", "detail": "%d wood, %d fiber, +%d XP. %d left today" % [MEND_WOOD, MEND_FIBER, XP_MEND, _mends_left()], "done": mend_day == day and mends_today > 0, "button": "Mend", "action": "mend", "enabled": _can_mend()})
 	if hens > 0:
-		chores.append({"name": "Feed the hens", "done": hens_fed_day == day, "button": "Feed", "action": "feed_hens", "enabled": _can_feed_hens()})
+		chores.append({"name": "Feed the hens", "detail": "%d crops" % (hens * HEN_FEED_CROPS), "done": hens_fed_day == day, "button": "Feed", "action": "feed_hens", "enabled": _can_feed_hens()})
 	return chores
 
 
