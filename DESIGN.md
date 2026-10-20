@@ -155,6 +155,8 @@ Achievements track stats and never reset. Each pays a small reward. Earning all 
 
 ## Farmhouse
 
+The other buildings are drawn tile by tile, each tile showing its place in the building. The **coop** has a roofed top row, a hen door at the bottom-left, and a straw nest at the bottom-right. The **barn** has red boards, a roofed top row, an X-braced double door in the bottom-middle, and hay bales on the right. The **root cellar** is a planked hatch in a stone rim with an iron ring. The **workshop** floor is planked with staggered joins. The **furnace** shows a glowing firebox mouth, and the **smokehouse** has brick courses and slatted vents.
+
 The house is drawn in four stages that match its repair level. **Decrepit** has a sagging eave, a missing roof patch, boarded windows, brick chimney, and a dark, planked door. **Boarded** has shingle courses on the roof and one board across each window. **Patched** has glazed windows with frames, green shutters, corner trim, and a panelled door with a brass knob. **Restored** adds window boxes of flowers, a ridge cap, a dark foundation, a lit lamp by the door, warm light in the windows, and a faint line of smoke from the chimney.
 
 - Starts at its final size in a **Decrepit** state. Repairs change its condition, not its footprint.

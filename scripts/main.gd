@@ -758,9 +758,17 @@ func _draw() -> void:
 			elif tile == Tile.WALL:
 				_draw_wall(cell, Vector2i(x, y))
 			elif tile == Tile.COOP:
-				_draw_coop_tile(cell)
+				_draw_coop_tile(cell, Vector2i(x, y) - coop_tile)
 			elif tile == Tile.BARN:
-				_draw_barn_tile(cell)
+				_draw_barn_tile(cell, Vector2i(x, y) - barn_tile)
+			elif tile == Tile.CELLAR:
+				_draw_cellar_tile(cell)
+			elif tile == Tile.SMOKEHOUSE:
+				_draw_smokehouse_tile(cell)
+			elif tile == Tile.FURNACE:
+				_draw_furnace_tile(cell)
+			elif tile == Tile.FLOOR:
+				_draw_floor_tile(cell, Vector2i(x, y))
 			else:
 				draw_rect(cell, TILE_COLORS[tile])
 			if tile == Tile.CELLAR or tile == Tile.COOLER or tile == Tile.SMOKEHOUSE or tile == Tile.FURNACE:
@@ -4929,21 +4937,103 @@ func _draw_wall(cell: Rect2, pos: Vector2i) -> void:
 		draw_line(Vector2(cell.position.x, cell.end.y - 2), Vector2(cell.end.x, cell.end.y - 2), Color(0.1, 0.07, 0.05, 0.7), 2.0)
 
 
-# A coop tile: a wooden floor with a sloped roof band along the top.
-func _draw_coop_tile(cell: Rect2) -> void:
+# A coop tile, drawn by where it sits in the 2 by 2 coop: the top row is roofed, the bottom-left
+# has the hen door, and the bottom-right holds the nest with straw.
+func _draw_coop_tile(cell: Rect2, local: Vector2i) -> void:
 	draw_rect(cell, Color("7a5230"))
 	draw_rect(cell.grow(-5), Color("94693d"))
+	for i in range(1, 4):
+		var x := cell.position.x + cell.size.x * float(i) / 4.0
+		draw_line(Vector2(x, cell.position.y + cell.size.y * 0.24), Vector2(x, cell.end.y), Color(0.2, 0.12, 0.06, 0.5), 1.0)
 	draw_rect(Rect2(cell.position, Vector2(cell.size.x, cell.size.y * 0.24)), Color("5a2e1c"))
+	draw_line(Vector2(cell.position.x, cell.position.y + cell.size.y * 0.24), Vector2(cell.end.x, cell.position.y + cell.size.y * 0.24), Color("3a1a10"), 2.0)
+	if local == Vector2i(0, 1):
+		var door := Rect2(cell.position.x + cell.size.x * 0.28, cell.position.y + cell.size.y * 0.42, cell.size.x * 0.44, cell.size.y * 0.58)
+		draw_rect(door, Color("3a2214"))
+		draw_line(Vector2(door.position.x, door.position.y + door.size.y * 0.5), Vector2(door.end.x, door.position.y + door.size.y * 0.5), Color("5a3a24"), 2.0)
+	if local == Vector2i(1, 1):
+		draw_rect(Rect2(cell.position.x + cell.size.x * 0.2, cell.position.y + cell.size.y * 0.5, cell.size.x * 0.6, cell.size.y * 0.35), Color("3a2a1a"))
+		for i in 5:
+			var sx := cell.position.x + cell.size.x * (0.25 + 0.12 * i)
+			draw_line(Vector2(sx, cell.position.y + cell.size.y * 0.7), Vector2(sx + 3, cell.position.y + cell.size.y * 0.8), Color("e0b850"), 2.0)
 
 
-# A barn tile: red boards with pale trim lines, and a ridge along the top.
-func _draw_barn_tile(cell: Rect2) -> void:
+# A barn tile, drawn by its place in the 3 by 2 barn: red boards, a roofed top row, a big door
+# in the bottom-middle with an X brace, and hay bales in the bottom-right.
+func _draw_barn_tile(cell: Rect2, local: Vector2i) -> void:
 	draw_rect(cell, Color("7a2e26"))
 	draw_rect(cell.grow(-4), Color("8f3a2f"))
-	for i in 3:
-		var x := cell.position.x + cell.size.x * (0.25 + 0.25 * i)
-		draw_line(Vector2(x, cell.position.y + 3), Vector2(x, cell.end.y - 3), Color(0.85, 0.8, 0.7, 0.35), 1.5)
+	for i in range(1, 4):
+		var x := cell.position.x + cell.size.x * float(i) / 4.0
+		draw_line(Vector2(x, cell.position.y + cell.size.y * 0.2), Vector2(x, cell.end.y), Color(0.25, 0.1, 0.08, 0.55), 1.5)
 	draw_rect(Rect2(cell.position, Vector2(cell.size.x, cell.size.y * 0.2)), Color("4a1a16"))
+	if local.y == 0:
+		draw_line(Vector2(cell.position.x, cell.position.y + cell.size.y * 0.2), Vector2(cell.end.x, cell.position.y + cell.size.y * 0.2), Color(Color("e8dcc0"), 0.6), 2.0)
+	if local == Vector2i(1, 1):
+		var door := Rect2(cell.position.x + cell.size.x * 0.1, cell.position.y + cell.size.y * 0.28, cell.size.x * 0.8, cell.size.y * 0.72)
+		draw_rect(door, Color("5c2219"))
+		draw_rect(door, Color("e8dcc0"), false, 2.0)
+		draw_line(door.position, door.end, Color("e8dcc0"), 2.0)
+		draw_line(Vector2(door.end.x, door.position.y), Vector2(door.position.x, door.end.y), Color("e8dcc0"), 2.0)
+		draw_line(Vector2(door.position.x + door.size.x * 0.5, door.position.y), Vector2(door.position.x + door.size.x * 0.5, door.end.y), Color("e8dcc0"), 2.0)
+	if local == Vector2i(2, 1):
+		var bale := Rect2(cell.position.x + 4, cell.position.y + cell.size.y * 0.4, cell.size.x - 8, cell.size.y * 0.5)
+		draw_rect(bale, Color("d8b050"))
+		for i in 3:
+			var by := bale.position.y + bale.size.y * (0.25 + 0.25 * i)
+			draw_line(Vector2(bale.position.x, by), Vector2(bale.end.x, by), Color("9a7a30"), 2.0)
+	if local == Vector2i(0, 1):
+		var win := Rect2(cell.position.x + cell.size.x * 0.3, cell.position.y + cell.size.y * 0.4, cell.size.x * 0.4, cell.size.y * 0.3)
+		draw_rect(win.grow(2), Color("e8dcc0"))
+		draw_rect(win, Color("1d1712"))
+
+
+# The root cellar: a hatch of planks set into a stone rim, with an iron ring to lift it.
+func _draw_cellar_tile(cell: Rect2) -> void:
+	draw_rect(cell, Color("4a4038"))
+	var hatch := cell.grow(-4)
+	draw_rect(hatch, Color("6b5a48"))
+	for i in range(1, 4):
+		var x := hatch.position.x + hatch.size.x * float(i) / 4.0
+		draw_line(Vector2(x, hatch.position.y), Vector2(x, hatch.end.y), Color("4a3524"), 2.0)
+	draw_arc(cell.get_center(), 4.0, 0.0, TAU, 12, Color("c9c2b0"), 2.0)
+
+
+# The smokehouse: brick walls, slatted vents, and a dark smoke hole, with a few hams hung on hooks.
+func _draw_smokehouse_tile(cell: Rect2) -> void:
+	draw_rect(cell, Color("7a4530"))
+	for row in range(1, 4):
+		var y := cell.position.y + cell.size.y * float(row) / 4.0
+		draw_line(Vector2(cell.position.x, y), Vector2(cell.end.x, y), Color(0.2, 0.1, 0.06, 0.6), 1.0)
+	draw_rect(Rect2(cell.position.x + cell.size.x * 0.38, cell.position.y + 3, cell.size.x * 0.24, cell.size.y * 0.18), Color("2a1a14"))
+	for i in 3:
+		var vx := cell.position.x + cell.size.x * (0.2 + 0.25 * i)
+		draw_line(Vector2(vx, cell.position.y + cell.size.y * 0.5), Vector2(vx, cell.end.y - 4), Color("4a2418"), 2.0)
+	draw_circle(Vector2(cell.position.x + cell.size.x * 0.5, cell.position.y + cell.size.y * 0.7), 3.0, Color("8a3a2a"))
+
+
+# The furnace: grey stone, with a glowing firebox mouth and a sooty stack.
+func _draw_furnace_tile(cell: Rect2) -> void:
+	draw_rect(cell, Color("5c5c66"))
+	for row in range(1, 4):
+		var y := cell.position.y + cell.size.y * float(row) / 4.0
+		draw_line(Vector2(cell.position.x, y), Vector2(cell.end.x, y), Color(0.1, 0.1, 0.12, 0.6), 1.0)
+	draw_rect(Rect2(cell.position.x + cell.size.x * 0.4, cell.position.y + 2, cell.size.x * 0.2, cell.size.y * 0.2), Color("2a2a30"))
+	var mouth := Rect2(cell.position.x + cell.size.x * 0.22, cell.position.y + cell.size.y * 0.45, cell.size.x * 0.56, cell.size.y * 0.35)
+	draw_rect(mouth, Color("2a0f05"))
+	draw_rect(mouth.grow(-3), Color("e0601e"))
+	draw_rect(mouth.grow(-7), Color("ffd060"))
+
+
+# Workshop floor: planks running across the tile, with the ends staggered so the boards don't line up.
+func _draw_floor_tile(cell: Rect2, tile: Vector2i) -> void:
+	draw_rect(cell, TILE_COLORS[Tile.FLOOR])
+	for i in range(1, 4):
+		var y := cell.position.y + cell.size.y * float(i) / 4.0
+		draw_line(Vector2(cell.position.x, y), Vector2(cell.end.x, y), Color(0.1, 0.07, 0.04, 0.6), 1.0)
+	var join := cell.position.x + (cell.size.x * 0.5 if (tile.x + tile.y) % 2 == 0 else cell.size.x * 0.25)
+	draw_line(Vector2(join, cell.position.y), Vector2(join, cell.position.y + cell.size.y * 0.25), Color(0.1, 0.07, 0.04, 0.6), 1.0)
+	draw_line(Vector2(join, cell.position.y + cell.size.y * 0.5), Vector2(join, cell.position.y + cell.size.y * 0.75), Color(0.1, 0.07, 0.04, 0.6), 1.0)
 
 
 # The hens are drawn on their own layer, from where each one currently stands in the coop.
