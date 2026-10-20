@@ -314,7 +314,7 @@ Later: more villages and roads, more creatures, and guardian quests that need co
 - At **Mining 3**, a quarry rock gives copper ore. At **Mining 5**, with a copper pick or better, there is an even chance of iron ore instead.
 - The quarry works in Ashford only. Farm rocks never give iron.
 
-## Gathering and metal (planned)
+## Gathering and metal
 
 Bark is the starting tier and metal is the later one. Each bark piece has a metal piece for the same slot. The metal piece is better, needs Smithing, and takes that slot once you have it. Bark pieces stay craftable early on.
 
@@ -339,13 +339,7 @@ Each gathering skill has its own tool. The tool's material sets what it can brea
 
 **Tool tiers:** a stone hatchet or pick (from farm stone) comes after the first tools. Copper tools come from Smithing, and iron tools after that. Trees need any hatchet. Hardwood needs a copper hatchet or better. Copper ore needs a pick. Iron ore needs a copper pick or better.
 
-**Build order:**
-1. Forestry, starting with a crude hatchet made from wood and fiber.
-2. Mining on farm rocks, which gives stone and the first pick.
-3. Smithing and the furnace, with copper bars and the first metal pieces.
-4. The Ashford quarry, with iron ore and the top metal tier.
-
-Levels here are placeholders and will be tuned once the systems exist.
+Levels are first-pass values and will be tuned in playtesting. Ammunition arrows and bolts are used up on shots, and there is no pickup yet. Magic (staves and wands) is not designed.
 
 **Decided:** the offhand (left hand) is for the shield. The lantern moves to a **belt** slot, so it can be worn without taking a hand. The lantern keeps its light ring and upgrades as before. Moving it is a grid change to be made when shields are built.
 
