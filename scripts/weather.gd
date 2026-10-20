@@ -6,7 +6,7 @@ extends CanvasLayer
 
 const DROPS := 170
 const CLOUDS := 6
-const WIND := 60.0          # sideways drift of the rain, in pixels per second
+const WIND := 30.0          # sideways drift of the rain, in pixels per second
 
 var drops: Array = []       # each: {"p": Vector2, "v": falling speed}
 var clouds: Array = []      # each: {"c": Vector2, "r": radius, "v": drift speed}
@@ -45,7 +45,7 @@ func _ready() -> void:
 	add_child(rain_canvas)
 
 	for i in DROPS:
-		drops.append({"p": Vector2(rng.randf() * size.x, rng.randf() * size.y), "v": rng.randf_range(420.0, 620.0)})
+		drops.append({"p": Vector2(rng.randf() * size.x, rng.randf() * size.y), "v": rng.randf_range(210.0, 310.0)})
 	for i in CLOUDS:
 		clouds.append({
 			"c": Vector2(rng.randf() * size.x, rng.randf_range(-40.0, 120.0)),
