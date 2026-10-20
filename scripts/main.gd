@@ -622,6 +622,7 @@ var hud_label: Label
 var message_label: Label
 var player    # Node2D with player.gd attached
 var camera: Camera2D
+var last_cam_center := Vector2.ZERO   # where the farm was last drawn from
 var lantern_light: PointLight2D
 
 
@@ -644,6 +645,9 @@ func _ready() -> void:
 
 
 func _process(delta: float) -> void:
+	if not in_cave and not _in_village() and camera.get_screen_center_position() != last_cam_center:
+		last_cam_center = camera.get_screen_center_position()
+		queue_redraw()
 	# Settings pauses the day: the clock stops, foes stand still, and only the menu responds.
 	player.paused = open_tab == "Settings"
 	if player.paused:
@@ -709,15 +713,21 @@ func _draw() -> void:
 	if _in_village():
 		_draw_world()
 		return
+	var view_left := camera.get_screen_center_position().x - get_viewport_rect().size.x * 0.5 / camera.zoom.x
 	for y in MAP_H:
 		for x in MAP_W:
 			var tile: int = map[y][x]
 			var cell := _tile_rect(Vector2i(x, y))
-			draw_rect(cell, TILE_COLORS[tile])
+			if tile == Tile.TREE:
+				_draw_tree(cell, Vector2i(x, y))
+			else:
+				draw_rect(cell, TILE_COLORS[tile])
 			if tile == Tile.CELLAR or tile == Tile.COOLER or tile == Tile.SMOKEHOUSE or tile == Tile.FURNACE:
 				draw_rect(cell, Color(1, 1, 1, 0.8), false, 2.0)
 				var label := _storage_label(tile)
-				draw_string(ThemeDB.fallback_font, cell.position + Vector2(2, PX * 0.6), label, HORIZONTAL_ALIGNMENT_LEFT, -1, 11, Color(0.05, 0.03, 0.02))
+				# Pinned to the visible edge, so a store at the screen's edge still shows its name.
+				var label_x := maxf(cell.position.x + 2, view_left + 6)
+				draw_string(ThemeDB.fallback_font, Vector2(label_x, cell.position.y + PX * 0.6), label, HORIZONTAL_ALIGNMENT_LEFT, -1, 11, Color(0.05, 0.03, 0.02))
 
 	for y in INT_H:
 		for x in INT_W:
@@ -971,11 +981,23 @@ func _build_lantern_light() -> void:
 func _build_hud() -> void:
 	var layer := CanvasLayer.new()
 	add_child(layer)
+	# A full-screen root gives the HUD a screen to anchor to. It ignores the mouse.
+	var hud_root := Control.new()
+	hud_root.set_anchors_preset(Control.PRESET_FULL_RECT)
+	hud_root.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	layer.add_child(hud_root)
 
-	hud_label = _make_label(layer, Vector2(16, 12), 24)
-	message_label = _make_label(layer, Vector2(16, 100), 20)
+	hud_label = _make_label(hud_root, Vector2(16, 12), 24)
+	message_label = _make_label(hud_root, Vector2(16, 100), 20)
 	message_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	message_label.custom_minimum_size = Vector2(620, 0)
+	# Messages sit low on the left, clear of the farm's labels and the HUD.
+	message_label.set_anchors_preset(Control.PRESET_BOTTOM_LEFT)
+	message_label.offset_left = 16
+	message_label.offset_right = 656
+	message_label.offset_top = -124
+	message_label.offset_bottom = -24
+	message_label.vertical_alignment = VERTICAL_ALIGNMENT_BOTTOM
 
 	minimap = Minimap.new()
 	var mini_size := Vector2(MAP_W, MAP_H) * Minimap.PX_PER_TILE
@@ -3520,7 +3542,11 @@ func _draw_world() -> void:
 	var y1 := clampi(ceili((top_left.y + view.y) / PX) + 1, 0, WORLD_H - 1)
 	for y in range(y0, y1 + 1):
 		for x in range(x0, x1 + 1):
-			draw_rect(_tile_rect(Vector2i(x, y)), TILE_COLORS[world[y * WORLD_W + x]])
+			var world_kind: int = world[y * WORLD_W + x]
+			if world_kind == Tile.TREE:
+				_draw_tree(_tile_rect(Vector2i(x, y)), Vector2i(x, y))
+			else:
+				draw_rect(_tile_rect(Vector2i(x, y)), TILE_COLORS[world_kind])
 	var origin := _region_origin()
 	for npc in _zone_npcs():
 		var c := _tile_center(origin.x + npc["pos"].x, origin.y + npc["pos"].y)
@@ -4478,6 +4504,19 @@ func _world_tile(ix: int, iy: int) -> Vector2i:
 
 func _tile_center(wx: int, wy: int) -> Vector2:
 	return Vector2(wx * PX + PX * 0.5, wy * PX + PX * 0.5)
+
+
+func _draw_tree(cell: Rect2, pos: Vector2i) -> void:
+	draw_rect(cell, Color("17281a"))
+	var h: int = absi((pos.x * 73856093) ^ (pos.y * 19349663))
+	var shades := [Color("2c5630"), Color("36643a"), Color("24472a"), Color("3d6e3f")]
+	var c := cell.position + cell.size * 0.5
+	for i in 3:
+		var ox := float((h >> (i * 4)) % 7 - 3) * PX * 0.06
+		var oy := float((h >> (i * 4 + 2)) % 7 - 3) * PX * 0.06
+		draw_circle(c + Vector2(ox, oy), PX * (0.34 + 0.05 * float(i)), shades[(h >> (i * 3)) % shades.size()])
+	# A little light on the upper left of the canopy.
+	draw_circle(c + Vector2(-PX * 0.12, -PX * 0.14), PX * 0.1, Color(0.62, 0.78, 0.46, 0.22))
 
 
 func _tile_rect(t: Vector2i) -> Rect2:

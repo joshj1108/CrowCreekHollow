@@ -29,6 +29,10 @@ A top-down farming game with heavy psychological horror, built in Godot 4.7.
 
 ## Action bar
 
+- Messages sit at the bottom-left of the screen, clear of the farm's labels. HUD and message text have a dark outline so they read over any ground.
+- Trees are drawn as canopies of overlapping crowns, so the outer forest reads as dense woodland. Trees block movement.
+- Storage labels (Cellar, Cooler, Smokehouse, Furnace) stay on screen when their building is at the view's edge.
+
 - A small **Menu** button sits in the bottom-right corner for mouse players. It reopens the last section you had open (Skills at first) and hides while the menu is open. Sections open from their keys, and the menu lists them on the left, so each section is one key or click away. The full-screen menu shows over a dimmed game: the sections down the left (with their keys), the current section's options on the right, and the controls and a Back button in the footer.
 - Each section lists its options as cards: name, value, and an optional button or progress bar. Crafting and the other grid-based sections use the same layout.
 - **Settings pauses the day.** While it is open the clock stops, foes stand still, and the player can't move. Other sections don't pause.
