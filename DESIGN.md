@@ -275,11 +275,8 @@ Later: more villages and roads, more creatures, and guardian quests that need co
 - **Rendering:** the world is stored in chunks, and only the chunks near the camera are drawn, so the full size stays fast.
 - **Villages and roads:** the world is rebuilt to fit Lowmere and Ashford inside the full map. Their layouts can change to suit it.
 - **Nighttime:** the restriction stays. At night you're sent back to the farm, the same as now.
-- **Campsites:** you can set up a campsite somewhere in the world, built from materials. A campsite lets you stay in the world at night and save there. How it works after dark is still open.
-
-**Open decisions:**
-- Where the portal sits on the farm.
-- What a campsite does at night: whether it is safe from foes, and whether it saves the game or only holds your place.
+- **Portal:** on the farm's east side, where the road to Lowmere starts today. Walking through it takes you into the world.
+- **Campsites:** you can build a campsite somewhere in the world from materials. A campsite is completely safe. It saves the game, and you use it the same way as a bed: from 18:00 onward, and it advances the day.
 
 ## Forestry and tools
 
