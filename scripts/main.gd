@@ -1933,6 +1933,10 @@ func _on_panel_action(action_id: String) -> void:
 
 
 func _refresh_panel() -> void:
+	# With no section open the menu frame must be hidden, not redrawn with an empty tab.
+	if open_tab == "":
+		action_bar.hide_panel()
+		return
 	var rows: Array = []
 	match open_tab:
 		"Skills":
