@@ -461,8 +461,7 @@ const WEAR_FOX := 4           # at this wear, a fox can get into the coop
 const COOP_COST := {"wood": 6, "fiber": 4, "level": 2}
 const COOP_HENS_MAX := 4
 const BARN_SIZE := Vector2i(3, 2)          # the barn is 3 wide and 2 deep, on open grass
-const BARN_COST := {"wood": 10, "fiber": 6, "level": 4}
-const BARN_EXTRA_HENS := 4                 # with a barn, the coop holds this many more hens
+const BARN_COST := {"wood": 10, "fiber": 6, "level": 4}   # the barn is for livestock, kept apart from the coop
 const HEN_PRICE := 12
 const HEN_FEED_CROPS := 1
 const HEN_LEAVE_DAYS := 2     # unfed this many days in a row, and a hen wanders off
@@ -1633,7 +1632,7 @@ func _house_rows() -> Array:
 	else:
 		rows.append({
 			"name": "Hens",
-			"value": "%d of %d, %d coins each" % [hens, _hens_max(), HEN_PRICE],
+			"value": "%d of %d, %d coins each" % [hens, COOP_HENS_MAX, HEN_PRICE],
 			"button": "Buy hen",
 			"action": "buy_hen",
 			"enabled": _can_buy_hen(),
@@ -1726,17 +1725,15 @@ func _buildings_rows() -> Array:
 	rows.append({"section": "Barn"})
 	if not barn_built:
 		rows.append({
-			"name": "Build a barn (the coop holds %d more hens)" % BARN_EXTRA_HENS,
+			"name": "Build a barn (for livestock)",
 			"value": _price_text(BARN_COST),
 			"button": "Build",
 			"action": "build_barn",
 			"enabled": _can_build("barn"),
 		})
-		if not coop_built:
-			rows.append({"note": "The barn needs the coop built first."})
+		rows.append({"note": "The barn is for livestock. Livestock are still to come, so for now it simply stands."})
 	else:
 		rows.append(_placed_row("Barn", "barn", barn_tile, "move_barn"))
-		rows.append({"note": "With the barn standing, the coop holds %d hens." % _hens_max()})
 	return rows
 
 
@@ -1875,7 +1872,7 @@ func _interact() -> void:
 		_feed_hens()
 		return
 	if kind == Tile.BARN:
-		_show_message("The barn stands here. With it, the coop holds %d hens." % _hens_max())
+		_show_message("The barn is for livestock, which are still to come.")
 		return
 	if kind == Tile.CELLAR:
 		_toggle_tab("Cellar")
@@ -3991,9 +3988,9 @@ func _build_cost(kind: String) -> Dictionary:
 	return BARN_COST if kind == "barn" else COOP_COST
 
 
-# A building can be built once, from the Buildings menu. A barn needs the coop first.
+# A building can be built once, from the Buildings menu.
 func _can_build(kind: String) -> bool:
-	if _is_built(kind) or (kind == "barn" and not coop_built):
+	if _is_built(kind):
 		return false
 	var cost := _build_cost(kind)
 	return _level("Carpentry") >= int(cost["level"]) \
@@ -4014,10 +4011,7 @@ func _start_placement(kind: String) -> void:
 		_show_message("You can only build on the farm.")
 		return
 	if not _is_built(kind) and not _can_build(kind):
-		if kind == "barn" and not coop_built:
-			_show_message("A barn needs the coop built first.")
-		else:
-			_show_message("A %s needs %s." % [kind, _price_text(_build_cost(kind))])
+		_show_message("A %s needs %s." % [kind, _price_text(_build_cost(kind))])
 		return
 	placing = kind
 	_close_panel()
@@ -4056,7 +4050,7 @@ func _confirm_placement() -> void:
 	placing = ""
 	_apply_storage_tiles()
 	if kind == "barn":
-		_show_message("The barn stands here now. With it, the coop holds %d hens." % _hens_max())
+		_show_message("The barn stands here now. Livestock will be kept here when they arrive.")
 	else:
 		_show_message("The coop stands here now. Stand beside it, facing it, and press Space to feed the hens.")
 
@@ -4087,18 +4081,13 @@ func _draw_placement_ghost() -> void:
 			placement_ghost.draw_rect(_tile_rect(top + Vector2i(dx, dy)), fill)
 
 
-# The coop holds COOP_HENS_MAX hens, and a barn makes room for BARN_EXTRA_HENS more.
-func _hens_max() -> int:
-	return COOP_HENS_MAX + (BARN_EXTRA_HENS if barn_built else 0)
-
-
 func _can_buy_hen() -> bool:
-	return coop_built and hens < _hens_max() and money >= HEN_PRICE
+	return coop_built and hens < COOP_HENS_MAX and money >= HEN_PRICE
 
 
 func _buy_hen() -> void:
 	if not _can_buy_hen():
-		_show_message("A hen costs %d coins, and the coop holds %d." % [HEN_PRICE, _hens_max()])
+		_show_message("A hen costs %d coins, and the coop holds %d." % [HEN_PRICE, COOP_HENS_MAX])
 		return
 	money -= HEN_PRICE
 	hens += 1
