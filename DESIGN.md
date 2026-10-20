@@ -307,6 +307,13 @@ Later: more villages and roads, more creatures, and guardian quests that need co
 - **Arrows** (wood and fiber, Bushcrafting 2) and **bolts** (hardwood and copper, Smithing 2) are fletched from the Gear panel's Ammunition section. Each shot uses one. Shots that miss are lost, since there is no pickup yet.
 - Melee and ranged attacks both use the same button. The bow or crossbow in the main hand decides which one you get.
 
+## The Ashford quarry
+
+- Four **quarry rocks** sit in Ashford, and they come back each morning.
+- You need a pick. Without one, a quarry rock is too hard to break.
+- At **Mining 3**, a quarry rock gives copper ore. At **Mining 5**, with a copper pick or better, there is an even chance of iron ore instead.
+- The quarry works in Ashford only. Farm rocks never give iron.
+
 ## Gathering and metal (planned)
 
 Bark is the starting tier and metal is the later one. Each bark piece has a metal piece for the same slot. The metal piece is better, needs Smithing, and takes that slot once you have it. Bark pieces stay craftable early on.

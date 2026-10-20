@@ -52,6 +52,9 @@ const ROCK_SPOTS := [Vector2i(14, 6), Vector2i(17, 10), Vector2i(27, 17), Vector
 const XP_MINE := 12
 const ORE_CHANCE := 0.15
 const ORE_MINING_LEVEL := 2
+# Quarry rocks in Ashford, in village tiles. They yield copper ore from Mining 3,
+# and iron ore from Mining 5 with a copper pick or better.
+const ASHFORD_QUARRY := [Vector2i(26, 16), Vector2i(30, 18), Vector2i(34, 15), Vector2i(9, 17)]
 # Tool tiers. A hatchet fells trees. Hardwood needs a copper hatchet or better.
 const TOOL_TIERS := {
 	"hatchet": [
@@ -464,6 +467,7 @@ var inventory := {"seeds": STARTING_SEEDS, "pumpkin_seeds": 0, "crops": 0, "fish
 var materials := {"wood": 0, "fiber": 0, "resin": 0, "hardwood": 0, "stone": 0, "copper_ore": 0, "iron_ore": 0, "copper_bar": 0, "iron_bar": 0, "arrows": 0, "bolts": 0}
 var tool_tier := {"hatchet": 0, "pick": 0}     # 0 = none; higher tiers come from TOOL_TIERS
 var grove_felled := {}
+var quarry := {}                                   # Ashford quarry rocks, village tile -> true
 var rocks := {}                                  # world tile -> true for unbroken rocks                          # world tile -> true for trees cut today
 var stats := {"planted": 0, "harvested": 0, "gathered": 0, "slept": 0, "tidied": 0,
 	"fished": 0, "caught": 0, "mended": 0, "cleansed": 0, "cooked": 0, "eaten": 0,
@@ -803,6 +807,7 @@ func _respawn_brush() -> void:
 	grove_felled.clear()
 	_apply_grove()
 	_fill_rocks()
+	_fill_quarry()
 	queue_redraw()
 
 
@@ -2303,6 +2308,30 @@ func _shot_hits(foe: Dictionary, amount: int) -> void:
 		_show_message("Your shot hits the %s for %d." % [str(foe["kind"]), amount])
 
 
+# --- The Ashford quarry ------------------------------------------------------------
+
+func _fill_quarry() -> void:
+	quarry.clear()
+	for spot in ASHFORD_QUARRY:
+		quarry[spot] = true
+
+
+func _quarry(tile: Vector2i) -> void:
+	var pick := int(tool_tier["pick"])
+	if pick < 1:
+		_show_message("The quarry rock is too hard for your hands. Craft a stone pick from the Gear panel.")
+		return
+	quarry.erase(tile)
+	var kind := "copper_ore" if _level("Mining") >= 3 else "stone"
+	if _level("Mining") >= 5 and pick >= 2 and randf() < 0.5:
+		kind = "iron_ore"
+	materials[kind] += 1
+	stats["mined"] += 1
+	_grant_xp("Mining", XP_MINE)
+	_show_message("You work the quarry rock. +1 %s. +%d Mining XP" % [kind.replace("_", " "), XP_MINE])
+	queue_redraw()
+
+
 # --- Slot grids for the pack, seed pouch, and equipment ---------------------
 
 func _pack_cells() -> Array:
@@ -2442,6 +2471,9 @@ func _interact_village() -> void:
 	if idx >= 0:
 		_talk(_zone_npcs()[idx])
 		return
+	if zone == Zone.ASHFORD and quarry.has(_tile_in_front()):
+		_quarry(_tile_in_front())
+		return
 	_swing()
 
 
@@ -2503,6 +2535,10 @@ func _draw_village() -> void:
 		draw_circle(pos + Vector2(5, -4), 2.5, Color(0.9, 0.1, 0.1))
 		var frac := float(foe["hp"]) / float(st["hp"])
 		draw_rect(Rect2(pos + Vector2(-PX * 0.3, -PX * 0.5), Vector2(PX * 0.6 * frac, 3)), Color("c24a4a"))
+	for pos in quarry:
+		var qc := _tile_center(pos.x, pos.y)
+		draw_circle(qc, PX * 0.3, Color("6a6a4a"))
+		draw_circle(qc + Vector2(-5, -4), PX * 0.08, Color("c9b46a"))
 	for shot in shots:
 		var shot_pos: Vector2 = shot["pos"]
 		var shot_vel: Vector2 = shot["vel"]
@@ -3112,6 +3148,7 @@ func _save_game() -> void:
 		"brush": _brush_to_array(),
 		"felled": _felled_to_array(),
 		"rocks": _tiles_to_array(rocks),
+		"quarry": _tiles_to_array(quarry),
 		"tool_tier": tool_tier,
 	}
 	var file := FileAccess.open(SAVE_PATH, FileAccess.WRITE)
@@ -3189,6 +3226,12 @@ func _load_game() -> bool:
 			rocks[Vector2i(int(r[0]), int(r[1]))] = true
 	else:
 		_fill_rocks()
+	if data.has("quarry"):
+		quarry.clear()
+		for q in data["quarry"]:
+			quarry[Vector2i(int(q[0]), int(q[1]))] = true
+	else:
+		_fill_quarry()
 	return true
 
 
