@@ -512,6 +512,10 @@ const COLLAPSE_SANITY_PENALTY := 5   # permanent cap reduction, curable with a c
 var save_slot := 1                  # which save slot this game reads and writes
 var world_started := false         # false while the start screen is up
 var title_menu: TitleMenu
+const SETTINGS_PATH := "user://hallowvale_settings.json"
+var music_on := true
+var music_player: AudioStreamPlayer
+var weather: Weather
 var tips_seen: Dictionary = {}     # tip id -> true, once it has been shown
 var tip_queue: Array = []          # tip ids waiting their turn
 var tip_showing := ""              # the tip on screen now, or ""
@@ -569,7 +573,7 @@ const TILE_COLORS := {
 
 const BUSH_COLOR := Color("3d6b2a")
 
-const DAY_TINT := Color(1, 1, 1)
+const DAY_TINT := Color(0.88, 0.91, 0.95)   # a cool, grey light for the dreary weather
 const NIGHT_TINT := Color("3a3f6e")
 
 enum Zone { HOMESTEAD, VILLAGE, ASHFORD, WILDS, TOWN }
@@ -686,6 +690,8 @@ var lantern_light: PointLight2D
 
 func _ready() -> void:
 	_setup_input()
+	_load_settings()
+	_start_music()
 	_build_map()
 	_generate_world()
 	_find_pond_edges()
@@ -714,6 +720,13 @@ func _game_rows() -> Array:
 			"enabled": _can_save_and_quit(),
 		},
 		{
+			"name": "Music",
+			"value": "On" if music_on else "Off",
+			"button": "Turn off" if music_on else "Turn on",
+			"action": "toggle_music",
+			"enabled": true,
+		},
+		{
 			"name": "Quit to the main menu",
 			"value": "Returns to the start screen without saving. Progress since your last sleep is lost.",
 			"button": "Quit",
@@ -721,6 +734,43 @@ func _game_rows() -> Array:
 			"enabled": true,
 		},
 	]
+
+
+# The lo-fi loop plays from the start screen on, and can be turned off in Settings. The choice is remembered.
+func _load_settings() -> void:
+	if FileAccess.file_exists(SETTINGS_PATH):
+		var parsed: Variant = JSON.parse_string(FileAccess.get_file_as_string(SETTINGS_PATH))
+		if typeof(parsed) == TYPE_DICTIONARY:
+			music_on = bool(parsed.get("music", true))
+
+
+func _save_settings() -> void:
+	var file := FileAccess.open(SETTINGS_PATH, FileAccess.WRITE)
+	if file != null:
+		file.store_string(JSON.stringify({"music": music_on}))
+
+
+func _start_music() -> void:
+	var stream := load("res://audio/dreary_loop.ogg") as AudioStreamOggVorbis
+	stream.loop = true
+	music_player = AudioStreamPlayer.new()
+	music_player.stream = stream
+	music_player.volume_db = -8.0
+	add_child(music_player)
+	_apply_music()
+
+
+func _apply_music() -> void:
+	if music_on and not music_player.playing:
+		music_player.play()
+	elif not music_on and music_player.playing:
+		music_player.stop()
+
+
+func _toggle_music() -> void:
+	music_on = not music_on
+	_save_settings()
+	_apply_music()
 
 
 # Saving only happens on the farm, where the saved position makes sense on load.
@@ -750,6 +800,8 @@ func _on_title_start(mode: String, slot: int) -> void:
 	_build_world()
 	_build_hud()
 	_build_tip_panel()
+	weather = Weather.new()
+	add_child(weather)
 	_build_action_bar()
 	_update_shadow_tile()
 	if loaded:
@@ -771,6 +823,8 @@ func _process(delta: float) -> void:
 		if cam_tile != last_cam_tile:
 			last_cam_tile = cam_tile
 			queue_redraw()
+	if weather != null:
+		weather.visible = not inside and not in_cave
 	# Settings pauses the day: the clock stops, foes stand still, and only the menu responds.
 	player.paused = open_tab == "Settings"
 	placement_ghost.visible = placing != ""
@@ -1556,6 +1610,9 @@ func _on_panel_action(action_id: String) -> void:
 		return
 	if action_id == "unstick":
 		_unstick()
+		return
+	if action_id == "toggle_music":
+		_toggle_music()
 		return
 	if action_id == "quit_title_save":
 		_quit_to_title(true)
