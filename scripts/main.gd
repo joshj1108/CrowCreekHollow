@@ -1227,6 +1227,9 @@ func _on_panel_action(action_id: String) -> void:
 	if action_id == "build_coop" or action_id == "move_coop":
 		_build_coop()
 		return
+	if action_id == "unstick":
+		_unstick()
+		return
 	if action_id == "build_barn" or action_id == "move_barn":
 		_build_barn()
 		return
@@ -1775,6 +1778,14 @@ func _settings_rows() -> Array:
 		{"name": "Settings", "value": "Start"},
 		{"note": "On a gamepad, open Craft with the Open button on the Gear panel."},
 		{"note": "While a panel is open, the D-pad or left stick moves between its buttons, and A presses the highlighted one."},
+		{"section": "Stuck"},
+		{
+			"name": "Unstick me",
+			"value": "Cancels any placement and moves you to the path outside the farmhouse door",
+			"button": "Unstick",
+			"action": "unstick",
+			"enabled": true,
+		},
 		{"section": "Saving"},
 		{"note": "Progress saves only when you sleep, or when you collapse at 03:00. The save includes your position and open panel."},
 		{"note": "Sound and display options are coming later."},
@@ -3995,6 +4006,44 @@ func _can_build(kind: String) -> bool:
 	var cost := _build_cost(kind)
 	return _level("Carpentry") >= int(cost["level"]) \
 		and int(materials["wood"]) >= int(cost["wood"]) and int(materials["fiber"]) >= int(cost["fiber"])
+
+
+# Gets you out of a bad spot: cancels any placement and walks you to the nearest open ground
+# by the farmhouse door. The search starts from that door, so a building that boxed you in doesn't matter.
+func _unstick() -> void:
+	placing = ""
+	_close_panel()
+	if inside or in_cave or _in_village():
+		_show_message("Unstick works on the farm. Leave the house, cave, or village first.")
+		return
+	var start := Vector2i(BORDER_X + HOUSE_DOOR_IX, BORDER_Y + HOUSE_DOOR_IY + 1)
+	var free := _nearest_open_tile(start)
+	if free.x < 0:
+		_show_message("Nothing open to walk to. Try the Settings menu again after moving a building.")
+		return
+	player.position = _tile_center(free.x, free.y)
+	_show_message("You step back onto open ground.")
+
+
+# Breadth-first search over open ground (grass, path, soil, fallow) inside the farm, from a starting tile.
+func _nearest_open_tile(start: Vector2i) -> Vector2i:
+	var open_kinds := [Tile.GRASS, Tile.PATH, Tile.SOIL, Tile.FALLOW]
+	var seen := {start: true}
+	var queue: Array = [start]
+	while queue.size() > 0:
+		var t: Vector2i = queue.pop_front()
+		if t.x >= BORDER_X and t.y >= BORDER_Y and t.x < BORDER_X + INNER_W and t.y < BORDER_Y + INNER_H:
+			if map[t.y][t.x] in open_kinds and not crops.has(t) and not rocks.has(t) and not brush.has(t) and not fish_spots.has(t):
+				return t
+		for d in [Vector2i(1, 0), Vector2i(-1, 0), Vector2i(0, 1), Vector2i(0, -1)]:
+			var n: Vector2i = t + d
+			if n.x < BORDER_X or n.y < BORDER_Y or n.x >= BORDER_X + INNER_W or n.y >= BORDER_Y + INNER_H:
+				continue
+			if seen.has(n):
+				continue
+			seen[n] = true
+			queue.append(n)
+	return Vector2i(-1, -1)
 
 
 func _build_coop() -> void:
