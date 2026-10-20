@@ -1,10 +1,10 @@
 class_name ActionBar
 extends CanvasLayer
 
-## The game's menus. A slim quick bar sits along the bottom. Opening a section shows a
-## full-screen menu like a console game: the sections down the left, the current section's
-## options on the right, and the controls in the footer. main.gd decides what each section
-## shows and handles its actions.
+## The game's menu. Opening a section shows a full-screen menu like a console game: the
+## sections down the left, the current section's options on the right, and the controls in
+## the footer. Sections open from their keys or from the list. main.gd decides what each
+## section shows and handles its actions.
 
 signal tab_pressed(tab_name: String)
 signal action_pressed(action_id: String)
@@ -48,7 +48,6 @@ const COL_TEXT := Color("f1e4c8")
 const COL_MUTED := Color("b3a27c")
 const COL_ACCENT := Color("d9a94e")
 
-var bar_buttons := {}      # tab name -> Button in the quick bar
 var nav_buttons := {}      # tab name -> Button in the menu's section list
 var panel: Control         # the full-screen menu; visible only while a panel is open
 var title_label: Label
@@ -65,21 +64,6 @@ func _ready() -> void:
 	root.set_anchors_preset(Control.PRESET_FULL_RECT)
 	root.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(root)
-
-	var bar := HBoxContainer.new()
-	bar.add_theme_constant_override("separation", 6)
-	_place_bottom_center(bar, -10)
-	root.add_child(bar)
-	for tab in TABS:
-		var button := Button.new()
-		button.text = "%s  [%s]" % [tab["name"], tab["key"]]
-		button.custom_minimum_size = Vector2(132, 36)
-		button.focus_mode = Control.FOCUS_NONE
-		button.add_theme_font_size_override("font_size", 14)
-		_style_button(button, false)
-		button.pressed.connect(_on_tab_pressed.bind(tab["name"]))
-		bar.add_child(button)
-		bar_buttons[tab["name"]] = button
 
 	panel = _build_menu()
 	root.add_child(panel)
@@ -368,8 +352,6 @@ func _build_cell(cell: Dictionary) -> Control:
 
 func _set_active(tab: String) -> void:
 	active_tab = tab
-	for tab_name in bar_buttons:
-		_style_button(bar_buttons[tab_name], tab_name == tab)
 	for tab_name in nav_buttons:
 		_style_nav(nav_buttons[tab_name], tab_name == tab)
 
@@ -405,13 +387,6 @@ func _box(bg: Color, border: Color, border_width: int, radius: int, margin: int)
 	sb.set_corner_radius_all(radius)
 	sb.set_content_margin_all(margin)
 	return sb
-
-
-func _place_bottom_center(ctrl: Control, bottom_offset: float) -> void:
-	ctrl.set_anchors_preset(Control.PRESET_CENTER_BOTTOM)
-	ctrl.grow_horizontal = Control.GROW_DIRECTION_BOTH
-	ctrl.grow_vertical = Control.GROW_DIRECTION_BEGIN
-	ctrl.offset_bottom = bottom_offset
 
 
 func _on_tab_pressed(tab: String) -> void:

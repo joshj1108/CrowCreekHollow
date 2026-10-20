@@ -14,7 +14,7 @@ A top-down farming game with heavy psychological horror, built in Godot 4.7.
 - Move: WASD or arrow keys
 - Use, plant, harvest, gather, sleep, tidy, cleanse, cook, talk, swing, or read: Space / Enter (face the tile)
 - Walk into the farmhouse door to go inside. Walk onto the exit mat to leave.
-- Action bar (click or key): Skills K, Inventory I, Gear G, Craft C, Quests Q, House H, Achievements J, Settings
+- Menu sections (key, or click in the menu list): Skills K, Inventory I, Gear G, Craft C, Quests Q, House H, Achievements J, Settings
 - Esc opens Settings, or closes it if it's already open
 - Farming and gathering pause while a panel is open
 
@@ -29,7 +29,7 @@ A top-down farming game with heavy psychological horror, built in Godot 4.7.
 
 ## Action bar
 
-- A slim quick bar runs along the bottom. Opening a section shows a full-screen menu over a dimmed game: the sections down the left (with their keys), the current section's options on the right, and the controls and a Back button in the footer.
+- There is no bar along the bottom. Sections open from their keys, and the menu lists them on the left, so each section is one key or click away. The full-screen menu shows over a dimmed game: the sections down the left (with their keys), the current section's options on the right, and the controls and a Back button in the footer.
 - Each section lists its options as cards: name, value, and an optional button or progress bar. Crafting and the other grid-based sections use the same layout.
 - **Settings pauses the day.** While it is open the clock stops, foes stand still, and the player can't move. Other sections don't pause.
 - Panels rebuild only when their content changes, so buttons don't disappear mid-click.
