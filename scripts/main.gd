@@ -38,6 +38,13 @@ const PLOT_THREE_LEVEL := 4
 const INT_W := 14
 const INT_H := 9
 const INT_ORIGIN := Vector2i(0, MAP_H + 4)
+const FIREPLACE_IX := Vector2i(12, 5)            # the hearth, in the hall's north-east corner
+const TABLE_TILES := [Vector2i(2, 6), Vector2i(3, 6)]
+const CHAIR_TILES := [Vector2i(2, 5), Vector2i(3, 5), Vector2i(2, 7), Vector2i(3, 7)]
+const RUG_RECT := Rect2i(5, 5, 6, 3)            # the hall rug, laid from the Boarded stage
+const INT_WALLS := [Color("221c18"), Color("4e4236"), Color("7a6a54"), Color("9a8a6a")]
+const INT_FLOORS := [Color("3e2e22"), Color("5a4430"), Color("6e5438"), Color("7f6244")]
+const QUILTS := [Color("6a5a4a"), Color("3e5a80"), Color("3f6b4a"), Color("8a2e3a")]
 
 # Brush piles for bushcrafting, in inner coordinates. They respawn each morning.
 const BRUSH_SPOTS := [
@@ -496,9 +503,9 @@ const NIGHT_EVENTS := [
 	{"message": "The field is quiet tonight. Too quiet.", "shadow": "none", "sanity": -3},
 ]
 
-enum Tile { TREE, GRASS, SOIL, PATH, WATER, HOUSE, DOOR, FLOOR, WALL, EXIT, BED, STATION, DESK, FALLOW, STALL, CELLAR, COOLER, GATE, SMOKEHOUSE, FURNACE, PORTAL, CAMP, CAVE_MOUTH, CAVE_EXIT, ORE_COPPER, ORE_IRON, COOP, BARN }
+enum Tile { TREE, GRASS, SOIL, PATH, WATER, HOUSE, DOOR, FLOOR, WALL, EXIT, BED, STATION, DESK, FALLOW, STALL, CELLAR, COOLER, GATE, SMOKEHOUSE, FURNACE, PORTAL, CAMP, CAVE_MOUTH, CAVE_EXIT, ORE_COPPER, ORE_IRON, COOP, BARN, TABLE, FIREPLACE }
 
-const BLOCKING := [Tile.TREE, Tile.WATER, Tile.HOUSE, Tile.WALL, Tile.BED, Tile.STATION, Tile.DESK, Tile.STALL, Tile.CELLAR, Tile.COOLER, Tile.SMOKEHOUSE, Tile.FURNACE, Tile.CAMP, Tile.ORE_COPPER, Tile.ORE_IRON, Tile.COOP, Tile.BARN]
+const BLOCKING := [Tile.TREE, Tile.WATER, Tile.HOUSE, Tile.WALL, Tile.BED, Tile.STATION, Tile.DESK, Tile.STALL, Tile.CELLAR, Tile.COOLER, Tile.SMOKEHOUSE, Tile.FURNACE, Tile.CAMP, Tile.ORE_COPPER, Tile.ORE_IRON, Tile.COOP, Tile.BARN, Tile.TABLE, Tile.FIREPLACE]
 
 const TILE_COLORS := {
 	Tile.TREE: Color("2f4f2f"),
@@ -528,6 +535,8 @@ const TILE_COLORS := {
 	Tile.ORE_IRON: Color("8a8f99"),
 	Tile.COOP: Color("8a6a3a"),
 	Tile.BARN: Color("7a2e26"),
+	Tile.TABLE: Color("7a5230"),
+	Tile.FIREPLACE: Color("5a5650"),
 	Tile.CAMP: Color("d07a30"),
 }
 
@@ -782,7 +791,7 @@ func _draw() -> void:
 		for x in INT_W:
 			var kind: int = interior[y][x]
 			var cell := _tile_rect(INT_ORIGIN + Vector2i(x, y))
-			draw_rect(cell, TILE_COLORS[kind])
+			_draw_interior_tile(cell, Vector2i(x, y), kind)
 			# Furniture is labeled in the house so it's easy to tell apart.
 			if kind == Tile.BED or kind == Tile.STATION or kind == Tile.DESK:
 				var furniture := "Bed" if kind == Tile.BED else ("Cleaning" if kind == Tile.STATION else "Desk")
@@ -1062,6 +1071,9 @@ func _build_interior() -> void:
 		interior.append(row)
 
 	_fill_interior(1, 5, 12, 7, Tile.FLOOR)   # the hall, always open
+	_set_interior(FIREPLACE_IX.x, FIREPLACE_IX.y, Tile.FIREPLACE)
+	for t in TABLE_TILES:
+		_set_interior(t.x, t.y, Tile.TABLE)
 	_set_interior(6, 8, Tile.EXIT)            # back out to the farm
 	if cooler_built:
 		_set_interior(COOLER_INTERIOR.x, COOLER_INTERIOR.y, Tile.COOLER)
@@ -4935,6 +4947,186 @@ func _draw_wall(cell: Rect2, pos: Vector2i) -> void:
 			draw_line(Vector2(cell.position.x, y), Vector2(cell.end.x, y), Color(0.16, 0.11, 0.07, 0.55), 1.0)
 	else:
 		draw_line(Vector2(cell.position.x, cell.end.y - 2), Vector2(cell.end.x, cell.end.y - 2), Color(0.1, 0.07, 0.05, 0.7), 2.0)
+
+
+# Each house tile is drawn for the house's current repair stage, so the rooms improve as you fix the house.
+func _draw_interior_tile(cell: Rect2, pos: Vector2i, kind: int) -> void:
+	match kind:
+		Tile.WALL:
+			_draw_interior_wall(cell)
+		Tile.FLOOR:
+			_draw_interior_floor(cell, pos)
+		Tile.BED:
+			_draw_bed_tile(cell)
+		Tile.STATION:
+			_draw_station_tile(cell)
+		Tile.DESK:
+			_draw_desk_tile(cell)
+		Tile.TABLE:
+			_draw_table_tile(cell, pos)
+		Tile.FIREPLACE:
+			_draw_fireplace_tile(cell)
+		Tile.COOLER:
+			_draw_interior_cooler(cell)
+		Tile.EXIT:
+			_draw_doormat(cell)
+		_:
+			draw_rect(cell, TILE_COLORS[kind])
+
+
+# Plaster walls with a faint course line and a baseboard along the bottom.
+func _draw_interior_wall(cell: Rect2) -> void:
+	var wall: Color = INT_WALLS[house_stage]
+	draw_rect(cell, wall)
+	for i in range(1, 4):
+		var y := cell.position.y + cell.size.y * float(i) / 4.0
+		draw_line(Vector2(cell.position.x, y), Vector2(cell.end.x, y), Color(0, 0, 0, 0.12), 1.0)
+	draw_rect(Rect2(cell.position.x, cell.end.y - 5, cell.size.x, 5), wall.darkened(0.35))
+
+
+# Wood floor with plank lines. Chairs sit on the floor and the rug covers the hall from the Boarded stage.
+func _draw_interior_floor(cell: Rect2, pos: Vector2i) -> void:
+	draw_rect(cell, INT_FLOORS[house_stage])
+	for i in range(1, 4):
+		var y := cell.position.y + cell.size.y * float(i) / 4.0
+		draw_line(Vector2(cell.position.x, y), Vector2(cell.end.x, y), Color(0, 0, 0, 0.18), 1.0)
+	var join := cell.position.x + (cell.size.x * 0.5 if (pos.x + pos.y) % 2 == 0 else cell.size.x * 0.25)
+	draw_line(Vector2(join, cell.position.y), Vector2(join, cell.position.y + cell.size.y * 0.25), Color(0, 0, 0, 0.18), 1.0)
+	if house_stage >= 1 and RUG_RECT.has_point(pos):
+		_draw_rug_tile(cell, pos)
+	if CHAIR_TILES.has(pos):
+		_draw_chair(cell)
+
+
+# The rug is one piece: the tiles are filled edge to edge, with a border only along its outer edge
+# and a diamond pattern in each tile.
+func _draw_rug_tile(cell: Rect2, pos: Vector2i) -> void:
+	var base := Color("7a2e3a") if house_stage < 3 else Color("8a3a4a")
+	draw_rect(cell, base)
+	if pos.x == RUG_RECT.position.x or pos.x == RUG_RECT.end.x - 1 or pos.y == RUG_RECT.position.y or pos.y == RUG_RECT.end.y - 1:
+		draw_rect(cell.grow(-6), base.lightened(0.25), false, 1.5)
+	var c := cell.get_center()
+	draw_colored_polygon(PackedVector2Array([c + Vector2(0, -8), c + Vector2(8, 0), c + Vector2(0, 8), c + Vector2(-8, 0)]), base.lightened(0.2))
+
+
+func _draw_chair(cell: Rect2) -> void:
+	draw_rect(Rect2(cell.position.x + 12, cell.position.y + 16, 24, 20), Color("6b4a2e"))
+	draw_rect(Rect2(cell.position.x + 12, cell.position.y + 8, 24, 7), Color("4e3420"))
+	draw_rect(Rect2(cell.position.x + 14, cell.position.y + 36, 4, 6), Color("3a2414"))
+	draw_rect(Rect2(cell.position.x + 30, cell.position.y + 36, 4, 6), Color("3a2414"))
+
+
+# A table across two tiles: a plank top, with a plate and a candle on the left half.
+func _draw_table_tile(cell: Rect2, pos: Vector2i) -> void:
+	var top := Rect2(cell.position + Vector2(0, 8), Vector2(cell.size.x, cell.size.y - 16))
+	draw_rect(top, Color("7a5230"))
+	draw_rect(Rect2(top.position.x, top.position.y, top.size.x, 3), Color("9a6a40"))
+	draw_rect(Rect2(top.position.x, top.end.y - 3, top.size.x, 3), Color("5a3a22"))
+	if pos == TABLE_TILES[0]:
+		draw_circle(cell.position + Vector2(cell.size.x * 0.45, cell.size.y * 0.5), 6.0, Color("e8dcc0"))
+		draw_circle(cell.position + Vector2(cell.size.x * 0.45, cell.size.y * 0.5), 3.5, Color("d8c8a8"))
+		draw_rect(Rect2(cell.position.x + cell.size.x * 0.75, cell.position.y + cell.size.y * 0.3, 4, 10), Color("e8dcc0"))
+		draw_circle(Vector2(cell.position.x + cell.size.x * 0.75 + 2, cell.position.y + cell.size.y * 0.3 - 2), 2.5, Color("ffd27a"))
+
+
+# The bed: a wooden frame and headboard, a sheet, and a quilt that gets better with each stage.
+func _draw_bed_tile(cell: Rect2) -> void:
+	draw_rect(cell, Color("4e3420"))
+	draw_rect(Rect2(cell.position.x, cell.position.y, cell.size.x, 6), Color("3a2414"))
+	var mattress := Rect2(cell.position + Vector2(4, 9), cell.size - Vector2(8, 13))
+	draw_rect(mattress, Color("e8dcc0"))
+	var quilt := Rect2(mattress.position + Vector2(0, mattress.size.y * 0.3), Vector2(mattress.size.x, mattress.size.y * 0.7))
+	draw_rect(quilt, QUILTS[house_stage])
+	draw_rect(Rect2(quilt.position.x, quilt.position.y, quilt.size.x, 2), QUILTS[house_stage].lightened(0.25))
+	draw_rect(Rect2(mattress.position + Vector2(5, 3), Vector2(mattress.size.x - 10, mattress.size.y * 0.22)), Color("f2ecdc"))
+	if house_stage == 0:
+		# A darned patch on the threadbare quilt.
+		draw_rect(Rect2(quilt.position + Vector2(6, 6), Vector2(8, 6)), Color("5a4a3a"))
+	if house_stage == 3:
+		# Stitched dots across the fine quilt.
+		for i in 3:
+			var sx := quilt.position.x + quilt.size.x * (0.25 + 0.25 * i)
+			draw_circle(Vector2(sx, quilt.position.y + quilt.size.y * 0.5), 1.5, Color("e0c060"))
+			draw_circle(Vector2(sx, quilt.position.y + quilt.size.y * 0.8), 1.5, Color("e0c060"))
+
+
+# The cleansing station: a washstand with a basin of water, a folded cloth, and a bar of soap.
+# Restored, it gets brass fittings, a mirror, and a candle.
+func _draw_station_tile(cell: Rect2) -> void:
+	draw_rect(cell, Color("5a4632"))
+	draw_rect(cell.grow(-3), Color("6b5440"))
+	draw_line(Vector2(cell.get_center().x, cell.position.y + 6), Vector2(cell.get_center().x, cell.end.y - 6), Color("3e2e20"), 2.0)
+	var basin := cell.position + Vector2(cell.size.x * 0.5, cell.size.y * 0.42)
+	draw_circle(basin, cell.size.x * 0.3, Color("ece8dc") if house_stage >= 2 else Color("a09a8a"))
+	draw_circle(basin, cell.size.x * 0.22, Color("5a8ab0"))
+	draw_circle(basin + Vector2(-3, -2), 2.0, Color(1, 1, 1, 0.5))
+	draw_rect(Rect2(cell.position.x + 6, cell.end.y - 13, 10, 6), Color("e8dcc0"))
+	draw_rect(Rect2(cell.end.x - 16, cell.end.y - 12, 10, 5), Color("c8a0d0"))
+	if house_stage == 3:
+		draw_rect(Rect2(cell.position.x + 4, cell.position.y + 4, 3, 3), Color("c8a040"))
+		draw_rect(Rect2(cell.end.x - 9, cell.position.y + 6, 4, 9), Color("f2ecdc"))
+		draw_circle(Vector2(cell.end.x - 7, cell.position.y + 4), 2.5, Color("ffd27a"))
+
+
+# The desk: a wooden top with papers, an inkwell, and a lamp.
+func _draw_desk_tile(cell: Rect2) -> void:
+	draw_rect(cell, Color("4e3420"))
+	draw_rect(cell.grow(-4), Color("7f5a36"))
+	draw_rect(Rect2(cell.position + Vector2(8, 10), Vector2(16, 13)), Color("ece4cc"))
+	for i in 3:
+		draw_line(Vector2(cell.position.x + 10, cell.position.y + 14 + i * 3), Vector2(cell.position.x + 22, cell.position.y + 14 + i * 3), Color("9a8a6a"), 1.0)
+	draw_circle(cell.position + Vector2(cell.size.x * 0.72, cell.size.y * 0.4), 3.0, Color("1a1a24"))
+	draw_circle(cell.position + Vector2(cell.size.x * 0.72, cell.size.y * 0.7), 4.0, Color(1.0, 0.8, 0.4, 0.25))
+	draw_circle(cell.position + Vector2(cell.size.x * 0.72, cell.size.y * 0.7), 2.5, Color("ffd27a"))
+
+
+# The hearth: stone that gets cleaner with each stage. Decrepit is cracked and cold, Boarded has ash,
+# Patched has a fire, and Restored has a wooden mantel with candles and a warm glow.
+func _draw_fireplace_tile(cell: Rect2) -> void:
+	var stone: Color = [Color("4a4640"), Color("5e5a52"), Color("6e6a62"), Color("7a7468")][house_stage]
+	draw_rect(cell, stone)
+	for i in range(1, 4):
+		var y := cell.position.y + cell.size.y * float(i) / 4.0
+		draw_line(Vector2(cell.position.x, y), Vector2(cell.end.x, y), Color(0, 0, 0, 0.25), 1.0)
+	var box := Rect2(cell.position + Vector2(8, 14), cell.size - Vector2(16, 20))
+	draw_rect(box, Color("1a0f0a"))
+	if house_stage >= 2:
+		draw_colored_polygon(PackedVector2Array([
+			box.position + Vector2(4, box.size.y),
+			box.position + Vector2(box.size.x * 0.5, box.size.y * 0.2),
+			box.position + Vector2(box.size.x - 4, box.size.y),
+		]), Color("e0601e"))
+		draw_colored_polygon(PackedVector2Array([
+			box.position + Vector2(box.size.x * 0.3, box.size.y),
+			box.position + Vector2(box.size.x * 0.5, box.size.y * 0.5),
+			box.position + Vector2(box.size.x * 0.7, box.size.y),
+		]), Color("ffd060"))
+	else:
+		draw_rect(Rect2(box.position.x, box.end.y - 4, box.size.x, 4), Color("3a3430"))
+	if house_stage == 0:
+		draw_line(Vector2(cell.position.x + 4, cell.position.y + 10), Vector2(cell.position.x + 14, cell.position.y + 22), Color("2a2622"), 1.5)
+		draw_line(cell.position + Vector2(cell.size.x - 4, 4), cell.position + Vector2(cell.size.x - 12, 14), Color(0.8, 0.8, 0.8, 0.4), 1.0)
+	if house_stage == 3:
+		draw_rect(Rect2(cell.position.x - 2, cell.position.y, cell.size.x + 4, 9), Color("5a3a22"))
+		draw_rect(Rect2(cell.position.x - 2, cell.position.y + 9, cell.size.x + 4, 2), Color("3a2414"))
+		draw_rect(Rect2(cell.position.x + 6, cell.position.y - 3, 3, 6), Color("f2ecdc"))
+		draw_rect(Rect2(cell.end.x - 10, cell.position.y - 3, 3, 6), Color("f2ecdc"))
+		draw_circle(cell.get_center(), cell.size.x * 0.9, Color(1.0, 0.7, 0.3, 0.08))
+
+
+func _draw_interior_cooler(cell: Rect2) -> void:
+	draw_rect(cell, Color("8e9ca4"))
+	draw_rect(cell.grow(-4), Color("aab8c0"))
+	for i in 3:
+		draw_circle(cell.position + Vector2(10 + i * 12, 10), 2.0, Color(1, 1, 1, 0.8))
+	draw_rect(Rect2(cell.end.x - 10, cell.position.y + cell.size.y * 0.5, 4, 8), Color("4a5258"))
+
+
+# The doormat by the front door: a woven mat with a border.
+func _draw_doormat(cell: Rect2) -> void:
+	draw_rect(cell, INT_FLOORS[house_stage])
+	draw_rect(cell.grow(-5), Color("8a6a3a"))
+	draw_rect(cell.grow(-9), Color("6a4e2a"), false, 2.0)
 
 
 # A coop tile, drawn by where it sits in the 2 by 2 coop: the top row is roofed, the bottom-left
