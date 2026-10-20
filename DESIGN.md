@@ -300,6 +300,13 @@ Later: more villages and roads, more creatures, and guardian quests that need co
 - The Gear panel has a **Tools** section. Hatchets and picks are upgraded there one tier at a time, in order.
 - The action bar panel now scrolls, so long crafting lists fit on screen.
 
+## Shields and ranged weapons
+
+- **Shields** go in the **off hand**. Hardwood shields (Forestry 4) use hardwood and fiber. Copper (Smithing 3) and iron (Smithing 6) shields are heavier and give more defense.
+- **Bows** (hardwood, Forestry 3) and **crossbows** (hardwood and copper, Smithing 3) go in the **main hand**. The attack button fires them in the direction you face, and only in Lowmere and Ashford, where the foes are. A bow fires every 0.6 seconds for 3 damage. A crossbow fires every 1.2 seconds for 6 damage.
+- **Arrows** (wood and fiber, Bushcrafting 2) and **bolts** (hardwood and copper, Smithing 2) are fletched from the Gear panel's Ammunition section. Each shot uses one. Shots that miss are lost, since there is no pickup yet.
+- Melee and ranged attacks both use the same button. The bow or crossbow in the main hand decides which one you get.
+
 ## Gathering and metal (planned)
 
 Bark is the starting tier and metal is the later one. Each bark piece has a metal piece for the same slot. The metal piece is better, needs Smithing, and takes that slot once you have it. Bark pieces stay craftable early on.

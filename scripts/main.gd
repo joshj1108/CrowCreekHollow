@@ -131,6 +131,13 @@ const FURNACE_IX := Vector2i(30, 10)
 const FURNACE_COST := {"wood": 6, "stone": 4, "coins": 80, "level": 4}
 const SMELT_LEVEL := {"copper": 1, "iron": 4}
 const XP_SMELT := 10
+# Ammunition is fletched at the Gear panel and used up by each shot.
+const AMMO := {
+	"arrows": {"name": "Arrows", "yield": 5, "cost": {"wood": 1, "fiber": 1}, "skill": "Bushcrafting", "level": 2},
+	"bolts": {"name": "Bolts", "yield": 3, "cost": {"hardwood": 1, "copper_bar": 1}, "skill": "Smithing", "level": 2},
+}
+const SHOT_SPEED := 320.0
+const SHOT_LIFE := 0.9
 const SMOKEHOUSE_COST := {"wood": 5, "fiber": 3, "coins": 60, "level": 3}
 # Preserving turns food into goods that keep in the pack. Each method needs a skill
 # level and makes one item per press at the smokehouse.
@@ -219,6 +226,11 @@ const GEAR_ITEMS := {
 	"iron_gauntlets": {"name": "Iron gauntlets", "slot": "wrist", "dmg": 0, "def": 3, "level": 5, "skill": "Smithing", "cost": {"iron_bar": 2}},
 	"iron_greaves": {"name": "Iron greaves", "slot": "legs", "dmg": 0, "def": 3, "level": 6, "skill": "Smithing", "cost": {"iron_bar": 3}},
 	"iron_sabatons": {"name": "Iron sabatons", "slot": "feet", "dmg": 0, "def": 3, "level": 6, "skill": "Smithing", "cost": {"iron_bar": 2}},
+	"wood_shield": {"name": "Hardwood shield", "slot": "offhand", "dmg": 0, "def": 2, "level": 4, "skill": "Forestry", "cost": {"hardwood": 3, "fiber": 2}},
+	"copper_shield": {"name": "Copper shield", "slot": "offhand", "dmg": 0, "def": 3, "level": 3, "skill": "Smithing", "cost": {"copper_bar": 4, "hardwood": 1}},
+	"iron_shield": {"name": "Iron shield", "slot": "offhand", "dmg": 0, "def": 4, "level": 6, "skill": "Smithing", "cost": {"iron_bar": 4, "hardwood": 1}},
+	"hardwood_bow": {"name": "Hardwood bow", "slot": "hand_r", "dmg": 3, "def": 0, "level": 3, "skill": "Forestry", "cost": {"hardwood": 3, "fiber": 2}, "ammo": "arrows", "cool": 0.6},
+	"crossbow": {"name": "Crossbow", "slot": "hand_r", "dmg": 6, "def": 0, "level": 3, "skill": "Smithing", "cost": {"hardwood": 4, "copper_bar": 2}, "ammo": "bolts", "cool": 1.2},
 }
 const NPCS := [
 	{"id": "mara", "name": "Mara the Reeve", "pos": Vector2i(8, 9), "color": "e0c48c", "lines": [
@@ -449,7 +461,7 @@ var current_hour := START_HOUR
 var day := 1
 var skill_xp := {"Farming": 0, "Bushcrafting": 0, "Carpentry": 0, "Cleaning": 0, "Fishing": 0, "Cooking": 0, "Combat": 0, "Forestry": 0, "Mining": 0, "Smithing": 0}
 var inventory := {"seeds": STARTING_SEEDS, "pumpkin_seeds": 0, "crops": 0, "fish": 0, "meals": 0, "smoked": 0, "dried": 0, "canned": 0, "fermented": 0}
-var materials := {"wood": 0, "fiber": 0, "resin": 0, "hardwood": 0, "stone": 0, "copper_ore": 0, "iron_ore": 0, "copper_bar": 0, "iron_bar": 0}
+var materials := {"wood": 0, "fiber": 0, "resin": 0, "hardwood": 0, "stone": 0, "copper_ore": 0, "iron_ore": 0, "copper_bar": 0, "iron_bar": 0, "arrows": 0, "bolts": 0}
 var tool_tier := {"hatchet": 0, "pick": 0}     # 0 = none; higher tiers come from TOOL_TIERS
 var grove_felled := {}
 var rocks := {}                                  # world tile -> true for unbroken rocks                          # world tile -> true for trees cut today
@@ -480,6 +492,7 @@ var cellar_built := false
 var cooler_built := false
 var smokehouse_built := false
 var furnace_built := false
+var shots: Array = []                 # arrows and bolts in flight, not saved
 var cellar_stock := 0          # crops in the root cellar
 var cooler_stock := 0          # fish in the cooler
 var zone: int = Zone.HOMESTEAD
@@ -554,6 +567,7 @@ func _process(delta: float) -> void:
 	_update_fish_spots(delta)
 	_update_fishing(delta)
 	_update_foes(delta)
+	_update_shots(delta)
 	if _in_village() and current_hour >= STALL_CLOSE_HOUR:
 		_go_home("Night falls. You are driven back to the homestead.")
 	fish_layer.visible = zone == Zone.HOMESTEAD
@@ -938,6 +952,9 @@ func _on_panel_action(action_id: String) -> void:
 	if action_id.begins_with("preserve:"):
 		_preserve(action_id.trim_prefix("preserve:"))
 		return
+	if action_id.begins_with("ammo:"):
+		_craft_ammo(action_id.trim_prefix("ammo:"))
+		return
 	if action_id.begins_with("tool:"):
 		_craft_tool(action_id.trim_prefix("tool:"))
 		return
@@ -1141,6 +1158,16 @@ func _gear_rows() -> Array:
 				"action": "tool:" + kind,
 				"enabled": _can_craft_tool(kind),
 			})
+	rows.append({"section": "Ammunition"})
+	for kind in ["arrows", "bolts"]:
+		var ammo: Dictionary = AMMO[kind]
+		rows.append({
+			"name": "%s (%d)" % [ammo["name"], int(ammo["yield"])],
+			"value": "%s, %s %d. Held: %d" % [_price_text_items(ammo["cost"]), ammo["skill"], int(ammo["level"]), int(materials[kind])],
+			"button": "Make",
+			"action": "ammo:" + kind,
+			"enabled": _can_fletch(kind),
+		})
 	rows.append({"section": "Craft and equip"})
 	for id in GEAR_ITEMS.keys():
 		if id == "hoe":
@@ -2208,6 +2235,74 @@ func _furnace_rows() -> Array:
 	return rows
 
 
+# --- Ranged combat and ammunition ----------------------------------------------
+
+func _can_fletch(kind: String) -> bool:
+	var ammo: Dictionary = AMMO[kind]
+	if _level(str(ammo["skill"])) < int(ammo["level"]):
+		return false
+	return _has_materials(ammo["cost"])
+
+
+func _craft_ammo(kind: String) -> void:
+	if not _can_fletch(kind):
+		_show_message("You need the materials and skill level to make %s." % kind)
+		return
+	var ammo: Dictionary = AMMO[kind]
+	for mat in ammo["cost"].keys():
+		materials[mat] -= int(ammo["cost"][mat])
+	materials[kind] += int(ammo["yield"])
+	_grant_xp(str(ammo["skill"]), 6)
+	_show_message("You make %d %s. +6 %s XP" % [int(ammo["yield"]), kind, ammo["skill"]])
+
+
+func _fire(weapon: String) -> void:
+	if swing_cool > 0.0:
+		return
+	var item: Dictionary = GEAR_ITEMS[weapon]
+	var ammo := str(item["ammo"])
+	if int(materials[ammo]) < 1:
+		_show_message("You're out of %s. Make more from the Gear panel." % ammo)
+		return
+	materials[ammo] -= 1
+	swing_cool = float(item["cool"])
+	var dir: Vector2 = player.facing.normalized()
+	shots.append({"pos": player.position, "vel": dir * SHOT_SPEED, "life": SHOT_LIFE, "dmg": int(item["dmg"])})
+	queue_redraw()
+
+
+func _update_shots(delta: float) -> void:
+	if not _in_village():
+		shots.clear()
+		return
+	if shots.is_empty():
+		return
+	for shot in shots.duplicate():
+		var pos: Vector2 = shot["pos"] + shot["vel"] * delta
+		shot["pos"] = pos
+		shot["life"] = float(shot["life"]) - delta
+		var hit := false
+		for foe in foes.duplicate():
+			var gap: Vector2 = foe["pos"] - pos
+			if gap.length() < PX * 0.45:
+				_shot_hits(foe, int(shot["dmg"]))
+				hit = true
+				break
+		if hit or float(shot["life"]) <= 0.0 or _is_blocked_world(pos):
+			shots.erase(shot)
+	queue_redraw()
+
+
+func _shot_hits(foe: Dictionary, amount: int) -> void:
+	foe["hp"] = int(foe["hp"]) - amount
+	foe["flash"] = 0.2
+	_grant_xp("Combat", XP_HIT)
+	if int(foe["hp"]) <= 0:
+		_kill_foe(foe)
+	else:
+		_show_message("Your shot hits the %s for %d." % [str(foe["kind"]), amount])
+
+
 # --- Slot grids for the pack, seed pouch, and equipment ---------------------
 
 func _pack_cells() -> Array:
@@ -2408,6 +2503,10 @@ func _draw_village() -> void:
 		draw_circle(pos + Vector2(5, -4), 2.5, Color(0.9, 0.1, 0.1))
 		var frac := float(foe["hp"]) / float(st["hp"])
 		draw_rect(Rect2(pos + Vector2(-PX * 0.3, -PX * 0.5), Vector2(PX * 0.6 * frac, 3)), Color("c24a4a"))
+	for shot in shots:
+		var shot_pos: Vector2 = shot["pos"]
+		var shot_vel: Vector2 = shot["vel"]
+		draw_line(shot_pos - shot_vel.normalized() * PX * 0.5, shot_pos, Color("e8e0c0"), 2.0)
 	if swing_time > 0.0:
 		draw_arc(player.position, SWING_REACH * PX, swing_dir.angle() - 0.9, swing_dir.angle() + 0.9, 12, Color(1, 1, 0.8, 0.8), 3.0)
 
@@ -2503,6 +2602,10 @@ func _foe_attack(foe: Dictionary) -> void:
 
 
 func _swing() -> void:
+	var weapon := str(equipment["hand_r"])
+	if weapon != "" and GEAR_ITEMS[weapon].has("ammo"):
+		_fire(weapon)
+		return
 	if swing_cool > 0.0:
 		return
 	swing_cool = SWING_COOLDOWN
