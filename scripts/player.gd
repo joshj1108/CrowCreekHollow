@@ -79,6 +79,17 @@ func _draw() -> void:
 	var bob := -absf(stride) * 1.2
 	# The shadow stays on the ground while the body bobs above it.
 	draw_colored_polygon(_ellipse(Vector2(0, 17), 11.0, 4.0), Color(0, 0, 0, 0.3))
+	if facing == Vector2.LEFT or facing == Vector2.RIGHT:
+		_draw_side(bob, stride)
+	else:
+		_draw_front_back(bob)
+	# Small marker showing the direction the player faces, so you can tell what you'll interact with.
+	draw_circle(facing * 22, 3, Color(1.0, 0.95, 0.7, 0.8))
+
+
+# The figure seen from the front or the back: both arms and legs, a wide body, and the face or hair.
+func _draw_front_back(bob: float) -> void:
+	var stride := sin(walk_t) if moving else 0.0
 	_draw_leg(Vector2(-4.5, 6.0 + bob), stride * 2.5)
 	_draw_leg(Vector2(4.5, 6.0 + bob), -stride * 2.5)
 	_draw_arm(Vector2(-11.0, -4.0 + bob), -stride * 2.0)
@@ -94,8 +105,55 @@ func _draw() -> void:
 	draw_rect(Rect2(-1, 4 + bob, 2, 2), BUCKLE)
 	draw_rect(Rect2(-3, -11 + bob, 6, 4), SKIN_SHADE)
 	_draw_head(bob)
-	# Small marker showing the direction the player faces, so you can tell what you'll interact with.
-	draw_circle(facing * 22, 3, Color(1.0, 0.95, 0.7, 0.8))
+
+
+# The figure seen from the side, facing left or right. The far arm and leg sit behind the body in shade,
+# the near ones in front, and the boots point the way the player faces.
+func _draw_side(bob: float, stride: float) -> void:
+	var side := signf(facing.x)
+	# Far leg and arm, drawn first so the body covers them.
+	_draw_side_leg(-side * 1.5, 6.0 + bob, -stride * 2.5, OVERALLS_SHADE, side)
+	_draw_side_arm(Vector2(-side * 1.0, -4.0 + bob), stride * 2.0, SHIRT_SHADE)
+	# Shirt and overalls, narrower in profile.
+	draw_rect(Rect2(-5, -8 + bob, 10, 16), SHIRT)
+	draw_rect(Rect2(-5, -8 + bob, 10, 2), SHIRT_SHADE)
+	draw_rect(Rect2(-4, -4 + bob, 8, 12), OVERALLS)
+	draw_rect(Rect2(-4, -4 + bob, 8, 1), OVERALLS_SHADE)
+	draw_rect(Rect2(-5, 4 + bob, 10, 2), BELT)
+	draw_rect(Rect2(2 if side > 0 else -3, 4 + bob, 2, 2), BUCKLE)
+	# Near leg and arm, in front of the body.
+	_draw_side_leg(side * 1.5, 6.0 + bob, stride * 2.5, PANTS, side)
+	_draw_side_arm(Vector2(side * 2.0, -4.0 + bob), -stride * 2.0, SHIRT)
+	_draw_side_head(bob, side)
+
+
+func _draw_side_leg(x: float, top: float, lift: float, color: Color, side: float) -> void:
+	draw_rect(Rect2(x - 2.5, top + lift * 0.3, 5, 9), color)
+	# The boot reaches forward, in the direction of travel.
+	var boot_x := x - 2.5 if side > 0 else x - 4.5
+	draw_rect(Rect2(boot_x, top + 8 + lift * 0.3, 7, 4), BOOTS)
+
+
+func _draw_side_arm(shoulder: Vector2, swing: float, color: Color) -> void:
+	draw_rect(Rect2(shoulder.x - 2, shoulder.y + swing * 0.5, 4, 10), color)
+	draw_circle(Vector2(shoulder.x, shoulder.y + 11 + swing * 0.5), 2.4, SKIN)
+
+
+# The head in profile: the face on the side you're walking toward, hair over the back, and a hat brim that
+# sticks out in front.
+func _draw_side_head(bob: float, side: float) -> void:
+	var c := Vector2(0, -19 + bob)
+	draw_circle(c + Vector2(0, 1), 7.5, SKIN)
+	# Hair covers the back of the head and runs down behind the ear.
+	draw_colored_polygon(_ellipse(c + Vector2(-side * 2.2, -1.0), 6.6, 7.4), HAIR)
+	draw_colored_polygon(_ellipse(c + Vector2(-side * 3.6, 2.5), 3.2, 3.6), HAIR)
+	draw_circle(c + Vector2(side * 3.5, 0), 1.4, EYE)
+	draw_circle(c + Vector2(side * 4.0, 3.0), 1.5, CHEEK)
+	# Hat: the brim sticks out further toward the face.
+	draw_colored_polygon(_ellipse(c + Vector2(side * 1.5, -6.5), 13.0, 3.5), STRAW)
+	draw_colored_polygon(_ellipse(c + Vector2(side * 1.5, -6.5), 13.0, 3.5).slice(8, 16), STRAW_SHADE)
+	draw_rect(Rect2(c.x - 6 + side, c.y - 16, 13, 10), STRAW)
+	draw_rect(Rect2(c.x - 6 + side, c.y - 9, 13, 2), BAND)
 
 
 func _draw_leg(hip: Vector2, lift: float) -> void:
