@@ -269,6 +269,21 @@ Quests in the Quests panel, under Guardian of Lowmere, run in order:
 
 Later: more villages and roads, more creatures, and guardian quests that need combat or exploration. Defense stacks across slots, so a full set can turn most hits into single points of damage. That needs a playtest before it is tuned.
 
+## Towns, shops, and the bank
+
+The whole land is filled with towns, planned from a fixed seed so every game gets the same map.
+
+- **Towns:** about 70 towns sit on a grid across the world, never overlapping. There are four kinds: hamlets (about 28 by 20 tiles), towns (about 40 by 28), castles (about 34 by 26, with a wall and a keep), and manors (about 20 by 16, walled, with a manor house). Each town is named, and a castle or manor takes "Keep" or "Manor" after its name.
+- **Layout:** a cross of streets runs through every town. Houses sit in the spaces between them, with trees on the open ground.
+- **Roads:** a road network joins every town and village, so the whole land is reachable on foot from the portal. Roads are always walkable, and no building covers one.
+- **Villagers:** each town has homeowners who chat. A town also has, depending on its kind:
+  - a **general store** (hamlets and towns): buys materials and sells wood, fiber, resin, stone, and hardwood. You buy 10 at a time, and sell all you hold at half price.
+  - a **grocer** (towns): opens the trade panel, for crops, fish, meals, and seeds.
+  - a **banker** (towns and castles): see below.
+  - a **lord** (castles and manors) at the keep door.
+- **The bank:** deposit and take back materials and coins. Banked goods are kept safe and saved with the game.
+- **Safety:** generated towns have no foes. The wilds between them are open land with the usual wild spaces.
+
 ## Campsites
 
 A campsite lets you stay out in the wider land overnight. It is built, not placed by the map.

@@ -203,6 +203,32 @@ const FOES := {
 const STALKER_SPAWNS := [Vector2i(26, 8), Vector2i(29, 12), Vector2i(31, 7)]
 const ASHFORD_HOUSES := [Rect2i(5, 3, 6, 5), Rect2i(14, 13, 5, 4)]
 const ASHFORD_WATER := Rect2i(22, 4, 3, 3)
+
+# Generated towns fill the rest of the world. Each cell of the grid may hold one town.
+const TOWN_SEED := 40417
+const TOWN_CELL := 80
+const TOWN_CHANCE := 0.75
+const TOWN_KINDS := [
+	{"kind": "hamlet", "w": 28, "h": 20, "weight": 5},
+	{"kind": "town", "w": 40, "h": 28, "weight": 3},
+	{"kind": "castle", "w": 34, "h": 26, "weight": 3},
+	{"kind": "manor", "w": 20, "h": 16, "weight": 2},
+]
+const TOWN_START_CLEAR := Rect2i(300, 380, 280, 140)   # keeps the portal road free
+const TOWN_NAME_START := ["Ash", "Brook", "Crow", "Dun", "Elm", "Fen", "Gale", "Hollow", "Iron", "Kettle", "Lark", "Mere", "Nettle", "Oak", "Pike", "Reed", "Stone", "Thorn", "Vale", "Wick", "Yew"]
+const TOWN_NAME_END := ["bury", "ford", "holt", "more", "stead", "ton", "wick", "field", "hythe", "dale", "moor", "by"]
+const TOWN_FIRST := ["Alder", "Bram", "Cora", "Dell", "Edda", "Frank", "Gwen", "Hal", "Ivy", "Jory", "Kit", "Lenna", "Mabel", "Nell", "Osric", "Pell", "Quinn", "Rhea", "Sol", "Tobin", "Una", "Vern", "Wat", "Yara"]
+const TOWN_LAST := ["Ashby", "Brightwater", "Cole", "Dunmore", "Fairlight", "Greave", "Ingle", "Joss", "Kell", "Latch", "Marsh", "Nye", "Pryce", "Rook", "Sayer", "Teague"]
+const TOWN_NPC_COLORS := ["d8d0b0", "b6e0a0", "e0c48c", "c98f5a", "a3c9e0", "e0a0b6", "c0b0e0"]
+const GENERAL_BUY := {"wood": 3, "fiber": 2, "resin": 5, "stone": 4, "hardwood": 8}
+const GENERAL_BUY_QTY := 10
+const TOWN_ROLES := {
+	"town": ["shop_general", "shop_grocer", "bank", "home", "home", "home", "home"],
+	"hamlet": ["shop_general", "home", "home", "home"],
+	"castle": ["bank", "home", "home"],
+	"manor": ["home"],
+}
+
 const ASHFORD_NPCS := [
 	{"id": "harrow", "name": "Harrow the Miller", "pos": Vector2i(12, 9), "color": "d8d0b0", "lines": [
 		"The mill has stopped turning. The stones need grinding, and the millers have gone to the wood.",
@@ -462,12 +488,17 @@ const BUSH_COLOR := Color("3d6b2a")
 const DAY_TINT := Color(1, 1, 1)
 const NIGHT_TINT := Color("3a3f6e")
 
-enum Zone { HOMESTEAD, VILLAGE, ASHFORD, WILDS }
+enum Zone { HOMESTEAD, VILLAGE, ASHFORD, WILDS, TOWN }
 
 var map: Array = []                 # farm tiles, [y][x]
 var world := PackedByteArray()      # the whole land, index y * WORLD_W + x
 var campsite := NO_CAMP             # the one campsite, in world tiles
 var world_map_tex: Texture2D = null # the whole land as a small picture for the minimap
+var towns: Array = []               # generated towns: origin, size, kind, title, npcs
+var current_town := -1              # index into towns while the player is in one
+var active_shop := ""               # the shop open in the Shop panel
+var bank_materials := {"wood": 0, "fiber": 0, "resin": 0, "hardwood": 0, "stone": 0, "copper_ore": 0, "iron_ore": 0, "copper_bar": 0, "iron_bar": 0, "arrows": 0, "bolts": 0}
+var bank_coins := 0
 
 var interior: Array = []            # house tiles, [y][x], local to INT_ORIGIN
 var crops := {}                     # Vector2i world tile -> {"stage": int, "kind": String}
@@ -914,11 +945,12 @@ func _make_label(parent: Node, pos: Vector2, font_size: int) -> Label:
 func _restore_saved_state() -> void:
 	_check_unlocks()
 	zone = saved_zone
-	if _in_village():
-		_spawn_foes()
 	hp = clampi(hp, 1, max_hp())
 	if has_saved_pos:
 		player.position = saved_pos
+	if _in_village():
+		_sync_region()
+		_spawn_foes()
 	if saved_inside:
 		inside = true
 	_set_bounds()
@@ -991,6 +1023,15 @@ func _on_panel_action(action_id: String) -> void:
 		return
 	if action_id.begins_with("smelt:"):
 		_smelt(action_id.trim_prefix("smelt:"))
+		return
+	if action_id.begins_with("buy:"):
+		_buy_material(action_id.trim_prefix("buy:"))
+		return
+	if action_id.begins_with("sellmat:"):
+		_sell_material(action_id.trim_prefix("sellmat:"))
+		return
+	if action_id.begins_with("dep:") or action_id.begins_with("wd:"):
+		_bank_move(action_id)
 		return
 	if action_id == "camp":
 		_place_campsite()
@@ -1066,6 +1107,10 @@ func _refresh_panel() -> void:
 			rows = _achievement_rows()
 		"Trade":
 			rows = _trade_rows()
+		"Shop":
+			rows = _general_shop_rows()
+		"Bank":
+			rows = _bank_rows()
 		"Cellar":
 			rows = _cellar_rows()
 		"Cooler":
@@ -2395,8 +2440,10 @@ func _generate_world() -> void:
 			world[y * WORLD_W + x] = t
 	for x in range(PORTAL_TILE.x, ASHFORD_ORIGIN.x + VILLAGE_W):
 		world[ROAD_Y * WORLD_W + x] = Tile.PATH
+	_plan_towns()
 	_stamp_village(LOWMERE_ORIGIN, _build_zone_map(VILLAGE_HOUSES, VILLAGE_WATER, 26, true))
 	_stamp_village(ASHFORD_ORIGIN, _build_zone_map(ASHFORD_HOUSES, ASHFORD_WATER, 24, false))
+	_layout_towns()
 	world[PORTAL_TILE.y * WORLD_W + PORTAL_TILE.x] = Tile.PORTAL
 	_build_world_minimap()
 
@@ -2413,7 +2460,11 @@ func _stamp_village(origin: Vector2i, local: Array) -> void:
 				k = Tile.PATH
 			elif k == Tile.GRASS or (k == Tile.TREE and edge):
 				continue
-			world[(origin.y + y) * WORLD_W + origin.x + x] = k
+			var idx := (origin.y + y) * WORLD_W + origin.x + x
+			# Roads stay walkable: a building never covers a road tile.
+			if world[idx] == Tile.PATH and k != Tile.PATH:
+				continue
+			world[idx] = k
 
 
 # The whole land as a small picture for the minimap: one pixel per 4 tiles, each pixel
@@ -2440,6 +2491,359 @@ func _place_minimap(mini_size: Vector2) -> void:
 	minimap.offset_right = -12.0
 	minimap.offset_top = 12.0
 	minimap.offset_bottom = 12.0 + mini_size.y
+
+
+# --- Generated towns -----------------------------------------------------------
+
+# Picks where the towns go and carves the roads between them. Runs before the villages
+# are stamped. Lowmere and Ashford are hubs too, and a minimum spanning road network
+# joins every hub, so the whole land is reachable from the portal.
+func _plan_towns() -> void:
+	var rng := RandomNumberGenerator.new()
+	rng.seed = TOWN_SEED
+	towns = []
+	current_town = -1
+	var taken: Array[Rect2i] = [TOWN_START_CLEAR, Rect2i(LOWMERE_ORIGIN, Vector2i(VILLAGE_W, VILLAGE_H)), Rect2i(ASHFORD_ORIGIN, Vector2i(VILLAGE_W, VILLAGE_H))]
+	var cols := ceili(float(WORLD_W) / TOWN_CELL)
+	var rows := ceili(float(WORLD_H) / TOWN_CELL)
+	for cy in rows:
+		for cx in cols:
+			if rng.randf() > TOWN_CHANCE:
+				continue
+			var pick: Dictionary = _pick_town_kind(rng)
+			var w: int = pick["w"]
+			var h: int = pick["h"]
+			var x := cx * TOWN_CELL + rng.randi_range(4, TOWN_CELL - w - 4)
+			var y := cy * TOWN_CELL + rng.randi_range(4, TOWN_CELL - h - 4)
+			var rect := Rect2i(x, y, w, h)
+			if rect.end.x > WORLD_W - 4 or rect.end.y > WORLD_H - 4:
+				continue
+			var clash := false
+			for other in taken:
+				if rect.grow(4).intersects(other):
+					clash = true
+					break
+			if clash:
+				continue
+			taken.append(rect)
+			towns.append({"kind": pick["kind"], "origin": Vector2i(x, y), "w": w, "h": h, "title": _town_title(rng, str(pick["kind"])), "npcs": []})
+	var hubs: Array[Vector2i] = [_village_hub(LOWMERE_ORIGIN), _village_hub(ASHFORD_ORIGIN)]
+	for town in towns:
+		hubs.append(_town_hub(town))
+	# Prim's algorithm: each new hub joins by its shortest road to the network so far.
+	var n := hubs.size()
+	var in_tree: Array = []
+	for i in n:
+		in_tree.append(i == 0)
+	for step in n - 1:
+		var best_d := INF
+		var best_i := -1
+		var best_j := -1
+		for i in n:
+			if not in_tree[i]:
+				continue
+			for j in n:
+				if in_tree[j]:
+					continue
+				var d := float(hubs[i].distance_squared_to(hubs[j]))
+				if d < best_d:
+					best_d = d
+					best_i = i
+					best_j = j
+		if best_j < 0:
+			break
+		in_tree[best_j] = true
+		_carve_road(hubs[best_i], hubs[best_j])
+
+
+func _pick_town_kind(rng: RandomNumberGenerator) -> Dictionary:
+	var total := 0
+	for k in TOWN_KINDS:
+		total += int(k["weight"])
+	var roll := rng.randi_range(1, total)
+	for k in TOWN_KINDS:
+		roll -= int(k["weight"])
+		if roll <= 0:
+			return k
+	return TOWN_KINDS[0]
+
+
+func _town_title(rng: RandomNumberGenerator, kind: String) -> String:
+	var base: String = TOWN_NAME_START[rng.randi() % TOWN_NAME_START.size()] + TOWN_NAME_END[rng.randi() % TOWN_NAME_END.size()]
+	if kind == "castle":
+		return base + " Keep"
+	if kind == "manor":
+		return base + " Manor"
+	return base
+
+
+func _village_hub(origin: Vector2i) -> Vector2i:
+	return origin + Vector2i(VILLAGE_W / 2, VILLAGE_GATE.y)
+
+
+func _town_hub(town: Dictionary) -> Vector2i:
+	var origin: Vector2i = town["origin"]
+	return origin + Vector2i(int(town["w"]) / 2, int(town["h"]) / 2)
+
+
+# An L-shaped road of plain path: across, then along.
+func _carve_road(a: Vector2i, b: Vector2i) -> void:
+	var step_x := 1 if b.x >= a.x else -1
+	var x := a.x
+	while x != b.x:
+		world[a.y * WORLD_W + x] = Tile.PATH
+		x += step_x
+	var step_y := 1 if b.y >= a.y else -1
+	var y := a.y
+	while y != b.y:
+		world[y * WORLD_W + b.x] = Tile.PATH
+		y += step_y
+	world[b.y * WORLD_W + b.x] = Tile.PATH
+
+
+# Lays out every generated town in the world, after the villages are stamped.
+func _layout_towns() -> void:
+	var rng := RandomNumberGenerator.new()
+	rng.seed = TOWN_SEED + 1
+	for i in towns.size():
+		_layout_town(i, rng)
+
+
+# Builds one town in a local grid, then stamps it. A cross of streets runs through the
+# middle. Buildings sit in the spaces between them and never cover a road.
+func _layout_town(index: int, rng: RandomNumberGenerator) -> void:
+	var town: Dictionary = towns[index]
+	var w: int = town["w"]
+	var h: int = town["h"]
+	var kind: String = town["kind"]
+	var origin: Vector2i = town["origin"]
+	var title: String = town["title"]
+	var sx := w / 2
+	var sy := h / 2
+	var local: Array = []
+	var occ: Array = []
+	for y in h:
+		var row: Array = []
+		var orow: Array = []
+		for x in w:
+			row.append(Tile.GRASS)
+			orow.append(false)
+		local.append(row)
+		occ.append(orow)
+	for x in w:
+		local[sy][x] = Tile.PATH
+		occ[sy][x] = true
+	for y in h:
+		local[y][sx] = Tile.PATH
+		occ[y][sx] = true
+	var npcs: Array = []
+	if kind == "castle" or kind == "manor":
+		for x in w:
+			local[0][x] = Tile.WALL
+			occ[0][x] = true
+			local[h - 1][x] = Tile.WALL
+			occ[h - 1][x] = true
+		for y in h:
+			local[y][0] = Tile.WALL
+			occ[y][0] = true
+			local[y][w - 1] = Tile.WALL
+			occ[y][w - 1] = true
+		# The gates sit where the streets cross the wall.
+		local[0][sx] = Tile.PATH
+		local[h - 1][sx] = Tile.PATH
+		local[sy][0] = Tile.PATH
+		local[sy][w - 1] = Tile.PATH
+		var keep := Rect2i(sx - 4, 3, 8, 6) if kind == "castle" else Rect2i(sx - 3, 3, 6, 5)
+		_mark_block(local, occ, keep)
+		var lord_door := Vector2i(keep.position.x + keep.size.x / 2, keep.end.y)
+		occ[lord_door.y][lord_door.x] = true
+		_add_npc(npcs, index, rng, "lord", lord_door, title)
+	for role in TOWN_ROLES[kind]:
+		var rect := _find_room(occ, rng, w, h)
+		if rect.size == Vector2i.ZERO:
+			continue
+		_mark_block(local, occ, rect)
+		var door := Vector2i(rect.position.x + rect.size.x / 2, rect.end.y)
+		occ[door.y][door.x] = true
+		_add_npc(npcs, index, rng, str(role), door, title)
+	# Scattered trees on open ground, away from the streets and buildings.
+	for y in h:
+		for x in w:
+			if local[y][x] == Tile.GRASS and not occ[y][x] and (x * 7 + y * 5 + index * 3) % 11 == 0:
+				local[y][x] = Tile.TREE
+	for y in h:
+		for x in w:
+			var idx := (origin.y + y) * WORLD_W + origin.x + x
+			var k: int = local[y][x]
+			if world[idx] == Tile.PATH and k != Tile.PATH:
+				continue
+			world[idx] = k
+	town["npcs"] = npcs
+
+
+func _find_room(occ: Array, rng: RandomNumberGenerator, w: int, h: int) -> Rect2i:
+	for attempt in 200:
+		var bw := rng.randi_range(4, 6)
+		var bh := rng.randi_range(3, 5)
+		var bx := rng.randi_range(2, w - bw - 2)
+		var by := rng.randi_range(2, h - bh - 2)
+		var rect := Rect2i(bx, by, bw, bh)
+		if _room_free(occ, rect):
+			return rect
+	return Rect2i()
+
+
+# A room fits if it and a one-tile margin (including the doorstep) are all free.
+func _room_free(occ: Array, rect: Rect2i) -> bool:
+	for y in range(rect.position.y - 1, rect.end.y + 2):
+		for x in range(rect.position.x - 1, rect.end.x + 2):
+			if occ[y][x]:
+				return false
+	return true
+
+
+func _mark_block(local: Array, occ: Array, rect: Rect2i) -> void:
+	for y in range(rect.position.y, rect.end.y):
+		for x in range(rect.position.x, rect.end.x):
+			local[y][x] = Tile.HOUSE
+			occ[y][x] = true
+
+
+func _add_npc(npcs: Array, index: int, rng: RandomNumberGenerator, role: String, spot: Vector2i, title: String) -> void:
+	var first: String = TOWN_FIRST[rng.randi() % TOWN_FIRST.size()]
+	var last: String = TOWN_LAST[rng.randi() % TOWN_LAST.size()]
+	var npc := {
+		"id": "t%d_%d" % [index, npcs.size()],
+		"pos": spot,
+		"role": role,
+		"color": TOWN_NPC_COLORS[rng.randi() % TOWN_NPC_COLORS.size()],
+	}
+	match role:
+		"shop_general":
+			npc["name"] = "%s the Trader" % first
+			npc["shop"] = "general"
+			npc["lines"] = ["Wood, fiber, stone. Name what you need.", "Fair prices, fair coin."]
+		"shop_grocer":
+			npc["name"] = "%s the Grocer" % first
+			npc["shop"] = "grocer"
+			npc["lines"] = ["Seed here, and I'll buy your crops and fish.", "Pumpkin seed needs a steady hand at Farming."]
+		"bank":
+			npc["name"] = "%s the Banker" % first
+			npc["bank"] = true
+			npc["lines"] = ["Your coins and goods are safe with us.", "Deposit what you don't need to carry."]
+		"lord":
+			npc["name"] = "%s of %s" % [first, title]
+			npc["lines"] = ["The land is ours to keep, for now.", "Travellers are welcome, as long as they keep the peace."]
+		_:
+			npc["name"] = "%s %s" % [first, last]
+			npc["lines"] = ["Good day, traveller.", "Keep to the road after dark.", "The forest here is quiet, but it listens.", "We have lived in %s for three generations." % title]
+	npcs.append(npc)
+
+
+func _town_at(tile: Vector2i) -> int:
+	for i in towns.size():
+		var town: Dictionary = towns[i]
+		var rect := Rect2i(town["origin"], Vector2i(int(town["w"]), int(town["h"])))
+		if rect.has_point(tile):
+			return i
+	return -1
+
+
+# --- Shops and the bank ------------------------------------------------------
+
+func _general_shop_rows() -> Array:
+	var rows: Array = [
+		{"section": "Purse"},
+		{"name": "Coins", "value": str(money)},
+		{"section": "Buy materials (%d at a time)" % GENERAL_BUY_QTY},
+	]
+	for key in GENERAL_BUY.keys():
+		var price := int(GENERAL_BUY[key])
+		rows.append({
+			"name": "%s (%d each)" % [str(key).capitalize(), price],
+			"value": "%d held" % int(materials[key]),
+			"button": "Buy %d" % GENERAL_BUY_QTY,
+			"action": "buy:%s" % key,
+			"enabled": money >= price * GENERAL_BUY_QTY,
+		})
+	rows.append({"section": "Sell materials (half price)"})
+	for key in GENERAL_BUY.keys():
+		var sell := maxi(1, int(GENERAL_BUY[key]) / 2)
+		rows.append({
+			"name": "%s (%d each)" % [str(key).capitalize(), sell],
+			"value": "%d held" % int(materials[key]),
+			"button": "Sell all",
+			"action": "sellmat:%s" % key,
+			"enabled": int(materials[key]) > 0,
+		})
+	return rows
+
+
+func _buy_material(key: String) -> void:
+	if not GENERAL_BUY.has(key):
+		return
+	var price := int(GENERAL_BUY[key]) * GENERAL_BUY_QTY
+	if money < price:
+		_show_message("That costs %d coins. You have %d." % [price, money])
+		return
+	money -= price
+	materials[key] += GENERAL_BUY_QTY
+	_show_message("You buy %d %s for %d coins." % [GENERAL_BUY_QTY, key, price])
+
+
+func _sell_material(key: String) -> void:
+	if not GENERAL_BUY.has(key):
+		return
+	var count := int(materials[key])
+	if count <= 0:
+		_show_message("You have none of that to sell.")
+		return
+	var price := maxi(1, int(GENERAL_BUY[key]) / 2)
+	materials[key] = 0
+	money += count * price
+	_show_message("Sold %d %s for %d coins." % [count, key, count * price])
+
+
+func _bank_rows() -> Array:
+	var rows: Array = [
+		{"section": "Coins"},
+		{"name": "Held", "value": str(money), "button": "Bank all", "action": "dep:coins", "enabled": money > 0},
+		{"name": "Banked", "value": str(bank_coins), "button": "Take all", "action": "wd:coins", "enabled": bank_coins > 0},
+		{"section": "Goods"},
+	]
+	for key in bank_materials.keys():
+		var held := int(materials[key])
+		var banked := int(bank_materials[key])
+		if held == 0 and banked == 0:
+			continue
+		rows.append({"name": "%s: held" % str(key).capitalize(), "value": str(held), "button": "Bank all", "action": "dep:%s" % key, "enabled": held > 0})
+		rows.append({"name": "%s: banked" % str(key).capitalize(), "value": str(banked), "button": "Take all", "action": "wd:%s" % key, "enabled": banked > 0})
+	if rows.size() == 4:
+		rows.append({"note": "Nothing to bank yet. Goods you deposit are kept safe here, even if you lose them in the wild."})
+	return rows
+
+
+func _bank_move(action_id: String) -> void:
+	var deposit := action_id.begins_with("dep:")
+	var key := action_id.trim_prefix("dep:") if deposit else action_id.trim_prefix("wd:")
+	if key == "coins":
+		if deposit:
+			bank_coins += money
+			_show_message("You bank %d coins." % money)
+			money = 0
+		else:
+			money += bank_coins
+			_show_message("You take %d coins from the bank." % bank_coins)
+			bank_coins = 0
+		return
+	if not bank_materials.has(key):
+		return
+	if deposit:
+		bank_materials[key] += int(materials[key])
+		materials[key] = 0
+	else:
+		materials[key] += int(bank_materials[key])
+		bank_materials[key] = 0
 
 
 # --- Campsites ----------------------------------------------------------------
@@ -2584,6 +2988,9 @@ func _region_origin() -> Vector2i:
 		return ASHFORD_ORIGIN
 	if zone == Zone.VILLAGE:
 		return LOWMERE_ORIGIN
+	if zone == Zone.TOWN and current_town >= 0:
+		var town: Dictionary = towns[current_town]
+		return town["origin"]
 	return Vector2i.ZERO
 
 
@@ -2592,6 +2999,8 @@ func _region_at(tile: Vector2i) -> int:
 		return Zone.VILLAGE
 	if Rect2i(ASHFORD_ORIGIN, Vector2i(VILLAGE_W, VILLAGE_H)).has_point(tile):
 		return Zone.ASHFORD
+	if _town_at(tile) >= 0:
+		return Zone.TOWN
 	return Zone.WILDS
 
 
@@ -2600,7 +3009,17 @@ func _zone_npcs() -> Array:
 		return ASHFORD_NPCS
 	if zone == Zone.VILLAGE:
 		return NPCS
+	if zone == Zone.TOWN and current_town >= 0:
+		var town: Dictionary = towns[current_town]
+		return town["npcs"]
 	return []
+
+
+# Sets the zone and the town from where the player stands, without announcing it.
+func _sync_region() -> void:
+	var tile := _player_tile()
+	zone = _region_at(tile)
+	current_town = _town_at(tile) if zone == Zone.TOWN else -1
 
 
 func _npc_index(tile: Vector2i) -> int:
@@ -2644,15 +3063,21 @@ func _update_region() -> void:
 	if not _in_village():
 		return
 	queue_redraw()
-	var z := _region_at(_player_tile())
-	if z == zone:
+	var tile := _player_tile()
+	var z := _region_at(tile)
+	var town := _town_at(tile) if z == Zone.TOWN else -1
+	if z == zone and town == current_town:
 		return
 	zone = z
+	current_town = town
 	_on_region_change()
 	if zone == Zone.VILLAGE:
 		_show_message("You come into Lowmere.")
 	elif zone == Zone.ASHFORD:
 		_show_message("You come into Ashford. Something watches from the road.")
+	elif zone == Zone.TOWN and current_town >= 0:
+		var title := str(towns[current_town]["title"])
+		_show_message("You come into %s." % title)
 
 
 # Walking the road is daylight only. At dusk the gate pushes you back.
@@ -2678,6 +3103,18 @@ func _interact_village() -> void:
 func _talk(npc: Dictionary) -> void:
 	stats["talks"] += 1
 	var lines: Array = npc["lines"]
+	if npc.has("shop"):
+		active_shop = str(npc["shop"])
+		open_tab = "Trade" if active_shop == "grocer" else "Shop"
+		_refresh_panel()
+		return
+	if npc.has("bank"):
+		open_tab = "Bank"
+		_refresh_panel()
+		return
+	if npc.has("role"):
+		_show_message("%s: %s" % [npc["name"], lines[int(stats["talks"]) % lines.size()]])
+		return
 	if npc["id"] == "tomas" and int(inventory["meals"]) > 0 and int(stats["delivered"]) == 0:
 		inventory["meals"] -= 1
 		stats["delivered"] += 1
@@ -3352,6 +3789,8 @@ func _save_game() -> void:
 		"rocks": _tiles_to_array(rocks),
 		"quarry": _tiles_to_array(quarry),
 		"tool_tier": tool_tier,
+		"bank_materials": bank_materials,
+		"bank_coins": bank_coins,
 	}
 	var file := FileAccess.open(SAVE_PATH, FileAccess.WRITE)
 	if file != null:
@@ -3384,6 +3823,8 @@ func _load_game() -> bool:
 	mends_today = int(data.get("mends_today", 0))
 	cleanse_day = int(data.get("cleanse_day", 0))
 	money = int(data.get("money", 0))
+	_merge_ints(bank_materials, data.get("bank_materials"))
+	bank_coins = int(data.get("bank_coins", 0))
 	bag_tier = int(data.get("bag_tier", 0))
 	cellar_built = bool(data.get("cellar_built", false))
 	cooler_built = bool(data.get("cooler_built", false))
