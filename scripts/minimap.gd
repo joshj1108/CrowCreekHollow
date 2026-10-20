@@ -10,6 +10,7 @@ const BORDER_COLOR := Color("8a6a3a")
 const BUSH_COLOR := Color("3d6b2a")
 const SHADOW_COLOR := Color("b02a2a")
 const PLAYER_COLOR := Color("fff2b0")
+const MARKER_COLOR := Color("6fb8d9")   # landmarks such as the well
 
 var tiles: Array = []
 var tile_colors: Dictionary = {}
@@ -18,13 +19,15 @@ var player_tile := Vector2.ZERO
 var shadow := Vector2i(-1, -1)   # (-1, -1) hides the shadow
 var world_texture: Texture2D = null   # the whole land, one pixel per WORLD_PX_PER_TILE tiles
 var world_tiles := Vector2i.ZERO
+var markers: Array = []   # landmark tiles, drawn as small blue squares on the farm map
 
 # The whole world at 1 pixel per 4 tiles. Each pixel is a sampled tile, not an average.
 const WORLD_PX_PER_TILE := 0.25
 
 
-func update_view(tiles_in: Array, colors: Dictionary, bushes_in: Array, player_tile_in: Vector2, shadow_in: Vector2i) -> void:
+func update_view(tiles_in: Array, colors: Dictionary, bushes_in: Array, player_tile_in: Vector2, shadow_in: Vector2i, markers_in: Array = []) -> void:
 	world_texture = null
+	markers = markers_in
 	tiles = tiles_in
 	tile_colors = colors
 	bushes = bushes_in
@@ -62,5 +65,7 @@ func _draw() -> void:
 		draw_rect(Rect2(b.x * s, b.y * s, s, s), BUSH_COLOR)
 	if shadow.x >= 0:
 		draw_rect(Rect2(shadow.x * s, shadow.y * s, s, s), SHADOW_COLOR)
+	for m in markers:
+		draw_rect(Rect2(m.x * s, m.y * s, s, s), MARKER_COLOR)
 	draw_circle(player_tile * s + Vector2(s, s) * 0.5, 2.5, PLAYER_COLOR)
 	draw_rect(Rect2(Vector2.ZERO, size), BORDER_COLOR, false, 2.0)

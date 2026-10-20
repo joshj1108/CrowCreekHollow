@@ -57,7 +57,7 @@ The farmer is drawn in code. A straw hat with a band, a shirt under blue overall
 - A 40×24 walkable farm surrounded by a tree border, so the camera stays centered on the player all the way to the farm's edge.
 - Two plots: **Plot one** is tilled from the start. **Plot two** is overgrown and opens at Farming 2.
 - Trees, water, the house walls, and brush piles block movement. The player slides along walls.
-- A minimap in the top-right shows the farm, the house, brush piles, the player, and the shadow on event nights.
+- A minimap in the top-right shows the farm, the house, brush piles, the well (a blue square), the player, and the shadow on event nights.
 - The farmhouse interior sits below the farm and has its own camera bounds.
 
 ## Day and night
@@ -291,7 +291,7 @@ The house is drawn in four stages that match its repair level. **Decrepit** has 
 ## Saving
 
 - The game opens on a **start screen**: **Continue** (the most recently saved slot), **New Game**, **Load Game**, **Settings** (the controls list), and **Quit**. The world is built only after you choose.
-- There are **three save slots**. New Game asks for a slot, and a used slot takes two presses to overwrite. Load Game lists each slot with its day, coins, and house stage. Older single-slot saves become slot 1.
+- There are **three save slots**. New Game asks for a slot, and a used slot takes two presses to overwrite. Load Game lists each slot with its day, coins, and house stage. Older single-slot saves become slot 1. Pressing Overwrite keeps focus on the armed slot, so a gamepad's second press overwrites it. Crops from saves made before watering existed count as watered on the day they load, so they grow that night.
 - The game saves **only** when you sleep in bed or collapse at 03:00, to the slot you're playing.
 - The in-game Settings menu ends with a **Game** section that never folds. It holds **Music** (on or off), **Unstick me**, and **Quit to the main menu**. Quitting returns to the start screen without saving, and progress since the last sleep is lost. The slot you were playing stays selected. Sleeping is the only way to save.
 - Saved: day, skill XP, inventory (including meals), coins, goats and their feeding, bag upgrades, root cellar, cooler, and smokehouse (built, and what they hold), materials, stats, story chapters done, achievements done, selected seed, lantern tier, house stage, house wear, coop and hens, barn (built, and where it stands), tidy/mend/cleanse days, sanity and sanity penalty, crops (with kind), brush piles, **player position**, whether you were **inside the house**, and the **open panel**.
@@ -477,7 +477,7 @@ A cave on the homestead, entered from the farm's west edge. It is the only place
 
 ## Upkeep, hens, and the third plot
 
-**Goats (the barn)** — The barn holds up to **3 goats**, bought for **45 coins** each from the Barn panel (stand beside the barn and press Space). Feed them **2 crops each, once a day**. A fed goat gives **1 milk each morning**, stored as a meal. Two unfed days in a row and a goat wanders off. Goats wander in the yard in front of the barn. Each goat that is unfed counts as a missed chore that night, like the hens.
+**Goats (the barn)** — The barn holds up to **3 goats**, bought for **45 coins** each from the Barn panel (stand beside the barn and press Space). Feed them **2 crops each, once a day**. A fed goat gives **1 milk each morning**, stored as a meal. Two unfed days in a row and a goat wanders off. Goats wander in the yard in front of the barn and keep about half a tile between them, so they never stand on the same spot. Each goat that is unfed counts as a missed chore that night, like the hens.
 
 
 Keeping the homestead running is the daily work. Each part is at base level for now, to be deepened one project at a time.

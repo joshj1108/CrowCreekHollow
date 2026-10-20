@@ -1616,7 +1616,8 @@ func _update_minimap() -> void:
 	if key == last_minimap_key:
 		return
 	last_minimap_key = key
-	minimap.update_view(map, TILE_COLORS, brush.keys(), player_tile, tonight_shadow)
+	var well_tile := Vector2(WELL_IX.x + BORDER_X, WELL_IX.y + BORDER_Y)
+	minimap.update_view(map, TILE_COLORS, brush.keys(), player_tile, tonight_shadow, [] if inside else [well_tile])
 
 
 # --- Tutorial tips ----------------------------------------------------------
@@ -6014,7 +6015,10 @@ func _load_game() -> bool:
 	crops.clear()
 	for c in data.get("crops", []):
 		var kind := str(c.get("kind", "turnip"))
-		crops[Vector2i(int(c["x"]), int(c["y"]))] = {"stage": int(c["stage"]), "kind": kind, "watered_day": int(c.get("watered_day", 0))}
+		# Saves from before watering existed have no record. Those crops count as watered today,
+		# so they grow tonight like they used to.
+		var watered := int(c["watered_day"]) if c.has("watered_day") else day
+		crops[Vector2i(int(c["x"]), int(c["y"]))] = {"stage": int(c["stage"]), "kind": kind, "watered_day": watered}
 	brush.clear()
 	for b in data.get("brush", []):
 		brush[Vector2i(int(b[0]), int(b[1]))] = true
@@ -6547,7 +6551,28 @@ func _update_goats(delta: float) -> void:
 			goat_goal[i] = Vector2(randf_range(-1.1, 1.1), randf_range(-0.2, 0.6))
 			goat_wait[i] = randf_range(1.5, 4.0)
 		goat_pos[i] = pos.move_toward(goat_goal[i], 0.3 * delta)
+	_separate_goats()
 	goat_layer.queue_redraw()
+
+
+# Goats keep a little room between them, so two never stand on the same spot.
+# Vertical distance counts double, since the goats are seen from above at an angle.
+const GOAT_SPACE := 0.5
+
+func _separate_goats() -> void:
+	for i in goat_pos.size():
+		for j in range(i + 1, goat_pos.size()):
+			var a: Vector2 = goat_pos[i]
+			var b: Vector2 = goat_pos[j]
+			var d: Vector2 = b - a
+			var scaled := Vector2(d.x, d.y * 2.0)
+			var dist := scaled.length()
+			if dist >= GOAT_SPACE:
+				continue
+			var dir := Vector2(1.0, 0.0) if dist < 0.0001 else scaled / dist
+			var push := dir * (GOAT_SPACE - dist) * 0.5
+			goat_pos[i] = a - Vector2(push.x, push.y * 0.5)
+			goat_pos[j] = b + Vector2(push.x, push.y * 0.5)
 
 
 func _draw_tree(cell: Rect2, pos: Vector2i) -> void:

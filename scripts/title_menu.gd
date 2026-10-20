@@ -155,7 +155,9 @@ func _show_slots_refresh_armed(slot: int) -> void:
 		var button := child as Button
 		if button != null and button.text.begins_with("Slot %d:" % slot):
 			button.text = "Slot %d: press again to overwrite" % slot
-	_focus_first()
+			# Keep focus on the armed slot, so a gamepad's second press overwrites it.
+			# Queued after _show_slots' own focus call, so this one wins.
+			button.grab_focus.call_deferred()
 
 
 func _show_settings() -> void:
