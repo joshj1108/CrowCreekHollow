@@ -71,6 +71,15 @@ const PORTAL_ARRIVE := Vector2i(354, 450) # where you step out of the farm's por
 # false keeps play on the homestead: the east portal is off, the wider land and its
 # towns are unreachable, and the Guardian of Lowmere quests are hidden.
 const WORLD_ENABLED := false
+# The mining cave, entered from the homestead's west edge. Its ore is copper and iron.
+const CAVE_W := 40
+const CAVE_H := 24
+const CAVE_SEED := 61019
+const CAVE_START := Vector2i(3, 12)      # where you step in, just inside the exit
+const CAVE_EXIT_TILE := Vector2i(2, 12)  # the mat that takes you back out
+const CAVE_CREATURES := ["bat", "bat", "bat", "lizard", "lizard", "snake", "snake"]
+const CAVE_MIN_CREATURE_DEPTH := 8       # creatures start at least this far from the entrance
+const CAVE_IRON_DEPTH := 12              # iron ore only this far in
 const LOWMERE_ORIGIN := Vector2i(380, 440)
 const ASHFORD_ORIGIN := Vector2i(470, 440)
 # Tool tiers. A hatchet fells trees. Hardwood needs a copper hatchet or better.
@@ -202,6 +211,9 @@ const INVULN_TIME := 0.9      # seconds of safety after a hit
 const FOES := {
 	"hollow": {"hp": 6, "speed": 26.0, "chase": 52.0, "dmg": 2, "aggro": 3.0, "cool": 1.2, "color": "1a1020", "xp": 20, "drop": "fiber"},
 	"stalker": {"hp": 10, "speed": 36.0, "chase": 84.0, "dmg": 3, "aggro": 4.5, "cool": 1.0, "color": "3a2a4a", "xp": 30, "drop": "resin"},
+	"bat": {"hp": 4, "speed": 40.0, "chase": 70.0, "dmg": 1, "aggro": 3.5, "cool": 0.9, "color": "3a3040", "xp": 12, "drop": "fiber"},
+	"lizard": {"hp": 8, "speed": 22.0, "chase": 44.0, "dmg": 2, "aggro": 3.0, "cool": 1.3, "color": "5f7a3a", "xp": 18, "drop": "resin"},
+	"snake": {"hp": 6, "speed": 30.0, "chase": 56.0, "dmg": 2, "aggro": 3.5, "cool": 1.1, "color": "6a5a2a", "xp": 16, "drop": "fiber"},
 }
 const STALKER_SPAWNS := [Vector2i(26, 8), Vector2i(29, 12), Vector2i(31, 7)]
 const ASHFORD_HOUSES := [Rect2i(5, 3, 6, 5), Rect2i(14, 13, 5, 4)]
@@ -457,9 +469,9 @@ const NIGHT_EVENTS := [
 	{"message": "The field is quiet tonight. Too quiet.", "shadow": "none", "sanity": -3},
 ]
 
-enum Tile { TREE, GRASS, SOIL, PATH, WATER, HOUSE, DOOR, FLOOR, WALL, EXIT, BED, STATION, DESK, FALLOW, STALL, CELLAR, COOLER, GATE, SMOKEHOUSE, FURNACE, PORTAL, CAMP }
+enum Tile { TREE, GRASS, SOIL, PATH, WATER, HOUSE, DOOR, FLOOR, WALL, EXIT, BED, STATION, DESK, FALLOW, STALL, CELLAR, COOLER, GATE, SMOKEHOUSE, FURNACE, PORTAL, CAMP, CAVE_MOUTH, CAVE_EXIT, ORE_COPPER, ORE_IRON }
 
-const BLOCKING := [Tile.TREE, Tile.WATER, Tile.HOUSE, Tile.WALL, Tile.BED, Tile.STATION, Tile.DESK, Tile.STALL, Tile.CELLAR, Tile.COOLER, Tile.SMOKEHOUSE, Tile.FURNACE, Tile.CAMP]
+const BLOCKING := [Tile.TREE, Tile.WATER, Tile.HOUSE, Tile.WALL, Tile.BED, Tile.STATION, Tile.DESK, Tile.STALL, Tile.CELLAR, Tile.COOLER, Tile.SMOKEHOUSE, Tile.FURNACE, Tile.CAMP, Tile.ORE_COPPER, Tile.ORE_IRON]
 
 const TILE_COLORS := {
 	Tile.TREE: Color("2f4f2f"),
@@ -483,6 +495,10 @@ const TILE_COLORS := {
 	Tile.SMOKEHOUSE: Color("9a5a3a"),
 	Tile.FURNACE: Color("5c5c66"),
 	Tile.PORTAL: Color("6a4fc0"),
+	Tile.CAVE_MOUTH: Color("2a2a30"),
+	Tile.CAVE_EXIT: Color("a08050"),
+	Tile.ORE_COPPER: Color("b87333"),
+	Tile.ORE_IRON: Color("8a8f99"),
 	Tile.CAMP: Color("d07a30"),
 }
 
@@ -502,6 +518,10 @@ var current_town := -1              # index into towns while the player is in on
 var active_shop := ""               # the shop open in the Shop panel
 var bank_materials := {"wood": 0, "fiber": 0, "resin": 0, "hardwood": 0, "stone": 0, "copper_ore": 0, "iron_ore": 0, "copper_bar": 0, "iron_bar": 0, "arrows": 0, "bolts": 0}
 var bank_coins := 0
+var in_cave := false                # standing in the mining cave
+var cave: Array = []                # cave tiles, [y][x], in cave tile coordinates
+var cave_spawns: Array = []         # creatures placed on each entry: {kind, tile}
+var cave_mined: Dictionary = {}     # cave ore already broken, tile -> true
 
 var interior: Array = []            # house tiles, [y][x], local to INT_ORIGIN
 var crops := {}                     # Vector2i world tile -> {"stage": int, "kind": String}
@@ -651,6 +671,9 @@ func _process(delta: float) -> void:
 
 
 func _draw() -> void:
+	if in_cave:
+		_draw_cave()
+		return
 	if _in_village():
 		_draw_world()
 		return
@@ -793,6 +816,8 @@ func _build_map() -> void:
 					t = Tile.HOUSE
 				if WORLD_ENABLED and ix == INNER_W - 1 and iy == INNER_H / 2:
 					t = Tile.PORTAL
+				if ix == 0 and iy == INNER_H / 2:
+					t = Tile.CAVE_MOUTH
 				if ix == STALL_IX and iy == STALL_IY:
 					t = Tile.STALL
 				if ix == HOUSE_DOOR_IX and iy == HOUSE_DOOR_IY:
@@ -967,6 +992,10 @@ func _restore_saved_state() -> void:
 
 
 func _update_minimap() -> void:
+	if in_cave:
+		_place_minimap(Vector2(CAVE_W, CAVE_H) * Minimap.PX_PER_TILE)
+		minimap.update_view(cave, TILE_COLORS, [], Vector2(_player_tile()), Vector2i(-1, -1))
+		return
 	if _in_village():
 		# In the world the minimap shows the whole land, with the player on it.
 		if world_map_tex == null:
@@ -1473,6 +1502,9 @@ func _check_unlocks() -> void:
 
 
 func _interact() -> void:
+	if in_cave:
+		_interact_cave()
+		return
 	if _in_village():
 		_interact_village()
 		return
@@ -2455,6 +2487,7 @@ func _generate_world() -> void:
 	_layout_towns()
 	world[PORTAL_TILE.y * WORLD_W + PORTAL_TILE.x] = Tile.PORTAL
 	_build_world_minimap()
+	_generate_cave()
 
 
 # Copies a village's houses, water, gates and trees into the world. Its open ground and
@@ -2500,6 +2533,166 @@ func _place_minimap(mini_size: Vector2) -> void:
 	minimap.offset_right = -12.0
 	minimap.offset_top = 12.0
 	minimap.offset_bottom = 12.0 + mini_size.y
+
+
+# --- The mining cave ---------------------------------------------------------
+
+# Fills the cave: rock walls, then carved floor from a few random walks out of the
+# entrance, then copper and iron ore set into the walls, then the creatures.
+func _generate_cave() -> void:
+	var rng := RandomNumberGenerator.new()
+	rng.seed = CAVE_SEED
+	cave = []
+	for y in CAVE_H:
+		var row: Array = []
+		for x in CAVE_W:
+			row.append(Tile.WALL)
+		cave.append(row)
+	var dirs := [Vector2i(1, 0), Vector2i(-1, 0), Vector2i(0, 1), Vector2i(0, -1)]
+	for walker in 8:
+		var p := CAVE_START
+		var dir: Vector2i = dirs[rng.randi() % dirs.size()]
+		for step in rng.randi_range(60, 120):
+			if _cave_inside(p):
+				cave[p.y][p.x] = Tile.FLOOR
+			if rng.randf() < 0.3:
+				dir = dirs[rng.randi() % dirs.size()]
+			var nxt := p + dir
+			if _cave_inside(nxt):
+				p = nxt
+			else:
+				dir = -dir
+	cave[CAVE_START.y][CAVE_START.x] = Tile.FLOOR
+	cave[CAVE_EXIT_TILE.y][CAVE_EXIT_TILE.x] = Tile.CAVE_EXIT
+	for y in range(1, CAVE_H - 1):
+		for x in range(1, CAVE_W - 1):
+			if cave[y][x] != Tile.WALL or not _touches_cave_floor(Vector2i(x, y)):
+				continue
+			var depth := absi(x - CAVE_START.x) + absi(y - CAVE_START.y)
+			var roll := rng.randf()
+			if depth >= CAVE_IRON_DEPTH and roll < 0.04:
+				cave[y][x] = Tile.ORE_IRON
+			elif roll < 0.09:
+				cave[y][x] = Tile.ORE_COPPER
+	var spots: Array = []
+	for y in range(1, CAVE_H - 1):
+		for x in range(1, CAVE_W - 1):
+			if cave[y][x] == Tile.FLOOR and absi(x - CAVE_START.x) + absi(y - CAVE_START.y) >= CAVE_MIN_CREATURE_DEPTH:
+				spots.append(Vector2i(x, y))
+	cave_spawns = []
+	for kind in CAVE_CREATURES:
+		if spots.is_empty():
+			break
+		var pick: Vector2i = spots[rng.randi() % spots.size()]
+		spots.erase(pick)
+		cave_spawns.append({"kind": kind, "tile": pick})
+
+
+func _cave_inside(t: Vector2i) -> bool:
+	return t.x >= 2 and t.y >= 2 and t.x <= CAVE_W - 3 and t.y <= CAVE_H - 3
+
+
+func _touches_cave_floor(t: Vector2i) -> bool:
+	for d in [Vector2i(1, 0), Vector2i(-1, 0), Vector2i(0, 1), Vector2i(0, -1)]:
+		var n: Vector2i = t + d
+		if cave[n.y][n.x] == Tile.FLOOR:
+			return true
+	return false
+
+
+func _enter_cave() -> void:
+	in_cave = true
+	inside = false
+	_stop_fishing("")
+	swing_time = 0.0
+	for tile in cave_mined.keys():
+		cave[tile.y][tile.x] = Tile.FLOOR
+	player.position = _tile_center(CAVE_START.x, CAVE_START.y)
+	_set_bounds()
+	_spawn_foes()
+	queue_redraw()
+	_show_message("You step into the cave. It smells of damp stone, and something skitters in the dark.")
+
+
+func _leave_cave() -> void:
+	in_cave = false
+	foes = []
+	swing_time = 0.0
+	player.position = _tile_center(BORDER_X + 1, BORDER_Y + INNER_H / 2)
+	_set_bounds()
+	queue_redraw()
+	_show_message("You step back out into the light.")
+
+
+func _interact_cave() -> void:
+	var tile := _tile_in_front()
+	var kind := _kind_at(tile)
+	if kind == Tile.ORE_COPPER or kind == Tile.ORE_IRON:
+		_mine_cave(tile, kind)
+		return
+	_swing()
+
+
+# Copper needs a stone pick and Mining 2. Iron needs a copper pick and Mining 5.
+func _mine_cave(tile: Vector2i, kind: int) -> void:
+	var iron := kind == Tile.ORE_IRON
+	var need_pick := 2 if iron else 1
+	var need_level := 5 if iron else 2
+	var ore := "iron" if iron else "copper"
+	if int(tool_tier["pick"]) < need_pick:
+		_show_message("The %s ore is too hard for your hands. Craft a %s pick from the Gear panel." % [ore, "copper" if iron else "stone"])
+		return
+	if _level("Mining") < need_level:
+		_show_message("You need Mining %d to work %s ore." % [need_level, ore])
+		return
+	cave[tile.y][tile.x] = Tile.FLOOR
+	cave_mined[tile] = true
+	materials[ore + "_ore"] += 1
+	_grant_xp("Mining", XP_MINE)
+	_show_message("You break the %s ore. +1 %s ore. +%d Mining XP" % [ore, ore, XP_MINE])
+	queue_redraw()
+
+
+func _draw_cave() -> void:
+	var view := get_viewport_rect().size / camera.zoom
+	var top_left := camera.get_screen_center_position() - view * 0.5
+	var x0 := clampi(floori(top_left.x / PX) - 1, 0, CAVE_W - 1)
+	var y0 := clampi(floori(top_left.y / PX) - 1, 0, CAVE_H - 1)
+	var x1 := clampi(ceili((top_left.x + view.x) / PX) + 1, 0, CAVE_W - 1)
+	var y1 := clampi(ceili((top_left.y + view.y) / PX) + 1, 0, CAVE_H - 1)
+	for y in range(y0, y1 + 1):
+		for x in range(x0, x1 + 1):
+			draw_rect(_tile_rect(Vector2i(x, y)), TILE_COLORS[cave[y][x]])
+	_draw_combat()
+
+
+# Where a save puts you: in the cave, the save records the homestead instead.
+func _save_pos() -> Array:
+	if in_cave:
+		var home := _tile_center(HOMESTEAD_ARRIVE.x, HOMESTEAD_ARRIVE.y)
+		return [home.x, home.y]
+	return [player.position.x, player.position.y]
+
+
+# Foes, arrows in flight, and the swing arc. Shared by the world and the cave.
+func _draw_combat() -> void:
+	for foe in foes:
+		var pos: Vector2 = foe["pos"]
+		var st: Dictionary = FOES[foe["kind"]]
+		var body := Color(str(st["color"]))
+		if float(foe["flash"]) > 0.0:
+			body = Color("e8e0d0")
+		draw_circle(pos, PX * 0.32, body)
+		draw_circle(pos + Vector2(-5, -4), 2.5, Color(0.9, 0.1, 0.1))
+		draw_circle(pos + Vector2(5, -4), 2.5, Color(0.9, 0.1, 0.1))
+		var frac := float(foe["hp"]) / float(st["hp"])
+		draw_rect(Rect2(pos + Vector2(-PX * 0.3, -PX * 0.5), Vector2(PX * 0.6 * frac, 3)), Color("c24a4a"))
+	for shot in shots:
+		var shot_pos: Vector2 = shot["pos"]
+		var shot_vel: Vector2 = shot["vel"]
+		draw_line(shot_pos - shot_vel.normalized() * PX * 0.5, shot_pos, Color("e8e0c0"), 2.0)
+	if swing_time > 0.0:
+		draw_arc(player.position, SWING_REACH * PX, swing_dir.angle() - 0.9, swing_dir.angle() + 0.9, 12, Color(1, 1, 0.8, 0.8), 3.0)
 
 
 # --- Generated towns -----------------------------------------------------------
@@ -2892,7 +3085,7 @@ func _apply_campsite() -> void:
 
 
 func _near_campsite(tile: Vector2i) -> bool:
-	return campsite != NO_CAMP and Vector2(tile - campsite).length() <= CAMP_SAFE_RADIUS
+	return campsite != NO_CAMP and not in_cave and Vector2(tile - campsite).length() <= CAMP_SAFE_RADIUS
 
 
 func _at_campsite() -> bool:
@@ -3050,6 +3243,7 @@ func _go_home(reason: String) -> void:
 
 func _enter_zone(z: int, arrive: Vector2i, reason: String) -> void:
 	zone = z
+	in_cave = false
 	_stop_fishing("")
 	swing_time = 0.0
 	player.position = _tile_center(arrive.x, arrive.y)
@@ -3181,23 +3375,7 @@ func _draw_world() -> void:
 		var qc := _tile_center(pos.x, pos.y)
 		draw_circle(qc, PX * 0.3, Color("6a6a4a"))
 		draw_circle(qc + Vector2(-5, -4), PX * 0.08, Color("c9b46a"))
-	for foe in foes:
-		var pos: Vector2 = foe["pos"]
-		var st: Dictionary = FOES[foe["kind"]]
-		var body := Color(str(st["color"]))
-		if float(foe["flash"]) > 0.0:
-			body = Color("e8e0d0")
-		draw_circle(pos, PX * 0.32, body)
-		draw_circle(pos + Vector2(-5, -4), 2.5, Color(0.9, 0.1, 0.1))
-		draw_circle(pos + Vector2(5, -4), 2.5, Color(0.9, 0.1, 0.1))
-		var frac := float(foe["hp"]) / float(st["hp"])
-		draw_rect(Rect2(pos + Vector2(-PX * 0.3, -PX * 0.5), Vector2(PX * 0.6 * frac, 3)), Color("c24a4a"))
-	for shot in shots:
-		var shot_pos: Vector2 = shot["pos"]
-		var shot_vel: Vector2 = shot["vel"]
-		draw_line(shot_pos - shot_vel.normalized() * PX * 0.5, shot_pos, Color("e8e0c0"), 2.0)
-	if swing_time > 0.0:
-		draw_arc(player.position, SWING_REACH * PX, swing_dir.angle() - 0.9, swing_dir.angle() + 0.9, 12, Color(1, 1, 0.8, 0.8), 3.0)
+	_draw_combat()
 
 
 # --- Foes and combat ----------------------------------------------------------
@@ -3213,6 +3391,11 @@ func _new_foe(kind: String, tile: Vector2i) -> Dictionary:
 
 func _spawn_foes() -> void:
 	foes = []
+	if in_cave:
+		for spawn in cave_spawns:
+			foes.append(_new_foe(str(spawn["kind"]), spawn["tile"]))
+		queue_redraw()
+		return
 	var origin := _region_origin()
 	if zone == Zone.VILLAGE:
 		for spot in HOLLOW_SPAWNS:
@@ -3227,7 +3410,7 @@ func _update_foes(delta: float) -> void:
 	swing_cool = maxf(0.0, swing_cool - delta)
 	swing_time = maxf(0.0, swing_time - delta)
 	invuln = maxf(0.0, invuln - delta)
-	if not _in_village():
+	if not (_in_village() or in_cave):
 		player.modulate = Color.WHITE
 		return
 	player.modulate = Color(1.0, 0.55, 0.55) if invuln > 0.0 else Color.WHITE
@@ -3701,6 +3884,13 @@ func _update_shadow_tile() -> void:
 func _check_doors() -> void:
 	var tile := _player_tile()
 	var kind := _kind_at(tile)
+	if in_cave:
+		if kind == Tile.CAVE_EXIT:
+			_leave_cave()
+		return
+	if not _in_village() and not inside and kind == Tile.CAVE_MOUTH:
+		_enter_cave()
+		return
 	if _in_village():
 		if kind == Tile.PORTAL and tile == PORTAL_TILE:
 			_enter_zone(Zone.HOMESTEAD, HOMESTEAD_ARRIVE, "You step back through the portal to the homestead.")
@@ -3730,6 +3920,14 @@ func _leave_house() -> void:
 
 
 func _set_bounds() -> void:
+	if in_cave:
+		player.min_pos = _tile_center(1, 1)
+		player.max_pos = _tile_center(CAVE_W - 2, CAVE_H - 2)
+		camera.limit_left = 0
+		camera.limit_top = 0
+		camera.limit_right = CAVE_W * PX
+		camera.limit_bottom = CAVE_H * PX
+		return
 	if _in_village():
 		player.min_pos = _tile_center(1, 1)
 		player.max_pos = _tile_center(WORLD_W - 2, WORLD_H - 2)
@@ -3791,7 +3989,7 @@ func _save_game() -> void:
 		"event_fired_day": event_fired_day,
 		"sanity": sanity,
 		"sanity_penalty": sanity_penalty,
-		"player_pos": [player.position.x, player.position.y],
+		"player_pos": _save_pos(),
 		"inside": inside,
 		"open_tab": open_tab,
 		"crops": _crops_to_array(),
@@ -3802,6 +4000,7 @@ func _save_game() -> void:
 		"tool_tier": tool_tier,
 		"bank_materials": bank_materials,
 		"bank_coins": bank_coins,
+		"cave_mined": _tiles_to_array(cave_mined),
 	}
 	var file := FileAccess.open(SAVE_PATH, FileAccess.WRITE)
 	if file != null:
@@ -3884,6 +4083,10 @@ func _load_game() -> bool:
 			rocks[Vector2i(int(r[0]), int(r[1]))] = true
 	else:
 		_fill_rocks()
+	if data.has("cave_mined"):
+		cave_mined.clear()
+		for c in data["cave_mined"]:
+			cave_mined[Vector2i(int(c[0]), int(c[1]))] = true
 	if data.has("quarry"):
 		quarry.clear()
 		for q in data["quarry"]:
@@ -3959,6 +4162,10 @@ func _in_interior(tile: Vector2i) -> bool:
 
 # The tile kind at a world tile: the interior if it's inside the house, else the farm.
 func _kind_at(tile: Vector2i) -> int:
+	if in_cave:
+		if tile.x < 0 or tile.y < 0 or tile.x >= CAVE_W or tile.y >= CAVE_H:
+			return Tile.WALL
+		return cave[tile.y][tile.x]
 	if _in_village():
 		if tile.x < 0 or tile.y < 0 or tile.x >= WORLD_W or tile.y >= WORLD_H:
 			return Tile.TREE

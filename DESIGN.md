@@ -373,6 +373,15 @@ Levels are first-pass values and will be tuned in playtesting. Ammunition arrows
 
 **Decided:** the offhand (left hand) is for the shield. The lantern moves to a **belt** slot, so it can be worn without taking a hand. The lantern keeps its light ring and upgrades as before. Moving it is a grid change to be made when shields are built.
 
+## The mining cave
+
+A cave on the homestead, entered from the farm's west edge. It is the only place to get iron ore, and the only place to fight.
+
+- **Entrance:** step onto the cave mouth on the farm's west edge. The exit mat inside takes you back out to the farm.
+- **Ore:** copper and iron set into the rock walls. Copper needs a stone pick and Mining 2. Iron needs a copper pick and Mining 5, and only sits deeper in the cave. Each node gives one ore and 12 Mining XP. Broken nodes stay broken after a save.
+- **Creatures:** ordinary animals, no supernatural ones. Three bats (fast, weak), two lizards (slow, tougher), and two snakes (quick, hard-hitting). They spawn away from the entrance and come back each time you enter. Kills give Combat XP and a small chance of fiber or resin.
+- **Saving:** a save made in the cave returns you to the homestead when loaded.
+
 ## Deferred
 
 - The story beyond the survival chapters: mystery and horror escalation.
