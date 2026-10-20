@@ -2195,7 +2195,7 @@ func _gear_rows() -> Array:
 		tile["action"] = "gear_pick:" + str(t["key"])
 		marked.append(tile)
 	return [
-		{"split": {"recipes": marked, "columns": 4, "detail": chosen}},
+		{"split": {"recipes": marked, "figure": true, "detail": chosen}},
 		{"name": "Defense", "value": str(_defense())},
 		{"name": "Hit damage", "value": str(_weapon_damage())},
 		{"note": "Worn gear sets your defense, and your main hand sets how hard you hit. Crafting a piece equips it at once and swaps out what was in that slot. Press C for the Craft panel."},
@@ -2225,9 +2225,17 @@ func _gear_tiles() -> Array:
 	tiles.append(_gear_slot_tile("offhand", "Off hand", "shield"))
 	tiles.append(_gear_slot_tile("chest", "Chest", "shirt"))
 	tiles.append(_gear_slot_tile("hand_r", "Main hand", "sword"))
-	tiles.append(_gear_slot_tile("wrist", "Wrist", "bracer"))
+	tiles.append(_gear_slot_tile("wrist", "Gloves", "glove"))
 	tiles.append(_gear_slot_tile("legs", "Legs", "pants"))
 	tiles.append(_gear_slot_tile("feet", "Feet", "boots"))
+	var spots := {
+		"slot:back": Vector2i(0, 1), "slot:head": Vector2i(1, 0), "slot:neck": Vector2i(1, 1),
+		"slot:chest": Vector2i(1, 2), "slot:hand_r": Vector2i(0, 2), "slot:offhand": Vector2i(2, 2),
+		"slot:wrist": Vector2i(0, 3), "slot:legs": Vector2i(1, 3), "slot:belt": Vector2i(2, 3), "slot:feet": Vector2i(1, 4),
+	}
+	for t in tiles:
+		if spots.has(t["key"]):
+			t["pos"] = spots[t["key"]]
 	tiles.append({
 		"key": "tool:hoe", "name": "Hoe", "icon": "hoe", "tint": "8a6a3a", "enabled": true,
 		"desc": "Tills the soil so you can plant.", "level_text": "", "level_ok": true, "costs": [], "action": "",

@@ -510,16 +510,53 @@ func _build_cell(cell: Dictionary) -> Control:
 	return panel_box
 
 
-# The recipe grid on the left and the picked recipe's details on the right.
+# The grid on the left and the picked recipe's details on the right. A figure layout places
+# each tile at its own spot in a body shape, and any tiles without a spot go in a row below.
 func _build_split(data: Dictionary) -> Control:
 	var holder := HBoxContainer.new()
 	holder.add_theme_constant_override("separation", 16)
 	holder.alignment = BoxContainer.ALIGNMENT_BEGIN
-	var grid := _build_recipes({"recipes": data["recipes"], "columns": data.get("columns", 4)})
-	holder.add_child(grid)
+	if data.get("figure", false):
+		holder.add_child(_build_figure(data["recipes"]))
+	else:
+		holder.add_child(_build_recipes({"recipes": data["recipes"], "columns": data.get("columns", 4)}))
 	if not data.get("detail", {}).is_empty():
 		holder.add_child(_build_detail(data["detail"]))
 	return holder
+
+
+# Tiles are 72 pixels with 6 between them: a 3-by-5 figure, then a row of tools.
+const FIGURE_TILE := 72
+const FIGURE_GAP := 6
+
+
+func _build_figure(recipes: Array) -> Control:
+	var column := VBoxContainer.new()
+	column.add_theme_constant_override("separation", 10)
+	var figure := Control.new()
+	figure.custom_minimum_size = Vector2(3 * FIGURE_TILE + 2 * FIGURE_GAP, 5 * FIGURE_TILE + 4 * FIGURE_GAP)
+	var loose: Array = []
+	for recipe in recipes:
+		if recipe.has("pos"):
+			var spot: Vector2i = recipe["pos"]
+			var placed := _build_recipe_tile(recipe, true)
+			placed.position = Vector2(spot.x * (FIGURE_TILE + FIGURE_GAP), spot.y * (FIGURE_TILE + FIGURE_GAP))
+			figure.add_child(placed)
+		else:
+			loose.append(recipe)
+	column.add_child(figure)
+	if not loose.is_empty():
+		var heading := Label.new()
+		heading.text = "TOOLBELT"
+		heading.add_theme_font_size_override("font_size", 13)
+		heading.add_theme_color_override("font_color", COL_ACCENT)
+		column.add_child(heading)
+		var row := HBoxContainer.new()
+		row.add_theme_constant_override("separation", FIGURE_GAP)
+		for recipe in loose:
+			row.add_child(_build_recipe_tile(recipe, true))
+		column.add_child(row)
+	return column
 
 
 # Recipe tiles: a drawn picture of each item with its name. Picking one shows its details below.
@@ -534,11 +571,11 @@ func _build_recipes(data: Dictionary) -> Control:
 	return grid
 
 
-func _build_recipe_tile(recipe: Dictionary) -> Control:
+func _build_recipe_tile(recipe: Dictionary, small: bool = false) -> Control:
 	var selected := bool(recipe.get("selected", false))
 	var lit := bool(recipe.get("enabled", false)) or selected
 	var tile := Button.new()
-	tile.custom_minimum_size = Vector2(88, 98)
+	tile.custom_minimum_size = Vector2(FIGURE_TILE, FIGURE_TILE) if small else Vector2(88, 98)
 	tile.focus_mode = Control.FOCUS_ALL
 	tile.tooltip_text = str(recipe.get("name", ""))
 	tile.clip_contents = true
@@ -559,7 +596,7 @@ func _build_recipe_tile(recipe: Dictionary) -> Control:
 	var icon := RecipeIcon.new()
 	icon.kind = str(recipe.get("icon", ""))
 	icon.tint = Color(str(recipe.get("tint", "6b4a3a")))
-	icon.custom_minimum_size = Vector2(56, 56)
+	icon.custom_minimum_size = Vector2(38, 38) if small else Vector2(56, 56)
 	icon.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 	icon.modulate = Color(1, 1, 1, 1) if lit else Color(1, 1, 1, 0.45)
 	box.add_child(icon)
@@ -568,7 +605,7 @@ func _build_recipe_tile(recipe: Dictionary) -> Control:
 	name_label.text = str(recipe.get("name", ""))
 	name_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	name_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	name_label.add_theme_font_size_override("font_size", 11)
+	name_label.add_theme_font_size_override("font_size", 9 if small else 11)
 	name_label.add_theme_color_override("font_color", COL_TEXT if lit else COL_MUTED)
 	name_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	box.add_child(name_label)
@@ -832,6 +869,12 @@ class RecipeIcon extends Control:
 				_box(Rect2(_pt(0.3, 0.36), Vector2(0.4, 0.5) * _sz), dark)
 				draw_circle(_pt(0.5, 0.6), 0.14 * _sz, Color("e8c060"))
 				_shape(_poly([[0.22, 0.38], [0.5, 0.12], [0.78, 0.38]]), tint)
+			"glove":
+				_shape(_poly([[0.28, 0.45], [0.72, 0.45], [0.74, 0.92], [0.26, 0.92]]), tint)
+				for x in [0.28, 0.42, 0.56]:
+					_box(Rect2(_pt(x, 0.12), Vector2(0.12, 0.36) * _sz), tint)
+				_shape(_poly([[0.72, 0.5], [0.9, 0.54], [0.9, 0.68], [0.72, 0.66]]), tint)
+				_box(Rect2(_pt(0.26, 0.8), Vector2(0.48, 0.12) * _sz), dark)
 			"pack":
 				draw_arc(_pt(0.5, 0.3), 0.18 * _sz, PI, TAU, 12, dark, 0.04 * _sz)
 				_box(Rect2(_pt(0.2, 0.3), Vector2(0.6, 0.62) * _sz), tint)
