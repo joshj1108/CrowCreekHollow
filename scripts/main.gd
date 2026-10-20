@@ -586,6 +586,10 @@ var coop_built := false
 var coop_tile := Vector2i(-1, -1)  # map tile of the coop's top-left corner, once built
 var placing := ""                  # "coop" while the player chooses where it goes
 var placement_ghost: Node2D        # the preview of where the coop would stand
+var hen_layer: Node2D              # the hens, drawn on their own so they can move without redrawing the farm
+var hen_pos: Array = []           # each hen's place in the coop, in tiles from its centre
+var hen_goal: Array = []          # where each hen is walking to
+var hen_wait: Array = []          # seconds before a hen picks its next spot
 var hens := 0
 var hens_fed_day := -1              # the last day the hens were fed
 var hen_unfed_days := 0
@@ -674,6 +678,7 @@ func _process(delta: float) -> void:
 		_refresh_panel()
 		return
 	clock += delta
+	_update_hens(delta)
 	current_hour = START_HOUR + clock / DAY_LENGTH * (DAY_END_HOUR - START_HOUR)
 
 	if current_hour >= DAY_END_HOUR:
@@ -758,8 +763,6 @@ func _draw() -> void:
 				var label_x := maxf(cell.position.x + 2, view_left + 6)
 				draw_string(ThemeDB.fallback_font, Vector2(label_x, cell.position.y + PX * 0.6), label, HORIZONTAL_ALIGNMENT_LEFT, -1, 11, Color(0.05, 0.03, 0.02))
 
-	if coop_built and coop_tile.x >= 0:
-		_draw_hens()
 	for y in INT_H:
 		for x in INT_W:
 			var kind: int = interior[y][x]
@@ -996,6 +999,10 @@ func _build_world() -> void:
 	placement_ghost.draw.connect(_draw_placement_ghost)
 	placement_ghost.visible = false
 	add_child(placement_ghost)
+	hen_layer = Node2D.new()
+	hen_layer.draw.connect(_draw_hen_layer)
+	hen_layer.visible = false
+	add_child(hen_layer)
 
 	player = Node2D.new()
 	player.set_script(load("res://scripts/player.gd"))
@@ -4676,14 +4683,37 @@ func _draw_coop_tile(cell: Rect2) -> void:
 	draw_rect(Rect2(cell.position, Vector2(cell.size.x, cell.size.y * 0.24)), Color("5a2e1c"))
 
 
-# A few hens inside the coop, one for each laying hen, up to the coop's size.
-func _draw_hens() -> void:
+# The hens are drawn on their own layer, from where each one currently stands in the coop.
+func _draw_hen_layer() -> void:
 	var center := Vector2(coop_tile.x + COOP_SIZE * 0.5, coop_tile.y + COOP_SIZE * 0.5) * PX
-	var spots := [Vector2(-0.42, -0.05), Vector2(0.38, -0.18), Vector2(-0.08, 0.42), Vector2(0.44, 0.34)]
-	for i in mini(hens, spots.size()):
-		var c: Vector2 = center + spots[i] * PX
-		draw_circle(c, PX * 0.16, Color("f4efe0"))
-		draw_circle(c + Vector2(PX * 0.14, 0.0), PX * 0.05, Color("d9a040"))
+	for i in hen_pos.size():
+		var c: Vector2 = center + hen_pos[i] * PX
+		hen_layer.draw_circle(c, PX * 0.16, Color("f4efe0"))
+		hen_layer.draw_circle(c + Vector2(PX * 0.14, 0.0), PX * 0.05, Color("d9a040"))
+
+
+# Each hen wanders inside the coop: it walks to a spot, pauses, then picks another.
+func _update_hens(delta: float) -> void:
+	hen_layer.visible = coop_built and coop_tile.x >= 0 and hens > 0
+	if not hen_layer.visible:
+		return
+	while hen_pos.size() < hens:
+		var start := Vector2(randf_range(-0.6, 0.6), randf_range(-0.6, 0.6))
+		hen_pos.append(start)
+		hen_goal.append(start)
+		hen_wait.append(randf_range(0.0, 2.0))
+	while hen_pos.size() > hens:
+		hen_pos.pop_back()
+		hen_goal.pop_back()
+		hen_wait.pop_back()
+	for i in hens:
+		hen_wait[i] = float(hen_wait[i]) - delta
+		var pos: Vector2 = hen_pos[i]
+		if float(hen_wait[i]) <= 0.0 and pos.distance_to(hen_goal[i]) < 0.02:
+			hen_goal[i] = Vector2(randf_range(-0.6, 0.6), randf_range(-0.6, 0.6))
+			hen_wait[i] = randf_range(1.0, 3.5)
+		hen_pos[i] = pos.move_toward(hen_goal[i], 0.45 * delta)
+	hen_layer.queue_redraw()
 
 
 func _draw_tree(cell: Rect2, pos: Vector2i) -> void:
