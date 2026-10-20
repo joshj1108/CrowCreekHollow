@@ -1,15 +1,33 @@
 class_name Weather
 extends CanvasLayer
 
-## Dreary weather over the farm: a grey wash, clouds drifting across the top, a darkened edge,
-## and steady rain. It is always rainy for now; weather that changes can come later.
+## The weather over the farm. Each morning the game picks a kind of weather for the season, and this
+## overlay shows it: a grey wash, drifting clouds, a darkened edge, and rain, drizzle, or snow.
+## Indoors and in the cave the overlay is hidden.
 
-const DROPS := 170
+const MAX_DROPS := 320
 const CLOUDS := 6
 const WIND := 30.0          # sideways drift of the rain, in pixels per second
 
+# How each kind of weather looks. Rain speeds are already halved from the first version.
+const PRESETS := {
+	"sunny":    {"wash": 0.0,  "edge": 0.0,  "clouds": 0.05, "drops": 0,   "speed": Vector2(0, 0),     "snow": false},
+	"cloudy":   {"wash": 0.12, "edge": 0.22, "clouds": 0.22, "drops": 0,   "speed": Vector2(0, 0),     "snow": false},
+	"fog":      {"wash": 0.42, "edge": 0.55, "clouds": 0.10, "drops": 0,   "speed": Vector2(0, 0),     "snow": false},
+	"drizzle":  {"wash": 0.20, "edge": 0.30, "clouds": 0.25, "drops": 90,  "speed": Vector2(120, 170), "snow": false},
+	"rain":     {"wash": 0.30, "edge": 0.50, "clouds": 0.30, "drops": 170, "speed": Vector2(210, 310), "snow": false},
+	"downpour": {"wash": 0.40, "edge": 0.65, "clouds": 0.36, "drops": 300, "speed": Vector2(300, 420), "snow": false},
+	"snow":     {"wash": 0.22, "edge": 0.35, "clouds": 0.25, "drops": 140, "speed": Vector2(40, 70),   "snow": true},
+}
+
+var kind := ""
 var drops: Array = []       # each: {"p": Vector2, "v": falling speed}
 var clouds: Array = []      # each: {"c": Vector2, "r": radius, "v": drift speed}
+var active_drops := 0
+var snowing := false
+var cloud_alpha := 0.25
+var wash_rect: ColorRect
+var edge_rect: TextureRect
 var rain_canvas: Control
 var rng := RandomNumberGenerator.new()
 
@@ -20,10 +38,10 @@ func _ready() -> void:
 	rng.randomize()
 	var size := get_viewport().get_visible_rect().size
 
-	var wash := ColorRect.new()
-	wash.color = Color(0.3, 0.34, 0.4, 0.2)
-	_fill(wash)
-	add_child(wash)
+	wash_rect = ColorRect.new()
+	wash_rect.color = Color(0.3, 0.34, 0.4, 1.0)
+	_fill(wash_rect)
+	add_child(wash_rect)
 
 	var grad := Gradient.new()
 	grad.colors = PackedColorArray([Color(0, 0, 0, 0), Color(0.03, 0.04, 0.06, 0.6)])
@@ -32,26 +50,43 @@ func _ready() -> void:
 	tex.fill = GradientTexture2D.FILL_RADIAL
 	tex.fill_from = Vector2(0.5, 0.5)
 	tex.fill_to = Vector2(1.0, 0.5)
-	var edge := TextureRect.new()
-	edge.texture = tex
-	edge.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-	edge.stretch_mode = TextureRect.STRETCH_SCALE
-	_fill(edge)
-	add_child(edge)
+	edge_rect = TextureRect.new()
+	edge_rect.texture = tex
+	edge_rect.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	edge_rect.stretch_mode = TextureRect.STRETCH_SCALE
+	_fill(edge_rect)
+	add_child(edge_rect)
 
 	rain_canvas = Control.new()
 	_fill(rain_canvas)
 	rain_canvas.draw.connect(_draw_weather)
 	add_child(rain_canvas)
 
-	for i in DROPS:
-		drops.append({"p": Vector2(rng.randf() * size.x, rng.randf() * size.y), "v": rng.randf_range(210.0, 310.0)})
+	for i in MAX_DROPS:
+		drops.append({"p": Vector2(rng.randf() * size.x, rng.randf() * size.y), "v": 250.0})
 	for i in CLOUDS:
 		clouds.append({
 			"c": Vector2(rng.randf() * size.x, rng.randf_range(-40.0, 120.0)),
 			"r": rng.randf_range(160.0, 280.0),
 			"v": rng.randf_range(8.0, 18.0),
 		})
+	set_condition("rain")
+
+
+# Shows one kind of weather. Speeds are reset so rain, drizzle, and snow fall at their own pace.
+func set_condition(new_kind: String) -> void:
+	if not PRESETS.has(new_kind):
+		new_kind = "cloudy"
+	kind = new_kind
+	var p: Dictionary = PRESETS[kind]
+	wash_rect.color = Color(0.3, 0.34, 0.4, float(p["wash"]))
+	edge_rect.modulate.a = float(p["edge"])
+	cloud_alpha = float(p["clouds"])
+	active_drops = int(p["drops"])
+	snowing = bool(p["snow"])
+	var speed: Vector2 = p["speed"]
+	for d in drops:
+		d["v"] = rng.randf_range(speed.x, speed.y)
 
 
 func _fill(control: Control) -> void:
@@ -61,7 +96,8 @@ func _fill(control: Control) -> void:
 
 func _process(delta: float) -> void:
 	var size := get_viewport().get_visible_rect().size
-	for d in drops:
+	for i in active_drops:
+		var d: Dictionary = drops[i]
 		var p: Vector2 = d["p"]
 		p.y += float(d["v"]) * delta
 		p.x += WIND * delta
@@ -85,10 +121,13 @@ func _draw_weather() -> void:
 	for c in clouds:
 		var centre: Vector2 = c["c"]
 		var r := float(c["r"])
-		var cloud := Color(0.18, 0.2, 0.24, 0.2)
+		var cloud := Color(0.18, 0.2, 0.24, cloud_alpha)
 		for i in 4:
 			var offset := Vector2((i - 1.5) * r * 0.45, sin(float(i)) * r * 0.12)
 			rain_canvas.draw_circle(centre + offset, r * 0.55, cloud)
-	for d in drops:
-		var p: Vector2 = d["p"]
-		rain_canvas.draw_line(p, p + Vector2(WIND * 0.05, 14.0), Color(0.75, 0.82, 0.9, 0.35), 1.0)
+	for i in active_drops:
+		var p: Vector2 = drops[i]["p"]
+		if snowing:
+			rain_canvas.draw_circle(p, 2.2, Color(0.95, 0.97, 1.0, 0.7))
+		else:
+			rain_canvas.draw_line(p, p + Vector2(WIND * 0.05, 14.0), Color(0.75, 0.82, 0.9, 0.35), 1.0)

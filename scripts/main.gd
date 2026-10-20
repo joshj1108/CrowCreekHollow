@@ -110,6 +110,29 @@ const TOOL_TIERS := {
 
 # Time runs from 06:00 to 03:00 the next morning (hours 6 to 27).
 const DAY_LENGTH := 240.0   # real seconds for a full day
+
+# The calendar follows the Pacific Northwest, and the first day is October 1st. Months have their usual lengths.
+const MONTH_NAMES := ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"]
+const MONTH_DAYS := [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
+const START_MONTH := 9   # October, as an index into MONTH_NAMES
+const START_DAY_OF_MONTH := 1
+# Weather is rolled each morning. Summer is mostly sunny, winter is wet, and snow is rare.
+const WEATHER_WEIGHTS := {
+	"Winter": {"sunny": 3, "cloudy": 10, "drizzle": 14, "rain": 12, "downpour": 6, "fog": 5, "snow": 2},
+	"Spring": {"sunny": 12, "cloudy": 12, "drizzle": 14, "rain": 10, "downpour": 3, "fog": 3, "snow": 0},
+	"Summer": {"sunny": 26, "cloudy": 10, "drizzle": 2, "rain": 2, "downpour": 0, "fog": 2, "snow": 0},
+	"Autumn": {"sunny": 6, "cloudy": 14, "drizzle": 16, "rain": 13, "downpour": 6, "fog": 5, "snow": 0},
+}
+const WEATHER_NAMES := {
+	"sunny": "Sunny", "cloudy": "Overcast", "fog": "Foggy", "drizzle": "Drizzle",
+	"rain": "Rain", "downpour": "Downpour", "snow": "Snow",
+}
+# The light over the farm for each kind of weather. Dark and grey weather is cooler.
+const WEATHER_LIGHT := {
+	"sunny": Color(1.0, 0.99, 0.96), "cloudy": Color(0.92, 0.94, 0.97), "fog": Color(0.9, 0.92, 0.94),
+	"drizzle": Color(0.88, 0.91, 0.95), "rain": Color(0.88, 0.91, 0.95), "downpour": Color(0.8, 0.84, 0.9),
+	"snow": Color(0.93, 0.95, 1.0),
+}
 const START_HOUR := 6.0
 const DAY_END_HOUR := 27.0  # 03:00. Missing bed by then means collapsing.
 const DUSK_HOUR := 19.0
@@ -574,7 +597,6 @@ const TILE_COLORS := {
 
 const BUSH_COLOR := Color("3d6b2a")
 
-const DAY_TINT := Color(0.88, 0.91, 0.95)   # a cool, grey light for the dreary weather
 const NIGHT_TINT := Color("3a3f6e")
 
 enum Zone { HOMESTEAD, VILLAGE, ASHFORD, WILDS, TOWN }
@@ -606,6 +628,7 @@ var plot_two_open := false
 var clock := 0.0
 var current_hour := START_HOUR
 var day := 1
+var weather_kind := ""       # today's weather, rolled each morning: see WEATHER_WEIGHTS
 var skill_xp := {"Farming": 0, "Bushcrafting": 0, "Carpentry": 0, "Cleaning": 0, "Fishing": 0, "Cooking": 0, "Combat": 0, "Forestry": 0, "Mining": 0, "Smithing": 0}
 var inventory := {"seeds": STARTING_SEEDS, "pumpkin_seeds": 0, "crops": 0, "fish": 0, "meals": 0, "smoked": 0, "dried": 0, "canned": 0, "fermented": 0}
 var materials := {"wood": 0, "fiber": 0, "resin": 0, "hardwood": 0, "stone": 0, "copper_ore": 0, "iron_ore": 0, "copper_bar": 0, "iron_bar": 0, "arrows": 0, "bolts": 0}
@@ -793,13 +816,16 @@ func _on_title_start(mode: String, slot: int) -> void:
 	_build_tip_panel()
 	weather = WeatherScript.new()
 	add_child(weather)
+	if weather_kind == "":
+		_roll_weather()
+	_apply_weather()
 	_build_action_bar()
 	_update_shadow_tile()
 	if loaded:
 		_restore_saved_state()
 		_show_message("Welcome back. Day %d." % day)
 	else:
-		_show_message("A new season begins. Day 1.")
+		_show_message("A new season begins. Day 1. %s." % WEATHER_NAMES.get(weather_kind, "Overcast"))
 	world_started = true
 	title_menu.queue_free()
 	title_menu = null
@@ -840,7 +866,7 @@ func _process(delta: float) -> void:
 	var darkness := smoothstep(DUSK_HOUR, DUSK_HOUR + 2.0, current_hour)
 	darkness *= 1.0 - _night_relief()
 	darkness = clampf(darkness + _low_sanity_boost(), 0.0, 1.0)
-	canvas_modulate.color = DAY_TINT.lerp(NIGHT_TINT, darkness)
+	canvas_modulate.color = _light_tint().lerp(NIGHT_TINT, darkness)
 	_update_lantern(darkness)
 	_update_sanity(darkness, delta)
 
@@ -859,8 +885,11 @@ func _process(delta: float) -> void:
 	fish_layer.visible = zone == Zone.HOMESTEAD
 
 	var minutes := int(fmod(current_hour, 1.0) * 60.0)
-	hud_label.text = "Day %d   %02d:%02d   Sanity %d/%d   Coins %d   HP %d/%d" % [
-		day, int(fmod(current_hour, 24.0)), minutes, int(sanity), _sanity_max(), money, hp, max_hp()]
+	var date := _calendar_date(day)
+	hud_label.text = "Day %d, %s %d (%s)   %s   %02d:%02d   Sanity %d/%d   Coins %d   HP %d/%d" % [
+		day, MONTH_NAMES[date["month"]].substr(0, 3), date["day"], _season_of(date["month"]),
+		WEATHER_NAMES.get(weather_kind, "Overcast"), int(fmod(current_hour, 24.0)), minutes,
+		int(sanity), _sanity_max(), money, hp, max_hp()]
 
 	_handle_keys()
 
@@ -4555,6 +4584,53 @@ func _chore_list() -> Array:
 	return chores
 
 
+# The date for a day number. Day 1 is October 1st, and each month uses its real length.
+func _calendar_date(day_number: int) -> Dictionary:
+	var m := START_MONTH
+	var dom := START_DAY_OF_MONTH + day_number - 1
+	while dom > MONTH_DAYS[m]:
+		dom -= MONTH_DAYS[m]
+		m = (m + 1) % 12
+	return {"month": m, "day": dom}
+
+
+# Pacific Northwest seasons: winter is December to February, spring is March to May, summer is June to August.
+func _season_of(month: int) -> String:
+	if month == 11 or month <= 1:
+		return "Winter"
+	if month <= 4:
+		return "Spring"
+	if month <= 7:
+		return "Summer"
+	return "Autumn"
+
+
+# Picks the day's weather from the season's weights.
+func _roll_weather() -> void:
+	var season := _season_of(_calendar_date(day)["month"])
+	var weights: Dictionary = WEATHER_WEIGHTS[season]
+	var total := 0
+	for k in weights:
+		total += int(weights[k])
+	var pick := randi() % total
+	for k in weights:
+		pick -= int(weights[k])
+		if pick < 0:
+			weather_kind = str(k)
+			break
+	_apply_weather()
+
+
+# Shows the day's weather and lights the farm to match.
+func _apply_weather() -> void:
+	if weather != null:
+		weather.set_condition(weather_kind)
+
+
+func _light_tint() -> Color:
+	return WEATHER_LIGHT.get(weather_kind, WEATHER_LIGHT["cloudy"])
+
+
 # Runs at the end of each day, before the crops grow: the house wears, hens lay or leave,
 # and rain or a fox may strike. Returns a note for the morning message.
 func _settle_day() -> String:
@@ -4826,11 +4902,13 @@ func _end_day(base: String, leave_house: bool = true) -> void:
 	for pos in crops.keys():
 		crops[pos]["stage"] = min(crops[pos]["stage"] + 1, MAX_STAGE)
 	day += 1
+	_roll_weather()
 	clock = 0.0
 	tonight_shadow = Vector2i(-1, -1)
 	_respawn_brush()
 	_update_shadow_tile()
-	_show_message("%s Your crops grew overnight.%s%s" % [base, spoil_note, upkeep_note])
+	_show_message("%s Your crops grew overnight.%s%s The morning is %s." % [
+		base, spoil_note, upkeep_note, str(WEATHER_NAMES.get(weather_kind, "overcast")).to_lower()])
 	_save_game()
 	queue_redraw()
 
@@ -4921,6 +4999,7 @@ func _set_bounds() -> void:
 func _save_game() -> void:
 	var data := {
 		"day": day,
+		"weather_kind": weather_kind,
 		"skill_xp": skill_xp,
 		"inventory": inventory,
 		"materials": materials,
@@ -4991,6 +5070,7 @@ func _load_game() -> bool:
 	var data: Dictionary = parsed
 
 	day = int(data.get("day", 1))
+	weather_kind = str(data.get("weather_kind", ""))
 	_merge_ints(skill_xp, data.get("skill_xp"))
 	_merge_ints(inventory, data.get("inventory"))
 	_merge_ints(materials, data.get("materials"))
