@@ -592,6 +592,12 @@ var title_menu: TitleMenu
 const SETTINGS_PATH := "user://hallowvale_settings.json"
 var music_on := true
 var music_player: AudioStreamPlayer
+var sfx_on := true                  # sound effects, remembered with the music setting
+var sfx_streams: Dictionary = {}    # sound name -> AudioStreamOggVorbis
+var sfx_players: Array = []         # a small pool, so overlapping sounds can play together
+var sfx_next := 0
+var bleat_timer := 20.0             # seconds until a goat next bleats
+var thunder_day := -1               # the day thunder last rolled, so it rolls once a morning
 var weather: CanvasLayer  # the dreary weather overlay
 var tips_seen: Dictionary = {}     # tip id -> true, once it has been shown
 var tip_queue: Array = []          # tip ids waiting their turn
@@ -790,6 +796,7 @@ func _ready() -> void:
 	_setup_input()
 	_load_settings()
 	_start_music()
+	_load_sfx()
 	_build_map()
 	_generate_world()
 	_find_pond_edges()
@@ -818,6 +825,13 @@ func _game_rows() -> Array:
 			"enabled": true,
 		},
 		{
+			"name": "Sound effects",
+			"value": "On" if sfx_on else "Off",
+			"button": "Turn off" if sfx_on else "Turn on",
+			"action": "toggle_sfx",
+			"enabled": true,
+		},
+		{
 			"name": "Unstick me",
 			"value": "Cancels any placement and moves you to the path outside the farmhouse door",
 			"button": "Unstick",
@@ -840,12 +854,13 @@ func _load_settings() -> void:
 		var parsed: Variant = JSON.parse_string(FileAccess.get_file_as_string(SETTINGS_PATH))
 		if typeof(parsed) == TYPE_DICTIONARY:
 			music_on = bool(parsed.get("music", true))
+			sfx_on = bool(parsed.get("sfx", true))
 
 
 func _save_settings() -> void:
 	var file := FileAccess.open(SETTINGS_PATH, FileAccess.WRITE)
 	if file != null:
-		file.store_string(JSON.stringify({"music": music_on}))
+		file.store_string(JSON.stringify({"music": music_on, "sfx": sfx_on}))
 
 
 func _start_music() -> void:
@@ -869,6 +884,41 @@ func _toggle_music() -> void:
 	music_on = not music_on
 	_save_settings()
 	_apply_music()
+
+
+# Sound effects are short clips in audio/sfx. A small pool plays them, so several can overlap.
+const SFX_NAMES := ["step", "plant", "harvest", "water", "eat", "drink", "repair", "coin", "panel", "tick",
+	"chime", "bleat", "buzz", "thunder", "door", "strike", "gather"]
+
+
+func _load_sfx() -> void:
+	for name in SFX_NAMES:
+		var path := "res://audio/sfx/%s.ogg" % name
+		if ResourceLoader.exists(path):
+			sfx_streams[name] = load(path)
+	for i in 8:
+		var p := AudioStreamPlayer.new()
+		p.volume_db = -4.0
+		add_child(p)
+		sfx_players.append(p)
+
+
+# Plays one sound effect. A little random pitch keeps repeated sounds from sounding identical.
+func play_sfx(name: String, jitter: float = 0.0) -> void:
+	if not sfx_on or not sfx_streams.has(name) or sfx_players.is_empty():
+		return
+	var p: AudioStreamPlayer = sfx_players[sfx_next]
+	sfx_next = (sfx_next + 1) % sfx_players.size()
+	p.stream = sfx_streams[name]
+	p.pitch_scale = 1.0 + randf_range(-jitter, jitter)
+	p.play()
+
+
+func _toggle_sfx() -> void:
+	sfx_on = not sfx_on
+	_save_settings()
+	if sfx_on:
+		play_sfx("tick")
 
 
 # Reloads the scene, which resets everything and shows the start screen. The chosen slot carries over.
@@ -1395,6 +1445,7 @@ func _build_world() -> void:
 	player.set_script(load("res://scripts/player.gd"))
 	player.position = _tile_center(BORDER_X + INNER_W / 2, BORDER_Y + INNER_H / 2)
 	player.is_blocked = _is_blocked_world
+	player.stepped.connect(func() -> void: play_sfx("step", 0.08))
 	add_child(player)
 	_build_lantern_light()
 
@@ -1727,10 +1778,13 @@ func _toggle_tab(tab: String) -> void:
 		_close_panel()
 	else:
 		open_tab = tab
+		play_sfx("panel")
 		_refresh_panel()
 
 
 func _close_panel() -> void:
+	if open_tab != "":
+		play_sfx("tick")
 	open_tab = ""
 	action_bar.hide_panel()
 
@@ -1783,6 +1837,9 @@ func _on_panel_action(action_id: String) -> void:
 		return
 	if action_id == "toggle_music":
 		_toggle_music()
+		return
+	if action_id == "toggle_sfx":
+		_toggle_sfx()
 		return
 	if action_id == "quit_title":
 		_quit_to_title()
@@ -2524,6 +2581,7 @@ func _interact() -> void:
 
 
 func _plant(tile: Vector2i) -> void:
+	play_sfx("plant", 0.06)
 	var kind := selected_seed
 	if kind == "pumpkin" and _level("Farming") < PUMPKIN_LEVEL:
 		kind = "turnip"
@@ -2539,6 +2597,7 @@ func _plant(tile: Vector2i) -> void:
 
 
 func _harvest(tile: Vector2i) -> void:
+	play_sfx("harvest", 0.06)
 	var kind: String = crops[tile]["kind"]
 	var yield_count: int = CROPS[kind]["yield"]
 	# Harvests go to the pack only. Storing in the cellar is up to the player.
@@ -2563,6 +2622,7 @@ func _read_desk() -> void:
 
 
 func _gather(tile: Vector2i) -> void:
+	play_sfx("gather", 0.05)
 	brush.erase(tile)
 	materials["wood"] += 1
 	materials["fiber"] += 1
@@ -2736,6 +2796,7 @@ func _eat_meal() -> void:
 	_change_sanity(MEAL_SANITY)
 	hp = mini(max_hp(), hp + HEAL_MEAL)
 	food = minf(100.0, food + MEAL_FOOD)
+	play_sfx("eat", 0.05)
 	_show_message("You eat a warm meal. Your mind steadies. Food %d/100, HP %d/%d" % [food, hp, max_hp()])
 
 
@@ -2751,6 +2812,7 @@ func _repair_well() -> void:
 	materials["wood"] -= WELL_REPAIR["wood"]
 	materials["fiber"] -= WELL_REPAIR["fiber"]
 	well_repaired = true
+	play_sfx("repair")
 	well_water = WELL_CAPACITY
 	stats["pump"] = 1
 	_grant_xp("Carpentry", XP_REPAIR)
@@ -2783,6 +2845,7 @@ func _drink_well() -> void:
 		_show_message("You're not thirsty.")
 		return
 	water = minf(100.0, water + DRINK_WELL)
+	play_sfx("drink", 0.05)
 	stats["drank"] += 1
 	_show_message("Cold water from the pump. Water %d/100" % water)
 
@@ -2796,6 +2859,7 @@ func _water_crop(tile: Vector2i) -> void:
 		_show_message("The tank is dry. It refills each morning.")
 		return
 	well_water -= 1.0
+	play_sfx("water", 0.08)
 	crops[tile]["watered_day"] = day
 	stats["watered"] += 1
 	_show_message("Watered. The tank has %d left." % int(well_water))
@@ -2865,6 +2929,7 @@ func _eat_crop() -> void:
 		return
 	inventory["crops"] -= 1
 	food = minf(100.0, food + CROP_FOOD)
+	play_sfx("eat", 0.05)
 	_show_message("You eat a raw crop. Food %d/100" % food)
 
 
@@ -2873,6 +2938,7 @@ func _drink_pond() -> void:
 		_show_message("You're not thirsty.")
 		return
 	water = minf(100.0, water + POND_WATER)
+	play_sfx("drink", 0.05)
 	stats["drank"] += 1
 	_show_message("You drink from the pond. Cold and muddy, but it helps. Water %d/100" % water)
 
@@ -3340,6 +3406,7 @@ func _storage_label(tile: int) -> String:
 # --- Forestry and tools -------------------------------------------------------
 
 func _chop(tile: Vector2i) -> void:
+	play_sfx("strike", 0.08)
 	if int(tool_tier["hatchet"]) < 1:
 		_show_message("You need a hatchet. Craft a crude one from the Craft panel.")
 		return
@@ -3415,6 +3482,7 @@ func _fill_rocks() -> void:
 
 
 func _mine(tile: Vector2i) -> void:
+	play_sfx("strike", 0.08)
 	rocks.erase(tile)
 	var pick := int(tool_tier["pick"])
 	var amount := 2 if pick >= 1 else 1
@@ -4728,6 +4796,7 @@ func _can_repair() -> bool:
 
 
 func _repair_house() -> void:
+	play_sfx("repair")
 	if not _can_repair():
 		_show_message("Not enough wood and fiber, or Carpentry is too low for this repair.")
 		return
@@ -4927,6 +4996,7 @@ func _can_buy_hen() -> bool:
 
 
 func _buy_hen() -> void:
+	play_sfx("coin")
 	if not _can_buy_hen():
 		_show_message("A hen costs %d coins, and the coop holds %d." % [HEN_PRICE, COOP_HENS_MAX])
 		return
@@ -4941,6 +5011,7 @@ func _can_buy_goat() -> bool:
 
 
 func _buy_goat() -> void:
+	play_sfx("coin")
 	if not barn_built:
 		_show_message("Build the barn first.")
 		return
@@ -5094,6 +5165,11 @@ func _roll_weather() -> void:
 func _apply_weather() -> void:
 	if weather != null:
 		weather.set_condition(weather_kind)
+	# A downpour sometimes brings thunder, once a morning.
+	if weather_kind == "downpour" and thunder_day != day:
+		thunder_day = day
+		if randf() < 0.6:
+			play_sfx("thunder")
 
 
 func _light_tint() -> Color:
@@ -5297,6 +5373,7 @@ func _check_achievements() -> void:
 			continue
 		if _stat_value(a["stat"]) >= a["goal"]:
 			achievements_done[a["id"]] = true
+			play_sfx("chime")
 			_grant_reward(a["reward"])
 			_show_message("Achievement: %s. Reward: %s" % [a["title"], _reward_text(a["reward"])])
 
@@ -5451,6 +5528,7 @@ func _check_doors() -> void:
 
 
 func _enter_house() -> void:
+	play_sfx("door", 0.05)
 	inside = true
 	player.position = _tile_center(INT_ORIGIN.x + 6, INT_ORIGIN.y + 6)
 	_set_bounds()
@@ -5458,6 +5536,7 @@ func _enter_house() -> void:
 
 
 func _leave_house() -> void:
+	play_sfx("door", 0.05)
 	inside = false
 	player.position = _tile_center(BORDER_X + HOUSE_DOOR_IX, BORDER_Y + HOUSE_DOOR_IY + 1)
 	_set_bounds()
@@ -6157,6 +6236,10 @@ func _update_goats(delta: float) -> void:
 	goat_layer.visible = barn_built and barn_tile.x >= 0 and goats > 0
 	if not goat_layer.visible:
 		return
+	bleat_timer -= delta
+	if bleat_timer <= 0.0:
+		play_sfx("bleat", 0.1)
+		bleat_timer = randf_range(18.0, 45.0)
 	while goat_pos.size() < goats:
 		var start := Vector2(randf_range(-1.1, 1.1), randf_range(-0.2, 0.6))
 		goat_pos.append(start)

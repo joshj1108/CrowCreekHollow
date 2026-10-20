@@ -18,6 +18,8 @@ var is_blocked := Callable()  # Callable(Vector2 world_pos) -> bool
 var paused := false           # set while the Settings menu is open
 var walk_t := 0.0             # advances while walking, drives the stride
 var moving := false
+var step_timer := 0.0         # seconds walked since the last footstep
+signal stepped                # emitted once per footstep, so the game can play a sound
 
 const SKIN := Color("f2c9a0")
 const SKIN_SHADE := Color("d9a27c")
@@ -44,6 +46,10 @@ func _process(delta: float) -> void:
 	moving = dir != Vector2.ZERO
 	if moving:
 		walk_t += delta * 11.0
+		step_timer += delta
+		if step_timer >= 0.32:
+			step_timer = 0.0
+			stepped.emit()
 		if absf(dir.x) > absf(dir.y):
 			facing = Vector2(signf(dir.x), 0)
 		else:
