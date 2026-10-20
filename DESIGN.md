@@ -32,7 +32,7 @@ A top-down farming game with heavy psychological horror, built in Godot 4.7.
 - Messages sit at the bottom-left of the screen, clear of the farm's labels. HUD and message text have a dark outline so they read over any ground.
 - Trees are drawn as canopies of overlapping crowns, so the outer forest reads as dense woodland. Trees block movement.
 - Storage labels (Cellar, Smoke, Furnace) stay on screen when their building is at the view's edge.
-- The farm's buildings hug the house: the cellar against the west wall, and a workshop against the east wall with the furnace above the smokehouse. The cooler is inside the house.
+- The farm's buildings hug the house: the cellar against the west wall. The workshop is a walled building against the east wall, 5 by 4, with a door on its south side. Its furnace and smokehouse stand inside. The cooler is inside the house.
 
 - A small **Menu** button sits in the bottom-right corner for mouse players. It reopens the last section you had open (Skills at first) and hides while the menu is open. Sections open from their keys, and the menu lists them on the left, so each section is one key or click away. The full-screen menu shows over a dimmed game: the sections down the left (with their keys), the current section's options on the right, and the controls and a Back button in the footer.
 - Quests are collapsed to a line: the title, and Done or the progress count. A Details button opens the story, reward, and progress bar, and Hide closes it. The current chapter starts open.
@@ -397,7 +397,7 @@ Keeping the homestead running is the daily work. Each part is at base level for 
 
 - **Chores:** each day has a short list, shown at the top of the House panel. Tidy the house and mend a board every day. Feed the hens too, once you have any. Each chore left undone adds 1 wear overnight. A night with every chore done brings back 5 sanity.
 - **Wear:** the house wears by 1 each night, plus 1 for each chore left undone, up to 10. Mending a board takes 2 off, a tidy takes 1, and a repair takes 3. At wear 6 or more, rain ruins a random crop overnight. The Upkeep section of the House panel shows it.
-- **Coop:** built from the House panel for 6 wood, 4 fiber, and Carpentry 2. It sits behind the house, not on the farm grid.
+- **Coop:** built from the House panel for 6 wood, 4 fiber, and Carpentry 2. Building it starts placement: a green or red preview follows the tile you face, and Space places the 2 by 2 coop on open grass. It can't go on plots, crops, rocks, brush, or fishing spots, and not on you. B cancels. The Move button lets you relocate it for free. Stand beside the coop, facing it, and press Space to feed the hens. Hens are drawn inside.
 - **Hens:** 12 coins each, up to four. Feed them once a day from your crops (1 crop per hen). Each fed hen lays an egg overnight, which goes into your pack as a meal, as far as there is room. Two unfed days in a row and a hen wanders off.
 - **Predators:** at wear 4 or more, a fox can get into the coop on a given night and take a hen.
 - **Third plot:** opens at Farming 4 once the house is Patched. It sits between the two paths, south of the first plot.

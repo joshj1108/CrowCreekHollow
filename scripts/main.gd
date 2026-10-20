@@ -161,8 +161,12 @@ const COOLER_COST := {"wood": 4, "fiber": 4, "coins": 40, "level": 2}
 # The workshop, with the furnace and smokehouse, stands against the east wall.
 # The cooler lives inside the house. House walls are at x 26 to 32 and y 3 to 8 (local to the farm).
 const CELLAR_IX := Vector2i(25, 5)
-const SMOKEHOUSE_IX := Vector2i(32, 4)
-const FURNACE_IX := Vector2i(32, 3)
+const SMOKEHOUSE_IX := Vector2i(35, 3)
+const FURNACE_IX := Vector2i(33, 3)
+# The workshop is a walled building against the house's east wall, with a door on its south side.
+const WORKSHOP_RECT := Rect2i(32, 2, 5, 4)   # farm-local: outer walls, x 32 to 36, y 2 to 5
+const WORKSHOP_DOOR := Vector2i(34, 5)
+const COOP_SIZE := 2                         # the coop is a 2 by 2 building on open grass
 const COOLER_INTERIOR := Vector2i(11, 6)   # in the hall, inside the house
 const FURNACE_COST := {"wood": 6, "stone": 4, "coins": 80, "level": 4}
 const SMELT_LEVEL := {"copper": 1, "iron": 4}
@@ -490,9 +494,9 @@ const NIGHT_EVENTS := [
 	{"message": "The field is quiet tonight. Too quiet.", "shadow": "none", "sanity": -3},
 ]
 
-enum Tile { TREE, GRASS, SOIL, PATH, WATER, HOUSE, DOOR, FLOOR, WALL, EXIT, BED, STATION, DESK, FALLOW, STALL, CELLAR, COOLER, GATE, SMOKEHOUSE, FURNACE, PORTAL, CAMP, CAVE_MOUTH, CAVE_EXIT, ORE_COPPER, ORE_IRON }
+enum Tile { TREE, GRASS, SOIL, PATH, WATER, HOUSE, DOOR, FLOOR, WALL, EXIT, BED, STATION, DESK, FALLOW, STALL, CELLAR, COOLER, GATE, SMOKEHOUSE, FURNACE, PORTAL, CAMP, CAVE_MOUTH, CAVE_EXIT, ORE_COPPER, ORE_IRON, COOP }
 
-const BLOCKING := [Tile.TREE, Tile.WATER, Tile.HOUSE, Tile.WALL, Tile.BED, Tile.STATION, Tile.DESK, Tile.STALL, Tile.CELLAR, Tile.COOLER, Tile.SMOKEHOUSE, Tile.FURNACE, Tile.CAMP, Tile.ORE_COPPER, Tile.ORE_IRON]
+const BLOCKING := [Tile.TREE, Tile.WATER, Tile.HOUSE, Tile.WALL, Tile.BED, Tile.STATION, Tile.DESK, Tile.STALL, Tile.CELLAR, Tile.COOLER, Tile.SMOKEHOUSE, Tile.FURNACE, Tile.CAMP, Tile.ORE_COPPER, Tile.ORE_IRON, Tile.COOP]
 
 const TILE_COLORS := {
 	Tile.TREE: Color("2f4f2f"),
@@ -520,6 +524,7 @@ const TILE_COLORS := {
 	Tile.CAVE_EXIT: Color("a08050"),
 	Tile.ORE_COPPER: Color("b87333"),
 	Tile.ORE_IRON: Color("8a8f99"),
+	Tile.COOP: Color("8a6a3a"),
 	Tile.CAMP: Color("d07a30"),
 }
 
@@ -578,6 +583,9 @@ var mend_day := 0                   # the day the mend count applies to
 var mends_today := 0
 var wear := 0                       # house upkeep, 0 to WEAR_MAX
 var coop_built := false
+var coop_tile := Vector2i(-1, -1)  # map tile of the coop's top-left corner, once built
+var placing := ""                  # "coop" while the player chooses where it goes
+var placement_ghost: Node2D        # the preview of where the coop would stand
 var hens := 0
 var hens_fed_day := -1              # the last day the hens were fed
 var hen_unfed_days := 0
@@ -658,6 +666,9 @@ func _process(delta: float) -> void:
 			queue_redraw()
 	# Settings pauses the day: the clock stops, foes stand still, and only the menu responds.
 	player.paused = open_tab == "Settings"
+	placement_ghost.visible = placing != ""
+	if placing != "":
+		placement_ghost.queue_redraw()
 	if player.paused:
 		_handle_keys()
 		_refresh_panel()
@@ -734,6 +745,10 @@ func _draw() -> void:
 			var cell := _tile_rect(Vector2i(x, y))
 			if tile == Tile.TREE:
 				_draw_tree(cell, Vector2i(x, y))
+			elif tile == Tile.WALL:
+				_draw_wall(cell, Vector2i(x, y))
+			elif tile == Tile.COOP:
+				_draw_coop_tile(cell)
 			else:
 				draw_rect(cell, TILE_COLORS[tile])
 			if tile == Tile.CELLAR or tile == Tile.COOLER or tile == Tile.SMOKEHOUSE or tile == Tile.FURNACE:
@@ -743,6 +758,8 @@ func _draw() -> void:
 				var label_x := maxf(cell.position.x + 2, view_left + 6)
 				draw_string(ThemeDB.fallback_font, Vector2(label_x, cell.position.y + PX * 0.6), label, HORIZONTAL_ALIGNMENT_LEFT, -1, 11, Color(0.05, 0.03, 0.02))
 
+	if coop_built and coop_tile.x >= 0:
+		_draw_hens()
 	for y in INT_H:
 		for x in INT_W:
 			var kind: int = interior[y][x]
@@ -892,11 +909,32 @@ func _build_map() -> void:
 func _apply_storage_tiles() -> void:
 	if cellar_built:
 		map[CELLAR_IX.y + BORDER_Y][CELLAR_IX.x + BORDER_X] = Tile.CELLAR
+	if smokehouse_built or furnace_built:
+		_stamp_workshop()
 	if smokehouse_built:
 		map[SMOKEHOUSE_IX.y + BORDER_Y][SMOKEHOUSE_IX.x + BORDER_X] = Tile.SMOKEHOUSE
 	if furnace_built:
 		map[FURNACE_IX.y + BORDER_Y][FURNACE_IX.x + BORDER_X] = Tile.FURNACE
+	if coop_built and coop_tile.x >= 0:
+		_stamp_coop(coop_tile, Tile.COOP)
 	queue_redraw()
+
+
+# Walls around the workshop footprint, with a floor inside and a door on the south side.
+func _stamp_workshop() -> void:
+	var r := WORKSHOP_RECT
+	for y in range(r.position.y, r.end.y):
+		for x in range(r.position.x, r.end.x):
+			var edge := x == r.position.x or x == r.end.x - 1 or y == r.position.y or y == r.end.y - 1
+			map[y + BORDER_Y][x + BORDER_X] = Tile.WALL if edge else Tile.FLOOR
+	map[WORKSHOP_DOOR.y + BORDER_Y][WORKSHOP_DOOR.x + BORDER_X] = Tile.DOOR
+
+
+# Sets a coop's 2 by 2 footprint, from its top-left map tile, to the given tile.
+func _stamp_coop(top: Vector2i, kind: int) -> void:
+	for dy in COOP_SIZE:
+		for dx in COOP_SIZE:
+			map[top.y + dy][top.x + dx] = kind
 
 
 func _build_interior() -> void:
@@ -953,6 +991,10 @@ func _build_world() -> void:
 	fish_layer = Node2D.new()
 	fish_layer.draw.connect(_draw_fish_spots)
 	add_child(fish_layer)
+	placement_ghost = Node2D.new()
+	placement_ghost.draw.connect(_draw_placement_ghost)
+	placement_ghost.visible = false
+	add_child(placement_ghost)
 
 	player = Node2D.new()
 	player.set_script(load("res://scripts/player.gd"))
@@ -1112,9 +1154,13 @@ func _handle_keys() -> void:
 	# B closes whatever panel is open.
 	if Input.is_action_just_pressed("close_panel") and open_tab != "":
 		_close_panel()
+	if Input.is_action_just_pressed("close_panel") and placing != "":
+		_cancel_placement()
 
 
 func _toggle_tab(tab: String) -> void:
+	if placing != "":
+		_cancel_placement()
 	if open_tab == tab:
 		_close_panel()
 	else:
@@ -1158,7 +1204,7 @@ func _on_panel_action(action_id: String) -> void:
 	if action_id == "build_furnace":
 		_build_furnace()
 		return
-	if action_id == "build_coop":
+	if action_id == "build_coop" or action_id == "move_coop":
 		_build_coop()
 		return
 	if action_id == "buy_hen":
@@ -1579,6 +1625,13 @@ func _house_rows() -> Array:
 			"action": "feed_hens",
 			"enabled": _can_feed_hens(),
 		})
+		rows.append({
+			"name": "Coop",
+			"value": "standing, %d by %d" % [COOP_SIZE, COOP_SIZE],
+			"button": "Move",
+			"action": "move_coop",
+			"enabled": true,
+		})
 		rows.append({"note": "A fed hen lays an egg each morning, kept as a meal. Two unfed days in a row and a hen wanders off."})
 	rows.append({"section": "Rest"})
 	rows.append({"note": "The bed is in the bedroom. Walk there and press Space from 18:00 to save and end the day. If you aren't in bed by 03:00 you collapse, and your sanity limit drops permanently."})
@@ -1706,6 +1759,9 @@ func _check_unlocks() -> void:
 
 
 func _interact() -> void:
+	if placing != "":
+		_confirm_placement()
+		return
 	if in_cave:
 		_interact_cave()
 		return
@@ -1754,6 +1810,9 @@ func _interact() -> void:
 		return
 	if kind == Tile.STALL:
 		_open_stall()
+		return
+	if kind == Tile.COOP:
+		_feed_hens()
 		return
 	if kind == Tile.CELLAR:
 		_toggle_tab("Cellar")
@@ -3857,14 +3916,69 @@ func _can_build_coop() -> bool:
 
 
 func _build_coop() -> void:
-	if not _can_build_coop():
+	_start_placement("coop")
+
+
+# Choosing a spot: the ghost follows the tile you face. Space places it, B cancels.
+func _start_placement(kind: String) -> void:
+	if inside or in_cave or _in_village():
+		_show_message("You can only build on the farm.")
+		return
+	if not coop_built and not _can_build_coop():
 		_show_message("A coop needs %d wood, %d fiber, and Carpentry %d." % [int(COOP_COST["wood"]), int(COOP_COST["fiber"]), int(COOP_COST["level"])])
 		return
-	materials["wood"] -= int(COOP_COST["wood"])
-	materials["fiber"] -= int(COOP_COST["fiber"])
-	coop_built = true
-	_grant_xp("Carpentry", XP_REPAIR)
-	_show_message("You raise a coop behind the house. +%d Carpentry XP" % XP_REPAIR)
+	placing = kind
+	_close_panel()
+	_show_message("Face the ground where the coop should go and press Space. It needs %d by %d open grass. B cancels." % [COOP_SIZE, COOP_SIZE])
+
+
+func _cancel_placement() -> void:
+	placing = ""
+	_show_message("You leave the spot empty for now.")
+
+
+func _confirm_placement() -> void:
+	var top := _tile_in_front()
+	if not _coop_spot_ok(top):
+		_show_message("There isn't room for the coop there. It needs open grass, clear of crops, rocks, and brush.")
+		return
+	if not coop_built:
+		materials["wood"] -= int(COOP_COST["wood"])
+		materials["fiber"] -= int(COOP_COST["fiber"])
+		coop_built = true
+		_grant_xp("Carpentry", XP_REPAIR)
+	elif coop_tile.x >= 0:
+		# Moving is free: the old footprint goes back to grass first.
+		_stamp_coop(coop_tile, Tile.GRASS)
+	coop_tile = top
+	placing = ""
+	_apply_storage_tiles()
+	_show_message("The coop stands here now. Stand beside it, facing it, and press Space to feed the hens.")
+
+
+# A spot fits when all of its tiles are open grass, clear of crops, rocks, brush, fishing spots, and you.
+func _coop_spot_ok(top: Vector2i) -> bool:
+	var here := _player_tile()
+	for dy in COOP_SIZE:
+		for dx in COOP_SIZE:
+			var t := top + Vector2i(dx, dy)
+			if t.x < BORDER_X or t.y < BORDER_Y or t.x >= BORDER_X + INNER_W or t.y >= BORDER_Y + INNER_H:
+				return false
+			if map[t.y][t.x] != Tile.GRASS:
+				return false
+			if crops.has(t) or rocks.has(t) or brush.has(t) or fish_spots.has(t) or t == here:
+				return false
+	return true
+
+
+func _draw_placement_ghost() -> void:
+	if placing == "":
+		return
+	var top := _tile_in_front()
+	var fill := Color(0.2, 0.9, 0.25, 0.5) if _coop_spot_ok(top) else Color(0.95, 0.2, 0.15, 0.5)
+	for dy in COOP_SIZE:
+		for dx in COOP_SIZE:
+			placement_ghost.draw_rect(_tile_rect(top + Vector2i(dx, dy)), fill)
 
 
 func _can_buy_hen() -> bool:
@@ -3877,6 +3991,7 @@ func _buy_hen() -> void:
 		return
 	money -= HEN_PRICE
 	hens += 1
+	queue_redraw()
 	_show_message("A hen settles into the coop.")
 
 
@@ -4318,6 +4433,8 @@ func _save_game() -> void:
 		"cave_mined_day": cave_mined_day,
 		"wear": wear,
 		"coop_built": coop_built,
+		"coop_x": coop_tile.x,
+		"coop_y": coop_tile.y,
 		"hens": hens,
 		"hens_fed_day": hens_fed_day,
 		"hen_unfed_days": hen_unfed_days,
@@ -4406,6 +4523,7 @@ func _load_game() -> bool:
 	cave_mined_day = int(data.get("cave_mined_day", -1))
 	wear = int(data.get("wear", 0))
 	coop_built = bool(data.get("coop_built", false))
+	coop_tile = Vector2i(int(data.get("coop_x", -1)), int(data.get("coop_y", -1)))
 	hens = int(data.get("hens", 0))
 	hens_fed_day = int(data.get("hens_fed_day", -1))
 	hen_unfed_days = int(data.get("hen_unfed_days", 0))
@@ -4535,6 +4653,35 @@ func _world_tile(ix: int, iy: int) -> Vector2i:
 
 func _tile_center(wx: int, wy: int) -> Vector2:
 	return Vector2(wx * PX + PX * 0.5, wy * PX + PX * 0.5)
+
+
+# Timber walls with plank lines. The top row of the workshop is its roof.
+func _draw_wall(cell: Rect2, pos: Vector2i) -> void:
+	var roof := pos.y == WORKSHOP_RECT.position.y + BORDER_Y
+	draw_rect(cell, Color("4f3622") if roof else Color("6b4c33"))
+	if not roof:
+		for i in range(1, 4):
+			var y := cell.position.y + cell.size.y * float(i) / 4.0
+			draw_line(Vector2(cell.position.x, y), Vector2(cell.end.x, y), Color(0.16, 0.11, 0.07, 0.55), 1.0)
+	else:
+		draw_line(Vector2(cell.position.x, cell.end.y - 2), Vector2(cell.end.x, cell.end.y - 2), Color(0.1, 0.07, 0.05, 0.7), 2.0)
+
+
+# A coop tile: a wooden floor with a sloped roof band along the top.
+func _draw_coop_tile(cell: Rect2) -> void:
+	draw_rect(cell, Color("7a5230"))
+	draw_rect(cell.grow(-5), Color("94693d"))
+	draw_rect(Rect2(cell.position, Vector2(cell.size.x, cell.size.y * 0.24)), Color("5a2e1c"))
+
+
+# A few hens inside the coop, one for each laying hen, up to the coop's size.
+func _draw_hens() -> void:
+	var center := Vector2(coop_tile.x + COOP_SIZE * 0.5, coop_tile.y + COOP_SIZE * 0.5) * PX
+	var spots := [Vector2(-0.42, -0.05), Vector2(0.38, -0.18), Vector2(-0.08, 0.42), Vector2(0.44, 0.34)]
+	for i in mini(hens, spots.size()):
+		var c: Vector2 = center + spots[i] * PX
+		draw_circle(c, PX * 0.16, Color("f4efe0"))
+		draw_circle(c + Vector2(PX * 0.14, 0.0), PX * 0.05, Color("d9a040"))
 
 
 func _draw_tree(cell: Rect2, pos: Vector2i) -> void:
