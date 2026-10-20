@@ -376,6 +376,8 @@ Levels are first-pass values and will be tuned in playtesting. Ammunition arrows
 ## Deferred
 
 - The story beyond the survival chapters: mystery and horror escalation.
+- **A cave system for combat.** A place to fight, and Combat's main source of XP. It would also restore the Combat training that the hollows and stalkers used to give.
+- **Wolves that threaten livestock.** Needs livestock first. Wolves would come after the cave system, so there's a reason to guard the animals.
 
 ## Open decisions
 
