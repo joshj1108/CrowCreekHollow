@@ -16,6 +16,7 @@ const TABS := [
 	{"name": "Craft", "key": "C"},
 	{"name": "Quests", "key": "Q"},
 	{"name": "House", "key": "H"},
+	{"name": "Buildings", "key": "U"},
 	{"name": "Achievements", "key": "J"},
 	{"name": "Settings", "key": "Esc"},
 ]
@@ -27,6 +28,7 @@ const SUBTITLES := {
 	"Craft": "Make, cook, and build",
 	"Quests": "What the farm asks of you",
 	"House": "Keep it standing",
+	"Buildings": "The workshop, the coop, and the barn",
 	"Achievements": "Things you have done",
 	"Settings": "Time is paused while you are here",
 }

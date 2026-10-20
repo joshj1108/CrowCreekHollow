@@ -14,7 +14,7 @@ A top-down farming game with heavy psychological horror, built in Godot 4.7.
 - Move: WASD or arrow keys
 - Use, plant, harvest, gather, sleep, tidy, cleanse, cook, talk, swing, or read: Space / Enter (face the tile)
 - Walk into the farmhouse door to go inside. Walk onto the exit mat to leave.
-- Menu sections (key, or click in the menu list): Skills K, Inventory I, Gear G, Craft C, Quests Q, House H, Achievements J, Settings
+- Menu sections (key, or click in the menu list): Skills K, Inventory I, Gear G, Craft C, Quests Q, House H, Buildings U, Achievements J, Settings
 - Esc opens Settings, or closes it if it's already open
 - Farming and gathering pause while a panel is open
 
@@ -32,7 +32,7 @@ A top-down farming game with heavy psychological horror, built in Godot 4.7.
 - Messages sit at the bottom-left of the screen, clear of the farm's labels. HUD and message text have a dark outline so they read over any ground.
 - Trees are drawn as canopies of overlapping crowns, so the outer forest reads as dense woodland. Trees block movement.
 - Storage labels (Cellar, Smoke, Furnace) stay on screen when their building is at the view's edge.
-- The farm's buildings hug the house: the cellar against the west wall. The workshop is a walled building against the east wall, 5 by 4, with a door on its south side. Its furnace and smokehouse stand inside. The cooler is inside the house.
+- The farm's buildings hug the house: the cellar against the west wall. The workshop is a walled building against the east wall, 5 by 4, with a door on its south side. Its furnace and smokehouse stand inside. The cooler is inside the house. The workshop, coop, and barn are built and moved from the Buildings menu (U).
 
 - A small **Menu** button sits in the bottom-right corner for mouse players. It reopens the last section you had open (Skills at first) and hides while the menu is open. Sections open from their keys, and the menu lists them on the left, so each section is one key or click away. The full-screen menu shows over a dimmed game: the sections down the left (with their keys), the current section's options on the right, and the controls and a Back button in the footer.
 - Quests are collapsed to a line: the title, and Done or the progress count. A Details button opens the story, reward, and progress bar, and Hide closes it. The current chapter starts open.
@@ -115,7 +115,7 @@ Saves from before this change reset chapter progress. Stat-based achievements re
 - **Fish spoil:** any fish still in the pack at the end of the day are lost. The end-of-day message says how many. Storing fish in the cooler is the only way to keep them overnight.
 - **Full pack:** storage is always manual. A full pack stops harvesting and fishing with a message. Store fish in the cooler, or sell or cook them, to keep going.
 
-**Smokehouse** (built from the House panel, beside the house): 60 coins, 5 wood, 3 fiber, Carpentry 3. Stand beside it, facing it, and press Space to preserve food. Preserved goods live in the pack and never spoil overnight.
+**Smokehouse** (built from the Buildings menu, in the workshop): 60 coins, 5 wood, 3 fiber, Carpentry 3. Stand beside it, facing it, and press Space to preserve food. Preserved goods live in the pack and never spoil overnight.
 
 | Method | Input | Needs | Makes | Sells | Skill |
 |---|---|---|---|---|---|
@@ -212,7 +212,7 @@ Achievements track stats and never reset. Each pays a small reward. Earning all 
 ## Saving
 
 - The game saves **only** when you sleep in bed or collapse at 03:00.
-- Saved: day, skill XP, inventory (including meals), coins, bag upgrades, root cellar, cooler, and smokehouse (built, and what they hold), materials, stats, story chapters done, achievements done, selected seed, lantern tier, house stage, house wear, coop and hens, tidy/mend/cleanse days, sanity and sanity penalty, crops (with kind), brush piles, **player position**, whether you were **inside the house**, and the **open panel**.
+- Saved: day, skill XP, inventory (including meals), coins, bag upgrades, root cellar, cooler, and smokehouse (built, and what they hold), materials, stats, story chapters done, achievements done, selected seed, lantern tier, house stage, house wear, coop and hens, barn (built, and where it stands), tidy/mend/cleanse days, sanity and sanity penalty, crops (with kind), brush piles, **player position**, whether you were **inside the house**, and the **open panel**.
 - Quitting mid-day loses that day's progress since the last save. Position and panel are saved at the same moment, so they reflect the last sleep or collapse.
 
 ## The world: the portal, the road, and the wilds
@@ -321,7 +321,7 @@ A campsite lets you stay out in the wider land overnight. It is built, not place
 
 ## Smithing and metal gear
 
-- **Furnace** (built from the House panel beside the house): 80 coins, 6 wood, 4 stone, Carpentry 4. Stand beside it, facing it, and press Space to smelt.
+- **Furnace** (built from the Buildings menu, in the workshop): 80 coins, 6 wood, 4 stone, Carpentry 4. Stand beside it, facing it, and press Space to smelt.
 - **Smelting** turns one ore and one wood into a bar. Copper needs Smithing 1. Iron needs Smithing 4. Smelting gives 10 Smithing XP.
 - **Metal gear replaces bark slot by slot.** Each bark piece has a metal version in the same slot:
 
@@ -363,7 +363,7 @@ Each gathering skill has its own tool. The tool's material sets what it can brea
 | Bushcrafting (existing) | Brush piles, thickets | None | Wood, fiber, resin |
 | Forestry | Trees on the farm edge and in the Lowmere wood | Hatchet | Wood, hardwood |
 | Mining | Rocks on the farm, the Ashford quarry | Pick | Stone; copper and iron ore |
-| Smithing | A furnace built from the House panel | None | Bars from ore and wood; metal gear and tools from bars |
+| Smithing | A furnace built from the Buildings menu | None | Bars from ore and wood; metal gear and tools from bars |
 
 **Hardwood is a key material.** It goes into tool handles and smithing fuel, and into the weapons and gear below.
 
@@ -397,8 +397,10 @@ Keeping the homestead running is the daily work. Each part is at base level for 
 
 - **Chores:** each day has a short list, shown at the top of the House panel. Tidy the house and mend a board every day. Feed the hens too, once you have any. Each chore left undone adds 1 wear overnight. A night with every chore done brings back 5 sanity.
 - **Wear:** the house wears by 1 each night, plus 1 for each chore left undone, up to 10. Mending a board takes 2 off, a tidy takes 1, and a repair takes 3. At wear 6 or more, rain ruins a random crop overnight. The Upkeep section of the House panel shows it.
-- **Coop:** built from the House panel for 6 wood, 4 fiber, and Carpentry 2. Building it starts placement: a green or red preview follows the tile you face, and Space places the 2 by 2 coop on open grass. It can't go on plots, crops, rocks, brush, or fishing spots, and not on you. B cancels. The Move button lets you relocate it for free. Stand beside the coop, facing it, and press Space to feed the hens. The hens wander inside it, walking to a spot, pausing, and walking on.
-- **Hens:** 12 coins each, up to four. Feed them once a day from your crops (1 crop per hen). Each fed hen lays an egg overnight, which goes into your pack as a meal, as far as there is room. Two unfed days in a row and a hen wanders off.
+- **Buildings menu (U):** the workshop, the coop, and the barn are built and moved from here, not from the House panel. Each one is placed the same way: building it starts placement, a green or red preview follows the tile you face, and Space places it on open grass. A spot can't cover plots, crops, rocks, brush, fishing spots, or you. B cancels. The Move button relocates a standing building for free. A building that was paid for but never placed (older saves) shows Place instead.
+- **Coop:** 6 wood, 4 fiber, and Carpentry 2. A 2 by 2 building. Stand beside the coop, facing it, and press Space to feed the hens. The hens wander inside it, walking to a spot, pausing, and walking on.
+- **Barn:** 10 wood, 6 fiber, and Carpentry 4, and it needs the coop built first. A 3 by 2 building of red boards. With the barn standing, the coop holds 8 hens instead of 4.
+- **Hens:** 12 coins each, up to four (eight with a barn). Feed them once a day from your crops (1 crop per hen). Each fed hen lays an egg overnight, which goes into your pack as a meal, as far as there is room. Two unfed days in a row and a hen wanders off.
 - **Predators:** at wear 4 or more, a fox can get into the coop on a given night and take a hen.
 - **Third plot:** opens at Farming 4 once the house is Patched. It sits between the two paths, south of the first plot.
 

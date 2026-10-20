@@ -460,6 +460,9 @@ const WEAR_FOX := 4           # at this wear, a fox can get into the coop
 # Livestock: hens in a coop behind the house. A fed hen lays an egg each morning.
 const COOP_COST := {"wood": 6, "fiber": 4, "level": 2}
 const COOP_HENS_MAX := 4
+const BARN_SIZE := Vector2i(3, 2)          # the barn is 3 wide and 2 deep, on open grass
+const BARN_COST := {"wood": 10, "fiber": 6, "level": 4}
+const BARN_EXTRA_HENS := 4                 # with a barn, the coop holds this many more hens
 const HEN_PRICE := 12
 const HEN_FEED_CROPS := 1
 const HEN_LEAVE_DAYS := 2     # unfed this many days in a row, and a hen wanders off
@@ -494,9 +497,9 @@ const NIGHT_EVENTS := [
 	{"message": "The field is quiet tonight. Too quiet.", "shadow": "none", "sanity": -3},
 ]
 
-enum Tile { TREE, GRASS, SOIL, PATH, WATER, HOUSE, DOOR, FLOOR, WALL, EXIT, BED, STATION, DESK, FALLOW, STALL, CELLAR, COOLER, GATE, SMOKEHOUSE, FURNACE, PORTAL, CAMP, CAVE_MOUTH, CAVE_EXIT, ORE_COPPER, ORE_IRON, COOP }
+enum Tile { TREE, GRASS, SOIL, PATH, WATER, HOUSE, DOOR, FLOOR, WALL, EXIT, BED, STATION, DESK, FALLOW, STALL, CELLAR, COOLER, GATE, SMOKEHOUSE, FURNACE, PORTAL, CAMP, CAVE_MOUTH, CAVE_EXIT, ORE_COPPER, ORE_IRON, COOP, BARN }
 
-const BLOCKING := [Tile.TREE, Tile.WATER, Tile.HOUSE, Tile.WALL, Tile.BED, Tile.STATION, Tile.DESK, Tile.STALL, Tile.CELLAR, Tile.COOLER, Tile.SMOKEHOUSE, Tile.FURNACE, Tile.CAMP, Tile.ORE_COPPER, Tile.ORE_IRON, Tile.COOP]
+const BLOCKING := [Tile.TREE, Tile.WATER, Tile.HOUSE, Tile.WALL, Tile.BED, Tile.STATION, Tile.DESK, Tile.STALL, Tile.CELLAR, Tile.COOLER, Tile.SMOKEHOUSE, Tile.FURNACE, Tile.CAMP, Tile.ORE_COPPER, Tile.ORE_IRON, Tile.COOP, Tile.BARN]
 
 const TILE_COLORS := {
 	Tile.TREE: Color("2f4f2f"),
@@ -525,6 +528,7 @@ const TILE_COLORS := {
 	Tile.ORE_COPPER: Color("b87333"),
 	Tile.ORE_IRON: Color("8a8f99"),
 	Tile.COOP: Color("8a6a3a"),
+	Tile.BARN: Color("7a2e26"),
 	Tile.CAMP: Color("d07a30"),
 }
 
@@ -584,8 +588,10 @@ var mends_today := 0
 var wear := 0                       # house upkeep, 0 to WEAR_MAX
 var coop_built := false
 var coop_tile := Vector2i(-1, -1)  # map tile of the coop's top-left corner, once built
-var placing := ""                  # "coop" while the player chooses where it goes
-var placement_ghost: Node2D        # the preview of where the coop would stand
+var barn_built := false
+var barn_tile := Vector2i(-1, -1)  # map tile of the barn's top-left corner, once built
+var placing := ""                  # "coop" or "barn" while the player chooses where it goes
+var placement_ghost: Node2D        # the preview of where the building would stand
 var hen_layer: Node2D              # the hens, drawn on their own so they can move without redrawing the farm
 var hen_pos: Array = []           # each hen's place in the coop, in tiles from its centre
 var hen_goal: Array = []          # where each hen is walking to
@@ -754,6 +760,8 @@ func _draw() -> void:
 				_draw_wall(cell, Vector2i(x, y))
 			elif tile == Tile.COOP:
 				_draw_coop_tile(cell)
+			elif tile == Tile.BARN:
+				_draw_barn_tile(cell)
 			else:
 				draw_rect(cell, TILE_COLORS[tile])
 			if tile == Tile.CELLAR or tile == Tile.COOLER or tile == Tile.SMOKEHOUSE or tile == Tile.FURNACE:
@@ -847,6 +855,7 @@ func _setup_input() -> void:
 	_ensure_action("quests", [KEY_Q], [JOY_BUTTON_RIGHT_SHOULDER])
 	_ensure_action("achievements", [KEY_J], [JOY_BUTTON_RIGHT_STICK])
 	_ensure_action("house", [KEY_H], [JOY_BUTTON_BACK])
+	_ensure_action("buildings", [KEY_U], [])
 	_ensure_action("settings", [KEY_ESCAPE], [JOY_BUTTON_START])
 	_ensure_action("close_panel", [], [JOY_BUTTON_B])
 
@@ -919,7 +928,9 @@ func _apply_storage_tiles() -> void:
 	if furnace_built:
 		map[FURNACE_IX.y + BORDER_Y][FURNACE_IX.x + BORDER_X] = Tile.FURNACE
 	if coop_built and coop_tile.x >= 0:
-		_stamp_coop(coop_tile, Tile.COOP)
+		_stamp_footprint(coop_tile, _footprint("coop"), Tile.COOP)
+	if barn_built and barn_tile.x >= 0:
+		_stamp_footprint(barn_tile, _footprint("barn"), Tile.BARN)
 	queue_redraw()
 
 
@@ -934,10 +945,10 @@ func _stamp_workshop() -> void:
 	map[WORKSHOP_DOOR.y + BORDER_Y][WORKSHOP_DOOR.x + BORDER_X] = Tile.PATH
 
 
-# Sets a coop's 2 by 2 footprint, from its top-left map tile, to the given tile.
-func _stamp_coop(top: Vector2i, kind: int) -> void:
-	for dy in COOP_SIZE:
-		for dx in COOP_SIZE:
+# Sets a building's footprint, from its top-left map tile, to the given tile.
+func _stamp_footprint(top: Vector2i, size: Vector2i, kind: int) -> void:
+	for dy in size.y:
+		for dx in size.x:
 			map[top.y + dy][top.x + dx] = kind
 
 
@@ -1156,6 +1167,8 @@ func _handle_keys() -> void:
 		_toggle_tab("Achievements")
 	if Input.is_action_just_pressed("house"):
 		_toggle_tab("House")
+	if Input.is_action_just_pressed("buildings"):
+		_toggle_tab("Buildings")
 	# Esc or Start opens Settings, or closes it if it's already open.
 	if Input.is_action_just_pressed("settings"):
 		_toggle_tab("Settings")
@@ -1214,6 +1227,9 @@ func _on_panel_action(action_id: String) -> void:
 		return
 	if action_id == "build_coop" or action_id == "move_coop":
 		_build_coop()
+		return
+	if action_id == "build_barn" or action_id == "move_barn":
+		_build_barn()
 		return
 	if action_id == "buy_hen":
 		_buy_hen()
@@ -1316,6 +1332,8 @@ func _refresh_panel() -> void:
 			rows = _furnace_rows()
 		"House":
 			rows = _house_rows()
+		"Buildings":
+			rows = _buildings_rows()
 		"Settings":
 			rows = _settings_rows()
 	action_bar.show_panel(open_tab, rows)
@@ -1611,17 +1629,11 @@ func _house_rows() -> Array:
 	rows.append({"note": "The house wears a little each night. Mending, tidying, and repairs bring it down. At %d wear, rain ruins a crop overnight. At %d, a fox can get into the coop. A third plot opens at Farming %d once the house is Patched." % [WEAR_RUNDOWN, WEAR_FOX, PLOT_THREE_LEVEL]})
 	rows.append({"section": "Livestock"})
 	if not coop_built:
-		rows.append({
-			"name": "Coop",
-			"value": "%d wood, %d fiber, Carpentry %d" % [int(COOP_COST["wood"]), int(COOP_COST["fiber"]), int(COOP_COST["level"])],
-			"button": "Build",
-			"action": "build_coop",
-			"enabled": _can_build_coop(),
-		})
+		rows.append({"note": "Hens live in a coop. Build one from the Buildings menu, U."})
 	else:
 		rows.append({
 			"name": "Hens",
-			"value": "%d of %d, %d coins each" % [hens, COOP_HENS_MAX, HEN_PRICE],
+			"value": "%d of %d, %d coins each" % [hens, _hens_max(), HEN_PRICE],
 			"button": "Buy hen",
 			"action": "buy_hen",
 			"enabled": _can_buy_hen(),
@@ -1632,14 +1644,6 @@ func _house_rows() -> Array:
 			"button": "Feed",
 			"action": "feed_hens",
 			"enabled": _can_feed_hens(),
-		})
-		var placed := coop_tile.x >= 0
-		rows.append({
-			"name": "Coop",
-			"value": ("standing, %d by %d" % [COOP_SIZE, COOP_SIZE]) if placed else "paid for, not yet placed",
-			"button": "Move" if placed else "Place",
-			"action": "move_coop",
-			"enabled": true,
 		})
 		rows.append({"note": "A fed hen lays an egg each morning, kept as a meal. Two unfed days in a row and a hen wanders off."})
 	rows.append({"section": "Rest"})
@@ -1673,6 +1677,20 @@ func _house_rows() -> Array:
 			"action": "build_cooler",
 			"enabled": _can_afford(COOLER_COST),
 		})
+	rows.append({"note": "The workshop, the coop, and the barn are in the Buildings menu (U)."})
+	rows.append({"section": "Features"})
+	for feature in HOUSE_FEATURES:
+		var unlocked: bool = house_stage >= feature["stage"]
+		rows.append({
+			"name": feature["text"],
+			"value": "unlocked" if unlocked else "at %s" % STAGE_NAMES[feature["stage"]],
+		})
+	return rows
+
+
+# The Buildings menu: the workshop, the coop, and the barn. Each one is placed on open grass.
+func _buildings_rows() -> Array:
+	var rows: Array = [{"section": "Workshop"}]
 	if smokehouse_built:
 		rows.append({"name": "Smokehouse", "value": "built. Stand beside it, facing it, and press Space to preserve food."})
 	else:
@@ -1693,14 +1711,46 @@ func _house_rows() -> Array:
 			"action": "build_furnace",
 			"enabled": _can_afford(FURNACE_COST),
 		})
-	rows.append({"section": "Features"})
-	for feature in HOUSE_FEATURES:
-		var unlocked: bool = house_stage >= feature["stage"]
+	rows.append({"note": "The workshop is a walled building against the east wall of the house. Its door is on the south side."})
+	rows.append({"section": "Coop"})
+	if not coop_built:
 		rows.append({
-			"name": feature["text"],
-			"value": "unlocked" if unlocked else "at %s" % STAGE_NAMES[feature["stage"]],
+			"name": "Build a coop (holds %d hens)" % COOP_HENS_MAX,
+			"value": _price_text(COOP_COST),
+			"button": "Build",
+			"action": "build_coop",
+			"enabled": _can_build("coop"),
 		})
+	else:
+		rows.append(_placed_row("Coop", "coop", coop_tile, "move_coop"))
+	rows.append({"section": "Barn"})
+	if not barn_built:
+		rows.append({
+			"name": "Build a barn (the coop holds %d more hens)" % BARN_EXTRA_HENS,
+			"value": _price_text(BARN_COST),
+			"button": "Build",
+			"action": "build_barn",
+			"enabled": _can_build("barn"),
+		})
+		if not coop_built:
+			rows.append({"note": "The barn needs the coop built first."})
+	else:
+		rows.append(_placed_row("Barn", "barn", barn_tile, "move_barn"))
+		rows.append({"note": "With the barn standing, the coop holds %d hens." % _hens_max()})
 	return rows
+
+
+# A standing building can be moved; one that is paid for but not yet placed gets a Place button.
+func _placed_row(label: String, kind: String, tile: Vector2i, action: String) -> Dictionary:
+	var placed := tile.x >= 0
+	var size := _footprint(kind)
+	return {
+		"name": label,
+		"value": ("standing, %d by %d" % [size.x, size.y]) if placed else "paid for, not yet placed",
+		"button": "Move" if placed else "Place",
+		"action": action,
+		"enabled": true,
+	}
 
 
 func _settings_rows() -> Array:
@@ -1715,6 +1765,7 @@ func _settings_rows() -> Array:
 		{"name": "Quests", "value": "Q"},
 		{"name": "Achievements", "value": "J"},
 		{"name": "House", "value": "H"},
+		{"name": "Buildings", "value": "U"},
 		{"name": "Settings", "value": "Esc"},
 		{"section": "Gamepad"},
 		{"name": "Move", "value": "Left stick or D-pad"},
@@ -1822,6 +1873,9 @@ func _interact() -> void:
 		return
 	if kind == Tile.COOP:
 		_feed_hens()
+		return
+	if kind == Tile.BARN:
+		_show_message("The barn stands here. With it, the coop holds %d hens." % _hens_max())
 		return
 	if kind == Tile.CELLAR:
 		_toggle_tab("Cellar")
@@ -3919,13 +3973,39 @@ func _mend_house() -> void:
 	_show_message("You mend a board. +%d Carpentry XP" % XP_MEND)
 
 
-func _can_build_coop() -> bool:
-	return not coop_built and _level("Carpentry") >= int(COOP_COST["level"]) \
-		and int(materials["wood"]) >= int(COOP_COST["wood"]) and int(materials["fiber"]) >= int(COOP_COST["fiber"])
+func _footprint(kind: String) -> Vector2i:
+	if kind == "barn":
+		return BARN_SIZE
+	return Vector2i(COOP_SIZE, COOP_SIZE)
+
+
+func _is_built(kind: String) -> bool:
+	return barn_built if kind == "barn" else coop_built
+
+
+func _placed_tile(kind: String) -> Vector2i:
+	return barn_tile if kind == "barn" else coop_tile
+
+
+func _build_cost(kind: String) -> Dictionary:
+	return BARN_COST if kind == "barn" else COOP_COST
+
+
+# A building can be built once, from the Buildings menu. A barn needs the coop first.
+func _can_build(kind: String) -> bool:
+	if _is_built(kind) or (kind == "barn" and not coop_built):
+		return false
+	var cost := _build_cost(kind)
+	return _level("Carpentry") >= int(cost["level"]) \
+		and int(materials["wood"]) >= int(cost["wood"]) and int(materials["fiber"]) >= int(cost["fiber"])
 
 
 func _build_coop() -> void:
 	_start_placement("coop")
+
+
+func _build_barn() -> void:
+	_start_placement("barn")
 
 
 # Choosing a spot: the ghost follows the tile you face. Space places it, B cancels.
@@ -3933,12 +4013,16 @@ func _start_placement(kind: String) -> void:
 	if inside or in_cave or _in_village():
 		_show_message("You can only build on the farm.")
 		return
-	if not coop_built and not _can_build_coop():
-		_show_message("A coop needs %d wood, %d fiber, and Carpentry %d." % [int(COOP_COST["wood"]), int(COOP_COST["fiber"]), int(COOP_COST["level"])])
+	if not _is_built(kind) and not _can_build(kind):
+		if kind == "barn" and not coop_built:
+			_show_message("A barn needs the coop built first.")
+		else:
+			_show_message("A %s needs %s." % [kind, _price_text(_build_cost(kind))])
 		return
 	placing = kind
 	_close_panel()
-	_show_message("Face the ground where the coop should go and press Space. It needs %d by %d open grass. B cancels." % [COOP_SIZE, COOP_SIZE])
+	var size := _footprint(kind)
+	_show_message("Face the ground where the %s should go and press Space. It needs %d by %d open grass. B cancels." % [kind, size.x, size.y])
 
 
 func _cancel_placement() -> void:
@@ -3947,29 +4031,41 @@ func _cancel_placement() -> void:
 
 
 func _confirm_placement() -> void:
+	var kind := placing
 	var top := _tile_in_front()
-	if not _coop_spot_ok(top):
-		_show_message("There isn't room for the coop there. It needs open grass, clear of crops, rocks, and brush.")
+	var size := _footprint(kind)
+	if not _spot_ok(top, size):
+		_show_message("There isn't room for the %s there. It needs open grass, clear of crops, rocks, and brush." % kind)
 		return
-	if not coop_built:
-		materials["wood"] -= int(COOP_COST["wood"])
-		materials["fiber"] -= int(COOP_COST["fiber"])
-		coop_built = true
+	if not _is_built(kind):
+		var cost := _build_cost(kind)
+		materials["wood"] -= int(cost["wood"])
+		materials["fiber"] -= int(cost["fiber"])
+		if kind == "barn":
+			barn_built = true
+		else:
+			coop_built = true
 		_grant_xp("Carpentry", XP_REPAIR)
-	elif coop_tile.x >= 0:
+	elif _placed_tile(kind).x >= 0:
 		# Moving is free: the old footprint goes back to grass first.
-		_stamp_coop(coop_tile, Tile.GRASS)
-	coop_tile = top
+		_stamp_footprint(_placed_tile(kind), size, Tile.GRASS)
+	if kind == "barn":
+		barn_tile = top
+	else:
+		coop_tile = top
 	placing = ""
 	_apply_storage_tiles()
-	_show_message("The coop stands here now. Stand beside it, facing it, and press Space to feed the hens.")
+	if kind == "barn":
+		_show_message("The barn stands here now. With it, the coop holds %d hens." % _hens_max())
+	else:
+		_show_message("The coop stands here now. Stand beside it, facing it, and press Space to feed the hens.")
 
 
 # A spot fits when all of its tiles are open grass, clear of crops, rocks, brush, fishing spots, and you.
-func _coop_spot_ok(top: Vector2i) -> bool:
+func _spot_ok(top: Vector2i, size: Vector2i) -> bool:
 	var here := _player_tile()
-	for dy in COOP_SIZE:
-		for dx in COOP_SIZE:
+	for dy in size.y:
+		for dx in size.x:
 			var t := top + Vector2i(dx, dy)
 			if t.x < BORDER_X or t.y < BORDER_Y or t.x >= BORDER_X + INNER_W or t.y >= BORDER_Y + INNER_H:
 				return false
@@ -3984,19 +4080,25 @@ func _draw_placement_ghost() -> void:
 	if placing == "":
 		return
 	var top := _tile_in_front()
-	var fill := Color(0.2, 0.9, 0.25, 0.5) if _coop_spot_ok(top) else Color(0.95, 0.2, 0.15, 0.5)
-	for dy in COOP_SIZE:
-		for dx in COOP_SIZE:
+	var size := _footprint(placing)
+	var fill := Color(0.2, 0.9, 0.25, 0.5) if _spot_ok(top, size) else Color(0.95, 0.2, 0.15, 0.5)
+	for dy in size.y:
+		for dx in size.x:
 			placement_ghost.draw_rect(_tile_rect(top + Vector2i(dx, dy)), fill)
 
 
+# The coop holds COOP_HENS_MAX hens, and a barn makes room for BARN_EXTRA_HENS more.
+func _hens_max() -> int:
+	return COOP_HENS_MAX + (BARN_EXTRA_HENS if barn_built else 0)
+
+
 func _can_buy_hen() -> bool:
-	return coop_built and hens < COOP_HENS_MAX and money >= HEN_PRICE
+	return coop_built and hens < _hens_max() and money >= HEN_PRICE
 
 
 func _buy_hen() -> void:
 	if not _can_buy_hen():
-		_show_message("A hen costs %d coins, and the coop holds %d." % [HEN_PRICE, COOP_HENS_MAX])
+		_show_message("A hen costs %d coins, and the coop holds %d." % [HEN_PRICE, _hens_max()])
 		return
 	money -= HEN_PRICE
 	hens += 1
@@ -4444,6 +4546,9 @@ func _save_game() -> void:
 		"coop_built": coop_built,
 		"coop_x": coop_tile.x,
 		"coop_y": coop_tile.y,
+		"barn_built": barn_built,
+		"barn_x": barn_tile.x,
+		"barn_y": barn_tile.y,
 		"hens": hens,
 		"hens_fed_day": hens_fed_day,
 		"hen_unfed_days": hen_unfed_days,
@@ -4533,6 +4638,8 @@ func _load_game() -> bool:
 	wear = int(data.get("wear", 0))
 	coop_built = bool(data.get("coop_built", false))
 	coop_tile = Vector2i(int(data.get("coop_x", -1)), int(data.get("coop_y", -1)))
+	barn_built = bool(data.get("barn_built", false))
+	barn_tile = Vector2i(int(data.get("barn_x", -1)), int(data.get("barn_y", -1)))
 	hens = int(data.get("hens", 0))
 	hens_fed_day = int(data.get("hens_fed_day", -1))
 	hen_unfed_days = int(data.get("hen_unfed_days", 0))
@@ -4681,6 +4788,16 @@ func _draw_coop_tile(cell: Rect2) -> void:
 	draw_rect(cell, Color("7a5230"))
 	draw_rect(cell.grow(-5), Color("94693d"))
 	draw_rect(Rect2(cell.position, Vector2(cell.size.x, cell.size.y * 0.24)), Color("5a2e1c"))
+
+
+# A barn tile: red boards with pale trim lines, and a ridge along the top.
+func _draw_barn_tile(cell: Rect2) -> void:
+	draw_rect(cell, Color("7a2e26"))
+	draw_rect(cell.grow(-4), Color("8f3a2f"))
+	for i in 3:
+		var x := cell.position.x + cell.size.x * (0.25 + 0.25 * i)
+		draw_line(Vector2(x, cell.position.y + 3), Vector2(x, cell.end.y - 3), Color(0.85, 0.8, 0.7, 0.35), 1.5)
+	draw_rect(Rect2(cell.position, Vector2(cell.size.x, cell.size.y * 0.2)), Color("4a1a16"))
 
 
 # The hens are drawn on their own layer, from where each one currently stands in the coop.
