@@ -273,6 +273,14 @@ Later: more villages and roads, more creatures, and guardian quests that need co
 - **Hatchets** and **picks** are tools with tiers. They are crafted from the Tools section of the Gear panel and are kept by tier rather than worn in a slot. Hatchet tiers: crude, stone, copper, iron. Pick tiers: stone, copper, iron.
 - A hatchet is needed to fell trees. Hardwood needs a copper hatchet or better.
 
+## Mining
+
+- **Rocks** sit on the farm at five spots. Each one comes back each morning, like brush piles.
+- Breaking a rock **by hand** gives 1 stone. That gets you the first stone pick.
+- With a **pick**, a rock gives 2 stone and 12 Mining XP.
+- From **Mining 2**, a pick also gives a 15% chance of **copper ore** per rock. Farm rocks never give iron.
+- Stone is worth little on its own. It goes into the stone hatchet and stone pick.
+
 ## Gathering and metal (planned)
 
 Bark is the starting tier and metal is the later one. Each bark piece has a metal piece for the same slot. The metal piece is better, needs Smithing, and takes that slot once you have it. Bark pieces stay craftable early on.

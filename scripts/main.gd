@@ -47,6 +47,11 @@ const THICKET_LEVEL := 3
 # A small grove of trees on the farm. Each one is felled once a day, like brush.
 const GROVE_SPOTS := [Vector2i(0, 0), Vector2i(1, 0), Vector2i(2, 0), Vector2i(0, 1), Vector2i(1, 1)]
 const XP_FELL := 20
+# Rocks on the farm. Breaking one gives stone. A pick gives more, and from Mining 2 a small chance of copper ore.
+const ROCK_SPOTS := [Vector2i(14, 6), Vector2i(17, 10), Vector2i(27, 17), Vector2i(36, 16), Vector2i(8, 22)]
+const XP_MINE := 12
+const ORE_CHANCE := 0.15
+const ORE_MINING_LEVEL := 2
 # Tool tiers. A hatchet fells trees. Hardwood needs a copper hatchet or better.
 const TOOL_TIERS := {
 	"hatchet": [
@@ -427,11 +432,12 @@ var skill_xp := {"Farming": 0, "Bushcrafting": 0, "Carpentry": 0, "Cleaning": 0,
 var inventory := {"seeds": STARTING_SEEDS, "pumpkin_seeds": 0, "crops": 0, "fish": 0, "meals": 0, "smoked": 0, "dried": 0, "canned": 0, "fermented": 0}
 var materials := {"wood": 0, "fiber": 0, "resin": 0, "hardwood": 0, "stone": 0, "copper_ore": 0, "iron_ore": 0, "copper_bar": 0, "iron_bar": 0}
 var tool_tier := {"hatchet": 0, "pick": 0}     # 0 = none; higher tiers come from TOOL_TIERS
-var grove_felled := {}                          # world tile -> true for trees cut today
+var grove_felled := {}
+var rocks := {}                                  # world tile -> true for unbroken rocks                          # world tile -> true for trees cut today
 var stats := {"planted": 0, "harvested": 0, "gathered": 0, "slept": 0, "tidied": 0,
 	"fished": 0, "caught": 0, "mended": 0, "cleansed": 0, "cooked": 0, "eaten": 0,
 	"pumpkins": 0, "collapses": 0, "events": 0, "sold": 0, "spoiled": 0,
-	"talks": 0, "defeated": 0, "delivered": 0, "stalkers": 0, "visited": 0, "crops_given": 0, "preserved": 0, "felled": 0}
+	"talks": 0, "defeated": 0, "delivered": 0, "stalkers": 0, "visited": 0, "crops_given": 0, "preserved": 0, "felled": 0, "mined": 0}
 var achievements_done := {}     # achievement id -> true
 var quests_done := {}               # quest id -> true
 var selected_seed := "turnip"
@@ -590,6 +596,10 @@ func _draw() -> void:
 		var size := PX * (0.2 + 0.2 * stage)
 		draw_rect(Rect2(center - Vector2.ONE * size * 0.5, Vector2.ONE * size), Color(colors[stage]))
 
+	for pos in rocks:
+		var rc := _tile_center(pos.x, pos.y)
+		draw_circle(rc, PX * 0.3, Color("7a7a84"))
+		draw_circle(rc + Vector2(-5, -4), PX * 0.08, Color("a6a6b0"))
 	for pos in brush:
 		var center := _tile_center(pos.x, pos.y)
 		draw_circle(center, PX * 0.32, BUSH_COLOR)
@@ -756,6 +766,7 @@ func _respawn_brush() -> void:
 			brush[_world_tile(spot.x, spot.y)] = true
 	grove_felled.clear()
 	_apply_grove()
+	_fill_rocks()
 	queue_redraw()
 
 
@@ -1329,6 +1340,9 @@ func _interact() -> void:
 		_start_fishing(tile)
 		return
 
+	if rocks.has(tile):
+		_mine(tile)
+		return
 	if brush.has(tile):
 		_gather(tile)
 		return
@@ -2058,6 +2072,36 @@ func _craft_tool(kind: String) -> void:
 	tool_tier[kind] += 1
 	_grant_xp(str(tier["skill"]), 10)
 	_show_message("You make a %s. +10 %s XP" % [tier["name"], tier["skill"]])
+
+
+# --- Mining --------------------------------------------------------------------
+
+func _fill_rocks() -> void:
+	rocks.clear()
+	for spot in ROCK_SPOTS:
+		rocks[_world_tile(spot.x, spot.y)] = true
+
+
+func _mine(tile: Vector2i) -> void:
+	rocks.erase(tile)
+	var pick := int(tool_tier["pick"])
+	var amount := 2 if pick >= 1 else 1
+	materials["stone"] += amount
+	var found := "%d stone" % amount
+	if pick >= 1 and _level("Mining") >= ORE_MINING_LEVEL and randf() < ORE_CHANCE:
+		materials["copper_ore"] += 1
+		found += " and copper ore"
+	stats["mined"] += 1
+	_grant_xp("Mining", XP_MINE)
+	_show_message("You break the rock. +%s. +%d Mining XP" % [found, XP_MINE])
+	queue_redraw()
+
+
+func _tiles_to_array(tiles: Dictionary) -> Array:
+	var arr: Array = []
+	for tile in tiles.keys():
+		arr.append([tile.x, tile.y])
+	return arr
 
 
 # --- Slot grids for the pack, seed pouch, and equipment ---------------------
@@ -2859,6 +2903,7 @@ func _save_game() -> void:
 		"crops": _crops_to_array(),
 		"brush": _brush_to_array(),
 		"felled": _felled_to_array(),
+		"rocks": _tiles_to_array(rocks),
 		"tool_tier": tool_tier,
 	}
 	var file := FileAccess.open(SAVE_PATH, FileAccess.WRITE)
@@ -2929,6 +2974,12 @@ func _load_game() -> bool:
 		grove_felled[Vector2i(int(g[0]), int(g[1]))] = true
 	_apply_grove()
 	_merge_ints(tool_tier, data.get("tool_tier"))
+	if data.has("rocks"):
+		rocks.clear()
+		for r in data["rocks"]:
+			rocks[Vector2i(int(r[0]), int(r[1]))] = true
+	else:
+		_fill_rocks()
 	return true
 
 
