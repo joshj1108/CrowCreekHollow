@@ -622,7 +622,8 @@ var hud_label: Label
 var message_label: Label
 var player    # Node2D with player.gd attached
 var camera: Camera2D
-var last_cam_center := Vector2.ZERO   # where the farm was last drawn from
+var last_minimap_key: Array = []
+var last_cam_tile := Vector2i(-99, -99)   # the tile the camera was last drawn from
 var lantern_light: PointLight2D
 
 
@@ -645,9 +646,12 @@ func _ready() -> void:
 
 
 func _process(delta: float) -> void:
-	if not in_cave and not _in_village() and camera.get_screen_center_position() != last_cam_center:
-		last_cam_center = camera.get_screen_center_position()
-		queue_redraw()
+	if not in_cave and not _in_village():
+		var cam := camera.get_screen_center_position()
+		var cam_tile := Vector2i(floori(cam.x / PX), floori(cam.y / PX))
+		if cam_tile != last_cam_tile:
+			last_cam_tile = cam_tile
+			queue_redraw()
 	# Settings pauses the day: the clock stops, foes stand still, and only the menu responds.
 	player.paused = open_tab == "Settings"
 	if player.paused:
@@ -713,9 +717,15 @@ func _draw() -> void:
 	if _in_village():
 		_draw_world()
 		return
-	var view_left := camera.get_screen_center_position().x - get_viewport_rect().size.x * 0.5 / camera.zoom.x
-	for y in MAP_H:
-		for x in MAP_W:
+	var view := get_viewport_rect().size / camera.zoom
+	var top_left := camera.get_screen_center_position() - view * 0.5
+	var view_left := top_left.x
+	var fx0 := clampi(floori(top_left.x / PX) - 1, 0, MAP_W - 1)
+	var fy0 := clampi(floori(top_left.y / PX) - 1, 0, MAP_H - 1)
+	var fx1 := clampi(ceili((top_left.x + view.x) / PX) + 1, 0, MAP_W - 1)
+	var fy1 := clampi(ceili((top_left.y + view.y) / PX) + 1, 0, MAP_H - 1)
+	for y in range(fy0, fy1 + 1):
+		for x in range(fx0, fx1 + 1):
 			var tile: int = map[y][x]
 			var cell := _tile_rect(Vector2i(x, y))
 			if tile == Tile.TREE:
@@ -1066,6 +1076,12 @@ func _update_minimap() -> void:
 	# Indoors the minimap shows the house, since the player isn't on the farm.
 	_place_minimap(Vector2(MAP_W, MAP_H) * Minimap.PX_PER_TILE)
 	var player_tile: Vector2 = Vector2(HOUSE_DOOR_IX + BORDER_X, HOUSE_DOOR_IY + BORDER_Y) if inside else player.position / PX
+	# Rebuilding the minimap is costly, so it only refreshes when the player changes tile,
+	# or every half second for things like brush and the shadow.
+	var key := [inside, Vector2i(player_tile), tonight_shadow, Engine.get_process_frames() / 30]
+	if key == last_minimap_key:
+		return
+	last_minimap_key = key
 	minimap.update_view(map, TILE_COLORS, brush.keys(), player_tile, tonight_shadow)
 
 
