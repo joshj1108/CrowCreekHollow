@@ -927,7 +927,8 @@ func _stamp_workshop() -> void:
 		for x in range(r.position.x, r.end.x):
 			var edge := x == r.position.x or x == r.end.x - 1 or y == r.position.y or y == r.end.y - 1
 			map[y + BORDER_Y][x + BORDER_X] = Tile.WALL if edge else Tile.FLOOR
-	map[WORKSHOP_DOOR.y + BORDER_Y][WORKSHOP_DOOR.x + BORDER_X] = Tile.DOOR
+	# A plain opening. DOOR is reserved for the farmhouse, so stepping here doesn't take you indoors.
+	map[WORKSHOP_DOOR.y + BORDER_Y][WORKSHOP_DOOR.x + BORDER_X] = Tile.PATH
 
 
 # Sets a coop's 2 by 2 footprint, from its top-left map tile, to the given tile.
@@ -1625,10 +1626,11 @@ func _house_rows() -> Array:
 			"action": "feed_hens",
 			"enabled": _can_feed_hens(),
 		})
+		var placed := coop_tile.x >= 0
 		rows.append({
 			"name": "Coop",
-			"value": "standing, %d by %d" % [COOP_SIZE, COOP_SIZE],
-			"button": "Move",
+			"value": ("standing, %d by %d" % [COOP_SIZE, COOP_SIZE]) if placed else "paid for, not yet placed",
+			"button": "Move" if placed else "Place",
 			"action": "move_coop",
 			"enabled": true,
 		})
