@@ -45,6 +45,8 @@ A top-down farming game with heavy psychological horror, built in Godot 4.7.
 
 ## Art
 
+The farmer is drawn in code. A straw hat with a band, a shirt under blue overalls with straps and a buckle, and boots. The face turns with the facing direction: eyes and a mouth when facing you, one eye to the side, and hair only from behind. While walking, the legs and arms swing in opposition and the body bobs with each step. A small marker in front shows what you'll interact with.
+
 - 16×16 base tiles, scaled 3× in-game (`SCALE = 3`), nearest-neighbor filtering.
 - Warm, saturated daytime palette. Night uses a cool, shadowy tint via `CanvasModulate`.
 - Placeholder art is drawn in code. Real licensed or commissioned pixel art replaces it later without touching game logic.
