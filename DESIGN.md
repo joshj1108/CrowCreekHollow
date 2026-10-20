@@ -187,6 +187,10 @@ Achievements track stats and never reset. Each pays a small reward. Earning all 
 - In the Craft panel's Cooking tab, **Cook a fish** uses 1 fish and 1 wood for 1 meal (15 XP). **Cook crops** uses 2 crops and 1 wood for 1 meal (10 XP).
 - **Eat a meal** uses one meal for +8 sanity.
 
+- **Fish stew** (Cooking 3): 1 fish, 2 crops, and 1 wood make one stew. It restores 70 food and 12 sanity, and gives 18 XP.
+- **Hearty stew** (Cooking 5): 1 smoked fish, 2 crops, and 1 wood make one. It restores 95 food and 18 sanity, and gives 26 XP.
+- Stews are kept in the pack as their own stacks. Eat them from the Inventory panel, like meals.
+
 ## Farming and crops
 
 - Two crop kinds:
