@@ -209,6 +209,8 @@ Achievements track stats and never reset. Each pays a small reward. Earning all 
 
 ## The world: the portal, the road, and the wilds
 
+**Currently off.** `WORLD_ENABLED` is `false`, so play stays on the homestead. The east portal is gone, the wider land and its towns are unreachable, and the Guardian of Lowmere quests are hidden. The code stays in place, and setting the flag back to `true` restores it.
+
 - The farm's **east gate is a portal**. Walking through it takes you into the world, at the portal stone's east side. The portal shuts at 18:00.
 - The **portal stone** in the world takes you back to the homestead.
 - The **world is 768 by 912 tiles**, generated from a fixed seed with forest, lakes, and open ground. Its edge is a line of trees.

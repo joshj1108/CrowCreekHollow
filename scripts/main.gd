@@ -68,6 +68,9 @@ const WORLD_SEED := 20031
 const ROAD_Y := 450
 const PORTAL_TILE := Vector2i(352, 450)   # the stone that takes you back home
 const PORTAL_ARRIVE := Vector2i(354, 450) # where you step out of the farm's portal
+# false keeps play on the homestead: the east portal is off, the wider land and its
+# towns are unreachable, and the Guardian of Lowmere quests are hidden.
+const WORLD_ENABLED := false
 const LOWMERE_ORIGIN := Vector2i(380, 440)
 const ASHFORD_ORIGIN := Vector2i(470, 440)
 # Tool tiers. A hatchet fells trees. Hardwood needs a copper hatchet or better.
@@ -788,7 +791,7 @@ func _build_map() -> void:
 					t = Tile.WATER
 				if ix >= HOUSE_IX and ix < HOUSE_IX + HOUSE_W and iy >= HOUSE_IY and iy < HOUSE_IY + HOUSE_H:
 					t = Tile.HOUSE
-				if ix == INNER_W - 1 and iy == INNER_H / 2:
+				if WORLD_ENABLED and ix == INNER_W - 1 and iy == INNER_H / 2:
 					t = Tile.PORTAL
 				if ix == STALL_IX and iy == STALL_IY:
 					t = Tile.STALL
@@ -945,9 +948,14 @@ func _make_label(parent: Node, pos: Vector2, font_size: int) -> Label:
 func _restore_saved_state() -> void:
 	_check_unlocks()
 	zone = saved_zone
+	if not WORLD_ENABLED:
+		zone = Zone.HOMESTEAD
 	hp = clampi(hp, 1, max_hp())
 	if has_saved_pos:
 		player.position = saved_pos
+	# A save made in the wider land returns to the homestead when the world is off.
+	if not WORLD_ENABLED and not _in_bounds(_player_tile()):
+		player.position = _tile_center(HOMESTEAD_ARRIVE.x, HOMESTEAD_ARRIVE.y)
 	if _in_village():
 		_sync_region()
 		_spawn_foes()
@@ -1134,7 +1142,7 @@ func _skill_rows() -> Array:
 			"value": "%d XP" % skill_xp[skill],
 			"progress": float(skill_xp[skill] % 100) / 100.0,
 		})
-	rows.append({"note": "Farming grows crops. Bushcrafting gathers wood, fiber, and resin. Carpentry trains by mending boards and repairing the house. Cleaning tidies it. Fishing works the sparkling spots at the pond. Cooking turns catches and crops into meals. Forestry fells trees for wood and hardwood. Mining breaks rocks for stone and ore. Smithing turns ore into bars and metal gear. Combat is earned guarding Lowmere."})
+	rows.append({"note": "Farming grows crops. Bushcrafting gathers wood, fiber, and resin. Carpentry trains by mending boards and repairing the house. Cleaning tidies it. Fishing works the sparkling spots at the pond. Cooking turns catches and crops into meals. Forestry fells trees for wood and hardwood. Mining breaks rocks for stone and ore. Smithing turns ore into bars and metal gear." + (" Combat is earned guarding Lowmere." if WORLD_ENABLED else "")})
 	return rows
 
 
@@ -1292,18 +1300,19 @@ func _quest_rows() -> Array:
 	rows.append({"section": "Chapters"})
 	for q in STORY:
 		rows.append(_quest_row(q, false))
-	rows.append({"section": "Guardian of Lowmere"})
-	var guardian_current: Variant = null
-	for q in GUARDIAN_QUESTS:
-		if not guardian_done.has(q["id"]):
-			guardian_current = q
-			break
-	if guardian_current != null:
-		rows.append(_quest_row(guardian_current, true))
-	else:
-		rows.append({"note": "Lowmere is safe for now."})
-	for q in GUARDIAN_QUESTS:
-		rows.append(_quest_row(q, false))
+	if WORLD_ENABLED:
+		rows.append({"section": "Guardian of Lowmere"})
+		var guardian_current: Variant = null
+		for q in GUARDIAN_QUESTS:
+			if not guardian_done.has(q["id"]):
+				guardian_current = q
+				break
+		if guardian_current != null:
+			rows.append(_quest_row(guardian_current, true))
+		else:
+			rows.append({"note": "Lowmere is safe for now."})
+		for q in GUARDIAN_QUESTS:
+			rows.append(_quest_row(q, false))
 	return rows
 
 
@@ -3138,6 +3147,8 @@ func _fallen() -> void:
 
 
 func _check_guardian() -> void:
+	if not WORLD_ENABLED:
+		return
 	for q in GUARDIAN_QUESTS:
 		if guardian_done.has(q["id"]):
 			continue
@@ -3698,7 +3709,7 @@ func _check_doors() -> void:
 		_enter_house()
 	elif inside and kind == Tile.EXIT:
 		_leave_house()
-	elif not inside and kind == Tile.PORTAL:
+	elif not inside and WORLD_ENABLED and kind == Tile.PORTAL:
 		if current_hour >= STALL_CLOSE_HOUR:
 			_refuse_gate(tile)
 		else:
