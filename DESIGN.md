@@ -267,6 +267,12 @@ Quests in the Quests panel, under Guardian of Lowmere, run in order:
 
 Later: more villages and roads, more creatures, and guardian quests that need combat or exploration. Defense stacks across slots, so a full set can turn most hits into single points of damage. That needs a playtest before it is tuned.
 
+## Forestry and tools
+
+- **Forestry** trains by felling trees. A grove of five trees sits in the top-left corner of the farm. Each tree gives 3 wood, and 2 hardwood with a copper hatchet or better, and 20 Forestry XP. Felled trees come back each morning.
+- **Hatchets** and **picks** are tools with tiers. They are crafted from the Tools section of the Gear panel and are kept by tier rather than worn in a slot. Hatchet tiers: crude, stone, copper, iron. Pick tiers: stone, copper, iron.
+- A hatchet is needed to fell trees. Hardwood needs a copper hatchet or better.
+
 ## Gathering and metal (planned)
 
 Bark is the starting tier and metal is the later one. Each bark piece has a metal piece for the same slot. The metal piece is better, needs Smithing, and takes that slot once you have it. Bark pieces stay craftable early on.

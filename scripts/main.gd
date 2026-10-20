@@ -44,6 +44,23 @@ const BRUSH_SPOTS := [
 # Extra piles that appear once Bushcrafting reaches level 3.
 const THICKET_SPOTS := [Vector2i(4, 21), Vector2i(12, 21), Vector2i(26, 20)]
 const THICKET_LEVEL := 3
+# A small grove of trees on the farm. Each one is felled once a day, like brush.
+const GROVE_SPOTS := [Vector2i(0, 0), Vector2i(1, 0), Vector2i(2, 0), Vector2i(0, 1), Vector2i(1, 1)]
+const XP_FELL := 20
+# Tool tiers. A hatchet fells trees. Hardwood needs a copper hatchet or better.
+const TOOL_TIERS := {
+	"hatchet": [
+		{"name": "Crude hatchet", "cost": {"wood": 2, "fiber": 2}, "skill": "Bushcrafting", "level": 1},
+		{"name": "Stone hatchet", "cost": {"wood": 2, "stone": 2}, "skill": "Forestry", "level": 2},
+		{"name": "Copper hatchet", "cost": {"wood": 1, "copper_bar": 2}, "skill": "Smithing", "level": 2},
+		{"name": "Iron hatchet", "cost": {"wood": 1, "iron_bar": 2}, "skill": "Smithing", "level": 5},
+	],
+	"pick": [
+		{"name": "Stone pick", "cost": {"wood": 2, "stone": 3}, "skill": "Mining", "level": 1},
+		{"name": "Copper pick", "cost": {"wood": 1, "copper_bar": 2}, "skill": "Smithing", "level": 2},
+		{"name": "Iron pick", "cost": {"wood": 1, "iron_bar": 2}, "skill": "Smithing", "level": 5},
+	],
+}
 
 # Time runs from 06:00 to 03:00 the next morning (hours 6 to 27).
 const DAY_LENGTH := 240.0   # real seconds for a full day
@@ -318,7 +335,7 @@ const ACHIEVEMENTS := [
 	{"id": "story_end", "title": "Story Complete", "text": "Finish every story chapter.", "tier": 3, "stat": "story", "goal": 15, "reward": {"seeds": 5, "pumpkin_seeds": 2}},
 ]
 
-const SKILLS := ["Farming", "Bushcrafting", "Carpentry", "Cleaning", "Fishing", "Cooking", "Combat"]
+const SKILLS := ["Farming", "Bushcrafting", "Carpentry", "Cleaning", "Fishing", "Cooking", "Combat", "Forestry", "Mining", "Smithing"]
 const XP_PLANT := 5
 const XP_GATHER := 10
 const XP_REPAIR := 30
@@ -406,13 +423,15 @@ var plot_two_open := false
 var clock := 0.0
 var current_hour := START_HOUR
 var day := 1
-var skill_xp := {"Farming": 0, "Bushcrafting": 0, "Carpentry": 0, "Cleaning": 0, "Fishing": 0, "Cooking": 0, "Combat": 0}
+var skill_xp := {"Farming": 0, "Bushcrafting": 0, "Carpentry": 0, "Cleaning": 0, "Fishing": 0, "Cooking": 0, "Combat": 0, "Forestry": 0, "Mining": 0, "Smithing": 0}
 var inventory := {"seeds": STARTING_SEEDS, "pumpkin_seeds": 0, "crops": 0, "fish": 0, "meals": 0, "smoked": 0, "dried": 0, "canned": 0, "fermented": 0}
-var materials := {"wood": 0, "fiber": 0, "resin": 0}
+var materials := {"wood": 0, "fiber": 0, "resin": 0, "hardwood": 0, "stone": 0, "copper_ore": 0, "iron_ore": 0, "copper_bar": 0, "iron_bar": 0}
+var tool_tier := {"hatchet": 0, "pick": 0}     # 0 = none; higher tiers come from TOOL_TIERS
+var grove_felled := {}                          # world tile -> true for trees cut today
 var stats := {"planted": 0, "harvested": 0, "gathered": 0, "slept": 0, "tidied": 0,
 	"fished": 0, "caught": 0, "mended": 0, "cleansed": 0, "cooked": 0, "eaten": 0,
 	"pumpkins": 0, "collapses": 0, "events": 0, "sold": 0, "spoiled": 0,
-	"talks": 0, "defeated": 0, "delivered": 0, "stalkers": 0, "visited": 0, "crops_given": 0, "preserved": 0}
+	"talks": 0, "defeated": 0, "delivered": 0, "stalkers": 0, "visited": 0, "crops_given": 0, "preserved": 0, "felled": 0}
 var achievements_done := {}     # achievement id -> true
 var quests_done := {}               # quest id -> true
 var selected_seed := "turnip"
@@ -677,6 +696,8 @@ func _build_map() -> void:
 					t = Tile.STALL
 				if ix == HOUSE_DOOR_IX and iy == HOUSE_DOOR_IY:
 					t = Tile.DOOR
+				if GROVE_SPOTS.has(Vector2i(ix, iy)):
+					t = Tile.TREE
 			row.append(t)
 		map.append(row)
 
@@ -733,6 +754,8 @@ func _respawn_brush() -> void:
 	if _level("Bushcrafting") >= THICKET_LEVEL:
 		for spot in THICKET_SPOTS:
 			brush[_world_tile(spot.x, spot.y)] = true
+	grove_felled.clear()
+	_apply_grove()
 	queue_redraw()
 
 
@@ -882,6 +905,9 @@ func _on_panel_action(action_id: String) -> void:
 	if action_id.begins_with("preserve:"):
 		_preserve(action_id.trim_prefix("preserve:"))
 		return
+	if action_id.begins_with("tool:"):
+		_craft_tool(action_id.trim_prefix("tool:"))
+		return
 	if action_id.begins_with("sell:"):
 		_sell(action_id.trim_prefix("sell:"))
 		return
@@ -974,7 +1000,7 @@ func _skill_rows() -> Array:
 			"value": "%d XP" % skill_xp[skill],
 			"progress": float(skill_xp[skill] % 100) / 100.0,
 		})
-	rows.append({"note": "Farming grows crops. Bushcrafting gathers wood, fiber, and resin. Carpentry trains by mending boards and repairing the house. Cleaning tidies it. Fishing works the sparkling spots at the pond. Cooking turns catches and crops into meals. Combat is earned guarding Lowmere."})
+	rows.append({"note": "Farming grows crops. Bushcrafting gathers wood, fiber, and resin. Carpentry trains by mending boards and repairing the house. Cleaning tidies it. Fishing works the sparkling spots at the pond. Cooking turns catches and crops into meals. Forestry fells trees for wood and hardwood. Mining breaks rocks for stone and ore. Smithing turns ore into bars and metal gear. Combat is earned guarding Lowmere."})
 	return rows
 
 
@@ -1060,6 +1086,20 @@ func _gear_rows() -> Array:
 			"action": "advance_lantern",
 			"enabled": _can_advance_lantern(),
 		})
+	rows.append({"section": "Tools"})
+	for kind in ["hatchet", "pick"]:
+		var tiers: Array = TOOL_TIERS[kind]
+		var have := int(tool_tier[kind])
+		rows.append({"name": "Best %s" % kind, "value": _tool_name(kind)})
+		if have < tiers.size():
+			var tier: Dictionary = tiers[have]
+			rows.append({
+				"name": "Next: %s" % tier["name"],
+				"value": "%s, %s %d" % [_price_text_items(tier["cost"]), tier["skill"], int(tier["level"])],
+				"button": "Make",
+				"action": "tool:" + kind,
+				"enabled": _can_craft_tool(kind),
+			})
 	rows.append({"section": "Craft and equip"})
 	for id in GEAR_ITEMS.keys():
 		if id == "hoe":
@@ -1294,6 +1334,9 @@ func _interact() -> void:
 		return
 
 	var kind: int = map[tile.y][tile.x]
+	if kind == Tile.TREE and GROVE_SPOTS.has(tile - Vector2i(BORDER_X, BORDER_Y)):
+		_chop(tile)
+		return
 	if kind == Tile.HOUSE:
 		_toggle_tab("House")
 		return
@@ -1948,6 +1991,75 @@ func _storage_label(tile: int) -> String:
 	return "Cellar"
 
 
+# --- Forestry and tools -------------------------------------------------------
+
+func _chop(tile: Vector2i) -> void:
+	if int(tool_tier["hatchet"]) < 1:
+		_show_message("You need a hatchet. Craft a crude one from the Gear panel.")
+		return
+	grove_felled[tile] = true
+	_apply_grove()
+	materials["wood"] += 3
+	var found := "3 wood"
+	if int(tool_tier["hatchet"]) >= 3:
+		materials["hardwood"] += 2
+		found += ", 2 hardwood"
+	stats["felled"] += 1
+	_grant_xp("Forestry", XP_FELL)
+	_show_message("You fell the tree. +%s. +%d Forestry XP" % [found, XP_FELL])
+	queue_redraw()
+
+
+func _apply_grove() -> void:
+	for spot in GROVE_SPOTS:
+		var w := _world_tile(spot.x, spot.y)
+		map[w.y][w.x] = Tile.GRASS if grove_felled.has(w) else Tile.TREE
+
+
+func _felled_to_array() -> Array:
+	var arr: Array = []
+	for tile in grove_felled.keys():
+		arr.append([tile.x, tile.y])
+	return arr
+
+
+func _has_materials(cost: Dictionary) -> bool:
+	for key in cost.keys():
+		if int(materials.get(key, 0)) < int(cost[key]):
+			return false
+	return true
+
+
+func _tool_name(kind: String) -> String:
+	var have := int(tool_tier[kind])
+	if have == 0:
+		return "none"
+	return str(TOOL_TIERS[kind][have - 1]["name"])
+
+
+func _can_craft_tool(kind: String) -> bool:
+	var have := int(tool_tier[kind])
+	var tiers: Array = TOOL_TIERS[kind]
+	if have >= tiers.size():
+		return false
+	var tier: Dictionary = tiers[have]
+	if _level(str(tier["skill"])) < int(tier["level"]):
+		return false
+	return _has_materials(tier["cost"])
+
+
+func _craft_tool(kind: String) -> void:
+	if not _can_craft_tool(kind):
+		_show_message("You need the materials and skill level for the next %s." % kind)
+		return
+	var tier: Dictionary = TOOL_TIERS[kind][int(tool_tier[kind])]
+	for mat in tier["cost"].keys():
+		materials[mat] -= int(tier["cost"][mat])
+	tool_tier[kind] += 1
+	_grant_xp(str(tier["skill"]), 10)
+	_show_message("You make a %s. +10 %s XP" % [tier["name"], tier["skill"]])
+
+
 # --- Slot grids for the pack, seed pouch, and equipment ---------------------
 
 func _pack_cells() -> Array:
@@ -2308,7 +2420,7 @@ func _can_craft(id: String) -> bool:
 	var item: Dictionary = GEAR_ITEMS[id]
 	if str(equipment[item["slot"]]) == id:
 		return false
-	if _level("Bushcrafting") < int(item["level"]):
+	if _level(str(item.get("skill", "Bushcrafting"))) < int(item["level"]):
 		return false
 	var cost: Dictionary = item["cost"]
 	for mat in cost.keys():
@@ -2746,6 +2858,8 @@ func _save_game() -> void:
 		"open_tab": open_tab,
 		"crops": _crops_to_array(),
 		"brush": _brush_to_array(),
+		"felled": _felled_to_array(),
+		"tool_tier": tool_tier,
 	}
 	var file := FileAccess.open(SAVE_PATH, FileAccess.WRITE)
 	if file != null:
@@ -2811,6 +2925,10 @@ func _load_game() -> bool:
 	brush.clear()
 	for b in data.get("brush", []):
 		brush[Vector2i(int(b[0]), int(b[1]))] = true
+	for g in data.get("felled", []):
+		grove_felled[Vector2i(int(g[0]), int(g[1]))] = true
+	_apply_grove()
+	_merge_ints(tool_tier, data.get("tool_tier"))
 	return true
 
 
