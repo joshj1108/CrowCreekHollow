@@ -10,6 +10,9 @@ signal tab_pressed(tab_name: String)
 var menu_frame: PanelContainer
 # Sections in these menus fold away, so a long list shows only its headings until one is opened.
 const COLLAPSIBLE_TABS := ["Settings"]
+const HINT_DEFAULT := "Click a section or press its key to switch   ·   B to close   ·   Esc for Settings"
+const HINT_SETTINGS := "Click a section or press its key to switch   ·   B or Esc to close"
+var hint_label: Label
 const ALWAYS_OPEN_SECTIONS := ["Game"]   # sections that never fold, so their options are always visible
 var collapsed_sections := {}   # "tab|section" -> true while folded (folded is the default)
 var _last_tab := ""
@@ -197,10 +200,11 @@ func _build_menu() -> Control:
 	footer.add_theme_constant_override("separation", 12)
 	main.add_child(footer)
 	var hints := Label.new()
-	hints.text = "Click a section or press its key to switch   ·   B to close   ·   Esc for Settings"
+	hints.text = HINT_DEFAULT
 	hints.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	hints.add_theme_font_size_override("font_size", 13)
 	hints.add_theme_color_override("font_color", COL_MUTED)
+	hint_label = hints
 	footer.add_child(hints)
 	var back := Button.new()
 	back.text = "Back"
@@ -237,6 +241,8 @@ func show_panel(tab: String, rows: Array) -> void:
 	if tab != active_tab:
 		scroll.scroll_vertical = 0
 	title_label.text = tab
+	if hint_label != null:
+		hint_label.text = HINT_SETTINGS if tab == "Settings" else HINT_DEFAULT
 	subtitle_label.text = str(SUBTITLES.get(tab, ""))
 	_set_active(tab)
 	for child in rows_box.get_children():

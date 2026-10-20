@@ -15,6 +15,7 @@ A top-down farming game with heavy psychological horror, built in Godot 4.7.
 - Use, plant, harvest, gather, sleep, tidy, cleanse, cook, talk, swing, or read: Space / Enter (face the tile)
 - Walk into the farmhouse door to go inside. Walk onto the exit mat to leave.
 - Menu sections (key, or click in the menu list): Skills K, Inventory I, Gear G, Craft C, Quests Q, House H, Buildings U, Achievements J, Settings
+- Esc opens Settings, and closes it when Settings is already open. B closes any other open section.
 - Esc opens Settings, or closes it if it's already open
 - Stuck while placing or boxed in? Esc opens Settings, which cancels any placement. The **Unstick** button in the Game section moves you to the nearest open ground (grass, path, soil, fallow) from the farmhouse door, and works on the farm only.
 - Farming and gathering pause while a panel is open
