@@ -689,6 +689,7 @@ func _ready() -> void:
 	_build_map()
 	_generate_world()
 	_find_pond_edges()
+	save_slot = TitleMenu.active_slot
 	# The start screen comes first. The world is built once the player picks Continue, New Game, or a slot.
 	title_menu = TitleMenu.new()
 	title_menu.settings_rows = _settings_rows()
@@ -701,9 +702,47 @@ func _save_path() -> String:
 	return TitleMenu.slot_path(save_slot)
 
 
+# The Game section of Settings: leaving the farm for the start screen.
+func _game_rows() -> Array:
+	return [
+		{"section": "Game"},
+		{
+			"name": "Save and quit to the main menu",
+			"value": "Saves this game to its slot, then returns to the start screen. Only from the farm.",
+			"button": "Save and quit",
+			"action": "quit_title_save",
+			"enabled": _can_save_and_quit(),
+		},
+		{
+			"name": "Quit to the main menu",
+			"value": "Returns to the start screen without saving. Progress since your last sleep is lost.",
+			"button": "Quit",
+			"action": "quit_title",
+			"enabled": true,
+		},
+	]
+
+
+# Saving only happens on the farm, where the saved position makes sense on load.
+func _can_save_and_quit() -> bool:
+	return not in_cave and not _in_village()
+
+
+# Reloads the scene, which resets everything and shows the start screen. The chosen slot carries over.
+func _quit_to_title(save_first: bool) -> void:
+	if save_first:
+		if not _can_save_and_quit():
+			_show_message("You can only save from the farm.")
+			return
+		_save_game()
+	_close_panel()
+	get_tree().call_deferred("reload_current_scene")
+
+
 # Starts the world from the start screen: Continue or Load Game read the slot, New Game starts fresh.
 func _on_title_start(mode: String, slot: int) -> void:
 	save_slot = slot
+	TitleMenu.active_slot = slot
 	var loaded := mode != "new" and _load_game()
 	if not loaded:
 		_respawn_brush()
@@ -1518,6 +1557,12 @@ func _on_panel_action(action_id: String) -> void:
 	if action_id == "unstick":
 		_unstick()
 		return
+	if action_id == "quit_title_save":
+		_quit_to_title(true)
+		return
+	if action_id == "quit_title":
+		_quit_to_title(false)
+		return
 	if action_id == "build_barn" or action_id == "move_barn":
 		_build_barn()
 		return
@@ -1629,7 +1674,7 @@ func _refresh_panel() -> void:
 		"Barn":
 			rows = _barn_rows()
 		"Settings":
-			rows = _settings_rows() + _tip_rows()
+			rows = _settings_rows() + _game_rows() + _tip_rows()
 	action_bar.show_panel(open_tab, rows)
 
 

@@ -7,6 +7,7 @@ extends CanvasLayer
 ## section shows and handles its actions.
 
 signal tab_pressed(tab_name: String)
+var menu_frame: PanelContainer
 signal action_pressed(action_id: String)
 
 const TABS := [
@@ -107,10 +108,12 @@ func _build_menu() -> Control:
 	var frame := PanelContainer.new()
 	frame.add_theme_stylebox_override("panel", _box(COL_FRAME, COL_BORDER, 2, 10, 0))
 	frame.set_anchors_preset(Control.PRESET_CENTER)
-	frame.custom_minimum_size = Vector2(1000, 600)
 	frame.grow_horizontal = Control.GROW_DIRECTION_BOTH
 	frame.grow_vertical = Control.GROW_DIRECTION_BOTH
 	overlay.add_child(frame)
+	menu_frame = frame
+	_fit_frame()
+	get_viewport().size_changed.connect(_fit_frame)
 
 	var split := HBoxContainer.new()
 	split.add_theme_constant_override("separation", 0)
@@ -199,6 +202,12 @@ func _build_menu() -> Control:
 	back.pressed.connect(_on_action_pressed.bind("close"))
 	footer.add_child(back)
 	return overlay
+
+
+# The menu is 1000 by 600 when the window allows, and shrinks to fit a smaller window.
+func _fit_frame() -> void:
+	var view := get_viewport().get_visible_rect().size
+	menu_frame.custom_minimum_size = Vector2(minf(1000.0, view.x - 40.0), minf(600.0, view.y - 40.0))
 
 
 func show_panel(tab: String, rows: Array) -> void:
@@ -305,11 +314,18 @@ func _build_card(data: Dictionary) -> Control:
 	name_control.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	line.add_child(name_control)
 
+	# Short values sit beside the name. Long ones, such as a tip's text, wrap on their own line
+	# so the card never grows wider than the menu.
 	var value_label := Label.new()
 	value_label.text = str(data.get("value", ""))
 	value_label.add_theme_font_size_override("font_size", 14)
 	value_label.add_theme_color_override("font_color", COL_MUTED)
-	line.add_child(value_label)
+	if value_label.text.length() > 60:
+		value_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		value_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		block.add_child(value_label)
+	else:
+		line.add_child(value_label)
 
 	if data.has("button"):
 		var button := Button.new()

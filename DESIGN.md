@@ -230,6 +230,7 @@ The house is drawn in four stages that match its repair level. **Decrepit** has 
 - The game opens on a **start screen**: **Continue** (the most recently saved slot), **New Game**, **Load Game**, **Settings** (the controls list), and **Quit**. The world is built only after you choose.
 - There are **three save slots**. New Game asks for a slot, and a used slot takes two presses to overwrite. Load Game lists each slot with its day, coins, and house stage. Older single-slot saves become slot 1.
 - The game saves **only** when you sleep in bed or collapse at 03:00, to the slot you're playing.
+- The in-game Settings menu has a **Game** section. **Save and quit to the main menu** saves to the current slot and returns to the start screen (only from the farm). **Quit to the main menu** returns without saving, and progress since the last sleep is lost. The slot you were playing stays selected.
 - Saved: day, skill XP, inventory (including meals), coins, bag upgrades, root cellar, cooler, and smokehouse (built, and what they hold), materials, stats, story chapters done, achievements done, selected seed, lantern tier, house stage, house wear, coop and hens, barn (built, and where it stands), tidy/mend/cleanse days, sanity and sanity penalty, crops (with kind), brush piles, **player position**, whether you were **inside the house**, and the **open panel**.
 - Quitting mid-day loses that day's progress since the last save. Position and panel are saved at the same moment, so they reflect the last sleep or collapse.
 

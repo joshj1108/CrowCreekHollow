@@ -9,6 +9,7 @@ signal start_requested(mode: String, slot: int)
 signal quit_requested
 
 const SLOT_COUNT := 3
+static var active_slot := 1   # the slot in play, kept across a return to the start screen
 const LEGACY_SAVE := "user://hallowvale_save.json"
 const COL_TEXT := Color("e8dcc0")
 const COL_GOLD := Color("d8b050")
