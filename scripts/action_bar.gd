@@ -51,6 +51,7 @@ const COL_ACCENT := Color("d9a94e")
 var nav_buttons := {}      # tab name -> Button in the menu's section list
 var panel: Control         # the full-screen menu; visible only while a panel is open
 var menu_button: Button    # small corner button that opens the menu when it is closed
+var last_section := "Skills"  # the last menu section shown, so the Menu button can return to it
 var title_label: Label
 var subtitle_label: Label
 var scroll: ScrollContainer
@@ -66,7 +67,7 @@ func _ready() -> void:
 	root.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(root)
 
-	# A small corner button for mouse players. It opens the menu on Skills, where the list takes over.
+	# A small corner button for mouse players. It reopens the last section shown.
 	menu_button = Button.new()
 	menu_button.text = "Menu"
 	menu_button.focus_mode = Control.FOCUS_NONE
@@ -80,7 +81,7 @@ func _ready() -> void:
 	menu_button.offset_bottom = -10
 	menu_button.add_theme_font_size_override("font_size", 15)
 	_style_button(menu_button, false)
-	menu_button.pressed.connect(_on_tab_pressed.bind("Skills"))
+	menu_button.pressed.connect(_on_menu_pressed)
 	root.add_child(menu_button)
 
 	panel = _build_menu()
@@ -204,6 +205,9 @@ func show_panel(tab: String, rows: Array) -> void:
 	_last_key = key
 	panel.visible = true
 	menu_button.visible = false
+	for section in TABS:
+		if section["name"] == tab:
+			last_section = tab
 	if tab != active_tab:
 		scroll.scroll_vertical = 0
 	title_label.text = tab
@@ -407,6 +411,10 @@ func _box(bg: Color, border: Color, border_width: int, radius: int, margin: int)
 	sb.set_corner_radius_all(radius)
 	sb.set_content_margin_all(margin)
 	return sb
+
+
+func _on_menu_pressed() -> void:
+	tab_pressed.emit(last_section)
 
 
 func _on_tab_pressed(tab: String) -> void:

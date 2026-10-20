@@ -29,7 +29,7 @@ A top-down farming game with heavy psychological horror, built in Godot 4.7.
 
 ## Action bar
 
-- A small **Menu** button sits in the bottom-right corner for mouse players. It opens the menu on Skills and hides while the menu is open. Sections open from their keys, and the menu lists them on the left, so each section is one key or click away. The full-screen menu shows over a dimmed game: the sections down the left (with their keys), the current section's options on the right, and the controls and a Back button in the footer.
+- A small **Menu** button sits in the bottom-right corner for mouse players. It reopens the last section you had open (Skills at first) and hides while the menu is open. Sections open from their keys, and the menu lists them on the left, so each section is one key or click away. The full-screen menu shows over a dimmed game: the sections down the left (with their keys), the current section's options on the right, and the controls and a Back button in the footer.
 - Each section lists its options as cards: name, value, and an optional button or progress bar. Crafting and the other grid-based sections use the same layout.
 - **Settings pauses the day.** While it is open the clock stops, foes stand still, and the player can't move. Other sections don't pause.
 - Panels rebuild only when their content changes, so buttons don't disappear mid-click.
