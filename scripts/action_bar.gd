@@ -39,6 +39,7 @@ const SUBTITLES := {
 	"Buildings": "The workshop, the coop, and the barn",
 	"Coop": "Hens and their feed",
 	"Barn": "Livestock",
+	"Well": "Water for the farm",
 	"Achievements": "Things you have done",
 	"Settings": "Time is paused while you are here",
 }

@@ -172,6 +172,7 @@ Achievements track stats and never reset. Each pays a small reward. Earning all 
   - **Pumpkin** (Farming 3): yields 3 crops and 1 pumpkin seed back. 40 XP.
 - Planting uses the **selected seed**. Switch it in the Inventory panel (Farming 3 and up). If you pick pumpkin before Farming 3, turnip is planted.
 - Planting gives 5 XP.
+- **Crops need water.** A crop grows overnight only if it was watered that day. A crop that wasn't watered stays at its stage, and the morning message says how many went thirsty. Watering is covered under Well and watering.
 - Plot two stays overgrown until Farming 2. Walking up to it says so.
 
 ## Farmhouse
@@ -223,6 +224,17 @@ The house is drawn in four stages that match its repair level. **Decrepit** has 
 | Hollow Lantern | 6 tiles, flickers | 6 wood, 6 fiber, 4 resin | 6 |
 
 - Hunger and thirst are covered under Body needs below.
+
+## Well and watering
+
+- The **well** stands on the farm between plot one and the path, and starts seized. Stand beside it and press Space to open its panel.
+- **Repairing the pump** costs 4 wood, 3 fiber, and Carpentry 2, and gives 30 Carpentry XP. It fills the tank, which holds 40 water.
+- The tank refills each morning once the pump is working.
+- **Attaching the hose** costs 3 fiber and 2 resin, and needs a working pump. The hose reaches every plot on the farm, so no plot is out of range.
+- Once the hose is on, face a growing crop and press Space to water it. Each watering uses 1 water from the tank. A crop only needs one watering a day, and a second press that day says it's already watered.
+- **Rain waters every crop** on a drizzly, rainy, or downpour day, so those crops grow without the hose. Sunny, overcast, fog, and snow days don't water.
+- A watered crop shows a blue drop. The Inventory's Planting section shows how many growing crops are watered today.
+- The well's panel also drinks from the pump, for +35 water, at no cost.
 
 ## Body needs
 

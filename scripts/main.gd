@@ -142,6 +142,12 @@ const NEED_HARM_HOURS := 2.0     # one HP lost every this many hours while a nee
 const MEAL_FOOD := 45.0
 const CROP_FOOD := 18.0
 const POND_WATER := 40.0
+const WELL_IX := Vector2i(12, 10)     # farm tile between plot one and the path, beside plot one
+const WELL_CAPACITY := 40.0           # water in the tank when it refills each morning
+const DRINK_WELL := 35.0
+const WELL_REPAIR := {"wood": 4, "fiber": 3, "level": 2}
+const HOSE_COST := {"fiber": 3, "resin": 2}
+const WATER_RAIN_KINDS := ["drizzle", "rain", "downpour"]   # rain waters every crop
 const SEASON_TEMP := {"Winter": 40.0, "Spring": 51.0, "Summer": 67.0, "Autumn": 54.0}
 const WEATHER_TEMP := {"sunny": 6.0, "cloudy": 0.0, "fog": -2.0, "drizzle": -3.0, "rain": -4.0, "downpour": -6.0, "snow": -10.0}
 const WEATHER_LIGHT := {
@@ -162,7 +168,8 @@ const STAGE_NAMES := ["Decrepit", "Boarded", "Patched", "Restored"]
 const TIPS := [
 	{"id": "move", "title": "Moving and using things", "text": "Walk with WASD or the arrow keys. Press Space to plant, harvest, gather, and use whatever you face."},
 	{"id": "menus", "title": "Menus", "text": "K Skills, I Inventory, G Gear, C Craft, Q Quests, H House, U Buildings, J Achievements. Esc opens Settings, and time stops while it's open."},
-	{"id": "farm", "title": "Growing food", "text": "Face a soil tile and press Space to plant a seed. Crops ripen over days. Face a ripe crop and press Space to harvest it."},
+	{"id": "farm", "title": "Growing food", "text": "Face a soil tile and press Space to plant a seed. Crops need water each day to grow. Face a ripe crop and press Space to harvest it."},
+	{"id": "well", "title": "The well", "text": "The pump by the plots is seized. Repair it from the Well panel, then attach the hose. The hose reaches every plot, so face a crop and press Space to water it. Rain waters everything."},
 	{"id": "sleep", "title": "Sleeping", "text": "Walk to the bed in the bedroom and press Space from 18:00 to save and end the day. Stay up past 03:00 and you collapse, which lowers your sanity limit."},
 	{"id": "chores", "title": "Keeping house", "text": "The house wears down a little each night. Tidy it and mend a board each day from the House menu (H). Chores you skip add wear."},
 	{"id": "repair", "title": "Repairing the farmhouse", "text": "Repair the house from the House menu (H). Each stage restores it inside and out, and unlocks rooms and features."},
@@ -575,9 +582,9 @@ const NIGHT_EVENTS := [
 	{"message": "The field is quiet tonight. Too quiet.", "shadow": "none", "sanity": -3},
 ]
 
-enum Tile { TREE, GRASS, SOIL, PATH, WATER, HOUSE, DOOR, FLOOR, WALL, EXIT, BED, STATION, DESK, FALLOW, STALL, CELLAR, COOLER, GATE, SMOKEHOUSE, FURNACE, PORTAL, CAMP, CAVE_MOUTH, CAVE_EXIT, ORE_COPPER, ORE_IRON, COOP, BARN, TABLE, FIREPLACE }
+enum Tile { TREE, GRASS, SOIL, PATH, WATER, HOUSE, DOOR, FLOOR, WALL, EXIT, BED, STATION, DESK, FALLOW, STALL, CELLAR, COOLER, GATE, SMOKEHOUSE, FURNACE, PORTAL, CAMP, CAVE_MOUTH, CAVE_EXIT, ORE_COPPER, ORE_IRON, COOP, BARN, TABLE, FIREPLACE, WELL }
 
-const BLOCKING := [Tile.TREE, Tile.WATER, Tile.HOUSE, Tile.WALL, Tile.BED, Tile.STATION, Tile.DESK, Tile.STALL, Tile.CELLAR, Tile.COOLER, Tile.SMOKEHOUSE, Tile.FURNACE, Tile.CAMP, Tile.ORE_COPPER, Tile.ORE_IRON, Tile.COOP, Tile.BARN, Tile.TABLE, Tile.FIREPLACE]
+const BLOCKING := [Tile.TREE, Tile.WATER, Tile.HOUSE, Tile.WALL, Tile.BED, Tile.STATION, Tile.DESK, Tile.STALL, Tile.CELLAR, Tile.COOLER, Tile.SMOKEHOUSE, Tile.FURNACE, Tile.CAMP, Tile.ORE_COPPER, Tile.ORE_IRON, Tile.COOP, Tile.BARN, Tile.TABLE, Tile.FIREPLACE, Tile.WELL]
 
 const TILE_COLORS := {
 	Tile.TREE: Color("2f4f2f"),
@@ -606,6 +613,7 @@ const TILE_COLORS := {
 	Tile.ORE_COPPER: Color("b87333"),
 	Tile.ORE_IRON: Color("8a8f99"),
 	Tile.COOP: Color("8a6a3a"),
+	Tile.WELL: Color("6e6a64"),
 	Tile.BARN: Color("7a2e26"),
 	Tile.TABLE: Color("7a5230"),
 	Tile.FIREPLACE: Color("5a5650"),
@@ -648,7 +656,10 @@ var day := 1
 var food := 100.0
 var water := 100.0
 var warmth := 100.0
-var starve_timer := 0.0      # hours spent with an empty need, toward the next HP lost
+var starve_timer := 0.0
+var well_repaired := false
+var hose_attached := false
+var well_water := 0.0      # hours spent with an empty need, toward the next HP lost
 var weather_kind := ""       # today's weather, rolled each morning: see WEATHER_WEIGHTS
 var skill_xp := {"Farming": 0, "Bushcrafting": 0, "Carpentry": 0, "Cleaning": 0, "Fishing": 0, "Cooking": 0, "Combat": 0, "Forestry": 0, "Mining": 0, "Smithing": 0}
 var inventory := {"seeds": STARTING_SEEDS, "pumpkin_seeds": 0, "crops": 0, "fish": 0, "meals": 0, "smoked": 0, "dried": 0, "canned": 0, "fermented": 0}
@@ -962,6 +973,8 @@ func _draw() -> void:
 				_draw_coop_tile(cell, Vector2i(x, y) - coop_tile)
 			elif tile == Tile.BARN:
 				_draw_barn_tile(cell, Vector2i(x, y) - barn_tile)
+			elif tile == Tile.WELL:
+				_draw_well(cell)
 			elif tile == Tile.CELLAR:
 				_draw_cellar_tile(cell)
 			elif tile == Tile.SMOKEHOUSE:
@@ -1001,6 +1014,9 @@ func _draw() -> void:
 		var center := _tile_center(pos.x, pos.y)
 		var size := PX * (0.2 + 0.2 * stage)
 		draw_rect(Rect2(center - Vector2.ONE * size * 0.5, Vector2.ONE * size), Color(colors[stage]))
+		# A blue drop shows the crop was watered today, so it will grow tonight.
+		if int(crop.get("watered_day", 0)) == day:
+			draw_circle(center + Vector2(PX * 0.34, -PX * 0.34), PX * 0.1, Color("6fa8dc"))
 
 	for pos in rocks:
 		var rc := _tile_center(pos.x, pos.y)
@@ -1213,6 +1229,8 @@ func _build_map() -> void:
 					t = Tile.DOOR
 				if GROVE_SPOTS.has(Vector2i(ix, iy)):
 					t = Tile.TREE
+				if Vector2i(ix, iy) == WELL_IX:
+					t = Tile.WELL
 			row.append(t)
 		map.append(row)
 
@@ -1477,6 +1495,8 @@ func _tip_ready(id: String) -> bool:
 			return cellar_built
 		"needs":
 			return current_hour >= 12.0
+		"well":
+			return day >= 2
 	return false
 
 
@@ -1660,6 +1680,15 @@ func _on_panel_action(action_id: String) -> void:
 	if action_id == "unstick":
 		_unstick()
 		return
+	if action_id == "repair_well":
+		_repair_well()
+		return
+	if action_id == "attach_hose":
+		_attach_hose()
+		return
+	if action_id == "drink_well":
+		_drink_well()
+		return
 	if action_id == "toggle_music":
 		_toggle_music()
 		return
@@ -1778,6 +1807,8 @@ func _refresh_panel() -> void:
 			rows = _coop_rows()
 		"Barn":
 			rows = _barn_rows()
+		"Well":
+			rows = _well_rows()
 		"Settings":
 			rows = _settings_rows() + _tip_rows() + _game_rows()
 	action_bar.show_panel(open_tab, rows)
@@ -1826,6 +1857,9 @@ func _inventory_rows() -> Array:
 	rows.append({"grid": _seed_cells(), "columns": 5})
 	rows.append({"section": "Planting"})
 	rows.append({"name": "Planting with", "value": _seed_label(selected_seed)})
+	var growing := crops.size()
+	if growing > 0:
+		rows.append({"name": "Watered today", "value": "%d of %d growing crops" % [_watered_today(), growing], "progress": float(_watered_today()) / float(growing)})
 	if _level("Farming") >= PUMPKIN_LEVEL:
 		rows.append({
 			"name": "Switch seed",
@@ -2331,6 +2365,9 @@ func _interact() -> void:
 	if kind == Tile.WATER:
 		_drink_pond()
 		return
+	if kind == Tile.WELL:
+		_toggle_tab("Well")
+		return
 	if kind == Tile.TREE and GROVE_SPOTS.has(tile - Vector2i(BORDER_X, BORDER_Y)):
 		_chop(tile)
 		return
@@ -2367,8 +2404,10 @@ func _interact() -> void:
 	if crops.has(tile):
 		if crops[tile]["stage"] >= MAX_STAGE:
 			_harvest(tile)
+		elif int(crops[tile].get("watered_day", 0)) == day:
+			_show_message("Already watered today. It isn't ready yet.")
 		else:
-			_show_message("It isn't ready yet.")
+			_water_crop(tile)
 	else:
 		_plant(tile)
 
@@ -2589,6 +2628,123 @@ func _eat_meal() -> void:
 	hp = mini(max_hp(), hp + HEAL_MEAL)
 	food = minf(100.0, food + MEAL_FOOD)
 	_show_message("You eat a warm meal. Your mind steadies. Food %d/100, HP %d/%d" % [food, hp, max_hp()])
+
+
+func _can_repair_well() -> bool:
+	return not well_repaired and materials["wood"] >= WELL_REPAIR["wood"] \
+		and materials["fiber"] >= WELL_REPAIR["fiber"] and _level("Carpentry") >= WELL_REPAIR["level"]
+
+
+func _repair_well() -> void:
+	if not _can_repair_well():
+		_show_message("The pump needs %d wood, %d fiber, and Carpentry %d to repair." % [WELL_REPAIR["wood"], WELL_REPAIR["fiber"], WELL_REPAIR["level"]])
+		return
+	materials["wood"] -= WELL_REPAIR["wood"]
+	materials["fiber"] -= WELL_REPAIR["fiber"]
+	well_repaired = true
+	well_water = WELL_CAPACITY
+	_grant_xp("Carpentry", XP_REPAIR)
+	_show_message("You rebuild the pump and the water comes up cold. +%d Carpentry XP" % XP_REPAIR)
+	queue_redraw()
+
+
+func _can_attach_hose() -> bool:
+	return well_repaired and not hose_attached and materials["fiber"] >= HOSE_COST["fiber"] \
+		and materials["resin"] >= HOSE_COST["resin"]
+
+
+# The hose runs from the pump to every plot on the farm, so it waters any crop you face.
+func _attach_hose() -> void:
+	if not _can_attach_hose():
+		_show_message("The hose needs %d fiber and %d resin, and the pump has to be working." % [HOSE_COST["fiber"], HOSE_COST["resin"]])
+		return
+	materials["fiber"] -= HOSE_COST["fiber"]
+	materials["resin"] -= HOSE_COST["resin"]
+	hose_attached = true
+	_show_message("The hose is on. It reaches every plot, so face a crop and press Space to water it.")
+
+
+func _drink_well() -> void:
+	if not well_repaired:
+		_show_message("The pump is seized. Repair it from this panel first.")
+		return
+	if water >= 100.0:
+		_show_message("You're not thirsty.")
+		return
+	water = minf(100.0, water + DRINK_WELL)
+	_show_message("Cold water from the pump. Water %d/100" % water)
+
+
+# Watering uses one unit from the tank, and a crop only needs to be watered once a day.
+func _water_crop(tile: Vector2i) -> void:
+	if not well_repaired or not hose_attached:
+		_show_message("Nothing comes out of the hose. Repair the pump and attach the hose from the Well.")
+		return
+	if well_water < 1.0:
+		_show_message("The tank is dry. It refills each morning.")
+		return
+	well_water -= 1.0
+	crops[tile]["watered_day"] = day
+	stats["watered"] = int(stats.get("watered", 0)) + 1
+	_show_message("Watered. The tank has %d left." % int(well_water))
+	queue_redraw()
+
+
+func _watered_today() -> int:
+	var n := 0
+	for pos in crops:
+		if int(crops[pos].get("watered_day", 0)) == day:
+			n += 1
+	return n
+
+
+func _well_rows() -> Array:
+	var rows: Array = [{"section": "Pump"}]
+	if not well_repaired:
+		rows.append({"name": "Pump", "value": "Seized. The pipe has rotted through, and the crank won't turn."})
+		rows.append({
+			"name": "Repair the pump",
+			"value": "%d wood, %d fiber, Carpentry %d" % [WELL_REPAIR["wood"], WELL_REPAIR["fiber"], WELL_REPAIR["level"]],
+			"button": "Repair",
+			"action": "repair_well",
+			"enabled": _can_repair_well(),
+		})
+		rows.append({"note": "Repairing the pump also refills the tank and gives Carpentry XP."})
+		return rows
+	rows.append({"name": "Water in the tank", "value": "%d of %d" % [int(well_water), int(WELL_CAPACITY)], "progress": well_water / WELL_CAPACITY})
+	rows.append({"note": "The tank refills each morning. Drinking from the pump costs nothing."})
+	rows.append({
+		"name": "Drink from the pump",
+		"value": "+%d water" % int(DRINK_WELL),
+		"button": "Drink",
+		"action": "drink_well",
+		"enabled": water < 100.0,
+	})
+	rows.append({"section": "Hose"})
+	if hose_attached:
+		rows.append({"name": "Hose", "value": "Attached. It reaches every plot on the farm. Face a crop and press Space to water it."})
+	else:
+		rows.append({
+			"name": "Attach the hose",
+			"value": "%d fiber, %d resin. It reaches every plot on the farm." % [HOSE_COST["fiber"], HOSE_COST["resin"]],
+			"button": "Attach",
+			"action": "attach_hose",
+			"enabled": _can_attach_hose(),
+		})
+	return rows
+
+
+func _draw_well(cell: Rect2) -> void:
+	var c := cell.get_center()
+	var r := cell.size.x * 0.4
+	draw_circle(c, r, Color("6e6a64"))
+	draw_circle(c, r * 0.72, Color("2a3440") if well_repaired else Color("3d3a36"))
+	if well_repaired:
+		draw_circle(c + Vector2(-r * 0.2, -r * 0.2), r * 0.2, Color("5a7d9a"))
+	# Posts and a crossbeam with the crank.
+	draw_rect(Rect2(c.x - r * 0.95, c.y - r * 1.25, 4, r * 1.25), Color("6b4e2e"))
+	draw_rect(Rect2(c.x + r * 0.9, c.y - r * 1.25, 4, r * 1.25), Color("6b4e2e"))
+	draw_rect(Rect2(c.x - r * 1.05, c.y - r * 1.3, r * 2.1, 4), Color("7a5a36"))
 
 
 func _eat_crop() -> void:
@@ -5008,8 +5164,21 @@ func _end_day(base: String, leave_house: bool = true) -> void:
 	stats["spoiled"] += spoiled
 	var spoil_note := (" %d fish spoiled in your pack overnight." % spoiled) if spoiled > 0 else ""
 	var upkeep_note := _settle_day()
+	# Rain waters every crop. Otherwise a crop must have been watered today to grow.
+	if weather_kind in WATER_RAIN_KINDS:
+		for pos in crops:
+			crops[pos]["watered_day"] = day
+	var thirsty := 0
 	for pos in crops.keys():
-		crops[pos]["stage"] = min(crops[pos]["stage"] + 1, MAX_STAGE)
+		if int(crops[pos].get("watered_day", 0)) == day:
+			crops[pos]["stage"] = min(crops[pos]["stage"] + 1, MAX_STAGE)
+		elif crops[pos]["stage"] < MAX_STAGE:
+			thirsty += 1
+	if thirsty > 0:
+		upkeep_note += " %d crop%s went thirsty and didn't grow." % [thirsty, "" if thirsty == 1 else "s"]
+	# The pump refills the tank overnight.
+	if well_repaired:
+		well_water = WELL_CAPACITY
 	day += 1
 	_roll_weather()
 	clock = 0.0
@@ -5113,6 +5282,9 @@ func _save_game() -> void:
 		"water": water,
 		"warmth": warmth,
 		"starve_timer": starve_timer,
+		"well_repaired": well_repaired,
+		"hose_attached": hose_attached,
+		"well_water": well_water,
 		"skill_xp": skill_xp,
 		"inventory": inventory,
 		"materials": materials,
@@ -5188,6 +5360,9 @@ func _load_game() -> bool:
 	water = float(data.get("water", 100.0))
 	warmth = float(data.get("warmth", 100.0))
 	starve_timer = float(data.get("starve_timer", 0.0))
+	well_repaired = bool(data.get("well_repaired", false))
+	hose_attached = bool(data.get("hose_attached", false))
+	well_water = float(data.get("well_water", 0.0))
 	_merge_ints(skill_xp, data.get("skill_xp"))
 	_merge_ints(inventory, data.get("inventory"))
 	_merge_ints(materials, data.get("materials"))
@@ -5241,7 +5416,7 @@ func _load_game() -> bool:
 	crops.clear()
 	for c in data.get("crops", []):
 		var kind := str(c.get("kind", "turnip"))
-		crops[Vector2i(int(c["x"]), int(c["y"]))] = {"stage": int(c["stage"]), "kind": kind}
+		crops[Vector2i(int(c["x"]), int(c["y"]))] = {"stage": int(c["stage"]), "kind": kind, "watered_day": int(c.get("watered_day", 0))}
 	brush.clear()
 	for b in data.get("brush", []):
 		brush[Vector2i(int(b[0]), int(b[1]))] = true
@@ -5297,7 +5472,7 @@ func _crops_to_array() -> Array:
 	var arr: Array = []
 	for pos in crops:
 		var crop: Dictionary = crops[pos]
-		arr.append({"x": pos.x, "y": pos.y, "stage": crop["stage"], "kind": crop["kind"]})
+		arr.append({"x": pos.x, "y": pos.y, "stage": crop["stage"], "kind": crop["kind"], "watered_day": int(crop.get("watered_day", 0))})
 	return arr
 
 
