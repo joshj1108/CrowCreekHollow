@@ -1876,6 +1876,10 @@ func _on_panel_action(action_id: String) -> void:
 		craft_tab = action_id.trim_prefix("craft_tab:")
 		_refresh_panel()
 		return
+	if action_id.begins_with("craft_pick:"):
+		craft_selected = action_id.trim_prefix("craft_pick:")
+		_refresh_panel()
+		return
 	match action_id:
 		"close":
 			_close_panel()
@@ -2070,119 +2074,234 @@ func _gear_rows() -> Array:
 	]
 
 
-# The Craft panel groups everything made or cooked, one sub-tab at a time.
+# The Craft panel is a grid of recipes for the chosen sub-tab. Picking a tile fills in its details below.
+const TINT_WEAPON := "6b4a3a"
+const TINT_ARMOR := "3f5a6b"
+const TINT_ACCESSORY := "6b5a2a"
+const TINT_TOOL := "4f6b3a"
+const TINT_FOOD := "8a4f2a"
+const TINT_LIGHT := "8a7a2a"
+var craft_selected := ""     # the recipe whose details show; remembered while the panel is open
+
+
 func _craft_rows() -> Array:
 	var tabs: Array = []
 	for tab in CRAFT_TABS:
 		tabs.append({"id": tab["id"], "name": tab["name"], "action": "craft_tab:" + str(tab["id"])})
 	var rows: Array = [{"tabs": tabs, "active": craft_tab}]
-	match craft_tab:
-		"cooking":
-			rows.append_array(_craft_cooking_rows())
-		"tools":
-			rows.append_array(_craft_tools_rows())
-		"other":
-			rows.append_array(_craft_other_rows())
-		_:
-			rows.append_array(_craft_gear_rows())
+	var recipes := _craft_recipes()
+	var chosen := _chosen_recipe(recipes)
+	if recipes.is_empty():
+		rows.append({"note": "Nothing to make here yet."})
+	else:
+		var tiles: Array = []
+		for r in recipes:
+			var tile: Dictionary = r.duplicate()
+			tile["selected"] = not chosen.is_empty() and r["key"] == chosen["key"]
+			tile["action"] = "craft_pick:" + str(r["key"])
+			tiles.append(tile)
+		rows.append({"split": {"recipes": tiles, "columns": 4, "detail": chosen}})
+	rows.append({"note": _craft_footer()})
+	if craft_tab == "other":
+		rows.append_array(_craft_camp_rows())
 	return rows
 
 
-func _craft_gear_rows() -> Array:
-	var rows: Array = [{"section": "Craft and equip"}]
+func _chosen_recipe(recipes: Array) -> Dictionary:
+	for r in recipes:
+		if str(r["key"]) == craft_selected:
+			return r
+	return recipes[0] if not recipes.is_empty() else {}
+
+
+func _craft_recipes() -> Array:
+	match craft_tab:
+		"cooking":
+			return _recipes_cooking()
+		"tools":
+			return _recipes_tools()
+		"other":
+			return _recipes_other()
+	return _recipes_gear()
+
+
+func _craft_footer() -> String:
+	match craft_tab:
+		"cooking":
+			return "Eat meals from the Inventory panel. Smoking and preserving are done at the smokehouse, and smelting at the furnace."
+		"tools":
+			return "Tools are kept by tier rather than worn in a slot. Upgrade them one tier at a time."
+		"other":
+			return "The lantern hangs from the belt and lights a ring around you in the dark."
+	return "Crafted gear equips at once and replaces what was worn in that slot. Armor cuts damage from foes. Weapons decide how hard you hit."
+
+
+# One line per material: how much the recipe needs, and how much you hold.
+func _cost_lines(cost: Dictionary) -> Array:
+	var lines: Array = []
+	for mat in cost.keys():
+		var need := int(cost[mat])
+		if need <= 0:
+			continue
+		lines.append({"label": "%d %s" % [need, str(mat).replace("_", " ")], "have": _held(str(mat)), "need": need})
+	return lines
+
+
+func _held(mat: String) -> int:
+	if mat == "coins":
+		return money
+	if materials.has(mat):
+		return int(materials[mat])
+	return int(inventory.get(mat, 0))
+
+
+func _level_text(skill: String, level: int) -> String:
+	return "Needs %s %d (you have %d)" % [skill, level, _level(skill)]
+
+
+func _slot_icon(item: Dictionary) -> String:
+	if item.has("ammo"):
+		return "bow"
+	match str(item["slot"]):
+		"hand_r":
+			return "sword"
+		"offhand":
+			return "shield"
+		"head":
+			return "hat"
+		"chest":
+			return "shirt"
+		"legs":
+			return "pants"
+		"feet":
+			return "boots"
+		"neck":
+			return "pendant"
+		"wrist":
+			return "bracer"
+	return "sword"
+
+
+func _recipes_gear() -> Array:
+	var out: Array = []
 	for id in GEAR_ITEMS.keys():
 		if id == "hoe":
 			continue
 		var item: Dictionary = GEAR_ITEMS[id]
-		rows.append({
-			"name": "%s  (%s)" % [item["name"], str(item["slot"]).replace("_", " ")],
-			"value": "%s, %s %d" % [_price_text_items(item["cost"]), str(item.get("skill", "Bushcrafting")), int(item["level"])],
-			"button": "Make",
-			"action": "craft:" + str(id),
-			"enabled": _can_craft(str(id)),
+		var worn: bool = str(equipment[item["slot"]]) == str(id)
+		var skill := str(item.get("skill", "Bushcrafting"))
+		var level := int(item["level"])
+		var parts: Array = []
+		if int(item.get("dmg", 0)) > 0:
+			parts.append("Damage %d" % int(item["dmg"]))
+		if int(item.get("def", 0)) > 0:
+			parts.append("Armor %d" % int(item["def"]))
+		var desc := ", ".join(parts) if not parts.is_empty() else "No damage or armor."
+		desc += ". Worn %s." % str(item["slot"]).replace("_", " ")
+		if worn:
+			desc = "Already worn. " + desc
+		var tint := TINT_WEAPON
+		if item.has("ammo"):
+			tint = TINT_WEAPON
+		elif str(item["slot"]) in ["head", "chest", "legs", "feet", "offhand"]:
+			tint = TINT_ARMOR
+		elif str(item["slot"]) in ["neck", "wrist"]:
+			tint = TINT_ACCESSORY
+		out.append({
+			"key": "gear:" + str(id), "name": str(item["name"]), "icon": _slot_icon(item), "tint": tint,
+			"desc": desc, "costs": _cost_lines(item["cost"]), "level_text": _level_text(skill, level),
+			"level_ok": _level(skill) >= level, "enabled": _can_craft(str(id)), "action": "craft:" + str(id),
+			"button": "Worn" if worn else "Make",
 		})
-	rows.append({"note": "Crafted gear equips at once and replaces what was worn in that slot. Armor cuts damage from foes. Weapons decide how hard you hit."})
-	return rows
+	return out
 
 
-func _craft_cooking_rows() -> Array:
+func _recipes_cooking() -> Array:
 	return [
-		{"section": "Cook"},
 		{
-			"name": "Cook a fish",
-			"value": "1 fish, 1 wood: +%d Cooking XP" % XP_COOK_FISH,
-			"button": "Cook",
-			"action": "cook_fish",
-			"enabled": _can_cook_fish(),
+			"key": "cook:fish", "name": "Cooked fish", "icon": "bowl", "tint": TINT_FOOD,
+			"desc": "A fish and a piece of wood make one meal. +%d Cooking XP." % XP_COOK_FISH,
+			"costs": [{"label": "1 fish", "have": _held("fish"), "need": 1}, {"label": "%d wood" % COOK_WOOD, "have": _held("wood"), "need": COOK_WOOD}],
+			"level_text": "", "level_ok": true, "enabled": _can_cook_fish(), "action": "cook_fish", "button": "Cook",
 		},
 		{
-			"name": "Cook crops",
-			"value": "%d crops, 1 wood: +%d Cooking XP" % [COOK_CROP_COUNT, XP_COOK_CROPS],
-			"button": "Cook",
-			"action": "cook_crops",
-			"enabled": _can_cook_crops(),
+			"key": "cook:crops", "name": "Cooked crops", "icon": "bowl", "tint": TINT_FOOD,
+			"desc": "%d crops and a piece of wood make one meal. +%d Cooking XP." % [COOK_CROP_COUNT, XP_COOK_CROPS],
+			"costs": [{"label": "%d crops" % COOK_CROP_COUNT, "have": _held("crops"), "need": COOK_CROP_COUNT}, {"label": "%d wood" % COOK_WOOD, "have": _held("wood"), "need": COOK_WOOD}],
+			"level_text": "", "level_ok": true, "enabled": _can_cook_crops(), "action": "cook_crops", "button": "Cook",
 		},
-		{"note": "Eat meals from the Inventory panel. Smoking and preserving are done at the smokehouse, and smelting at the furnace."},
 	]
 
 
-func _craft_tools_rows() -> Array:
-	var rows: Array = [{"section": "Tools"}]
+func _recipes_tools() -> Array:
+	var out: Array = []
 	for kind in ["hatchet", "pick"]:
 		var tiers: Array = TOOL_TIERS[kind]
 		var have := int(tool_tier[kind])
-		rows.append({"name": "Best %s" % kind, "value": _tool_name(kind)})
-		if have < tiers.size():
-			var tier: Dictionary = tiers[have]
-			rows.append({
-				"name": "Next: %s" % tier["name"],
-				"value": "%s, %s %d" % [_price_text_items(tier["cost"]), tier["skill"], int(tier["level"])],
-				"button": "Make",
-				"action": "tool:" + kind,
-				"enabled": _can_craft_tool(kind),
+		var icon := "axe" if kind == "hatchet" else "pick"
+		if have >= tiers.size():
+			out.append({
+				"key": "tool:" + kind, "name": _tool_name(kind), "icon": icon, "tint": TINT_TOOL,
+				"desc": "You have the best %s there is." % kind, "costs": [], "level_text": "", "level_ok": true,
+				"enabled": false, "action": "", "button": "Best",
 			})
-	rows.append({"section": "Ammunition"})
+			continue
+		var tier: Dictionary = tiers[have]
+		out.append({
+			"key": "tool:" + kind, "name": str(tier["name"]), "icon": icon, "tint": TINT_TOOL,
+			"desc": "Your %s is %s. This is the next tier." % [kind, _tool_name(kind)],
+			"costs": _cost_lines(tier["cost"]), "level_text": _level_text(str(tier["skill"]), int(tier["level"])),
+			"level_ok": _level(str(tier["skill"])) >= int(tier["level"]), "enabled": _can_craft_tool(kind),
+			"action": "tool:" + kind, "button": "Make",
+		})
 	for kind in ["arrows", "bolts"]:
 		var ammo: Dictionary = AMMO[kind]
-		rows.append({
-			"name": "%s (%d)" % [ammo["name"], int(ammo["yield"])],
-			"value": "%s, %s %d. Held: %d" % [_price_text_items(ammo["cost"]), ammo["skill"], int(ammo["level"]), int(materials[kind])],
-			"button": "Make",
-			"action": "ammo:" + kind,
-			"enabled": _can_fletch(kind),
+		out.append({
+			"key": "ammo:" + kind, "name": str(ammo["name"]), "icon": "arrow", "tint": TINT_TOOL,
+			"desc": "Makes %d at a time. You hold %d." % [int(ammo["yield"]), int(materials[kind])],
+			"costs": _cost_lines(ammo["cost"]), "level_text": _level_text(str(ammo["skill"]), int(ammo["level"])),
+			"level_ok": _level(str(ammo["skill"])) >= int(ammo["level"]), "enabled": _can_fletch(kind),
+			"action": "ammo:" + kind, "button": "Make",
 		})
-	rows.append({"note": "Tools are kept by tier rather than worn in a slot. Upgrade them one tier at a time."})
-	return rows
+	return out
 
 
-func _craft_other_rows() -> Array:
-	var rows: Array = [{"section": "Lantern"}]
-	if lantern_tier == 0:
-		rows.append({"name": "Lantern", "value": "not built"})
-	else:
-		var current: Dictionary = LANTERN_TIERS[lantern_tier - 1]
-		rows.append({"name": current["name"], "value": "light ring %.1f tiles" % current["radius"]})
+func _recipes_other() -> Array:
+	var out: Array = []
 	if lantern_tier < LANTERN_TIERS.size():
-		var upcoming: Dictionary = LANTERN_TIERS[lantern_tier]
-		rows.append({
-			"name": "Next: %s" % upcoming["name"],
-			"value": _cost_text(upcoming),
-			"button": "Build" if lantern_tier == 0 else "Upgrade",
-			"action": "advance_lantern",
-			"enabled": _can_advance_lantern(),
+		var t: Dictionary = LANTERN_TIERS[lantern_tier]
+		var costs: Array = [
+			{"label": "%d wood" % int(t["wood"]), "have": _held("wood"), "need": int(t["wood"])},
+			{"label": "%d fiber" % int(t["fiber"]), "have": _held("fiber"), "need": int(t["fiber"])},
+		]
+		if int(t["resin"]) > 0:
+			costs.append({"label": "%d resin" % int(t["resin"]), "have": _held("resin"), "need": int(t["resin"])})
+		var desc := "Lights a ring %.1f tiles across. It hangs from your belt." % float(t["radius"])
+		if lantern_tier > 0:
+			desc = "You have the %s. %s" % [LANTERN_TIERS[lantern_tier - 1]["name"], desc]
+		out.append({
+			"key": "lantern", "name": str(t["name"]), "icon": "lantern", "tint": TINT_LIGHT,
+			"desc": desc, "costs": costs, "level_text": _level_text("Bushcrafting", int(t["level"])),
+			"level_ok": _level("Bushcrafting") >= int(t["level"]), "enabled": _can_advance_lantern(),
+			"action": "advance_lantern", "button": "Build" if lantern_tier == 0 else "Upgrade",
 		})
-	rows.append({"note": "The lantern hangs from the belt and lights a ring around you in the dark."})
-	if _in_village():
-		rows.append({"section": "Campsite"})
-		rows.append({
+	return out
+
+
+func _craft_camp_rows() -> Array:
+	if not _in_village():
+		return []
+	return [
+		{"section": "Campsite"},
+		{
 			"name": "Set up camp here",
 			"value": "%d wood, %d fiber, Bushcrafting %d. Face open ground." % [int(CAMP_COST["wood"]), int(CAMP_COST["fiber"]), CAMP_LEVEL],
 			"button": "Camp",
 			"action": "camp",
 			"enabled": _can_camp(),
-		})
-		rows.append({"note": "A campsite is safe from foes. Rest there from 18:00 like a bed. It saves the game and ends the day. Setting up a new camp moves the old one."})
-	return rows
+		},
+		{"note": "A campsite is safe from foes. Rest there from 18:00 like a bed. It saves the game and ends the day. Setting up a new camp moves the old one."},
+	]
 
 
 func _price_text_items(cost: Dictionary) -> String:

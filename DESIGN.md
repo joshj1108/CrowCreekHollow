@@ -39,7 +39,7 @@ A top-down farming game with heavy psychological horror, built in Godot 4.7.
 - Quests are collapsed to a line: the title, and Done or the progress count. A Details button opens the story, reward, and progress bar, and Hide closes it. The current chapter starts open.
 - Completed quests show their title struck through.
 - Settings sections fold. Each header shows its item count and opens with Enter or A, or a click, so only the headings show until you open one. Every section starts folded.
-- Each section lists its options as cards: name, value, and an optional button or progress bar. Crafting and the other grid-based sections use the same layout.
+- Each section lists its options as cards: name, value, and an optional button or progress bar. The Craft panel is the exception: it is a picture grid (see Gear and crafting). The other sections use the card layout.
 - **Settings pauses the day.** While it is open the clock stops, foes stand still, and the player can't move. Other sections don't pause.
 - Panels rebuild only when their content changes, so buttons don't disappear mid-click.
 - The open panel is saved and reopened on load.
@@ -329,6 +329,8 @@ Combat happens while you move, in the style of Stardew Valley.
 The Gear panel has ten slots in four columns: Back (your bag), Head, Neck, Belt (lantern), Off hand (shield), Chest, Main hand (weapon), Wrist, Legs, and Feet. The lantern hangs from the belt, so the offhand is free for a shield.
 
 The Gear panel shows only what is worn, plus the toolbelt: the hoe, axe, and pickaxe. Everything is made in the Craft panel (press C), which has four tabs: Gear, Cooking, Tools, and Other. Gear is crafted with wood, fiber, and resin. Crafting equips the piece at once and replaces whatever was in that slot.
+
+**The Craft panel is a grid of pictures.** Each sub-tab shows its recipes as tiles, four across: a drawn picture of the item with its name under it. Items you can't make yet are dimmed, but they still show, so you can see what they need. Picking a tile fills the detail card on the right: the picture, its name, what it does (damage, armor, or what it yields), its level requirement (green-red coloring shows whether you meet it), each material with how much you hold against how much it costs, and a single button (Make, Build, Cook, Upgrade, or Best when a tool is at its top tier). The card stays on the screen while you pick another tile, so you can compare recipes without scrolling. The Campsite section still sits below the grid on the Other tab. Pictures are drawn from shapes in code (the RecipeIcon in the action bar), so no image files are needed.
 
 | Piece | Slot | Effect | Bushcrafting | Cost |
 |---|---|---|---|---|

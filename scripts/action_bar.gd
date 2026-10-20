@@ -59,6 +59,7 @@ const COL_TRACK := Color("120d09")
 const COL_TEXT := Color("f1e4c8")
 const COL_MUTED := Color("b3a27c")
 const COL_ACCENT := Color("d9a94e")
+const COL_SHORT := Color("d0705a")   # a cost or level the player does not meet yet
 
 var nav_buttons := {}      # tab name -> Button in the menu's section list
 var panel: Control         # the full-screen menu; visible only while a panel is open
@@ -334,6 +335,8 @@ func _first_enabled_button(node: Node) -> Button:
 func _build_row(data: Dictionary) -> Control:
 	if data.has("tabs"):
 		return _build_tabs(data)
+	if data.has("split"):
+		return _build_split(data["split"])
 	if data.has("grid"):
 		return _build_grid(data)
 	if data.has("section_toggle"):
@@ -501,6 +504,142 @@ func _build_cell(cell: Dictionary) -> Control:
 	return panel_box
 
 
+# The recipe grid on the left and the picked recipe's details on the right.
+func _build_split(data: Dictionary) -> Control:
+	var holder := HBoxContainer.new()
+	holder.add_theme_constant_override("separation", 16)
+	holder.alignment = BoxContainer.ALIGNMENT_BEGIN
+	var grid := _build_recipes({"recipes": data["recipes"], "columns": data.get("columns", 4)})
+	holder.add_child(grid)
+	if not data.get("detail", {}).is_empty():
+		holder.add_child(_build_detail(data["detail"]))
+	return holder
+
+
+# Recipe tiles: a drawn picture of each item with its name. Picking one shows its details below.
+# Each recipe dict: key, name, icon, tint (hex), enabled, selected, action.
+func _build_recipes(data: Dictionary) -> Control:
+	var grid := GridContainer.new()
+	grid.columns = int(data.get("columns", 5))
+	grid.add_theme_constant_override("h_separation", 8)
+	grid.add_theme_constant_override("v_separation", 8)
+	for recipe in data["recipes"]:
+		grid.add_child(_build_recipe_tile(recipe))
+	return grid
+
+
+func _build_recipe_tile(recipe: Dictionary) -> Control:
+	var selected := bool(recipe.get("selected", false))
+	var lit := bool(recipe.get("enabled", false)) or selected
+	var tile := Button.new()
+	tile.custom_minimum_size = Vector2(88, 98)
+	tile.focus_mode = Control.FOCUS_ALL
+	tile.tooltip_text = str(recipe.get("name", ""))
+	tile.clip_contents = true
+	var base := COL_BUTTON_ACTIVE if selected else COL_BUTTON
+	tile.add_theme_stylebox_override("normal", _box(base, COL_ACCENT if selected else COL_BORDER, 2, 8, 4))
+	tile.add_theme_stylebox_override("hover", _box(COL_BUTTON_HOVER, COL_ACCENT, 2, 8, 4))
+	tile.add_theme_stylebox_override("pressed", _box(COL_BUTTON_ACTIVE, COL_ACCENT, 2, 8, 4))
+	tile.add_theme_stylebox_override("focus", _box(base, COL_ACCENT, 2, 8, 4))
+	tile.pressed.connect(_on_action_pressed.bind(str(recipe.get("action", ""))))
+
+	var box := VBoxContainer.new()
+	box.set_anchors_preset(Control.PRESET_FULL_RECT)
+	box.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	box.alignment = BoxContainer.ALIGNMENT_CENTER
+	box.add_theme_constant_override("separation", 4)
+	tile.add_child(box)
+
+	var icon := RecipeIcon.new()
+	icon.kind = str(recipe.get("icon", ""))
+	icon.tint = Color(str(recipe.get("tint", "6b4a3a")))
+	icon.custom_minimum_size = Vector2(56, 56)
+	icon.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+	icon.modulate = Color(1, 1, 1, 1) if lit else Color(1, 1, 1, 0.45)
+	box.add_child(icon)
+
+	var name_label := Label.new()
+	name_label.text = str(recipe.get("name", ""))
+	name_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	name_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	name_label.add_theme_font_size_override("font_size", 11)
+	name_label.add_theme_color_override("font_color", COL_TEXT if lit else COL_MUTED)
+	name_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	box.add_child(name_label)
+	return tile
+
+
+# The details of the picked recipe: the picture, what it does, what it costs, and the button to make it.
+func _build_detail(recipe: Dictionary) -> Control:
+	var card := PanelContainer.new()
+	card.custom_minimum_size = Vector2(280, 0)
+	card.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
+	card.add_theme_stylebox_override("panel", _box(COL_CARD, COL_BORDER, 1, 8, 14))
+	var block := VBoxContainer.new()
+	block.add_theme_constant_override("separation", 10)
+	card.add_child(block)
+
+	var icon := RecipeIcon.new()
+	icon.kind = str(recipe.get("icon", ""))
+	icon.tint = Color(str(recipe.get("tint", "6b4a3a")))
+	icon.custom_minimum_size = Vector2(96, 96)
+	icon.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+	block.add_child(icon)
+
+	var title := Label.new()
+	title.text = str(recipe.get("name", ""))
+	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	title.add_theme_font_size_override("font_size", 19)
+	block.add_child(title)
+
+	var desc := Label.new()
+	desc.text = str(recipe.get("desc", ""))
+	desc.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	desc.add_theme_font_size_override("font_size", 14)
+	desc.add_theme_color_override("font_color", COL_MUTED)
+	block.add_child(desc)
+
+	var level_text := str(recipe.get("level_text", ""))
+	if level_text != "":
+		var level := Label.new()
+		level.text = level_text
+		level.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		level.add_theme_font_size_override("font_size", 13)
+		level.add_theme_color_override("font_color", COL_TEXT if bool(recipe.get("level_ok", true)) else COL_SHORT)
+		block.add_child(level)
+
+	if not recipe.get("costs", []).is_empty():
+		var costs := VBoxContainer.new()
+		costs.add_theme_constant_override("separation", 4)
+		block.add_child(costs)
+		for cost in recipe["costs"]:
+			var have := int(cost["have"])
+			var need := int(cost["need"])
+			var line := HBoxContainer.new()
+			var what := Label.new()
+			what.text = str(cost["label"])
+			what.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+			what.add_theme_font_size_override("font_size", 14)
+			what.add_theme_color_override("font_color", COL_TEXT if have >= need else COL_SHORT)
+			line.add_child(what)
+			var count := Label.new()
+			count.text = "%d / %d" % [have, need]
+			count.add_theme_font_size_override("font_size", 14)
+			count.add_theme_color_override("font_color", COL_ACCENT if have >= need else COL_SHORT)
+			line.add_child(count)
+			costs.add_child(line)
+
+	var button := Button.new()
+	button.text = str(recipe.get("button", "Make"))
+	button.custom_minimum_size = Vector2(0, 40)
+	button.focus_mode = Control.FOCUS_ALL
+	button.disabled = not bool(recipe.get("enabled", false)) or str(recipe.get("action", "")) == ""
+	_style_button(button, false)
+	button.pressed.connect(_on_action_pressed.bind(str(recipe.get("action", ""))))
+	block.add_child(button)
+	return card
+
+
 func _set_active(tab: String) -> void:
 	active_tab = tab
 	for tab_name in nav_buttons:
@@ -558,3 +697,98 @@ func _on_tab_pressed(tab: String) -> void:
 
 func _on_action_pressed(action_id: String) -> void:
 	action_pressed.emit(action_id)
+
+
+# A small drawn picture for a recipe, made from shapes so it needs no image files.
+# kind picks the drawing; tint is the item's main color.
+class RecipeIcon extends Control:
+	var kind := ""
+	var tint := Color("6b4a3a")
+	var _org := Vector2.ZERO
+	var _sz := 1.0
+
+	func _init() -> void:
+		mouse_filter = Control.MOUSE_FILTER_IGNORE
+
+	func _pt(x: float, y: float) -> Vector2:
+		return _org + Vector2(x, y) * _sz
+
+	func _poly(pairs: Array) -> PackedVector2Array:
+		var out := PackedVector2Array()
+		for pair in pairs:
+			out.append(_pt(pair[0], pair[1]))
+		return out
+
+	func _draw() -> void:
+		_sz = minf(size.x, size.y)
+		_org = (size - Vector2(_sz, _sz)) * 0.5
+		var light := tint.lightened(0.3)
+		var dark := tint.darkened(0.45)
+		var metal := Color("b9b4a6")
+		match kind:
+			"sword":
+				draw_colored_polygon(_poly([[0.5, 0.02], [0.58, 0.12], [0.58, 0.62], [0.42, 0.62], [0.42, 0.12]]), metal)
+				draw_line(_pt(0.3, 0.64), _pt(0.7, 0.64), dark, 0.09 * _sz)
+				draw_line(_pt(0.5, 0.66), _pt(0.5, 0.9), dark, 0.1 * _sz)
+				draw_circle(_pt(0.5, 0.94), 0.05 * _sz, light)
+			"shield":
+				var outline := _poly([[0.2, 0.1], [0.8, 0.1], [0.8, 0.5], [0.5, 0.92], [0.2, 0.5]])
+				draw_colored_polygon(outline, tint)
+				outline.append(outline[0])
+				draw_polyline(outline, dark, 0.04 * _sz)
+				draw_line(_pt(0.5, 0.2), _pt(0.5, 0.8), light, 0.06 * _sz)
+			"hat":
+				draw_rect(Rect2(_pt(0.3, 0.18), Vector2(0.4, 0.4) * _sz), tint)
+				draw_rect(Rect2(_pt(0.3, 0.5), Vector2(0.4, 0.08) * _sz), dark)
+				draw_rect(Rect2(_pt(0.12, 0.58), Vector2(0.76, 0.12) * _sz), light)
+			"shirt":
+				draw_colored_polygon(_poly([[0.32, 0.12], [0.42, 0.08], [0.58, 0.08], [0.68, 0.12], [0.92, 0.3], [0.8, 0.46], [0.7, 0.38], [0.7, 0.92], [0.3, 0.92], [0.3, 0.38], [0.2, 0.46], [0.08, 0.3]]), tint)
+				draw_arc(_pt(0.5, 0.1), 0.1 * _sz, 0.0, PI, 10, dark, 0.04 * _sz)
+			"pants":
+				draw_rect(Rect2(_pt(0.18, 0.1), Vector2(0.64, 0.22) * _sz), tint)
+				draw_colored_polygon(_poly([[0.18, 0.3], [0.48, 0.3], [0.44, 0.92], [0.22, 0.92]]), tint)
+				draw_colored_polygon(_poly([[0.52, 0.3], [0.82, 0.3], [0.78, 0.92], [0.56, 0.92]]), tint)
+				draw_line(_pt(0.18, 0.32), _pt(0.82, 0.32), dark, 0.03 * _sz)
+			"boots":
+				draw_colored_polygon(_poly([[0.28, 0.1], [0.5, 0.1], [0.5, 0.62], [0.88, 0.7], [0.9, 0.86], [0.28, 0.86]]), tint)
+				draw_rect(Rect2(_pt(0.28, 0.82), Vector2(0.62, 0.07) * _sz), dark)
+			"pendant":
+				draw_arc(_pt(0.5, 0.12), 0.38 * _sz, PI * 0.2, PI * 0.8, 16, metal, 0.04 * _sz)
+				draw_circle(_pt(0.5, 0.62), 0.16 * _sz, tint)
+				draw_arc(_pt(0.5, 0.62), 0.16 * _sz, 0.0, TAU, 24, light, 0.03 * _sz)
+				draw_circle(_pt(0.5, 0.62), 0.06 * _sz, light)
+			"bracer":
+				draw_rect(Rect2(_pt(0.08, 0.36), Vector2(0.84, 0.28) * _sz), tint)
+				draw_rect(Rect2(_pt(0.08, 0.36), Vector2(0.84, 0.04) * _sz), light)
+				for x in [0.2, 0.5, 0.8]:
+					draw_circle(_pt(x, 0.5), 0.035 * _sz, light)
+			"bow":
+				draw_arc(_pt(0.78, 0.5), 0.5 * _sz, PI * 0.5, PI * 1.5, 24, tint, 0.07 * _sz)
+				draw_line(_pt(0.78, 0.0), _pt(0.78, 1.0), light, 0.02 * _sz)
+			"arrow":
+				draw_line(_pt(0.12, 0.88), _pt(0.84, 0.16), light, 0.05 * _sz)
+				draw_colored_polygon(_poly([[0.94, 0.06], [0.58, 0.14], [0.86, 0.42]]), metal)
+				draw_colored_polygon(_poly([[0.08, 0.92], [0.12, 0.6], [0.4, 0.88]]), tint)
+			"bowl":
+				var bowl := PackedVector2Array()
+				for i in range(17):
+					var a := PI * float(i) / 16.0
+					bowl.append(_pt(0.5, 0.42) + Vector2(cos(a), sin(a)) * 0.42 * _sz)
+				draw_colored_polygon(bowl, tint)
+				draw_rect(Rect2(_pt(0.08, 0.42), Vector2(0.84, 0.06) * _sz), light)
+				draw_line(_pt(0.4, 0.2), _pt(0.36, 0.06), light, 0.03 * _sz)
+				draw_line(_pt(0.6, 0.2), _pt(0.64, 0.06), light, 0.03 * _sz)
+			"axe":
+				draw_line(_pt(0.3, 0.92), _pt(0.62, 0.22), light, 0.07 * _sz)
+				draw_colored_polygon(_poly([[0.56, 0.16], [0.92, 0.3], [0.78, 0.52], [0.5, 0.42]]), metal)
+			"pick":
+				draw_line(_pt(0.22, 0.92), _pt(0.76, 0.26), light, 0.07 * _sz)
+				draw_polyline(_poly([[0.06, 0.4], [0.5, 0.1], [0.94, 0.4]]), metal, 0.09 * _sz)
+			"lantern":
+				draw_arc(_pt(0.5, 0.34), 0.14 * _sz, PI, TAU, 12, dark, 0.03 * _sz)
+				draw_rect(Rect2(_pt(0.3, 0.36), Vector2(0.4, 0.5) * _sz), dark)
+				draw_circle(_pt(0.5, 0.6), 0.14 * _sz, Color("e8c060"))
+				draw_colored_polygon(_poly([[0.22, 0.38], [0.5, 0.12], [0.78, 0.38]]), tint)
+			_:
+				draw_circle(_pt(0.5, 0.5), 0.3 * _sz, tint)
+
