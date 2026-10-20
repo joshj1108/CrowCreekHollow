@@ -710,34 +710,21 @@ func _save_path() -> String:
 
 
 # The Game section of Settings: leaving the farm for the start screen.
-func _stuck_rows() -> Array:
-	return [
-		{"section": "Stuck"},
-		{
-			"name": "Unstick me",
-			"value": "Cancels any placement and moves you to the path outside the farmhouse door",
-			"button": "Unstick",
-			"action": "unstick",
-			"enabled": true,
-		},
-	]
-
-
 func _game_rows() -> Array:
 	return [
 		{"section": "Game"},
-		{
-			"name": "Save and quit to the main menu",
-			"value": "Saves this game to its slot, then returns to the start screen. Only from the farm.",
-			"button": "Save and quit",
-			"action": "quit_title_save",
-			"enabled": _can_save_and_quit(),
-		},
 		{
 			"name": "Music",
 			"value": "On" if music_on else "Off",
 			"button": "Turn off" if music_on else "Turn on",
 			"action": "toggle_music",
+			"enabled": true,
+		},
+		{
+			"name": "Unstick me",
+			"value": "Cancels any placement and moves you to the path outside the farmhouse door",
+			"button": "Unstick",
+			"action": "unstick",
 			"enabled": true,
 		},
 		{
@@ -787,18 +774,8 @@ func _toggle_music() -> void:
 	_apply_music()
 
 
-# Saving only happens on the farm, where the saved position makes sense on load.
-func _can_save_and_quit() -> bool:
-	return not in_cave and not _in_village()
-
-
 # Reloads the scene, which resets everything and shows the start screen. The chosen slot carries over.
-func _quit_to_title(save_first: bool) -> void:
-	if save_first:
-		if not _can_save_and_quit():
-			_show_message("You can only save from the farm.")
-			return
-		_save_game()
+func _quit_to_title() -> void:
 	_close_panel()
 	get_tree().call_deferred("reload_current_scene")
 
@@ -1628,11 +1605,8 @@ func _on_panel_action(action_id: String) -> void:
 	if action_id == "toggle_music":
 		_toggle_music()
 		return
-	if action_id == "quit_title_save":
-		_quit_to_title(true)
-		return
 	if action_id == "quit_title":
-		_quit_to_title(false)
+		_quit_to_title()
 		return
 	if action_id == "build_barn" or action_id == "move_barn":
 		_build_barn()
@@ -1745,7 +1719,7 @@ func _refresh_panel() -> void:
 		"Barn":
 			rows = _barn_rows()
 		"Settings":
-			rows = _settings_rows() + _tip_rows() + _game_rows() + _stuck_rows()
+			rows = _settings_rows() + _tip_rows() + _game_rows()
 	action_bar.show_panel(open_tab, rows)
 
 

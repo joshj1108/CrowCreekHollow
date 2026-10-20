@@ -16,7 +16,7 @@ A top-down farming game with heavy psychological horror, built in Godot 4.7.
 - Walk into the farmhouse door to go inside. Walk onto the exit mat to leave.
 - Menu sections (key, or click in the menu list): Skills K, Inventory I, Gear G, Craft C, Quests Q, House H, Buildings U, Achievements J, Settings
 - Esc opens Settings, or closes it if it's already open
-- Stuck while placing or boxed in? Esc opens Settings, which cancels any placement. Its **Unstick** button moves you to the nearest open ground (grass, path, soil, fallow) from the farmhouse door, and works on the farm only.
+- Stuck while placing or boxed in? Esc opens Settings, which cancels any placement. The **Unstick** button in the Game section moves you to the nearest open ground (grass, path, soil, fallow) from the farmhouse door, and works on the farm only.
 - Farming and gathering pause while a panel is open
 
 ## Gamepad (Xbox layout)
@@ -240,7 +240,7 @@ The house is drawn in four stages that match its repair level. **Decrepit** has 
 - The game opens on a **start screen**: **Continue** (the most recently saved slot), **New Game**, **Load Game**, **Settings** (the controls list), and **Quit**. The world is built only after you choose.
 - There are **three save slots**. New Game asks for a slot, and a used slot takes two presses to overwrite. Load Game lists each slot with its day, coins, and house stage. Older single-slot saves become slot 1.
 - The game saves **only** when you sleep in bed or collapse at 03:00, to the slot you're playing.
-- The in-game Settings menu has a **Game** section. **Save and quit to the main menu** saves to the current slot and returns to the start screen (only from the farm). **Quit to the main menu** returns without saving, and progress since the last sleep is lost. The slot you were playing stays selected.
+- The in-game Settings menu ends with a **Game** section that never folds. It holds **Music** (on or off), **Unstick me**, and **Quit to the main menu**. Quitting returns to the start screen without saving, and progress since the last sleep is lost. The slot you were playing stays selected. Sleeping is the only way to save.
 - Saved: day, skill XP, inventory (including meals), coins, bag upgrades, root cellar, cooler, and smokehouse (built, and what they hold), materials, stats, story chapters done, achievements done, selected seed, lantern tier, house stage, house wear, coop and hens, barn (built, and where it stands), tidy/mend/cleanse days, sanity and sanity penalty, crops (with kind), brush piles, **player position**, whether you were **inside the house**, and the **open panel**.
 - Quitting mid-day loses that day's progress since the last save. Position and panel are saved at the same moment, so they reflect the last sleep or collapse.
 
