@@ -1833,7 +1833,21 @@ func _inventory_rows() -> Array:
 		{"name": "Water", "value": "%d of 100" % roundi(water), "progress": water / 100.0},
 		{"name": "Warmth", "value": "%d of 100" % roundi(warmth), "progress": warmth / 100.0},
 		{"name": "Outside", "value": "%d°F, %s" % [roundi(_temperature()), str(WEATHER_NAMES.get(weather_kind, "Overcast")).to_lower()]},
-		{"note": "Food and water drain through the day. Eat a meal or a crop to refill food, and drink from the pond to refill water. Warmth drains outdoors on cold days, refills in the house, and is full again after a night's sleep. An empty need costs HP."},
+		{
+			"name": "Eat a meal",
+			"value": "%d ready. +%d food, +%d sanity" % [int(inventory["meals"]), int(MEAL_FOOD), int(MEAL_SANITY)],
+			"button": "Eat",
+			"action": "eat_meal",
+			"enabled": int(inventory["meals"]) > 0,
+		},
+		{
+			"name": "Eat a raw crop",
+			"value": "%d in the pack. +%d food" % [int(inventory["crops"]), int(CROP_FOOD)],
+			"button": "Eat",
+			"action": "eat_crop",
+			"enabled": int(inventory["crops"]) > 0,
+		},
+		{"note": "Food and water drain through the day. Drink from the pond or the pump to refill water. Warmth drains outdoors on cold days, refills in the house, and is full again after a night's sleep. An empty need costs HP."},
 		{"section": "Pack"},
 		{"name": "Coins", "value": str(money)},
 		{"grid": _pack_cells(), "columns": 5},
@@ -1868,21 +1882,6 @@ func _inventory_rows() -> Array:
 			"action": "switch_seed",
 			"enabled": true,
 		})
-	rows.append({"section": "Meals"})
-	rows.append({
-		"name": "Eat a meal",
-		"value": "%d ready, +%d sanity, +%d food" % [int(inventory["meals"]), int(MEAL_SANITY), int(MEAL_FOOD)],
-		"button": "Eat",
-		"action": "eat_meal",
-		"enabled": int(inventory["meals"]) > 0,
-	})
-	rows.append({
-		"name": "Eat a raw crop",
-		"value": "%d crops, +%d food" % [int(inventory["crops"]), int(CROP_FOOD)],
-		"button": "Eat",
-		"action": "eat_crop",
-		"enabled": int(inventory["crops"]) > 0,
-	})
 	rows.append({"section": "Materials"})
 	rows.append({"name": "Wood", "value": str(materials["wood"])})
 	rows.append({"name": "Fiber", "value": str(materials["fiber"])})
@@ -4125,11 +4124,11 @@ func _rest_at_camp() -> void:
 func _pack_cells() -> Array:
 	var cells: Array = []
 	for i in int(inventory["crops"]):
-		cells.append({"color": "8fd16b", "label": "Crop", "tip": "Harvested crop"})
+		cells.append({"color": "8fd16b", "label": "Crop", "tip": "Harvested crop. Eat it from the Body section, or cook it."})
 	for i in int(inventory["fish"]):
 		cells.append({"color": "6fb8d9", "label": "Fish", "tip": "Fish. Spoils overnight unless stored in the cooler."})
 	for i in int(inventory["meals"]):
-		cells.append({"color": "e0a050", "label": "Meal", "tip": "Cooked meal. Eat it for sanity."})
+		cells.append({"color": "e0a050", "label": "Meal", "tip": "Cooked meal. Eat it from the Body section for food and sanity."})
 	for entry in PRESERVE:
 		for _i in int(inventory[entry["kind"]]):
 			cells.append({"color": entry["color"], "label": entry["short"], "tip": "%s. Keeps in the pack." % entry["short"]})
