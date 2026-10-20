@@ -1501,8 +1501,9 @@ func _quest_row(q: Dictionary, expanded: bool) -> Dictionary:
 	if expanded:
 		note = "%s\n%s" % [q["story"], note]
 	return {
-		"name": "%s%s" % [q["title"], "   (done)" if done else ""],
-		"value": "%d/%d" % [shown, q["goal"]],
+		"name": str(q["title"]),
+		"struck": done,
+		"value": "Done" if done else "%d/%d" % [shown, q["goal"]],
 		"progress": float(shown) / float(q["goal"]),
 		"note": note,
 	}

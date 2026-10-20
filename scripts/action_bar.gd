@@ -260,7 +260,7 @@ func _build_row(data: Dictionary) -> Control:
 		spaced.add_theme_constant_override("margin_top", 10)
 		spaced.add_child(heading)
 		return spaced
-	if data.has("note"):
+	if data.has("note") and not data.has("name"):
 		var note := Label.new()
 		note.text = str(data["note"])
 		note.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
@@ -282,11 +282,24 @@ func _build_card(data: Dictionary) -> Control:
 	line.add_theme_constant_override("separation", 14)
 	block.add_child(line)
 
-	var name_label := Label.new()
-	name_label.text = str(data.get("name", ""))
-	name_label.add_theme_font_size_override("font_size", 16)
-	name_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	line.add_child(name_label)
+	# A struck name is a finished item, such as a completed quest. It is drawn dimmed with a line through it.
+	var name_control: Control
+	if bool(data.get("struck", false)):
+		var rich := RichTextLabel.new()
+		rich.bbcode_enabled = true
+		rich.fit_content = true
+		rich.scroll_active = false
+		rich.text = "[s]%s[/s]" % str(data.get("name", ""))
+		rich.add_theme_font_size_override("normal_font_size", 16)
+		rich.add_theme_color_override("default_color", COL_MUTED)
+		name_control = rich
+	else:
+		var name_label := Label.new()
+		name_label.text = str(data.get("name", ""))
+		name_label.add_theme_font_size_override("font_size", 16)
+		name_control = name_label
+	name_control.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	line.add_child(name_control)
 
 	var value_label := Label.new()
 	value_label.text = str(data.get("value", ""))
@@ -303,6 +316,14 @@ func _build_card(data: Dictionary) -> Control:
 		_style_button(button, false)
 		button.pressed.connect(_on_action_pressed.bind(str(data.get("action", ""))))
 		line.add_child(button)
+
+	if data.has("note"):
+		var note := Label.new()
+		note.text = str(data["note"])
+		note.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		note.add_theme_font_size_override("font_size", 14)
+		note.add_theme_color_override("font_color", COL_MUTED)
+		block.add_child(note)
 
 	if data.has("progress"):
 		var bar := ProgressBar.new()
