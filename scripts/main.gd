@@ -584,6 +584,7 @@ var sanity := SANITY_MAX
 var sanity_penalty := 0             # permanent cap reduction from collapsing
 var inside := false                 # standing in the farmhouse interior
 var open_tab := ""                  # "" when the action bar panel is closed
+var quest_open := {}              # quest id -> true when its details are open (not saved)
 var craft_tab := "gear"             # which Craft sub-tab shows (not saved)
 var event_fired_day := 0            # the day the night event last happened
 var tonight_shadow := Vector2i(-1, -1)
@@ -1169,6 +1170,10 @@ func _on_panel_action(action_id: String) -> void:
 	if action_id.begins_with("craft:"):
 		_craft_gear(action_id.trim_prefix("craft:"))
 		return
+	if action_id.begins_with("quest_open:") or action_id.begins_with("quest_close:"):
+		quest_open[action_id.get_slice(":", 1)] = action_id.begins_with("quest_open:")
+		_refresh_panel()
+		return
 	if action_id.begins_with("craft_tab:"):
 		craft_tab = action_id.trim_prefix("craft_tab:")
 		_refresh_panel()
@@ -1494,22 +1499,28 @@ func _quest_rows() -> Array:
 	return rows
 
 
+# A quest is a single line: its name, and Done or its progress. Details open with a button.
+# The current chapter starts open; the player's choice overrides that.
 func _quest_row(q: Dictionary, expanded: bool) -> Dictionary:
+	var id := str(q["id"])
 	var done: bool = quests_done.has(q["id"])
+	var is_open: bool = bool(quest_open.get(id, expanded))
 	var shown := mini(_stat_value(q["stat"]), q["goal"])
-	var note := "%s  Reward: %s" % [q["text"], _reward_text(q["reward"])]
-	if expanded:
-		note = "%s\n%s" % [q["story"], note]
-	return {
+	var row := {
 		"name": str(q["title"]),
 		"struck": done,
 		"value": "Done" if done else "%d/%d" % [shown, q["goal"]],
-		"progress": float(shown) / float(q["goal"]),
-		"note": note,
+		"button": "Hide" if is_open else "Details",
+		"action": ("quest_close:" if is_open else "quest_open:") + id,
+		"enabled": true,
 	}
-
-
-
+	if is_open:
+		var note := "%s  Reward: %s" % [q["text"], _reward_text(q["reward"])]
+		if expanded:
+			note = "%s\n%s" % [q["story"], note]
+		row["note"] = note
+		row["progress"] = float(shown) / float(q["goal"])
+	return row
 
 
 func _house_rows() -> Array:
