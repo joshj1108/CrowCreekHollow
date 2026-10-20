@@ -50,6 +50,7 @@ const COL_ACCENT := Color("d9a94e")
 
 var nav_buttons := {}      # tab name -> Button in the menu's section list
 var panel: Control         # the full-screen menu; visible only while a panel is open
+var menu_button: Button    # small corner button that opens the menu when it is closed
 var title_label: Label
 var subtitle_label: Label
 var scroll: ScrollContainer
@@ -64,6 +65,23 @@ func _ready() -> void:
 	root.set_anchors_preset(Control.PRESET_FULL_RECT)
 	root.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(root)
+
+	# A small corner button for mouse players. It opens the menu on Skills, where the list takes over.
+	menu_button = Button.new()
+	menu_button.text = "Menu"
+	menu_button.focus_mode = Control.FOCUS_NONE
+	menu_button.custom_minimum_size = Vector2(96, 34)
+	menu_button.set_anchors_preset(Control.PRESET_BOTTOM_RIGHT)
+	menu_button.grow_horizontal = Control.GROW_DIRECTION_BEGIN
+	menu_button.grow_vertical = Control.GROW_DIRECTION_BEGIN
+	menu_button.offset_left = -112
+	menu_button.offset_top = -44
+	menu_button.offset_right = -16
+	menu_button.offset_bottom = -10
+	menu_button.add_theme_font_size_override("font_size", 15)
+	_style_button(menu_button, false)
+	menu_button.pressed.connect(_on_tab_pressed.bind("Skills"))
+	root.add_child(menu_button)
 
 	panel = _build_menu()
 	root.add_child(panel)
@@ -185,6 +203,7 @@ func show_panel(tab: String, rows: Array) -> void:
 		return
 	_last_key = key
 	panel.visible = true
+	menu_button.visible = false
 	if tab != active_tab:
 		scroll.scroll_vertical = 0
 	title_label.text = tab
@@ -202,6 +221,7 @@ func show_panel(tab: String, rows: Array) -> void:
 func hide_panel() -> void:
 	_last_key = ""
 	panel.visible = false
+	menu_button.visible = true
 	_set_active("")
 
 
