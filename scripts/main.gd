@@ -157,10 +157,13 @@ const CELLAR_CAP := 30
 const COOLER_CAP := 10
 const CELLAR_COST := {"wood": 4, "fiber": 2, "coins": 25, "level": 1}
 const COOLER_COST := {"wood": 4, "fiber": 4, "coins": 40, "level": 2}
-const CELLAR_IX := Vector2i(24, 7)   # farm tiles, local to the farm, beside the house
-const COOLER_IX := Vector2i(33, 7)
-const SMOKEHOUSE_IX := Vector2i(34, 4)
-const FURNACE_IX := Vector2i(30, 10)
+# The root cellar sits against the house's west wall, like a cellar dug in beside it.
+# The workshop, with the furnace and smokehouse, stands against the east wall.
+# The cooler lives inside the house. House walls are at x 26 to 32 and y 3 to 8 (local to the farm).
+const CELLAR_IX := Vector2i(25, 5)
+const SMOKEHOUSE_IX := Vector2i(32, 4)
+const FURNACE_IX := Vector2i(32, 3)
+const COOLER_INTERIOR := Vector2i(11, 6)   # in the hall, inside the house
 const FURNACE_COST := {"wood": 6, "stone": 4, "coins": 80, "level": 4}
 const SMELT_LEVEL := {"copper": 1, "iron": 4}
 const XP_SMELT := 10
@@ -885,12 +888,10 @@ func _build_map() -> void:
 
 
 # The interior is a fixed layout. Rooms open up as the house is repaired.
-# The cellar and cooler are farm tiles beside the house, so they show on the map.
+# The cellar and workshop are farm tiles beside the house, so they show on the map.
 func _apply_storage_tiles() -> void:
 	if cellar_built:
 		map[CELLAR_IX.y + BORDER_Y][CELLAR_IX.x + BORDER_X] = Tile.CELLAR
-	if cooler_built:
-		map[COOLER_IX.y + BORDER_Y][COOLER_IX.x + BORDER_X] = Tile.COOLER
 	if smokehouse_built:
 		map[SMOKEHOUSE_IX.y + BORDER_Y][SMOKEHOUSE_IX.x + BORDER_X] = Tile.SMOKEHOUSE
 	if furnace_built:
@@ -909,6 +910,8 @@ func _build_interior() -> void:
 
 	_fill_interior(1, 5, 12, 7, Tile.FLOOR)   # the hall, always open
 	_set_interior(6, 8, Tile.EXIT)            # back out to the farm
+	if cooler_built:
+		_set_interior(COOLER_INTERIOR.x, COOLER_INTERIOR.y, Tile.COOLER)
 
 	# The bedroom and its bed are open from the start.
 	_fill_interior(1, 1, 4, 4, Tile.FLOOR)

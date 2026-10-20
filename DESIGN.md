@@ -31,7 +31,8 @@ A top-down farming game with heavy psychological horror, built in Godot 4.7.
 
 - Messages sit at the bottom-left of the screen, clear of the farm's labels. HUD and message text have a dark outline so they read over any ground.
 - Trees are drawn as canopies of overlapping crowns, so the outer forest reads as dense woodland. Trees block movement.
-- Storage labels (Cellar, Cooler, Smokehouse, Furnace) stay on screen when their building is at the view's edge.
+- Storage labels (Cellar, Smoke, Furnace) stay on screen when their building is at the view's edge.
+- The farm's buildings hug the house: the cellar against the west wall, and a workshop against the east wall with the furnace above the smokehouse. The cooler is inside the house.
 
 - A small **Menu** button sits in the bottom-right corner for mouse players. It reopens the last section you had open (Skills at first) and hides while the menu is open. Sections open from their keys, and the menu lists them on the left, so each section is one key or click away. The full-screen menu shows over a dimmed game: the sections down the left (with their keys), the current section's options on the right, and the controls and a Back button in the footer.
 - Quests are collapsed to a line: the title, and Done or the progress count. A Details button opens the story, reward, and progress bar, and Hide closes it. The current chapter starts open.
@@ -109,8 +110,8 @@ Saves from before this change reset chapter progress. Stat-based achievements re
 | Haversack | +10 | 120 coins, 4 wood, 8 fiber | 3 |
 | Backpack | +10 | 300 coins, 8 wood, 12 fiber | 5 |
 
-- **Root cellar** (built from the House panel, stores **30 crops**): 25 coins, 4 wood, 2 fiber, Carpentry 1. They sit on the farm beside the house, so you can see them from the homestead. Stand beside the cellar, facing it, and press Space to store or take crops. Nothing spoils in the cellar. Storing is always manual: harvests go to the pack, and a harvest is refused if the pack is full.
-- **Cooler** (built from the House panel, stores **10 fish**): 40 coins, 4 wood, 4 fiber, Carpentry 2. Fish kept in the cooler don't spoil. Stand beside the cooler, facing it, and press Space to store or take fish.
+- **Root cellar** (built from the House panel, stores **30 crops**): 25 coins, 4 wood, 2 fiber, Carpentry 1. It is dug against the house's west wall, so it reads as part of the house. Stand beside it, facing it, and press Space to store or take crops. Nothing spoils in the cellar. Storing is always manual: harvests go to the pack, and a harvest is refused if the pack is full.
+- **Cooler** (built from the House panel, stores **10 fish**): 40 coins, 4 wood, 4 fiber, Carpentry 2. Fish kept in the cooler don't spoil. It sits inside the house, in the hall. Stand beside it, facing it, and press Space to store or take fish.
 - **Fish spoil:** any fish still in the pack at the end of the day are lost. The end-of-day message says how many. Storing fish in the cooler is the only way to keep them overnight.
 - **Full pack:** storage is always manual. A full pack stops harvesting and fishing with a message. Store fish in the cooler, or sell or cook them, to keep going.
 
