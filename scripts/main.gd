@@ -273,13 +273,11 @@ const SEED_PUMPKIN_PRICE := 10  # per seed, sold in packs of 3
 const VILLAGE_W := 36
 const VILLAGE_H := 20
 const VILLAGE_GATE := Vector2i(0, 10)
-const VILLAGE_ARRIVE := Vector2i(2, 10)
 const VILLAGE_HOUSES := [Rect2i(4, 3, 5, 4), Rect2i(13, 2, 6, 4), Rect2i(8, 14, 5, 4)]
 const VILLAGE_WATER := Rect2i(19, 13, 2, 2)
 # Hollows gather in the clearing east of the village wood. They respawn each morning.
 const HOLLOW_SPAWNS := [Vector2i(28, 9), Vector2i(31, 13), Vector2i(33, 8)]
 const XP_HIT := 4
-const XP_KILL := 20
 const BASE_HP := 10
 const HEAL_MEAL := 4
 const HOMESTEAD_ARRIVE := Vector2i(BORDER_X + INNER_W - 3, BORDER_Y + INNER_H / 2)
@@ -2279,7 +2277,7 @@ func _settings_rows() -> Array:
 		{"note": "While a panel is open, the D-pad or left stick moves between its buttons, and A presses the highlighted one."},
 		{"section": "Saving"},
 		{"note": "Progress saves only when you sleep, or when you collapse at 03:00. The save includes your position and open panel."},
-		{"note": "Sound and display options are coming later."},
+		{"note": "Sound effects and display options are coming later."},
 	]
 
 
