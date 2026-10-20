@@ -875,6 +875,15 @@ class RecipeIcon extends Control:
 					_box(Rect2(_pt(x, 0.12), Vector2(0.12, 0.36) * _sz), tint)
 				_shape(_poly([[0.72, 0.5], [0.9, 0.54], [0.9, 0.68], [0.72, 0.66]]), tint)
 				_box(Rect2(_pt(0.26, 0.8), Vector2(0.48, 0.12) * _sz), dark)
+			"rod":
+				draw_line(_pt(0.18, 0.9), _pt(0.84, 0.12), tint, 0.06 * _sz)
+				draw_line(_pt(0.84, 0.12), _pt(0.84, 0.6), light, 0.02 * _sz)
+				draw_arc(_pt(0.8, 0.64), 0.06 * _sz, 0.0, PI, 8, metal, 0.03 * _sz)
+			"bandage":
+				_shape(_ellipse(0.5, 0.5, 0.36, 0.3), tint)
+				draw_arc(_pt(0.5, 0.5), 0.17 * _sz, 0.0, TAU, 16, OUTLINE, 0.03 * _sz)
+				_box(Rect2(_pt(0.43, 0.3), Vector2(0.14, 0.4) * _sz), Color("b23a3a"))
+				_box(Rect2(_pt(0.3, 0.43), Vector2(0.4, 0.14) * _sz), Color("b23a3a"))
 			"pack":
 				draw_arc(_pt(0.5, 0.3), 0.18 * _sz, PI, TAU, 12, dark, 0.04 * _sz)
 				_box(Rect2(_pt(0.2, 0.3), Vector2(0.6, 0.62) * _sz), tint)

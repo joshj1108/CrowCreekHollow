@@ -106,7 +106,14 @@ const TOOL_TIERS := {
 		{"name": "Copper pick", "cost": {"wood": 1, "copper_bar": 2}, "skill": "Smithing", "level": 2},
 		{"name": "Iron pick", "cost": {"wood": 1, "iron_bar": 2}, "skill": "Smithing", "level": 5},
 	],
+	# A rod adds to the chance of each catch. The bonus is added up across the tiers you own.
+	"rod": [
+		{"name": "Willow rod", "cost": {"wood": 2, "fiber": 2}, "skill": "Fishing", "level": 2, "bonus": 0.10},
+		{"name": "Hardwood rod", "cost": {"hardwood": 2, "fiber": 2, "resin": 1}, "skill": "Fishing", "level": 5, "bonus": 0.10},
+	],
 }
+# A bandage is made from fiber and resin, and heals when used from the pack.
+const BANDAGE := {"name": "Bandage", "heal": 25, "fiber": 2, "resin": 1, "level": 2, "xp": 8}
 
 # Time runs from 06:00 to 03:00 the next morning (hours 6 to 27).
 const DAY_LENGTH := 240.0   # real seconds for a full day
@@ -704,9 +711,9 @@ var hose_attached := false
 var well_water := 0.0      # hours spent with an empty need, toward the next HP lost
 var weather_kind := ""       # today's weather, rolled each morning: see WEATHER_WEIGHTS
 var skill_xp := {"Farming": 0, "Bushcrafting": 0, "Carpentry": 0, "Cleaning": 0, "Fishing": 0, "Cooking": 0, "Combat": 0, "Forestry": 0, "Mining": 0, "Smithing": 0}
-var inventory := {"seeds": STARTING_SEEDS, "pumpkin_seeds": 0, "crops": 0, "fish": 0, "meals": 0, "smoked": 0, "dried": 0, "canned": 0, "fermented": 0, "stew": 0, "hearty": 0}
+var inventory := {"seeds": STARTING_SEEDS, "pumpkin_seeds": 0, "crops": 0, "fish": 0, "meals": 0, "smoked": 0, "dried": 0, "canned": 0, "fermented": 0, "stew": 0, "hearty": 0, "bandage": 0}
 var materials := {"wood": 0, "fiber": 0, "resin": 0, "hardwood": 0, "stone": 0, "copper_ore": 0, "iron_ore": 0, "copper_bar": 0, "iron_bar": 0, "arrows": 0, "bolts": 0}
-var tool_tier := {"hatchet": 0, "pick": 0}     # 0 = none; higher tiers come from TOOL_TIERS
+var tool_tier := {"hatchet": 0, "pick": 0, "rod": 0}     # 0 = none; higher tiers come from TOOL_TIERS
 var grove_felled := {}
 var quarry := {}                                   # Ashford quarry rocks, village tile -> true
 var rocks := {}                                  # world tile -> true for unbroken rocks
@@ -1892,6 +1899,12 @@ func _on_panel_action(action_id: String) -> void:
 		gear_selected = action_id.trim_prefix("gear_pick:")
 		_refresh_panel()
 		return
+	if action_id == "use_bandage":
+		_use_bandage()
+		return
+	if action_id == "make_bandage":
+		_make_bandage()
+		return
 	if action_id.begins_with("eat_stew:"):
 		_eat_stew(action_id.trim_prefix("eat_stew:"))
 		return
@@ -2143,6 +2156,10 @@ func _inventory_tiles() -> Array:
 	if n > 0:
 		tiles.append(_stack_tile("pack:meal", "Meal", "bowl", "e0a050", n, "in the pack",
 			"A cooked meal. Restores %d food and %d sanity. Sells for %d coins." % [int(MEAL_FOOD), int(MEAL_SANITY), SELL_MEAL], "eat_meal", "Eat"))
+	n = int(inventory["bandage"])
+	if n > 0:
+		tiles.append(_stack_tile("pack:bandage", str(BANDAGE["name"]), "bandage", "e8e0d0", n, "in the pack",
+			"Heals %d HP. Use it from here." % int(BANDAGE["heal"]), "use_bandage", "Use"))
 	for st in STEWS:
 		n = int(inventory[st["kind"]])
 		if n > 0:
@@ -2261,6 +2278,11 @@ func _gear_tiles() -> Array:
 	tiles.append({
 		"key": "tool:axe", "name": _tool_name("hatchet") if int(tool_tier["hatchet"]) > 0 else "Axe", "icon": "axe", "tint": TINT_TOOL, "enabled": int(tool_tier["hatchet"]) > 0,
 		"desc": "Chops trees. Upgrade it in the Craft panel, under Tools.", "level_text": "", "level_ok": true, "costs": [], "action": "",
+	})
+	tiles.append({
+		"key": "tool:rod", "name": _tool_name("rod") if int(tool_tier["rod"]) > 0 else "Fishing rod", "icon": "rod", "tint": TINT_TOOL,
+		"enabled": int(tool_tier["rod"]) > 0, "level_ok": true, "costs": [], "action": "",
+		"desc": "Adds to your catch chance when you fish. Make better rods in the Craft panel, under Tools.", "level_text": "",
 	})
 	tiles.append({
 		"key": "tool:pick", "name": _tool_name("pick") if int(tool_tier["pick"]) > 0 else "Pickaxe", "icon": "pick", "tint": TINT_TOOL, "enabled": int(tool_tier["pick"]) > 0,
@@ -2478,10 +2500,10 @@ func _recipes_cooking_base() -> Array:
 
 func _recipes_tools() -> Array:
 	var out: Array = []
-	for kind in ["hatchet", "pick"]:
+	for kind in ["hatchet", "pick", "rod"]:
 		var tiers: Array = TOOL_TIERS[kind]
 		var have := int(tool_tier[kind])
-		var icon := "axe" if kind == "hatchet" else "pick"
+		var icon := "axe" if kind == "hatchet" else ("pick" if kind == "pick" else "rod")
 		if have >= tiers.size():
 			out.append({
 				"key": "tool:" + kind, "name": _tool_name(kind), "icon": icon, "tint": TINT_TOOL,
@@ -2492,7 +2514,7 @@ func _recipes_tools() -> Array:
 		var tier: Dictionary = tiers[have]
 		out.append({
 			"key": "tool:" + kind, "name": str(tier["name"]), "icon": icon, "tint": TINT_TOOL,
-			"desc": "Your %s is %s. This is the next tier." % [kind, _tool_name(kind)],
+			"desc": _tool_desc(kind, tier, have),
 			"costs": _cost_lines(tier["cost"]), "level_text": _level_text(str(tier["skill"]), int(tier["level"])),
 			"level_ok": _level(str(tier["skill"])) >= int(tier["level"]), "enabled": _can_craft_tool(kind),
 			"action": "tool:" + kind, "button": "Make",
@@ -2528,7 +2550,51 @@ func _recipes_other() -> Array:
 			"level_ok": _level("Bushcrafting") >= int(t["level"]), "enabled": _can_advance_lantern(),
 			"action": "advance_lantern", "button": "Build" if lantern_tier == 0 else "Upgrade",
 		})
+	out.append(_recipes_other_bandage())
 	return out
+
+
+func _recipes_other_bandage() -> Dictionary:
+	var costs: Array = [
+		{"label": "%d fiber" % int(BANDAGE["fiber"]), "have": _held("fiber"), "need": int(BANDAGE["fiber"])},
+		{"label": "%d resin" % int(BANDAGE["resin"]), "have": _held("resin"), "need": int(BANDAGE["resin"])},
+	]
+	return {
+		"key": "bandage", "name": str(BANDAGE["name"]), "icon": "bandage", "tint": "e8e0d0",
+		"desc": "Heals %d HP when used from the Inventory panel. +%d Bushcrafting XP." % [int(BANDAGE["heal"]), int(BANDAGE["xp"])],
+		"costs": costs, "level_text": _level_text("Bushcrafting", int(BANDAGE["level"])),
+		"level_ok": _level("Bushcrafting") >= int(BANDAGE["level"]), "enabled": _can_make_bandage(),
+		"action": "make_bandage", "button": "Make",
+	}
+
+
+func _can_make_bandage() -> bool:
+	return _level("Bushcrafting") >= int(BANDAGE["level"]) and materials["fiber"] >= int(BANDAGE["fiber"]) \
+		and materials["resin"] >= int(BANDAGE["resin"])
+
+
+func _make_bandage() -> void:
+	if not _can_make_bandage():
+		_show_message("You need %d fiber, %d resin, and Bushcrafting %d." % [int(BANDAGE["fiber"]), int(BANDAGE["resin"]), int(BANDAGE["level"])])
+		return
+	materials["fiber"] -= int(BANDAGE["fiber"])
+	materials["resin"] -= int(BANDAGE["resin"])
+	inventory["bandage"] += 1
+	_grant_xp("Bushcrafting", int(BANDAGE["xp"]))
+	_show_message("You roll a bandage. +%d Bushcrafting XP" % int(BANDAGE["xp"]))
+
+
+func _use_bandage() -> void:
+	if int(inventory["bandage"]) <= 0:
+		_show_message("You have no bandages.")
+		return
+	if hp >= max_hp():
+		_show_message("You don't need a bandage right now.")
+		return
+	inventory["bandage"] -= 1
+	hp = mini(max_hp(), hp + int(BANDAGE["heal"]))
+	play_sfx("eat", 0.05)
+	_show_message("You bind your wounds. HP %d/%d" % [hp, max_hp()])
 
 
 func _craft_camp_rows() -> Array:
@@ -3108,9 +3174,16 @@ func _draw_fish_spots() -> void:
 		i += 1
 
 
+func _rod_bonus() -> float:
+	var total := 0.0
+	for i in int(tool_tier["rod"]):
+		total += float(TOOL_TIERS["rod"][i]["bonus"])
+	return total
+
+
 func _fish_roll() -> void:
 	stats["fished"] += 1
-	var chance := clampf(FISH_BASE_CHANCE + FISH_CHANCE_PER_LEVEL * float(_level("Fishing") - 1), 0.0, FISH_CHANCE_CAP)
+	var chance := clampf(FISH_BASE_CHANCE + FISH_CHANCE_PER_LEVEL * float(_level("Fishing") - 1) + _rod_bonus(), 0.0, FISH_CHANCE_CAP)
 	if randf() < chance:
 		stats["caught"] += 1
 		inventory["fish"] += 1
@@ -3454,6 +3527,7 @@ func _pack_used() -> int:
 		used += int(inventory[kind])
 	for st in STEWS:
 		used += int(inventory[st["kind"]])
+	used += int(inventory["bandage"])
 	return used
 
 
@@ -3863,6 +3937,13 @@ func _has_materials(cost: Dictionary) -> bool:
 		if int(materials.get(key, 0)) < int(cost[key]):
 			return false
 	return true
+
+
+func _tool_desc(kind: String, tier: Dictionary, have: int) -> String:
+	if kind == "rod":
+		var now := "You have no rod yet." if have == 0 else "You have the %s." % _tool_name("rod")
+		return "%s Adds %d%% to your catch chance." % [now, int(float(tier["bonus"]) * 100.0)]
+	return "Your %s is %s. This is the next tier." % [kind, _tool_name(kind)]
 
 
 func _tool_name(kind: String) -> String:

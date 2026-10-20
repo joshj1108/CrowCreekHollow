@@ -252,6 +252,7 @@ The house is drawn in four stages that match its repair level. **Decrepit** has 
 
 - Hunger and thirst are covered under Body needs below.
 
+- **Bandages** are in the Other tab (Bushcrafting 2: 2 fiber, 1 resin). Each heals 25 HP when used from the pack in the Inventory panel. A bandage is not used up when you are at full HP.
 ## Well and watering
 
 - The **well** stands on the farm between plot one and the path, and starts seized. Stand beside it and press Space to open its panel.
@@ -399,6 +400,7 @@ A campsite lets you stay out in the wider land overnight. It is built, not place
 - **Hatchets** and **picks** are tools with tiers. They are crafted from the Tools tab of the Craft panel and are kept by tier rather than worn in a slot. Hatchet tiers: crude, stone, copper, iron. Pick tiers: stone, copper, iron.
 - A hatchet is needed to fell trees. Hardwood needs a copper hatchet or better.
 
+- **Fishing rods** are in the Tools tab too. A **Willow rod** (Fishing 2: 2 wood, 2 fiber) adds 10% to each catch chance. A **Hardwood rod** (Fishing 5: 2 hardwood, 2 fiber, 1 resin) adds another 10%. The rod sits in the toolbelt on the Gear panel.
 ## Mining
 
 - **Rocks** sit on the farm at five spots. Each one comes back each morning, like brush piles.
