@@ -157,7 +157,9 @@ Achievements are a tiered list toward 100% completion, shown in the Achievements
 - **Tier III: Keeper** (9): full restoration, pumpkins, cleansing, and level 3 skills.
 - **Tier IV: Hollow Hand** (9): mastery. Level 5 skills, 100 harvests, 50 meals, and finishing the story.
 
-Achievements track stats and never reset. Each pays a small reward. Earning all 36 gives 100%.
+Achievements track stats and never reset. Each pays a small reward. Earning all 42 gives 100%.
+
+- New with the needs and well: **Cool Water** (drink from the pond or pump), **Hose Hand** (water a crop), **Working Pump** (repair the pump), **Garden Hose** (attach the hose), **Rain Keeps Them Green** (5 rainy days), and **Tender of the Plots** (water 50 crops).
 
 ## Cooking
 

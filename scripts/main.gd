@@ -476,6 +476,8 @@ const ACHIEVEMENTS := [
 	{"id": "tin_light", "title": "Tin Light", "text": "Build a Tin Lantern.", "tier": 0, "stat": "lantern_tier", "goal": 1, "reward": {"seeds": 2}},
 	{"id": "boarded", "title": "Boarded Up", "text": "Repair the house to Boarded.", "tier": 0, "stat": "house_stage", "goal": 1, "reward": {"wood": 2, "fiber": 2}},
 	{"id": "first_tidy", "title": "Tidy Hands", "text": "Tidy the house once.", "tier": 0, "stat": "tidied", "goal": 1, "reward": {"seeds": 2}},
+	{"id": "first_drink", "title": "Cool Water", "text": "Drink from the pond or the pump.", "tier": 0, "stat": "drank", "goal": 1, "reward": {"seeds": 2}},
+	{"id": "first_water", "title": "Hose Hand", "text": "Water a crop with the hose.", "tier": 0, "stat": "watered", "goal": 1, "reward": {"seeds": 2}},
 
 	{"id": "ten_harvests", "title": "Ten Harvests", "text": "Harvest 10 crops.", "tier": 1, "stat": "harvested", "goal": 10, "reward": {"wood": 2, "fiber": 2}},
 	{"id": "carpenter", "title": "Carpenter's Hand", "text": "Mend 6 boards.", "tier": 1, "stat": "mended", "goal": 6, "reward": {"wood": 2, "fiber": 2}},
@@ -486,6 +488,9 @@ const ACHIEVEMENTS := [
 	{"id": "farmer_2", "title": "Growing Hands", "text": "Reach Farming level 2.", "tier": 1, "stat": "level_Farming", "goal": 2, "reward": {"wood": 2, "fiber": 2}},
 	{"id": "bush_3", "title": "Thicket Walker", "text": "Reach Bushcrafting level 3.", "tier": 1, "stat": "level_Bushcrafting", "goal": 3, "reward": {"wood": 2, "fiber": 2}},
 	{"id": "cleaner", "title": "Clean Air", "text": "Tidy the house 5 times.", "tier": 1, "stat": "tidied", "goal": 5, "reward": {"wood": 2, "fiber": 2}},
+	{"id": "pump_fixed", "title": "Working Pump", "text": "Repair the well pump.", "tier": 1, "stat": "pump", "goal": 1, "reward": {"wood": 2, "fiber": 2}},
+	{"id": "hose_on", "title": "Garden Hose", "text": "Attach the hose to the pump.", "tier": 1, "stat": "hose", "goal": 1, "reward": {"fiber": 2}},
+	{"id": "rain_days", "title": "Rain Keeps Them Green", "text": "Live through 5 rainy days.", "tier": 1, "stat": "rain_days", "goal": 5, "reward": {"wood": 2, "fiber": 2}},
 
 	{"id": "restored", "title": "Restored", "text": "Restore the farmhouse fully.", "tier": 2, "stat": "house_stage", "goal": 3, "reward": {"wood": 3, "fiber": 3}},
 	{"id": "pumpkin_grower", "title": "Pumpkin Grower", "text": "Harvest 3 pumpkins.", "tier": 2, "stat": "pumpkins", "goal": 3, "reward": {"wood": 3, "fiber": 3}},
@@ -496,6 +501,7 @@ const ACHIEVEMENTS := [
 	{"id": "hollow_light", "title": "Hollow Light", "text": "Build a Hollow Lantern.", "tier": 2, "stat": "lantern_tier", "goal": 3, "reward": {"wood": 3, "fiber": 3}},
 	{"id": "survivor", "title": "Survivor", "text": "Sleep in your bed 10 times.", "tier": 2, "stat": "slept", "goal": 10, "reward": {"wood": 3, "fiber": 3}},
 	{"id": "watcher", "title": "Field Watcher", "text": "Live through 5 nights of events.", "tier": 2, "stat": "events", "goal": 5, "reward": {"wood": 3, "fiber": 3}},
+	{"id": "waterer", "title": "Tender of the Plots", "text": "Water 50 crops with the hose.", "tier": 2, "stat": "watered", "goal": 50, "reward": {"wood": 3, "fiber": 3}},
 
 	{"id": "hundred_harvests", "title": "Full Barns", "text": "Harvest 100 crops.", "tier": 3, "stat": "harvested", "goal": 100, "reward": {"seeds": 5, "pumpkin_seeds": 2}},
 	{"id": "master_farmer", "title": "Master Farmer", "text": "Reach Farming level 5.", "tier": 3, "stat": "level_Farming", "goal": 5, "reward": {"seeds": 5, "pumpkin_seeds": 2}},
@@ -669,7 +675,8 @@ var rocks := {}                                  # world tile -> true for unbrok
 var stats := {"planted": 0, "harvested": 0, "gathered": 0, "slept": 0, "tidied": 0,
 	"fished": 0, "caught": 0, "mended": 0, "cleansed": 0, "cooked": 0, "eaten": 0,
 	"pumpkins": 0, "collapses": 0, "events": 0, "sold": 0, "spoiled": 0,
-	"talks": 0, "defeated": 0, "delivered": 0, "stalkers": 0, "visited": 0, "crops_given": 0, "preserved": 0, "felled": 0, "mined": 0}
+	"talks": 0, "defeated": 0, "delivered": 0, "stalkers": 0, "visited": 0, "crops_given": 0, "preserved": 0, "felled": 0, "mined": 0,
+	"drank": 0, "watered": 0, "pump": 0, "hose": 0, "rain_days": 0}
 var achievements_done := {}     # achievement id -> true
 var quests_done := {}               # quest id -> true
 var selected_seed := "turnip"
@@ -2685,6 +2692,7 @@ func _repair_well() -> void:
 	materials["fiber"] -= WELL_REPAIR["fiber"]
 	well_repaired = true
 	well_water = WELL_CAPACITY
+	stats["pump"] = 1
 	_grant_xp("Carpentry", XP_REPAIR)
 	_show_message("You rebuild the pump and the water comes up cold. +%d Carpentry XP" % XP_REPAIR)
 	queue_redraw()
@@ -2703,6 +2711,7 @@ func _attach_hose() -> void:
 	materials["fiber"] -= HOSE_COST["fiber"]
 	materials["resin"] -= HOSE_COST["resin"]
 	hose_attached = true
+	stats["hose"] = 1
 	_show_message("The hose is on. It reaches every plot, so face a crop and press Space to water it.")
 
 
@@ -2714,6 +2723,7 @@ func _drink_well() -> void:
 		_show_message("You're not thirsty.")
 		return
 	water = minf(100.0, water + DRINK_WELL)
+	stats["drank"] += 1
 	_show_message("Cold water from the pump. Water %d/100" % water)
 
 
@@ -2727,7 +2737,7 @@ func _water_crop(tile: Vector2i) -> void:
 		return
 	well_water -= 1.0
 	crops[tile]["watered_day"] = day
-	stats["watered"] = int(stats.get("watered", 0)) + 1
+	stats["watered"] += 1
 	_show_message("Watered. The tank has %d left." % int(well_water))
 	queue_redraw()
 
@@ -2803,6 +2813,7 @@ func _drink_pond() -> void:
 		_show_message("You're not thirsty.")
 		return
 	water = minf(100.0, water + POND_WATER)
+	stats["drank"] += 1
 	_show_message("You drink from the pond. Cold and muddy, but it helps. Water %d/100" % water)
 
 
@@ -5208,6 +5219,7 @@ func _end_day(base: String, leave_house: bool = true) -> void:
 	var upkeep_note := _settle_day()
 	# Rain waters every crop. Otherwise a crop must have been watered today to grow.
 	if weather_kind in WATER_RAIN_KINDS:
+		stats["rain_days"] += 1
 		for pos in crops:
 			crops[pos]["watered_day"] = day
 	var thirsty := 0
