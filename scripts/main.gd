@@ -74,7 +74,7 @@ const WORLD_ENABLED := false
 # The mining cave, entered from the homestead's west edge. Its ore is copper and iron.
 const CAVE_W := 40
 const CAVE_H := 24
-const CAVE_SEED := 61019
+const CAVE_SEED := 61019                 # base seed; each day's cave is CAVE_SEED + day
 const CAVE_START := Vector2i(3, 12)      # where you step in, just inside the exit
 const CAVE_EXIT_TILE := Vector2i(2, 12)  # the mat that takes you back out
 const CAVE_CREATURES := ["bat", "bat", "bat", "lizard", "lizard", "snake", "snake"]
@@ -521,7 +521,8 @@ var bank_coins := 0
 var in_cave := false                # standing in the mining cave
 var cave: Array = []                # cave tiles, [y][x], in cave tile coordinates
 var cave_spawns: Array = []         # creatures placed on each entry: {kind, tile}
-var cave_mined: Dictionary = {}     # cave ore already broken, tile -> true
+var cave_mined: Dictionary = {}     # cave ore already broken today, tile -> true
+var cave_mined_day := -1            # the day cave_mined belongs to; a new day brings new ore
 
 var interior: Array = []            # house tiles, [y][x], local to INT_ORIGIN
 var crops := {}                     # Vector2i world tile -> {"stage": int, "kind": String}
@@ -2605,11 +2606,12 @@ func _place_minimap(mini_size: Vector2) -> void:
 
 # --- The mining cave ---------------------------------------------------------
 
-# Fills the cave: rock walls, then carved floor from a few random walks out of the
-# entrance, then copper and iron ore set into the walls, then the creatures.
+# Fills the cave for today: rock walls, then carved floor from a few random walks out of
+# the entrance, then copper and iron ore set into the walls, then the creatures. The same
+# day always gives the same cave, and the next day gives a new one.
 func _generate_cave() -> void:
 	var rng := RandomNumberGenerator.new()
-	rng.seed = CAVE_SEED
+	rng.seed = CAVE_SEED + day * 7919
 	cave = []
 	for y in CAVE_H:
 		var row: Array = []
@@ -2673,6 +2675,11 @@ func _enter_cave() -> void:
 	inside = false
 	_stop_fishing("")
 	swing_time = 0.0
+	# The cave is laid out fresh each day, so yesterday's mined ore is gone.
+	if cave_mined_day != day:
+		cave_mined.clear()
+		cave_mined_day = day
+	_generate_cave()
 	for tile in cave_mined.keys():
 		cave[tile.y][tile.x] = Tile.FLOOR
 	player.position = _tile_center(CAVE_START.x, CAVE_START.y)
@@ -4069,6 +4076,7 @@ func _save_game() -> void:
 		"bank_materials": bank_materials,
 		"bank_coins": bank_coins,
 		"cave_mined": _tiles_to_array(cave_mined),
+		"cave_mined_day": cave_mined_day,
 	}
 	var file := FileAccess.open(SAVE_PATH, FileAccess.WRITE)
 	if file != null:
@@ -4151,6 +4159,7 @@ func _load_game() -> bool:
 			rocks[Vector2i(int(r[0]), int(r[1]))] = true
 	else:
 		_fill_rocks()
+	cave_mined_day = int(data.get("cave_mined_day", -1))
 	if data.has("cave_mined"):
 		cave_mined.clear()
 		for c in data["cave_mined"]:
