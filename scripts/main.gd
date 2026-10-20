@@ -6,6 +6,7 @@ extends Node2D
 ## and save/load. The day runs 06:00 to 03:00. Sleep in bed to save and end the day.
 ## Placeholder art is drawn in code; no external assets yet.
 
+const WeatherScript := preload("res://scripts/weather.gd")  # loaded by path, so it works before the class cache is rebuilt
 const TILE_SIZE := 16
 const SCALE := 3
 const PX := TILE_SIZE * SCALE  # one tile in world units
@@ -515,7 +516,7 @@ var title_menu: TitleMenu
 const SETTINGS_PATH := "user://hallowvale_settings.json"
 var music_on := true
 var music_player: AudioStreamPlayer
-var weather: Weather
+var weather: CanvasLayer  # the dreary weather overlay
 var tips_seen: Dictionary = {}     # tip id -> true, once it has been shown
 var tip_queue: Array = []          # tip ids waiting their turn
 var tip_showing := ""              # the tip on screen now, or ""
@@ -800,7 +801,7 @@ func _on_title_start(mode: String, slot: int) -> void:
 	_build_world()
 	_build_hud()
 	_build_tip_panel()
-	weather = Weather.new()
+	weather = WeatherScript.new()
 	add_child(weather)
 	_build_action_bar()
 	_update_shadow_tile()
