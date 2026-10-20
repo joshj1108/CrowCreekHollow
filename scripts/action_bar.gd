@@ -8,6 +8,12 @@ extends CanvasLayer
 
 signal tab_pressed(tab_name: String)
 var menu_frame: PanelContainer
+# Sections in these menus fold away, so a long list shows only its headings until one is opened.
+const COLLAPSIBLE_TABS := ["Settings"]
+var collapsed_sections := {}   # "tab|section" -> true while folded (folded is the default)
+var _last_tab := ""
+var _last_rows: Array = []
+var _focus_section := ""       # a header to focus after it folds or unfolds
 signal action_pressed(action_id: String)
 
 const TABS := [
@@ -212,10 +218,12 @@ func _fit_frame() -> void:
 
 func show_panel(tab: String, rows: Array) -> void:
 	# Only rebuild when the content changes, so buttons aren't recreated mid-click.
-	var key := JSON.stringify([tab, rows])
+	var key := JSON.stringify([tab, rows, collapsed_sections])
 	if panel.visible and key == _last_key:
 		return
 	_last_key = key
+	_last_tab = tab
+	_last_rows = rows
 	panel.visible = true
 	menu_button.visible = false
 	for section in TABS:
@@ -229,7 +237,7 @@ func show_panel(tab: String, rows: Array) -> void:
 	for child in rows_box.get_children():
 		rows_box.remove_child(child)
 		child.queue_free()
-	for row in rows:
+	for row in _with_folds(tab, rows):
 		rows_box.add_child(_build_row(row))
 	# Highlight the first usable button so a gamepad can reach it.
 	call_deferred("_focus_first_button")
@@ -242,7 +250,62 @@ func hide_panel() -> void:
 	_set_active("")
 
 
+# Turns each section of a collapsible menu into a header that shows its item count. The items
+# are only included while the section is open.
+func _with_folds(tab: String, rows: Array) -> Array:
+	if not COLLAPSIBLE_TABS.has(tab):
+		return rows
+	var out: Array = []
+	var i := 0
+	while i < rows.size():
+		var row: Dictionary = rows[i]
+		if not row.has("section"):
+			out.append(row)
+			i += 1
+			continue
+		var group: Array = []
+		var j := i + 1
+		while j < rows.size() and not rows[j].has("section"):
+			group.append(rows[j])
+			j += 1
+		var items := 0
+		for item in group:
+			if not item.has("note"):
+				items += 1
+		var key := "%s|%s" % [tab, str(row["section"])]
+		var folded := bool(collapsed_sections.get(key, true))
+		out.append({"section_toggle": str(row["section"]), "key": key, "count": items, "folded": folded})
+		if not folded:
+			out.append_array(group)
+		i = j
+	return out
+
+
+func _toggle_section(key: String) -> void:
+	collapsed_sections[key] = not bool(collapsed_sections.get(key, true))
+	_focus_section = key
+	_last_key = ""
+	show_panel(_last_tab, _last_rows)
+
+
+func _find_toggle(node: Node, key: String) -> Button:
+	for child in node.get_children():
+		var button := child as Button
+		if button != null and button.has_meta("toggle_key") and str(button.get_meta("toggle_key")) == key:
+			return button
+		var found := _find_toggle(child, key)
+		if found != null:
+			return found
+	return null
+
+
 func _focus_first_button() -> void:
+	if _focus_section != "":
+		var header := _find_toggle(rows_box, _focus_section)
+		_focus_section = ""
+		if header != null:
+			header.grab_focus()
+			return
 	var button := _first_enabled_button(rows_box)
 	if button != null:
 		button.grab_focus()
@@ -264,6 +327,20 @@ func _build_row(data: Dictionary) -> Control:
 		return _build_tabs(data)
 	if data.has("grid"):
 		return _build_grid(data)
+	if data.has("section_toggle"):
+		var toggle := Button.new()
+		var sign_text := "+" if bool(data["folded"]) else "-"
+		toggle.text = "%s  %s   (%d)" % [sign_text, str(data["section_toggle"]).to_upper(), int(data["count"])]
+		toggle.alignment = HORIZONTAL_ALIGNMENT_LEFT
+		toggle.focus_mode = Control.FOCUS_ALL
+		toggle.custom_minimum_size = Vector2(0, 34)
+		_style_button(toggle, false)
+		toggle.set_meta("toggle_key", str(data["key"]))
+		toggle.pressed.connect(_toggle_section.bind(str(data["key"])))
+		var toggle_space := MarginContainer.new()
+		toggle_space.add_theme_constant_override("margin_top", 10)
+		toggle_space.add_child(toggle)
+		return toggle_space
 	if data.has("section"):
 		var heading := Label.new()
 		heading.text = str(data["section"]).to_upper()
