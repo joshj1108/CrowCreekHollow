@@ -267,6 +267,18 @@ Quests in the Quests panel, under Guardian of Lowmere, run in order:
 
 Later: more villages and roads, more creatures, and guardian quests that need combat or exploration. Defense stacks across slots, so a full set can turn most hits into single points of damage. That needs a playtest before it is tuned.
 
+## The world (planned)
+
+- **Size:** the world is 768 by 912 tiles, the same as the full RuneScape Classic map (16 by 19 sectors of 48 tiles). It is at the same tile scale as the farm.
+- **The farm is separate.** The homestead stays a self-contained base for farming, storage and sleep. The rest of the land is the world, and you travel between them through a **portal**.
+- **Our own map.** The world is generated from a seed, with forest, water, roads and clearings. We don't use Jagex's map data, which we only measured.
+- **Rendering:** the world is stored in chunks, and only the chunks near the camera are drawn, so the full size stays fast.
+- **Villages and roads** (Lowmere and Ashford) become places in the world, not separate maps.
+
+**Open decisions:**
+- Where the portal sits on the farm, and whether it works at night.
+- Whether Lowmere and Ashford keep their current layouts inside the world or are rebuilt.
+
 ## Forestry and tools
 
 - **Forestry** trains by felling trees. A grove of five trees sits in the top-left corner of the farm. Each tree gives 3 wood, and 2 hardwood with a copper hatchet or better, and 20 Forestry XP. Felled trees come back each morning.
