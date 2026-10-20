@@ -87,9 +87,15 @@ func _ready() -> void:
 
 	column.add_child(HSeparator.new())
 
+	# The rows scroll, so long lists like the gear crafting don't run off the screen.
+	var scroll := ScrollContainer.new()
+	scroll.custom_minimum_size = Vector2(500, 340)
+	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	column.add_child(scroll)
 	rows_box = VBoxContainer.new()
 	rows_box.add_theme_constant_override("separation", 10)
-	column.add_child(rows_box)
+	rows_box.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	scroll.add_child(rows_box)
 
 
 func show_panel(tab: String, rows: Array) -> void:

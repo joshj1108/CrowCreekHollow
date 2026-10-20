@@ -281,6 +281,25 @@ Later: more villages and roads, more creatures, and guardian quests that need co
 - From **Mining 2**, a pick also gives a 15% chance of **copper ore** per rock. Farm rocks never give iron.
 - Stone is worth little on its own. It goes into the stone hatchet and stone pick.
 
+## Smithing and metal gear
+
+- **Furnace** (built from the House panel beside the house): 80 coins, 6 wood, 4 stone, Carpentry 4. Stand beside it, facing it, and press Space to smelt.
+- **Smelting** turns one ore and one wood into a bar. Copper needs Smithing 1. Iron needs Smithing 4. Smelting gives 10 Smithing XP.
+- **Metal gear replaces bark slot by slot.** Each bark piece has a metal version in the same slot:
+
+| Slot | Bark | Copper (Smithing 2 to 3) | Iron (Smithing 5 to 6) |
+|---|---|---|---|
+| Head | Resin cap | Copper helm, 2 defense | Iron helm, 3 defense |
+| Neck | Twine collar, resin amulet | Copper torc, 2 defense | Iron torc, 3 defense |
+| Chest | Bark wrap | Copper cuirass, 3 defense | Iron cuirass, 4 defense |
+| Main hand | Sharpened stick, hunting knife | Copper sword, 4 damage | Iron sword, 6 damage |
+| Wrist | Fiber wraps | Copper bracers, 2 defense | Iron gauntlets, 3 defense |
+| Legs | Reed leggings, bark greaves | Copper greaves, 2 defense | Iron greaves, 3 defense |
+| Feet | Bark boots | Copper boots, 2 defense | Iron sabatons, 3 defense |
+
+- The Gear panel has a **Tools** section. Hatchets and picks are upgraded there one tier at a time, in order.
+- The action bar panel now scrolls, so long crafting lists fit on screen.
+
 ## Gathering and metal (planned)
 
 Bark is the starting tier and metal is the later one. Each bark piece has a metal piece for the same slot. The metal piece is better, needs Smithing, and takes that slot once you have it. Bark pieces stay craftable early on.

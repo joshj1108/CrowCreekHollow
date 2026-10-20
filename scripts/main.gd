@@ -127,6 +127,10 @@ const COOLER_COST := {"wood": 4, "fiber": 4, "coins": 40, "level": 2}
 const CELLAR_IX := Vector2i(24, 7)   # farm tiles, local to the farm, beside the house
 const COOLER_IX := Vector2i(33, 7)
 const SMOKEHOUSE_IX := Vector2i(34, 4)
+const FURNACE_IX := Vector2i(30, 10)
+const FURNACE_COST := {"wood": 6, "stone": 4, "coins": 80, "level": 4}
+const SMELT_LEVEL := {"copper": 1, "iron": 4}
+const XP_SMELT := 10
 const SMOKEHOUSE_COST := {"wood": 5, "fiber": 3, "coins": 60, "level": 3}
 # Preserving turns food into goods that keep in the pack. Each method needs a skill
 # level and makes one item per press at the smokehouse.
@@ -201,6 +205,20 @@ const GEAR_ITEMS := {
 	"resin_amulet": {"name": "Resin amulet", "slot": "neck", "dmg": 0, "def": 2, "level": 5, "cost": {"resin": 3, "fiber": 2}},
 	"reed_leggings": {"name": "Reed leggings", "slot": "legs", "dmg": 0, "def": 1, "level": 1, "cost": {"fiber": 4}},
 	"bark_greaves": {"name": "Bark greaves", "slot": "legs", "dmg": 0, "def": 2, "level": 4, "cost": {"wood": 3, "fiber": 3}},
+	"copper_helm": {"name": "Copper helm", "slot": "head", "dmg": 0, "def": 2, "level": 2, "skill": "Smithing", "cost": {"copper_bar": 3}},
+	"copper_torc": {"name": "Copper torc", "slot": "neck", "dmg": 0, "def": 2, "level": 2, "skill": "Smithing", "cost": {"copper_bar": 2}},
+	"copper_cuirass": {"name": "Copper cuirass", "slot": "chest", "dmg": 0, "def": 3, "level": 3, "skill": "Smithing", "cost": {"copper_bar": 4}},
+	"copper_sword": {"name": "Copper sword", "slot": "hand_r", "dmg": 4, "def": 0, "level": 2, "skill": "Smithing", "cost": {"copper_bar": 3}},
+	"copper_bracers": {"name": "Copper bracers", "slot": "wrist", "dmg": 0, "def": 2, "level": 2, "skill": "Smithing", "cost": {"copper_bar": 2}},
+	"copper_greaves": {"name": "Copper greaves", "slot": "legs", "dmg": 0, "def": 2, "level": 3, "skill": "Smithing", "cost": {"copper_bar": 3}},
+	"copper_boots": {"name": "Copper boots", "slot": "feet", "dmg": 0, "def": 2, "level": 3, "skill": "Smithing", "cost": {"copper_bar": 2}},
+	"iron_helm": {"name": "Iron helm", "slot": "head", "dmg": 0, "def": 3, "level": 5, "skill": "Smithing", "cost": {"iron_bar": 3}},
+	"iron_torc": {"name": "Iron torc", "slot": "neck", "dmg": 0, "def": 3, "level": 5, "skill": "Smithing", "cost": {"iron_bar": 2}},
+	"iron_cuirass": {"name": "Iron cuirass", "slot": "chest", "dmg": 0, "def": 4, "level": 6, "skill": "Smithing", "cost": {"iron_bar": 4}},
+	"iron_sword": {"name": "Iron sword", "slot": "hand_r", "dmg": 6, "def": 0, "level": 5, "skill": "Smithing", "cost": {"iron_bar": 4}},
+	"iron_gauntlets": {"name": "Iron gauntlets", "slot": "wrist", "dmg": 0, "def": 3, "level": 5, "skill": "Smithing", "cost": {"iron_bar": 2}},
+	"iron_greaves": {"name": "Iron greaves", "slot": "legs", "dmg": 0, "def": 3, "level": 6, "skill": "Smithing", "cost": {"iron_bar": 3}},
+	"iron_sabatons": {"name": "Iron sabatons", "slot": "feet", "dmg": 0, "def": 3, "level": 6, "skill": "Smithing", "cost": {"iron_bar": 2}},
 }
 const NPCS := [
 	{"id": "mara", "name": "Mara the Reeve", "pos": Vector2i(8, 9), "color": "e0c48c", "lines": [
@@ -380,9 +398,9 @@ const NIGHT_EVENTS := [
 	{"message": "The field is quiet tonight. Too quiet.", "shadow": "none", "sanity": -3},
 ]
 
-enum Tile { TREE, GRASS, SOIL, PATH, WATER, HOUSE, DOOR, FLOOR, WALL, EXIT, BED, STATION, DESK, FALLOW, STALL, CELLAR, COOLER, GATE, SMOKEHOUSE }
+enum Tile { TREE, GRASS, SOIL, PATH, WATER, HOUSE, DOOR, FLOOR, WALL, EXIT, BED, STATION, DESK, FALLOW, STALL, CELLAR, COOLER, GATE, SMOKEHOUSE, FURNACE }
 
-const BLOCKING := [Tile.TREE, Tile.WATER, Tile.HOUSE, Tile.WALL, Tile.BED, Tile.STATION, Tile.DESK, Tile.STALL, Tile.CELLAR, Tile.COOLER, Tile.SMOKEHOUSE]
+const BLOCKING := [Tile.TREE, Tile.WATER, Tile.HOUSE, Tile.WALL, Tile.BED, Tile.STATION, Tile.DESK, Tile.STALL, Tile.CELLAR, Tile.COOLER, Tile.SMOKEHOUSE, Tile.FURNACE]
 
 const TILE_COLORS := {
 	Tile.TREE: Color("2f4f2f"),
@@ -404,6 +422,7 @@ const TILE_COLORS := {
 	Tile.COOLER: Color("7fc4e0"),
 	Tile.GATE: Color("8f7a4f"),
 	Tile.SMOKEHOUSE: Color("9a5a3a"),
+	Tile.FURNACE: Color("5c5c66"),
 }
 
 const BUSH_COLOR := Color("3d6b2a")
@@ -460,6 +479,7 @@ var bag_tier := 0               # bag upgrades bought
 var cellar_built := false
 var cooler_built := false
 var smokehouse_built := false
+var furnace_built := false
 var cellar_stock := 0          # crops in the root cellar
 var cooler_stock := 0          # fish in the cooler
 var zone: int = Zone.HOMESTEAD
@@ -568,7 +588,7 @@ func _draw() -> void:
 			var tile: int = map[y][x]
 			var cell := _tile_rect(Vector2i(x, y))
 			draw_rect(cell, TILE_COLORS[tile])
-			if tile == Tile.CELLAR or tile == Tile.COOLER or tile == Tile.SMOKEHOUSE:
+			if tile == Tile.CELLAR or tile == Tile.COOLER or tile == Tile.SMOKEHOUSE or tile == Tile.FURNACE:
 				draw_rect(cell, Color(1, 1, 1, 0.8), false, 2.0)
 				var label := _storage_label(tile)
 				draw_string(ThemeDB.fallback_font, cell.position + Vector2(2, PX * 0.6), label, HORIZONTAL_ALIGNMENT_LEFT, -1, 11, Color(0.05, 0.03, 0.02))
@@ -721,6 +741,8 @@ func _apply_storage_tiles() -> void:
 		map[COOLER_IX.y + BORDER_Y][COOLER_IX.x + BORDER_X] = Tile.COOLER
 	if smokehouse_built:
 		map[SMOKEHOUSE_IX.y + BORDER_Y][SMOKEHOUSE_IX.x + BORDER_X] = Tile.SMOKEHOUSE
+	if furnace_built:
+		map[FURNACE_IX.y + BORDER_Y][FURNACE_IX.x + BORDER_X] = Tile.FURNACE
 	queue_redraw()
 
 
@@ -922,6 +944,12 @@ func _on_panel_action(action_id: String) -> void:
 	if action_id.begins_with("sell:"):
 		_sell(action_id.trim_prefix("sell:"))
 		return
+	if action_id.begins_with("smelt:"):
+		_smelt(action_id.trim_prefix("smelt:"))
+		return
+	if action_id == "build_furnace":
+		_build_furnace()
+		return
 	if action_id == "build_smokehouse":
 		_build_smokehouse()
 		return
@@ -996,6 +1024,8 @@ func _refresh_panel() -> void:
 			rows = _cooler_rows()
 		"Smokehouse":
 			rows = _smokehouse_rows()
+		"Furnace":
+			rows = _furnace_rows()
 		"House":
 			rows = _house_rows()
 		"Settings":
@@ -1118,7 +1148,7 @@ func _gear_rows() -> Array:
 		var item: Dictionary = GEAR_ITEMS[id]
 		rows.append({
 			"name": "%s  (%s)" % [item["name"], str(item["slot"]).replace("_", " ")],
-			"value": "%s, Bushcrafting %d" % [_price_text_items(item["cost"]), int(item["level"])],
+			"value": "%s, %s %d" % [_price_text_items(item["cost"]), str(item.get("skill", "Bushcrafting")), int(item["level"])],
 			"button": "Make",
 			"action": "craft:" + str(id),
 			"enabled": _can_craft(str(id)),
@@ -1250,6 +1280,16 @@ func _house_rows() -> Array:
 			"action": "build_smokehouse",
 			"enabled": _can_afford(SMOKEHOUSE_COST),
 		})
+	if furnace_built:
+		rows.append({"name": "Furnace", "value": "built. Stand beside it, facing it, and press Space to smelt ore."})
+	else:
+		rows.append({
+			"name": "Build a furnace (smelts ore into bars)",
+			"value": _price_text(FURNACE_COST),
+			"button": "Build",
+			"action": "build_furnace",
+			"enabled": _can_afford(FURNACE_COST),
+		})
 	rows.append({"section": "Features"})
 	for feature in HOUSE_FEATURES:
 		var unlocked: bool = house_stage >= feature["stage"]
@@ -1362,6 +1402,9 @@ func _interact() -> void:
 		return
 	if kind == Tile.COOLER:
 		_toggle_tab("Cooler")
+		return
+	if kind == Tile.FURNACE:
+		_toggle_tab("Furnace")
 		return
 	if kind == Tile.SMOKEHOUSE:
 		_toggle_tab("Smokehouse")
@@ -1675,26 +1718,34 @@ func _upgrade_bag() -> void:
 # --- Money and costs ---------------------------------------------------------
 
 func _can_afford(cost: Dictionary) -> bool:
-	return money >= int(cost.get("coins", 0)) \
-		and int(materials["wood"]) >= int(cost.get("wood", 0)) \
-		and int(materials["fiber"]) >= int(cost.get("fiber", 0)) \
-		and _level("Carpentry") >= int(cost.get("level", 1))
+	if money < int(cost.get("coins", 0)):
+		return false
+	if _level("Carpentry") < int(cost.get("level", 1)):
+		return false
+	for key in cost.keys():
+		if key == "coins" or key == "level":
+			continue
+		if int(materials.get(key, 0)) < int(cost[key]):
+			return false
+	return true
 
 
 func _pay(cost: Dictionary) -> void:
 	money -= int(cost.get("coins", 0))
-	materials["wood"] -= int(cost.get("wood", 0))
-	materials["fiber"] -= int(cost.get("fiber", 0))
+	for key in cost.keys():
+		if key == "coins" or key == "level":
+			continue
+		materials[key] -= int(cost[key])
 
 
 func _price_text(cost: Dictionary) -> String:
 	var parts: Array = []
 	if int(cost.get("coins", 0)) > 0:
 		parts.append("%d coins" % int(cost["coins"]))
-	if int(cost.get("wood", 0)) > 0:
-		parts.append("%d wood" % int(cost["wood"]))
-	if int(cost.get("fiber", 0)) > 0:
-		parts.append("%d fiber" % int(cost["fiber"]))
+	for key in cost.keys():
+		if key == "coins" or key == "level" or int(cost[key]) <= 0:
+			continue
+		parts.append("%d %s" % [int(cost[key]), key])
 	parts.append("Carpentry %d" % int(cost.get("level", 1)))
 	return ", ".join(parts)
 
@@ -2002,6 +2053,8 @@ func _storage_label(tile: int) -> String:
 		return "Cooler"
 	if tile == Tile.SMOKEHOUSE:
 		return "Smoke"
+	if tile == Tile.FURNACE:
+		return "Furnace"
 	return "Cellar"
 
 
@@ -2102,6 +2155,57 @@ func _tiles_to_array(tiles: Dictionary) -> Array:
 	for tile in tiles.keys():
 		arr.append([tile.x, tile.y])
 	return arr
+
+
+# --- Smithing -------------------------------------------------------------------
+
+func _build_furnace() -> void:
+	if not _can_afford(FURNACE_COST):
+		_show_message("You can't build that yet. Needs %s." % _price_text(FURNACE_COST))
+		return
+	_pay(FURNACE_COST)
+	furnace_built = true
+	_build_interior()
+	_show_message("The furnace is built beside the house. Smelt ore into bars there.")
+	queue_redraw()
+
+
+func _can_smelt(kind: String) -> bool:
+	if not furnace_built:
+		return false
+	if _level("Smithing") < int(SMELT_LEVEL[kind]):
+		return false
+	return int(materials[kind + "_ore"]) >= 1 and int(materials["wood"]) >= 1
+
+
+func _smelt(kind: String) -> void:
+	if not furnace_built:
+		_show_message("Build a furnace from the House panel first.")
+		return
+	if not _can_smelt(kind):
+		_show_message("You need %s ore, a piece of wood, and Smithing %d." % [kind, int(SMELT_LEVEL[kind])])
+		return
+	materials[kind + "_ore"] -= 1
+	materials["wood"] -= 1
+	materials[kind + "_bar"] += 1
+	_grant_xp("Smithing", XP_SMELT)
+	_show_message("You smelt a %s bar. +%d Smithing XP" % [kind, XP_SMELT])
+
+
+func _furnace_rows() -> Array:
+	var rows: Array = [
+		{"section": "Furnace"},
+		{"note": "Smelting turns ore into bars, with wood as fuel. Bars make metal tools and gear. Stand beside the furnace, facing it, and press Space to open this panel."},
+	]
+	for kind in ["copper", "iron"]:
+		rows.append({
+			"name": "Smelt a %s bar (1 %s ore, 1 wood)" % [kind, kind],
+			"value": "Smithing %d, +%d XP. Held: %d ore, %d bars" % [int(SMELT_LEVEL[kind]), XP_SMELT, int(materials[kind + "_ore"]), int(materials[kind + "_bar"])],
+			"button": "Smelt",
+			"action": "smelt:" + kind,
+			"enabled": _can_smelt(kind),
+		})
+	return rows
 
 
 # --- Slot grids for the pack, seed pouch, and equipment ---------------------
@@ -2482,8 +2586,8 @@ func _craft_gear(id: String) -> void:
 	for mat in cost.keys():
 		materials[mat] -= int(cost[mat])
 	equipment[item["slot"]] = id
-	_grant_xp("Bushcrafting", 10)
-	_show_message("You fashion a %s and equip it. +10 Bushcrafting XP" % item["name"])
+	_grant_xp(str(item.get("skill", "Bushcrafting")), 10)
+	_show_message("You fashion a %s and equip it. +10 %s XP" % [item["name"], item.get("skill", "Bushcrafting")])
 
 
 func _slot_cell(slot: String, label: String) -> Dictionary:
@@ -2885,6 +2989,7 @@ func _save_game() -> void:
 		"cellar_stock": cellar_stock,
 		"cooler_stock": cooler_stock,
 		"smokehouse_built": smokehouse_built,
+		"furnace_built": furnace_built,
 		"achievements_done": achievements_done,
 		"story_version": 2,
 		"selected_seed": selected_seed,
@@ -2943,6 +3048,7 @@ func _load_game() -> bool:
 	cellar_stock = int(data.get("cellar_stock", 0))
 	cooler_stock = int(data.get("cooler_stock", 0))
 	smokehouse_built = bool(data.get("smokehouse_built", false))
+	furnace_built = bool(data.get("furnace_built", false))
 	saved_zone = int(data.get("zone", 0))
 	hp = int(data.get("hp", BASE_HP))
 	guardian_done = data.get("guardian_done", {})
