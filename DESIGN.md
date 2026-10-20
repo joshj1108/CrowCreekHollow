@@ -14,7 +14,7 @@ A top-down farming game with heavy psychological horror, built in Godot 4.7.
 - Move: WASD or arrow keys
 - Use, plant, harvest, gather, sleep, tidy, cleanse, cook, talk, swing, or read: Space / Enter (face the tile)
 - Walk into the farmhouse door to go inside. Walk onto the exit mat to leave.
-- Action bar (click or key): Skills K, Inventory I, Gear G, Quests Q, House H, Achievements J, Settings
+- Action bar (click or key): Skills K, Inventory I, Gear G, Craft C, Quests Q, House H, Achievements J, Settings
 - Esc opens Settings, or closes it if it's already open
 - Farming and gathering pause while a panel is open
 
@@ -132,7 +132,7 @@ Achievements track stats and never reset. Each pays a small reward. Earning all 
 ## Cooking
 
 - Cooking is a skill (`Level = 1 + XP / 100`).
-- In the Inventory panel, **Cook a fish** uses 1 fish and 1 wood for 1 meal (15 XP). **Cook crops** uses 2 crops and 1 wood for 1 meal (10 XP).
+- In the Craft panel's Cooking tab, **Cook a fish** uses 1 fish and 1 wood for 1 meal (15 XP). **Cook crops** uses 2 crops and 1 wood for 1 meal (10 XP).
 - **Eat a meal** uses one meal for +8 sanity.
 
 ## Farming and crops
@@ -178,7 +178,7 @@ Achievements track stats and never reset. Each pays a small reward. Earning all 
 ## Survival (bushcrafting and lanterns)
 
 - Brush piles give wood and fiber, and sometimes resin.
-- Lanterns are built in the Gear panel. Each tier lights a ring around the player in the dark:
+- Lanterns are built in the Craft panel, under Other. Each tier lights a ring around the player in the dark:
 
 | Tier | Ring | Needs | Bushcrafting |
 |---|---|---|---|
@@ -239,7 +239,7 @@ Combat happens while you move, in the style of Stardew Valley.
 
 The Gear panel has ten slots in four columns: Back (your bag), Head, Neck, Belt (lantern), Off hand (shield), Chest, Main hand (weapon), Wrist, Legs, and Feet. The lantern hangs from the belt, so the offhand is free for a shield.
 
-Gear is crafted from the Gear panel with wood, fiber, and resin. Crafting equips the piece at once and replaces whatever was in that slot.
+The Gear panel shows only what is worn, plus the toolbelt: the hoe, axe, and pickaxe. Everything is made in the Craft panel (press C), which has four tabs: Gear, Cooking, Tools, and Other. Gear is crafted with wood, fiber, and resin. Crafting equips the piece at once and replaces whatever was in that slot.
 
 | Piece | Slot | Effect | Bushcrafting | Cost |
 |---|---|---|---|---|
@@ -290,7 +290,7 @@ The whole land is filled with towns, planned from a fixed seed so every game get
 
 A campsite lets you stay out in the wider land overnight. It is built, not placed by the map.
 
-- **Setting up:** from the Gear panel's Campsite section, while in the world. Face open ground (grass or path) and press Camp. It costs 4 wood and 3 fiber, needs Bushcrafting 2, and gives 15 Bushcrafting XP.
+- **Setting up:** from the Craft panel's Other tab, Campsite section, while in the world. Face open ground (grass or path) and press Camp. It costs 4 wood and 3 fiber, needs Bushcrafting 2, and gives 15 Bushcrafting XP.
 - **One at a time:** setting up a new campsite moves your camp. The old tile goes back to grass.
 - **Safe:** foes cannot attack you while you stand at the campsite, and they will not enter within 3 tiles of it.
 - **Resting:** face the campsite and interact with it from 18:00, as you would a bed. It saves the game, advances the day, and keeps you in the wider land. The dusk rule does not send you home from it.
@@ -300,7 +300,7 @@ A campsite lets you stay out in the wider land overnight. It is built, not place
 ## Forestry and tools
 
 - **Forestry** trains by felling trees. A grove of five trees sits in the top-left corner of the farm. Each tree gives 3 wood, and 2 hardwood with a copper hatchet or better, and 20 Forestry XP. Felled trees come back each morning.
-- **Hatchets** and **picks** are tools with tiers. They are crafted from the Tools section of the Gear panel and are kept by tier rather than worn in a slot. Hatchet tiers: crude, stone, copper, iron. Pick tiers: stone, copper, iron.
+- **Hatchets** and **picks** are tools with tiers. They are crafted from the Tools tab of the Craft panel and are kept by tier rather than worn in a slot. Hatchet tiers: crude, stone, copper, iron. Pick tiers: stone, copper, iron.
 - A hatchet is needed to fell trees. Hardwood needs a copper hatchet or better.
 
 ## Mining
@@ -327,14 +327,14 @@ A campsite lets you stay out in the wider land overnight. It is built, not place
 | Legs | Reed leggings, bark greaves | Copper greaves, 2 defense | Iron greaves, 3 defense |
 | Feet | Bark boots | Copper boots, 2 defense | Iron sabatons, 3 defense |
 
-- The Gear panel has a **Tools** section. Hatchets and picks are upgraded there one tier at a time, in order.
+- The Craft panel's **Tools** tab holds them. Hatchets and picks are upgraded there one tier at a time, in order.
 - The action bar panel now scrolls, so long crafting lists fit on screen.
 
 ## Shields and ranged weapons
 
 - **Shields** go in the **off hand**. Hardwood shields (Forestry 4) use hardwood and fiber. Copper (Smithing 3) and iron (Smithing 6) shields are heavier and give more defense.
 - **Bows** (hardwood, Forestry 3) and **crossbows** (hardwood and copper, Smithing 3) go in the **main hand**. The attack button fires them in the direction you face, and only in Lowmere and Ashford, where the foes are. A bow fires every 0.6 seconds for 3 damage. A crossbow fires every 1.2 seconds for 6 damage.
-- **Arrows** (wood and fiber, Bushcrafting 2) and **bolts** (hardwood and copper, Smithing 2) are fletched from the Gear panel's Ammunition section. Each shot uses one. Shots that miss are lost, since there is no pickup yet.
+- **Arrows** (wood and fiber, Bushcrafting 2) and **bolts** (hardwood and copper, Smithing 2) are fletched from the Craft panel's Tools tab, Ammunition section. Each shot uses one. Shots that miss are lost, since there is no pickup yet.
 - Melee and ranged attacks both use the same button. The bow or crossbow in the main hand decides which one you get.
 
 ## The Ashford quarry

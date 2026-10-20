@@ -161,7 +161,7 @@ const FURNACE_IX := Vector2i(30, 10)
 const FURNACE_COST := {"wood": 6, "stone": 4, "coins": 80, "level": 4}
 const SMELT_LEVEL := {"copper": 1, "iron": 4}
 const XP_SMELT := 10
-# Ammunition is fletched at the Gear panel and used up by each shot.
+# Ammunition is fletched at the Craft panel and used up by each shot.
 const AMMO := {
 	"arrows": {"name": "Arrows", "yield": 5, "cost": {"wood": 1, "fiber": 1}, "skill": "Bushcrafting", "level": 2},
 	"bolts": {"name": "Bolts", "yield": 3, "cost": {"hardwood": 1, "copper_bar": 1}, "skill": "Smithing", "level": 2},
@@ -559,6 +559,7 @@ var sanity := SANITY_MAX
 var sanity_penalty := 0             # permanent cap reduction from collapsing
 var inside := false                 # standing in the farmhouse interior
 var open_tab := ""                  # "" when the action bar panel is closed
+var craft_tab := "gear"             # which Craft sub-tab shows (not saved)
 var event_fired_day := 0            # the day the night event last happened
 var tonight_shadow := Vector2i(-1, -1)
 var shadow_tile := Vector2i.ZERO    # where the field shadow sits
@@ -767,6 +768,7 @@ func _setup_input() -> void:
 	_ensure_action("skills", [KEY_K], [JOY_BUTTON_Y])
 	_ensure_action("inventory", [KEY_I], [JOY_BUTTON_X])
 	_ensure_action("gear", [KEY_G], [JOY_BUTTON_LEFT_SHOULDER])
+	_ensure_action("craft", [KEY_C], [])
 	_ensure_action("quests", [KEY_Q], [JOY_BUTTON_RIGHT_SHOULDER])
 	_ensure_action("achievements", [KEY_J], [JOY_BUTTON_RIGHT_STICK])
 	_ensure_action("house", [KEY_H], [JOY_BUTTON_BACK])
@@ -1018,6 +1020,8 @@ func _handle_keys() -> void:
 		_toggle_tab("Inventory")
 	if Input.is_action_just_pressed("gear"):
 		_toggle_tab("Gear")
+	if Input.is_action_just_pressed("craft"):
+		_toggle_tab("Craft")
 	if Input.is_action_just_pressed("quests"):
 		_toggle_tab("Quests")
 	if Input.is_action_just_pressed("achievements"):
@@ -1082,9 +1086,16 @@ func _on_panel_action(action_id: String) -> void:
 	if action_id.begins_with("craft:"):
 		_craft_gear(action_id.trim_prefix("craft:"))
 		return
+	if action_id.begins_with("craft_tab:"):
+		craft_tab = action_id.trim_prefix("craft_tab:")
+		_refresh_panel()
+		return
 	match action_id:
 		"close":
 			_close_panel()
+		"open_craft":
+			open_tab = "Craft"
+			_refresh_panel()
 		"repair":
 			_repair_house()
 		"mend":
@@ -1138,6 +1149,8 @@ func _refresh_panel() -> void:
 			rows = _inventory_rows()
 		"Gear":
 			rows = _gear_rows()
+		"Craft":
+			rows = _craft_rows()
 		"Quests":
 			rows = _quest_rows()
 		"Achievements":
@@ -1208,21 +1221,7 @@ func _inventory_rows() -> Array:
 			"action": "switch_seed",
 			"enabled": true,
 		})
-	rows.append({"section": "Cooking"})
-	rows.append({
-		"name": "Cook a fish",
-		"value": "1 fish, 1 wood: +%d Cooking XP" % XP_COOK_FISH,
-		"button": "Cook",
-		"action": "cook_fish",
-		"enabled": _can_cook_fish(),
-	})
-	rows.append({
-		"name": "Cook crops",
-		"value": "%d crops, 1 wood: +%d Cooking XP" % [COOK_CROP_COUNT, XP_COOK_CROPS],
-		"button": "Cook",
-		"action": "cook_crops",
-		"enabled": _can_cook_crops(),
-	})
+	rows.append({"section": "Meals"})
 	rows.append({
 		"name": "Eat a meal",
 		"value": "%d ready, +%d sanity" % [int(inventory["meals"]), int(MEAL_SANITY)],
@@ -1237,37 +1236,86 @@ func _inventory_rows() -> Array:
 	return rows
 
 
+const CRAFT_TABS := [
+	{"id": "gear", "name": "Gear"},
+	{"id": "cooking", "name": "Cooking"},
+	{"id": "tools", "name": "Tools"},
+	{"id": "other", "name": "Other"},
+]
+
+
+# The Gear panel shows only what is worn and what is on the toolbelt.
 func _gear_rows() -> Array:
-	var rows: Array = [
+	return [
 		{"section": "Equipped"},
 		{"grid": _gear_cells(), "columns": 4},
-		{"section": "Lantern"},
+		{"name": "Crafting", "value": "gear, cooking, tools, and more", "button": "Open", "action": "open_craft", "enabled": true},
+		{"section": "Toolbelt"},
+		{"name": "Hoe", "value": "for tilling soil"},
+		{"name": "Axe", "value": _tool_name("hatchet")},
+		{"name": "Pickaxe", "value": _tool_name("pick")},
+		{"note": "Axes and pickaxes are upgraded in the Craft panel, under Tools. Press C to open it."},
 	]
-	if lantern_tier == 0:
-		rows.append({"name": "Lantern", "value": "not built"})
-	else:
-		var current: Dictionary = LANTERN_TIERS[lantern_tier - 1]
-		rows.append({"name": current["name"], "value": "light ring %.1f tiles" % current["radius"]})
-	if lantern_tier < LANTERN_TIERS.size():
-		var upcoming: Dictionary = LANTERN_TIERS[lantern_tier]
+
+
+# The Craft panel groups everything made or cooked, one sub-tab at a time.
+func _craft_rows() -> Array:
+	var tabs: Array = []
+	for tab in CRAFT_TABS:
+		tabs.append({"id": tab["id"], "name": tab["name"], "action": "craft_tab:" + str(tab["id"])})
+	var rows: Array = [{"tabs": tabs, "active": craft_tab}]
+	match craft_tab:
+		"cooking":
+			rows.append_array(_craft_cooking_rows())
+		"tools":
+			rows.append_array(_craft_tools_rows())
+		"other":
+			rows.append_array(_craft_other_rows())
+		_:
+			rows.append_array(_craft_gear_rows())
+	return rows
+
+
+func _craft_gear_rows() -> Array:
+	var rows: Array = [{"section": "Craft and equip"}]
+	for id in GEAR_ITEMS.keys():
+		if id == "hoe":
+			continue
+		var item: Dictionary = GEAR_ITEMS[id]
 		rows.append({
-			"name": "Next: %s" % upcoming["name"],
-			"value": _cost_text(upcoming),
-			"button": "Build" if lantern_tier == 0 else "Upgrade",
-			"action": "advance_lantern",
-			"enabled": _can_advance_lantern(),
+			"name": "%s  (%s)" % [item["name"], str(item["slot"]).replace("_", " ")],
+			"value": "%s, %s %d" % [_price_text_items(item["cost"]), str(item.get("skill", "Bushcrafting")), int(item["level"])],
+			"button": "Make",
+			"action": "craft:" + str(id),
+			"enabled": _can_craft(str(id)),
 		})
-	if _in_village():
-		rows.append({"section": "Campsite"})
-		rows.append({
-			"name": "Set up camp here",
-			"value": "%d wood, %d fiber, Bushcrafting %d. Face open ground." % [int(CAMP_COST["wood"]), int(CAMP_COST["fiber"]), CAMP_LEVEL],
-			"button": "Camp",
-			"action": "camp",
-			"enabled": _can_camp(),
-		})
-		rows.append({"note": "A campsite is safe from foes. Rest there from 18:00 like a bed. It saves the game and ends the day. Setting up a new camp moves the old one."})
-	rows.append({"section": "Tools"})
+	rows.append({"note": "Crafted gear equips at once and replaces what was worn in that slot. Armor cuts damage from foes. Weapons decide how hard you hit."})
+	return rows
+
+
+func _craft_cooking_rows() -> Array:
+	return [
+		{"section": "Cook"},
+		{
+			"name": "Cook a fish",
+			"value": "1 fish, 1 wood: +%d Cooking XP" % XP_COOK_FISH,
+			"button": "Cook",
+			"action": "cook_fish",
+			"enabled": _can_cook_fish(),
+		},
+		{
+			"name": "Cook crops",
+			"value": "%d crops, 1 wood: +%d Cooking XP" % [COOK_CROP_COUNT, XP_COOK_CROPS],
+			"button": "Cook",
+			"action": "cook_crops",
+			"enabled": _can_cook_crops(),
+		},
+		{"note": "Eat meals from the Inventory panel. Smoking and preserving are done at the smokehouse, and smelting at the furnace."},
+	]
+
+
+func _craft_tools_rows() -> Array:
+	var rows: Array = [{"section": "Tools"}]
 	for kind in ["hatchet", "pick"]:
 		var tiers: Array = TOOL_TIERS[kind]
 		var have := int(tool_tier[kind])
@@ -1291,19 +1339,37 @@ func _gear_rows() -> Array:
 			"action": "ammo:" + kind,
 			"enabled": _can_fletch(kind),
 		})
-	rows.append({"section": "Craft and equip"})
-	for id in GEAR_ITEMS.keys():
-		if id == "hoe":
-			continue
-		var item: Dictionary = GEAR_ITEMS[id]
+	rows.append({"note": "Tools are kept by tier rather than worn in a slot. Upgrade them one tier at a time."})
+	return rows
+
+
+func _craft_other_rows() -> Array:
+	var rows: Array = [{"section": "Lantern"}]
+	if lantern_tier == 0:
+		rows.append({"name": "Lantern", "value": "not built"})
+	else:
+		var current: Dictionary = LANTERN_TIERS[lantern_tier - 1]
+		rows.append({"name": current["name"], "value": "light ring %.1f tiles" % current["radius"]})
+	if lantern_tier < LANTERN_TIERS.size():
+		var upcoming: Dictionary = LANTERN_TIERS[lantern_tier]
 		rows.append({
-			"name": "%s  (%s)" % [item["name"], str(item["slot"]).replace("_", " ")],
-			"value": "%s, %s %d" % [_price_text_items(item["cost"]), str(item.get("skill", "Bushcrafting")), int(item["level"])],
-			"button": "Make",
-			"action": "craft:" + str(id),
-			"enabled": _can_craft(str(id)),
+			"name": "Next: %s" % upcoming["name"],
+			"value": _cost_text(upcoming),
+			"button": "Build" if lantern_tier == 0 else "Upgrade",
+			"action": "advance_lantern",
+			"enabled": _can_advance_lantern(),
 		})
-	rows.append({"note": "Crafted gear equips at once and replaces what was worn in that slot. Armor cuts damage from foes. Weapons decide how hard you hit."})
+	rows.append({"note": "The lantern hangs from the belt and lights a ring around you in the dark."})
+	if _in_village():
+		rows.append({"section": "Campsite"})
+		rows.append({
+			"name": "Set up camp here",
+			"value": "%d wood, %d fiber, Bushcrafting %d. Face open ground." % [int(CAMP_COST["wood"]), int(CAMP_COST["fiber"]), CAMP_LEVEL],
+			"button": "Camp",
+			"action": "camp",
+			"enabled": _can_camp(),
+		})
+		rows.append({"note": "A campsite is safe from foes. Rest there from 18:00 like a bed. It saves the game and ends the day. Setting up a new camp moves the old one."})
 	return rows
 
 
@@ -1459,6 +1525,7 @@ func _settings_rows() -> Array:
 		{"name": "Skills", "value": "K"},
 		{"name": "Inventory", "value": "I"},
 		{"name": "Gear", "value": "G"},
+		{"name": "Craft", "value": "C"},
 		{"name": "Quests", "value": "Q"},
 		{"name": "Achievements", "value": "J"},
 		{"name": "House", "value": "H"},
@@ -1472,6 +1539,7 @@ func _settings_rows() -> Array:
 		{"name": "Achievements", "value": "Right stick click"},
 		{"name": "House", "value": "Back / View"},
 		{"name": "Settings", "value": "Start"},
+		{"note": "On a gamepad, open Craft with the Open button on the Gear panel."},
 		{"note": "While a panel is open, the D-pad or left stick moves between its buttons, and A presses the highlighted one."},
 		{"section": "Saving"},
 		{"note": "Progress saves only when you sleep, or when you collapse at 03:00. The save includes your position and open panel."},
@@ -2216,7 +2284,7 @@ func _storage_label(tile: int) -> String:
 
 func _chop(tile: Vector2i) -> void:
 	if int(tool_tier["hatchet"]) < 1:
-		_show_message("You need a hatchet. Craft a crude one from the Gear panel.")
+		_show_message("You need a hatchet. Craft a crude one from the Craft panel.")
 		return
 	grove_felled[tile] = true
 	_apply_grove()
@@ -2389,7 +2457,7 @@ func _fire(weapon: String) -> void:
 	var item: Dictionary = GEAR_ITEMS[weapon]
 	var ammo := str(item["ammo"])
 	if int(materials[ammo]) < 1:
-		_show_message("You're out of %s. Make more from the Gear panel." % ammo)
+		_show_message("You're out of %s. Make more from the Craft panel." % ammo)
 		return
 	materials[ammo] -= 1
 	swing_cool = float(item["cool"])
@@ -2441,7 +2509,7 @@ func _fill_quarry() -> void:
 func _quarry(tile: Vector2i) -> void:
 	var pick := int(tool_tier["pick"])
 	if pick < 1:
-		_show_message("The quarry rock is too hard for your hands. Craft a stone pick from the Gear panel.")
+		_show_message("The quarry rock is too hard for your hands. Craft a stone pick from the Craft panel.")
 		return
 	quarry.erase(tile)
 	var kind := "copper_ore" if _level("Mining") >= 3 else "stone"
@@ -2640,7 +2708,7 @@ func _mine_cave(tile: Vector2i, kind: int) -> void:
 	var need_level := 5 if iron else 2
 	var ore := "iron" if iron else "copper"
 	if int(tool_tier["pick"]) < need_pick:
-		_show_message("The %s ore is too hard for your hands. Craft a %s pick from the Gear panel." % [ore, "copper" if iron else "stone"])
+		_show_message("The %s ore is too hard for your hands. Craft a %s pick from the Craft panel." % [ore, "copper" if iron else "stone"])
 		return
 	if _level("Mining") < need_level:
 		_show_message("You need Mining %d to work %s ore." % [need_level, ore])

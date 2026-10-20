@@ -11,6 +11,7 @@ const TABS := [
 	{"name": "Skills", "key": "K"},
 	{"name": "Inventory", "key": "I"},
 	{"name": "Gear", "key": "G"},
+	{"name": "Craft", "key": "C"},
 	{"name": "Quests", "key": "Q"},
 	{"name": "House", "key": "H"},
 	{"name": "Achievements", "key": "J"},
@@ -50,7 +51,7 @@ func _ready() -> void:
 	for tab in TABS:
 		var button := Button.new()
 		button.text = "%s  [%s]" % [tab["name"], tab["key"]]
-		button.custom_minimum_size = Vector2(150, 44)
+		button.custom_minimum_size = Vector2(140, 44)
 		button.focus_mode = Control.FOCUS_NONE
 		button.add_theme_font_size_override("font_size", 16)
 		_style_button(button, false)
@@ -133,6 +134,8 @@ func _focus_first_button() -> void:
 
 
 func _build_row(data: Dictionary) -> Control:
+	if data.has("tabs"):
+		return _build_tabs(data)
 	if data.has("grid"):
 		return _build_grid(data)
 	if data.has("section"):
@@ -185,6 +188,20 @@ func _build_row(data: Dictionary) -> Control:
 		block.add_child(bar)
 
 	return block
+
+
+# A row of sub-tab buttons. The active one is highlighted; each button sends its action.
+func _build_tabs(data: Dictionary) -> Control:
+	var holder := HBoxContainer.new()
+	holder.add_theme_constant_override("separation", 6)
+	for tab in data["tabs"]:
+		var button := Button.new()
+		button.text = str(tab["name"])
+		button.focus_mode = Control.FOCUS_ALL
+		_style_button(button, str(tab["id"]) == str(data.get("active", "")))
+		button.pressed.connect(_on_action_pressed.bind(str(tab.get("action", ""))))
+		holder.add_child(button)
+	return holder
 
 
 # A grid of item slots, like a bag or equipment panel. Each cell is a dict:
