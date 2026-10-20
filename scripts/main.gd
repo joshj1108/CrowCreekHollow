@@ -1876,6 +1876,10 @@ func _on_panel_action(action_id: String) -> void:
 		craft_tab = action_id.trim_prefix("craft_tab:")
 		_refresh_panel()
 		return
+	if action_id.begins_with("gear_pick:"):
+		gear_selected = action_id.trim_prefix("gear_pick:")
+		_refresh_panel()
+		return
 	if action_id.begins_with("inv_pick:"):
 		inventory_selected = action_id.trim_prefix("inv_pick:")
 		_refresh_panel()
@@ -2131,18 +2135,98 @@ const CRAFT_TABS := [
 ]
 
 
-# The Gear panel shows only what is worn and what is on the toolbelt.
+# The Gear panel is a grid of picture tiles: each worn slot, the bag and belt, then the toolbelt.
+# Picking a tile fills the detail card beside the grid.
+var gear_selected := ""   # the slot or tool whose details show; remembered while the panel is open
+
+
 func _gear_rows() -> Array:
+	var tiles := _gear_tiles()
+	var chosen := _gear_chosen(tiles)
+	var marked: Array = []
+	for t in tiles:
+		var tile: Dictionary = t.duplicate()
+		tile["selected"] = str(t["key"]) == str(chosen["key"])
+		tile["action"] = "gear_pick:" + str(t["key"])
+		marked.append(tile)
 	return [
-		{"section": "Equipped"},
-		{"grid": _gear_cells(), "columns": 4},
-		{"name": "Crafting", "value": "gear, cooking, tools, and more", "button": "Open", "action": "open_craft", "enabled": true},
-		{"section": "Toolbelt"},
-		{"name": "Hoe", "value": "for tilling soil"},
-		{"name": "Axe", "value": _tool_name("hatchet")},
-		{"name": "Pickaxe", "value": _tool_name("pick")},
-		{"note": "Axes and pickaxes are upgraded in the Craft panel, under Tools. Press C to open it."},
+		{"split": {"recipes": marked, "columns": 4, "detail": chosen}},
+		{"name": "Defense", "value": str(_defense())},
+		{"name": "Hit damage", "value": str(_weapon_damage())},
+		{"note": "Worn gear sets your defense, and your main hand sets how hard you hit. Crafting a piece equips it at once and swaps out what was in that slot. Press C for the Craft panel."},
 	]
+
+
+func _gear_tiles() -> Array:
+	var tiles: Array = []
+	var bag_name := "Pack" if bag_tier == 0 else str(BAG_TIERS[bag_tier - 1]["name"])
+	tiles.append({
+		"key": "slot:back", "name": bag_name, "icon": "pack", "tint": "7a5a3a", "enabled": true,
+		"desc": "Your bag. Upgrade it from the Inventory panel.", "level_text": "%d pack slots" % _pack_capacity(),
+		"level_ok": true, "costs": [], "action": "",
+	})
+	tiles.append(_gear_slot_tile("head", "Head", "hat"))
+	tiles.append(_gear_slot_tile("neck", "Neck", "pendant"))
+	var lantern := {
+		"key": "slot:belt", "name": "Belt", "icon": "lantern", "tint": "8a7a2a", "enabled": false, "level_ok": true,
+		"desc": "No lantern yet. Build one in the Craft panel, under Other.", "level_text": "", "costs": [], "action": "",
+	}
+	if lantern_tier > 0:
+		var current: Dictionary = LANTERN_TIERS[lantern_tier - 1]
+		lantern["name"] = str(current["name"])
+		lantern["enabled"] = true
+		lantern["desc"] = "Lights a ring %.1f tiles across. It hangs from your belt." % float(current["radius"])
+	tiles.append(lantern)
+	tiles.append(_gear_slot_tile("offhand", "Off hand", "shield"))
+	tiles.append(_gear_slot_tile("chest", "Chest", "shirt"))
+	tiles.append(_gear_slot_tile("hand_r", "Main hand", "sword"))
+	tiles.append(_gear_slot_tile("wrist", "Wrist", "bracer"))
+	tiles.append(_gear_slot_tile("legs", "Legs", "pants"))
+	tiles.append(_gear_slot_tile("feet", "Feet", "boots"))
+	tiles.append({
+		"key": "tool:hoe", "name": "Hoe", "icon": "hoe", "tint": "8a6a3a", "enabled": true,
+		"desc": "Tills the soil so you can plant.", "level_text": "", "level_ok": true, "costs": [], "action": "",
+	})
+	tiles.append({
+		"key": "tool:axe", "name": _tool_name("hatchet") if int(tool_tier["hatchet"]) > 0 else "Axe", "icon": "axe", "tint": TINT_TOOL, "enabled": int(tool_tier["hatchet"]) > 0,
+		"desc": "Chops trees. Upgrade it in the Craft panel, under Tools.", "level_text": "", "level_ok": true, "costs": [], "action": "",
+	})
+	tiles.append({
+		"key": "tool:pick", "name": _tool_name("pick") if int(tool_tier["pick"]) > 0 else "Pickaxe", "icon": "pick", "tint": TINT_TOOL, "enabled": int(tool_tier["pick"]) > 0,
+		"desc": "Breaks rocks and ore. Upgrade it in the Craft panel, under Tools.", "level_text": "", "level_ok": true, "costs": [], "action": "",
+	})
+	return tiles
+
+
+# One worn slot: the piece in it, or a dim empty tile that points to the Craft panel.
+func _gear_slot_tile(slot: String, label: String, icon: String) -> Dictionary:
+	var id := str(equipment[slot])
+	var tint := "4a4036"
+	if id == "":
+		return {
+			"key": "slot:" + slot, "name": label, "icon": icon, "tint": tint, "enabled": false,
+			"desc": "Nothing worn here. Craft a piece for this slot in the Craft panel.", "level_text": "Empty", "level_ok": true,
+			"costs": [], "action": "open_craft", "button": "Craft",
+		}
+	var item: Dictionary = GEAR_ITEMS[id]
+	tint = TINT_WEAPON if slot == "hand_r" or item.has("ammo") else (TINT_ACCESSORY if slot == "neck" or slot == "wrist" else TINT_ARMOR)
+	var parts: Array = []
+	if int(item["dmg"]) > 0:
+		parts.append("Damage %d" % int(item["dmg"]))
+	if int(item["def"]) > 0:
+		parts.append("Armor %d" % int(item["def"]))
+	var desc := ", ".join(parts) if not parts.is_empty() else "No damage or armor."
+	return {
+		"key": "slot:" + slot, "name": str(item["name"]), "icon": icon, "tint": tint, "enabled": true,
+		"desc": desc + ".", "level_text": "Worn now", "level_ok": true, "costs": [], "action": "open_craft", "button": "Craft",
+	}
+
+
+func _gear_chosen(tiles: Array) -> Dictionary:
+	for t in tiles:
+		if str(t["key"]) == gear_selected:
+			return t
+	return tiles[0] if not tiles.is_empty() else {}
 
 
 # The Craft panel is a grid of recipes for the chosen sub-tab. Picking a tile fills in its details below.
@@ -4524,26 +4608,6 @@ func _seed_cells() -> Array:
 
 # Ten slots in four columns. The top row holds the back, head, neck, and belt.
 # The lantern hangs from the belt, so the offhand is free for a shield.
-func _gear_cells() -> Array:
-	var bag_name := "Pack" if bag_tier == 0 else str(BAG_TIERS[bag_tier - 1]["name"])
-	var lantern: Dictionary = {"empty": true, "label": "Belt", "tip": "Belt: no lantern built yet"}
-	if lantern_tier > 0:
-		var current: Dictionary = LANTERN_TIERS[lantern_tier - 1]
-		lantern = {"color": "ffd38a", "label": current["name"], "tip": "Belt: %s, ring %.1f tiles" % [current["name"], current["radius"]]}
-	return [
-		{"color": "7a5a3a", "label": bag_name, "tip": "Back: %s, %d pack slots" % [bag_name, _pack_capacity()]},
-		_slot_cell("head", "Head"),
-		_slot_cell("neck", "Neck"),
-		lantern,
-		_slot_cell("offhand", "Off hand"),
-		_slot_cell("chest", "Chest"),
-		_slot_cell("hand_r", "Main hand"),
-		_slot_cell("wrist", "Wrist"),
-		_slot_cell("legs", "Legs"),
-		_slot_cell("feet", "Feet"),
-	]
-
-
 # --- Lowmere and the road ---------------------------------------------------
 
 # A village is a grass field with a road along row 10, a west gate to the
@@ -4965,18 +5029,6 @@ func _craft_gear(id: String) -> void:
 	equipment[item["slot"]] = id
 	_grant_xp(str(item.get("skill", "Bushcrafting")), 10)
 	_show_message("You fashion a %s and equip it. +10 %s XP" % [item["name"], item.get("skill", "Bushcrafting")])
-
-
-func _slot_cell(slot: String, label: String) -> Dictionary:
-	var id := str(equipment[slot])
-	if id == "":
-		return {"empty": true, "label": label, "tip": "%s: empty" % label}
-	var item: Dictionary = GEAR_ITEMS[id]
-	var color := "8a8f96" if slot == "hand_r" else "9c8362"
-	return {
-		"color": color, "label": item["name"],
-		"tip": "%s: %s. Damage %d, defense %d" % [label, item["name"], int(item["dmg"]), int(item["def"])],
-	}
 
 
 # --- Repairs and mending ----------------------------------------------------

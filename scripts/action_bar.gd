@@ -807,6 +807,14 @@ class RecipeIcon extends Control:
 				draw_rect(Rect2(_pt(0.3, 0.36), Vector2(0.4, 0.5) * _sz), dark)
 				draw_circle(_pt(0.5, 0.6), 0.14 * _sz, Color("e8c060"))
 				draw_colored_polygon(_poly([[0.22, 0.38], [0.5, 0.12], [0.78, 0.38]]), tint)
+			"pack":
+				draw_arc(_pt(0.5, 0.3), 0.18 * _sz, PI, TAU, 12, dark, 0.04 * _sz)
+				draw_rect(Rect2(_pt(0.2, 0.3), Vector2(0.6, 0.62) * _sz), tint)
+				draw_rect(Rect2(_pt(0.2, 0.3), Vector2(0.6, 0.2) * _sz), light)
+				draw_line(_pt(0.2, 0.62), _pt(0.8, 0.62), dark, 0.03 * _sz)
+			"hoe":
+				draw_line(_pt(0.3, 0.95), _pt(0.7, 0.12), tint, 0.06 * _sz)
+				draw_colored_polygon(_poly([[0.5, 0.12], [0.92, 0.2], [0.86, 0.42], [0.5, 0.36]]), metal)
 			"crop":
 				draw_line(_pt(0.5, 0.95), _pt(0.5, 0.45), dark, 0.05 * _sz)
 				draw_colored_polygon(_ellipse(0.32, 0.36, 0.2, 0.12), light)
