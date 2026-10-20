@@ -816,24 +816,117 @@ func _draw_house() -> void:
 	var rect := Rect2(Vector2(origin) * PX, Vector2(HOUSE_W, HOUSE_H) * PX)
 	var stage := house_stage
 
+	_draw_house_chimney(rect, stage)
 	draw_rect(rect, HOUSE_WALLS[stage])
-	draw_rect(Rect2(rect.position, Vector2(rect.size.x, PX * 1.4)), HOUSE_ROOFS[stage])
+	_draw_house_siding(rect, stage)
+	_draw_house_roof(rect, stage)
+	_draw_house_door(rect, stage)
+	_draw_house_windows(rect, stage)
 
-	# The door fills the bottom-middle tile of the footprint.
-	var door_pos := rect.position + Vector2(2 * PX, (HOUSE_H - 1) * PX)
-	draw_rect(Rect2(door_pos, Vector2(PX, PX)), Color("24180f"))
 
-	# Windows on either side of the door. Boarded until the house is patched.
+# The chimney rises from the roof's east end. Brick at first, repointed and capped once patched.
+func _draw_house_chimney(rect: Rect2, stage: int) -> void:
+	var cx := rect.end.x - PX * 1.4
+	var top := rect.position.y - PX * (0.9 if stage >= 2 else 0.6)
+	var chim := Rect2(cx, top, PX * 0.5, rect.position.y - top + 8)
+	draw_rect(chim, Color("5a3f33") if stage < 2 else Color("7a4a38"))
+	for row in range(1, 4):
+		var by := top + row * (chim.size.y / 4.0)
+		draw_line(Vector2(chim.position.x, by), Vector2(chim.end.x, by), Color(0, 0, 0, 0.25), 1.0)
+	draw_rect(Rect2(cx - 3, top, PX * 0.5 + 6, 5), Color("2a221c"))
+	if stage == 3:
+		# A thin line of smoke, so the restored house looks lived in.
+		for i in 3:
+			draw_circle(Vector2(cx + PX * 0.25 + i * 3, top - 10 - i * 9), 4 + i, Color(0.8, 0.8, 0.8, 0.12))
+
+
+# Clapboard lines across the wall. Patched houses get corner boards, and restored ones a dark foundation.
+func _draw_house_siding(rect: Rect2, stage: int) -> void:
+	var line := Color(0, 0, 0, 0.14 if stage < 3 else 0.07)
+	var y := rect.position.y + PX * 1.4
+	while y < rect.end.y:
+		draw_line(Vector2(rect.position.x, y), Vector2(rect.end.x, y), line, 1.0)
+		y += 10.0
+	if stage >= 2:
+		var trim := Color("e8dcc0") if stage == 3 else Color("c9b48c")
+		var wall_top := rect.position.y + PX * 1.4
+		draw_rect(Rect2(rect.position.x, wall_top, 6, rect.size.y - PX * 1.4), trim)
+		draw_rect(Rect2(rect.end.x - 6, wall_top, 6, rect.size.y - PX * 1.4), trim)
+	if stage == 3:
+		draw_rect(Rect2(rect.position.x, rect.end.y - 8, rect.size.x, 8), Color("4a3a2e"))
+
+
+# The roof: shingle courses across the band. Stage 0 has a missing patch; later stages add a ridge cap and eave trim.
+func _draw_house_roof(rect: Rect2, stage: int) -> void:
+	var band := Rect2(rect.position, Vector2(rect.size.x, PX * 1.4))
+	var roof: Color = HOUSE_ROOFS[stage]
+	draw_rect(band, roof)
+	var shingle := roof.darkened(0.3)
+	var course := 0
+	var y := band.position.y + 12.0
+	while y < band.end.y - 4.0:
+		draw_line(Vector2(band.position.x, y), Vector2(band.end.x, y), shingle, 2.0)
+		var x := band.position.x + (0.0 if course % 2 == 0 else 12.0)
+		while x < band.end.x:
+			draw_line(Vector2(x, y), Vector2(x, y + 12.0), shingle, 1.0)
+			x += 24.0
+		y += 14.0
+		course += 1
+	if stage == 0:
+		# A missing roof patch shows the house is decrepit.
+		draw_rect(Rect2(rect.end.x - PX * 2.2, rect.position.y + 6, PX * 1.4, PX * 0.9), Color("0d0a08"))
+		# A sagging eave: the bottom edge dips toward the middle.
+		draw_line(Vector2(band.position.x, band.end.y), Vector2(band.position.x + band.size.x * 0.5, band.end.y + 6), Color("1a140f"), 3.0)
+		draw_line(Vector2(band.position.x + band.size.x * 0.5, band.end.y + 6), Vector2(band.end.x, band.end.y), Color("1a140f"), 3.0)
+	if stage >= 2:
+		draw_rect(Rect2(rect.position.x - 4, band.end.y - 4, rect.size.x + 8, 6), roof.darkened(0.45))
+	if stage == 3:
+		draw_rect(Rect2(rect.position.x - 4, band.position.y - 4, rect.size.x + 8, 6), Color("3a2418"))
+
+
+# The door sits in the bottom-middle tile. Planked at first, then panelled, with a knob and a lamp once restored.
+func _draw_house_door(rect: Rect2, stage: int) -> void:
+	var door := Rect2(rect.position + Vector2(2 * PX, (HOUSE_H - 1) * PX), Vector2(PX, PX))
+	draw_rect(door.grow(3), Color("e8dcc0") if stage >= 2 else Color("2a1f16"))
+	draw_rect(door, Color("24180f") if stage < 2 else Color("5c3a24"))
+	if stage < 2:
+		draw_line(Vector2(door.position.x + door.size.x * 0.33, door.position.y), Vector2(door.position.x + door.size.x * 0.33, door.end.y), Color("150e09"), 2.0)
+		draw_line(Vector2(door.position.x + door.size.x * 0.66, door.position.y), Vector2(door.position.x + door.size.x * 0.66, door.end.y), Color("150e09"), 2.0)
+	else:
+		draw_rect(door.grow(-6), Color("6e4a2e"), false, 2.0)
+		draw_circle(door.position + Vector2(door.size.x * 0.8, door.size.y * 0.55), 2.5, Color("d9b040"))
+	if stage == 3:
+		var lamp := door.position + Vector2(-8, 8)
+		draw_circle(lamp, 9, Color(1.0, 0.8, 0.4, 0.18))
+		draw_circle(lamp, 3.5, Color("ffd27a"))
+
+
+# Windows on either side of the door. Boarded until the house is patched, then glazed, with shutters, and with flower boxes once restored.
+func _draw_house_windows(rect: Rect2, stage: int) -> void:
+	var frame := Color("e8dcc0") if stage >= 2 else Color("3a2a1c")
 	for wx in [0.15, 0.7]:
 		var win := Rect2(rect.position + Vector2(rect.size.x * wx, PX * 2.0), Vector2(PX * 1.2, PX * 1.2))
-		draw_rect(win, Color("9bb7c4") if stage >= 2 else Color("1d1712"))
-		if stage < 2:
-			draw_rect(Rect2(win.position + Vector2(0, win.size.y * 0.4), Vector2(win.size.x, 4)), Color("3a2a1c"))
-			draw_rect(Rect2(win.position + Vector2(0, win.size.y * 0.7), Vector2(win.size.x, 4)), Color("3a2a1c"))
-
-	# A missing roof patch shows the house is decrepit.
-	if stage == 0:
-		draw_rect(Rect2(rect.end.x - PX * 2.2, rect.position.y + 6, PX * 1.4, PX * 0.9), Color("0d0a08"))
+		draw_rect(win.grow(3), frame)
+		if stage >= 2:
+			draw_rect(win, Color("9bb7c4"))
+			var mid := win.position + win.size * 0.5
+			draw_line(Vector2(mid.x, win.position.y), Vector2(mid.x, win.end.y), frame, 3.0)
+			draw_line(Vector2(win.position.x, mid.y), Vector2(win.end.x, mid.y), frame, 3.0)
+			if stage == 3:
+				draw_rect(win, Color(1.0, 0.8, 0.4, 0.22))
+				var shutter := Color("3f6b4a")
+				draw_rect(Rect2(win.position.x - 9, win.position.y, 6, win.size.y), shutter)
+				draw_rect(Rect2(win.end.x + 3, win.position.y, 6, win.size.y), shutter)
+				var box := Rect2(win.position.x, win.end.y + 4, win.size.x, 6)
+				draw_rect(box, Color("5a3a24"))
+				for i in 4:
+					draw_circle(Vector2(box.position.x + 6 + i * 11, box.position.y - 1), 2.5, Color("d96b8a") if i % 2 == 0 else Color("e8c24a"))
+		else:
+			draw_rect(win, Color("1d1712"))
+			var boards := 2 if stage == 0 else 1
+			for i in boards:
+				var by := win.position.y + win.size.y * (0.4 + 0.3 * i)
+				draw_rect(Rect2(win.position.x, by, win.size.x, 4), Color("3a2a1c"))
 
 
 # --- Setup -------------------------------------------------------------------
