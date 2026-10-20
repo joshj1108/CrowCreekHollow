@@ -745,132 +745,151 @@ class RecipeIcon extends Control:
 	func _rock() -> PackedVector2Array:
 		return _poly([[0.12, 0.7], [0.25, 0.3], [0.55, 0.15], [0.88, 0.35], [0.82, 0.78], [0.45, 0.88]])
 
+	const OUTLINE := Color("1d1611")
+
+	# A filled polygon with a dark outline, so shapes read clearly against each other.
+	func _shape(pts: PackedVector2Array, color: Color) -> void:
+		draw_colored_polygon(pts, color)
+		var closed := pts.duplicate()
+		closed.append(pts[0])
+		draw_polyline(closed, OUTLINE, 0.025 * _sz)
+
+	# A filled rectangle with a dark outline.
+	func _box(rect: Rect2, color: Color) -> void:
+		draw_rect(rect, color)
+		draw_rect(rect, OUTLINE, false, 0.025 * _sz)
+
 	func _draw() -> void:
 		_sz = minf(size.x, size.y)
 		_org = (size - Vector2(_sz, _sz)) * 0.5
+		# A soft shadow under each picture, so the items sit on something.
+		draw_colored_polygon(_ellipse(0.5, 0.93, 0.3, 0.05), Color(0, 0, 0, 0.35))
 		var light := tint.lightened(0.3)
 		var dark := tint.darkened(0.45)
 		var metal := Color("b9b4a6")
 		match kind:
 			"sword":
-				draw_colored_polygon(_poly([[0.5, 0.02], [0.58, 0.12], [0.58, 0.62], [0.42, 0.62], [0.42, 0.12]]), metal)
+				_shape(_poly([[0.5, 0.02], [0.58, 0.12], [0.58, 0.62], [0.42, 0.62], [0.42, 0.12]]), metal)
 				draw_line(_pt(0.3, 0.64), _pt(0.7, 0.64), dark, 0.09 * _sz)
 				draw_line(_pt(0.5, 0.66), _pt(0.5, 0.9), dark, 0.1 * _sz)
 				draw_circle(_pt(0.5, 0.94), 0.05 * _sz, light)
 			"shield":
 				var outline := _poly([[0.2, 0.1], [0.8, 0.1], [0.8, 0.5], [0.5, 0.92], [0.2, 0.5]])
-				draw_colored_polygon(outline, tint)
+				_shape(outline, tint)
 				outline.append(outline[0])
 				draw_polyline(outline, dark, 0.04 * _sz)
 				draw_line(_pt(0.5, 0.2), _pt(0.5, 0.8), light, 0.06 * _sz)
 			"hat":
-				draw_rect(Rect2(_pt(0.3, 0.18), Vector2(0.4, 0.4) * _sz), tint)
-				draw_rect(Rect2(_pt(0.3, 0.5), Vector2(0.4, 0.08) * _sz), dark)
-				draw_rect(Rect2(_pt(0.12, 0.58), Vector2(0.76, 0.12) * _sz), light)
+				_box(Rect2(_pt(0.3, 0.18), Vector2(0.4, 0.4) * _sz), tint)
+				_box(Rect2(_pt(0.3, 0.5), Vector2(0.4, 0.08) * _sz), dark)
+				_box(Rect2(_pt(0.12, 0.58), Vector2(0.76, 0.12) * _sz), light)
 			"shirt":
-				draw_colored_polygon(_poly([[0.32, 0.12], [0.42, 0.08], [0.58, 0.08], [0.68, 0.12], [0.92, 0.3], [0.8, 0.46], [0.7, 0.38], [0.7, 0.92], [0.3, 0.92], [0.3, 0.38], [0.2, 0.46], [0.08, 0.3]]), tint)
-				draw_arc(_pt(0.5, 0.1), 0.1 * _sz, 0.0, PI, 10, dark, 0.04 * _sz)
+				_shape(_poly([[0.32, 0.12], [0.42, 0.08], [0.58, 0.08], [0.68, 0.12], [0.92, 0.3], [0.8, 0.46], [0.7, 0.38], [0.7, 0.92], [0.3, 0.92], [0.3, 0.38], [0.2, 0.46], [0.08, 0.3]]), tint)
+				draw_arc(_pt(0.5, 0.12), 0.11 * _sz, 0.0, PI, 10, dark, 0.04 * _sz)
 			"pants":
-				draw_rect(Rect2(_pt(0.18, 0.1), Vector2(0.64, 0.22) * _sz), tint)
-				draw_colored_polygon(_poly([[0.18, 0.3], [0.48, 0.3], [0.44, 0.92], [0.22, 0.92]]), tint)
-				draw_colored_polygon(_poly([[0.52, 0.3], [0.82, 0.3], [0.78, 0.92], [0.56, 0.92]]), tint)
+				_box(Rect2(_pt(0.18, 0.1), Vector2(0.64, 0.22) * _sz), tint)
+				_shape(_poly([[0.18, 0.3], [0.48, 0.3], [0.44, 0.92], [0.22, 0.92]]), tint)
+				_shape(_poly([[0.52, 0.3], [0.82, 0.3], [0.78, 0.92], [0.56, 0.92]]), tint)
 				draw_line(_pt(0.18, 0.32), _pt(0.82, 0.32), dark, 0.03 * _sz)
 			"boots":
-				draw_colored_polygon(_poly([[0.28, 0.1], [0.5, 0.1], [0.5, 0.62], [0.88, 0.7], [0.9, 0.86], [0.28, 0.86]]), tint)
-				draw_rect(Rect2(_pt(0.28, 0.82), Vector2(0.62, 0.07) * _sz), dark)
+				_shape(_poly([[0.28, 0.1], [0.5, 0.1], [0.5, 0.62], [0.88, 0.7], [0.9, 0.86], [0.28, 0.86]]), tint)
+				_box(Rect2(_pt(0.28, 0.82), Vector2(0.62, 0.07) * _sz), dark)
 			"pendant":
 				draw_arc(_pt(0.5, 0.12), 0.38 * _sz, PI * 0.2, PI * 0.8, 16, metal, 0.04 * _sz)
 				draw_circle(_pt(0.5, 0.62), 0.16 * _sz, tint)
 				draw_arc(_pt(0.5, 0.62), 0.16 * _sz, 0.0, TAU, 24, light, 0.03 * _sz)
 				draw_circle(_pt(0.5, 0.62), 0.06 * _sz, light)
 			"bracer":
-				draw_rect(Rect2(_pt(0.08, 0.36), Vector2(0.84, 0.28) * _sz), tint)
-				draw_rect(Rect2(_pt(0.08, 0.36), Vector2(0.84, 0.04) * _sz), light)
+				_box(Rect2(_pt(0.08, 0.36), Vector2(0.84, 0.28) * _sz), tint)
+				_box(Rect2(_pt(0.08, 0.36), Vector2(0.84, 0.04) * _sz), light)
 				for x in [0.2, 0.5, 0.8]:
 					draw_circle(_pt(x, 0.5), 0.035 * _sz, light)
 			"bow":
-				draw_arc(_pt(0.78, 0.5), 0.5 * _sz, PI * 0.5, PI * 1.5, 24, tint, 0.07 * _sz)
-				draw_line(_pt(0.78, 0.0), _pt(0.78, 1.0), light, 0.02 * _sz)
+				draw_arc(_pt(0.7, 0.5), 0.44 * _sz, PI * 0.5, PI * 1.5, 24, OUTLINE, 0.1 * _sz)
+				draw_arc(_pt(0.7, 0.5), 0.44 * _sz, PI * 0.5, PI * 1.5, 24, tint, 0.07 * _sz)
+				draw_line(_pt(0.7, 0.06), _pt(0.7, 0.94), light, 0.02 * _sz)
 			"arrow":
 				draw_line(_pt(0.12, 0.88), _pt(0.84, 0.16), light, 0.05 * _sz)
-				draw_colored_polygon(_poly([[0.94, 0.06], [0.58, 0.14], [0.86, 0.42]]), metal)
-				draw_colored_polygon(_poly([[0.08, 0.92], [0.12, 0.6], [0.4, 0.88]]), tint)
+				_shape(_poly([[0.94, 0.06], [0.58, 0.14], [0.86, 0.42]]), metal)
+				_shape(_poly([[0.08, 0.92], [0.12, 0.6], [0.4, 0.88]]), tint)
 			"bowl":
 				var bowl := PackedVector2Array()
 				for i in range(17):
 					var a := PI * float(i) / 16.0
 					bowl.append(_pt(0.5, 0.42) + Vector2(cos(a), sin(a)) * 0.42 * _sz)
-				draw_colored_polygon(bowl, tint)
-				draw_rect(Rect2(_pt(0.08, 0.42), Vector2(0.84, 0.06) * _sz), light)
+				_shape(bowl, tint)
+				_box(Rect2(_pt(0.08, 0.42), Vector2(0.84, 0.06) * _sz), light)
 				draw_line(_pt(0.4, 0.2), _pt(0.36, 0.06), light, 0.03 * _sz)
 				draw_line(_pt(0.6, 0.2), _pt(0.64, 0.06), light, 0.03 * _sz)
 			"axe":
 				draw_line(_pt(0.3, 0.92), _pt(0.62, 0.22), light, 0.07 * _sz)
-				draw_colored_polygon(_poly([[0.56, 0.16], [0.92, 0.3], [0.78, 0.52], [0.5, 0.42]]), metal)
+				_shape(_poly([[0.56, 0.16], [0.92, 0.3], [0.78, 0.52], [0.5, 0.42]]), metal)
 			"pick":
 				draw_line(_pt(0.22, 0.92), _pt(0.76, 0.26), light, 0.07 * _sz)
 				draw_polyline(_poly([[0.06, 0.4], [0.5, 0.1], [0.94, 0.4]]), metal, 0.09 * _sz)
 			"lantern":
 				draw_arc(_pt(0.5, 0.34), 0.14 * _sz, PI, TAU, 12, dark, 0.03 * _sz)
-				draw_rect(Rect2(_pt(0.3, 0.36), Vector2(0.4, 0.5) * _sz), dark)
+				_box(Rect2(_pt(0.3, 0.36), Vector2(0.4, 0.5) * _sz), dark)
 				draw_circle(_pt(0.5, 0.6), 0.14 * _sz, Color("e8c060"))
-				draw_colored_polygon(_poly([[0.22, 0.38], [0.5, 0.12], [0.78, 0.38]]), tint)
+				_shape(_poly([[0.22, 0.38], [0.5, 0.12], [0.78, 0.38]]), tint)
 			"pack":
 				draw_arc(_pt(0.5, 0.3), 0.18 * _sz, PI, TAU, 12, dark, 0.04 * _sz)
-				draw_rect(Rect2(_pt(0.2, 0.3), Vector2(0.6, 0.62) * _sz), tint)
-				draw_rect(Rect2(_pt(0.2, 0.3), Vector2(0.6, 0.2) * _sz), light)
+				_box(Rect2(_pt(0.2, 0.3), Vector2(0.6, 0.62) * _sz), tint)
+				_box(Rect2(_pt(0.2, 0.3), Vector2(0.6, 0.2) * _sz), light)
 				draw_line(_pt(0.2, 0.62), _pt(0.8, 0.62), dark, 0.03 * _sz)
 			"hoe":
 				draw_line(_pt(0.3, 0.95), _pt(0.7, 0.12), tint, 0.06 * _sz)
-				draw_colored_polygon(_poly([[0.5, 0.12], [0.92, 0.2], [0.86, 0.42], [0.5, 0.36]]), metal)
+				_shape(_poly([[0.5, 0.12], [0.92, 0.2], [0.86, 0.42], [0.5, 0.36]]), metal)
 			"hammer":
 				draw_line(_pt(0.3, 0.95), _pt(0.6, 0.4), tint, 0.07 * _sz)
-				draw_rect(Rect2(_pt(0.45, 0.12), Vector2(0.45, 0.28) * _sz), metal)
+				_box(Rect2(_pt(0.45, 0.12), Vector2(0.45, 0.28) * _sz), metal)
 			"broom":
 				draw_line(_pt(0.7, 0.08), _pt(0.42, 0.6), tint, 0.05 * _sz)
-				draw_colored_polygon(_poly([[0.3, 0.55], [0.56, 0.55], [0.72, 0.92], [0.14, 0.92]]), light)
-				draw_rect(Rect2(_pt(0.32, 0.52), Vector2(0.26, 0.08) * _sz), dark)
+				_shape(_poly([[0.3, 0.55], [0.56, 0.55], [0.72, 0.92], [0.14, 0.92]]), light)
+				_box(Rect2(_pt(0.32, 0.52), Vector2(0.26, 0.08) * _sz), dark)
 			"anvil":
-				draw_rect(Rect2(_pt(0.1, 0.3), Vector2(0.8, 0.16) * _sz), metal)
-				draw_colored_polygon(_poly([[0.3, 0.46], [0.7, 0.46], [0.6, 0.7], [0.4, 0.7]]), metal)
-				draw_rect(Rect2(_pt(0.22, 0.7), Vector2(0.56, 0.16) * _sz), dark)
+				_box(Rect2(_pt(0.1, 0.3), Vector2(0.8, 0.16) * _sz), metal)
+				_shape(_poly([[0.3, 0.46], [0.7, 0.46], [0.6, 0.7], [0.4, 0.7]]), metal)
+				_box(Rect2(_pt(0.22, 0.7), Vector2(0.56, 0.16) * _sz), dark)
 			"crop":
 				draw_line(_pt(0.5, 0.95), _pt(0.5, 0.45), dark, 0.05 * _sz)
-				draw_colored_polygon(_ellipse(0.32, 0.36, 0.2, 0.12), light)
-				draw_colored_polygon(_ellipse(0.68, 0.34, 0.2, 0.12), light)
-				draw_colored_polygon(_ellipse(0.5, 0.66, 0.24, 0.22), tint)
+				_shape(_ellipse(0.32, 0.36, 0.2, 0.12), light)
+				_shape(_ellipse(0.68, 0.34, 0.2, 0.12), light)
+				_shape(_ellipse(0.5, 0.66, 0.24, 0.22), tint)
 			"fish":
-				draw_colored_polygon(_ellipse(0.42, 0.5, 0.36, 0.22), tint)
-				draw_colored_polygon(_poly([[0.72, 0.5], [0.98, 0.25], [0.98, 0.75]]), dark)
+				_shape(_ellipse(0.42, 0.5, 0.36, 0.22), tint)
+				_shape(_poly([[0.72, 0.5], [0.98, 0.25], [0.98, 0.75]]), dark)
 				draw_circle(_pt(0.24, 0.45), 0.04 * _sz, dark)
 			"jar":
-				draw_rect(Rect2(_pt(0.3, 0.12), Vector2(0.4, 0.12) * _sz), metal)
-				draw_rect(Rect2(_pt(0.22, 0.22), Vector2(0.56, 0.7) * _sz), tint)
-				draw_rect(Rect2(_pt(0.3, 0.45), Vector2(0.4, 0.2) * _sz), light)
+				_box(Rect2(_pt(0.3, 0.12), Vector2(0.4, 0.12) * _sz), metal)
+				_box(Rect2(_pt(0.22, 0.22), Vector2(0.56, 0.7) * _sz), tint)
+				_box(Rect2(_pt(0.3, 0.45), Vector2(0.4, 0.2) * _sz), light)
 			"seed":
-				draw_colored_polygon(_ellipse(0.5, 0.62, 0.3, 0.28), tint)
-				draw_colored_polygon(_poly([[0.4, 0.4], [0.6, 0.4], [0.5, 0.2]]), dark)
+				_shape(_ellipse(0.5, 0.62, 0.3, 0.28), tint)
+				_shape(_poly([[0.4, 0.4], [0.6, 0.4], [0.5, 0.2]]), dark)
 				draw_circle(_pt(0.42, 0.62), 0.04 * _sz, light)
 				draw_circle(_pt(0.58, 0.66), 0.04 * _sz, light)
 			"log":
-				draw_rect(Rect2(_pt(0.2, 0.32), Vector2(0.6, 0.36) * _sz), tint)
+				_box(Rect2(_pt(0.2, 0.32), Vector2(0.6, 0.36) * _sz), tint)
 				draw_circle(_pt(0.2, 0.5), 0.18 * _sz, light)
 				draw_circle(_pt(0.2, 0.5), 0.08 * _sz, dark)
 			"fiber":
 				for x in [0.2, 0.4, 0.6, 0.8]:
 					draw_line(_pt(x, 0.9), _pt(x + 0.1, 0.1), tint, 0.05 * _sz)
 			"resin":
-				draw_colored_polygon(_ellipse(0.5, 0.56, 0.36, 0.3), tint)
-				draw_circle(_pt(0.4, 0.44), 0.08 * _sz, light)
+				_shape(_ellipse(0.5, 0.56, 0.34, 0.28), tint)
+				draw_circle(_pt(0.38, 0.44), 0.09 * _sz, light)
+				draw_circle(_pt(0.34, 0.4), 0.035 * _sz, Color("fff4d0"))
+				_shape(_poly([[0.6, 0.78], [0.66, 0.78], [0.66, 0.92], [0.6, 0.92]]), tint)
 			"stone":
-				draw_colored_polygon(_rock(), tint)
+				_shape(_rock(), tint)
 				draw_line(_pt(0.3, 0.45), _pt(0.5, 0.6), dark, 0.03 * _sz)
 			"ore":
-				draw_colored_polygon(_rock(), tint)
+				_shape(_rock(), tint)
 				for sparkle in [[0.4, 0.5], [0.6, 0.62], [0.5, 0.36]]:
 					draw_circle(_pt(sparkle[0], sparkle[1]), 0.05 * _sz, light)
 			"bar":
-				draw_colored_polygon(_poly([[0.12, 0.62], [0.28, 0.34], [0.72, 0.34], [0.88, 0.62], [0.72, 0.74], [0.28, 0.74]]), tint)
+				_shape(_poly([[0.12, 0.62], [0.28, 0.34], [0.72, 0.34], [0.88, 0.62], [0.72, 0.74], [0.28, 0.74]]), tint)
 				draw_line(_pt(0.3, 0.42), _pt(0.7, 0.42), light, 0.04 * _sz)
 			_:
 				draw_circle(_pt(0.5, 0.5), 0.3 * _sz, tint)
