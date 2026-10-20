@@ -1,8 +1,10 @@
 class_name ActionBar
 extends CanvasLayer
 
-## RuneScape-style action bar: tab buttons along the bottom and a panel above
-## them. main.gd decides what each panel shows and handles its actions.
+## The game's menus. A slim quick bar sits along the bottom. Opening a section shows a
+## full-screen menu like a console game: the sections down the left, the current section's
+## options on the right, and the controls in the footer. main.gd decides what each section
+## shows and handles its actions.
 
 signal tab_pressed(tab_name: String)
 signal action_pressed(action_id: String)
@@ -18,6 +20,23 @@ const TABS := [
 	{"name": "Settings", "key": "Esc"},
 ]
 
+const SUBTITLES := {
+	"Skills": "How far you have come",
+	"Inventory": "What you carry",
+	"Gear": "What you wear and hold",
+	"Craft": "Make, cook, and build",
+	"Quests": "What the farm asks of you",
+	"House": "Keep it standing",
+	"Achievements": "Things you have done",
+	"Settings": "Time is paused while you are here",
+}
+
+const COL_DIM := Color(0.0, 0.0, 0.0, 0.62)
+const COL_FRAME := Color("151009")
+const COL_SIDE := Color("0e0a07")
+const COL_CARD := Color("231a12")
+const COL_NAV_ACTIVE := Color("3a2a18")
+const COL_NAV_HOVER := Color("2a1e13")
 const COL_PANEL := Color("1d1611")
 const COL_BORDER := Color("8a6a3a")
 const COL_BUTTON := Color("2e2218")
@@ -29,9 +48,12 @@ const COL_TEXT := Color("f1e4c8")
 const COL_MUTED := Color("b3a27c")
 const COL_ACCENT := Color("d9a94e")
 
-var bar_buttons := {}      # tab name -> Button
-var panel: PanelContainer
+var bar_buttons := {}      # tab name -> Button in the quick bar
+var nav_buttons := {}      # tab name -> Button in the menu's section list
+var panel: Control         # the full-screen menu; visible only while a panel is open
 var title_label: Label
+var subtitle_label: Label
+var scroll: ScrollContainer
 var rows_box: VBoxContainer
 var active_tab := ""
 var _last_key := ""
@@ -45,58 +67,131 @@ func _ready() -> void:
 	add_child(root)
 
 	var bar := HBoxContainer.new()
-	bar.add_theme_constant_override("separation", 8)
-	_place_bottom_center(bar, -12)
+	bar.add_theme_constant_override("separation", 6)
+	_place_bottom_center(bar, -10)
 	root.add_child(bar)
 	for tab in TABS:
 		var button := Button.new()
 		button.text = "%s  [%s]" % [tab["name"], tab["key"]]
-		button.custom_minimum_size = Vector2(140, 44)
+		button.custom_minimum_size = Vector2(132, 36)
 		button.focus_mode = Control.FOCUS_NONE
-		button.add_theme_font_size_override("font_size", 16)
+		button.add_theme_font_size_override("font_size", 14)
 		_style_button(button, false)
 		button.pressed.connect(_on_tab_pressed.bind(tab["name"]))
 		bar.add_child(button)
 		bar_buttons[tab["name"]] = button
 
-	panel = PanelContainer.new()
-	panel.visible = false
-	panel.add_theme_stylebox_override("panel", _box(COL_PANEL, COL_BORDER, 3, 8, 16))
-	_place_bottom_center(panel, -72)
+	panel = _build_menu()
 	root.add_child(panel)
 
-	var column := VBoxContainer.new()
-	column.custom_minimum_size = Vector2(500, 0)
-	column.add_theme_constant_override("separation", 10)
-	panel.add_child(column)
+
+func _build_menu() -> Control:
+	var overlay := Control.new()
+	overlay.set_anchors_preset(Control.PRESET_FULL_RECT)
+	overlay.mouse_filter = Control.MOUSE_FILTER_STOP
+	overlay.visible = false
+
+	var dim := ColorRect.new()
+	dim.color = COL_DIM
+	dim.set_anchors_preset(Control.PRESET_FULL_RECT)
+	dim.mouse_filter = Control.MOUSE_FILTER_STOP
+	overlay.add_child(dim)
+
+	var frame := PanelContainer.new()
+	frame.add_theme_stylebox_override("panel", _box(COL_FRAME, COL_BORDER, 2, 10, 0))
+	frame.set_anchors_preset(Control.PRESET_CENTER)
+	frame.custom_minimum_size = Vector2(1000, 600)
+	frame.grow_horizontal = Control.GROW_DIRECTION_BOTH
+	frame.grow_vertical = Control.GROW_DIRECTION_BOTH
+	overlay.add_child(frame)
+
+	var split := HBoxContainer.new()
+	split.add_theme_constant_override("separation", 0)
+	frame.add_child(split)
+
+	# Left: the sections.
+	var side := PanelContainer.new()
+	side.add_theme_stylebox_override("panel", _box(COL_SIDE, COL_SIDE, 0, 10, 14))
+	side.custom_minimum_size = Vector2(230, 0)
+	split.add_child(side)
+	var nav := VBoxContainer.new()
+	nav.add_theme_constant_override("separation", 4)
+	side.add_child(nav)
+	var brand := Label.new()
+	brand.text = "HALLOWVALE"
+	brand.add_theme_font_size_override("font_size", 13)
+	brand.add_theme_color_override("font_color", COL_BORDER)
+	nav.add_child(brand)
+	var gap := Control.new()
+	gap.custom_minimum_size = Vector2(0, 10)
+	nav.add_child(gap)
+	for tab in TABS:
+		if tab["name"] == "Settings":
+			nav.add_child(HSeparator.new())
+		var button := Button.new()
+		button.text = "%s     %s" % [tab["name"], tab["key"]]
+		button.alignment = HORIZONTAL_ALIGNMENT_LEFT
+		button.custom_minimum_size = Vector2(0, 42)
+		button.focus_mode = Control.FOCUS_ALL
+		button.add_theme_font_size_override("font_size", 17)
+		button.pressed.connect(_on_tab_pressed.bind(tab["name"]))
+		nav.add_child(button)
+		nav_buttons[tab["name"]] = button
+
+	# Right: the section itself.
+	var margin := MarginContainer.new()
+	margin.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	margin.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	for side_name in ["margin_left", "margin_top", "margin_right", "margin_bottom"]:
+		margin.add_theme_constant_override(side_name, 24)
+	split.add_child(margin)
+
+	var main := VBoxContainer.new()
+	main.add_theme_constant_override("separation", 12)
+	margin.add_child(main)
 
 	var header := HBoxContainer.new()
-	column.add_child(header)
-
+	main.add_child(header)
+	var titles := VBoxContainer.new()
+	titles.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	header.add_child(titles)
 	title_label = Label.new()
-	title_label.add_theme_font_size_override("font_size", 24)
+	title_label.add_theme_font_size_override("font_size", 30)
 	title_label.add_theme_color_override("font_color", COL_ACCENT)
-	title_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	header.add_child(title_label)
+	titles.add_child(title_label)
+	subtitle_label = Label.new()
+	subtitle_label.add_theme_font_size_override("font_size", 14)
+	subtitle_label.add_theme_color_override("font_color", COL_MUTED)
+	titles.add_child(subtitle_label)
+	main.add_child(HSeparator.new())
 
-	var close_button := Button.new()
-	close_button.text = "Close"
-	close_button.focus_mode = Control.FOCUS_ALL
-	_style_button(close_button, false)
-	close_button.pressed.connect(_on_action_pressed.bind("close"))
-	header.add_child(close_button)
-
-	column.add_child(HSeparator.new())
-
-	# The rows scroll, so long lists like the gear crafting don't run off the screen.
-	var scroll := ScrollContainer.new()
-	scroll.custom_minimum_size = Vector2(500, 340)
+	# The options scroll, so long lists like crafting don't run off the screen.
+	scroll = ScrollContainer.new()
+	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
-	column.add_child(scroll)
+	main.add_child(scroll)
 	rows_box = VBoxContainer.new()
-	rows_box.add_theme_constant_override("separation", 10)
 	rows_box.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	rows_box.add_theme_constant_override("separation", 8)
 	scroll.add_child(rows_box)
+
+	var footer := HBoxContainer.new()
+	footer.add_theme_constant_override("separation", 12)
+	main.add_child(footer)
+	var hints := Label.new()
+	hints.text = "Click a section or press its key to switch   ·   B to close   ·   Esc for Settings"
+	hints.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	hints.add_theme_font_size_override("font_size", 13)
+	hints.add_theme_color_override("font_color", COL_MUTED)
+	footer.add_child(hints)
+	var back := Button.new()
+	back.text = "Back"
+	back.custom_minimum_size = Vector2(120, 36)
+	back.focus_mode = Control.FOCUS_ALL
+	_style_button(back, false)
+	back.pressed.connect(_on_action_pressed.bind("close"))
+	footer.add_child(back)
+	return overlay
 
 
 func show_panel(tab: String, rows: Array) -> void:
@@ -106,7 +201,10 @@ func show_panel(tab: String, rows: Array) -> void:
 		return
 	_last_key = key
 	panel.visible = true
+	if tab != active_tab:
+		scroll.scroll_vertical = 0
 	title_label.text = tab
+	subtitle_label.text = str(SUBTITLES.get(tab, ""))
 	_set_active(tab)
 	for child in rows_box.get_children():
 		rows_box.remove_child(child)
@@ -124,13 +222,20 @@ func hide_panel() -> void:
 
 
 func _focus_first_button() -> void:
-	for block in rows_box.get_children():
-		for child in block.get_children():
-			if child is HBoxContainer:
-				for button in child.get_children():
-					if button is Button and not button.disabled:
-						button.grab_focus()
-						return
+	var button := _first_enabled_button(rows_box)
+	if button != null:
+		button.grab_focus()
+
+
+func _first_enabled_button(node: Node) -> Button:
+	for child in node.get_children():
+		var button := child as Button
+		if button != null and not button.disabled:
+			return button
+		var found := _first_enabled_button(child)
+		if found != null:
+			return found
+	return null
 
 
 func _build_row(data: Dictionary) -> Control:
@@ -141,37 +246,50 @@ func _build_row(data: Dictionary) -> Control:
 	if data.has("section"):
 		var heading := Label.new()
 		heading.text = str(data["section"]).to_upper()
-		heading.add_theme_font_size_override("font_size", 14)
-		heading.add_theme_color_override("font_color", COL_BORDER)
-		return heading
-
+		heading.add_theme_font_size_override("font_size", 13)
+		heading.add_theme_color_override("font_color", COL_ACCENT)
+		var spaced := MarginContainer.new()
+		spaced.add_theme_constant_override("margin_top", 10)
+		spaced.add_child(heading)
+		return spaced
 	if data.has("note"):
 		var note := Label.new()
 		note.text = str(data["note"])
 		note.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		note.add_theme_font_size_override("font_size", 14)
 		note.add_theme_color_override("font_color", COL_MUTED)
 		return note
+	return _build_card(data)
 
+
+# One option: a name, a value, an optional button, and an optional progress bar.
+func _build_card(data: Dictionary) -> Control:
+	var card := PanelContainer.new()
+	card.add_theme_stylebox_override("panel", _box(COL_CARD, COL_CARD, 0, 8, 12))
 	var block := VBoxContainer.new()
-	block.add_theme_constant_override("separation", 4)
+	block.add_theme_constant_override("separation", 6)
+	card.add_child(block)
 
 	var line := HBoxContainer.new()
-	line.add_theme_constant_override("separation", 12)
+	line.add_theme_constant_override("separation", 14)
 	block.add_child(line)
 
 	var name_label := Label.new()
 	name_label.text = str(data.get("name", ""))
+	name_label.add_theme_font_size_override("font_size", 16)
 	name_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	line.add_child(name_label)
 
 	var value_label := Label.new()
 	value_label.text = str(data.get("value", ""))
+	value_label.add_theme_font_size_override("font_size", 14)
 	value_label.add_theme_color_override("font_color", COL_MUTED)
 	line.add_child(value_label)
 
 	if data.has("button"):
 		var button := Button.new()
 		button.text = str(data["button"])
+		button.custom_minimum_size = Vector2(120, 34)
 		button.focus_mode = Control.FOCUS_ALL
 		button.disabled = not bool(data.get("enabled", true))
 		_style_button(button, false)
@@ -181,22 +299,22 @@ func _build_row(data: Dictionary) -> Control:
 	if data.has("progress"):
 		var bar := ProgressBar.new()
 		bar.show_percentage = false
-		bar.custom_minimum_size = Vector2(0, 10)
+		bar.custom_minimum_size = Vector2(0, 8)
 		bar.value = clampf(float(data["progress"]), 0.0, 1.0) * 100.0
-		bar.add_theme_stylebox_override("background", _box(COL_TRACK, COL_BORDER, 1, 3, 0))
-		bar.add_theme_stylebox_override("fill", _box(COL_ACCENT, COL_ACCENT, 0, 3, 0))
+		bar.add_theme_stylebox_override("background", _box(COL_TRACK, COL_TRACK, 0, 4, 0))
+		bar.add_theme_stylebox_override("fill", _box(COL_ACCENT, COL_ACCENT, 0, 4, 0))
 		block.add_child(bar)
-
-	return block
+	return card
 
 
 # A row of sub-tab buttons. The active one is highlighted; each button sends its action.
 func _build_tabs(data: Dictionary) -> Control:
 	var holder := HBoxContainer.new()
-	holder.add_theme_constant_override("separation", 6)
+	holder.add_theme_constant_override("separation", 8)
 	for tab in data["tabs"]:
 		var button := Button.new()
 		button.text = str(tab["name"])
+		button.custom_minimum_size = Vector2(120, 36)
 		button.focus_mode = Control.FOCUS_ALL
 		_style_button(button, str(tab["id"]) == str(data.get("active", "")))
 		button.pressed.connect(_on_action_pressed.bind(str(tab.get("action", ""))))
@@ -209,8 +327,8 @@ func _build_tabs(data: Dictionary) -> Control:
 func _build_grid(data: Dictionary) -> Control:
 	var grid := GridContainer.new()
 	grid.columns = int(data.get("columns", 5))
-	grid.add_theme_constant_override("h_separation", 6)
-	grid.add_theme_constant_override("v_separation", 6)
+	grid.add_theme_constant_override("h_separation", 8)
+	grid.add_theme_constant_override("v_separation", 8)
 	for cell in data["grid"]:
 		grid.add_child(_build_cell(cell))
 	return grid
@@ -223,10 +341,10 @@ func _build_cell(cell: Dictionary) -> Control:
 	var bg := COL_BUTTON_DISABLED
 	if filled:
 		bg = Color(str(cell.get("color", "8a6a3a")))
-	var panel := PanelContainer.new()
-	panel.custom_minimum_size = Vector2(56, 56)
-	panel.tooltip_text = str(cell.get("tip", ""))
-	panel.add_theme_stylebox_override("panel", _box(bg, COL_BORDER if filled else Color("3d3024"), 2, 4, 2))
+	var panel_box := PanelContainer.new()
+	panel_box.custom_minimum_size = Vector2(68, 68)
+	panel_box.tooltip_text = str(cell.get("tip", ""))
+	panel_box.add_theme_stylebox_override("panel", _box(bg, COL_BORDER if filled else Color("3d3024"), 2, 6, 3))
 
 	var label := Label.new()
 	label.text = str(cell.get("label", ""))
@@ -235,7 +353,7 @@ func _build_cell(cell: Dictionary) -> Control:
 	label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	label.add_theme_font_size_override("font_size", 12)
 	label.add_theme_color_override("font_color", COL_TEXT if filled else COL_MUTED)
-	panel.add_child(label)
+	panel_box.add_child(label)
 
 	if cell.has("count"):
 		var count := Label.new()
@@ -244,23 +362,37 @@ func _build_cell(cell: Dictionary) -> Control:
 		count.vertical_alignment = VERTICAL_ALIGNMENT_BOTTOM
 		count.add_theme_font_size_override("font_size", 13)
 		count.add_theme_color_override("font_color", COL_ACCENT)
-		panel.add_child(count)
-	return panel
+		panel_box.add_child(count)
+	return panel_box
 
 
 func _set_active(tab: String) -> void:
 	active_tab = tab
 	for tab_name in bar_buttons:
 		_style_button(bar_buttons[tab_name], tab_name == tab)
+	for tab_name in nav_buttons:
+		_style_nav(nav_buttons[tab_name], tab_name == tab)
+
+
+# The section list: the active section gets a gold edge and a lighter fill.
+func _style_nav(button: Button, active: bool) -> void:
+	var base: Color = COL_NAV_ACTIVE if active else Color(0.0, 0.0, 0.0, 0.0)
+	var normal := _box(base, COL_ACCENT, 0, 6, 10)
+	normal.border_width_left = 4 if active else 0
+	button.add_theme_stylebox_override("normal", normal)
+	button.add_theme_stylebox_override("hover", _box(COL_NAV_HOVER, COL_NAV_HOVER, 0, 6, 10))
+	button.add_theme_stylebox_override("pressed", _box(COL_NAV_HOVER, COL_NAV_HOVER, 0, 6, 10))
+	button.add_theme_stylebox_override("focus", _box(COL_NAV_HOVER, COL_ACCENT, 1, 6, 10))
+	button.add_theme_color_override("font_color", COL_ACCENT if active else COL_TEXT)
 
 
 func _style_button(button: Button, active: bool) -> void:
-	var base := COL_BUTTON_ACTIVE if active else COL_BUTTON
+	var base: Color = COL_BUTTON_ACTIVE if active else COL_BUTTON
 	button.add_theme_stylebox_override("normal", _box(base, COL_BORDER, 2, 6, 8))
 	button.add_theme_stylebox_override("hover", _box(COL_BUTTON_HOVER, COL_ACCENT, 2, 6, 8))
 	button.add_theme_stylebox_override("pressed", _box(COL_BUTTON_ACTIVE, COL_ACCENT, 2, 6, 8))
 	button.add_theme_stylebox_override("disabled", _box(COL_BUTTON_DISABLED, Color("3d3024"), 2, 6, 8))
-	button.add_theme_stylebox_override("focus", _box(base, COL_BORDER, 2, 6, 8))
+	button.add_theme_stylebox_override("focus", _box(base, COL_ACCENT, 2, 6, 8))
 	button.add_theme_color_override("font_color", COL_TEXT)
 	button.add_theme_color_override("font_disabled_color", COL_MUTED)
 

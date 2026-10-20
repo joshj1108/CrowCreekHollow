@@ -644,6 +644,12 @@ func _ready() -> void:
 
 
 func _process(delta: float) -> void:
+	# Settings pauses the day: the clock stops, foes stand still, and only the menu responds.
+	player.paused = open_tab == "Settings"
+	if player.paused:
+		_handle_keys()
+		_refresh_panel()
+		return
 	clock += delta
 	current_hour = START_HOUR + clock / DAY_LENGTH * (DAY_END_HOUR - START_HOUR)
 

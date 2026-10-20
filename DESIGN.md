@@ -29,8 +29,9 @@ A top-down farming game with heavy psychological horror, built in Godot 4.7.
 
 ## Action bar
 
-- Tab buttons along the bottom. A panel opens above the bar for the active tab.
-- Each panel lists rows: name, value, and optional buttons or progress bars.
+- A slim quick bar runs along the bottom. Opening a section shows a full-screen menu over a dimmed game: the sections down the left (with their keys), the current section's options on the right, and the controls and a Back button in the footer.
+- Each section lists its options as cards: name, value, and an optional button or progress bar. Crafting and the other grid-based sections use the same layout.
+- **Settings pauses the day.** While it is open the clock stops, foes stand still, and the player can't move. Other sections don't pause.
 - Panels rebuild only when their content changes, so buttons don't disappear mid-click.
 - The open panel is saved and reopened on load.
 

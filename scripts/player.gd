@@ -15,9 +15,12 @@ var min_pos := Vector2.ZERO
 var max_pos := Vector2.INF
 var facing := Vector2.DOWN   # last cardinal direction moved; used for interaction
 var is_blocked := Callable()  # Callable(Vector2 world_pos) -> bool
+var paused := false           # set while the Settings menu is open
 
 
 func _process(delta: float) -> void:
+	if paused:
+		return
 	var dir := Input.get_vector("move_left", "move_right", "move_up", "move_down")
 	if dir != Vector2.ZERO:
 		if absf(dir.x) > absf(dir.y):
