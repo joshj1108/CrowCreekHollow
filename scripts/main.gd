@@ -1183,7 +1183,7 @@ func _skill_rows() -> Array:
 		rows.append({
 			"name": "%s   Lv %d" % [skill, _level(skill)],
 			"value": "%d XP" % skill_xp[skill],
-			"progress": float(skill_xp[skill] % 100) / 100.0,
+			"progress": _level_progress(skill),
 		})
 	rows.append({"note": "Farming grows crops. Bushcrafting gathers wood, fiber, and resin. Carpentry trains by mending boards and repairing the house. Cleaning tidies it. Fishing works the sparkling spots at the pond. Cooking turns catches and crops into meals. Forestry fells trees for wood and hardwood. Mining breaks rocks for stone and ore. Smithing turns ore into bars and metal gear." + (" Combat is earned guarding Lowmere." if WORLD_ENABLED else "")})
 	return rows
@@ -4198,8 +4198,25 @@ func _brush_to_array() -> Array:
 
 # --- Helpers -----------------------------------------------------------------
 
+# Each level costs more XP than the last. Reaching level L takes 50 * (L - 1) * L XP in total:
+# level 2 at 100, level 3 at 300, level 4 at 600, level 5 at 1000, level 6 at 1500.
 func _level(skill: String) -> int:
-	return 1 + int(skill_xp[skill]) / 100
+	var xp := int(skill_xp[skill])
+	var n := int(floor((-1.0 + sqrt(1.0 + 4.0 * float(xp) / 50.0)) / 2.0))
+	return n + 1
+
+
+# The XP needed to reach a level, counted from the start.
+func _xp_for_level(level: int) -> int:
+	return 50 * (level - 1) * level
+
+
+# How far through the current level the skill is, from 0.0 to 1.0.
+func _level_progress(skill: String) -> float:
+	var level := _level(skill)
+	var start := _xp_for_level(level)
+	var span := _xp_for_level(level + 1) - start
+	return clampf(float(int(skill_xp[skill]) - start) / float(span), 0.0, 1.0)
 
 
 func _grant_xp(skill: String, amount: int) -> void:

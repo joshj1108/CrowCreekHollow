@@ -131,7 +131,7 @@ Achievements track stats and never reset. Each pays a small reward. Earning all 
 
 ## Cooking
 
-- Cooking is a skill (`Level = 1 + XP / 100`).
+- Cooking is a skill (same level curve as Skills).
 - In the Craft panel's Cooking tab, **Cook a fish** uses 1 fish and 1 wood for 1 meal (15 XP). **Cook crops** uses 2 crops and 1 wood for 1 meal (10 XP).
 - **Eat a meal** uses one meal for +8 sanity.
 
@@ -166,7 +166,7 @@ Achievements track stats and never reset. Each pays a small reward. Earning all 
 
 ## Skills (RuneScape-style)
 
-- Five skills, each with XP and levels (`Level = 1 + XP / 100`):
+- Ten skills, each with XP and levels. Each level costs more than the last: level 2 at 100 XP, level 3 at 300, level 4 at 600, level 5 at 1000, level 6 at 1500 (level L needs 50 × (L−1) × L XP in total):
   - **Farming:** planting gives 5 XP. Turnips give 25 XP and pumpkins give 40 XP on harvest. Level 2 opens plot two. Level 3 unlocks pumpkins.
   - **Bushcrafting:** gathering a brush pile gives 10 XP. Level 3 adds three thicket piles.
   - **Carpentry:** each house repair gives 30 XP. Mending a board (1 wood, 1 fiber, from the House panel) gives 15 XP, capped at 2 mends per day so the house can't be finished in one day. Training to level 2 takes about 3 days, and level 3 takes about a week.
@@ -232,7 +232,7 @@ Combat happens while you move, in the style of Stardew Valley.
 - **Damage:** a swing deals your weapon's damage plus a random bonus of up to half your Combat level. Foe hits are reduced by your total armor defense, with a minimum of 1.
 - **Invulnerability:** after you're hit, you have 0.9 seconds of safety and you're knocked back a little.
 - **Kills** give Combat XP (20 for hollows, 30 for stalkers) and sometimes a material drop: fiber from hollows, resin from stalkers.
-- **Combat** is a skill (`Level = 1 + XP / 100`). Each hit gives 4 XP. Max HP is 10 plus Combat level − 1.
+- **Combat** is a skill (same level curve as Skills). Each hit gives 4 XP. Max HP is 10 plus Combat level − 1.
 - A meal heals 4 HP. Sleeping restores full HP. Losing all HP sends you home, shaken, with a 10 sanity penalty.
 
 ## Gear and crafting
