@@ -860,6 +860,8 @@ var water_fx: Node2D              # the pond's shine, redrawn about 20 times a s
 var water_fx_next_ms := 0            # when the shine is next due for a redraw
 var perf_label: Label = null         # F3 shows frame and draw stats
 var perf_shown := false
+var tree_sprites: Dictionary = {}   # "variant:seed" -> Texture2D, filled in once at start
+var tree_bake_started := false
 var perf_was_down := false
 
 
@@ -1043,6 +1045,9 @@ func _process(delta: float) -> void:
 		_update_perf()
 	if not world_started:
 		return
+	if not tree_bake_started:
+		tree_bake_started = true
+		_bake_tree_sprites()
 	if not in_cave and not _in_village():
 		var cam := camera.get_screen_center_position()
 		var cam_tile := Vector2i(floori(cam.x / PX), floori(cam.y / PX))
@@ -1171,7 +1176,7 @@ func _draw() -> void:
 				continue
 			if tile == Tile.TREE:
 				FarmArt.draw_tree_floor(self, cell, FarmArt.hash_int(x, y, 8))
-				FarmArt.draw_tree(self, cell, FarmArt.hash_int(x, y, 3), _tree_variant(Vector2i(x, y)))
+				_draw_tree_tile(cell, x, y)
 			elif tile == Tile.WALL:
 				FarmArt.draw_wall_tile(self, cell, y == WORKSHOP_RECT.position.y + BORDER_Y)
 			elif tile == Tile.COOP:
@@ -1837,6 +1842,41 @@ func _restore_saved_state() -> void:
 	_set_bounds()
 	if saved_panel != "":
 		_toggle_tab(saved_panel)
+
+
+# A tree is drawn from its baked picture once that exists. Until then it is drawn directly.
+func _draw_tree_tile(cell: Rect2, x: int, y: int) -> void:
+	var variant := _tree_variant(Vector2i(x, y))
+	var seed_index: int = FarmArt.hash_int(x, y, 3) % FarmArt.TREE_SEEDS
+	var key := "%d:%d" % [variant, seed_index]
+	if tree_sprites.has(key):
+		var sprite_rect := Rect2(cell.get_center().x - FarmArt.TREE_SPRITE_W * 0.5, cell.end.y - FarmArt.TREE_SPRITE_H + 0.1 * PX, FarmArt.TREE_SPRITE_W, FarmArt.TREE_SPRITE_H)
+		draw_texture_rect(tree_sprites[key], sprite_rect, false)
+		return
+	FarmArt.draw_tree(self, cell, FarmArt.hash_int(x, y, 3), variant)
+
+
+# Draws every tree style once into a small offscreen picture, then keeps the result.
+func _bake_tree_sprites() -> void:
+	for variant in 3:
+		for seed_index in FarmArt.TREE_SEEDS:
+			var key := "%d:%d" % [variant, seed_index]
+			var size_px := Vector2(FarmArt.TREE_SPRITE_W, FarmArt.TREE_SPRITE_H) * FarmArt.TREE_BAKE_SCALE
+			var vp := SubViewport.new()
+			vp.transparent_bg = true
+			vp.size = Vector2i(ceili(size_px.x), ceili(size_px.y))
+			vp.render_target_update_mode = SubViewport.UPDATE_ONCE
+			add_child(vp)
+			var node := Node2D.new()
+			node.scale = Vector2(FarmArt.TREE_BAKE_SCALE, FarmArt.TREE_BAKE_SCALE)
+			vp.add_child(node)
+			var h := FarmArt.hash_int(variant, seed_index, 99)
+			node.draw.connect(func() -> void: FarmArt.draw_tree(node, FarmArt.TREE_CELL, h, variant))
+			# The offscreen picture is kept as a live texture, drawn once and reused.
+			tree_sprites[key] = vp.get_texture()
+			await get_tree().process_frame
+			await get_tree().process_frame
+			queue_redraw()
 
 
 func _update_perf() -> void:

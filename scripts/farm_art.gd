@@ -7,6 +7,13 @@ extends RefCounted
 
 const T := 48.0   # one tile in world units. Matches PX in main.gd.
 
+# Trees are drawn once into small pictures and reused, since a border of them is costly to draw every frame.
+const TREE_SEEDS := 6                 # how many distinct trees of each kind
+const TREE_BAKE_SCALE := 2.0          # the pictures are drawn at twice the size for sharpness
+const TREE_SPRITE_W := 2.8 * T        # the tree picture's footprint on the map, in world units
+const TREE_SPRITE_H := 3.3 * T
+const TREE_CELL := Rect2(0.9 * T, 2.2 * T, T, T)  # where a tree sits inside its picture when baked
+
 
 # A stable pseudo-random number for a tile or an object, so it looks the same every time it is drawn.
 static func hash_int(x: int, y: int, salt: int) -> int:
