@@ -843,6 +843,7 @@ var action_bar: ActionBar
 var minimap: Minimap
 var canvas_modulate: CanvasModulate
 var hud_panel: PanelContainer
+var hud_clock_panel: PanelContainer
 var hud_day_label: Label
 var hud_date_label: Label
 var hud_time_label: Label
@@ -1754,70 +1755,67 @@ func _build_hud() -> void:
 	hud_root.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	layer.add_child(hud_root)
 
-	perf_label = _make_label(hud_root, Vector2(16, 190), 14)
+	perf_label = _make_label(hud_root, Vector2(16, 120), 14)
 	perf_label.visible = false
-	# One framed panel in the top-left, grouped into three rows: the date and time, the
-	# vitals, and the body needs. Each row sits between thin gold rules.
+	# Two compact plates. The vitals and needs sit top-left; the date, clock, weather and
+	# temperature sit in a slim strip across the top middle, clear of the minimap.
 	hud_panel = PanelContainer.new()
-	hud_panel.position = Vector2(14, 12)
+	hud_panel.position = Vector2(12, 10)
 	hud_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	hud_panel.add_theme_stylebox_override("panel", _hud_box())
 	hud_root.add_child(hud_panel)
 	var pad := MarginContainer.new()
 	for side in ["margin_left", "margin_right", "margin_top", "margin_bottom"]:
-		pad.add_theme_constant_override(side, 14)
+		pad.add_theme_constant_override(side, 8)
 	hud_panel.add_child(pad)
 	var stack := VBoxContainer.new()
-	stack.add_theme_constant_override("separation", 8)
+	stack.add_theme_constant_override("separation", 5)
 	pad.add_child(stack)
 
-	# Row one: the day and date on the left, the clock and weather on the right.
-	var top := HBoxContainer.new()
-	stack.add_child(top)
-	var date_col := VBoxContainer.new()
-	top.add_child(date_col)
-	hud_day_label = _make_label(date_col, Vector2.ZERO, 24)
-	hud_day_label.add_theme_color_override("font_color", Color("f2d27a"))
-	hud_date_label = _make_label(date_col, Vector2.ZERO, 14)
-	hud_date_label.add_theme_color_override("font_color", Color("e8dcc0"))
-	var spacer := Control.new()
-	spacer.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	top.add_child(spacer)
-	var time_col := VBoxContainer.new()
-	top.add_child(time_col)
-	hud_time_label = _make_label(time_col, Vector2.ZERO, 24)
-	hud_time_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
-	var weather_row := HBoxContainer.new()
-	weather_row.alignment = BoxContainer.ALIGNMENT_END
-	weather_row.add_theme_constant_override("separation", 6)
-	time_col.add_child(weather_row)
-	hud_weather_icon = HudIcon.new()
-	hud_weather_icon.custom_minimum_size = Vector2(18, 18)
-	hud_weather_icon.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	weather_row.add_child(hud_weather_icon)
-	hud_weather_label = _make_label(weather_row, Vector2.ZERO, 14)
-	stack.add_child(_hud_rule())
-
-	# Row two: health, sanity, and coins, each with its own small icon.
 	var vitals := HBoxContainer.new()
-	vitals.add_theme_constant_override("separation", 26)
+	vitals.add_theme_constant_override("separation", 14)
 	stack.add_child(vitals)
 	hud_hp_label = _vital_chip(vitals, "heart")
 	hud_sanity_label = _vital_chip(vitals, "moon")
 	hud_coins_label = _vital_chip(vitals, "coin")
-	stack.add_child(_hud_rule())
 
-	# Row three: food, water, and warmth as bars, with the temperature at the end.
 	needs_box = HBoxContainer.new()
-	needs_box.add_theme_constant_override("separation", 16)
+	needs_box.add_theme_constant_override("separation", 10)
 	stack.add_child(needs_box)
 	food_bar = _make_need_bar("Food")
 	water_bar = _make_need_bar("Water")
 	warmth_bar = _make_need_bar("Warmth")
-	var temp_col := VBoxContainer.new()
-	needs_box.add_child(temp_col)
-	_make_label(temp_col, Vector2.ZERO, 13).text = "Outside"
-	needs_temp = _make_label(temp_col, Vector2.ZERO, 18)
+
+	hud_clock_panel = PanelContainer.new()
+	hud_clock_panel.set_anchors_preset(Control.PRESET_CENTER_TOP)
+	hud_clock_panel.grow_horizontal = Control.GROW_DIRECTION_BOTH
+	hud_clock_panel.offset_top = 10
+	hud_clock_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	hud_clock_panel.add_theme_stylebox_override("panel", _hud_box())
+	hud_root.add_child(hud_clock_panel)
+	var clock_pad := MarginContainer.new()
+	for side in ["margin_left", "margin_right", "margin_top", "margin_bottom"]:
+		clock_pad.add_theme_constant_override(side, 6)
+	hud_clock_panel.add_child(clock_pad)
+	var clock_row := HBoxContainer.new()
+	clock_row.add_theme_constant_override("separation", 10)
+	clock_row.alignment = BoxContainer.ALIGNMENT_CENTER
+	clock_pad.add_child(clock_row)
+	hud_day_label = _make_label(clock_row, Vector2.ZERO, 16)
+	hud_day_label.add_theme_color_override("font_color", Color("f2d27a"))
+	hud_date_label = _make_label(clock_row, Vector2.ZERO, 13)
+	hud_date_label.add_theme_color_override("font_color", Color("e8dcc0"))
+	clock_row.add_child(_hud_divider())
+	hud_time_label = _make_label(clock_row, Vector2.ZERO, 16)
+	clock_row.add_child(_hud_divider())
+	hud_weather_icon = HudIcon.new()
+	hud_weather_icon.custom_minimum_size = Vector2(16, 16)
+	hud_weather_icon.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	clock_row.add_child(hud_weather_icon)
+	hud_weather_label = _make_label(clock_row, Vector2.ZERO, 13)
+	needs_temp = _make_label(clock_row, Vector2.ZERO, 13)
+	needs_temp.add_theme_color_override("font_color", Color("9fd3e6"))
+
 	message_label = _make_label(hud_root, Vector2(16, 100), 20)
 	message_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	message_label.custom_minimum_size = Vector2(620, 0)
@@ -1864,13 +1862,13 @@ func _make_need_bar(title: String) -> ProgressBar:
 	var col := VBoxContainer.new()
 	col.add_theme_constant_override("separation", 3)
 	needs_box.add_child(col)
-	var name_label := _make_label(col, Vector2.ZERO, 13)
+	var name_label := _make_label(col, Vector2.ZERO, 11)
 	name_label.text = title
 	var bar := ProgressBar.new()
 	bar.show_percentage = false
 	bar.min_value = 0.0
 	bar.max_value = 100.0
-	bar.custom_minimum_size = Vector2(108, 12)
+	bar.custom_minimum_size = Vector2(64, 8)
 	bar.add_theme_stylebox_override("background", _bar_box(Color(0.06, 0.045, 0.035, 0.95)))
 	bar.add_theme_stylebox_override("fill", _bar_box(Color("c9a24a")))
 	col.add_child(bar)
@@ -1888,6 +1886,15 @@ func _hud_box() -> StyleBoxFlat:
 	box.shadow_size = 6
 	box.shadow_offset = Vector2(0, 3)
 	return box
+
+
+# A small gold divider between items in the clock strip.
+func _hud_divider() -> ColorRect:
+	var rule := ColorRect.new()
+	rule.color = Color(0.72, 0.54, 0.25, 0.5)
+	rule.custom_minimum_size = Vector2(2, 14)
+	rule.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	return rule
 
 
 # A thin gold rule that divides the rows of the info bar.
@@ -1909,7 +1916,7 @@ func _vital_chip(parent: Node, icon_kind: String) -> Label:
 	icon.custom_minimum_size = Vector2(20, 20)
 	icon.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	row.add_child(icon)
-	return _make_label(row, Vector2.ZERO, 18)
+	return _make_label(row, Vector2.ZERO, 15)
 
 
 func _bar_box(color: Color) -> StyleBoxFlat:
