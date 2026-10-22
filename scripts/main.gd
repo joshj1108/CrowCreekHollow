@@ -747,7 +747,7 @@ var hose_attached := false
 var well_water := 0.0      # hours spent with an empty need, toward the next HP lost
 var weather_kind := ""       # today's weather, rolled each morning: see WEATHER_WEIGHTS
 var skill_xp := {"Farming": 0, "Bushcrafting": 0, "Carpentry": 0, "Cleaning": 0, "Fishing": 0, "Cooking": 0, "Combat": 0, "Forestry": 0, "Mining": 0, "Smithing": 0}
-var inventory := {"seeds": STARTING_SEEDS, "pumpkin_seeds": 0, "crops": 0, "fish": 0, "meals": 0, "smoked": 0, "dried": 0, "canned": 0, "fermented": 0, "stew": 0, "hearty": 0, "bandage": 0}
+var inventory := {"seeds": STARTING_SEEDS, "pumpkin_seeds": 0, "crops": 0, "pumpkins": 0, "fish": 0, "meals": 0, "smoked": 0, "dried": 0, "canned": 0, "fermented": 0, "stew": 0, "hearty": 0, "bandage": 0}
 var materials := {"wood": 0, "sticks": 0, "fiber": 0, "resin": 0, "hardwood": 0, "stone": 0, "copper_ore": 0, "iron_ore": 0, "copper_bar": 0, "iron_bar": 0, "arrows": 0, "bolts": 0}
 var tool_tier := {"hatchet": 0, "pick": 0, "rod": 0}     # 0 = none; higher tiers come from TOOL_TIERS
 var grove_felled := {}
