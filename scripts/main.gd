@@ -858,6 +858,9 @@ var window_lights: Array = []   # glows for the lit windows, one PointLight2D ea
 var porch_light: PointLight2D     # the lamp by the door, once the house is restored
 var water_fx: Node2D              # the pond's shine, redrawn about 20 times a second
 var water_fx_next_ms := 0            # when the shine is next due for a redraw
+var perf_label: Label = null         # F3 shows frame and draw stats
+var perf_shown := false
+var perf_was_down := false
 
 
 func _ready() -> void:
@@ -1030,6 +1033,14 @@ func _on_title_start(mode: String, slot: int) -> void:
 
 
 func _process(delta: float) -> void:
+	# F3 toggles the performance readout, even while a menu is open.
+	var f3_down := Input.is_physical_key_pressed(KEY_F3)
+	if f3_down and not perf_was_down:
+		perf_shown = not perf_shown
+		perf_label.visible = perf_shown
+	perf_was_down = f3_down
+	if perf_shown:
+		_update_perf()
 	if not world_started:
 		return
 	if not in_cave and not _in_village():
@@ -1726,6 +1737,8 @@ func _build_hud() -> void:
 	layer.add_child(hud_root)
 
 	hud_label = _make_label(hud_root, Vector2(16, 12), 24)
+	perf_label = _make_label(hud_root, Vector2(16, 110), 14)
+	perf_label.visible = false
 	# Food, water, and warmth as bars under the top line. The temperature sits at the end.
 	needs_box = HBoxContainer.new()
 	needs_box.position = Vector2(16, 50)
@@ -1824,6 +1837,27 @@ func _restore_saved_state() -> void:
 	_set_bounds()
 	if saved_panel != "":
 		_toggle_tab(saved_panel)
+
+
+func _update_perf() -> void:
+	var lights := 0
+	for light in window_lights:
+		if light.enabled:
+			lights += 1
+	if porch_light != null and porch_light.enabled:
+		lights += 1
+	if lantern_light != null and lantern_light.enabled:
+		lights += 1
+	perf_label.text = "FPS %d   frame %.1f ms   script %.1f ms\nphysics %.1f ms\ndraw calls %d\nprimitives %d   objects %d\nlights on %d" % [
+		Performance.get_monitor(Performance.TIME_FPS),
+		Performance.get_monitor(Performance.TIME_PROCESS) * 1000.0 + Performance.get_monitor(Performance.TIME_PHYSICS_PROCESS) * 1000.0,
+		Performance.get_monitor(Performance.TIME_PROCESS) * 1000.0,
+		Performance.get_monitor(Performance.TIME_PHYSICS_PROCESS) * 1000.0,
+		Performance.get_monitor(Performance.RENDER_TOTAL_DRAW_CALLS_IN_FRAME),
+		Performance.get_monitor(Performance.RENDER_TOTAL_PRIMITIVES_IN_FRAME),
+		Performance.get_monitor(Performance.RENDER_TOTAL_OBJECTS_IN_FRAME),
+		lights,
+	]
 
 
 func _update_minimap() -> void:
