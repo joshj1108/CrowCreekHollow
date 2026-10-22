@@ -504,6 +504,17 @@ Keeping the homestead running is the daily work. Each part is at base level for 
 - **Predators:** at wear 4 or more, a fox can get into the coop on a given night and take a hen.
 - **Third plot:** opens at Farming 4 once the house is Patched. It sits between the two paths, south of the first plot.
 
+## Graphics and atmosphere
+
+The farm reads as a finished picture rather than flat colour blocks. Four layers do this, all on the farm view.
+
+- **Colour grade.** A full-screen pass (`shaders/grade.gdshader`) sits on a CanvasLayer under the HUD. It lifts saturation slightly, adds a touch of warmth, and applies a soft vignette and fine film grain. The HUD stays unfiltered so text remains sharp.
+- **Ground detail.** Grass is tinted per tile (±2% so it does not checkerboard), with tufts and small pebbles on the path. Soil and path keep their own texture so they never blend into grass.
+- **Shadows.** Trees cast a soft ground shadow, drawn in a separate pass beneath their canopy. Rocks and brush cast small shadows too.
+- **Seasonal particles.** Each one follows the camera and only runs in its season. Autumn drops orange leaves that spin as they fall. Spring drifts pale petals. Summer dusk brings blinking fireflies. Particles are CPU-driven and stay small in number, so they cost little.
+
+Particles do not run indoors, in the cave, or in the village. Nothing in the grade pass changes game logic, so the save and the rules are untouched.
+
 ## Deferred
 
 - The story beyond the survival chapters: mystery and horror escalation.

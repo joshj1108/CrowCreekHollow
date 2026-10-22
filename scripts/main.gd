@@ -979,6 +979,7 @@ func _on_title_start(mode: String, slot: int) -> void:
 		_roll_weather()
 	_apply_weather()
 	_build_action_bar()
+	_build_ambience()
 	_update_shadow_tile()
 	if loaded:
 		_restore_saved_state()
@@ -1073,6 +1074,7 @@ func _process(delta: float) -> void:
 		_refresh_panel()
 
 	_update_minimap()
+	_update_ambience()
 
 	if message_timer > 0.0:
 		message_timer -= delta
@@ -1096,10 +1098,26 @@ func _draw() -> void:
 	var fy0 := clampi(floori(top_left.y / PX) - 1, 0, MAP_H - 1)
 	var fx1 := clampi(ceili((top_left.x + view.x) / PX) + 1, 0, MAP_W - 1)
 	var fy1 := clampi(ceili((top_left.y + view.y) / PX) + 1, 0, MAP_H - 1)
+	# Pass one: the ground, with small details. Pass two: shadows, which fall on the ground only.
+	# Pass three: trees and buildings, drawn over both.
+	for y in range(fy0, fy1 + 1):
+		for x in range(fx0, fx1 + 1):
+			var ground: int = map[y][x]
+			if _is_ground(ground):
+				var gcell := _tile_rect(Vector2i(x, y))
+				draw_rect(gcell, _ground_color(TILE_COLORS[ground], x, y))
+				_draw_ground_detail(gcell, ground, x, y)
+	for y in range(fy0, fy1 + 1):
+		for x in range(fx0, fx1 + 1):
+			if map[y][x] == Tile.TREE:
+				var scell := _tile_rect(Vector2i(x, y))
+				draw_colored_polygon(_ellipse_at(scell.get_center() + Vector2(PX * 0.2, PX * 0.26), PX * 0.42, PX * 0.2), Color(0, 0, 0, 0.26))
 	for y in range(fy0, fy1 + 1):
 		for x in range(fx0, fx1 + 1):
 			var tile: int = map[y][x]
 			var cell := _tile_rect(Vector2i(x, y))
+			if _is_ground(tile):
+				continue
 			if tile == Tile.TREE:
 				_draw_tree(cell, Vector2i(x, y))
 			elif tile == Tile.WALL:
@@ -1155,10 +1173,12 @@ func _draw() -> void:
 
 	for pos in rocks:
 		var rc := _tile_center(pos.x, pos.y)
+		draw_colored_polygon(_ellipse_at(rc + Vector2(PX * 0.14, PX * 0.18), PX * 0.3, PX * 0.14), Color(0, 0, 0, 0.26))
 		draw_circle(rc, PX * 0.3, Color("7a7a84"))
 		draw_circle(rc + Vector2(-5, -4), PX * 0.08, Color("a6a6b0"))
 	for pos in brush:
 		var center := _tile_center(pos.x, pos.y)
+		draw_colored_polygon(_ellipse_at(center + Vector2(PX * 0.12, PX * 0.2), PX * 0.32, PX * 0.14), Color(0, 0, 0, 0.24))
 		draw_circle(center, PX * 0.32, BUSH_COLOR)
 		draw_circle(center + Vector2(-4, -4), PX * 0.1, Color("5d8f3e"))
 
@@ -1169,6 +1189,137 @@ func _draw() -> void:
 		draw_circle(s, PX * 0.6, Color(0.02, 0.01, 0.05, 0.9))
 		draw_circle(s + Vector2(-8, -6), 3, Color(0.9, 0.1, 0.1))
 		draw_circle(s + Vector2(8, -6), 3, Color(0.9, 0.1, 0.1))
+
+
+# Ground is the tiles drawn flat with detail on top: grass, soil, path, fallow ground, and water.
+func _is_ground(tile: int) -> bool:
+	return tile == Tile.GRASS or tile == Tile.SOIL or tile == Tile.PATH or tile == Tile.FALLOW
+
+
+# A stable pseudo-random number for a tile, so the ground looks the same every time it is drawn.
+func _tile_hash(x: int, y: int, salt: int) -> int:
+	var h: int = (x * 73856093) ^ (y * 19349663) ^ (salt * 83492791)
+	h = (h ^ (h >> 13)) * 1274126177
+	return absi(h)
+
+
+func _ground_color(base: Color, x: int, y: int) -> Color:
+	var jitter := float(_tile_hash(x, y, 1) % 5 - 2) / 100.0
+	return Color(base.r + jitter, base.g + jitter * 1.2, base.b + jitter * 0.6)
+
+
+# Small marks on the ground: grass tufts, pebbles on the path, furrows in the soil.
+func _draw_ground_detail(cell: Rect2, tile: int, x: int, y: int) -> void:
+	var count := 2 + _tile_hash(x, y, 2) % 3
+	for i in count:
+		var h := _tile_hash(x, y, 10 + i)
+		var at := cell.position + Vector2(float(h % 40) / 40.0, float((h / 40) % 40) / 40.0) * PX
+		if tile == Tile.GRASS:
+			var dark := Color(0.16, 0.34, 0.14, 0.6)
+			var light := Color(0.78, 0.92, 0.56, 0.3)
+			var tuft := dark if i % 2 == 0 else light
+			draw_line(at, at + Vector2(-2, -5), tuft, 1.2)
+			draw_line(at, at + Vector2(0, -6), tuft, 1.2)
+			draw_line(at, at + Vector2(2, -5), tuft, 1.2)
+		elif tile == Tile.PATH:
+			var r := 1.2 + float(h % 3) * 0.6
+			draw_circle(at, r + 0.6, Color(0.36, 0.27, 0.16, 0.5))
+			draw_circle(at + Vector2(-0.5, -0.5), r, Color(0.9, 0.82, 0.62, 0.7))
+		elif tile == Tile.SOIL or tile == Tile.FALLOW:
+			var span := 6.0 + float(h % 5)
+			draw_line(at, at + Vector2(span, 0), Color(0.3, 0.19, 0.1, 0.45), 1.4)
+
+
+func _ellipse_at(c: Vector2, rx: float, ry: float) -> PackedVector2Array:
+	var out := PackedVector2Array()
+	for i in range(20):
+		var a := TAU * float(i) / 20.0
+		out.append(c + Vector2(cos(a) * rx, sin(a) * ry))
+	return out
+
+
+# Drifting leaves, petals, and fireflies that follow the camera. Each one is on only in its season.
+var leaves_fx: CPUParticles2D
+var petals_fx: CPUParticles2D
+var fireflies_fx: CPUParticles2D
+
+
+func _build_ambience() -> void:
+	var dot_gradient := Gradient.new()
+	dot_gradient.set_color(0, Color(1, 1, 1, 1))
+	dot_gradient.set_color(1, Color(1, 1, 1, 0))
+	# Leaves are stretched soft ovals, petals are round, and fireflies are small bright dots.
+	var leaf := _soft_dot(dot_gradient, 16, 8)
+	var petal := _soft_dot(dot_gradient, 8, 8)
+	var dot := _soft_dot(dot_gradient, 12, 12)
+	leaves_fx = _make_ambience(leaf, Color(0.86, 0.5, 0.2), 2.4, 0.95, Vector2(0, 26), 26.0, 5.0)
+	leaves_fx.amount = 46
+	petals_fx = _make_ambience(petal, Color(1.0, 0.82, 0.88), 1.9, 0.9, Vector2(0, 14), 16.0, 4.0)
+	petals_fx.amount = 40
+	# Fireflies are bright dots that blink on and off as they drift.
+	fireflies_fx = _make_ambience(dot, Color(0.85, 1.0, 0.45), 1.3, 1.0, Vector2.ZERO, 10.0, 6.0)
+	fireflies_fx.spread = 180.0
+	fireflies_fx.amount = 34
+	fireflies_fx.lifetime = 6.0
+	var blink := Gradient.new()
+	blink.set_color(0, Color(1, 1, 1, 0.0))
+	blink.add_point(0.25, Color(1, 1, 1, 1.0))
+	blink.add_point(0.45, Color(1, 1, 1, 0.1))
+	blink.add_point(0.7, Color(1, 1, 1, 1.0))
+	blink.set_color(blink.get_point_count() - 1, Color(1, 1, 1, 0.0))
+	fireflies_fx.color_ramp = blink
+
+
+func _soft_dot(gradient: Gradient, width: int, height: int) -> Texture2D:
+	var tex := GradientTexture2D.new()
+	tex.gradient = gradient
+	tex.fill = GradientTexture2D.FILL_RADIAL
+	tex.fill_from = Vector2(0.5, 0.5)
+	tex.fill_to = Vector2(1.0, 0.5)
+	tex.width = width
+	tex.height = height
+	return tex
+
+
+func _make_ambience(dot: Texture2D, color: Color, scale_px: float, alpha: float, gravity: Vector2, speed: float, life: float) -> CPUParticles2D:
+	var fx := CPUParticles2D.new()
+	fx.texture = dot
+	fx.angle_min = 0.0
+	fx.angle_max = 360.0
+	fx.angular_velocity_min = -120.0
+	fx.angular_velocity_max = 120.0
+	fx.amount = 22
+	fx.lifetime = life
+	fx.emitting = false
+	fx.local_coords = false
+	fx.emission_shape = CPUParticles2D.EMISSION_SHAPE_RECTANGLE
+	fx.emission_rect_extents = Vector2(400, 300)
+	fx.direction = Vector2(0, 1)
+	fx.spread = 25.0
+	fx.gravity = gravity
+	fx.initial_velocity_min = speed * 0.5
+	fx.initial_velocity_max = speed
+	fx.scale_amount_min = scale_px * 0.7
+	fx.scale_amount_max = scale_px * 1.3
+	fx.color = Color(color.r, color.g, color.b, alpha)
+	fx.z_index = 2
+	add_child(fx)
+	return fx
+
+
+func _update_ambience() -> void:
+	if leaves_fx == null:
+		return
+	var on_farm := not inside and not in_cave and not _in_village() and world_started
+	var season := _season_of(_calendar_date(day)["month"])
+	var view := get_viewport_rect().size / camera.zoom
+	var centre := camera.get_screen_center_position()
+	for fx in [leaves_fx, petals_fx, fireflies_fx]:
+		fx.global_position = centre
+		fx.emission_rect_extents = view * 0.5 + Vector2(60, 60)
+	leaves_fx.emitting = on_farm and season == "Autumn"
+	petals_fx.emitting = on_farm and season == "Spring"
+	fireflies_fx.emitting = on_farm and season == "Summer" and current_hour >= DUSK_HOUR
 
 
 func _draw_house() -> void:
@@ -1516,6 +1667,17 @@ func _build_lantern_light() -> void:
 
 
 func _build_hud() -> void:
+	# The colour pass sits under the HUD and menus, so only the world is graded.
+	var grade_layer := CanvasLayer.new()
+	grade_layer.layer = 0
+	add_child(grade_layer)
+	var grade := ColorRect.new()
+	grade.set_anchors_preset(Control.PRESET_FULL_RECT)
+	grade.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	grade.material = ShaderMaterial.new()
+	grade.material.shader = load("res://shaders/grade.gdshader")
+	grade_layer.add_child(grade)
+
 	var layer := CanvasLayer.new()
 	add_child(layer)
 	# A full-screen root gives the HUD a screen to anchor to. It ignores the mouse.
