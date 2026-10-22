@@ -856,7 +856,8 @@ var last_cam_tile := Vector2i(-99, -99)   # the tile the camera was last drawn f
 var lantern_light: PointLight2D
 var window_lights: Array = []   # glows for the lit windows, one PointLight2D each
 var porch_light: PointLight2D     # the lamp by the door, once the house is restored
-var water_fx: Node2D              # the pond's shine, redrawn every frame
+var water_fx: Node2D              # the pond's shine, redrawn about 20 times a second
+var water_fx_next_ms := 0            # when the shine is next due for a redraw
 
 
 func _ready() -> void:
@@ -1365,7 +1366,9 @@ func _update_ambience() -> void:
 	petals_fx.emitting = on_farm and season == "Spring"
 	fireflies_fx.emitting = on_farm and season == "Summer" and current_hour >= DUSK_HOUR
 	water_fx.visible = on_farm
-	if on_farm:
+	var now := Time.get_ticks_msec()
+	if on_farm and now >= water_fx_next_ms:
+		water_fx_next_ms = now + 50
 		water_fx.queue_redraw()
 
 
