@@ -7,6 +7,7 @@ extends Node2D
 ## Placeholder art is drawn in code; no external assets yet.
 
 const WeatherScript := preload("res://scripts/weather.gd")  # loaded by path, so it works before the class cache is rebuilt
+const FarmArt := preload("res://scripts/farm_art.gd")  # the farm's drawing: houses, trees, rocks, and the pond
 const TILE_SIZE := 16
 const SCALE := 3
 const PX := TILE_SIZE * SCALE  # one tile in world units
@@ -47,19 +48,41 @@ const INT_WALLS := [Color("221c18"), Color("4e4236"), Color("7a6a54"), Color("9a
 const INT_FLOORS := [Color("3e2e22"), Color("5a4430"), Color("6e5438"), Color("7f6244")]
 const QUILTS := [Color("6a5a4a"), Color("3e5a80"), Color("3f6b4a"), Color("8a2e3a")]
 
-# Brush piles for bushcrafting, in inner coordinates. They respawn each morning.
+# Brush piles for bushcrafting, in inner coordinates. They grow back once a week, as a clean-up job.
+# Each one gives sticks and fiber. Brush and trees come back on a weekly cycle; rocks take a month.
 const BRUSH_SPOTS := [
-	Vector2i(16, 3), Vector2i(22, 15), Vector2i(30, 14),
-	Vector2i(2, 18), Vector2i(35, 6), Vector2i(18, 20),
+	Vector2i(3, 3), Vector2i(16, 2), Vector2i(34, 11), Vector2i(24, 20),
+	Vector2i(6, 21), Vector2i(33, 8), Vector2i(14, 21),
 ]
+const BRUSH_REGROW_DAYS := 7
+const ROCK_REGROW_DAYS := 30
 # Extra piles that appear once Bushcrafting reaches level 3.
-const THICKET_SPOTS := [Vector2i(4, 21), Vector2i(12, 21), Vector2i(26, 20)]
+const THICKET_SPOTS := [Vector2i(10, 21), Vector2i(23, 14), Vector2i(38, 16)]
+# The porch: four tiles of boards in front of the door, starting one row below the house.
+const PORCH_RECT := Rect2i(26, 8, 4, 2)
+# The yard paths run from the porch and the stall down to the road. The road itself is the middle row.
+const YARD_PATH := [Vector2i(28, 10), Vector2i(28, 11), Vector2i(22, 10), Vector2i(22, 11), Vector2i(12, 11)]
+# The pond is an uneven lake in the south-east, centred here in inner tiles.
+const LAKE_CENTRE := Vector2(33.0, 19.0)
+const LAKE_RADIUS := Vector2(4.6, 3.6)
 const THICKET_LEVEL := 3
-# A small grove of trees on the farm. Each one is felled once a day, like brush.
-const GROVE_SPOTS := [Vector2i(0, 0), Vector2i(1, 0), Vector2i(2, 0), Vector2i(0, 1), Vector2i(1, 1)]
+# Trees on the property. Felling one with a hatchet gives wood. They grow back with the brush, once a week.
+# The first five are the grove in the north-west corner. The rest frame the house, the yard, and the pond.
+const GROVE_SPOTS := [
+	Vector2i(0, 0), Vector2i(1, 0), Vector2i(2, 0), Vector2i(0, 1), Vector2i(1, 1),
+	Vector2i(9, 1), Vector2i(20, 1), Vector2i(38, 4), Vector2i(36, 9), Vector2i(2, 8),
+	Vector2i(2, 17), Vector2i(30, 15), Vector2i(21, 21), Vector2i(17, 22),
+]
+# Weeping willows lean over the back fence and the pond. The bare tree at the top of the field is dead.
+const WILLOW_TREES := [Vector2i(2, 17), Vector2i(30, 15)]
+const DEAD_TREES := [Vector2i(20, 1)]
 const XP_FELL := 20
 # Rocks on the farm. Breaking one gives stone. A pick gives more, and from Mining 2 a small chance of copper ore.
-const ROCK_SPOTS := [Vector2i(14, 6), Vector2i(17, 10), Vector2i(27, 17), Vector2i(36, 16), Vector2i(8, 22)]
+# Some sit inside the plots: a rock must be broken before that soil can be planted.
+const ROCK_SPOTS := [
+	Vector2i(5, 5), Vector2i(10, 8), Vector2i(6, 16), Vector2i(10, 18), Vector2i(15, 15),
+	Vector2i(18, 6), Vector2i(24, 15), Vector2i(35, 13),
+]
 const XP_MINE := 12
 const ORE_CHANCE := 0.15
 const ORE_MINING_LEVEL := 2
@@ -96,7 +119,7 @@ const ASHFORD_ORIGIN := Vector2i(470, 440)
 # Tool tiers. A hatchet fells trees. Hardwood needs a copper hatchet or better.
 const TOOL_TIERS := {
 	"hatchet": [
-		{"name": "Crude hatchet", "cost": {"wood": 2, "fiber": 2}, "skill": "Bushcrafting", "level": 1},
+		{"name": "Crude hatchet", "cost": {"sticks": 2, "fiber": 2}, "skill": "Bushcrafting", "level": 1},
 		{"name": "Stone hatchet", "cost": {"wood": 2, "stone": 2}, "skill": "Forestry", "level": 2},
 		{"name": "Copper hatchet", "cost": {"wood": 1, "copper_bar": 2}, "skill": "Smithing", "level": 2},
 		{"name": "Iron hatchet", "cost": {"wood": 1, "iron_bar": 2}, "skill": "Smithing", "level": 5},
@@ -108,7 +131,7 @@ const TOOL_TIERS := {
 	],
 	# A rod adds to the chance of each catch. The bonus is added up across the tiers you own.
 	"rod": [
-		{"name": "Willow rod", "cost": {"wood": 2, "fiber": 2}, "skill": "Fishing", "level": 2, "bonus": 0.10},
+		{"name": "Willow rod", "cost": {"sticks": 2, "fiber": 2}, "skill": "Fishing", "level": 2, "bonus": 0.10},
 		{"name": "Hardwood rod", "cost": {"hardwood": 2, "fiber": 2, "resin": 1}, "skill": "Fishing", "level": 5, "bonus": 0.10},
 	],
 }
@@ -223,7 +246,11 @@ const HOUSE_FEATURES := [
 ]
 const HOUSE_WALLS := [Color("4a3a2e"), Color("6b5340"), Color("8a6a4c"), Color("b08a5e")]
 const HOUSE_ROOFS := [Color("2d2620"), Color("4a3a2c"), Color("6b4b33"), Color("8c5a3c")]
-const HOUSE_RELIEF := 0.2   # night darkness reduction once the house is restored
+const HOUSE_RELIEF := 0.2
+const COOP_ROOF := Color("8a4a30")
+const COOP_WALL := Color("94693d")
+const BARN_ROOF := Color("4a2a22")
+const BARN_WALL := Color("8f3a2f")   # night darkness reduction once the house is restored
 
 # Lantern tiers. Each entry is the next thing to build, in order.
 const LANTERN_TIERS := [
@@ -232,6 +259,9 @@ const LANTERN_TIERS := [
 	{"name": "Hollow Lantern", "radius": 6.0, "wood": 6, "fiber": 6, "resin": 4, "level": 6},
 ]
 const LANTERN_FLICKER_TIER := 3
+# How bright a lantern and a lit window glow. Kept low, so the dark still reads as dark.
+const LANTERN_ENERGY := 0.5
+const WINDOW_ENERGY := 0.45
 
 # Crops. Turnips are the starter crop. Pumpkins need Farming 3 and yield more.
 const CROPS := {
@@ -239,6 +269,9 @@ const CROPS := {
 	"pumpkin": {"seed": "pumpkin_seeds", "yield": 3, "xp": 40, "colors": ["9fd27a", "d98a35", "c26a1f", "f2a13a"]},
 }
 const PUMPKIN_LEVEL := 3
+# A crop sells for its seed's cost spread over its yield, plus this difficulty bonus.
+# Pumpkins need Farming 3 and more care, so each one sells for more than a turnip.
+const CROP_DIFFICULTY := {"turnip": 1, "pumpkin": 6}
 const XP_COOK_FISH := 15
 const XP_COOK_CROPS := 10
 const COOK_CROP_COUNT := 2
@@ -299,7 +332,6 @@ const PRESERVE := [
 const STALL_IX := 22
 const STALL_IY := 9
 const STALL_CLOSE_HOUR := 18.0
-const SELL_CROP := 4
 const SELL_FISH := 6
 const SELL_MEAL := 8
 const SEED_TURNIP_PRICE := 3    # per seed, sold in packs of 5
@@ -635,7 +667,7 @@ const NIGHT_EVENTS := [
 	{"message": "The field is quiet tonight. Too quiet.", "shadow": "none", "sanity": -3},
 ]
 
-enum Tile { TREE, GRASS, SOIL, PATH, WATER, HOUSE, DOOR, FLOOR, WALL, EXIT, BED, STATION, DESK, FALLOW, STALL, CELLAR, COOLER, GATE, SMOKEHOUSE, FURNACE, PORTAL, CAMP, CAVE_MOUTH, CAVE_EXIT, ORE_COPPER, ORE_IRON, COOP, BARN, TABLE, FIREPLACE, WELL }
+enum Tile { TREE, GRASS, SOIL, PATH, WATER, HOUSE, DOOR, FLOOR, WALL, EXIT, BED, STATION, DESK, FALLOW, STALL, CELLAR, COOLER, GATE, SMOKEHOUSE, FURNACE, PORTAL, CAMP, CAVE_MOUTH, CAVE_EXIT, ORE_COPPER, ORE_IRON, COOP, BARN, TABLE, FIREPLACE, WELL, PORCH }
 
 const BLOCKING := [Tile.TREE, Tile.WATER, Tile.HOUSE, Tile.WALL, Tile.BED, Tile.STATION, Tile.DESK, Tile.STALL, Tile.CELLAR, Tile.COOLER, Tile.SMOKEHOUSE, Tile.FURNACE, Tile.CAMP, Tile.ORE_COPPER, Tile.ORE_IRON, Tile.COOP, Tile.BARN, Tile.TABLE, Tile.FIREPLACE, Tile.WELL]
 
@@ -671,9 +703,9 @@ const TILE_COLORS := {
 	Tile.TABLE: Color("7a5230"),
 	Tile.FIREPLACE: Color("5a5650"),
 	Tile.CAMP: Color("d07a30"),
+	Tile.PORCH: Color("8a6a46"),
 }
 
-const BUSH_COLOR := Color("3d6b2a")
 
 const NIGHT_TINT := Color("3a3f6e")
 
@@ -686,7 +718,7 @@ var world_map_tex: Texture2D = null # the whole land as a small picture for the 
 var towns: Array = []               # generated towns: origin, size, kind, title, npcs
 var current_town := -1              # index into towns while the player is in one
 var active_shop := ""               # the shop open in the Shop panel
-var bank_materials := {"wood": 0, "fiber": 0, "resin": 0, "hardwood": 0, "stone": 0, "copper_ore": 0, "iron_ore": 0, "copper_bar": 0, "iron_bar": 0, "arrows": 0, "bolts": 0}
+var bank_materials := {"wood": 0, "sticks": 0, "fiber": 0, "resin": 0, "hardwood": 0, "stone": 0, "copper_ore": 0, "iron_ore": 0, "copper_bar": 0, "iron_bar": 0, "arrows": 0, "bolts": 0}
 var bank_coins := 0
 var in_cave := false                # standing in the mining cave
 var cave: Array = []                # cave tiles, [y][x], in cave tile coordinates
@@ -716,11 +748,13 @@ var well_water := 0.0      # hours spent with an empty need, toward the next HP 
 var weather_kind := ""       # today's weather, rolled each morning: see WEATHER_WEIGHTS
 var skill_xp := {"Farming": 0, "Bushcrafting": 0, "Carpentry": 0, "Cleaning": 0, "Fishing": 0, "Cooking": 0, "Combat": 0, "Forestry": 0, "Mining": 0, "Smithing": 0}
 var inventory := {"seeds": STARTING_SEEDS, "pumpkin_seeds": 0, "crops": 0, "fish": 0, "meals": 0, "smoked": 0, "dried": 0, "canned": 0, "fermented": 0, "stew": 0, "hearty": 0, "bandage": 0}
-var materials := {"wood": 0, "fiber": 0, "resin": 0, "hardwood": 0, "stone": 0, "copper_ore": 0, "iron_ore": 0, "copper_bar": 0, "iron_bar": 0, "arrows": 0, "bolts": 0}
+var materials := {"wood": 0, "sticks": 0, "fiber": 0, "resin": 0, "hardwood": 0, "stone": 0, "copper_ore": 0, "iron_ore": 0, "copper_bar": 0, "iron_bar": 0, "arrows": 0, "bolts": 0}
 var tool_tier := {"hatchet": 0, "pick": 0, "rod": 0}     # 0 = none; higher tiers come from TOOL_TIERS
 var grove_felled := {}
 var quarry := {}                                   # Ashford quarry rocks, village tile -> true
 var rocks := {}                                  # world tile -> true for unbroken rocks
+var brush_day := 0   # the day the brush and trees were last restored
+var rock_day := 0    # the day the rocks were last restored
 var stats := {"jobs": 0, "planted": 0, "harvested": 0, "gathered": 0, "slept": 0, "tidied": 0,
 	"fished": 0, "caught": 0, "mended": 0, "cleansed": 0, "cooked": 0, "eaten": 0,
 	"pumpkins": 0, "collapses": 0, "events": 0, "sold": 0, "spoiled": 0,
@@ -820,6 +854,9 @@ var camera: Camera2D
 var last_minimap_key: Array = []
 var last_cam_tile := Vector2i(-99, -99)   # the tile the camera was last drawn from
 var lantern_light: PointLight2D
+var window_lights: Array = []   # glows for the lit windows, one PointLight2D each
+var porch_light: PointLight2D     # the lamp by the door, once the house is restored
+var water_fx: Node2D              # the pond's shine, redrawn every frame
 
 
 func _ready() -> void:
@@ -1107,6 +1144,8 @@ func _draw() -> void:
 				var gcell := _tile_rect(Vector2i(x, y))
 				draw_rect(gcell, _ground_color(TILE_COLORS[ground], x, y))
 				_draw_ground_detail(gcell, ground, x, y)
+				if grove_felled.has(Vector2i(x, y)):
+					FarmArt.draw_stump(self, gcell)
 	for y in range(fy0, fy1 + 1):
 		for x in range(fx0, fx1 + 1):
 			if map[y][x] == Tile.TREE:
@@ -1119,21 +1158,28 @@ func _draw() -> void:
 			if _is_ground(tile):
 				continue
 			if tile == Tile.TREE:
-				_draw_tree(cell, Vector2i(x, y))
+				FarmArt.draw_tree_floor(self, cell, FarmArt.hash_int(x, y, 8))
+				FarmArt.draw_tree(self, cell, FarmArt.hash_int(x, y, 3), _tree_variant(Vector2i(x, y)))
 			elif tile == Tile.WALL:
-				_draw_wall(cell, Vector2i(x, y))
+				FarmArt.draw_wall_tile(self, cell, y == WORKSHOP_RECT.position.y + BORDER_Y)
 			elif tile == Tile.COOP:
-				_draw_coop_tile(cell, Vector2i(x, y) - coop_tile)
+				FarmArt.draw_gable_tile(self, cell, Vector2i(x, y) - coop_tile, Vector2i(COOP_SIZE, COOP_SIZE), COOP_ROOF, COOP_WALL, "coop")
 			elif tile == Tile.BARN:
-				_draw_barn_tile(cell, Vector2i(x, y) - barn_tile)
+				FarmArt.draw_gable_tile(self, cell, Vector2i(x, y) - barn_tile, _footprint("barn"), BARN_ROOF, BARN_WALL, "barn")
 			elif tile == Tile.WELL:
-				_draw_well(cell)
+				FarmArt.draw_well(self, cell, well_repaired)
 			elif tile == Tile.CELLAR:
-				_draw_cellar_tile(cell)
+				FarmArt.draw_cellar(self, cell)
 			elif tile == Tile.SMOKEHOUSE:
-				_draw_smokehouse_tile(cell)
+				FarmArt.draw_smokehouse(self, cell)
 			elif tile == Tile.FURNACE:
-				_draw_furnace_tile(cell)
+				FarmArt.draw_furnace(self, cell)
+			elif tile == Tile.PORCH:
+				FarmArt.draw_porch_tile(self, cell, Vector2i(x, y) - _world_tile(PORCH_RECT.position.x, PORCH_RECT.position.y), PORCH_RECT.size, house_stage)
+			elif tile == Tile.STALL:
+				FarmArt.draw_stall(self, cell)
+			elif tile == Tile.WATER:
+				FarmArt.draw_water_tile(self, cell, Vector2i(x, y), _land_mask(x, y))
 			elif tile == Tile.FLOOR:
 				_draw_floor_tile(cell, Vector2i(x, y))
 			else:
@@ -1172,15 +1218,9 @@ func _draw() -> void:
 			draw_circle(center + Vector2(PX * 0.34, -PX * 0.34), PX * 0.1, Color("6fa8dc"))
 
 	for pos in rocks:
-		var rc := _tile_center(pos.x, pos.y)
-		draw_colored_polygon(_ellipse_at(rc + Vector2(PX * 0.14, PX * 0.18), PX * 0.3, PX * 0.14), Color(0, 0, 0, 0.26))
-		draw_circle(rc, PX * 0.3, Color("7a7a84"))
-		draw_circle(rc + Vector2(-5, -4), PX * 0.08, Color("a6a6b0"))
+		FarmArt.draw_rock(self, _tile_center(pos.x, pos.y), PX * 0.3, FarmArt.hash_int(pos.x, pos.y, 4))
 	for pos in brush:
-		var center := _tile_center(pos.x, pos.y)
-		draw_colored_polygon(_ellipse_at(center + Vector2(PX * 0.12, PX * 0.2), PX * 0.32, PX * 0.14), Color(0, 0, 0, 0.24))
-		draw_circle(center, PX * 0.32, BUSH_COLOR)
-		draw_circle(center + Vector2(-4, -4), PX * 0.1, Color("5d8f3e"))
+		FarmArt.draw_brush(self, _tile_center(pos.x, pos.y), FarmArt.hash_int(pos.x, pos.y, 6))
 
 	_draw_house()
 
@@ -1268,6 +1308,10 @@ func _build_ambience() -> void:
 	blink.add_point(0.7, Color(1, 1, 1, 1.0))
 	blink.set_color(blink.get_point_count() - 1, Color(1, 1, 1, 0.0))
 	fireflies_fx.color_ramp = blink
+	_build_window_lights()
+	water_fx = Node2D.new()
+	water_fx.draw.connect(_draw_water_shimmer)
+	add_child(water_fx)
 
 
 func _soft_dot(gradient: Gradient, width: int, height: int) -> Texture2D:
@@ -1320,124 +1364,15 @@ func _update_ambience() -> void:
 	leaves_fx.emitting = on_farm and season == "Autumn"
 	petals_fx.emitting = on_farm and season == "Spring"
 	fireflies_fx.emitting = on_farm and season == "Summer" and current_hour >= DUSK_HOUR
+	water_fx.visible = on_farm
+	if on_farm:
+		water_fx.queue_redraw()
 
 
 func _draw_house() -> void:
 	var origin := _world_tile(HOUSE_IX, HOUSE_IY)
 	var rect := Rect2(Vector2(origin) * PX, Vector2(HOUSE_W, HOUSE_H) * PX)
-	var stage := house_stage
-
-	_draw_house_chimney(rect, stage)
-	draw_rect(rect, HOUSE_WALLS[stage])
-	_draw_house_siding(rect, stage)
-	_draw_house_roof(rect, stage)
-	_draw_house_door(rect, stage)
-	_draw_house_windows(rect, stage)
-
-
-# The chimney rises from the roof's east end. Brick at first, repointed and capped once patched.
-func _draw_house_chimney(rect: Rect2, stage: int) -> void:
-	var cx := rect.end.x - PX * 1.4
-	var top := rect.position.y - PX * (0.9 if stage >= 2 else 0.6)
-	var chim := Rect2(cx, top, PX * 0.5, rect.position.y - top + 8)
-	draw_rect(chim, Color("5a3f33") if stage < 2 else Color("7a4a38"))
-	for row in range(1, 4):
-		var by := top + row * (chim.size.y / 4.0)
-		draw_line(Vector2(chim.position.x, by), Vector2(chim.end.x, by), Color(0, 0, 0, 0.25), 1.0)
-	draw_rect(Rect2(cx - 3, top, PX * 0.5 + 6, 5), Color("2a221c"))
-	if stage == 3:
-		# A thin line of smoke, so the restored house looks lived in.
-		for i in 3:
-			draw_circle(Vector2(cx + PX * 0.25 + i * 3, top - 10 - i * 9), 4 + i, Color(0.8, 0.8, 0.8, 0.12))
-
-
-# Clapboard lines across the wall. Patched houses get corner boards, and restored ones a dark foundation.
-func _draw_house_siding(rect: Rect2, stage: int) -> void:
-	var line := Color(0, 0, 0, 0.14 if stage < 3 else 0.07)
-	var y := rect.position.y + PX * 1.4
-	while y < rect.end.y:
-		draw_line(Vector2(rect.position.x, y), Vector2(rect.end.x, y), line, 1.0)
-		y += 10.0
-	if stage >= 2:
-		var trim := Color("e8dcc0") if stage == 3 else Color("c9b48c")
-		var wall_top := rect.position.y + PX * 1.4
-		draw_rect(Rect2(rect.position.x, wall_top, 6, rect.size.y - PX * 1.4), trim)
-		draw_rect(Rect2(rect.end.x - 6, wall_top, 6, rect.size.y - PX * 1.4), trim)
-	if stage == 3:
-		draw_rect(Rect2(rect.position.x, rect.end.y - 8, rect.size.x, 8), Color("4a3a2e"))
-
-
-# The roof: shingle courses across the band. Stage 0 has a missing patch; later stages add a ridge cap and eave trim.
-func _draw_house_roof(rect: Rect2, stage: int) -> void:
-	var band := Rect2(rect.position, Vector2(rect.size.x, PX * 1.4))
-	var roof: Color = HOUSE_ROOFS[stage]
-	draw_rect(band, roof)
-	var shingle := roof.darkened(0.3)
-	var course := 0
-	var y := band.position.y + 12.0
-	while y < band.end.y - 4.0:
-		draw_line(Vector2(band.position.x, y), Vector2(band.end.x, y), shingle, 2.0)
-		var x := band.position.x + (0.0 if course % 2 == 0 else 12.0)
-		while x < band.end.x:
-			draw_line(Vector2(x, y), Vector2(x, y + 12.0), shingle, 1.0)
-			x += 24.0
-		y += 14.0
-		course += 1
-	if stage == 0:
-		# A missing roof patch shows the house is decrepit.
-		draw_rect(Rect2(rect.end.x - PX * 2.2, rect.position.y + 6, PX * 1.4, PX * 0.9), Color("0d0a08"))
-		# A sagging eave: the bottom edge dips toward the middle.
-		draw_line(Vector2(band.position.x, band.end.y), Vector2(band.position.x + band.size.x * 0.5, band.end.y + 6), Color("1a140f"), 3.0)
-		draw_line(Vector2(band.position.x + band.size.x * 0.5, band.end.y + 6), Vector2(band.end.x, band.end.y), Color("1a140f"), 3.0)
-	if stage >= 2:
-		draw_rect(Rect2(rect.position.x - 4, band.end.y - 4, rect.size.x + 8, 6), roof.darkened(0.45))
-	if stage == 3:
-		draw_rect(Rect2(rect.position.x - 4, band.position.y - 4, rect.size.x + 8, 6), Color("3a2418"))
-
-
-# The door sits in the bottom-middle tile. Planked at first, then panelled, with a knob and a lamp once restored.
-func _draw_house_door(rect: Rect2, stage: int) -> void:
-	var door := Rect2(rect.position + Vector2(2 * PX, (HOUSE_H - 1) * PX), Vector2(PX, PX))
-	draw_rect(door.grow(3), Color("e8dcc0") if stage >= 2 else Color("2a1f16"))
-	draw_rect(door, Color("24180f") if stage < 2 else Color("5c3a24"))
-	if stage < 2:
-		draw_line(Vector2(door.position.x + door.size.x * 0.33, door.position.y), Vector2(door.position.x + door.size.x * 0.33, door.end.y), Color("150e09"), 2.0)
-		draw_line(Vector2(door.position.x + door.size.x * 0.66, door.position.y), Vector2(door.position.x + door.size.x * 0.66, door.end.y), Color("150e09"), 2.0)
-	else:
-		draw_rect(door.grow(-6), Color("6e4a2e"), false, 2.0)
-		draw_circle(door.position + Vector2(door.size.x * 0.8, door.size.y * 0.55), 2.5, Color("d9b040"))
-	if stage == 3:
-		var lamp := door.position + Vector2(-8, 8)
-		draw_circle(lamp, 9, Color(1.0, 0.8, 0.4, 0.18))
-		draw_circle(lamp, 3.5, Color("ffd27a"))
-
-
-# Windows on either side of the door. Boarded until the house is patched, then glazed, with shutters, and with flower boxes once restored.
-func _draw_house_windows(rect: Rect2, stage: int) -> void:
-	var frame := Color("e8dcc0") if stage >= 2 else Color("3a2a1c")
-	for wx in [0.15, 0.7]:
-		var win := Rect2(rect.position + Vector2(rect.size.x * wx, PX * 2.0), Vector2(PX * 1.2, PX * 1.2))
-		draw_rect(win.grow(3), frame)
-		if stage >= 2:
-			draw_rect(win, Color("9bb7c4"))
-			var mid := win.position + win.size * 0.5
-			draw_line(Vector2(mid.x, win.position.y), Vector2(mid.x, win.end.y), frame, 3.0)
-			draw_line(Vector2(win.position.x, mid.y), Vector2(win.end.x, mid.y), frame, 3.0)
-			if stage == 3:
-				draw_rect(win, Color(1.0, 0.8, 0.4, 0.22))
-				var shutter := Color("3f6b4a")
-				draw_rect(Rect2(win.position.x - 9, win.position.y, 6, win.size.y), shutter)
-				draw_rect(Rect2(win.end.x + 3, win.position.y, 6, win.size.y), shutter)
-				var box := Rect2(win.position.x, win.end.y + 4, win.size.x, 6)
-				draw_rect(box, Color("5a3a24"))
-				for i in 4:
-					draw_circle(Vector2(box.position.x + 6 + i * 11, box.position.y - 1), 2.5, Color("d96b8a") if i % 2 == 0 else Color("e8c24a"))
-		else:
-			draw_rect(win, Color("1d1712"))
-			var boards := 2 if stage == 0 else 1
-			for i in boards:
-				var by := win.position.y + win.size.y * (0.4 + 0.3 * i)
-				draw_rect(Rect2(win.position.x, by, win.size.x, 4), Color("3a2a1c"))
+	FarmArt.draw_house(self, rect, house_stage, HOUSE_WALLS[house_stage], HOUSE_ROOFS[house_stage])
 
 
 # --- Setup -------------------------------------------------------------------
@@ -1483,6 +1418,35 @@ func _ensure_action(action: String, keys: Array, buttons: Array = [], axes: Arra
 		InputMap.action_add_event(action, motion)
 
 
+# The pond: an uneven lake. Its edge wobbles a little from tile to tile.
+func _in_lake(ix: int, iy: int) -> bool:
+	var dx: float = (float(ix) - LAKE_CENTRE.x) / LAKE_RADIUS.x
+	var dy: float = (float(iy) - LAKE_CENTRE.y) / LAKE_RADIUS.y
+	var wobble: float = float(FarmArt.hash_int(ix, iy, 9) % 100) / 100.0 * 0.3 - 0.15
+	return dx * dx + dy * dy < 1.0 + wobble
+
+
+# Which sides of a pond tile touch land: 1 north, 2 east, 4 south, 8 west.
+func _land_mask(x: int, y: int) -> int:
+	var mask := 0
+	var dirs: Array[Vector2i] = [Vector2i(0, -1), Vector2i(1, 0), Vector2i(0, 1), Vector2i(-1, 0)]
+	for i in 4:
+		var n: Vector2i = Vector2i(x, y) + dirs[i]
+		if n.x >= 0 and n.y >= 0 and n.x < MAP_W and n.y < MAP_H and map[n.y][n.x] != Tile.WATER:
+			mask |= 1 << i
+	return mask
+
+
+# Which tree art to draw: 0 an oak, 1 a willow, 2 a dead tree.
+func _tree_variant(tile: Vector2i) -> int:
+	var ix := tile - Vector2i(BORDER_X, BORDER_Y)
+	if DEAD_TREES.has(ix):
+		return 2
+	if WILLOW_TREES.has(ix):
+		return 1
+	return 0
+
+
 func _build_map() -> void:
 	map = []
 	for y in MAP_H:
@@ -1493,7 +1457,7 @@ func _build_map() -> void:
 			var t := Tile.TREE
 			if ix >= 0 and ix < INNER_W and iy >= 0 and iy < INNER_H:
 				t = Tile.GRASS
-				if iy == INNER_H / 2 or ix == INNER_W / 2:
+				if iy == INNER_H / 2 or YARD_PATH.has(Vector2i(ix, iy)):
 					t = Tile.PATH
 				if PLOT_ONE.has_point(Vector2i(ix, iy)):
 					t = Tile.SOIL
@@ -1501,10 +1465,12 @@ func _build_map() -> void:
 					t = Tile.FALLOW   # cleared once Farming reaches level 2
 				if PLOT_THREE.has_point(Vector2i(ix, iy)):
 					t = Tile.FALLOW   # cleared once Farming 4 and a Patched house
-				if ix >= INNER_W - 6 and iy >= INNER_H - 6:
+				if _in_lake(ix, iy):
 					t = Tile.WATER
 				if ix >= HOUSE_IX and ix < HOUSE_IX + HOUSE_W and iy >= HOUSE_IY and iy < HOUSE_IY + HOUSE_H:
 					t = Tile.HOUSE
+				if PORCH_RECT.has_point(Vector2i(ix, iy)):
+					t = Tile.PORCH
 				if WORLD_ENABLED and ix == INNER_W - 1 and iy == INNER_H / 2:
 					t = Tile.PORTAL
 				if ix == 0 and iy == INNER_H / 2:
@@ -1595,7 +1561,29 @@ func _set_interior(x: int, y: int, kind: int) -> void:
 	interior[y][x] = kind
 
 
+# A new game lays out the brush, trees, and rocks in their places.
 func _respawn_brush() -> void:
+	_fill_brush()
+	_fill_rocks()
+	_fill_quarry()
+	brush_day = day
+	rock_day = day
+	queue_redraw()
+
+
+# Brush and trees grow back once a week, and rocks once a month. The quarry refills each morning.
+func _regrow_wild() -> void:
+	_fill_quarry()
+	if day - brush_day >= BRUSH_REGROW_DAYS:
+		_fill_brush()
+		brush_day = day
+	if day - rock_day >= ROCK_REGROW_DAYS:
+		_fill_rocks(true)
+		rock_day = day
+	queue_redraw()
+
+
+func _fill_brush() -> void:
 	brush.clear()
 	for spot in BRUSH_SPOTS:
 		brush[_world_tile(spot.x, spot.y)] = true
@@ -1604,9 +1592,6 @@ func _respawn_brush() -> void:
 			brush[_world_tile(spot.x, spot.y)] = true
 	grove_felled.clear()
 	_apply_grove()
-	_fill_rocks()
-	_fill_quarry()
-	queue_redraw()
 
 
 func _build_world() -> void:
@@ -1644,8 +1629,8 @@ func _build_world() -> void:
 	add_child(canvas_modulate)
 
 
-func _build_lantern_light() -> void:
-	# A soft white-to-black radial gradient, tinted warm. Its size follows the lantern tier.
+# A soft white-to-black radial gradient. Used as the falloff for every light on the farm.
+func _glow_texture() -> GradientTexture2D:
 	var gradient := Gradient.new()
 	gradient.set_color(0, Color.WHITE)
 	gradient.set_color(1, Color.BLACK)
@@ -1656,11 +1641,62 @@ func _build_lantern_light() -> void:
 	texture.fill_to = Vector2(1.0, 0.5)
 	texture.width = 256
 	texture.height = 256
+	return texture
+
+
+# One warm light for each window, and a lamp by the door. They come on at dusk once the house has glass.
+func _build_window_lights() -> void:
+	var house := Rect2(Vector2(_world_tile(HOUSE_IX, HOUSE_IY)) * PX, Vector2(HOUSE_W, HOUSE_H) * PX)
+	var texture := _glow_texture()
+	for w in FarmArt.window_rects(house):
+		var light := PointLight2D.new()
+		light.texture = texture
+		light.color = Color("ffc878")
+		light.texture_scale = 0.9
+		light.position = w.get_center()
+		light.enabled = false
+		add_child(light)
+		window_lights.append(light)
+	porch_light = PointLight2D.new()
+	porch_light.texture = texture
+	porch_light.color = Color("ffd27a")
+	porch_light.texture_scale = 0.6
+	porch_light.position = Vector2(_world_tile(HOUSE_DOOR_IX, HOUSE_DOOR_IY)) * PX + Vector2(PX * 0.5, PX * 0.5)
+	porch_light.enabled = false
+	add_child(porch_light)
+
+
+# The pond's shine, drawn every frame while on the farm.
+func _draw_water_shimmer() -> void:
+	if not world_started or inside or in_cave or _in_village():
+		return
+	var view := get_viewport_rect().size / camera.zoom
+	var top_left := camera.get_screen_center_position() - view * 0.5
+	var fx0 := clampi(floori(top_left.x / PX) - 1, 0, MAP_W - 1)
+	var fy0 := clampi(floori(top_left.y / PX) - 1, 0, MAP_H - 1)
+	var fx1 := clampi(ceili((top_left.x + view.x) / PX) + 1, 0, MAP_W - 1)
+	var fy1 := clampi(ceili((top_left.y + view.y) / PX) + 1, 0, MAP_H - 1)
+	var water_tiles: Array = []
+	for y in range(fy0, fy1 + 1):
+		for x in range(fx0, fx1 + 1):
+			if map[y][x] == Tile.WATER:
+				water_tiles.append(Vector2i(x, y))
+	# Clear weather shows the sun by day and the moon by night. Rain sends rings across the surface.
+	var sky := 0
+	if weather_kind == "sunny":
+		sky = 2 if current_hour >= DUSK_HOUR else 1
+	var focus := Vector2(LAKE_CENTRE.x + BORDER_X, LAKE_CENTRE.y + BORDER_Y)
+	FarmArt.draw_water_shimmer(water_fx, water_tiles, Time.get_ticks_msec() * 0.001, sky, weather_kind in WATER_RAIN_KINDS, focus)
+
+
+func _build_lantern_light() -> void:
+	# A soft white-to-black radial gradient, tinted warm. Its size follows the lantern tier.
+	var texture := _glow_texture()
 
 	lantern_light = PointLight2D.new()
 	lantern_light.texture = texture
 	lantern_light.color = Color("ffd38a")
-	lantern_light.energy = 1.0
+	lantern_light.energy = LANTERN_ENERGY
 	lantern_light.enabled = false
 	player.add_child(lantern_light)
 	_apply_lantern_radius()
@@ -2126,8 +2162,12 @@ func _on_panel_action(action_id: String) -> void:
 			_eat_meal()
 		"eat_crop":
 			_eat_crop()
+		"eat_pumpkin":
+			_eat_pumpkin()
 		"sell_crops":
 			_sell("crops")
+		"sell_pumpkins":
+			_sell("pumpkins")
 		"sell_fish":
 			_sell("fish")
 		"sell_meals":
@@ -2255,6 +2295,7 @@ func _skill_chosen(tiles: Array) -> Dictionary:
 # The pack, seeds, and materials are a grid of picture tiles. Picking one shows its details beside the grid.
 const MATERIAL_INFO := {
 	"wood": {"name": "Wood", "icon": "log", "tint": "6b4a3a", "desc": "Burned for cooking and used in most early crafts."},
+	"sticks": {"name": "Sticks", "icon": "sticks", "tint": "8a6a3a", "desc": "Dry sticks from the brush piles. Crude hatchets and rods are made from them."},
 	"fiber": {"name": "Fiber", "icon": "fiber", "tint": "8a8a4a", "desc": "Plant fiber for wraps, leggings, and the hose."},
 	"resin": {"name": "Resin", "icon": "resin", "tint": "b5703a", "desc": "Sticky sap for caps, amulets, and the hose."},
 	"hardwood": {"name": "Hardwood", "icon": "log", "tint": "4a3426", "desc": "Dense wood for stronger gear and bolts."},
@@ -2327,8 +2368,12 @@ func _inventory_tiles() -> Array:
 	var tiles: Array = []
 	var n := int(inventory["crops"])
 	if n > 0:
-		tiles.append(_stack_tile("pack:crop", "Crop", "crop", "8fd16b", n, "in the pack",
-			"Harvested from the field. Eat it raw, or cook it for a better meal. Sells for %d coins." % SELL_CROP, "eat_crop", "Eat"))
+		tiles.append(_stack_tile("pack:crop", "Turnip", "crop", "8fd16b", n, "in the pack",
+			"Harvested from the field. Eat it raw, or cook it for a better meal. Sells for %d coins." % _crop_price("turnip"), "eat_crop", "Eat"))
+	n = int(inventory["pumpkins"])
+	if n > 0:
+		tiles.append(_stack_tile("pack:pumpkin", "Pumpkin", "crop", "e0822a", n, "in the pack",
+			"A large pumpkin. Eat it raw, or cook it. Sells for %d coins. Pumpkins do not keep in the cellar." % _crop_price("pumpkin"), "eat_pumpkin", "Eat"))
 	n = int(inventory["fish"])
 	if n > 0:
 		tiles.append(_stack_tile("pack:fish", "Fish", "fish", "6fb8d9", n, "in the pack",
@@ -2579,6 +2624,8 @@ func _cost_lines(cost: Dictionary) -> Array:
 func _held(mat: String) -> int:
 	if mat == "coins":
 		return money
+	if mat == "crops":
+		return _crop_total()
 	if materials.has(mat):
 		return int(materials[mat])
 	return int(inventory.get(mat, 0))
@@ -3219,7 +3266,10 @@ func _harvest(tile: Vector2i) -> void:
 	if _pack_free() < yield_count:
 		_show_message("Your pack is full. Store crops in the root cellar, or sell them.")
 		return
-	inventory["crops"] += yield_count
+	if kind == "pumpkin":
+		inventory["pumpkins"] += yield_count
+	else:
+		inventory["crops"] += yield_count
 	crops.erase(tile)
 	stats["harvested"] += 1
 	if kind == "pumpkin":
@@ -3229,7 +3279,7 @@ func _harvest(tile: Vector2i) -> void:
 		inventory["seeds"] += 1
 	var xp: int = CROPS[kind]["xp"]
 	_grant_xp("Farming", xp)
-	_show_message("Harvested %s for %d crops. +%d Farming XP" % [_seed_label(kind).to_lower(), yield_count, xp])
+	_show_message("Harvested %s for %d %s. +%d Farming XP" % [_seed_label(kind).to_lower(), yield_count, "pumpkins" if kind == "pumpkin" else "crops", xp])
 
 
 func _read_desk() -> void:
@@ -3239,13 +3289,13 @@ func _read_desk() -> void:
 func _gather(tile: Vector2i) -> void:
 	play_sfx("gather", 0.05)
 	brush.erase(tile)
-	materials["wood"] += 1
+	materials["sticks"] += 2
 	materials["fiber"] += 1
 	stats["gathered"] += 1
-	var found := "wood and fiber"
+	var found := "sticks and fiber"
 	if randf() < 0.34:
 		materials["resin"] += 1
-		found = "wood, fiber, and resin"
+		found = "sticks, fiber, and resin"
 	_grant_xp("Bushcrafting", XP_GATHER)
 	_show_message("Gathered %s from the brush. +%d Bushcrafting XP" % [found, XP_GATHER])
 	queue_redraw()
@@ -3394,13 +3444,13 @@ func _cook_fish() -> void:
 
 
 func _can_cook_crops() -> bool:
-	return int(inventory["crops"]) >= COOK_CROP_COUNT and int(materials["wood"]) >= COOK_WOOD
+	return _crop_total() >= COOK_CROP_COUNT and int(materials["wood"]) >= COOK_WOOD
 
 
 func _can_cook_stew(st: Dictionary) -> bool:
 	if _level("Cooking") < int(st["level"]):
 		return false
-	return int(inventory["fish"]) >= int(st["fish"]) and int(inventory["crops"]) >= int(st["crops"]) \
+	return int(inventory["fish"]) >= int(st["fish"]) and _crop_total() >= int(st["crops"]) \
 		and int(inventory["smoked"]) >= int(st["smoked"]) and int(materials["wood"]) >= int(st["wood"])
 
 
@@ -3412,7 +3462,7 @@ func _cook_stew(kind: String) -> void:
 			_show_message("You need %s and a fire to make a %s." % [_stew_ingredients(st), str(st["name"]).to_lower()])
 			return
 		inventory["fish"] -= int(st["fish"])
-		inventory["crops"] -= int(st["crops"])
+		_spend_crops(int(st["crops"]))
 		inventory["smoked"] -= int(st["smoked"])
 		materials["wood"] -= int(st["wood"])
 		inventory[kind] += 1
@@ -3454,7 +3504,7 @@ func _cook_crops() -> void:
 	if not _can_cook_crops():
 		_show_message("You need %d crops and a piece of wood to cook." % COOK_CROP_COUNT)
 		return
-	inventory["crops"] -= COOK_CROP_COUNT
+	_spend_crops(COOK_CROP_COUNT)
 	materials["wood"] -= COOK_WOOD
 	inventory["meals"] += 1
 	stats["cooked"] += 1
@@ -3585,27 +3635,50 @@ func _well_rows() -> Array:
 	return rows
 
 
-func _draw_well(cell: Rect2) -> void:
-	var c := cell.get_center()
-	var r := cell.size.x * 0.4
-	draw_circle(c, r, Color("6e6a64"))
-	draw_circle(c, r * 0.72, Color("2a3440") if well_repaired else Color("3d3a36"))
-	if well_repaired:
-		draw_circle(c + Vector2(-r * 0.2, -r * 0.2), r * 0.2, Color("5a7d9a"))
-	# Posts and a crossbeam with the crank.
-	draw_rect(Rect2(c.x - r * 0.95, c.y - r * 1.25, 4, r * 1.25), Color("6b4e2e"))
-	draw_rect(Rect2(c.x + r * 0.9, c.y - r * 1.25, 4, r * 1.25), Color("6b4e2e"))
-	draw_rect(Rect2(c.x - r * 1.05, c.y - r * 1.3, r * 2.1, 4), Color("7a5a36"))
-
-
 func _eat_crop() -> void:
-	if int(inventory["crops"]) <= 0:
+	if _crop_total() <= 0:
 		_show_message("You have no crops to eat.")
 		return
-	inventory["crops"] -= 1
+	_spend_crops(1)
 	food = minf(100.0, food + CROP_FOOD)
 	play_sfx("eat", 0.05)
 	_show_message("You eat a raw crop. Food %d/100" % food)
+
+
+# Turnips and pumpkins both feed you and cook into meals. Food and cooking count them together.
+func _crop_total() -> int:
+	return int(inventory["crops"]) + int(inventory["pumpkins"])
+
+
+# Uses crops for food or cooking, taking turnips first and then pumpkins.
+func _spend_crops(amount: int) -> void:
+	var from_crops := mini(amount, int(inventory["crops"]))
+	inventory["crops"] -= from_crops
+	inventory["pumpkins"] -= amount - from_crops
+
+
+# How much one crop sells for: its seed's cost spread over its yield, plus its difficulty.
+func _crop_price(kind: String) -> int:
+	var seed_cost: int = SEED_PUMPKIN_PRICE if kind == "pumpkin" else SEED_TURNIP_PRICE
+	var yield_count: int = CROPS[kind]["yield"]
+	return seed_cost / yield_count + int(CROP_DIFFICULTY[kind])
+
+
+# What the preserve recipes take as input. "crops" means turnips or pumpkins.
+func _input_held(kind: String) -> int:
+	if kind == "crops":
+		return _crop_total()
+	return int(inventory[kind])
+
+
+func _eat_pumpkin() -> void:
+	if int(inventory["pumpkins"]) <= 0:
+		_show_message("You have no pumpkins to eat.")
+		return
+	inventory["pumpkins"] -= 1
+	food = minf(100.0, food + CROP_FOOD * 2.0)
+	play_sfx("eat", 0.05)
+	_show_message("You eat a raw pumpkin. Food %d/100" % food)
 
 
 func _drink_pond() -> void:
@@ -3704,7 +3777,7 @@ func _achievement_row(a: Dictionary) -> Dictionary:
 # --- Pack and bags -----------------------------------------------------------
 
 func _pack_used() -> int:
-	var used := int(inventory["crops"]) + int(inventory["fish"]) + int(inventory["meals"])
+	var used := _crop_total() + int(inventory["fish"]) + int(inventory["meals"])
 	for kind in PRESERVED_KINDS:
 		used += int(inventory[kind])
 	for st in STEWS:
@@ -3787,7 +3860,7 @@ func _sell(kind: String) -> void:
 	if count <= 0:
 		_show_message("You have nothing to sell.")
 		return
-	var price := SELL_CROP
+	var price := _crop_price("pumpkin") if kind == "pumpkins" else _crop_price("turnip")
 	if kind == "fish":
 		price = SELL_FISH
 	elif kind == "meals":
@@ -3891,11 +3964,18 @@ func _trade_rows() -> Array:
 		{"name": "Coins", "value": str(money)},
 		{"section": "Sell from your pack"},
 		{
-			"name": "Crops (%d each)" % SELL_CROP,
+			"name": "Turnips (%d each)" % _crop_price("turnip"),
 			"value": "%d held" % int(inventory["crops"]),
 			"button": "Sell all",
 			"action": "sell_crops",
 			"enabled": int(inventory["crops"]) > 0,
+		},
+		{
+			"name": "Pumpkins (%d each)" % _crop_price("pumpkin"),
+			"value": "%d held" % int(inventory["pumpkins"]),
+			"button": "Sell all",
+			"action": "sell_pumpkins",
+			"enabled": int(inventory["pumpkins"]) > 0,
 		},
 		{
 			"name": "Fish (%d each)" % SELL_FISH,
@@ -4001,7 +4081,7 @@ func _can_preserve(entry: Dictionary) -> bool:
 		return false
 	if _level(str(entry["skill"])) < int(entry["level"]):
 		return false
-	if int(inventory[entry["input"]]) < int(entry["count"]):
+	if _input_held(str(entry["input"])) < int(entry["count"]):
 		return false
 	if int(materials["wood"]) < int(entry["wood"]):
 		return false
@@ -4021,7 +4101,10 @@ func _preserve(id: String) -> void:
 	if not _can_preserve(entry):
 		_show_message("You need %d %s, the materials, and %s %d." % [int(entry["count"]), entry["input"], entry["skill"], int(entry["level"])])
 		return
-	inventory[entry["input"]] -= int(entry["count"])
+	if entry["input"] == "crops":
+		_spend_crops(int(entry["count"]))
+	else:
+		inventory[entry["input"]] -= int(entry["count"])
 	materials["wood"] -= int(entry["wood"])
 	materials["fiber"] -= int(entry["fiber"])
 	inventory[entry["kind"]] += 1
@@ -4160,10 +4243,14 @@ func _craft_tool(kind: String) -> void:
 
 # --- Mining --------------------------------------------------------------------
 
-func _fill_rocks() -> void:
+# A monthly refill leaves a spot empty while a crop is growing on it, so the crop is never buried.
+func _fill_rocks(keep_clear: bool = false) -> void:
 	rocks.clear()
 	for spot in ROCK_SPOTS:
-		rocks[_world_tile(spot.x, spot.y)] = true
+		var t := _world_tile(spot.x, spot.y)
+		if keep_clear and crops.has(t):
+			continue
+		rocks[t] = true
 
 
 func _mine(tile: Vector2i) -> void:
@@ -5188,8 +5275,8 @@ func _talk(npc: Dictionary) -> void:
 		stats["delivered"] += 1
 		_show_message("Tomas: Bread and thanks. The village eats tonight.")
 		return
-	if npc["id"] == "harrow" and int(inventory["crops"]) >= 5 and int(stats["crops_given"]) < 5:
-		inventory["crops"] -= 5
+	if npc["id"] == "harrow" and _crop_total() >= 5 and int(stats["crops_given"]) < 5:
+		_spend_crops(5)
 		stats["crops_given"] += 5
 		_show_message("Harrow: Five crops. The wheel will turn again.")
 		return
@@ -5230,7 +5317,7 @@ func _draw_world() -> void:
 		for x in range(x0, x1 + 1):
 			var world_kind: int = world[y * WORLD_W + x]
 			if world_kind == Tile.TREE:
-				_draw_tree(_tile_rect(Vector2i(x, y)), Vector2i(x, y))
+				FarmArt.draw_tree(self, _tile_rect(Vector2i(x, y)), FarmArt.hash_int(x, y, 3), 0)
 			else:
 				draw_rect(_tile_rect(Vector2i(x, y)), TILE_COLORS[world_kind])
 	var origin := _region_origin()
@@ -5682,7 +5769,7 @@ func _buy_goat() -> void:
 
 
 func _can_feed_goats() -> bool:
-	return goats > 0 and goats_fed_day != day and int(inventory["crops"]) >= goats * GOAT_FEED_CROPS
+	return goats > 0 and goats_fed_day != day and _crop_total() >= goats * GOAT_FEED_CROPS
 
 
 func _feed_goats() -> void:
@@ -5692,13 +5779,13 @@ func _feed_goats() -> void:
 	if not _can_feed_goats():
 		_show_message("The goats need %d crops." % (goats * GOAT_FEED_CROPS))
 		return
-	inventory["crops"] -= goats * GOAT_FEED_CROPS
+	_spend_crops(goats * GOAT_FEED_CROPS)
 	goats_fed_day = day
 	_show_message("You feed the goats.")
 
 
 func _can_feed_hens() -> bool:
-	return hens > 0 and hens_fed_day != day and int(inventory["crops"]) >= hens * HEN_FEED_CROPS
+	return hens > 0 and hens_fed_day != day and _crop_total() >= hens * HEN_FEED_CROPS
 
 
 func _feed_hens() -> void:
@@ -5708,7 +5795,7 @@ func _feed_hens() -> void:
 	if not _can_feed_hens():
 		_show_message("The hens need %d crops." % (hens * HEN_FEED_CROPS))
 		return
-	inventory["crops"] -= hens * HEN_FEED_CROPS
+	_spend_crops(hens * HEN_FEED_CROPS)
 	hens_fed_day = day
 	_show_message("You feed the hens.")
 
@@ -5983,14 +6070,14 @@ func _tidy_house() -> void:
 func _can_cleanse() -> bool:
 	return sanity_penalty > 0 and cleanse_day != day \
 		and _level("Cleaning") >= CLEANSE_LEVEL \
-		and inventory["crops"] >= CLEANSE_CROPS
+		and _crop_total() >= CLEANSE_CROPS
 
 
 func _cleanse_house() -> void:
 	if not _can_cleanse():
 		_show_message("Cleansing needs Cleaning %d, %d crops, and one try a day." % [CLEANSE_LEVEL, CLEANSE_CROPS])
 		return
-	inventory["crops"] -= CLEANSE_CROPS
+	_spend_crops(CLEANSE_CROPS)
 	cleanse_day = day
 	sanity_penalty = maxi(0, sanity_penalty - CLEANSE_RELIEF)
 	sanity = minf(sanity, _sanity_max())
@@ -6034,9 +6121,18 @@ func _update_lantern(darkness: float) -> void:
 	lantern_light.enabled = lantern_tier > 0 and darkness > 0.05
 	if lantern_tier >= LANTERN_FLICKER_TIER:
 		var t := Time.get_ticks_msec() / 1000.0
-		lantern_light.energy = 0.9 + 0.08 * sin(t * 9.0) + randf_range(-0.03, 0.03)
+		lantern_light.energy = LANTERN_ENERGY * (0.9 + 0.08 * sin(t * 9.0) + randf_range(-0.03, 0.03))
 	else:
-		lantern_light.energy = 1.0
+		lantern_light.energy = LANTERN_ENERGY
+	# Lit windows glow once the house has glass, and the porch lamp once it is restored.
+	var outdoors := not inside and not in_cave and not _in_village() and world_started
+	var lit := outdoors and house_stage >= 2 and darkness > 0.1
+	var glow := WINDOW_ENERGY * (0.6 + 0.4 * darkness) * (1.0 if house_stage == 3 else 0.75)
+	for light in window_lights:
+		light.enabled = lit
+		light.energy = glow
+	porch_light.enabled = outdoors and house_stage == 3 and darkness > 0.1
+	porch_light.energy = glow
 
 
 func _night_relief() -> float:
@@ -6192,7 +6288,7 @@ func _end_day(base: String, leave_house: bool = true) -> void:
 	var event_note := _begin_day_events()
 	clock = 0.0
 	tonight_shadow = Vector2i(-1, -1)
-	_respawn_brush()
+	_regrow_wild()
 	_update_shadow_tile()
 	_show_message("%s Your crops grew overnight.%s%s The morning is %s.%s" % [
 		base, spoil_note, upkeep_note, str(WEATHER_NAMES.get(weather_kind, "overcast")).to_lower(), event_note])
@@ -6333,6 +6429,8 @@ func _save_game() -> void:
 		"open_tab": open_tab,
 		"crops": _crops_to_array(),
 		"brush": _brush_to_array(),
+		"brush_day": brush_day,
+		"rock_day": rock_day,
 		"felled": _felled_to_array(),
 		"rocks": _tiles_to_array(rocks),
 		"quarry": _tiles_to_array(quarry),
@@ -6436,6 +6534,8 @@ func _load_game() -> bool:
 		# so they grow tonight like they used to.
 		var watered := int(c["watered_day"]) if c.has("watered_day") else day
 		crops[Vector2i(int(c["x"]), int(c["y"]))] = {"stage": int(c["stage"]), "kind": kind, "watered_day": watered}
+	brush_day = int(data.get("brush_day", data.get("day", 0)))
+	rock_day = int(data.get("rock_day", data.get("day", 0)))
 	brush.clear()
 	for b in data.get("brush", []):
 		brush[Vector2i(int(b[0]), int(b[1]))] = true
@@ -6595,18 +6695,6 @@ func _world_tile(ix: int, iy: int) -> Vector2i:
 
 func _tile_center(wx: int, wy: int) -> Vector2:
 	return Vector2(wx * PX + PX * 0.5, wy * PX + PX * 0.5)
-
-
-# Timber walls with plank lines. The top row of the workshop is its roof.
-func _draw_wall(cell: Rect2, pos: Vector2i) -> void:
-	var roof := pos.y == WORKSHOP_RECT.position.y + BORDER_Y
-	draw_rect(cell, Color("4f3622") if roof else Color("6b4c33"))
-	if not roof:
-		for i in range(1, 4):
-			var y := cell.position.y + cell.size.y * float(i) / 4.0
-			draw_line(Vector2(cell.position.x, y), Vector2(cell.end.x, y), Color(0.16, 0.11, 0.07, 0.55), 1.0)
-	else:
-		draw_line(Vector2(cell.position.x, cell.end.y - 2), Vector2(cell.end.x, cell.end.y - 2), Color(0.1, 0.07, 0.05, 0.7), 2.0)
 
 
 # Each house tile is drawn for the house's current repair stage, so the rooms improve as you fix the house.
@@ -6789,94 +6877,6 @@ func _draw_doormat(cell: Rect2) -> void:
 	draw_rect(cell.grow(-9), Color("6a4e2a"), false, 2.0)
 
 
-# A coop tile, drawn by where it sits in the 2 by 2 coop: the top row is roofed, the bottom-left
-# has the hen door, and the bottom-right holds the nest with straw.
-func _draw_coop_tile(cell: Rect2, local: Vector2i) -> void:
-	draw_rect(cell, Color("7a5230"))
-	draw_rect(cell.grow(-5), Color("94693d"))
-	for i in range(1, 4):
-		var x := cell.position.x + cell.size.x * float(i) / 4.0
-		draw_line(Vector2(x, cell.position.y + cell.size.y * 0.24), Vector2(x, cell.end.y), Color(0.2, 0.12, 0.06, 0.5), 1.0)
-	draw_rect(Rect2(cell.position, Vector2(cell.size.x, cell.size.y * 0.24)), Color("5a2e1c"))
-	draw_line(Vector2(cell.position.x, cell.position.y + cell.size.y * 0.24), Vector2(cell.end.x, cell.position.y + cell.size.y * 0.24), Color("3a1a10"), 2.0)
-	if local == Vector2i(0, 1):
-		var door := Rect2(cell.position.x + cell.size.x * 0.28, cell.position.y + cell.size.y * 0.42, cell.size.x * 0.44, cell.size.y * 0.58)
-		draw_rect(door, Color("3a2214"))
-		draw_line(Vector2(door.position.x, door.position.y + door.size.y * 0.5), Vector2(door.end.x, door.position.y + door.size.y * 0.5), Color("5a3a24"), 2.0)
-	if local == Vector2i(1, 1):
-		draw_rect(Rect2(cell.position.x + cell.size.x * 0.2, cell.position.y + cell.size.y * 0.5, cell.size.x * 0.6, cell.size.y * 0.35), Color("3a2a1a"))
-		for i in 5:
-			var sx := cell.position.x + cell.size.x * (0.25 + 0.12 * i)
-			draw_line(Vector2(sx, cell.position.y + cell.size.y * 0.7), Vector2(sx + 3, cell.position.y + cell.size.y * 0.8), Color("e0b850"), 2.0)
-
-
-# A barn tile, drawn by its place in the 3 by 2 barn: red boards, a roofed top row, a big door
-# in the bottom-middle with an X brace, and hay bales in the bottom-right.
-func _draw_barn_tile(cell: Rect2, local: Vector2i) -> void:
-	draw_rect(cell, Color("7a2e26"))
-	draw_rect(cell.grow(-4), Color("8f3a2f"))
-	for i in range(1, 4):
-		var x := cell.position.x + cell.size.x * float(i) / 4.0
-		draw_line(Vector2(x, cell.position.y + cell.size.y * 0.2), Vector2(x, cell.end.y), Color(0.25, 0.1, 0.08, 0.55), 1.5)
-	draw_rect(Rect2(cell.position, Vector2(cell.size.x, cell.size.y * 0.2)), Color("4a1a16"))
-	if local.y == 0:
-		draw_line(Vector2(cell.position.x, cell.position.y + cell.size.y * 0.2), Vector2(cell.end.x, cell.position.y + cell.size.y * 0.2), Color(Color("e8dcc0"), 0.6), 2.0)
-	if local == Vector2i(1, 1):
-		var door := Rect2(cell.position.x + cell.size.x * 0.1, cell.position.y + cell.size.y * 0.28, cell.size.x * 0.8, cell.size.y * 0.72)
-		draw_rect(door, Color("5c2219"))
-		draw_rect(door, Color("e8dcc0"), false, 2.0)
-		draw_line(door.position, door.end, Color("e8dcc0"), 2.0)
-		draw_line(Vector2(door.end.x, door.position.y), Vector2(door.position.x, door.end.y), Color("e8dcc0"), 2.0)
-		draw_line(Vector2(door.position.x + door.size.x * 0.5, door.position.y), Vector2(door.position.x + door.size.x * 0.5, door.end.y), Color("e8dcc0"), 2.0)
-	if local == Vector2i(2, 1):
-		var bale := Rect2(cell.position.x + 4, cell.position.y + cell.size.y * 0.4, cell.size.x - 8, cell.size.y * 0.5)
-		draw_rect(bale, Color("d8b050"))
-		for i in 3:
-			var by := bale.position.y + bale.size.y * (0.25 + 0.25 * i)
-			draw_line(Vector2(bale.position.x, by), Vector2(bale.end.x, by), Color("9a7a30"), 2.0)
-	if local == Vector2i(0, 1):
-		var win := Rect2(cell.position.x + cell.size.x * 0.3, cell.position.y + cell.size.y * 0.4, cell.size.x * 0.4, cell.size.y * 0.3)
-		draw_rect(win.grow(2), Color("e8dcc0"))
-		draw_rect(win, Color("1d1712"))
-
-
-# The root cellar: a hatch of planks set into a stone rim, with an iron ring to lift it.
-func _draw_cellar_tile(cell: Rect2) -> void:
-	draw_rect(cell, Color("4a4038"))
-	var hatch := cell.grow(-4)
-	draw_rect(hatch, Color("6b5a48"))
-	for i in range(1, 4):
-		var x := hatch.position.x + hatch.size.x * float(i) / 4.0
-		draw_line(Vector2(x, hatch.position.y), Vector2(x, hatch.end.y), Color("4a3524"), 2.0)
-	draw_arc(cell.get_center(), 4.0, 0.0, TAU, 12, Color("c9c2b0"), 2.0)
-
-
-# The smokehouse: brick walls, slatted vents, and a dark smoke hole, with a few hams hung on hooks.
-func _draw_smokehouse_tile(cell: Rect2) -> void:
-	draw_rect(cell, Color("7a4530"))
-	for row in range(1, 4):
-		var y := cell.position.y + cell.size.y * float(row) / 4.0
-		draw_line(Vector2(cell.position.x, y), Vector2(cell.end.x, y), Color(0.2, 0.1, 0.06, 0.6), 1.0)
-	draw_rect(Rect2(cell.position.x + cell.size.x * 0.38, cell.position.y + 3, cell.size.x * 0.24, cell.size.y * 0.18), Color("2a1a14"))
-	for i in 3:
-		var vx := cell.position.x + cell.size.x * (0.2 + 0.25 * i)
-		draw_line(Vector2(vx, cell.position.y + cell.size.y * 0.5), Vector2(vx, cell.end.y - 4), Color("4a2418"), 2.0)
-	draw_circle(Vector2(cell.position.x + cell.size.x * 0.5, cell.position.y + cell.size.y * 0.7), 3.0, Color("8a3a2a"))
-
-
-# The furnace: grey stone, with a glowing firebox mouth and a sooty stack.
-func _draw_furnace_tile(cell: Rect2) -> void:
-	draw_rect(cell, Color("5c5c66"))
-	for row in range(1, 4):
-		var y := cell.position.y + cell.size.y * float(row) / 4.0
-		draw_line(Vector2(cell.position.x, y), Vector2(cell.end.x, y), Color(0.1, 0.1, 0.12, 0.6), 1.0)
-	draw_rect(Rect2(cell.position.x + cell.size.x * 0.4, cell.position.y + 2, cell.size.x * 0.2, cell.size.y * 0.2), Color("2a2a30"))
-	var mouth := Rect2(cell.position.x + cell.size.x * 0.22, cell.position.y + cell.size.y * 0.45, cell.size.x * 0.56, cell.size.y * 0.35)
-	draw_rect(mouth, Color("2a0f05"))
-	draw_rect(mouth.grow(-3), Color("e0601e"))
-	draw_rect(mouth.grow(-7), Color("ffd060"))
-
-
 # Workshop floor: planks running across the tile, with the ends staggered so the boards don't line up.
 func _draw_floor_tile(cell: Rect2, tile: Vector2i) -> void:
 	draw_rect(cell, TILE_COLORS[Tile.FLOOR])
@@ -6990,19 +6990,6 @@ func _separate_goats() -> void:
 			var push := dir * (GOAT_SPACE - dist) * 0.5
 			goat_pos[i] = a - Vector2(push.x, push.y * 0.5)
 			goat_pos[j] = b + Vector2(push.x, push.y * 0.5)
-
-
-func _draw_tree(cell: Rect2, pos: Vector2i) -> void:
-	draw_rect(cell, Color("17281a"))
-	var h: int = absi((pos.x * 73856093) ^ (pos.y * 19349663))
-	var shades := [Color("2c5630"), Color("36643a"), Color("24472a"), Color("3d6e3f")]
-	var c := cell.position + cell.size * 0.5
-	for i in 3:
-		var ox := float((h >> (i * 4)) % 7 - 3) * PX * 0.06
-		var oy := float((h >> (i * 4 + 2)) % 7 - 3) * PX * 0.06
-		draw_circle(c + Vector2(ox, oy), PX * (0.34 + 0.05 * float(i)), shades[(h >> (i * 3)) % shades.size()])
-	# A little light on the upper left of the canopy.
-	draw_circle(c + Vector2(-PX * 0.12, -PX * 0.14), PX * 0.1, Color(0.62, 0.78, 0.46, 0.22))
 
 
 func _tile_rect(t: Vector2i) -> Rect2:

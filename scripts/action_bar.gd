@@ -928,6 +928,11 @@ class RecipeIcon extends Control:
 			"fiber":
 				for x in [0.2, 0.4, 0.6, 0.8]:
 					draw_line(_pt(x, 0.9), _pt(x + 0.1, 0.1), tint, 0.05 * _sz)
+			"sticks":
+				for k in 3:
+					var sx: float = 0.22 + 0.26 * float(k)
+					draw_line(_pt(sx, 0.92), _pt(sx + 0.14, 0.08), tint, 0.08 * _sz)
+					draw_line(_pt(sx + 0.02, 0.9), _pt(sx + 0.15, 0.1), light, 0.02 * _sz)
 			"resin":
 				_shape(_ellipse(0.5, 0.56, 0.34, 0.28), tint)
 				draw_circle(_pt(0.38, 0.44), 0.09 * _sz, light)
