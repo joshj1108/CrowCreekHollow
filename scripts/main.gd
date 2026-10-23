@@ -217,7 +217,7 @@ const STAGE_NAMES := ["Decrepit", "Boarded", "Patched", "Restored"]
 # The tutorial: short tips that appear one at a time as the player reaches each part of the farm.
 # Each shows once, and the Settings menu keeps the ones already seen. When the condition is met, see _tip_ready.
 const TIPS := [
-	{"id": "move", "title": "Moving and using things", "text": "Walk with WASD or the arrow keys. Press Space to plant, harvest, gather, and use whatever you face."},
+	{"id": "move", "title": "Moving and using things", "text": "Walk with WASD or the arrow keys. Pick a tool on the hotbar with 1 to 0, or scroll with the mouse wheel. Left click or Space uses the tool on whatever you face. Right click blocks with a weapon."},
 	{"id": "menus", "title": "Menus", "text": "K Skills, I Inventory, G Gear, C Craft, Q Quests, H House, U Buildings, J Achievements. Esc opens Settings, and time stops while it's open."},
 	{"id": "farm", "title": "Growing food", "text": "Face a soil tile and press Space to plant a seed. Crops need water each day to grow. Face a ripe crop and press Space to harvest it."},
 	{"id": "well", "title": "The well", "text": "The pump by the plots is seized. Repair it from the Well panel, then attach the hose. The hose reaches every plot, so face a crop and press Space to water it. Rain waters everything."},
@@ -749,6 +749,18 @@ var weather_kind := ""       # today's weather, rolled each morning: see WEATHER
 var skill_xp := {"Farming": 0, "Bushcrafting": 0, "Carpentry": 0, "Cleaning": 0, "Fishing": 0, "Cooking": 0, "Combat": 0, "Forestry": 0, "Mining": 0, "Smithing": 0}
 var inventory := {"seeds": STARTING_SEEDS, "pumpkin_seeds": 0, "crops": 0, "pumpkins": 0, "fish": 0, "meals": 0, "smoked": 0, "dried": 0, "canned": 0, "fermented": 0, "stew": 0, "hearty": 0, "bandage": 0}
 var materials := {"wood": 0, "sticks": 0, "fiber": 0, "resin": 0, "hardwood": 0, "stone": 0, "copper_ore": 0, "iron_ore": 0, "copper_bar": 0, "iron_bar": 0, "arrows": 0, "bolts": 0}
+# The hotbar, in slot order. Slots after these are empty.
+const HOTBAR_TOOLS := [
+	{"id": "sword", "name": "Weapon", "icon": "sword", "tint": "6b4a3a"},
+	{"id": "axe", "name": "Axe", "icon": "axe", "tint": "8a6a3a"},
+	{"id": "pick", "name": "Pickaxe", "icon": "pick", "tint": "6b5a4a"},
+	{"id": "hoe", "name": "Hoe", "icon": "hoe", "tint": "8a6a3a"},
+	{"id": "trowel", "name": "Trowel", "icon": "trowel", "tint": "9a7a4a"},
+	{"id": "hose", "name": "Watering hose", "icon": "hose", "tint": "3f6b8a"},
+	{"id": "rod", "name": "Fishing pole", "icon": "rod", "tint": "6b5a3a"},
+]
+const TOOL_LABELS := {"sword": "weapon", "axe": "axe", "pick": "pickaxe", "hoe": "hoe", "trowel": "trowel", "hose": "watering hose", "rod": "fishing pole"}
+
 var tool_tier := {"hatchet": 0, "pick": 0, "rod": 0}     # 0 = none; higher tiers come from TOOL_TIERS
 var grove_felled := {}
 var quarry := {}                                   # Ashford quarry rocks, village tile -> true
@@ -869,6 +881,9 @@ var water_fx: Node2D              # the pond's shine, redrawn about 20 times a s
 var water_fx_next_ms := 0            # when the shine is next due for a redraw
 var perf_label: Label = null         # F3 shows frame and draw stats
 var perf_shown := false
+var hotbar: Hotbar = null
+var active_slot := 3                 # 0-based hotbar slot; 3 is the hoe the farm starts with
+var blocking := false                # held block: LT or right click, with a weapon in the weapon slot
 var tree_sprites: Dictionary = {}   # "variant:seed" -> Texture2D, filled in once at start
 var tree_bake_started := false
 var perf_was_down := false
@@ -1070,10 +1085,21 @@ func _process(delta: float) -> void:
 	placement_ghost.visible = placing != ""
 	if placing != "":
 		placement_ghost.queue_redraw()
+	if hotbar != null:
+		hotbar.set_state(_hotbar_entries(), active_slot)
 	if player.paused:
 		_handle_keys()
 		_refresh_panel()
 		return
+	blocking = Input.is_action_pressed("block") and _active_tool() == "sword" and _has_weapon()
+	# Scrolling runs through the tools only; the number keys can still reach any slot.
+	if Input.is_action_just_pressed("hotbar_next"):
+		active_slot = posmod(active_slot + 1, HOTBAR_TOOLS.size())
+	if Input.is_action_just_pressed("hotbar_prev"):
+		active_slot = posmod(active_slot - 1, HOTBAR_TOOLS.size())
+	for i in Hotbar.SLOT_COUNT:
+		if Input.is_action_just_pressed("slot_%d" % (i + 1)):
+			active_slot = i
 	_update_tips(delta)
 	clock += delta
 	_update_hens(delta)
@@ -1139,7 +1165,7 @@ func _process(delta: float) -> void:
 	if open_tab == "" and get_viewport().gui_get_focus_owner() != null:
 		get_viewport().gui_release_focus()
 	# Farming and gathering pause while a panel is open (the day is already paused above).
-	if Input.is_action_just_pressed("use") and open_tab == "":
+	if Input.is_action_just_pressed("use") and open_tab == "" and not _pointer_on_ui():
 		_interact()
 
 	if open_tab != "":
@@ -1422,7 +1448,16 @@ func _setup_input() -> void:
 	_ensure_action("move_right", [KEY_D, KEY_RIGHT], [JOY_BUTTON_DPAD_RIGHT], [[JOY_AXIS_LEFT_X, 1.0]])
 	for move in ["move_up", "move_down", "move_left", "move_right"]:
 		InputMap.action_set_deadzone(move, 0.3)
-	_ensure_action("use", [KEY_SPACE, KEY_ENTER], [JOY_BUTTON_A])
+	_ensure_action("use", [KEY_SPACE, KEY_ENTER], [JOY_BUTTON_A], [[JOY_AXIS_TRIGGER_RIGHT, 1.0]])
+	_add_mouse("use", MOUSE_BUTTON_LEFT)
+	_ensure_action("block", [], [], [[JOY_AXIS_TRIGGER_LEFT, 1.0]])
+	_add_mouse("block", MOUSE_BUTTON_RIGHT)
+	_ensure_action("hotbar_prev", [], [JOY_BUTTON_LEFT_SHOULDER])
+	_add_mouse("hotbar_prev", MOUSE_BUTTON_WHEEL_UP)
+	_ensure_action("hotbar_next", [], [JOY_BUTTON_RIGHT_SHOULDER])
+	_add_mouse("hotbar_next", MOUSE_BUTTON_WHEEL_DOWN)
+	for i in 10:
+		_ensure_action("slot_%d" % (i + 1), [KEY_1 + i if i < 9 else KEY_0])
 	# Menus move focus and press buttons through the ui_ actions, so the gamepad needs them too.
 	_ensure_action("ui_up", [], [JOY_BUTTON_DPAD_UP], [[JOY_AXIS_LEFT_Y, -1.0]])
 	_ensure_action("ui_down", [], [JOY_BUTTON_DPAD_DOWN], [[JOY_AXIS_LEFT_Y, 1.0]])
@@ -1431,12 +1466,12 @@ func _setup_input() -> void:
 	_ensure_action("ui_accept", [], [JOY_BUTTON_A])
 	_ensure_action("ui_cancel", [], [JOY_BUTTON_B])
 	_ensure_action("skills", [KEY_K], [JOY_BUTTON_Y])
-	_ensure_action("inventory", [KEY_I], [JOY_BUTTON_X])
-	_ensure_action("gear", [KEY_G], [JOY_BUTTON_LEFT_SHOULDER])
+	_ensure_action("inventory", [KEY_I], [JOY_BUTTON_X, JOY_BUTTON_BACK])
+	_ensure_action("gear", [KEY_G], [])
 	_ensure_action("craft", [KEY_C], [])
-	_ensure_action("quests", [KEY_Q], [JOY_BUTTON_RIGHT_SHOULDER])
+	_ensure_action("quests", [KEY_Q], [])
 	_ensure_action("achievements", [KEY_J], [JOY_BUTTON_RIGHT_STICK])
-	_ensure_action("house", [KEY_H], [JOY_BUTTON_BACK])
+	_ensure_action("house", [KEY_H], [])
 	_ensure_action("buildings", [KEY_U], [])
 	_ensure_action("settings", [KEY_ESCAPE], [JOY_BUTTON_START])
 	_ensure_action("close_panel", [], [JOY_BUTTON_B])
@@ -1444,6 +1479,13 @@ func _setup_input() -> void:
 
 # Adds keys, gamepad buttons, and stick directions to an action. Each axis entry
 # is [axis, direction], where direction is -1.0 or 1.0 along that axis.
+# Mouse buttons and wheel steps for an action.
+func _add_mouse(action: String, button: int) -> void:
+	var ev := InputEventMouseButton.new()
+	ev.button_index = button
+	InputMap.action_add_event(action, ev)
+
+
 func _ensure_action(action: String, keys: Array, buttons: Array = [], axes: Array = []) -> void:
 	if not InputMap.has_action(action):
 		InputMap.add_action(action)
@@ -1829,14 +1871,22 @@ func _build_hud() -> void:
 
 	message_label = _make_label(hud_root, Vector2(16, 100), 20)
 	message_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	message_label.custom_minimum_size = Vector2(620, 0)
+	message_label.custom_minimum_size = Vector2(300, 0)
 	# Messages sit low on the left, clear of the farm's labels and the HUD.
 	message_label.set_anchors_preset(Control.PRESET_BOTTOM_LEFT)
 	message_label.offset_left = 16
-	message_label.offset_right = 656
+	message_label.offset_right = 316
 	message_label.offset_top = -124
 	message_label.offset_bottom = -24
 	message_label.vertical_alignment = VERTICAL_ALIGNMENT_BOTTOM
+
+	hotbar = Hotbar.new()
+	hotbar.set_anchors_preset(Control.PRESET_CENTER_BOTTOM)
+	hotbar.grow_horizontal = Control.GROW_DIRECTION_BOTH
+	hotbar.grow_vertical = Control.GROW_DIRECTION_BEGIN
+	hotbar.offset_bottom = -14
+	hotbar.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	hud_root.add_child(hotbar)
 
 	minimap = Minimap.new()
 	var mini_size := Vector2(MAP_W, MAP_H) * Minimap.PX_PER_TILE
@@ -3340,6 +3390,57 @@ func _check_unlocks() -> void:
 	queue_redraw()
 
 
+# The tool in the active hotbar slot, or "" for an empty slot.
+func _active_tool() -> String:
+	if active_slot < 0 or active_slot >= HOTBAR_TOOLS.size():
+		return ""
+	return str(HOTBAR_TOOLS[active_slot]["id"])
+
+
+# The weapon slot holds whatever is in the main hand besides the hoe.
+func _has_weapon() -> bool:
+	var weapon := str(equipment["hand_r"])
+	return weapon != "" and weapon != "hoe"
+
+
+func _hotbar_unlocked(id: String) -> bool:
+	match id:
+		"sword":
+			return _has_weapon()
+		"axe":
+			return int(tool_tier["hatchet"]) > 0
+		"pick":
+			return int(tool_tier["pick"]) > 0
+		"rod":
+			return int(tool_tier["rod"]) > 0
+	return true
+
+
+func _hotbar_entries() -> Array:
+	var out: Array = []
+	for i in Hotbar.SLOT_COUNT:
+		if i < HOTBAR_TOOLS.size():
+			var tool: Dictionary = HOTBAR_TOOLS[i].duplicate()
+			tool["enabled"] = _hotbar_unlocked(str(tool["id"]))
+			out.append(tool)
+		else:
+			out.append({})
+	return out
+
+
+# True when a mouse click landed on a menu control, so the click does not also act on the world.
+func _pointer_on_ui() -> bool:
+	return Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT) and get_viewport().gui_get_hovered_control() != null
+
+
+# Checks that the active slot holds the tool a target needs. Says what to select when it doesn't.
+func _need_tool(id: String) -> bool:
+	if _active_tool() == id:
+		return true
+	_show_message("Select the %s on the hotbar to do that." % str(TOOL_LABELS.get(id, id)))
+	return false
+
+
 func _interact() -> void:
 	if placing != "":
 		_confirm_placement()
@@ -3373,11 +3474,13 @@ func _interact() -> void:
 		return
 
 	if fish_spots.has(tile):
-		_start_fishing(tile)
+		if _need_tool("rod"):
+			_start_fishing(tile)
 		return
 
 	if rocks.has(tile):
-		_mine(tile)
+		if _need_tool("pick"):
+			_mine(tile)
 		return
 	if brush.has(tile):
 		_gather(tile)
@@ -3391,7 +3494,8 @@ func _interact() -> void:
 		_toggle_tab("Well")
 		return
 	if kind == Tile.TREE and GROVE_SPOTS.has(tile - Vector2i(BORDER_X, BORDER_Y)):
-		_chop(tile)
+		if _need_tool("axe"):
+			_chop(tile)
 		return
 	if kind == Tile.HOUSE:
 		_toggle_tab("House")
@@ -3425,12 +3529,13 @@ func _interact() -> void:
 
 	if crops.has(tile):
 		if crops[tile]["stage"] >= MAX_STAGE:
-			_harvest(tile)
+			if _need_tool("hoe"):
+				_harvest(tile)
 		elif int(crops[tile].get("watered_day", 0)) == day:
 			_show_message("Already watered today. It isn't ready yet.")
-		else:
+		elif _need_tool("hose"):
 			_water_crop(tile)
-	else:
+	elif _need_tool("trowel"):
 		_plant(tile)
 
 	queue_redraw()
@@ -4793,7 +4898,8 @@ func _interact_cave() -> void:
 	var tile := _tile_in_front()
 	var kind := _kind_at(tile)
 	if kind == Tile.ORE_COPPER or kind == Tile.ORE_IRON:
-		_mine_cave(tile, kind)
+		if _need_tool("pick"):
+			_mine_cave(tile, kind)
 		return
 	_swing()
 
@@ -5441,7 +5547,8 @@ func _interact_village() -> void:
 		_talk(_zone_npcs()[idx])
 		return
 	if zone == Zone.ASHFORD and quarry.has(_tile_in_front()):
-		_quarry(_tile_in_front())
+		if _need_tool("pick"):
+			_quarry(_tile_in_front())
 		return
 	if campsite != NO_CAMP and _tile_in_front() == campsite:
 		_rest_at_camp()
@@ -5611,6 +5718,11 @@ func _foe_attack(foe: Dictionary) -> void:
 		return
 	if invuln > 0.0:
 		return
+	# A held block turns aside a blow from the front.
+	if blocking and (foe["pos"] - player.position).normalized().dot(player.facing) > 0.3:
+		invuln = INVULN_TIME * 0.5
+		play_sfx("tick", 0.05)
+		return
 	var st: Dictionary = FOES[foe["kind"]]
 	var dmg := maxi(1, int(st["dmg"]) - _defense())
 	hp -= dmg
@@ -5627,6 +5739,11 @@ func _foe_attack(foe: Dictionary) -> void:
 
 
 func _swing() -> void:
+	if _active_tool() != "sword":
+		return
+	if not _has_weapon():
+		_show_message("Equip a weapon from Gear to fight.")
+		return
 	var weapon := str(equipment["hand_r"])
 	if weapon != "" and GEAR_ITEMS[weapon].has("ammo"):
 		_fire(weapon)

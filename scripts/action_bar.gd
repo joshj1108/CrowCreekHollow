@@ -903,6 +903,12 @@ class RecipeIcon extends Control:
 				_box(Rect2(_pt(0.2, 0.3), Vector2(0.6, 0.62) * _sz), tint)
 				_box(Rect2(_pt(0.2, 0.3), Vector2(0.6, 0.2) * _sz), light)
 				draw_line(_pt(0.2, 0.62), _pt(0.8, 0.62), dark, 0.03 * _sz)
+			"trowel":
+				draw_line(_pt(0.3, 0.95), _pt(0.52, 0.5), tint, 0.07 * _sz)
+				_shape(_poly([[0.48, 0.5], [0.86, 0.14], [0.92, 0.28], [0.6, 0.6]]), metal)
+			"hose":
+				draw_arc(_pt(0.5, 0.5), 0.3 * _sz, 0.0, TAU * 0.85, 20, tint, 0.09 * _sz)
+				_box(Rect2(_pt(0.7, 0.12), Vector2(0.16, 0.14) * _sz), metal)
 			"hoe":
 				draw_line(_pt(0.3, 0.95), _pt(0.7, 0.12), tint, 0.06 * _sz)
 				_shape(_poly([[0.5, 0.12], [0.92, 0.2], [0.86, 0.42], [0.5, 0.36]]), metal)
