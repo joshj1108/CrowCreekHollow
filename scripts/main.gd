@@ -1206,6 +1206,15 @@ func _process(delta: float) -> void:
 	if open_tab == "" and not _bag_open() and not _wheel_open() and get_viewport().gui_get_focus_owner() != null:
 		get_viewport().gui_release_focus()
 	# Farming and gathering pause while a panel is open (the day is already paused above).
+	# With the trowel in hand, the D-pad up and down cycle the seed you plant.
+	var trowel_out := open_tab == "" and not _bag_open() and not _wheel_open() and _active_tool() == "trowel"
+	if player:
+		player.vertical_locked = trowel_out
+	if trowel_out:
+		if Input.is_action_just_pressed("ui_down"):
+			_cycle_seed(1)
+		elif Input.is_action_just_pressed("ui_up"):
+			_cycle_seed(-1)
 	var tool_pressed := Input.is_action_just_pressed("tool_use")
 	var hand_pressed := Input.is_action_just_pressed("use")
 	if (tool_pressed or hand_pressed) and open_tab == "" and not _bag_open() and not _wheel_open() and not _pointer_on_ui():
@@ -3612,6 +3621,27 @@ func _settings_rows() -> Array:
 
 func _seed_label(kind: String) -> String:
 	return "Pumpkin" if kind == "pumpkin" else "Turnip"
+
+
+# Steps through the seeds you have in the pouch: turnip always, pumpkin once Farming reaches its level.
+func _cycle_seed(step: int) -> void:
+	var options: Array = []
+	for kind in ["turnip", "pumpkin"]:
+		if kind == "pumpkin" and _level("Farming") < PUMPKIN_LEVEL:
+			continue
+		if int(inventory[CROPS[kind]["seed"]]) > 0:
+			options.append(kind)
+	if options.is_empty():
+		_show_message("You have no seeds to plant.")
+		return
+	var at := options.find(selected_seed)
+	var idx: int
+	if at == -1:
+		idx = 0 if step > 0 else options.size() - 1
+	else:
+		idx = posmod(at + step, options.size())
+	selected_seed = str(options[idx])
+	_show_message("Planting %s seeds now. %d left." % [_seed_label(selected_seed).to_lower(), int(inventory[CROPS[selected_seed]["seed"]])])
 
 
 func _switch_seed() -> void:

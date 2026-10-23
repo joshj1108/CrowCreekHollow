@@ -106,6 +106,15 @@ const KEYS := {
 }
 
 
+# Set by the game each frame: true while the trowel is in hand and no panel is open.
+var vertical_locked := false
+
+
+func _dpad_vertical() -> bool:
+	var pads := Input.get_connected_joypads()
+	var device: int = pads[0] if not pads.is_empty() else 0
+	return Input.is_joy_button_pressed(device, JOY_BUTTON_DPAD_UP) or Input.is_joy_button_pressed(device, JOY_BUTTON_DPAD_DOWN)
+
 func _process(delta: float) -> void:
 	_advance_anim(delta)
 	if paused:
@@ -113,6 +122,9 @@ func _process(delta: float) -> void:
 			queue_redraw()
 		return
 	var dir := Input.get_vector("move_left", "move_right", "move_up", "move_down")
+	# With the trowel in hand the D-pad up and down cycle the seed, so they don't also walk you.
+	if vertical_locked and _dpad_vertical():
+		dir.y = 0.0
 	moving = dir != Vector2.ZERO
 	if moving:
 		walk_t += delta * 11.0
