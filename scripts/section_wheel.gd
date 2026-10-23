@@ -9,13 +9,13 @@ extends CanvasLayer
 signal section_chosen(section_name: String)
 
 const SECTIONS := [
-	{"name": "Skills", "subtitle": "How far you have come"},
-	{"name": "Gear", "subtitle": "What you wear and hold"},
-	{"name": "Craft", "subtitle": "Make, cook, and build"},
-	{"name": "Quests", "subtitle": "What the farm asks of you"},
-	{"name": "House", "subtitle": "Keep it standing"},
-	{"name": "Buildings", "subtitle": "The workshop, the coop, and the barn"},
-	{"name": "Achievements", "subtitle": "Things you have done"},
+	{"name": "Skills", "subtitle": "How far you have come", "icon": "star"},
+	{"name": "Gear", "subtitle": "What you wear and hold", "icon": "shield"},
+	{"name": "Craft", "subtitle": "Make, cook, and build", "icon": "hammer"},
+	{"name": "Quests", "subtitle": "What the farm asks of you", "icon": "scroll"},
+	{"name": "House", "subtitle": "Keep it standing", "icon": "house"},
+	{"name": "Buildings", "subtitle": "The workshop, the coop, and the barn", "icon": "barn"},
+	{"name": "Achievements", "subtitle": "Things you have done", "icon": "trophy"},
 ]
 const INNER_R := 92.0
 const OUTER_R := 222.0
@@ -129,10 +129,8 @@ func _draw_ring() -> void:
 		var edge := PackedVector2Array(points)
 		edge.append(points[0])
 		ring.draw_polyline(edge, COL_ACCENT if hot else COL_BORDER, 3.0 if hot else 1.5)
-		var label := str(SECTIONS[i]["name"])
-		var width := font.get_string_size(label, HORIZONTAL_ALIGNMENT_LEFT, -1, 20).x
 		var at := c + _dir(mid) * ((INNER_R + OUTER_R) * 0.5)
-		ring.draw_string(font, at + Vector2(-width * 0.5, 7.0), label, HORIZONTAL_ALIGNMENT_LEFT, -1, 20, COL_ACCENT if hot else COL_TEXT)
+		_icon(str(SECTIONS[i]["icon"]), at, 17.0, COL_ACCENT if hot else COL_TEXT)
 	# The middle names the highlighted section.
 	var name_text := str(SECTIONS[highlight]["name"])
 	var name_width := font.get_string_size(name_text, HORIZONTAL_ALIGNMENT_LEFT, -1, 24).x
@@ -148,3 +146,47 @@ func _draw_ring() -> void:
 # A direction on the screen for an angle, zero straight up and growing clockwise.
 func _dir(angle: float) -> Vector2:
 	return Vector2(sin(angle), -cos(angle))
+
+
+# Draws a section's icon, centred on at and about 2 * size across, from simple shapes.
+func _icon(kind: String, at: Vector2, size: float, col: Color) -> void:
+	var dark := COL_SEGMENT
+	match kind:
+		"star":
+			var pts := PackedVector2Array()
+			for k in 10:
+				var r := size if k % 2 == 0 else size * 0.45
+				var a := -PI * 0.5 + float(k) * PI * 0.2
+				pts.append(at + Vector2(cos(a), sin(a)) * r)
+			ring.draw_colored_polygon(pts, col)
+		"shield":
+			_poly(at, size, [[-0.8, -1.0], [0.8, -1.0], [0.8, 0.1], [0.0, 1.0], [-0.8, 0.1]], col)
+		"hammer":
+			ring.draw_line(at + Vector2(0.2, -0.2) * size, at + Vector2(-0.6, 0.9) * size, col, maxf(3.0, size * 0.22))
+			_poly(at, size, [[0.0, -0.75], [0.8, -0.75], [0.8, -0.2], [0.0, -0.2]], col)
+		"scroll":
+			_poly(at, size, [[-0.6, -0.8], [0.6, -0.8], [0.6, 0.8], [-0.6, 0.8]], col)
+			for y in [-0.4, 0.0, 0.4]:
+				ring.draw_line(at + Vector2(-0.35, y) * size, at + Vector2(0.35, y) * size, dark, maxf(1.5, size * 0.1))
+		"house":
+			_poly(at, size, [[-1.0, 0.0], [0.0, -1.0], [1.0, 0.0]], col)
+			_poly(at, size, [[-0.7, 0.0], [0.7, 0.0], [0.7, 0.9], [-0.7, 0.9]], col)
+			_poly(at, size, [[-0.2, 0.9], [-0.2, 0.35], [0.2, 0.35], [0.2, 0.9]], dark)
+		"barn":
+			# A barn with a silo beside it, so it doesn't read as a house.
+			_poly(at, size, [[-1.0, -0.1], [-0.2, -0.7], [-0.2, 0.9], [-1.0, 0.9]], col)
+			_poly(at, size, [[-0.6, 0.9], [-0.6, 0.3], [-0.4, 0.3], [-0.4, 0.9]], dark)
+			_poly(at, size, [[0.2, -0.7], [0.2, 0.9], [0.9, 0.9], [0.9, -0.7], [0.55, -1.0]], col)
+			for y in [-0.35, 0.1]:
+				ring.draw_line(at + Vector2(0.2, y) * size, at + Vector2(0.9, y) * size, dark, maxf(1.5, size * 0.1))
+		"trophy":
+			_poly(at, size, [[-0.8, -0.9], [0.8, -0.9], [0.6, 0.0], [0.0, 0.4], [-0.6, 0.0]], col)
+			_poly(at, size, [[-0.12, 0.4], [0.12, 0.4], [0.12, 0.7], [-0.12, 0.7]], col)
+			_poly(at, size, [[-0.5, 0.7], [0.5, 0.7], [0.5, 0.9], [-0.5, 0.9]], col)
+
+
+func _poly(at: Vector2, size: float, pairs: Array, col: Color) -> void:
+	var pts := PackedVector2Array()
+	for pair in pairs:
+		pts.append(at + Vector2(pair[0], pair[1]) * size)
+	ring.draw_colored_polygon(pts, col)
