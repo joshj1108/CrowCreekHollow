@@ -780,6 +780,12 @@ var last_walk_tile := NO_SPOT           # the tile the player stood on last fram
 var harvest_tile := NO_SPOT            # the tree or rock being worked, or NO_SPOT
 var harvest_kind := ""                 # "chop" or "mine" while a roll is running, else ""
 var harvest_timer := 0.0
+var crow_layer: Node2D                 # crows on the farm, drawn on their own layer
+var crows: Array = []                  # each: pos, target, state, timer, flap, facing
+var crow_perches: Array = []           # where a crow can land: the roof and the tree tops
+var crow_spawn_timer := 6.0
+const MAX_CROWS := 3
+const CROW_SPEED := 90.0
 var harvest_place := ""              # the area a roll started in, so leaving it stops the roll
 var fish_timer := 0.0
 var fish_layer: Node2D
@@ -1096,6 +1102,7 @@ func _on_title_start(mode: String, slot: int) -> void:
 	_apply_weather()
 	_build_action_bar()
 	_build_ambience()
+	_build_crows()
 	_update_shadow_tile()
 	if loaded:
 		_restore_saved_state()
@@ -1187,6 +1194,7 @@ func _process(delta: float) -> void:
 	_update_fish_spots(delta)
 	_update_fishing(delta)
 	_update_harvest(delta)
+	_update_crows(delta)
 	_update_foes(delta)
 	_update_shots(delta)
 	_update_region()
@@ -3747,6 +3755,102 @@ func _stop_harvest(reason: String) -> void:
 
 
 # Each tick rolls for the thing being worked. A better pick or hatchet raises the odds.
+# Crows come in from the edge of the view, land on the roof or a tree, sit for a while, then
+# hop to another perch or fly off. Only the farm has them.
+func _build_crows() -> void:
+	crow_layer = Node2D.new()
+	crow_layer.draw.connect(_draw_crow_layer)
+	crow_layer.visible = false
+	add_child(crow_layer)
+	crow_perches.clear()
+	var house := Rect2(Vector2(_world_tile(HOUSE_IX, HOUSE_IY)) * PX, Vector2(HOUSE_W, HOUSE_H) * PX)
+	for i in 2:
+		crow_perches.append(Vector2(house.position.x + house.size.x * (0.3 + 0.4 * i), house.position.y + PX * 0.25))
+	for y in MAP_H:
+		for x in MAP_W:
+			if map[y][x] == Tile.TREE:
+				crow_perches.append(Vector2((x + 0.5) * PX, (y + 0.5) * PX - PX * 1.5))
+
+
+func _update_crows(delta: float) -> void:
+	var on_farm := world_started and not inside and not in_cave and not _in_village()
+	if crow_layer == null:
+		return
+	if not on_farm:
+		crows.clear()
+		crow_layer.visible = false
+		return
+	crow_layer.visible = true
+	var view := get_viewport_rect().size / camera.zoom
+	var centre := camera.get_screen_center_position()
+	crow_spawn_timer -= delta
+	if crow_spawn_timer <= 0.0 and crows.size() < MAX_CROWS and not crow_perches.is_empty():
+		crow_spawn_timer = randf_range(10.0, 30.0)
+		var side := -1.0 if randf() < 0.5 else 1.0
+		var start := centre + Vector2(side * (view.x * 0.5 + 40.0), randf_range(-view.y * 0.4, view.y * 0.4))
+		crows.append({"pos": start, "target": crow_perches.pick_random(), "state": "fly_in", "timer": 0.0, "flap": randf() * TAU, "facing": -side})
+	var keep: Array = []
+	for c in crows:
+		c["flap"] = float(c["flap"]) + delta * 14.0
+		var pos: Vector2 = c["pos"]
+		var target: Vector2 = c["target"]
+		var state: String = str(c["state"])
+		var gone := false
+		if state == "fly_in" or state == "fly_out" or state == "hop":
+			var to := target - pos
+			var step := CROW_SPEED * delta
+			if to.length() <= step:
+				pos = target
+				if state == "fly_out":
+					gone = true
+				else:
+					c["state"] = "perched"
+					c["timer"] = randf_range(8.0, 30.0)
+			else:
+				pos += to.normalized() * step
+				c["facing"] = signf(to.x)
+		elif state == "perched":
+			c["timer"] = float(c["timer"]) - delta
+			if float(c["timer"]) <= 0.0:
+				if randf() < 0.4:
+					c["state"] = "hop"
+					c["target"] = crow_perches.pick_random()
+				else:
+					var away := -1.0 if float(c["facing"]) < 0.0 else 1.0
+					c["state"] = "fly_out"
+					c["target"] = centre + Vector2(away * (view.x * 0.5 + 80.0), -view.y * 0.5 - 60.0)
+		c["pos"] = pos
+		if not gone:
+			keep.append(c)
+	crows = keep
+	crow_layer.queue_redraw()
+
+
+func _draw_crow_layer() -> void:
+	var ink := Color("1c1a22")
+	var sheen := Color(0.3, 0.3, 0.4, 0.5)
+	for c in crows:
+		var p: Vector2 = c["pos"]
+		var facing := float(c["facing"]) if c.has("facing") else 1.0
+		var perched := str(c["state"]) == "perched"
+		var lift := 0.0 if perched else sin(float(c["flap"])) * 5.0
+		# Legs only show while it stands on a perch.
+		if perched:
+			crow_layer.draw_line(p + Vector2(-1.5, 4), p + Vector2(-1.5, 7), ink, 1.2)
+			crow_layer.draw_line(p + Vector2(1.5, 4), p + Vector2(1.5, 7), ink, 1.2)
+		# Tail, body, head, beak.
+		crow_layer.draw_colored_polygon(PackedVector2Array([p + Vector2(-facing * 4, -0.5), p + Vector2(-facing * 10, 2.5), p + Vector2(-facing * 4, 2.5)]), ink)
+		crow_layer.draw_colored_polygon(FarmArt.ellipse(p, 6.0, 4.2), ink)
+		var head := p + Vector2(facing * 4.5, -3.5)
+		crow_layer.draw_circle(head, 3.0, ink)
+		crow_layer.draw_colored_polygon(PackedVector2Array([head + Vector2(facing * 2.5, -1), head + Vector2(facing * 7, 0.5), head + Vector2(facing * 2.5, 1.2)]), Color("3b3428"))
+		crow_layer.draw_circle(head + Vector2(facing * 1.2, -0.6), 0.7, Color(0.9, 0.85, 0.5))
+		# Wing: folded along the back when perched, lifting and dropping in flight.
+		var wing := PackedVector2Array([p + Vector2(-facing * 2, -1), p + Vector2(facing * 4, -1 - lift), p + Vector2(-facing * 4, 1.5)])
+		crow_layer.draw_colored_polygon(wing, Color("26242e"))
+		crow_layer.draw_line(p + Vector2(-facing * 1, -0.5), p + Vector2(facing * 3, -1 - lift * 0.7), sheen, 1.0)
+
+
 func _update_harvest(delta: float) -> void:
 	if not _is_harvesting():
 		return
