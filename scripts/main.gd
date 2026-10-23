@@ -482,41 +482,70 @@ const GUARDIAN_QUESTS := [
 # Story chapters run in order. The first unfinished one is the Current chapter.
 # "story" is the narrative beat, "text" the goal, and "stat" what it reads.
 # The first chapters teach the game one piece at a time. Each one asks for something to be done.
-const TUTORIAL_IDS := ["t_walk", "t_hotbar", "t_menus", "t_craft", "t_chop"]
+const TUTORIAL_IDS := ["t_walk", "t_water", "t_hotbar", "t_menus", "t_eat", "t_craft", "t_chop", "t_chores", "t_well"]
 const STORY := [
 	{"id": "t_walk", "title": "Wake Up",
 		"story": "You wake at the edge of Hallowvale with a hoe, a few seeds, and a house that is falling down around you. Get your feet under you and walk the yard.",
-		"text": "Walk 15 steps. Use WASD, the arrow keys, or the left stick.", "stat": "walked", "goal": 15, "reward": {"seeds": 3}},
+		"text": "Walk 15 steps.",
+		"prompt": "Use {move} to walk around the yard a bit. Every step counts.", "stat": "walked", "goal": 15, "reward": {"seeds": 3}},
+	{"id": "ground", "title": "Break Ground",
+		"story": "You wake with a hoe and a few seeds, and nothing here will feed you unless you put it in the ground. The trowel plants seeds, so reach for it first.",
+		"text": "Plant 3 seeds on tilled soil with the trowel.",
+		"prompt": "{tool:trowel} to select the trowel. Face a tilled soil tile and press {use} to plant 3 seeds.", "stat": "planted", "goal": 3, "reward": {"seeds": 5}},
+	{"id": "t_water", "title": "Drink Deep",
+		"story": "Water comes first. The pond is right here and it is free to drink. Once the well is fixed, its tank and hose will serve the farm too, but the pond stays open.",
+		"text": "Drink from the pond.",
+		"prompt": "Walk to the pond, face the water, and press {use} to drink.", "stat": "drank", "goal": 1, "reward": {"seeds": 2}},
 	{"id": "t_hotbar", "title": "Your Hands Are Full",
 		"story": "A pair of hands can only hold one tool at a time. The hotbar along the bottom of the screen holds the rest, and each slot does a different job.",
-		"text": "Switch tools 3 times. Press 1 to 0, scroll the mouse wheel, or use LB and RB.", "stat": "tool_switches", "goal": 3, "reward": {"coins": 10}},
+		"text": "Switch tools 3 times.",
+		"prompt": "Switch tools three times. You can use {switch}.", "stat": "tool_switches", "goal": 3, "reward": {"coins": 10}},
 	{"id": "t_menus", "title": "The Books",
 		"story": "Everything you own, know, and need is kept in a menu. Skills, your pack, crafting, and quests each have their own key.",
-		"text": "Open 3 menus. K Skills, I Inventory, C Craft, Q Quests. On a controller: Y, Back, and Start for Settings.", "stat": "panels_opened", "goal": 3, "reward": {"seeds": 2}},
-	{"id": "ground", "title": "Unfamiliar Ground",
-		"story": "You wake at the edge of Hallowvale with a hoe and a few seeds. The farmhouse is rotting, the pond is still, and nothing here will feed you unless you put it in the ground.",
-		"text": "Select the trowel on the hotbar and plant 3 seeds on the tilled soil.", "stat": "planted", "goal": 3, "reward": {"seeds": 5}},
+		"text": "Open 3 menus.",
+		"prompt": "Open three menus: {menus}.", "stat": "panels_opened", "goal": 3, "reward": {"seeds": 2}},
+	{"id": "pond", "title": "Work the Pond",
+		"story": "The pond is the only other food on the land. Its fish gather in the sparkling spots. Hold the line steady with the fishing pole and one will bite in time.",
+		"text": "Catch a fish.",
+		"prompt": "{tool:rod} to select the fishing pole. Face a sparkling spot and press {use}, then stand still while the line is in.", "stat": "caught", "goal": 1, "reward": {"skill": "Fishing", "xp": 40}},
+	{"id": "cook", "title": "A Fire and a Pan",
+		"story": "Raw fish sits badly on an empty stomach. Cook one of your catches into a meal.",
+		"text": "Cook a meal from a fish or crops.",
+		"prompt": "Open {craft} and cook a fish under Cooking.", "stat": "cooked", "goal": 1, "reward": {"skill": "Cooking", "xp": 30}},
+	{"id": "t_eat", "title": "Supper",
+		"story": "A meal is only worth something once it is in you. Eat it and your food bar fills.",
+		"text": "Eat a meal.",
+		"prompt": "Open your Inventory ({inv}) and eat your meal.", "stat": "eaten", "goal": 1, "reward": {"seeds": 2}},
 	{"id": "wood", "title": "Wood Before Walls",
-		"story": "The brush piles around the homestead hide wood and fiber. The house will need both before it can keep the cold out.",
-		"text": "Gather from 3 brush piles.", "stat": "gathered", "goal": 3, "reward": {"wood": 2, "fiber": 2}},
+		"story": "The brush piles around the homestead hide sticks and fiber. The house and your first tools need both.",
+		"text": "Gather from 3 brush piles.",
+		"prompt": "Face a brush pile and press {use} to gather from it. Three piles give sticks and fiber.", "stat": "gathered", "goal": 3, "reward": {"wood": 2, "fiber": 2}},
 	{"id": "t_craft", "title": "Your First Tool",
-		"story": "A bare hand cannot fell a tree. Sticks and fiber from the brush make a crude hatchet. Open the Craft menu (C) and make one.",
-		"text": "Craft a crude hatchet.", "stat": "crafted", "goal": 1, "reward": {"coins": 10}},
+		"story": "A bare hand cannot fell a tree. Sticks and fiber from the brush make a crude hatchet. Open the Craft menu and make one.",
+		"text": "Craft a crude hatchet.",
+		"prompt": "Open {craft} and make a crude hatchet from your sticks and fiber.", "stat": "crafted", "goal": 1, "reward": {"coins": 10}},
 	{"id": "t_chop", "title": "Timber",
-		"story": "The trees on the property give wood. Select the axe in slot 2, face a tree, and keep chopping. Each tick has a chance to fell it, and a better axe has better odds.",
-		"text": "Fell a tree with the axe.", "stat": "felled", "goal": 1, "reward": {"wood": 3}},
-	{"id": "first_crop", "title": "Food Takes Time",
-		"story": "Seeds need days to become food. Each night they grow a stage. Come back when something is ripe, and take it.",
-		"text": "Select the hoe and harvest one ripe crop.", "stat": "harvested", "goal": 1, "reward": {"skill": "Farming", "xp": 50}},
+		"story": "The trees on the property give wood. Each tick of chopping has a chance to fell the tree, and a better axe has better odds.",
+		"text": "Fell a tree with the axe.",
+		"prompt": "{tool:axe} to select the axe. Face a tree, press {use}, and keep chopping until it falls.", "stat": "felled", "goal": 1, "reward": {"wood": 3}},
 	{"id": "hold_door", "title": "Hold the Door",
 		"story": "The walls are open to the wind. Board them up so the house can hold a night.",
-		"text": "Repair the farmhouse to Boarded.", "stat": "house_stage", "goal": 1, "reward": {"wood": 2, "fiber": 2}},
-	{"id": "pond", "title": "Work the Pond",
-		"story": "The pond is the only other food on the land. Its fish move in the shallows. Select the fishing pole in slot 7 and face a sparkling spot to try for one.",
-		"text": "Catch 3 fish.", "stat": "caught", "goal": 3, "reward": {"skill": "Fishing", "xp": 40}},
-	{"id": "cook", "title": "A Fire and a Pan",
-		"story": "Raw fish sits badly on an empty stomach. Burn a little wood under a pan and cook one of your catches into a meal.",
-		"text": "Cook a meal from a fish or crops.", "stat": "cooked", "goal": 1, "reward": {"skill": "Cooking", "xp": 30}},
+		"text": "Repair the farmhouse to Boarded.", "prompt": "Open the House menu ({house}) and repair the farmhouse with the wood and fiber you have.", "stat": "house_stage", "goal": 1, "reward": {"wood": 2, "fiber": 2}},
+	{"id": "tidy", "title": "A Clean Start",
+		"story": "The house holds the dust of whoever lived here before. Patch it, then tidy it, so it begins to feel like yours.",
+		"text": "Repair the house to Patched and tidy once.", "prompt": "Open the House menu ({house}) and tidy the house once.", "stat": "tidied", "goal": 1, "reward": {"skill": "Cleaning", "xp": 40}},
+	{"id": "t_chores", "title": "Keeping House",
+		"story": "The house wears down a little each night. Chores in the House menu slow the damage, so finish one now.",
+		"text": "Finish a chore in the House menu.",
+		"prompt": "Open the House menu ({house}) and finish a chore.", "stat": "mended", "goal": 1, "reward": {"wood": 2}},
+	{"id": "t_well", "title": "Mend the Well",
+		"story": "The well by the plots has a seized pump. Repaired, its tank fills each morning and its hose reaches every plot.",
+		"text": "Repair the well pump.",
+		"prompt": "Stand by the well, face it, and press {use} to repair the pump. Then attach the hose from the Well panel.", "stat": "pump", "goal": 1, "reward": {"coins": 15}},
+	{"id": "first_crop", "title": "Food Takes Time",
+		"story": "Seeds need days to become food. Each night they grow a stage. Come back when something is ripe, and take it.",
+		"text": "Harvest one ripe crop.",
+		"prompt": "{tool:hoe} to select the hoe. Once a crop is ripe, face it and press {use} to harvest it.", "stat": "harvested", "goal": 1, "reward": {"skill": "Farming", "xp": 50}},
 	{"id": "light", "title": "Light the Way",
 		"story": "The night here is longer than the day, and it is not empty. A lantern keeps the dark a little further off.",
 		"text": "Build a Tin Lantern.", "stat": "lantern_tier", "goal": 1, "reward": {"seeds": 3}},
@@ -526,9 +555,6 @@ const STORY := [
 	{"id": "second_plot", "title": "The Overgrown Plot",
 		"story": "The second plot is choked with weeds. Clearing it takes more skill than you have yet.",
 		"text": "Reach Farming level 2.", "stat": "level_Farming", "goal": 2, "reward": {"pumpkin_seeds": 3}},
-	{"id": "tidy", "title": "A Clean Start",
-		"story": "The house holds the dust of whoever lived here before. Patch it, then tidy it, so it begins to feel like yours.",
-		"text": "Repair the house to Patched and tidy once.", "stat": "tidied", "goal": 1, "reward": {"skill": "Cleaning", "xp": 40}},
 	{"id": "winter_store", "title": "Feed Yourself Through the Cold",
 		"story": "One crop will not last. Harvest enough to keep a store against the long nights.",
 		"text": "Harvest 10 crops.", "stat": "harvested", "goal": 10, "reward": {"skill": "Farming", "xp": 60}},
@@ -1076,7 +1102,7 @@ func _on_title_start(mode: String, slot: int) -> void:
 		_show_message("Welcome back. Day %d." % day)
 	else:
 		_show_message("A new season begins. Day 1. %s." % WEATHER_NAMES.get(weather_kind, "Overcast"))
-		_show_welcome()
+		_show_quest_prompt()
 	world_started = true
 	title_menu.queue_free()
 	title_menu = null
@@ -2170,13 +2196,40 @@ func _update_tips(delta: float) -> void:
 		_show_tip(str(tip_queue.pop_front()))
 
 
-# The first thing a new player sees: the quests run in order, and the first one is the tutorial.
-func _show_welcome() -> void:
-	tip_showing = "welcome"
+# Shows the current chapter as a prompt: its title, and what to do with the controls for this device.
+func _show_quest_prompt() -> void:
+	var current: Variant = null
+	for q in STORY:
+		if not quests_done.has(q["id"]):
+			current = q
+			break
+	if current == null:
+		return
+	tip_showing = "quest"
 	tip_timer = 30.0
-	tip_title_label.text = "Welcome to Hallowvale"
-	tip_body_label.text = "Your quests run in order, and they teach you the farm as you go. Open the Quests menu (Q, or the Menu button) to start with \"Wake Up\"."
+	tip_title_label.text = str(current["title"])
+	tip_body_label.text = _prompt_text(current)
 	tip_panel.visible = true
+
+
+# A chapter's prompt, with the control names filled in for a keyboard or a gamepad.
+func _prompt_text(q: Dictionary) -> String:
+	var text := str(q.get("prompt", q["text"]))
+	var pad := not Input.get_connected_joypads().is_empty()
+	text = text.replace("{move}", "the left stick" if pad else "WASD or the arrow keys")
+	text = text.replace("{use}", "RT or A" if pad else "left click or Space")
+	text = text.replace("{switch}", "LB and RB" if pad else "the number keys 1 to 0 or the mouse wheel")
+	text = text.replace("{menus}", "Y for Skills, Back for Inventory, Start for Settings" if pad else "K Skills, I Inventory, C Craft, Q Quests")
+	text = text.replace("{craft}", "the Craft menu from the Menu button" if pad else "the Craft menu (C)")
+	text = text.replace("{inv}", "Back" if pad else "I")
+	text = text.replace("{house}", "the Menu button" if pad else "H")
+	for i in HOTBAR_TOOLS.size():
+		var tool_id := str(HOTBAR_TOOLS[i]["id"])
+		var how := "scroll with LB and RB" if pad else "press %d or scroll the mouse wheel" % ((i + 1) % 10)
+		# A hint that opens the sentence gets a capital letter.
+		var opening := text.begins_with("{tool:%s}" % tool_id)
+		text = text.replace("{tool:%s}" % tool_id, (how.substr(0, 1).to_upper() + how.substr(1)) if opening else how)
+	return text
 
 
 func _show_tip(id: String) -> void:
@@ -6624,6 +6677,7 @@ func _bump(stat: String) -> void:
 
 
 func _check_story() -> void:
+	var finished := false
 	for q in STORY:
 		if quests_done.has(q["id"]):
 			continue
@@ -6632,6 +6686,10 @@ func _check_story() -> void:
 		quests_done[q["id"]] = true
 		_grant_reward(q["reward"])
 		_show_message("Chapter complete: %s. Reward: %s" % [q["title"], _reward_text(q["reward"])])
+		finished = true
+	# The next chapter is announced straight away, so the player always knows what to do next.
+	if finished:
+		_show_quest_prompt()
 
 
 func _check_achievements() -> void:
