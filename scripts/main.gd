@@ -228,8 +228,8 @@ const TIPS := [
 	{"id": "repair", "title": "Repairing the farmhouse", "text": "Repair the house from the House section on the section wheel (Shift). Each stage restores it inside and out, and unlocks rooms and features."},
 	{"id": "buildings", "title": "Buildings", "text": "Build the workshop, coop, and barn from the Buildings section on the section wheel (Shift). Pick a spot on open grass, press Space to place it, and B to cancel."},
 	{"id": "quests", "title": "Quests", "text": "The Quests section, on the section wheel (Shift), lists what the farm asks of you. Press Details on a quest to read its story."},
-	{"id": "hens", "title": "Hens", "text": "Stand beside the coop, facing it, and press Space to buy and feed hens. A fed hen lays an egg each morning."},
-	{"id": "goats", "title": "Goats", "text": "Build the barn from the Buildings menu, then stand beside it, facing it, and press Space to buy and feed goats. A fed goat gives milk each morning."},
+	{"id": "hens", "title": "Hens", "text": "Stand beside the coop, facing it, and press Space to buy and feed hens. A grown hen that is fed lays an egg each morning. Hens are grown after three nights."},
+	{"id": "goats", "title": "Goats", "text": "Build the barn from the Buildings menu, then stand beside it, facing it, and press Space to buy and feed goats. A grown goat that is fed gives milk each morning. Goats are grown after four nights."},
 	{"id": "cellar", "title": "Storing crops", "text": "Stand beside the root cellar and press Space to store or take crops. Nothing spoils in the cellar."},
 	{"id": "smelt", "title": "Smelting and preserving", "text": "Stand beside the furnace and press Space to smelt ore into bars. The smokehouse preserves food, and the cooler keeps fish fresh."},
 	{"id": "needs", "title": "Food, water, and warmth", "text": "Food and water drain through the day, and warmth drops outside on cold days. Eat from the bag (Tab), drink from the pond, and warm up in the house. Sleep to be fully warm again, but only with a fire lit: feed the hearth from the firewood store at the workshop."},
@@ -324,6 +324,18 @@ const STALL_IX := 22
 const STALL_IY := 9
 const STALL_CLOSE_HOUR := 18.0
 const SELL_FISH := 6
+const SELL_EGG := 4                 # farm stand price for an egg
+const SELL_MILK := 6                # farm stand price for a jug of goat milk
+const HEN_SELL := 20                # what a grown hen fetches at the coop
+const GOAT_SELL := 70               # what a grown goat fetches at the barn
+const HEN_MATURE_DAYS := 3          # nights before a hen is grown and starts laying
+const GOAT_MATURE_DAYS := 4         # nights before a goat is grown and starts giving milk
+const PROPERTY_TAX := 40            # coins per quarter
+const TAX_MONTHS := [0, 3, 6, 9]    # January, April, July, October: the bill comes on the 1st
+const TAX_GRACE_DAYS := 14          # days to pay a bill after it arrives
+const TAX_FINAL_DAYS := 7           # days overdue before the final notice
+const TAX_EVICT_DAYS := 14          # days overdue before the land is lost
+const DESK_IX := Vector2i(4, 1)     # the desk, in the bedroom: post lands here
 const SEED_TURNIP_PRICE := 3    # per seed, sold in packs of 5
 const SEED_PUMPKIN_PRICE := 10  # per seed, sold in packs of 3
 
@@ -493,8 +505,8 @@ const STORY := [
 		"story": "One crop will not last. Harvest enough to keep a store against the long nights.",
 		"text": "Harvest 10 crops.", "stat": "harvested", "goal": 10, "reward": {"skill": "Farming", "xp": 60}},
 	{"id": "first_sale", "title": "Coin for Seed",
-		"story": "The stall on the path buys what the land gives you. Coins buy seeds, bags, and the rooms the homestead will need. Sell five items to learn how it works.",
-		"text": "Sell 5 items at the stall.", "stat": "sold", "goal": 5, "reward": {"coins": 30}},
+		"story": "The farm stand on the path buys what the land gives you. Coins buy seeds, bags, and the rooms the homestead will need. Sell five items to learn how it works.",
+		"text": "Sell 5 items at the farm stand.", "stat": "sold", "goal": 5, "reward": {"coins": 30}},
 	{"id": "pumpkin", "title": "Something Sweeter",
 		"story": "Pumpkins need more skill than turnips. Reach Farming level 3 and bring one in from the field.",
 		"text": "Harvest a pumpkin.", "stat": "pumpkins", "goal": 1, "reward": {"pumpkin_seeds": 2}},
@@ -790,6 +802,7 @@ var hen_pos: Array = []           # each hen's place in the coop, in tiles from 
 var hen_goal: Array = []          # where each hen is walking to
 var hen_wait: Array = []          # seconds before a hen picks its next spot
 var hens := 0
+var hen_ages: Array = []          # days old for each hen, kept in step with hens
 # The daily job: one delivery a day, rotating through these. Turn the items in for coins and XP.
 const JOBS := [
 	{"id": "crops", "name": "Deliver crops", "need": {"crops": 3}, "coins": 30, "skill": "Farming", "xp": 12},
@@ -809,6 +822,7 @@ var goat_pos: Array = []
 var goat_goal: Array = []
 var goat_wait: Array = []
 var goats := 0
+var goat_ages: Array = []         # days old for each goat, kept in step with goats
 var goats_fed_day := -1
 var goat_unfed_days := 0
 var plot_three_open := false
@@ -836,6 +850,11 @@ var smokehouse_built := false
 var furnace_built := false
 var woodshed_built := false
 var firewood_store := 0
+var tax_owed := 0                   # property tax owed, 0 when paid up
+var tax_due_day := 0                # the day the oldest unpaid bill is due
+var tax_stage := 0                  # 0 none sent, 1 overdue reminder sent, 2 final notice sent
+var desk_mail: Array = []           # letters on the desk: {"title", "text", "unread"}
+var desk_light: PointLight2D        # red light on the desk while post is unread
 var fire_hours := 0.0
 var shots: Array = []                 # arrows and bolts in flight, not saved
 var cellar_stock := 0          # crops in the root cellar
@@ -1143,6 +1162,7 @@ func _process(delta: float) -> void:
 	clock += delta
 	_update_hens(delta)
 	_update_goats(delta)
+	_update_desk_light()
 	current_hour = START_HOUR + clock / DAY_LENGTH * (DAY_END_HOUR - START_HOUR)
 	_update_needs(delta * (DAY_END_HOUR - START_HOUR) / DAY_LENGTH)
 
@@ -1434,6 +1454,7 @@ func _build_ambience() -> void:
 	blink.set_color(blink.get_point_count() - 1, Color(1, 1, 1, 0.0))
 	fireflies_fx.color_ramp = blink
 	_build_window_lights()
+	_build_desk_light()
 	water_fx = Node2D.new()
 	water_fx.draw.connect(_draw_water_shimmer)
 	add_child(water_fx)
@@ -1705,9 +1726,9 @@ func _build_interior() -> void:
 	if house_stage >= 2:
 		_fill_interior(9, 1, 12, 4, Tile.FLOOR)
 		_set_interior(11, 1, Tile.STATION)
+	_set_interior(DESK_IX.x, DESK_IX.y, Tile.DESK)   # the desk is in the bedroom from the start, for the post
 	if house_stage >= 3:
 		_fill_interior(5, 1, 8, 4, Tile.FLOOR)
-		_set_interior(6, 1, Tile.DESK)
 
 
 func _fill_interior(x0: int, y0: int, x1: int, y1: int, kind: int) -> void:
@@ -2520,7 +2541,7 @@ func _on_bag_slot(index: int) -> void:
 
 
 func _on_panel_action(action_id: String) -> void:
-	if action_id.begins_with("game_") or action_id.begins_with("sudoku_") or action_id.begins_with("sol_"):
+	if action_id.begins_with("game_") or action_id.begins_with("sudoku_") or action_id.begins_with("sol_") or action_id == "pay_tax" or action_id == "mail_clear":
 		_desk_action(action_id)
 		return
 	if action_id.begins_with("cook:"):
@@ -2597,6 +2618,10 @@ func _on_panel_action(action_id: String) -> void:
 		return
 	if action_id == "feed_hens":
 		_feed_hens()
+	if action_id == "sell_hen":
+		_sell_hen()
+	if action_id == "sell_goat":
+		_sell_goat()
 	if action_id == "buy_goat":
 		_buy_goat()
 	if action_id == "feed_goats":
@@ -2668,6 +2693,10 @@ func _on_panel_action(action_id: String) -> void:
 			_sell("pumpkins")
 		"sell_fish":
 			_sell("fish")
+		"sell_eggs":
+			_sell("eggs")
+		"sell_milk":
+			_sell("milk")
 		"buy_turnip":
 			_buy_seeds("turnip")
 		"buy_pumpkin":
@@ -3484,7 +3513,8 @@ func _coop_rows() -> Array:
 		"action": "feed_hens",
 		"enabled": _can_feed_hens(),
 	})
-	rows.append({"note": "A fed hen lays an egg each morning, kept as a meal. Two unfed days in a row and a hen wanders off."})
+	rows.append({"name": "Grown hens", "value": "%d of %d, %d coins each" % [_grown_count(hen_ages, HEN_MATURE_DAYS), hens, HEN_SELL], "button": "Sell a hen", "action": "sell_hen", "enabled": _grown_count(hen_ages, HEN_MATURE_DAYS) > 0})
+	rows.append({"note": "A grown hen (%d nights) lays an egg each morning when fed, kept as a meal or sold at the farm stand. Young hens do not lay. Two unfed days in a row and a hen wanders off." % HEN_MATURE_DAYS})
 	return rows
 
 
@@ -3505,7 +3535,8 @@ func _barn_rows() -> Array:
 		"action": "feed_goats",
 		"enabled": _can_feed_goats(),
 	})
-	rows.append({"note": "A fed goat gives milk each morning, which you can drink as a meal. Two unfed days in a row and a goat wanders off."})
+	rows.append({"name": "Grown goats", "value": "%d of %d, %d coins each" % [_grown_count(goat_ages, GOAT_MATURE_DAYS), goats, GOAT_SELL], "button": "Sell a goat", "action": "sell_goat", "enabled": _grown_count(goat_ages, GOAT_MATURE_DAYS) > 0})
+	rows.append({"note": "A grown goat (%d nights) gives milk each morning when fed, kept to drink or sold at the farm stand. Young goats do not give milk. Two unfed days in a row and a goat wanders off." % GOAT_MATURE_DAYS})
 	return rows
 
 
@@ -3922,6 +3953,8 @@ func _harvest(tile: Vector2i) -> void:
 
 
 func _read_desk() -> void:
+	for letter in desk_mail:
+		letter["unread"] = false
 	_toggle_tab("Desk")
 
 
@@ -3943,6 +3976,14 @@ func _boredom_check() -> String:
 
 func _desk_rows() -> Array:
 	var rows: Array = [{"section": "Desk"}]
+	rows.append({"section": "Post on the desk"})
+	if desk_mail.is_empty():
+		rows.append({"note": "No post. The mail slot in the front door drops letters here."})
+	for letter in desk_mail:
+		rows.append({"note": "%s%s\n%s" % [str(letter["title"]), "  (new)" if bool(letter["unread"]) else "", str(letter["text"])]})
+	rows.append({"name": "Property tax", "value": _tax_text(), "button": "Pay", "action": "pay_tax", "enabled": tax_owed > 0 and money >= tax_owed})
+	rows.append({"name": "Put letters away", "value": "read letters go in the drawer", "button": "Clear", "action": "mail_clear", "enabled": _has_read_mail()})
+	rows.append({"section": "Games"})
 	var entertained := entertained_day == day
 	rows.append({"name": "Entertained today", "value": "yes" if entertained else "no, finish a game or your limit slips"})
 	if boredom_loss > 0.0:
@@ -3958,7 +3999,11 @@ func _desk_rows() -> Array:
 
 
 func _desk_action(action_id: String) -> void:
-	if action_id.begins_with("game_new:"):
+	if action_id == "pay_tax":
+		_pay_tax()
+	elif action_id == "mail_clear":
+		_clear_read_mail()
+	elif action_id.begins_with("game_new:"):
 		if action_id.ends_with("sudoku"):
 			_start_sudoku()
 		else:
@@ -5140,7 +5185,7 @@ func _price_text(cost: Dictionary) -> String:
 
 func _open_stall() -> void:
 	if current_hour >= STALL_CLOSE_HOUR:
-		_show_message("The stall is shut for the night. It opens at 06:00.")
+		_show_message("The farm stand is shut for the night. It opens at 06:00.")
 		return
 	_toggle_tab("Trade")
 
@@ -5153,6 +5198,10 @@ func _sell(kind: String) -> void:
 	var price := _crop_price("pumpkin") if kind == "pumpkins" else _crop_price("turnip")
 	if kind == "fish":
 		price = SELL_FISH
+	if kind == "eggs":
+		price = SELL_EGG
+	if kind == "milk":
+		price = SELL_MILK
 	inventory[kind] = 0
 	money += count * price
 	stats["sold"] += count
@@ -5269,6 +5318,20 @@ func _trade_rows() -> Array:
 			"action": "sell_fish",
 			"enabled": int(inventory["fish"]) > 0,
 		},
+		{
+			"name": "Eggs (%d each)" % SELL_EGG,
+			"value": "%d held" % int(inventory["eggs"]),
+			"button": "Sell all",
+			"action": "sell_eggs",
+			"enabled": int(inventory["eggs"]) > 0,
+		},
+		{
+			"name": "Goat milk (%d each)" % SELL_MILK,
+			"value": "%d held" % int(inventory["milk"]),
+			"button": "Sell all",
+			"action": "sell_milk",
+			"enabled": int(inventory["milk"]) > 0,
+		},
 		] + _cooked_sell_rows() + [
 		{"section": "Buy seeds"},
 		{
@@ -5285,7 +5348,7 @@ func _trade_rows() -> Array:
 			"action": "buy_pumpkin",
 			"enabled": _level("Farming") >= PUMPKIN_LEVEL and money >= pumpkin_pack,
 		},
-		{"note": "The stall is open from 06:00 to 18:00. It only buys what you carry, so take crops or fish out of storage first."},
+		{"note": "The farm stand is open from 06:00 to 18:00. It only buys what you carry, so take crops or fish out of storage first."},
 	]
 
 
@@ -7294,6 +7357,198 @@ func _light_tint() -> Color:
 	return WEATHER_LIGHT.get(weather_kind, WEATHER_LIGHT["cloudy"])
 
 
+# --- Post, property tax, and the desk light ---
+# Post comes through the mail slot in the front door and lands on the desk. Unread post turns
+# on a red light at the desk. The property tax comes quarterly and must be paid, or the land is lost.
+
+func _add_letter(title: String, text: String) -> void:
+	desk_mail.append({"title": title, "text": text, "unread": true})
+
+
+func _unread_count() -> int:
+	var n := 0
+	for letter in desk_mail:
+		if bool(letter["unread"]):
+			n += 1
+	return n
+
+
+func _has_read_mail() -> bool:
+	for letter in desk_mail:
+		if not bool(letter["unread"]):
+			return true
+	return false
+
+
+func _clear_read_mail() -> void:
+	var kept: Array = []
+	for letter in desk_mail:
+		if bool(letter["unread"]):
+			kept.append(letter)
+	desk_mail = kept
+	_show_message("You put the read letters away in the drawer.")
+
+
+func _date_text(day_number: int) -> String:
+	var d := _calendar_date(day_number)
+	return "%s %d" % [MONTH_NAMES[int(d["month"])], int(d["day"])]
+
+
+func _tax_text() -> String:
+	if tax_owed <= 0:
+		return "paid up for this quarter"
+	return "%d coins owed, due %s" % [tax_owed, _date_text(tax_due_day)]
+
+
+func _tax_evicts() -> bool:
+	return tax_owed > 0 and day - tax_due_day >= TAX_EVICT_DAYS
+
+
+# Each morning: a new quarterly bill, then reminders for any unpaid tax. Returns a note for the morning message.
+func _mail_day() -> String:
+	var note := ""
+	var date := _calendar_date(day)
+	if int(date["day"]) == 1 and TAX_MONTHS.has(int(date["month"])) and day > 1:
+		if tax_owed == 0:
+			tax_due_day = day + TAX_GRACE_DAYS
+			tax_stage = 0
+		tax_owed += PROPERTY_TAX
+		_add_letter("Property tax bill", "Your quarterly property tax is %d coins. Pay it at this desk by %s, or the land will be taken." % [tax_owed, _date_text(tax_due_day)])
+		note += " Post came through the mail slot, and a property tax bill is on the desk."
+	if tax_owed > 0:
+		var late := day - tax_due_day
+		if late >= TAX_FINAL_DAYS and tax_stage < 2:
+			tax_stage = 2
+			_add_letter("Final notice", "You still owe %d coins in property tax. Pay within %d days or the land will be taken." % [tax_owed, TAX_EVICT_DAYS - late])
+			note += " A final notice is on the desk."
+		elif late >= 1 and tax_stage < 1:
+			tax_stage = 1
+			_add_letter("Payment overdue", "The property tax of %d coins was due %s. Please pay at this desk." % [tax_owed, _date_text(tax_due_day)])
+			note += " A payment reminder is on the desk."
+	return note
+
+
+func _pay_tax() -> void:
+	if tax_owed <= 0:
+		_show_message("Nothing is owed on the property tax.")
+		return
+	if money < tax_owed:
+		_show_message("You need %d coins to pay the property tax." % tax_owed)
+		return
+	var paid := tax_owed
+	money -= paid
+	tax_owed = 0
+	tax_due_day = 0
+	tax_stage = 0
+	_add_letter("Receipt", "Property tax of %d coins paid in full. The land is yours for another quarter." % paid)
+	_show_message("You pay the property tax of %d coins." % paid)
+
+
+# The land is lost: the save is removed and the start screen says why.
+func _evict() -> void:
+	DirAccess.remove_absolute(ProjectSettings.globalize_path(_save_path()))
+	TitleMenu.notice = "The farm was taken. The property tax went unpaid, and you lost the land."
+	_quit_to_title()
+
+
+func _build_desk_light() -> void:
+	desk_light = PointLight2D.new()
+	desk_light.texture = _glow_texture()
+	desk_light.color = Color("ff2a2a")
+	desk_light.texture_scale = 0.45
+	desk_light.position = _tile_center(INT_ORIGIN.x + DESK_IX.x, INT_ORIGIN.y + DESK_IX.y)
+	desk_light.enabled = false
+	add_child(desk_light)
+
+
+# Blinks red once a second while there is unread post and the player is in the house.
+func _update_desk_light() -> void:
+	if desk_light == null:
+		return
+	var blinking := inside and _unread_count() > 0
+	desk_light.enabled = blinking
+	if blinking:
+		desk_light.energy = 1.4 if fmod(Time.get_ticks_msec() / 1000.0, 1.0) < 0.5 else 0.0
+
+
+# --- Animal ages: young animals do not lay or give until they are grown ---
+
+func _sync_ages() -> void:
+	while hen_ages.size() < hens:
+		hen_ages.append(0)
+	while hen_ages.size() > hens:
+		hen_ages.pop_back()
+	while goat_ages.size() < goats:
+		goat_ages.append(0)
+	while goat_ages.size() > goats:
+		goat_ages.pop_back()
+
+
+func _age_animals() -> void:
+	_sync_ages()
+	for i in hen_ages.size():
+		hen_ages[i] = int(hen_ages[i]) + 1
+	for i in goat_ages.size():
+		goat_ages[i] = int(goat_ages[i]) + 1
+
+
+func _grown_count(ages: Array, mature_days: int) -> int:
+	var n := 0
+	for a in ages:
+		if int(a) >= mature_days:
+			n += 1
+	return n
+
+
+func _grown_index(ages: Array, mature_days: int) -> int:
+	for i in ages.size():
+		if int(ages[i]) >= mature_days:
+			return i
+	return -1
+
+
+func _sell_hen() -> void:
+	_sync_ages()
+	var i := _grown_index(hen_ages, HEN_MATURE_DAYS)
+	if i < 0:
+		_show_message("No hen is grown yet. A grown hen sells for %d coins." % HEN_SELL)
+		return
+	hen_ages.remove_at(i)
+	hens -= 1
+	money += HEN_SELL
+	stats["sold"] += 1
+	_sync_ages()
+	_show_message("You sell a grown hen for %d coins, %d more than you paid." % [HEN_SELL, HEN_SELL - HEN_PRICE])
+
+
+func _sell_goat() -> void:
+	_sync_ages()
+	var i := _grown_index(goat_ages, GOAT_MATURE_DAYS)
+	if i < 0:
+		_show_message("No goat is grown yet. A grown goat sells for %d coins." % GOAT_SELL)
+		return
+	goat_ages.remove_at(i)
+	goats -= 1
+	money += GOAT_SELL
+	stats["sold"] += 1
+	_sync_ages()
+	_show_message("You sell a grown goat for %d coins, %d more than you paid." % [GOAT_SELL, GOAT_SELL - GOAT_PRICE])
+
+
+func _int_list(values: Array) -> Array:
+	var out: Array = []
+	for v in values:
+		out.append(int(v))
+	return out
+
+
+func _filled(n: int, value: int) -> Array:
+	var out: Array = []
+	for i in n:
+		out.append(value)
+	return out
+
+
 # Runs at the end of each day, before the crops grow: the house wears, hens lay or leave,
 # and rain or a fox may strike. Returns a note for the morning message.
 func _settle_day() -> String:
@@ -7308,15 +7563,17 @@ func _settle_day() -> String:
 	else:
 		_change_sanity(WELL_KEPT_SANITY)
 		notes += " The house is kept well, and you sleep easier. +%d sanity." % WELL_KEPT_SANITY
+	_age_animals()
 	if hens > 0:
 		if hens_fed_day == day:
 			hen_unfed_days = 0
 			var room := maxi(0, _pack_capacity() - _pack_used())
-			var eggs := mini(hens, room)
+			var layers := _grown_count(hen_ages, HEN_MATURE_DAYS)
+			var eggs := mini(layers, room)
 			if eggs > 0:
 				inventory["eggs"] += eggs
 				notes += " The hens laid %d egg%s." % [eggs, "" if eggs == 1 else "s"]
-			if eggs < hens:
+			if eggs < layers:
 				notes += " Some eggs spoiled for want of pack room."
 		else:
 			hen_unfed_days += 1
@@ -7328,11 +7585,12 @@ func _settle_day() -> String:
 		if goats_fed_day == day:
 			goat_unfed_days = 0
 			var room := maxi(0, _pack_capacity() - _pack_used())
-			var milk := mini(goats, room)
+			var givers := _grown_count(goat_ages, GOAT_MATURE_DAYS)
+			var milk := mini(givers, room)
 			if milk > 0:
 				inventory["milk"] += milk
-				notes += " The goats gave %d milk%s to drink." % [milk, "" if milk == 1 else "s"]
-			if milk < goats:
+				notes += " The goats gave %d milk%s." % [milk, "" if milk == 1 else "s"]
+			if milk < givers:
 				notes += " Some milk spoiled for want of pack room."
 		else:
 			goat_unfed_days += 1
@@ -7343,6 +7601,7 @@ func _settle_day() -> String:
 	if wear >= WEAR_FOX and hens > 0 and randf() < 0.5:
 		hens -= 1
 		notes += " A fox got into the coop and took a hen."
+	_sync_ages()
 	if wear >= WEAR_RUNDOWN and not crops.is_empty():
 		var spot = crops.keys().pick_random()
 		crops.erase(spot)
@@ -7722,8 +7981,12 @@ func _end_day(base: String, leave_house: bool = true) -> void:
 	tonight_shadow = Vector2i(-1, -1)
 	_regrow_wild()
 	_update_shadow_tile()
+	var mail_note := _mail_day()
 	_show_message("%s Your crops grew overnight.%s%s The morning is %s.%s" % [
-		base, spoil_note, upkeep_note, str(WEATHER_NAMES.get(weather_kind, "overcast")).to_lower(), event_note])
+		base, spoil_note, upkeep_note, str(WEATHER_NAMES.get(weather_kind, "overcast")).to_lower(), event_note + mail_note])
+	if _tax_evicts():
+		_evict()
+		return
 	_save_game()
 	queue_redraw()
 
@@ -7891,6 +8154,12 @@ func _save_game() -> void:
 		"goats": goats,
 		"goats_fed_day": goats_fed_day,
 		"goat_unfed_days": goat_unfed_days,
+		"hen_ages": hen_ages,
+		"goat_ages": goat_ages,
+		"tax_owed": tax_owed,
+		"tax_due_day": tax_due_day,
+		"tax_stage": tax_stage,
+		"desk_mail": desk_mail,
 		"tips_seen": tips_seen.keys(),
 	}
 	var file := FileAccess.open(_save_path(), FileAccess.WRITE)
@@ -8007,6 +8276,14 @@ func _load_game() -> bool:
 	goats = int(data.get("goats", 0))
 	goats_fed_day = int(data.get("goats_fed_day", -1))
 	goat_unfed_days = int(data.get("goat_unfed_days", 0))
+	# Saves from before ages existed count the animals they had as already grown.
+	hen_ages = _int_list(data["hen_ages"]) if data.has("hen_ages") else _filled(hens, HEN_MATURE_DAYS)
+	goat_ages = _int_list(data["goat_ages"]) if data.has("goat_ages") else _filled(goats, GOAT_MATURE_DAYS)
+	tax_owed = int(data.get("tax_owed", 0))
+	tax_due_day = int(data.get("tax_due_day", 0))
+	tax_stage = int(data.get("tax_stage", 0))
+	desk_mail = data.get("desk_mail", [])
+	_sync_ages()
 	if data.has("tips_seen"):
 		tips_seen = {}
 		for id in data["tips_seen"]:

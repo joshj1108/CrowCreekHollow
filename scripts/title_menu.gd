@@ -9,6 +9,7 @@ signal start_requested(mode: String, slot: int)
 signal quit_requested
 
 const SLOT_COUNT := 3
+static var notice := ""      # shown once on the start screen, e.g. after the farm was lost
 static var active_slot := 1   # the slot in play, kept across a return to the start screen
 const LEGACY_SAVE := "user://hallowvale_save.json"
 const COL_TEXT := Color("e8dcc0")
@@ -92,6 +93,15 @@ func _ready() -> void:
 	box.add_theme_constant_override("separation", 14)
 	box.custom_minimum_size = Vector2(420, 0)
 	column.add_child(box)
+	if notice != "":
+		var notice_label := Label.new()
+		notice_label.text = notice
+		notice_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		notice_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		notice_label.custom_minimum_size = Vector2(420, 0)
+		notice_label.add_theme_color_override("font_color", COL_GOLD)
+		box.add_child(notice_label)
+		notice = ""
 
 	var title := Label.new()
 	title.text = "HALLOWVALE"
