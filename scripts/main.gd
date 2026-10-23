@@ -210,6 +210,7 @@ const START_HOUR := 6.0
 const DAY_END_HOUR := 27.0  # 03:00. Missing bed by then means collapsing.
 const DUSK_HOUR := 19.0
 const SLEEP_HOUR := 18.0    # the bed can be used from 18:00 onward
+const BED_INTERIOR := Vector2i(2, 1)  # the bed's tile in the bedroom; you wake on the tile below it
 const EVENT_HOUR := 22.0
 
 const MAX_STAGE := 3        # 0 = seed, 3 = ready to harvest
@@ -927,6 +928,11 @@ var needs_temp: Label
 var message_label: Label
 var player    # Node2D with player.gd attached
 var camera: Camera2D
+# Full-screen fade for sleeping and collapsing. While a scene plays the world is frozen.
+var transitioning := false
+var fade_layer: CanvasLayer
+var fade_rect: ColorRect
+var card_label: Label
 var last_minimap_key: Array = []
 var last_cam_tile := Vector2i(-99, -99)   # the tile the camera was last drawn from
 var lantern_light: PointLight2D
@@ -1094,6 +1100,7 @@ func _on_title_start(mode: String, slot: int) -> void:
 	_build_interior()
 	_build_world()
 	_build_hud()
+	_build_fade()
 	_build_tip_panel()
 	weather = WeatherScript.new()
 	add_child(weather)
@@ -1125,6 +1132,8 @@ func _process(delta: float) -> void:
 	if perf_shown:
 		_update_perf()
 	if not world_started:
+		return
+	if transitioning:
 		return
 	if not tree_bake_started:
 		tree_bake_started = true
@@ -1695,7 +1704,7 @@ func _build_interior() -> void:
 
 	# The bedroom and its bed are open from the start.
 	_fill_interior(1, 1, 4, 4, Tile.FLOOR)
-	_set_interior(2, 1, Tile.BED)
+	_set_interior(BED_INTERIOR.x, BED_INTERIOR.y, Tile.BED)
 	if house_stage >= 2:
 		_fill_interior(9, 1, 12, 4, Tile.FLOOR)
 		_set_interior(11, 1, Tile.STATION)
@@ -2065,8 +2074,12 @@ func _restore_saved_state() -> void:
 	hp = clampi(hp, 1, max_hp())
 	if has_saved_pos:
 		player.position = saved_pos
-	# A save made in the wider land returns to the homestead when the world is off.
-	if not WORLD_ENABLED and not _in_bounds(_player_tile()):
+	# The house interior lies outside the farm bounds, so a saved spot inside is checked against the interior.
+	if saved_inside:
+		if not _in_interior(_player_tile()):
+			player.position = _wake_spot()
+	elif not WORLD_ENABLED and not _in_bounds(_player_tile()):
+		# A save made in the wider land returns to the homestead when the world is off.
 		player.position = _tile_center(HOMESTEAD_ARRIVE.x, HOMESTEAD_ARRIVE.y)
 	if _in_village():
 		_sync_region()
@@ -6678,8 +6691,15 @@ func _settle_day() -> String:
 	return notes
 
 
+# The spot beside the bed, where you stand when you wake.
+func _wake_spot() -> Vector2:
+	return _tile_center(INT_ORIGIN.x + BED_INTERIOR.x, INT_ORIGIN.y + BED_INTERIOR.y + 1)
+
+
 # Sleeping only happens at the bed, from 18:00 until 03:00.
 func _try_sleep() -> void:
+	if transitioning:
+		return
 	if _in_village():
 		_show_message("You can only sleep in your own bed, at the homestead.")
 		return
@@ -6689,16 +6709,94 @@ func _try_sleep() -> void:
 	stats["slept"] += 1
 	_change_sanity(SLEEP_SANITY)
 	warmth = 100.0
-	# Sleeping keeps you in bed, so the house is not left.
-	_end_day("You sleep through the night.", false)
+	# You wake standing beside the bed, so the house is not left.
+	player.position = _wake_spot()
+	_sleep_scene()
 
 
 # Missing the bed by 03:00 ends the day, and the sanity limit drops for good.
 func _collapse() -> void:
+	if transitioning:
+		return
 	sanity_penalty += COLLAPSE_SANITY_PENALTY
 	stats["collapses"] += 1
 	sanity = minf(sanity, _sanity_max())
+	_collapse_scene()
+
+
+# A slow, quiet fade: the night closes in, the day passes, and the light comes back.
+func _sleep_scene() -> void:
+	transitioning = true
+	player.paused = true
+	card_label.add_theme_color_override("font_color", Color("e8dcc0"))
+	await _fade_to(Color(0.0, 0.0, 0.0, 1.0), 2.8, Tween.TRANS_SINE)
+	await get_tree().create_timer(0.6).timeout
+	# The day ends while the screen is dark. This saves the game.
+	_end_day("You sleep through the night.", false)
+	await _show_card("Night settles over the farm.", 1.6, 2.0, 1.4)
+	await _show_card("Day %d. The morning is %s." % [day, str(WEATHER_NAMES.get(weather_kind, "overcast")).to_lower()], 1.4, 1.8, 1.2)
+	await _fade_to(Color(0.0, 0.0, 0.0, 0.0), 3.0, Tween.TRANS_SINE)
+	transitioning = false
+
+
+# A violent, unnatural cut at 03:00: red flash, the ground shaking, then a long dread fade back.
+func _collapse_scene() -> void:
+	transitioning = true
+	player.paused = true
+	card_label.add_theme_color_override("font_color", Color("c9463d"))
+	_shake_camera(1.1, 9.0)
+	await _fade_to(Color(0.22, 0.0, 0.0, 1.0), 0.45, Tween.TRANS_QUAD)
+	await get_tree().create_timer(0.9).timeout
 	_end_day("You collapse before reaching your bed. Something in your mind gives way.")
+	await _show_card("It is past three.", 1.4, 2.2, 1.0)
+	await _show_card("Something in the dark has been keeping pace with you.", 1.8, 2.8, 1.4)
+	await _show_card("You don't remember the way home.", 1.6, 2.2, 1.8)
+	await _fade_to(Color(0.22, 0.0, 0.0, 0.0), 4.2, Tween.TRANS_CUBIC)
+	transitioning = false
+
+
+func _fade_to(colour: Color, seconds: float, trans: Tween.TransitionType) -> void:
+	var tw := create_tween()
+	tw.tween_property(fade_rect, "color", colour, seconds).set_trans(trans).set_ease(Tween.EASE_IN_OUT)
+	await tw.finished
+
+
+func _show_card(text: String, fade_in: float, hold: float, fade_out: float) -> void:
+	card_label.text = text
+	var tw := create_tween()
+	tw.tween_property(card_label, "modulate:a", 1.0, fade_in)
+	tw.tween_interval(hold)
+	tw.tween_property(card_label, "modulate:a", 0.0, fade_out)
+	await tw.finished
+
+
+func _shake_camera(seconds: float, strength: float) -> void:
+	var tw := create_tween()
+	for i in int(seconds / 0.05):
+		tw.tween_property(camera, "offset", Vector2(randf_range(-strength, strength), randf_range(-strength, strength)), 0.05)
+	tw.tween_property(camera, "offset", Vector2.ZERO, 0.08)
+
+
+func _build_fade() -> void:
+	fade_layer = CanvasLayer.new()
+	fade_layer.layer = 100
+	add_child(fade_layer)
+	fade_rect = ColorRect.new()
+	fade_rect.color = Color(0.0, 0.0, 0.0, 0.0)
+	fade_rect.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	fade_rect.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	fade_layer.add_child(fade_rect)
+	card_label = Label.new()
+	card_label.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	card_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	card_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	card_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	card_label.add_theme_font_size_override("font_size", 34)
+	card_label.add_theme_color_override("font_outline_color", Color(0.0, 0.0, 0.0, 0.9))
+	card_label.add_theme_constant_override("outline_size", 8)
+	card_label.modulate.a = 0.0
+	card_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	fade_layer.add_child(card_label)
 
 
 func _can_tidy() -> bool:
