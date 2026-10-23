@@ -7210,7 +7210,9 @@ func _draw_hen_layer() -> void:
 
 # Each hen wanders inside the coop: it walks to a spot, pauses, then picks another.
 func _update_hens(delta: float) -> void:
-	hen_layer.visible = coop_built and coop_tile.x >= 0 and hens > 0
+	# The animals live on the farm, so they stay hidden in the cave, the house, and the village.
+	var on_farm := not inside and not in_cave and not _in_village()
+	hen_layer.visible = on_farm and coop_built and coop_tile.x >= 0 and hens > 0
 	if not hen_layer.visible:
 		return
 	while hen_pos.size() < hens:
@@ -7256,7 +7258,8 @@ func _goat_ellipse(center: Vector2, rx: float, ry: float) -> PackedVector2Array:
 
 # Goats wander a little in front of the barn, pausing between steps.
 func _update_goats(delta: float) -> void:
-	goat_layer.visible = barn_built and barn_tile.x >= 0 and goats > 0
+	var goats_on_farm := not inside and not in_cave and not _in_village()
+	goat_layer.visible = goats_on_farm and barn_built and barn_tile.x >= 0 and goats > 0
 	if not goat_layer.visible:
 		return
 	bleat_timer -= delta
