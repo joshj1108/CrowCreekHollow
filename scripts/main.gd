@@ -3756,7 +3756,11 @@ func _stop_harvest(reason: String) -> void:
 
 # Each tick rolls for the thing being worked. A better pick or hatchet raises the odds.
 # Crows come in from the edge of the view, land on the roof or a tree, sit for a while, then
-# hop to another perch or fly off. Only the farm has them.
+# hop to another perch or fly off. Each crow has a ground position and an altitude: its shadow
+# sits on the ground below it and shrinks and fades as it climbs. Only the farm has them.
+const CROW_FLY_ALT := 70.0
+const CROW_ALT_SPEED := 60.0
+
 func _build_crows() -> void:
 	crow_layer = Node2D.new()
 	crow_layer.draw.connect(_draw_crow_layer)
@@ -3765,11 +3769,11 @@ func _build_crows() -> void:
 	crow_perches.clear()
 	var house := Rect2(Vector2(_world_tile(HOUSE_IX, HOUSE_IY)) * PX, Vector2(HOUSE_W, HOUSE_H) * PX)
 	for i in 2:
-		crow_perches.append(Vector2(house.position.x + house.size.x * (0.3 + 0.4 * i), house.position.y + PX * 0.25))
+		crow_perches.append({"ground": Vector2(house.position.x + house.size.x * (0.3 + 0.4 * i), house.position.y + house.size.y), "alt": PX * 2.6})
 	for y in MAP_H:
 		for x in MAP_W:
 			if map[y][x] == Tile.TREE:
-				crow_perches.append(Vector2((x + 0.5) * PX, (y + 0.5) * PX - PX * 1.5))
+				crow_perches.append({"ground": Vector2((x + 0.5) * PX, (y + 0.8) * PX), "alt": PX * 1.5})
 
 
 func _update_crows(delta: float) -> void:
@@ -3788,38 +3792,53 @@ func _update_crows(delta: float) -> void:
 		crow_spawn_timer = randf_range(10.0, 30.0)
 		var side := -1.0 if randf() < 0.5 else 1.0
 		var start := centre + Vector2(side * (view.x * 0.5 + 40.0), randf_range(-view.y * 0.4, view.y * 0.4))
-		crows.append({"pos": start, "target": crow_perches.pick_random(), "state": "fly_in", "timer": 0.0, "flap": randf() * TAU, "facing": -side})
+		var perch: Dictionary = crow_perches.pick_random()
+		crows.append({"ground": start, "alt": CROW_FLY_ALT, "target": perch["ground"], "target_alt": float(perch["alt"]), "state": "fly_in", "timer": 0.0, "flap": randf() * TAU, "facing": -side})
 	var keep: Array = []
 	for c in crows:
-		c["flap"] = float(c["flap"]) + delta * 14.0
-		var pos: Vector2 = c["pos"]
-		var target: Vector2 = c["target"]
 		var state: String = str(c["state"])
+		var flying := state == "fly_in" or state == "fly_out" or state == "hop"
+		c["flap"] = float(c["flap"]) + delta * (16.0 if flying else 0.0)
+		var g: Vector2 = c["ground"]
+		var alt := float(c["alt"])
 		var gone := false
-		if state == "fly_in" or state == "fly_out" or state == "hop":
-			var to := target - pos
+		if flying:
+			var target: Vector2 = c["target"]
+			var to := target - g
+			var dist := to.length()
 			var step := CROW_SPEED * delta
-			if to.length() <= step:
-				pos = target
-				if state == "fly_out":
-					gone = true
-				else:
-					c["state"] = "perched"
-					c["timer"] = randf_range(8.0, 30.0)
+			# High while travelling, then coming down onto the perch.
+			var final_alt := float(c["target_alt"])
+			var goal_alt := final_alt if dist < 40.0 else CROW_FLY_ALT
+			alt = move_toward(alt, goal_alt, CROW_ALT_SPEED * delta)
+			if dist <= step:
+				g = target
+				if absf(alt - final_alt) < 1.0:
+					if state == "fly_out":
+						gone = true
+					else:
+						c["state"] = "perched"
+						c["timer"] = randf_range(8.0, 30.0)
 			else:
-				pos += to.normalized() * step
-				c["facing"] = signf(to.x)
+				g += to.normalized() * step
+				if absf(to.x) > 0.5:
+					c["facing"] = signf(to.x)
 		elif state == "perched":
+			alt = move_toward(alt, float(c["target_alt"]), CROW_ALT_SPEED * delta)
 			c["timer"] = float(c["timer"]) - delta
 			if float(c["timer"]) <= 0.0:
 				if randf() < 0.4:
+					var perch: Dictionary = crow_perches.pick_random()
 					c["state"] = "hop"
-					c["target"] = crow_perches.pick_random()
+					c["target"] = perch["ground"]
+					c["target_alt"] = float(perch["alt"])
 				else:
 					var away := -1.0 if float(c["facing"]) < 0.0 else 1.0
 					c["state"] = "fly_out"
 					c["target"] = centre + Vector2(away * (view.x * 0.5 + 80.0), -view.y * 0.5 - 60.0)
-		c["pos"] = pos
+					c["target_alt"] = CROW_FLY_ALT
+		c["ground"] = g
+		c["alt"] = alt
 		if not gone:
 			keep.append(c)
 	crows = keep
@@ -3827,28 +3846,45 @@ func _update_crows(delta: float) -> void:
 
 
 func _draw_crow_layer() -> void:
-	var ink := Color("1c1a22")
-	var sheen := Color(0.3, 0.3, 0.4, 0.5)
+	# Shadows first, on the ground under each crow, so they sit beneath everything else.
 	for c in crows:
-		var p: Vector2 = c["pos"]
-		var facing := float(c["facing"]) if c.has("facing") else 1.0
-		var perched := str(c["state"]) == "perched"
-		var lift := 0.0 if perched else sin(float(c["flap"])) * 5.0
-		# Legs only show while it stands on a perch.
+		var alt := float(c["alt"])
+		var fade := clampf(1.0 - alt / 150.0, 0.1, 1.0)
+		var w := 5.0 + alt * 0.06
+		crow_layer.draw_colored_polygon(FarmArt.ellipse(c["ground"], w, w * 0.42), Color(0.02, 0.03, 0.02, 0.38 * fade))
+	var ink := Color("1c1a22")
+	var wing_near := Color("2e2b38")
+	var wing_far := Color("16141c")
+	for c in crows:
+		var facing := float(c["facing"])
+		var st := str(c["state"])
+		var perched := st == "perched"
+		var p: Vector2 = (c["ground"] as Vector2) + Vector2(0, -float(c["alt"]))
+		var flap := sin(float(c["flap"])) * (0.6 if st == "hop" else 1.0)
 		if perched:
-			crow_layer.draw_line(p + Vector2(-1.5, 4), p + Vector2(-1.5, 7), ink, 1.2)
-			crow_layer.draw_line(p + Vector2(1.5, 4), p + Vector2(1.5, 7), ink, 1.2)
-		# Tail, body, head, beak.
-		crow_layer.draw_colored_polygon(PackedVector2Array([p + Vector2(-facing * 4, -0.5), p + Vector2(-facing * 10, 2.5), p + Vector2(-facing * 4, 2.5)]), ink)
-		crow_layer.draw_colored_polygon(FarmArt.ellipse(p, 6.0, 4.2), ink)
-		var head := p + Vector2(facing * 4.5, -3.5)
-		crow_layer.draw_circle(head, 3.0, ink)
-		crow_layer.draw_colored_polygon(PackedVector2Array([head + Vector2(facing * 2.5, -1), head + Vector2(facing * 7, 0.5), head + Vector2(facing * 2.5, 1.2)]), Color("3b3428"))
-		crow_layer.draw_circle(head + Vector2(facing * 1.2, -0.6), 0.7, Color(0.9, 0.85, 0.5))
-		# Wing: folded along the back when perched, lifting and dropping in flight.
-		var wing := PackedVector2Array([p + Vector2(-facing * 2, -1), p + Vector2(facing * 4, -1 - lift), p + Vector2(-facing * 4, 1.5)])
-		crow_layer.draw_colored_polygon(wing, Color("26242e"))
-		crow_layer.draw_line(p + Vector2(-facing * 1, -0.5), p + Vector2(facing * 3, -1 - lift * 0.7), sheen, 1.0)
+			crow_layer.draw_line(p + Vector2(-1.5, 3.5), p + Vector2(-1.5, 6.0), ink, 1.2)
+			crow_layer.draw_line(p + Vector2(1.5, 3.5), p + Vector2(1.5, 6.0), ink, 1.2)
+		var root := p + Vector2(-facing * 1.0, -1.5)
+		# Far wing sits behind the body, a shade darker, so the wings read as two.
+		var far_tip: Vector2
+		var near_tip: Vector2
+		if perched:
+			far_tip = root + Vector2(-facing * 4.5, 1.5)
+			near_tip = root + Vector2(-facing * 6.0, 1.8)
+		else:
+			far_tip = root + Vector2(-facing * 3.0, -2.0 + flap * 6.5)
+			near_tip = root + Vector2(-facing * 6.0, -2.0 + flap * 7.5)
+		crow_layer.draw_colored_polygon(PackedVector2Array([root + Vector2(facing * 1.5, -0.5), far_tip, root + Vector2(-facing * 1.5, 0.5)]), wing_far)
+		# Tail, body, head and beak.
+		crow_layer.draw_colored_polygon(PackedVector2Array([p + Vector2(-facing * 4.0, -0.5), p + Vector2(-facing * 10.0, 1.5), p + Vector2(-facing * 4.0, 2.5)]), ink)
+		crow_layer.draw_colored_polygon(FarmArt.ellipse(p, 6.0, 3.6), ink)
+		var head := p + Vector2(facing * 4.8, -3.2)
+		crow_layer.draw_circle(head, 2.8, ink)
+		crow_layer.draw_colored_polygon(PackedVector2Array([head + Vector2(facing * 2.2, -0.9), head + Vector2(facing * 6.8, 0.4), head + Vector2(facing * 2.2, 1.2)]), Color("3b3428"))
+		crow_layer.draw_circle(head + Vector2(facing * 1.0, -0.6), 0.75, Color(0.92, 0.86, 0.5))
+		# Near wing in front of the body.
+		crow_layer.draw_colored_polygon(PackedVector2Array([root + Vector2(facing * 2.0, 0.0), near_tip, root + Vector2(-facing * 2.0, 0.8)]), wing_near)
+		crow_layer.draw_line(root + Vector2(facing * 1.0, 0.0), near_tip.lerp(root, 0.35), Color(0.45, 0.45, 0.55, 0.45), 0.8)
 
 
 func _update_harvest(delta: float) -> void:
