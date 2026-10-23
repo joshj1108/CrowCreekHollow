@@ -11,7 +11,7 @@ A top-down farming game with heavy psychological horror, built in Godot 4.7.
 
 ## Controls (Stardew-style)
 
-- **Section wheel.** Shift, or a click on the left stick, opens a ring of the menus that aren't in the bag: Skills, Gear, Craft, Quests, House, Buildings, and Achievements. The mouse hovers and clicks a section. On a controller the right stick highlights one and A opens it. B or Esc closes the wheel. Choosing a section closes the wheel and shows that section alone. Sections can't be opened while the wheel is up, the bag is up, or another section is open.
+- **Section wheel.** Shift, or a click on the left stick, opens a ring of the menus that aren't in the bag: Skills, Gear, Craft, Quests, House, Buildings, and Achievements. The mouse hovers and clicks a section. On a controller the right stick highlights one and A opens it. B or Esc closes the wheel, and from a section returns to the wheel. Choosing a section closes the wheel and shows that section alone. Sections can't be opened while the wheel is up, the bag is up, or another section is open.
 
 - Move: WASD or arrow keys
 - Use, plant, harvest, gather, sleep, tidy, cleanse, cook, talk, swing, or read: Space / Enter (face the tile)

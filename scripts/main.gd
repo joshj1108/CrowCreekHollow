@@ -2344,7 +2344,8 @@ func _handle_keys() -> void:
 			_press_back(false)
 
 
-# B and Esc close the thing on top: the bag, the wheel, a placement, or the open section.
+# B and Esc close the thing on top. A wheel section goes back to the wheel, and a second press closes
+# the wheel. Other panels close back to the farm.
 func _press_back(open_settings: bool) -> void:
 	if _bag_open():
 		_toggle_bag()
@@ -2352,10 +2353,21 @@ func _press_back(open_settings: bool) -> void:
 		_close_wheel()
 	elif placing != "":
 		_cancel_placement()
+	elif open_tab != "" and _is_wheel_section(open_tab):
+		_close_panel()
+		wheel.show_wheel()
+		play_sfx("panel")
 	elif open_tab != "":
 		_close_panel()
 	elif open_settings:
 		_toggle_tab("Settings")
+
+
+func _is_wheel_section(section_name: String) -> bool:
+	for section in SectionWheel.SECTIONS:
+		if str(section["name"]) == section_name:
+			return true
+	return false
 
 
 func _toggle_tab(tab: String) -> void:
