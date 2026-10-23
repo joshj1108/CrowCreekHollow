@@ -246,6 +246,7 @@ The house is drawn in four stages that match its repair level. **Decrepit** has 
   - **Bedroom:** open from the start. The bed saves and ends the day.
   - **Parlor (Patched):** a cleaning station. Tidy once a day for Cleaning XP.
   - **Study (Restored):** a desk.
+  - **Desk games:** using the desk opens a Desk panel with **Sudoku** (a 4 by 4 grid: set each blank cell with Next, then Check to lock in the right numbers) and **Solitaire** (turn cards from the stock and play the waste top to its suit foundation; the deck can be turned over three times). Solving or finishing a game entertains you for the day.
 - A restored house softens the night overall.
 - **Cleanse** (House panel): needs Cleaning 3 and 2 harvested crops. Once a day. Lifts the sanity limit by 5 and cures part of the collapse penalty.
 
@@ -307,6 +308,7 @@ The house is drawn in four stages that match its repair level. **Decrepit** has 
   - A quiet night (−3)
 - The field shadow creeps closer each night.
 - **Collapse penalty:** missing the bed by 03:00 lowers the sanity limit by 5 permanently. A **cleanse** (see Farmhouse) lifts it by 5 per use, once a day.
+- **Boredom:** finishing one game at the **desk** (Sudoku or Solitaire) entertains you for that day. A day without a finished game lowers the sanity limit by 1, at the end of the day, down to 40 points lost (a limit of 60). The limit recovers only through cleansing and the collapse relief, not through boredom. Putting a game away unfinished does not count, and games are not kept across a save.
 
 ## Tutorial tips
 
@@ -321,7 +323,7 @@ The house is drawn in four stages that match its repair level. **Decrepit** has 
 - There are **three save slots**. New Game asks for a slot, and a used slot takes two presses to overwrite. Load Game lists each slot with its day, coins, and house stage. Older single-slot saves become slot 1. Pressing Overwrite keeps focus on the armed slot, so a gamepad's second press overwrites it. Crops from saves made before watering existed count as watered on the day they load, so they grow that night.
 - The game saves **only** when you sleep in bed or collapse at 03:00, to the slot you're playing.
 - The in-game Settings menu ends with a **Game** section that never folds. It holds **Music** (on or off), **Unstick me**, and **Quit to the main menu**. Quitting returns to the start screen without saving, and progress since the last sleep is lost. The slot you were playing stays selected. Sleeping is the only way to save.
-- Saved: day, skill XP, inventory (including every food), coins, goats and their feeding, bag upgrades, root cellar, cooler, and smokehouse (built, and what they hold), materials, stats, story chapters done, achievements done, selected seed, lantern tier, house stage, house wear, coop and hens, barn (built, and where it stands), tidy/mend/cleanse days, sanity and sanity penalty, crops (with kind), brush piles, **player position**, whether you were **inside the house**, and the **open panel**.
+- Saved: day, skill XP, inventory (including every food), coins, goats and their feeding, bag upgrades, root cellar, cooler, and smokehouse (built, and what they hold), materials, stats, story chapters done, achievements done, selected seed, lantern tier, house stage, house wear, coop and hens, barn (built, and where it stands), tidy/mend/cleanse days, sanity, sanity penalty, boredom loss and the day you were last entertained, crops (with kind), brush piles, **player position**, whether you were **inside the house**, and the **open panel**.
 - Quitting mid-day loses that day's progress since the last save. Position and panel are saved at the same moment, so they reflect the last sleep or collapse.
 
 ## The world: the portal, the road, and the wilds

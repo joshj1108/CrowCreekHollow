@@ -610,6 +610,12 @@ const NO_SPOT := Vector2i(-1, -1)
 const STARTING_SEEDS := 5
 const MESSAGE_SECONDS := 3.0
 const SANITY_MAX := 100.0
+const BOREDOM_DRAIN := 1.0          # sanity limit lost on a day with no finished desk game
+const BOREDOM_MAX_LOSS := 40.0      # the most boredom can take from the limit
+const SOL_PASSES := 3               # times the solitaire waste can be turned back into the deck
+const DESK_SUITS := ["Hearts", "Diamonds", "Clubs", "Spades"]
+const DESK_RANKS := ["A", "2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K"]
+const SUDOKU_BASE := [[1, 2, 3, 4], [3, 4, 1, 2], [2, 1, 4, 3], [4, 3, 2, 1]]
 const LOW_SANITY := 30.0
 const SLEEP_SANITY := 25.0
 const TIDY_SANITY := 10.0
@@ -808,6 +814,9 @@ var plot_three_open := false
 var cleanse_day := 0
 var sanity := SANITY_MAX
 var sanity_penalty := 0             # permanent cap reduction from collapsing
+var boredom_loss := 0.0             # sanity limit lost to days without a finished desk game
+var entertained_day := 0            # the last day a desk game was finished
+var desk_game: Dictionary = {}      # the desk game in progress (not saved)
 var inside := false                 # standing in the farmhouse interior
 var open_tab := ""                  # "" when the action bar panel is closed
 var bag: BagPanel                   # the grid bag in the bottom-right corner (Tab or Y)
@@ -2510,6 +2519,9 @@ func _on_bag_slot(index: int) -> void:
 
 
 func _on_panel_action(action_id: String) -> void:
+	if action_id.begins_with("game_") or action_id.begins_with("sudoku_") or action_id.begins_with("sol_"):
+		_desk_action(action_id)
+		return
 	if action_id.begins_with("cook:"):
 		_make_food(action_id.trim_prefix("cook:"))
 		return
@@ -2710,6 +2722,8 @@ func _refresh_panel() -> void:
 			rows = _furnace_rows()
 		"Woodstore":
 			rows = _woodstore_rows()
+		"Desk":
+			rows = _desk_rows()
 		"House":
 			rows = _house_rows()
 		"Buildings":
@@ -3907,7 +3921,269 @@ func _harvest(tile: Vector2i) -> void:
 
 
 func _read_desk() -> void:
-	_show_message("A desk covered in seed catalogs and unpaid bills.")
+	_toggle_tab("Desk")
+
+
+# --- Desk games ---
+# Finishing a game at the desk entertains you for that day. A day without one costs a little
+# of the sanity limit, down to BOREDOM_MAX_LOSS. Leaving a game unfinished does not count.
+
+func _boredom_check() -> String:
+	if entertained_day == day:
+		return ""
+	var before := _sanity_max()
+	boredom_loss = minf(boredom_loss + BOREDOM_DRAIN, BOREDOM_MAX_LOSS)
+	sanity = minf(sanity, _sanity_max())
+	if _sanity_max() < before:
+		return " Nothing to occupy you today, so your sanity limit slips to %d." % int(_sanity_max())
+	return ""
+
+
+func _desk_rows() -> Array:
+	var rows: Array = [{"section": "Desk"}]
+	var entertained := entertained_day == day
+	rows.append({"name": "Entertained today", "value": "yes" if entertained else "no, finish a game or your limit slips"})
+	if boredom_loss > 0.0:
+		rows.append({"name": "Sanity limit lost to boredom", "value": str(int(boredom_loss))})
+	if desk_game.is_empty():
+		rows.append({"name": "Sudoku", "value": "fill the 4 by 4 grid so each row, column and 2 by 2 box has 1 to 4", "button": "Play", "action": "game_new:sudoku"})
+		rows.append({"name": "Solitaire", "value": "turn cards and build the four suit foundations", "button": "Play", "action": "game_new:solitaire"})
+	elif desk_game["kind"] == "sudoku":
+		rows.append_array(_sudoku_rows())
+	else:
+		rows.append_array(_solitaire_rows())
+	return rows
+
+
+func _desk_action(action_id: String) -> void:
+	if action_id.begins_with("game_new:"):
+		if action_id.ends_with("sudoku"):
+			_start_sudoku()
+		else:
+			_start_solitaire()
+	elif action_id == "game_quit":
+		desk_game = {}
+	elif desk_game.get("kind", "") == "sudoku":
+		if action_id.begins_with("sudoku_next:"):
+			_sudoku_next(int(action_id.trim_prefix("sudoku_next:")))
+		elif action_id == "sudoku_check":
+			_sudoku_check()
+	elif desk_game.get("kind", "") == "solitaire":
+		if action_id == "sol_draw":
+			_sol_draw()
+		elif action_id == "sol_play":
+			_sol_play()
+	_refresh_panel()
+
+
+func _finish_game(result: String) -> void:
+	entertained_day = day
+	desk_game = {}
+	_show_message("%s You are entertained for the day." % result)
+
+
+func _zeros(n: int) -> Array:
+	var out: Array = []
+	for i in n:
+		out.append(0)
+	return out
+
+
+# --- Sudoku (4 by 4) ---
+
+func _start_sudoku() -> void:
+	# Relabelling the digits of a valid grid still gives a valid grid, so each game differs.
+	var digits := [1, 2, 3, 4]
+	digits.shuffle()
+	var solution: Array = []
+	for r in 4:
+		for c in 4:
+			solution.append(digits[SUDOKU_BASE[r][c] - 1])
+	var puzzle: Array = solution.duplicate()
+	var order: Array = range(16)
+	order.shuffle()
+	# Clear cells one at a time, keeping any clear that would leave more than one answer.
+	for i in order:
+		var keep: int = puzzle[i]
+		puzzle[i] = 0
+		if _sudoku_solutions(puzzle, 2) != 1:
+			puzzle[i] = keep
+	desk_game = {"kind": "sudoku", "solution": solution, "puzzle": puzzle, "guess": _zeros(16)}
+
+
+func _sudoku_solutions(board: Array, limit: int) -> int:
+	var idx := board.find(0)
+	if idx == -1:
+		return 1
+	var found := 0
+	for v in range(1, 5):
+		if _sudoku_fits(board, idx / 4, idx % 4, v):
+			board[idx] = v
+			found += _sudoku_solutions(board, limit - found)
+			board[idx] = 0
+			if found >= limit:
+				break
+	return found
+
+
+func _sudoku_fits(board: Array, r: int, c: int, v: int) -> bool:
+	for k in 4:
+		if int(board[r * 4 + k]) == v or int(board[k * 4 + c]) == v:
+			return false
+	var br := r / 2 * 2
+	var bc := c / 2 * 2
+	for dr in 2:
+		for dc in 2:
+			if int(board[(br + dr) * 4 + bc + dc]) == v:
+				return false
+	return true
+
+
+func _sudoku_rows() -> Array:
+	var puzzle: Array = desk_game["puzzle"]
+	var guess: Array = desk_game["guess"]
+	var lines: Array = []
+	for r in 4:
+		var cells: Array = []
+		for c in 4:
+			var i := r * 4 + c
+			var v := int(puzzle[i]) if int(puzzle[i]) != 0 else int(guess[i])
+			cells.append(str(v) if v != 0 else ".")
+		lines.append(" ".join(PackedStringArray(cells)))
+	var rows: Array = [{"section": "Sudoku"}, {"note": "\n".join(PackedStringArray(lines))}]
+	for i in 16:
+		if int(puzzle[i]) != 0:
+			continue
+		var g := int(guess[i])
+		rows.append({"name": "Row %d, column %d" % [i / 4 + 1, i % 4 + 1], "value": str(g) if g != 0 else "empty", "button": "Next", "action": "sudoku_next:%d" % i})
+	rows.append({"name": "Check your numbers", "value": "right ones are locked in, wrong ones clear", "button": "Check", "action": "sudoku_check"})
+	rows.append({"name": "Put the game away", "value": "unfinished, so it does not count today", "button": "Put away", "action": "game_quit"})
+	return rows
+
+
+func _sudoku_next(i: int) -> void:
+	var guess: Array = desk_game["guess"]
+	guess[i] = (int(guess[i]) + 1) % 5
+
+
+func _sudoku_check() -> void:
+	var puzzle: Array = desk_game["puzzle"]
+	var guess: Array = desk_game["guess"]
+	var solution: Array = desk_game["solution"]
+	var right := 0
+	var wrong := 0
+	for i in 16:
+		if int(puzzle[i]) != 0 or int(guess[i]) == 0:
+			continue
+		if int(guess[i]) == int(solution[i]):
+			puzzle[i] = solution[i]
+			right += 1
+		else:
+			wrong += 1
+		guess[i] = 0
+	if right == 0 and wrong == 0:
+		_show_message("Choose some numbers first, then check them.")
+		return
+	if not puzzle.has(0):
+		_finish_game("The sudoku is solved.")
+		return
+	_show_message("%d right and locked in, %d wrong and cleared." % [right, wrong])
+
+
+# --- Solitaire (one card at a time, to the four foundations) ---
+
+func _start_solitaire() -> void:
+	var stock: Array = []
+	for card in 52:
+		stock.append(card)
+	stock.shuffle()
+	# A card is 0 to 51: suit = card / 13, rank = card % 13 + 1.
+	desk_game = {"kind": "solitaire", "stock": stock, "waste": [], "found": [0, 0, 0, 0], "passes": 0}
+
+
+func _card_name(card: int) -> String:
+	return "%s of %s" % [DESK_RANKS[card % 13], DESK_SUITS[card / 13]]
+
+
+func _sol_can_play() -> bool:
+	var waste: Array = desk_game["waste"]
+	if waste.is_empty():
+		return false
+	var card := int(waste.back())
+	var found: Array = desk_game["found"]
+	return int(found[card / 13]) == card % 13
+
+
+func _sol_can_turn() -> bool:
+	var stock: Array = desk_game["stock"]
+	var waste: Array = desk_game["waste"]
+	if not stock.is_empty():
+		return true
+	return not waste.is_empty() and int(desk_game["passes"]) < SOL_PASSES
+
+
+func _sol_draw() -> void:
+	if not _sol_can_turn():
+		_show_message("Nothing left to turn over.")
+		return
+	var stock: Array = desk_game["stock"]
+	var waste: Array = desk_game["waste"]
+	if not stock.is_empty():
+		waste.append(stock.pop_back())
+	else:
+		# The waste goes back face down: one more pass through the deck.
+		var back: Array = waste.duplicate()
+		back.reverse()
+		desk_game["stock"] = back
+		desk_game["waste"] = []
+		desk_game["passes"] = int(desk_game["passes"]) + 1
+	_sol_check_end()
+
+
+func _sol_play() -> void:
+	if not _sol_can_play():
+		_show_message("That card cannot go up yet.")
+		return
+	var waste: Array = desk_game["waste"]
+	var card := int(waste.pop_back())
+	var found: Array = desk_game["found"]
+	found[card / 13] = int(found[card / 13]) + 1
+	_sol_check_end()
+
+
+func _sol_check_end() -> void:
+	var found: Array = desk_game["found"]
+	var total := 0
+	for n in found:
+		total += int(n)
+	if total == 52:
+		_finish_game("You built all four foundations. Solitaire won.")
+	elif _sol_stuck():
+		_finish_game("No card can move. Solitaire is over with %d of 52 played." % total)
+
+
+func _sol_stuck() -> bool:
+	var stock: Array = desk_game["stock"]
+	return stock.is_empty() and not _sol_can_turn() and not _sol_can_play()
+
+
+func _solitaire_rows() -> Array:
+	var stock: Array = desk_game["stock"]
+	var waste: Array = desk_game["waste"]
+	var found: Array = desk_game["found"]
+	var top := "empty" if waste.is_empty() else _card_name(int(waste.back()))
+	var piles: Array = []
+	for s in 4:
+		piles.append("%s %d" % [DESK_SUITS[s], int(found[s])])
+	return [
+		{"section": "Solitaire"},
+		{"name": "Waste top", "value": top},
+		{"name": "Stock", "value": "%d left, %d of %d deck passes used" % [stock.size(), int(desk_game["passes"]), SOL_PASSES]},
+		{"name": "Turn a card", "value": "from the stock", "button": "Turn", "action": "sol_draw", "enabled": _sol_can_turn()},
+		{"name": "Play the waste card", "value": "up to its foundation, if it is next", "button": "Play", "action": "sol_play", "enabled": _sol_can_play()},
+		{"note": "Foundations (cards played): " + ", ".join(PackedStringArray(piles))},
+		{"name": "Put the game away", "value": "unfinished, so it does not count today", "button": "Put away", "action": "game_quit"},
+	]
 
 
 func _gather(tile: Vector2i) -> void:
@@ -7367,7 +7643,7 @@ func _reward_text(reward: Dictionary) -> String:
 # --- Sanity and night events ------------------------------------------------
 
 func _sanity_max() -> float:
-	return SANITY_MAX - sanity_penalty
+	return SANITY_MAX - sanity_penalty - boredom_loss
 
 
 func _change_sanity(amount: float) -> void:
@@ -7419,6 +7695,7 @@ func _end_day(base: String, leave_house: bool = true) -> void:
 	stats["spoiled"] += spoiled
 	var spoil_note := (" %d fish spoiled in your pack overnight." % spoiled) if spoiled > 0 else ""
 	var upkeep_note := _settle_day()
+	upkeep_note += _boredom_check()
 	# Rain waters every crop. Otherwise a crop must have been watered today to grow.
 	if weather_kind in WATER_RAIN_KINDS:
 		stats["rain_days"] += 1
@@ -7581,6 +7858,8 @@ func _save_game() -> void:
 		"event_fired_day": event_fired_day,
 		"sanity": sanity,
 		"sanity_penalty": sanity_penalty,
+		"boredom_loss": boredom_loss,
+		"entertained_day": entertained_day,
 		"player_pos": _save_pos(),
 		"inside": inside,
 		"appearance": appearance,
@@ -7679,6 +7958,8 @@ func _load_game() -> bool:
 				equipment[slot] = str(saved_eq[slot])
 	event_fired_day = int(data.get("event_fired_day", 0))
 	sanity_penalty = int(data.get("sanity_penalty", 0))
+	boredom_loss = float(data.get("boredom_loss", 0.0))
+	entertained_day = int(data.get("entertained_day", 0))
 	sanity = float(data.get("sanity", SANITY_MAX))
 	saved_inside = bool(data.get("inside", false))
 	appearance = Appearance.clean(data.get("appearance", {}))
