@@ -101,7 +101,7 @@ Each year has a few dated events. When one starts, the morning message announces
 
 | Event | Date | Length | Effect |
 |---|---|---|---|
-| Harvest Moon | Sep 22 | 1 day | Two meals and +10 sanity when it starts |
+| Harvest Moon | Sep 22 | 1 day | Two turnip hashes and +10 sanity when it starts |
 | First Frost | Nov 10 | 3 days | Warmth drains 60% faster outdoors |
 | The Longest Night | Dec 21 | 1 day | The night's sanity change is doubled |
 | Spring Thaw | Mar 1 | 2 days | Watered crops grow an extra stage |
@@ -109,11 +109,11 @@ Each year has a few dated events. When one starts, the morning message announces
 | Midsummer Heat | Jun 21 | 3 days | Every day is sunny |
 
 - **All Hallows** (October 31): lanterns are lit along the road, so the dark costs half the usual sanity that night.
-- **Winter Feast** (January 1): two meals and a bandage go into the pack.
+- **Winter Feast** (January 1): two grilled fish and a bandage go into the pack.
 
 ## Daily job
 
-- The House panel (H) has one **daily job**, separate from the chores so skipping it adds no wear. It rotates each day through crops, fish, wood, stone, resin, meals, and preserves. Each asks for a few of those items, which are used up when you deliver them. Delivering pays coins and XP in the job's skill, and only one delivery counts per day.
+- The House panel (H) has one **daily job**, separate from the chores so skipping it adds no wear. It rotates each day through crops, fish, wood, stone, resin, cooked food, and preserves. Each asks for a few of those items, which are used up when you deliver them. Delivering pays coins and XP in the job's skill, and only one delivery counts per day.
 
 ## Music
 
@@ -150,12 +150,12 @@ Saves from before this change reset chapter progress. Stat-based achievements re
 - Coins are the money. The HUD shows them, and they're saved.
 - The **stall** sits on the path east of the house. It is open **06:00 to 18:00**. Walk up to it and press Space to trade.
 - The stall **only buys what you carry**. Take crops or fish out of storage first.
-- Sell prices: crops 4 each, fish 6 each, meals 8 each.
+- Sell prices: turnips 4 each, fish 6 each, and cooked food from 8 to 20 each, as listed on the Trade panel.
 - Buy seeds: 5 turnip seeds for 15 coins, or 3 pumpkin seeds for 30 coins at Farming 3.
 
 ## Pack, bags, and storage
 
-- The **pack** holds crops, fish, and meals. Seeds have their own pouch and don't count. Materials are uncapped for now.
+- The **pack** holds crops, fish, eggs, milk, and every cooked food, each under its own name and picture. Seeds have their own pouch and don't count. Materials are uncapped for now.
 - The pack starts at **20 slots**. Like items stack up to **28** to a slot, so a kind takes as many slots as its stacks need. Grid menus (Skills, Inventory, Craft, Gear) sit centred in the menu box. The Inventory panel (I) shows what you carry as a grid of picture tiles, one per kind with its count, like the Craft panel: the pack's crops, fish, meals, and preserved goods, then the seed pouch and the materials you hold. Every item has a drawn picture. The name shows only on the highlighted tile, and the bag works the same way: each slot shows a picture and count, with the name on the slot in focus. Picking a tile fills the detail card beside the grid, which holds the **Eat** button for crops and meals. The pack's slots used and the next bag are listed under the grid. The Body meters and the planting options sit below it.
 - The seed pouch is a small grid with a count on each seed type.
 - The Gear panel is a paper-doll grid of nine slots. The slots and crafting are described under Gear and crafting below.
@@ -177,9 +177,9 @@ Saves from before this change reset chapter progress. Stat-based achievements re
 | Method | Input | Needs | Makes | Sells | Skill |
 |---|---|---|---|---|---|
 | Smoke a fish | 1 fish | 1 wood | Smoked fish | 11 | Cooking 2 |
-| Dry crops | 2 crops | none | Dried crops | 9 | Farming 2 |
-| Can crops | 2 crops | 1 fiber | Canned crops | 10 | Cooking 3 |
-| Ferment crops | 2 crops | 1 wood | Fermented crops | 11 | Cooking 4 |
+| Dry turnips | 2 turnips | none | Dried crops | 9 | Farming 2 |
+| Can turnips | 2 turnips | 1 fiber | Canned turnip | 10 | Cooking 3 |
+| Ferment turnips | 2 turnips | 1 wood | Fermented turnip | 11 | Cooking 4 |
 
 Each press makes one item and gives XP in that skill. Preserved goods show in the pack and sell on the Trade panel.
 
@@ -199,12 +199,10 @@ Achievements track stats and never reset. Each pays a small reward. Earning all 
 ## Cooking
 
 - Cooking is a skill (same level curve as Skills).
-- In the Craft panel's Cooking tab, **Cook a fish** uses 1 fish and 1 wood for 1 meal (15 XP). **Cook crops** uses 2 crops and 1 wood for 1 meal (10 XP).
-- **Eat a meal** uses one meal for +8 sanity.
-
-- **Fish stew** (Cooking 3): 1 fish, 2 crops, and 1 wood make one stew. It restores 70 food and 12 sanity, and gives 18 XP.
-- **Hearty stew** (Cooking 5): 1 smoked fish, 2 crops, and 1 wood make one. It restores 95 food and 18 sanity, and gives 26 XP.
-- Stews are kept in the pack as their own stacks. Eat them from the Inventory panel, like meals.
+- Every cooked food is named for what made it and has its own picture. At the fire (the Craft panel's Cooking tab): **Grilled fish** (1 fish, 1 wood), **Turnip hash** (2 turnips, 1 wood), **Pumpkin soup** (2 pumpkins, 1 wood, Cooking 3), **Fish stew** (1 fish, 2 turnips, 1 wood, Cooking 3), and **Hearty stew** (1 smoked fish, 2 turnips, 1 wood, Cooking 5).
+- At the smokehouse: smoked fish, dried turnip, canned turnip, and fermented turnip (see the table above).
+- Each food has a difficulty (1 to 4) and the level needed to obtain it. Both set how much it restores, and cooking it gives XP in its skill.
+- Foods are kept in the pack as their own stacks. Eat them from the bag or the Inventory panel.
 
 ## Farming and crops
 
@@ -282,7 +280,7 @@ The house is drawn in four stages that match its repair level. **Decrepit** has 
 ## Body needs
 
 - Three meters run from 0 to 100: **Food**, **Water**, and **Warmth**. They show on a line under the top bar, in red when one is under 25, and in full in the Body section of the Inventory menu (I), below the pack.
-- **Food** drains about 2.4 an hour, so it runs out in about two days. A **meal** gives +45 food (and its usual sanity), and a **raw crop** gives +18. Both are eaten from the Inventory's Meals section.
+- **Food** drains about 2.4 an hour, so it runs out in about two days. Every food restores food, sanity and HP from its difficulty (1 to 4) and the level needed to obtain it: food = 10 + 12 × difficulty + 3 × level, sanity = 2 + 2 × difficulty + level, HP = difficulty. A raw turnip restores 22 food and a hearty stew 73. Eat food from the bag or the Inventory panel.
 - **Water** drains about 3 an hour, and 1.6 times faster on hot days (75°F and up). Face the **pond** and press Space to drink, for +40 water.
 - **Warmth** depends on the temperature. Outside it drains when it's below 50°F, faster the colder it gets. In mild weather it slowly refills. Inside the house it refills, faster once the house is patched. Sleeping in bed fills it to 100.
 - If any need is empty, you lose 1 HP every 2 hours until it's filled. Dropping to 0 HP collapses you at the homestead, as in the wilds.
@@ -314,7 +312,7 @@ The house is drawn in four stages that match its repair level. **Decrepit** has 
 - There are **three save slots**. New Game asks for a slot, and a used slot takes two presses to overwrite. Load Game lists each slot with its day, coins, and house stage. Older single-slot saves become slot 1. Pressing Overwrite keeps focus on the armed slot, so a gamepad's second press overwrites it. Crops from saves made before watering existed count as watered on the day they load, so they grow that night.
 - The game saves **only** when you sleep in bed or collapse at 03:00, to the slot you're playing.
 - The in-game Settings menu ends with a **Game** section that never folds. It holds **Music** (on or off), **Unstick me**, and **Quit to the main menu**. Quitting returns to the start screen without saving, and progress since the last sleep is lost. The slot you were playing stays selected. Sleeping is the only way to save.
-- Saved: day, skill XP, inventory (including meals), coins, goats and their feeding, bag upgrades, root cellar, cooler, and smokehouse (built, and what they hold), materials, stats, story chapters done, achievements done, selected seed, lantern tier, house stage, house wear, coop and hens, barn (built, and where it stands), tidy/mend/cleanse days, sanity and sanity penalty, crops (with kind), brush piles, **player position**, whether you were **inside the house**, and the **open panel**.
+- Saved: day, skill XP, inventory (including every food), coins, goats and their feeding, bag upgrades, root cellar, cooler, and smokehouse (built, and what they hold), materials, stats, story chapters done, achievements done, selected seed, lantern tier, house stage, house wear, coop and hens, barn (built, and where it stands), tidy/mend/cleanse days, sanity and sanity penalty, crops (with kind), brush piles, **player position**, whether you were **inside the house**, and the **open panel**.
 - Quitting mid-day loses that day's progress since the last save. Position and panel are saved at the same moment, so they reflect the last sleep or collapse.
 
 ## The world: the portal, the road, and the wilds
@@ -343,7 +341,7 @@ Combat happens while you move, in the style of Stardew Valley.
 - **Invulnerability:** after you're hit, you have 0.9 seconds of safety and you're knocked back a little.
 - **Kills** give Combat XP (20 for hollows, 30 for stalkers) and sometimes a material drop: fiber from hollows, resin from stalkers.
 - **Combat** is a skill (same level curve as Skills). Each hit gives 4 XP. Max HP is 10 plus Combat level − 1.
-- A meal heals 4 HP. Sleeping restores full HP. Losing all HP sends you home, shaken, with a 10 sanity penalty.
+- Food heals HP by its difficulty, from 1 to 4. Sleeping restores full HP. Losing all HP sends you home, shaken, with a 10 sanity penalty.
 
 ## Gear and crafting
 
@@ -392,7 +390,7 @@ The whole land is filled with towns, planned from a fixed seed so every game get
 - **Roads:** a road network joins every town and village, so the whole land is reachable on foot from the portal. Roads are always walkable, and no building covers one.
 - **Villagers:** each town has homeowners who chat. A town also has, depending on its kind:
   - a **general store** (hamlets and towns): buys materials and sells wood, fiber, resin, stone, and hardwood. You buy 10 at a time, and sell all you hold at half price.
-  - a **grocer** (towns): opens the trade panel, for crops, fish, meals, and seeds.
+  - a **grocer** (towns): opens the trade panel, for crops, fish, cooked food, and seeds.
   - a **banker** (towns and castles): see below.
   - a **lord** (castles and manors) at the keep door.
 - **The bank:** deposit and take back materials and coins. Banked goods are kept safe and saved with the game.
@@ -498,7 +496,7 @@ A cave on the homestead, entered from the farm's west edge. It is the only place
 
 ## Upkeep, hens, and the third plot
 
-**Goats (the barn)** — The barn holds up to **3 goats**, bought for **45 coins** each from the Barn panel (stand beside the barn and press Space). Feed them **2 crops each, once a day**. A fed goat gives **1 milk each morning**, stored as a meal. Two unfed days in a row and a goat wanders off. Goats wander in the yard in front of the barn and keep about half a tile between them, so they never stand on the same spot. Each goat that is unfed counts as a missed chore that night, like the hens.
+**Goats (the barn)** — The barn holds up to **3 goats**, bought for **45 coins** each from the Barn panel (stand beside the barn and press Space). Feed them **2 crops each, once a day**. A fed goat gives **1 milk each morning**, stored as milk. Two unfed days in a row and a goat wanders off. Goats wander in the yard in front of the barn and keep about half a tile between them, so they never stand on the same spot. Each goat that is unfed counts as a missed chore that night, like the hens.
 
 
 Keeping the homestead running is the daily work. Each part is at base level for now, to be deepened one project at a time.
@@ -508,7 +506,7 @@ Keeping the homestead running is the daily work. Each part is at base level for 
 - **Buildings menu (U):** the workshop, the coop, and the barn are built and moved from here, not from the House panel. Each one is placed the same way: building it starts placement, a green or red preview follows the tile you face, and Space places it on open grass. A spot can't cover plots, crops, rocks, brush, fishing spots, or you. B cancels. The Move button relocates a standing building for free. A building that was paid for but never placed (older saves) shows Place instead.
 - **Coop:** 6 wood, 4 fiber, and Carpentry 2. A 2 by 2 building. Stand beside the coop, facing it, and press Space to open its panel, where you buy and feed the hens. The hens wander inside it, walking to a spot, pausing, and walking on.
 - **Barn:** 10 wood, 6 fiber, and Carpentry 4. A 3 by 2 building of red boards. Stand beside it, facing it, and press Space to open its panel. Livestock aren't in the game yet, so for now the panel only says so. It is separate from the coop and doesn't change how many hens the coop holds.
-- **Hens:** 12 coins each, up to four in the coop. Feed them once a day from your crops (1 crop per hen). Each fed hen lays an egg overnight, which goes into your pack as a meal, as far as there is room. Two unfed days in a row and a hen wanders off.
+- **Hens:** 12 coins each, up to four in the coop. Feed them once a day from your crops (1 crop per hen). Each fed hen lays an egg overnight, which goes into your pack as an egg, as far as there is room. Two unfed days in a row and a hen wanders off.
 - **Predators:** at wear 4 or more, a fox can get into the coop on a given night and take a hen.
 - **Third plot:** opens at Farming 4 once the house is Patched. It sits between the two paths, south of the first plot.
 

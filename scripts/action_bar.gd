@@ -756,6 +756,14 @@ class RecipeIcon extends Control:
 		draw_rect(rect, color)
 		draw_rect(rect, OUTLINE, false, 0.025 * _sz)
 
+	# A bowl with a rim band, the base of the cooked dishes.
+	func _bowl_dish(col: Color) -> void:
+		var pts := PackedVector2Array()
+		for i in range(17):
+			var a := PI * float(i) / 16.0
+			pts.append(_pt(0.5, 0.42) + Vector2(cos(a), sin(a)) * 0.42 * _sz)
+		_shape(pts, col)
+		_box(Rect2(_pt(0.08, 0.42), Vector2(0.84, 0.06) * _sz), col.lightened(0.3))
 	func _draw() -> void:
 		_sz = minf(size.x, size.y)
 		_org = (size - Vector2(_sz, _sz)) * 0.5
@@ -889,6 +897,55 @@ class RecipeIcon extends Control:
 			"pumpkin_seed":
 				_shape(_ellipse(0.4, 0.55, 0.2, 0.3), Color("efe2a6"))
 				_shape(_ellipse(0.62, 0.48, 0.2, 0.3), Color("efe2a6"))
+			"egg":
+				_shape(_ellipse(0.5, 0.52, 0.3, 0.4), tint)
+				draw_circle(_pt(0.42, 0.36), 0.05 * _sz, light)
+			"milk":
+				_shape(_poly([[0.3, 0.3], [0.5, 0.1], [0.7, 0.3]]), light)
+				_box(Rect2(_pt(0.28, 0.3), Vector2(0.44, 0.62) * _sz), tint)
+				_box(Rect2(_pt(0.28, 0.55), Vector2(0.44, 0.14) * _sz), dark)
+			"grilled":
+				_shape(_ellipse(0.42, 0.5, 0.34, 0.2), tint)
+				_shape(_poly([[0.7, 0.5], [0.96, 0.3], [0.96, 0.7]]), dark)
+				for x in [0.26, 0.4, 0.54]:
+					draw_line(_pt(x, 0.4), _pt(x + 0.1, 0.6), dark, 0.03 * _sz)
+			"smoked":
+				_shape(_ellipse(0.42, 0.56, 0.34, 0.2), tint)
+				_shape(_poly([[0.7, 0.56], [0.96, 0.36], [0.96, 0.76]]), dark)
+				for x in [0.3, 0.5]:
+					draw_arc(_pt(x, 0.2), 0.07 * _sz, PI * 0.8, PI * 2.2, 8, Color("bdbdbd"), 0.03 * _sz)
+			"hash":
+				_bowl_dish(tint)
+				_box(Rect2(_pt(0.3, 0.22), Vector2(0.14, 0.14) * _sz), Color("efe8f2"))
+				_box(Rect2(_pt(0.52, 0.2), Vector2(0.14, 0.14) * _sz), Color("9a5aa8"))
+			"soup":
+				_bowl_dish(tint)
+				draw_circle(_pt(0.5, 0.2), 0.04 * _sz, Color("5f9a3a"))
+				draw_circle(_pt(0.32, 0.24), 0.05 * _sz, light)
+				draw_circle(_pt(0.66, 0.22), 0.05 * _sz, light)
+			"fish_stew":
+				_bowl_dish(tint)
+				_shape(_ellipse(0.4, 0.24, 0.14, 0.07), Color("8fb8c9"))
+				draw_circle(_pt(0.62, 0.22), 0.05 * _sz, Color("efe8f2"))
+			"hearty":
+				_bowl_dish(tint)
+				for x in [0.38, 0.6]:
+					draw_arc(_pt(x, 0.18), 0.06 * _sz, PI * 0.8, PI * 2.2, 8, Color("d8d0c0"), 0.03 * _sz)
+				_box(Rect2(_pt(0.3, 0.26), Vector2(0.14, 0.14) * _sz), dark)
+				_box(Rect2(_pt(0.56, 0.26), Vector2(0.14, 0.14) * _sz), dark)
+			"dried":
+				for y in [0.42, 0.6, 0.78]:
+					_shape(_ellipse(0.5, y, 0.36, 0.1), tint)
+			"canned":
+				_box(Rect2(_pt(0.27, 0.14), Vector2(0.46, 0.8) * _sz), metal)
+				_box(Rect2(_pt(0.27, 0.4), Vector2(0.46, 0.28) * _sz), tint)
+				draw_line(_pt(0.27, 0.2), _pt(0.73, 0.2), dark, 0.03 * _sz)
+			"fermented":
+				_box(Rect2(_pt(0.3, 0.1), Vector2(0.4, 0.12) * _sz), metal)
+				_box(Rect2(_pt(0.24, 0.22), Vector2(0.52, 0.7) * _sz), tint)
+				draw_circle(_pt(0.4, 0.5), 0.04 * _sz, light)
+				draw_circle(_pt(0.6, 0.62), 0.05 * _sz, light)
+				draw_circle(_pt(0.5, 0.78), 0.035 * _sz, light)
 			"fish":
 				_shape(_ellipse(0.42, 0.5, 0.36, 0.22), tint)
 				_shape(_poly([[0.72, 0.5], [0.98, 0.25], [0.98, 0.75]]), dark)

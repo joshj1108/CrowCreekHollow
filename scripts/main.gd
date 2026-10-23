@@ -196,8 +196,6 @@ const WARMTH_OUTDOORS := 3.0     # warmth regained per hour outdoors in mild wea
 const WARMTH_INDOORS := 25.0     # warmth regained per hour in a patched or restored house
 const WARMTH_INDOORS_COLD := 10.0  # ... and in a decrepit or boarded one
 const NEED_HARM_HOURS := 2.0     # one HP lost every this many hours while a need is empty
-const MEAL_FOOD := 45.0
-const CROP_FOOD := 18.0
 const POND_WATER := 40.0
 const WELL_IX := Vector2i(12, 10)     # farm tile between plot one and the path, beside plot one
 const WELL_CAPACITY := 40.0           # water in the tank when it refills each morning
@@ -276,11 +274,6 @@ const PUMPKIN_LEVEL := 3
 # A crop sells for its seed's cost spread over its yield, plus this difficulty bonus.
 # Pumpkins need Farming 3 and more care, so each one sells for more than a turnip.
 const CROP_DIFFICULTY := {"turnip": 1, "pumpkin": 6}
-const XP_COOK_FISH := 15
-const XP_COOK_CROPS := 10
-const COOK_CROP_COUNT := 2
-const COOK_WOOD := 1         # wood burned per meal
-const MEAL_SANITY := 8.0     # sanity restored by eating a meal
 
 # Pack: crops, fish, and meals share the pack. Seeds have their own pouch.
 const BAG_BASE := 20
@@ -318,26 +311,11 @@ const SHOT_LIFE := 0.9
 const SMOKEHOUSE_COST := {"wood": 5, "fiber": 3, "coins": 60, "level": 3}
 # Preserving turns food into goods that keep in the pack. Each method needs a skill
 # level and makes one item per press at the smokehouse.
-const PRESERVED_KINDS := ["smoked", "dried", "canned", "fermented"]
-# Stews are slow cooked meals. Each kind is stored in the pack like a meal, and restores more than one.
-const STEWS := [
-	{"kind": "stew", "name": "Fish stew", "food": 70.0, "sanity": 12, "xp": 18, "level": 3, "fish": 1, "crops": 2, "smoked": 0, "wood": 1, "price": 13,
-		"color": "9a5a3a", "desc": "A thick stew of fish and crops."},
-	{"kind": "hearty", "name": "Hearty stew", "food": 95.0, "sanity": 18, "xp": 26, "level": 5, "fish": 0, "crops": 2, "smoked": 1, "wood": 1, "price": 20,
-		"color": "b5602a", "desc": "Smoked fish and crops, simmered for hours."},
-]
-const PRESERVE := [
-	{"id": "smoke", "kind": "smoked", "short": "Smoked", "name": "Smoke a fish", "input": "fish", "count": 1, "wood": 1, "fiber": 0, "skill": "Cooking", "level": 2, "xp": 12, "price": 11, "color": "b5703a"},
-	{"id": "dry", "kind": "dried", "short": "Dried", "name": "Dry crops", "input": "crops", "count": 2, "wood": 0, "fiber": 0, "skill": "Farming", "level": 2, "xp": 10, "price": 9, "color": "d8c48a"},
-	{"id": "can", "kind": "canned", "short": "Canned", "name": "Can crops", "input": "crops", "count": 2, "wood": 0, "fiber": 1, "skill": "Cooking", "level": 3, "xp": 14, "price": 10, "color": "9fb7c9"},
-	{"id": "ferment", "kind": "fermented", "short": "Fermented", "name": "Ferment crops", "input": "crops", "count": 2, "wood": 1, "fiber": 0, "skill": "Cooking", "level": 4, "xp": 16, "price": 11, "color": "a6c26a"},
-]
 # The stall sells what you carry and buys seeds. It is open 06:00 to 18:00.
 const STALL_IX := 22
 const STALL_IY := 9
 const STALL_CLOSE_HOUR := 18.0
 const SELL_FISH := 6
-const SELL_MEAL := 8
 const SEED_TURNIP_PRICE := 3    # per seed, sold in packs of 5
 const SEED_PUMPKIN_PRICE := 10  # per seed, sold in packs of 3
 
@@ -351,7 +329,6 @@ const VILLAGE_WATER := Rect2i(19, 13, 2, 2)
 const HOLLOW_SPAWNS := [Vector2i(28, 9), Vector2i(31, 13), Vector2i(33, 8)]
 const XP_HIT := 4
 const BASE_HP := 10
-const HEAL_MEAL := 4
 const HOMESTEAD_ARRIVE := Vector2i(BORDER_X + INNER_W - 3, BORDER_Y + INNER_H / 2)
 const SWING_TIME := 0.3       # seconds the swing is shown
 const SWING_COOLDOWN := 0.5
@@ -751,7 +728,7 @@ var hose_attached := false
 var well_water := 0.0      # hours spent with an empty need, toward the next HP lost
 var weather_kind := ""       # today's weather, rolled each morning: see WEATHER_WEIGHTS
 var skill_xp := {"Farming": 0, "Bushcrafting": 0, "Carpentry": 0, "Cleaning": 0, "Fishing": 0, "Cooking": 0, "Combat": 0, "Forestry": 0, "Mining": 0, "Smithing": 0}
-var inventory := {"seeds": STARTING_SEEDS, "pumpkin_seeds": 0, "crops": 0, "pumpkins": 0, "fish": 0, "meals": 0, "smoked": 0, "dried": 0, "canned": 0, "fermented": 0, "stew": 0, "hearty": 0, "bandage": 0}
+var inventory := {"seeds": STARTING_SEEDS, "pumpkin_seeds": 0, "crops": 0, "pumpkins": 0, "fish": 0, "eggs": 0, "milk": 0, "fish_meal": 0, "turnip_hash": 0, "smoked_fish": 0, "dried_turnip": 0, "pumpkin_soup": 0, "canned_turnip": 0, "fish_stew": 0, "fermented_turnip": 0, "hearty_stew": 0, "bandage": 0}
 var materials := {"wood": 0, "sticks": 0, "fiber": 0, "resin": 0, "hardwood": 0, "stone": 0, "copper_ore": 0, "iron_ore": 0, "copper_bar": 0, "iron_bar": 0, "arrows": 0, "bolts": 0}
 # The hotbar, in slot order. Slots after these are empty.
 const HOTBAR_TOOLS := [
@@ -803,8 +780,8 @@ const JOBS := [
 	{"id": "wood", "name": "Deliver wood", "need": {"wood": 6}, "coins": 24, "skill": "Forestry", "xp": 12},
 	{"id": "stone", "name": "Deliver stone", "need": {"stone": 4}, "coins": 22, "skill": "Mining", "xp": 12},
 	{"id": "resin", "name": "Deliver resin", "need": {"resin": 3}, "coins": 20, "skill": "Bushcrafting", "xp": 12},
-	{"id": "meals", "name": "Deliver meals", "need": {"meals": 2}, "coins": 34, "skill": "Cooking", "xp": 12},
-	{"id": "preserved", "name": "Deliver preserves", "need": {"smoked": 1, "dried": 1}, "coins": 40, "skill": "Cooking", "xp": 16},
+	{"id": "meals", "name": "Deliver meals", "need": {"fish_meal": 1, "turnip_hash": 1}, "coins": 34, "skill": "Cooking", "xp": 12},
+	{"id": "preserved", "name": "Deliver preserves", "need": {"smoked_fish": 1, "dried_turnip": 1}, "coins": 40, "skill": "Cooking", "xp": 16},
 ]
 var job_done_day := -1   # the last day the daily job was turned in
 
@@ -2491,7 +2468,7 @@ func _bag_items() -> Array:
 		if str(t["name"]).ends_with(" x0"):
 			continue
 		var action := str(t.get("action", ""))
-		var usable := action == "eat_meal" or action == "use_bandage" or action.begins_with("eat_stew:")
+		var usable := action.begins_with("eat_food:") or action == "use_bandage"
 		var desc := str(t.get("desc", ""))
 		if usable:
 			desc += "\nClick or press A to use."
@@ -2512,8 +2489,11 @@ func _on_bag_slot(index: int) -> void:
 
 
 func _on_panel_action(action_id: String) -> void:
-	if action_id.begins_with("preserve:"):
-		_preserve(action_id.trim_prefix("preserve:"))
+	if action_id.begins_with("cook:"):
+		_make_food(action_id.trim_prefix("cook:"))
+		return
+	if action_id.begins_with("sell_food:"):
+		_sell_food(action_id.trim_prefix("sell_food:"))
 		return
 	if action_id.begins_with("ammo:"):
 		_craft_ammo(action_id.trim_prefix("ammo:"))
@@ -2610,11 +2590,8 @@ func _on_panel_action(action_id: String) -> void:
 	if action_id == "make_bandage":
 		_make_bandage()
 		return
-	if action_id.begins_with("eat_stew:"):
-		_eat_stew(action_id.trim_prefix("eat_stew:"))
-		return
-	if action_id.begins_with("cook_stew:"):
-		_cook_stew(action_id.trim_prefix("cook_stew:"))
+	if action_id.begins_with("eat_food:"):
+		_eat_food(action_id.trim_prefix("eat_food:"))
 		return
 	if action_id.begins_with("inv_pick:"):
 		inventory_selected = action_id.trim_prefix("inv_pick:")
@@ -2642,24 +2619,12 @@ func _on_panel_action(action_id: String) -> void:
 			_advance_lantern()
 		"switch_seed":
 			_switch_seed()
-		"cook_fish":
-			_cook_fish()
-		"cook_crops":
-			_cook_crops()
-		"eat_meal":
-			_eat_meal()
-		"eat_crop":
-			_eat_crop()
-		"eat_pumpkin":
-			_eat_pumpkin()
 		"sell_crops":
 			_sell("crops")
 		"sell_pumpkins":
 			_sell("pumpkins")
 		"sell_fish":
 			_sell("fish")
-		"sell_meals":
-			_sell("meals")
 		"buy_turnip":
 			_buy_seeds("turnip")
 		"buy_pumpkin":
@@ -2885,36 +2850,25 @@ func _split_pack_tiles(tiles: Array) -> Array:
 
 func _raw_inventory_tiles() -> Array:
 	var tiles: Array = []
-	var n := int(inventory["crops"])
-	if n > 0:
-		tiles.append(_stack_tile("pack:crop", "Turnip", "turnip", "8fd16b", n, "in the pack",
-			"Harvested from the field. Eat it raw, or cook it for a better meal. Sells for %d coins." % _crop_price("turnip"), "eat_crop", "Eat"))
-	n = int(inventory["pumpkins"])
-	if n > 0:
-		tiles.append(_stack_tile("pack:pumpkin", "Pumpkin", "pumpkin", "e0822a", n, "in the pack",
-			"A large pumpkin. Eat it raw, or cook it. Sells for %d coins. Pumpkins do not keep in the cellar." % _crop_price("pumpkin"), "eat_pumpkin", "Eat"))
+	var n := 0
+	for f in Foods.LIST:
+		n = int(inventory[str(f["held"])])
+		if n <= 0:
+			continue
+		var desc := "%s %s" % [str(f["desc"]), _food_stats_text(f)]
+		var sells := _food_price(str(f["id"]))
+		if sells > 0:
+			desc += " Sells for %d coins." % sells
+		tiles.append(_stack_tile("pack:" + str(f["id"]), str(f["name"]), str(f["icon"]), str(f["tint"]), n, "in the pack",
+			desc, "eat_food:" + str(f["id"]), str(f.get("verb", "Eat"))))
 	n = int(inventory["fish"])
 	if n > 0:
 		tiles.append(_stack_tile("pack:fish", "Fish", "fish", "6fb8d9", n, "in the pack",
 			"Caught from the pond. Spoils overnight unless it is kept in the cooler. Sells for %d coins." % SELL_FISH, "", ""))
-	n = int(inventory["meals"])
-	if n > 0:
-		tiles.append(_stack_tile("pack:meal", "Meal", "bowl", "e0a050", n, "in the pack",
-			"A cooked meal. Restores %d food and %d sanity. Sells for %d coins." % [int(MEAL_FOOD), int(MEAL_SANITY), SELL_MEAL], "eat_meal", "Eat"))
 	n = int(inventory["bandage"])
 	if n > 0:
 		tiles.append(_stack_tile("pack:bandage", str(BANDAGE["name"]), "bandage", "e8e0d0", n, "in the pack",
 			"Heals %d HP. Use it from here." % int(BANDAGE["heal"]), "use_bandage", "Use"))
-	for st in STEWS:
-		n = int(inventory[st["kind"]])
-		if n > 0:
-			tiles.append(_stack_tile("pack:" + str(st["kind"]), str(st["name"]), "bowl", str(st["color"]), n, "in the pack",
-				"%s. Restores %d food and %d sanity. Eat it from here." % [st["desc"], int(st["food"]), int(st["sanity"])], "eat_stew:" + str(st["kind"]), "Eat"))
-	for entry in PRESERVE:
-		n = int(inventory[entry["kind"]])
-		if n > 0:
-			tiles.append(_stack_tile("pack:" + str(entry["kind"]), str(entry["short"]), "jar", str(entry["color"]), n, "in the pack",
-				"Preserved food. Keeps in the pack. Sells for %d coins." % int(entry["price"]), "", ""))
 	var turnip_ok := true
 	tiles.append(_stack_tile("seed:turnip", "Turnip seeds", "seed", "a8d46f", int(inventory["seeds"]), "in the pouch",
 		"Planted in tilled soil. Kept in the seed pouch.", "", ""))
@@ -3209,40 +3163,6 @@ func _recipes_gear() -> Array:
 			"button": "Worn" if worn else "Make",
 		})
 	return out
-
-
-func _recipes_cooking() -> Array:
-	var out: Array = _recipes_cooking_base()
-	for st in STEWS:
-		var cost := {"fish": int(st["fish"]), "crops": int(st["crops"]), "smoked": int(st["smoked"]), "wood": int(st["wood"])}
-		var costs: Array = []
-		for line in _cost_lines(cost):
-			costs.append(line)
-		out.append({
-			"key": "cook:" + str(st["kind"]), "name": str(st["name"]), "icon": "bowl", "tint": str(st["color"]),
-			"desc": "%s +%d Cooking XP." % [st["desc"], int(st["xp"])],
-			"costs": costs, "level_text": _level_text("Cooking", int(st["level"])),
-			"level_ok": _level("Cooking") >= int(st["level"]), "enabled": _can_cook_stew(st),
-			"action": "cook_stew:" + str(st["kind"]), "button": "Cook",
-		})
-	return out
-
-
-func _recipes_cooking_base() -> Array:
-	return [
-		{
-			"key": "cook:fish", "name": "Cooked fish", "icon": "bowl", "tint": TINT_FOOD,
-			"desc": "A fish and a piece of wood make one meal. +%d Cooking XP." % XP_COOK_FISH,
-			"costs": [{"label": "1 fish", "have": _held("fish"), "need": 1}, {"label": "%d wood" % COOK_WOOD, "have": _held("wood"), "need": COOK_WOOD}],
-			"level_text": "", "level_ok": true, "enabled": _can_cook_fish(), "action": "cook_fish", "button": "Cook",
-		},
-		{
-			"key": "cook:crops", "name": "Cooked crops", "icon": "bowl", "tint": TINT_FOOD,
-			"desc": "%d crops and a piece of wood make one meal. +%d Cooking XP." % [COOK_CROP_COUNT, XP_COOK_CROPS],
-			"costs": [{"label": "%d crops" % COOK_CROP_COUNT, "have": _held("crops"), "need": COOK_CROP_COUNT}, {"label": "%d wood" % COOK_WOOD, "have": _held("wood"), "need": COOK_WOOD}],
-			"level_text": "", "level_ok": true, "enabled": _can_cook_crops(), "action": "cook_crops", "button": "Cook",
-		},
-	]
 
 
 func _recipes_tools() -> Array:
@@ -4162,6 +4082,16 @@ func _update_crows(delta: float) -> void:
 	crow_layer.queue_redraw()
 
 
+# A wing is a thin triangle, and at some flap angles its three points line up, which the triangulator
+# rejects. Nudge the middle point off the line in that case.
+func _wing_shape(a: Vector2, b: Vector2, c: Vector2) -> PackedVector2Array:
+	for nudge in [Vector2(0, 0.6), Vector2(0.6, 0), Vector2(0, -0.6)]:
+		if absf((b - a).cross(c - a)) >= 0.6:
+			break
+		b += nudge
+	return PackedVector2Array([a, b, c])
+
+
 func _draw_crow_layer() -> void:
 	# Shadows first, on the ground under each crow, so they sit beneath everything else.
 	for c in crows:
@@ -4192,7 +4122,7 @@ func _draw_crow_layer() -> void:
 		else:
 			far_tip = root + Vector2(-facing * 3.0, -2.0 + flap * 6.5)
 			near_tip = root + Vector2(-facing * 6.0, -2.0 + flap * 7.5)
-		crow_layer.draw_colored_polygon(PackedVector2Array([root + Vector2(facing * 1.5, -0.5), far_tip, root + Vector2(-facing * 1.5, 0.5)]), wing_far)
+		crow_layer.draw_colored_polygon(_wing_shape(root + Vector2(facing * 1.5, -0.5), far_tip, root + Vector2(-facing * 1.5, 0.5)), wing_far)
 		# Tail, body, head and beak.
 		crow_layer.draw_colored_polygon(PackedVector2Array([p + Vector2(-facing * 4.0, -0.5), p + Vector2(-facing * 10.0, 1.5), p + Vector2(-facing * 4.0, 2.5)]), ink)
 		crow_layer.draw_colored_polygon(FarmArt.ellipse(p, 6.0, 3.6), ink)
@@ -4205,7 +4135,7 @@ func _draw_crow_layer() -> void:
 			crow_layer.draw_circle(head + Vector2(facing * 1.0, -0.6), 2.2, Color(1.0, 0.1, 0.08, 0.3))
 		crow_layer.draw_circle(head + Vector2(facing * 1.0, -0.6), 0.75, Color(1.0, 0.18, 0.14) if roost_crow else Color(0.92, 0.86, 0.5))
 		# Near wing in front of the body.
-		crow_layer.draw_colored_polygon(PackedVector2Array([root + Vector2(facing * 2.0, 0.0), near_tip, root + Vector2(-facing * 2.0, 0.8)]), wing_near)
+		crow_layer.draw_colored_polygon(_wing_shape(root + Vector2(facing * 2.0, 0.0), near_tip, root + Vector2(-facing * 2.0, 0.8)), wing_near)
 		crow_layer.draw_line(root + Vector2(facing * 1.0, 0.0), near_tip.lerp(root, 0.35), Color(0.45, 0.45, 0.55, 0.45), 0.8)
 
 
@@ -4362,104 +4292,209 @@ func _fish_roll() -> void:
 
 
 # --- Cooking -----------------------------------------------------------------
-
-func _can_cook_fish() -> bool:
-	return int(inventory["fish"]) > 0 and int(materials["wood"]) >= COOK_WOOD
-
-
-func _cook_fish() -> void:
-	if not _can_cook_fish():
-		_show_message("You need a fish and a piece of wood to cook.")
-		return
-	inventory["fish"] -= 1
-	materials["wood"] -= COOK_WOOD
-	inventory["meals"] += 1
-	stats["cooked"] += 1
-	_grant_xp("Cooking", XP_COOK_FISH)
-	_show_message("You cook the fish over a small fire. +%d Cooking XP" % XP_COOK_FISH)
+# The Craft panel's cooking list: every recipe made at the fire.
+func _recipes_cooking() -> Array:
+	var out: Array = []
+	for r in Foods.RECIPES:
+		if r["station"] == "fire":
+			out.append(_recipe_card(r))
+	return out
 
 
-func _can_cook_crops() -> bool:
-	return _crop_total() >= COOK_CROP_COUNT and int(materials["wood"]) >= COOK_WOOD
+func _recipe_card(r: Dictionary) -> Dictionary:
+	var f := Foods.find(str(r["food"]))
+	var costs: Array = []
+	for key in r["needs"].keys():
+		var need := int(r["needs"][key])
+		costs.append({"label": "%d %s" % [need, _need_label(str(key))], "have": _recipe_held(str(key)), "need": need})
+	var skill := str(f["skill"])
+	var level := int(f["level"])
+	return {
+		"key": "cook:" + str(f["id"]), "name": str(f["name"]), "icon": str(f["icon"]), "tint": str(f["tint"]),
+		"desc": "%s %s +%d %s XP." % [str(f["desc"]), _food_stats_text(f), int(r["xp"]), skill],
+		"costs": costs, "level_text": _level_text(skill, level) if level > 0 else "",
+		"level_ok": _level(skill) >= level, "enabled": _can_make(str(f["id"])),
+		"action": "cook:" + str(f["id"]), "button": "Cook",
+	}
 
 
-func _can_cook_stew(st: Dictionary) -> bool:
-	if _level("Cooking") < int(st["level"]):
-		return false
-	return int(inventory["fish"]) >= int(st["fish"]) and _crop_total() >= int(st["crops"]) \
-		and int(inventory["smoked"]) >= int(st["smoked"]) and int(materials["wood"]) >= int(st["wood"])
+func _need_label(key: String) -> String:
+	return key.replace("_", " ")
 
 
-func _cook_stew(kind: String) -> void:
-	for st in STEWS:
-		if st["kind"] != kind:
-			continue
-		if not _can_cook_stew(st):
-			_show_message("You need %s and a fire to make a %s." % [_stew_ingredients(st), str(st["name"]).to_lower()])
-			return
-		inventory["fish"] -= int(st["fish"])
-		_spend_crops(int(st["crops"]))
-		inventory["smoked"] -= int(st["smoked"])
-		materials["wood"] -= int(st["wood"])
-		inventory[kind] += 1
-		stats["cooked"] += 1
-		_grant_xp("Cooking", int(st["xp"]))
-		_show_message("You simmer a %s. +%d Cooking XP" % [str(st["name"]).to_lower(), int(st["xp"])])
-		return
+# What a recipe input is held as. Turnips are the crops in the pack; the rest are pack or material counts.
+func _recipe_held(key: String) -> int:
+	if key == "turnips":
+		return int(inventory["crops"])
+	return _held(key)
 
 
-func _stew_ingredients(st: Dictionary) -> String:
+func _spend_recipe_input(key: String, n: int) -> void:
+	if key == "turnips":
+		inventory["crops"] -= n
+	elif materials.has(key):
+		materials[key] -= n
+	else:
+		inventory[key] -= n
+
+
+func _recipe_needs_text(r: Dictionary) -> String:
 	var parts: Array = []
-	if int(st["fish"]) > 0:
-		parts.append("%d fish" % int(st["fish"]))
-	if int(st["smoked"]) > 0:
-		parts.append("%d smoked fish" % int(st["smoked"]))
-	parts.append("%d crops" % int(st["crops"]))
-	parts.append("%d wood" % int(st["wood"]))
+	for key in r["needs"].keys():
+		parts.append("%d %s" % [int(r["needs"][key]), _need_label(str(key))])
 	return ", ".join(parts)
 
 
-func _eat_stew(kind: String) -> void:
-	for st in STEWS:
-		if st["kind"] != kind:
-			continue
-		if int(inventory[kind]) <= 0:
-			_show_message("You have no %s left." % str(st["name"]).to_lower())
-			return
-		inventory[kind] -= 1
-		stats["eaten"] += 1
-		_change_sanity(float(st["sanity"]))
-		hp = mini(max_hp(), hp + HEAL_MEAL)
-		food = minf(100.0, food + float(st["food"]))
-		play_sfx("eat", 0.05)
-		_show_message("You eat the %s. Food %d/100, HP %d/%d" % [str(st["name"]).to_lower(), food, hp, max_hp()])
-		return
+func _food_stats_text(f: Dictionary) -> String:
+	return "Restores %d food, %d sanity, %d HP." % [int(Foods.food_restore(f)), int(Foods.sanity_restore(f)), Foods.hp_restore(f)]
 
 
-func _cook_crops() -> void:
-	if not _can_cook_crops():
-		_show_message("You need %d crops and a piece of wood to cook." % COOK_CROP_COUNT)
+func _can_make(food_id: String) -> bool:
+	var r := Foods.recipe(food_id)
+	if r.is_empty():
+		return false
+	if r["station"] == "smokehouse" and not smokehouse_built:
+		return false
+	var f := Foods.find(food_id)
+	if _level(str(f["skill"])) < int(f["level"]):
+		return false
+	for key in r["needs"].keys():
+		if _recipe_held(str(key)) < int(r["needs"][key]):
+			return false
+	return true
+
+
+func _make_food(food_id: String) -> void:
+	var r := Foods.recipe(food_id)
+	var f := Foods.find(food_id)
+	if r.is_empty() or f.is_empty():
 		return
-	_spend_crops(COOK_CROP_COUNT)
-	materials["wood"] -= COOK_WOOD
-	inventory["meals"] += 1
+	if r["station"] == "smokehouse" and not smokehouse_built:
+		_show_message("Build a smokehouse from the House panel first.")
+		return
+	var skill := str(f["skill"])
+	if _level(skill) < int(f["level"]):
+		_show_message("%s needs %s %d." % [str(f["name"]), skill, int(f["level"])])
+		return
+	if not _can_make(food_id):
+		_show_message("You need %s to make %s." % [_recipe_needs_text(r), str(f["name"]).to_lower()])
+		return
+	for key in r["needs"].keys():
+		_spend_recipe_input(str(key), int(r["needs"][key]))
+	inventory[food_id] += 1
 	stats["cooked"] += 1
-	_grant_xp("Cooking", XP_COOK_CROPS)
-	_show_message("You stew the crops into a meal. +%d Cooking XP" % XP_COOK_CROPS)
+	_grant_xp(skill, int(r["xp"]))
+	_show_message("You make %s. +%d %s XP" % [str(f["name"]).to_lower(), int(r["xp"]), skill])
 
 
-func _eat_meal() -> void:
-	if int(inventory["meals"]) <= 0:
-		_show_message("You have nothing to eat.")
+func _eat_food(food_id: String) -> void:
+	var f := Foods.find(food_id)
+	if f.is_empty():
 		return
-	inventory["meals"] -= 1
+	var key := str(f["held"])
+	if int(inventory[key]) <= 0:
+		_show_message("You have no %s left." % str(f["name"]).to_lower())
+		return
+	inventory[key] -= 1
 	stats["eaten"] += 1
-	_change_sanity(MEAL_SANITY)
-	hp = mini(max_hp(), hp + HEAL_MEAL)
-	food = minf(100.0, food + MEAL_FOOD)
+	_change_sanity(Foods.sanity_restore(f))
+	hp = mini(max_hp(), hp + Foods.hp_restore(f))
+	food = minf(100.0, food + Foods.food_restore(f))
 	play_sfx("eat", 0.05)
-	_show_message("You eat a warm meal. Your mind steadies. Food %d/100, HP %d/%d" % [food, hp, max_hp()])
+	var verb := str(f.get("verb", "Eat")).to_lower()
+	_show_message("You %s the %s. Food %d/100, HP %d/%d" % [verb, str(f["name"]).to_lower(), food, hp, max_hp()])
 
+
+# The first cooked food in the pack, for the miller's bread. Empty when there is none.
+func _first_cooked() -> String:
+	for r in Foods.RECIPES:
+		var f := Foods.find(str(r["food"]))
+		if int(inventory[str(f["held"])]) > 0:
+			return str(f["id"])
+	return ""
+
+
+func _food_price(food_id: String) -> int:
+	if food_id == "turnip":
+		return _crop_price("turnip")
+	if food_id == "pumpkin":
+		return _crop_price("pumpkin")
+	return int(Foods.find(food_id).get("price", 0))
+
+
+func _sell_food(food_id: String) -> void:
+	var f := Foods.find(food_id)
+	if f.is_empty():
+		return
+	var key := str(f["held"])
+	var count := int(inventory[key])
+	if count <= 0:
+		_show_message("You have nothing to sell.")
+		return
+	var price := _food_price(food_id)
+	inventory[key] = 0
+	money += count * price
+	stats["sold"] += count
+	_show_message("Sold %d for %d coins." % [count, count * price])
+
+
+func _cooked_sell_rows() -> Array:
+	var rows: Array = []
+	for r in Foods.RECIPES:
+		var f := Foods.find(str(r["food"]))
+		var held := int(inventory[str(f["held"])])
+		if held <= 0:
+			continue
+		rows.append({
+			"name": "%s (%d each)" % [str(f["name"]), _food_price(str(f["id"]))],
+			"value": "%d held" % held,
+			"button": "Sell all",
+			"action": "sell_food:" + str(f["id"]),
+			"enabled": true,
+		})
+	return rows
+
+
+func _smokehouse_rows() -> Array:
+	var rows: Array = [
+		{"section": "Smokehouse"},
+		{"note": "Preserved goods keep in your pack, so nothing spoils. Stand beside the smokehouse, facing it, and press Space to open this panel."},
+	]
+	var held: Array = []
+	for r in Foods.RECIPES:
+		if r["station"] != "smokehouse":
+			continue
+		var f := Foods.find(str(r["food"]))
+		rows.append({
+			"name": "%s (%s)" % [str(f["name"]), _recipe_needs_text(r)],
+			"value": "%s %d, +%d XP, sells %d" % [str(f["skill"]), int(f["level"]), int(r["xp"]), _food_price(str(f["id"]))],
+			"button": "Make",
+			"action": "cook:" + str(f["id"]),
+			"enabled": _can_make(str(f["id"])),
+		})
+		var n := int(inventory[str(f["held"])])
+		if n > 0:
+			held.append("%s %d" % [str(f["name"]).to_lower(), n])
+	rows.append({"name": "Held", "value": ", ".join(held) if not held.is_empty() else "nothing yet"})
+	return rows
+
+
+func _pack_used() -> int:
+	var used := _slots_for(int(inventory["fish"])) + _slots_for(int(inventory["bandage"]))
+	for f in Foods.LIST:
+		used += _slots_for(int(inventory[str(f["held"])]))
+	return used
+
+
+# Saves from before foods were named for what made them keep their food under the new names.
+func _migrate_legacy_food(saved: Variant) -> void:
+	if typeof(saved) != TYPE_DICTIONARY:
+		return
+	var moves := {"meals": "turnip_hash", "smoked": "smoked_fish", "dried": "dried_turnip", "canned": "canned_turnip",
+		"fermented": "fermented_turnip", "stew": "fish_stew", "hearty": "hearty_stew"}
+	for old in moves.keys():
+		if saved.has(old):
+			inventory[moves[old]] = int(inventory[moves[old]]) + int(saved[old])
 
 func _can_repair_well() -> bool:
 	return not well_repaired and materials["wood"] >= WELL_REPAIR["wood"] \
@@ -4571,16 +4606,6 @@ func _well_rows() -> Array:
 	return rows
 
 
-func _eat_crop() -> void:
-	if _crop_total() <= 0:
-		_show_message("You have no crops to eat.")
-		return
-	_spend_crops(1)
-	food = minf(100.0, food + CROP_FOOD)
-	play_sfx("eat", 0.05)
-	_show_message("You eat a raw crop. Food %d/100" % food)
-
-
 # Turnips and pumpkins both feed you and cook into meals. Food and cooking count them together.
 func _crop_total() -> int:
 	return int(inventory["crops"]) + int(inventory["pumpkins"])
@@ -4601,22 +4626,6 @@ func _crop_price(kind: String) -> int:
 
 
 # What the preserve recipes take as input. "crops" means turnips or pumpkins.
-func _input_held(kind: String) -> int:
-	if kind == "crops":
-		return _crop_total()
-	return int(inventory[kind])
-
-
-func _eat_pumpkin() -> void:
-	if int(inventory["pumpkins"]) <= 0:
-		_show_message("You have no pumpkins to eat.")
-		return
-	inventory["pumpkins"] -= 1
-	food = minf(100.0, food + CROP_FOOD * 2.0)
-	play_sfx("eat", 0.05)
-	_show_message("You eat a raw pumpkin. Food %d/100" % food)
-
-
 func _drink_pond() -> void:
 	if water >= 100.0:
 		_show_message("You're not thirsty.")
@@ -4720,17 +4729,6 @@ func _slots_for(count: int) -> int:
 	return ceili(float(maxi(0, count)) / float(STACK_SIZE))
 
 
-func _pack_used() -> int:
-	var used := _slots_for(int(inventory["crops"])) + _slots_for(int(inventory["pumpkins"]))
-	used += _slots_for(int(inventory["fish"])) + _slots_for(int(inventory["meals"]))
-	for kind in PRESERVED_KINDS:
-		used += _slots_for(int(inventory[kind]))
-	for st in STEWS:
-		used += _slots_for(int(inventory[st["kind"]]))
-	used += _slots_for(int(inventory["bandage"]))
-	return used
-
-
 # True when adding amount more of a kind that already holds current still fits in the pack's free slots.
 func _pack_room(current: int, amount: int) -> bool:
 	return _slots_for(current + amount) - _slots_for(current) <= _pack_free()
@@ -4813,11 +4811,6 @@ func _sell(kind: String) -> void:
 	var price := _crop_price("pumpkin") if kind == "pumpkins" else _crop_price("turnip")
 	if kind == "fish":
 		price = SELL_FISH
-	elif kind == "meals":
-		price = SELL_MEAL
-	for entry in PRESERVE:
-		if entry["kind"] == kind:
-			price = int(entry["price"])
 	inventory[kind] = 0
 	money += count * price
 	stats["sold"] += count
@@ -4934,14 +4927,7 @@ func _trade_rows() -> Array:
 			"action": "sell_fish",
 			"enabled": int(inventory["fish"]) > 0,
 		},
-		{
-			"name": "Meals (%d each)" % SELL_MEAL,
-			"value": "%d held" % int(inventory["meals"]),
-			"button": "Sell all",
-			"action": "sell_meals",
-			"enabled": int(inventory["meals"]) > 0,
-		},
-		] + _preserved_sell_rows() + [
+		] + _cooked_sell_rows() + [
 		{"section": "Buy seeds"},
 		{
 			"name": "Turnip seeds (%d each)" % SEED_TURNIP_PRICE,
@@ -5024,84 +5010,6 @@ func _build_smokehouse() -> void:
 	_build_interior()
 	_show_message("The smokehouse is built beside the house. Smoke fish and preserve crops there.")
 	queue_redraw()
-
-
-func _can_preserve(entry: Dictionary) -> bool:
-	if not smokehouse_built:
-		return false
-	if _level(str(entry["skill"])) < int(entry["level"]):
-		return false
-	if _input_held(str(entry["input"])) < int(entry["count"]):
-		return false
-	if int(materials["wood"]) < int(entry["wood"]):
-		return false
-	return int(materials["fiber"]) >= int(entry["fiber"])
-
-
-func _preserve(id: String) -> void:
-	if not smokehouse_built:
-		_show_message("Build a smokehouse from the House panel first.")
-		return
-	var entry: Dictionary = {}
-	for e in PRESERVE:
-		if e["id"] == id:
-			entry = e
-	if entry.is_empty():
-		return
-	if not _can_preserve(entry):
-		_show_message("You need %d %s, the materials, and %s %d." % [int(entry["count"]), entry["input"], entry["skill"], int(entry["level"])])
-		return
-	if entry["input"] == "crops":
-		_spend_crops(int(entry["count"]))
-	else:
-		inventory[entry["input"]] -= int(entry["count"])
-	materials["wood"] -= int(entry["wood"])
-	materials["fiber"] -= int(entry["fiber"])
-	inventory[entry["kind"]] += 1
-	stats["preserved"] += 1
-	_grant_xp(str(entry["skill"]), int(entry["xp"]))
-	_show_message("You make a %s. +%d %s XP" % [str(entry["short"]).to_lower(), int(entry["xp"]), entry["skill"]])
-
-
-func _smokehouse_rows() -> Array:
-	var rows: Array = [
-		{"section": "Smokehouse"},
-		{"note": "Preserved goods keep in your pack, so nothing spoils. Stand beside the smokehouse, facing it, and press Space to open this panel."},
-	]
-	for entry in PRESERVE:
-		var needs: Array = ["%d %s" % [int(entry["count"]), entry["input"]]]
-		if int(entry["wood"]) > 0:
-			needs.append("%d wood" % int(entry["wood"]))
-		if int(entry["fiber"]) > 0:
-			needs.append("%d fiber" % int(entry["fiber"]))
-		rows.append({
-			"name": "%s (%s)" % [entry["name"], ", ".join(needs)],
-			"value": "%s %d, +%d XP, sells %d" % [entry["skill"], int(entry["level"]), int(entry["xp"]), int(entry["price"])],
-			"button": "Make",
-			"action": "preserve:" + str(entry["id"]),
-			"enabled": _can_preserve(entry),
-		})
-	rows.append({
-		"name": "Held",
-		"value": "smoked %d, dried %d, canned %d, fermented %d" % [int(inventory["smoked"]), int(inventory["dried"]), int(inventory["canned"]), int(inventory["fermented"])],
-	})
-	return rows
-
-
-func _preserved_sell_rows() -> Array:
-	var rows: Array = []
-	for entry in PRESERVE:
-		var held := int(inventory[entry["kind"]])
-		if held <= 0:
-			continue
-		rows.append({
-			"name": "%s (%d each)" % [entry["short"], int(entry["price"])],
-			"value": "%d held" % held,
-			"button": "Sell all",
-			"action": "sell:" + str(entry["kind"]),
-			"enabled": true,
-		})
-	return rows
 
 
 func _storage_label(tile: int) -> String:
@@ -6056,15 +5964,11 @@ func _rest_at_camp() -> void:
 
 func _pack_cells() -> Array:
 	var cells: Array = []
-	for i in int(inventory["crops"]):
-		cells.append({"color": "8fd16b", "label": "Crop", "tip": "Harvested crop. Eat it from the Body section, or cook it."})
-	for i in int(inventory["fish"]):
+	for f in Foods.LIST:
+		for _i in int(inventory[str(f["held"])]):
+			cells.append({"color": str(f["tint"]), "label": str(f["name"]), "tip": "%s. %s" % [str(f["name"]), _food_stats_text(f)]})
+	for _i in int(inventory["fish"]):
 		cells.append({"color": "6fb8d9", "label": "Fish", "tip": "Fish. Spoils overnight unless stored in the cooler."})
-	for i in int(inventory["meals"]):
-		cells.append({"color": "e0a050", "label": "Meal", "tip": "Cooked meal. Eat it from the Body section for food and sanity."})
-	for entry in PRESERVE:
-		for _i in int(inventory[entry["kind"]]):
-			cells.append({"color": entry["color"], "label": entry["short"], "tip": "%s. Keeps in the pack." % entry["short"]})
 	while cells.size() < _pack_capacity():
 		cells.append({"empty": true, "tip": "Empty slot"})
 	return cells
@@ -6251,8 +6155,8 @@ func _talk(npc: Dictionary) -> void:
 	if npc.has("role"):
 		_show_message("%s: %s" % [npc["name"], lines[int(stats["talks"]) % lines.size()]])
 		return
-	if npc["id"] == "tomas" and int(inventory["meals"]) > 0 and int(stats["delivered"]) == 0:
-		inventory["meals"] -= 1
+	if npc["id"] == "tomas" and _first_cooked() != "" and int(stats["delivered"]) == 0:
+		inventory[_first_cooked()] -= 1
 		stats["delivered"] += 1
 		_show_message("Tomas: Bread and thanks. The village eats tonight.")
 		return
@@ -6917,12 +6821,12 @@ func _begin_day_events() -> String:
 			continue
 		stats["events_seen"] += 1
 		if ev["effect"] == "supper":
-			inventory["meals"] += 2
+			inventory["turnip_hash"] += 2
 			_change_sanity(10.0)
 		elif ev["effect"] == "fair":
 			inventory["seeds"] += 5
 		elif ev["effect"] == "feast":
-			inventory["meals"] += 2
+			inventory["fish_meal"] += 2
 			inventory["bandage"] += 1
 		note += " %s: %s" % [ev["title"], ev["text"]]
 	return note
@@ -6988,7 +6892,7 @@ func _settle_day() -> String:
 			var room := maxi(0, _pack_capacity() - _pack_used())
 			var eggs := mini(hens, room)
 			if eggs > 0:
-				inventory["meals"] += eggs
+				inventory["eggs"] += eggs
 				notes += " The hens laid %d egg%s." % [eggs, "" if eggs == 1 else "s"]
 			if eggs < hens:
 				notes += " Some eggs spoiled for want of pack room."
@@ -7004,7 +6908,7 @@ func _settle_day() -> String:
 			var room := maxi(0, _pack_capacity() - _pack_used())
 			var milk := mini(goats, room)
 			if milk > 0:
-				inventory["meals"] += milk
+				inventory["milk"] += milk
 				notes += " The goats gave %d milk%s to drink." % [milk, "" if milk == 1 else "s"]
 			if milk < goats:
 				notes += " Some milk spoiled for want of pack room."
@@ -7582,6 +7486,7 @@ func _load_game() -> bool:
 	well_water = float(data.get("well_water", 0.0))
 	_merge_ints(skill_xp, data.get("skill_xp"))
 	_merge_ints(inventory, data.get("inventory"))
+	_migrate_legacy_food(data.get("inventory"))
 	_merge_ints(materials, data.get("materials"))
 	_merge_ints(stats, data.get("stats"))
 	# Saves before version 2 used the old quest list, so their progress is reset.
