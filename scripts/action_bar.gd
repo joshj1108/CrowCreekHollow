@@ -190,6 +190,8 @@ func _build_menu() -> Control:
 	scroll = ScrollContainer.new()
 	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	# Moving the gamepad's focus down the list scrolls it along.
+	scroll.follow_focus = true
 	main.add_child(scroll)
 	rows_box = VBoxContainer.new()
 	rows_box.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -732,6 +734,18 @@ func _box(bg: Color, border: Color, border_width: int, radius: int, margin: int)
 
 
 var _pointer_held := false
+
+
+# The right stick scrolls the open menu, so long lists can be read without moving focus.
+func _process(delta: float) -> void:
+	if not panel.visible or scroll == null:
+		return
+	var pads := Input.get_connected_joypads()
+	if pads.is_empty():
+		return
+	var stick := Input.get_joy_axis(pads[0], JOY_AXIS_RIGHT_Y)
+	if absf(stick) > 0.25:
+		scroll.scroll_vertical += int(stick * 900.0 * delta)
 
 
 func _input(event: InputEvent) -> void:
