@@ -73,8 +73,8 @@ The farmer is drawn in code. A straw hat with a band, a shirt under blue overall
 - Darkness starts at 19:00.
 - The bed can be used from **18:00 to 03:00**. Using it saves the game and ends the day.
 - If you aren't in bed by **03:00**, you collapse. The day ends, the game saves, and your **sanity limit drops by 5 permanently**. A cleanse can recover it (see Sanity).
-- Crops grow one stage per day. Brush piles respawn each morning. Thicket piles appear at Bushcrafting 3.
-- Rain (drizzle, rain, or downpour) waters every crop as soon as it starts that morning, and a crop planted on a rainy day is watered too. Watered crops show a sparkle and a faint sheen. Turnips and pumpkins each have four drawn stages: a sprout, leaves (pumpkins add a vine), a swelling fruit, and the ripe crop.
+- Crops grow one watered day at a time: **turnips take 7 days** and **pumpkins take 10 days** from seed to ripe, with the four stages spread across those days. Brush piles respawn each morning. Thicket piles appear at Bushcrafting 3.
+- Rain (drizzle, rain, or downpour) waters every crop as soon as it starts that morning, and a crop planted on a rainy day is watered too. Watered crops show a sparkle and a faint sheen (there is no blue drop). Turnips and pumpkins each have four drawn stages: a sprout, leaves (pumpkins add a vine), a swelling fruit, and the ripe crop.
 
 ## Calendar, seasons, and weather
 
@@ -150,7 +150,7 @@ Saves from before this change reset chapter progress. Stat-based achievements re
 - Coins are the money. The HUD shows them, and they're saved.
 - The **farm stand** sits on the path east of the house. It is open **06:00 to 18:00**. Walk up to it and press Space to trade.
 - The farm stand **only buys what you carry**. Take crops or fish out of storage first.
-- Sell prices: turnips 4 each, fish 6 each, eggs 4 each, goat milk 6 each, and cooked food from 8 to 20 each, as listed on the Trade panel.
+- Sell prices: turnips 8 each, pumpkins 30 each, fish 6 each, eggs 4 each, goat milk 6 each, and cooked food from 8 to 20 each, as listed on the Trade panel.
 - Buy seeds: 5 turnip seeds for 15 coins, or 3 pumpkin seeds for 30 coins at Farming 3.
 
 ## Pack, bags, and storage
@@ -284,7 +284,7 @@ The house is drawn in four stages that match its repair level. **Decrepit** has 
 - **Attaching the hose** costs 3 fiber and 2 resin, and needs a working pump. The hose reaches every plot on the farm, so no plot is out of range.
 - Once the hose is on, face a growing crop and press Space to water it. Each watering uses 1 water from the tank. A crop only needs one watering a day, and a second press that day says it's already watered.
 - **Rain waters every crop** on a drizzly, rainy, or downpour day, so those crops grow without the hose. Sunny, overcast, fog, and snow days don't water.
-- A watered crop shows a blue drop. The Inventory's Planting section shows how many growing crops are watered today.
+- The Inventory's Planting section shows how many growing crops are watered today.
 - The well's panel also drinks from the pump, for +35 water, at no cost.
 
 ## Body needs
@@ -323,7 +323,7 @@ The house is drawn in four stages that match its repair level. **Decrepit** has 
 - There are **three save slots**. New Game asks for a slot, and a used slot takes two presses to overwrite. Load Game lists each slot with its day, coins, and house stage. Older single-slot saves become slot 1. Pressing Overwrite keeps focus on the armed slot, so a gamepad's second press overwrites it. Crops from saves made before watering existed count as watered on the day they load, so they grow that night.
 - The game saves **only** when you sleep in bed or collapse at 03:00, to the slot you're playing.
 - The in-game Settings menu ends with a **Game** section that never folds. It holds **Music** (on or off), **Unstick me**, and **Quit to the main menu**. Quitting returns to the start screen without saving, and progress since the last sleep is lost. The slot you were playing stays selected. Sleeping is the only way to save.
-- Saved: day, skill XP, inventory (including every food), coins, goats and their feeding, bag upgrades, root cellar, cooler, and smokehouse (built, and what they hold), materials, stats, story chapters done, achievements done, selected seed, lantern tier, house stage, house wear, coop and hens, barn (built, and where it stands), tidy/mend/cleanse days, sanity, sanity penalty, boredom loss and the day you were last entertained, animal ages (hens and goats), property tax owed, its due day and reminder stage, the post on the desk, crops (with kind), brush piles, **player position**, whether you were **inside the house**, and the **open panel**.
+- Saved: day, skill XP, inventory (including every food), coins, goats and their feeding, bag upgrades, root cellar, cooler, and smokehouse (built, and what they hold), materials, stats, story chapters done, achievements done, selected seed, lantern tier, house stage, house wear, coop and hens, barn (built, and where it stands), tidy/mend/cleanse days, sanity, sanity penalty, boredom loss and the day you were last entertained, animal ages (hens and goats), crop days, clean nights, property tax owed, its due day and reminder stage, the post on the desk, crops (with kind), brush piles, **player position**, whether you were **inside the house**, and the **open panel**.
 - Quitting mid-day loses that day's progress since the last save. Position and panel are saved at the same moment, so they reflect the last sleep or collapse.
 
 ## The world: the portal, the road, and the wilds
@@ -507,7 +507,7 @@ A cave on the homestead, entered from the farm's west edge. It is the only place
 
 ## Upkeep, hens, and the third plot
 
-**Goats (the barn)** — The barn holds up to **3 goats**, bought for **45 coins** each from the Barn panel (stand beside the barn and press Space). Feed them **2 crops each, once a day**. A **grown** goat (4 nights old) gives **1 milk each morning** when fed, stored as milk. Young goats give nothing. A grown goat sells for **70 coins** from the Barn panel, against 45 to buy. Two unfed days in a row and a goat wanders off. Goats wander in the yard in front of the barn and keep about half a tile between them, so they never stand on the same spot. Each goat that is unfed counts as a missed chore that night, like the hens.
+**Goats (the barn)** — The barn holds up to **3 goats**, bought for **45 coins** each from the Barn panel (stand beside the barn and press Space). Feed them **2 crops each, once a day**. A **grown** goat (10 days old) gives **1 milk each morning** when fed, stored as milk. Young goats give nothing. A grown goat sells for **70 coins** from the Barn panel, against 45 to buy. Two unfed days in a row and a goat wanders off. Goats wander in the yard in front of the barn and keep about half a tile between them, so they never stand on the same spot. Each goat that is unfed counts as a missed chore that night, like the hens.
 
 
 Keeping the homestead running is the daily work. Each part is at base level for now, to be deepened one project at a time.
@@ -517,10 +517,10 @@ Keeping the homestead running is the daily work. Each part is at base level for 
 - **Buildings menu (U):** the workshop, the coop, and the barn are built and moved from here, not from the House panel. Each one is placed the same way: building it starts placement, a green or red preview follows the tile you face, and Space places it on open grass. A spot can't cover plots, crops, rocks, brush, fishing spots, or you. B cancels. The Move button relocates a standing building for free. A building that was paid for but never placed (older saves) shows Place instead.
 - **Coop:** 6 wood, 4 fiber, and Carpentry 2. A 2 by 2 building. Stand beside the coop, facing it, and press Space to open its panel, where you buy and feed the hens. The hens wander inside it, walking to a spot, pausing, and walking on.
 - **Barn:** 10 wood, 6 fiber, and Carpentry 4. A 3 by 2 building of red boards. Stand beside it, facing it, and press Space to open its panel. It holds the goats, and it is separate from the coop.
-- **Hens:** 12 coins each, up to four in the coop. Feed them once a day from your crops (1 crop per hen). Hens are grown after 3 nights, and only a grown hen that is fed lays an egg overnight, which goes into your pack as an egg, as far as there is room. A grown hen sells for **20 coins** from the coop panel. Two unfed days in a row and a hen wanders off.
+- **Hens:** 12 coins each, up to four in the coop. Feed them once a day from your crops (1 crop per hen). Hens are grown after a week (7 nights), and only a grown hen that is fed lays an egg overnight, which goes into your pack as an egg, as far as there is room. A grown hen sells for **20 coins** from the coop panel. Two unfed days in a row and a hen wanders off.
 - **Predators:** at wear 4 or more, a fox can get into the coop on a given night and take a hen.
 - **Post and the desk:** post comes through the mail slot in the front door and lands on the **desk** in the bedroom, which is there from the start. Each morning's new letters are announced in the morning message. Unread post turns on a **red light** at the desk, blinking, while you are in the house. Using the desk opens the Desk panel, which marks the post read and lists it. Read letters go in the drawer with the Clear button.
-- **Property tax:** a bill for **40 coins** arrives on the 1st of January, April, July, and October (not on the first day of the game). It is due 14 days after it arrives. Pay it from the Desk panel. Unpaid, a reminder comes the day after it is due, a final notice 7 days late, and at 14 days late the **land is lost**: the save is removed and the start screen says why.
+- **Property tax:** a bill arrives on the 1st of January, April, July, and October (not on the first day of the game). Its amount is the **property value** at that moment. The value starts at **40 coins**, then: it **multiplies by 1.8 with each house upgrade** (exponential), gains **5% per building** (coop, barn, cellar, cooler, smokehouse, furnace, woodshed), gains **25% per farm plot past the first** (plot two at Farming 2, plot three at Farming 4), and gains **1% per clean night** in a row, up to 20 nights, where a clean night is one with every chore done. The Desk panel shows the value and its breakdown. It is due 14 days after it arrives. Pay it from the Desk panel. Unpaid, a reminder comes the day after it is due, a final notice 7 days late, and at 14 days late the **land is lost**: the save is removed and the start screen says why.
 - **Third plot:** opens at Farming 4 once the house is Patched. It sits between the two paths, south of the first plot.
 
 ## Graphics and atmosphere

@@ -218,6 +218,9 @@ const BED_INTERIOR := Vector2i(2, 1)  # the bed's tile in the bedroom; you wake 
 const EVENT_HOUR := 22.0
 
 const MAX_STAGE := 3        # 0 = seed, 3 = ready to harvest
+const CROP_GROW_DAYS := {"turnip": 7, "pumpkin": 10}   # watered days from seed to ready: a week, and ten days
+# What a sold crop fetches at the farm stand, and what food from it is worth.
+const CROP_VALUE := {"turnip": 8, "pumpkin": 30}
 const STAGE_NAMES := ["Decrepit", "Boarded", "Patched", "Restored"]
 # Tips: short notes that appear one at a time as the player reaches each part of the farm.
 # Each shows once, and the Settings menu keeps the ones already seen. When the condition is met, see _tip_ready.
@@ -228,8 +231,8 @@ const TIPS := [
 	{"id": "repair", "title": "Repairing the farmhouse", "text": "Repair the house from the House section on the section wheel (Shift). Each stage restores it inside and out, and unlocks rooms and features."},
 	{"id": "buildings", "title": "Buildings", "text": "Build the workshop, coop, and barn from the Buildings section on the section wheel (Shift). Pick a spot on open grass, press Space to place it, and B to cancel."},
 	{"id": "quests", "title": "Quests", "text": "The Quests section, on the section wheel (Shift), lists what the farm asks of you. Press Details on a quest to read its story."},
-	{"id": "hens", "title": "Hens", "text": "Stand beside the coop, facing it, and press Space to buy and feed hens. A grown hen that is fed lays an egg each morning. Hens are grown after three nights."},
-	{"id": "goats", "title": "Goats", "text": "Build the barn from the Buildings menu, then stand beside it, facing it, and press Space to buy and feed goats. A grown goat that is fed gives milk each morning. Goats are grown after four nights."},
+	{"id": "hens", "title": "Hens", "text": "Stand beside the coop, facing it, and press Space to buy and feed hens. A grown hen that is fed lays an egg each morning. Hens are grown after a week."},
+	{"id": "goats", "title": "Goats", "text": "Build the barn from the Buildings menu, then stand beside it, facing it, and press Space to buy and feed goats. A grown goat that is fed gives milk each morning. Goats are grown after ten days."},
 	{"id": "cellar", "title": "Storing crops", "text": "Stand beside the root cellar and press Space to store or take crops. Nothing spoils in the cellar."},
 	{"id": "smelt", "title": "Smelting and preserving", "text": "Stand beside the furnace and press Space to smelt ore into bars. The smokehouse preserves food, and the cooler keeps fish fresh."},
 	{"id": "needs", "title": "Food, water, and warmth", "text": "Food and water drain through the day, and warmth drops outside on cold days. Eat from the bag (Tab), drink from the pond, and warm up in the house. Sleep to be fully warm again, but only with a fire lit: feed the hearth from the firewood store at the workshop."},
@@ -273,7 +276,6 @@ const CROPS := {
 const PUMPKIN_LEVEL := 3
 # A crop sells for its seed's cost spread over its yield, plus this difficulty bonus.
 # Pumpkins need Farming 3 and more care, so each one sells for more than a turnip.
-const CROP_DIFFICULTY := {"turnip": 1, "pumpkin": 6}
 
 # Pack: crops, fish, and meals share the pack. Seeds have their own pouch.
 const BAG_BASE := 20
@@ -328,9 +330,14 @@ const SELL_EGG := 4                 # farm stand price for an egg
 const SELL_MILK := 6                # farm stand price for a jug of goat milk
 const HEN_SELL := 20                # what a grown hen fetches at the coop
 const GOAT_SELL := 70               # what a grown goat fetches at the barn
-const HEN_MATURE_DAYS := 3          # nights before a hen is grown and starts laying
-const GOAT_MATURE_DAYS := 4         # nights before a goat is grown and starts giving milk
-const PROPERTY_TAX := 40            # coins per quarter
+const HEN_MATURE_DAYS := 7          # nights before a hen is grown and starts laying: a week
+const GOAT_MATURE_DAYS := 10        # nights before a goat is grown and starts giving milk: ten days
+const PROPERTY_TAX := 40            # coins per quarter at the start: the base of the property value
+const PROPERTY_HOUSE_GROWTH := 1.8  # each house upgrade multiplies the value (exponential)
+const PROPERTY_PER_BUILDING := 0.05 # +5% for each building on the farm
+const PROPERTY_PER_PLOT := 0.25     # +25% for each farm plot unlocked past the first
+const PROPERTY_PER_CLEAN_NIGHT := 0.01  # +1% for each clean night in a row (every chore done)
+const PROPERTY_CLEAN_NIGHTS_MAX := 20   # the clean bonus stops growing after this many nights
 const TAX_MONTHS := [0, 3, 6, 9]    # January, April, July, October: the bill comes on the 1st
 const TAX_GRACE_DAYS := 14          # days to pay a bill after it arrives
 const TAX_FINAL_DAYS := 7           # days overdue before the final notice
@@ -489,7 +496,7 @@ const GUARDIAN_QUESTS := [
 # "story" is the narrative beat, "text" the goal, and "stat" what it reads.
 const STORY := [
 	{"id": "first_crop", "title": "Food Takes Time",
-		"story": "Seeds need days to become food. Each night they grow a stage. Come back when something is ripe, and take it.",
+		"story": "Seeds need days to become food. Each night they are watered, they grow. Turnips take a week and pumpkins ten days. Come back when something is ripe, and take it.",
 		"text": "Harvest one ripe crop.",
 		"prompt": "{tool:hoe} to select the hoe. Once a crop is ripe, face it and press {use} to harvest it.", "stat": "harvested", "goal": 1, "reward": {"skill": "Farming", "xp": 50}},
 	{"id": "light", "title": "Light the Way",
@@ -826,6 +833,7 @@ var goat_ages: Array = []         # days old for each goat, kept in step with go
 var goats_fed_day := -1
 var goat_unfed_days := 0
 var plot_three_open := false
+var clean_nights := 0               # nights in a row with every chore done
 var cleanse_day := 0
 var sanity := SANITY_MAX
 var sanity_penalty := 0             # permanent cap reduction from collapsing
@@ -1358,9 +1366,6 @@ func _draw() -> void:
 		var center := _tile_center(pos.x, pos.y)
 		var watered_now := int(crop.get("watered_day", 0)) == day
 		FarmArt.draw_crop(self, center, PX, str(crop["kind"]), stage, watered_now)
-		# A blue drop shows the crop was watered today, so it will grow tonight.
-		if watered_now:
-			draw_circle(center + Vector2(PX * 0.34, -PX * 0.34), PX * 0.1, Color("6fa8dc"))
 
 	for pos in rocks:
 		FarmArt.draw_rock(self, _tile_center(pos.x, pos.y), PX * 0.3, FarmArt.hash_int(pos.x, pos.y, 4))
@@ -3919,7 +3924,7 @@ func _plant(tile: Vector2i) -> void:
 		_show_message("You're out of %s seeds." % _seed_label(kind).to_lower())
 		return
 	inventory[seed_key] -= 1
-	crops[tile] = {"stage": 0, "kind": kind}
+	crops[tile] = {"stage": 0, "kind": kind, "days": 0}
 	if weather_kind in WATER_RAIN_KINDS:
 		crops[tile]["watered_day"] = day
 	stats["planted"] += 1
@@ -3981,6 +3986,8 @@ func _desk_rows() -> Array:
 		rows.append({"note": "No post. The mail slot in the front door drops letters here."})
 	for letter in desk_mail:
 		rows.append({"note": "%s%s\n%s" % [str(letter["title"]), "  (new)" if bool(letter["unread"]) else "", str(letter["text"])]})
+	rows.append({"name": "Property value", "value": "%d a quarter" % _property_value()})
+	rows.append({"note": _property_text()})
 	rows.append({"name": "Property tax", "value": _tax_text(), "button": "Pay", "action": "pay_tax", "enabled": tax_owed > 0 and money >= tax_owed})
 	rows.append({"name": "Put letters away", "value": "read letters go in the drawer", "button": "Clear", "action": "mail_clear", "enabled": _has_read_mail()})
 	rows.append({"section": "Games"})
@@ -5002,9 +5009,12 @@ func _spend_crops(amount: int) -> void:
 
 # How much one crop sells for: its seed's cost spread over its yield, plus its difficulty.
 func _crop_price(kind: String) -> int:
-	var seed_cost: int = SEED_PUMPKIN_PRICE if kind == "pumpkin" else SEED_TURNIP_PRICE
-	var yield_count: int = CROPS[kind]["yield"]
-	return seed_cost / yield_count + int(CROP_DIFFICULTY[kind])
+	return int(CROP_VALUE[kind])
+
+
+# The picture stage (0 to MAX_STAGE) for a crop that has been watered this many days.
+func _stage_for(kind: String, days: int) -> int:
+	return mini(MAX_STAGE, days * MAX_STAGE / int(CROP_GROW_DAYS[kind]))
 
 
 # What the preserve recipes take as input. "crops" means turnips or pumpkins.
@@ -7400,6 +7410,31 @@ func _tax_text() -> String:
 	return "%d coins owed, due %s" % [tax_owed, _date_text(tax_due_day)]
 
 
+# Buildings on the farm, for the property value.
+func _building_count() -> int:
+	var n := 0
+	for built in [coop_built, barn_built, cellar_built, cooler_built, smokehouse_built, furnace_built, woodshed_built]:
+		if built:
+			n += 1
+	return n
+
+
+# The property value: the quarterly bill, from the house, the buildings, the plots and how clean the farm is kept.
+func _property_value() -> int:
+	var house_mult := pow(PROPERTY_HOUSE_GROWTH, house_stage)
+	var building_mult := 1.0 + PROPERTY_PER_BUILDING * _building_count()
+	var plot_mult := 1.0 + PROPERTY_PER_PLOT * (int(plot_two_open) + int(plot_three_open))
+	var clean_mult := 1.0 + PROPERTY_PER_CLEAN_NIGHT * mini(clean_nights, PROPERTY_CLEAN_NIGHTS_MAX)
+	return roundi(PROPERTY_TAX * house_mult * building_mult * plot_mult * clean_mult)
+
+
+func _property_text() -> String:
+	return "%d coins a quarter. Starts at %d; x%.1f per house upgrade, +%d%% per building (%d), +%d%% per farm plot past the first (%d), +%d%% for %d clean nights in a row (up to %d)." % [
+		_property_value(), PROPERTY_TAX, PROPERTY_HOUSE_GROWTH, int(PROPERTY_PER_BUILDING * 100), _building_count(),
+		int(PROPERTY_PER_PLOT * 100), int(plot_two_open) + int(plot_three_open),
+		int(PROPERTY_PER_CLEAN_NIGHT * 100), clean_nights, PROPERTY_CLEAN_NIGHTS_MAX]
+
+
 func _tax_evicts() -> bool:
 	return tax_owed > 0 and day - tax_due_day >= TAX_EVICT_DAYS
 
@@ -7412,8 +7447,9 @@ func _mail_day() -> String:
 		if tax_owed == 0:
 			tax_due_day = day + TAX_GRACE_DAYS
 			tax_stage = 0
-		tax_owed += PROPERTY_TAX
-		_add_letter("Property tax bill", "Your quarterly property tax is %d coins. Pay it at this desk by %s, or the land will be taken." % [tax_owed, _date_text(tax_due_day)])
+		var bill := _property_value()
+		tax_owed += bill
+		_add_letter("Property tax bill", "Your quarterly property tax is %d coins, based on the value of the farm. Pay it at this desk by %s, or the land will be taken." % [bill, _date_text(tax_due_day)])
 		note += " Post came through the mail slot, and a property tax bill is on the desk."
 	if tax_owed > 0:
 		var late := day - tax_due_day
@@ -7558,6 +7594,7 @@ func _settle_day() -> String:
 		if not bool(chore["done"]):
 			missed += 1
 	wear = mini(wear + WEAR_PER_NIGHT + missed, WEAR_MAX)
+	clean_nights = clean_nights + 1 if missed == 0 else 0
 	if missed > 0:
 		notes += " %d chore%s left undone, so the house wears faster." % [missed, "" if missed == 1 else "s"]
 	else:
@@ -7966,7 +8003,9 @@ func _end_day(base: String, leave_house: bool = true) -> void:
 	for pos in crops.keys():
 		if int(crops[pos].get("watered_day", 0)) == day:
 			var bonus := 1 if _event_active("thaw") else 0
-			crops[pos]["stage"] = min(crops[pos]["stage"] + 1 + bonus, MAX_STAGE)
+			var kind := str(crops[pos]["kind"])
+			crops[pos]["days"] = mini(int(crops[pos].get("days", 0)) + 1 + bonus, int(CROP_GROW_DAYS[kind]))
+			crops[pos]["stage"] = _stage_for(kind, int(crops[pos]["days"]))
 		elif crops[pos]["stage"] < MAX_STAGE:
 			thirsty += 1
 	if thirsty > 0:
@@ -8159,6 +8198,7 @@ func _save_game() -> void:
 		"tax_owed": tax_owed,
 		"tax_due_day": tax_due_day,
 		"tax_stage": tax_stage,
+		"clean_nights": clean_nights,
 		"desk_mail": desk_mail,
 		"tips_seen": tips_seen.keys(),
 	}
@@ -8248,7 +8288,10 @@ func _load_game() -> bool:
 		# Saves from before watering existed have no record. Those crops count as watered today,
 		# so they grow tonight like they used to.
 		var watered := int(c["watered_day"]) if c.has("watered_day") else day
-		crops[Vector2i(int(c["x"]), int(c["y"]))] = {"stage": int(c["stage"]), "kind": kind, "watered_day": watered}
+		var stage := int(c["stage"])
+		# Saves from before crops counted days convert their stage to days.
+		var days := int(c["days"]) if c.has("days") else stage * int(CROP_GROW_DAYS[kind]) / MAX_STAGE
+		crops[Vector2i(int(c["x"]), int(c["y"]))] = {"stage": stage, "kind": kind, "days": days, "watered_day": watered}
 	brush_day = int(data.get("brush_day", data.get("day", 0)))
 	rock_day = int(data.get("rock_day", data.get("day", 0)))
 	brush.clear()
@@ -8282,6 +8325,7 @@ func _load_game() -> bool:
 	tax_owed = int(data.get("tax_owed", 0))
 	tax_due_day = int(data.get("tax_due_day", 0))
 	tax_stage = int(data.get("tax_stage", 0))
+	clean_nights = int(data.get("clean_nights", 0))
 	desk_mail = data.get("desk_mail", [])
 	_sync_ages()
 	if data.has("tips_seen"):
@@ -8317,7 +8361,7 @@ func _crops_to_array() -> Array:
 	var arr: Array = []
 	for pos in crops:
 		var crop: Dictionary = crops[pos]
-		arr.append({"x": pos.x, "y": pos.y, "stage": crop["stage"], "kind": crop["kind"], "watered_day": int(crop.get("watered_day", 0))})
+		arr.append({"x": pos.x, "y": pos.y, "stage": crop["stage"], "days": int(crop.get("days", 0)), "kind": crop["kind"], "watered_day": int(crop.get("watered_day", 0))})
 	return arr
 
 
