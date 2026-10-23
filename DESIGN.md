@@ -11,12 +11,14 @@ A top-down farming game with heavy psychological horror, built in Godot 4.7.
 
 ## Controls (Stardew-style)
 
+- **Section wheel.** Shift, or a click on the left stick, opens a ring of the menus that aren't in the bag: Skills, Gear, Craft, Quests, House, Buildings, and Achievements. The mouse hovers and clicks a section. On a controller the right stick highlights one and A opens it. B or Esc closes the wheel. Choosing a section closes the wheel and shows that section alone. Sections can't be opened while the wheel is up, the bag is up, or another section is open.
+
 - Move: WASD or arrow keys
 - Use, plant, harvest, gather, sleep, tidy, cleanse, cook, talk, swing, or read: Space / Enter (face the tile)
 - Walk into the farmhouse door to go inside. Walk onto the exit mat to leave.
-- Menu sections (key, or click in the menu list): Skills K, Inventory I, Gear G, Craft C, Quests Q, House H, Buildings U, Achievements J, Settings
+- The section wheel: Shift opens it (see Section wheel below). Settings is Esc only. The Inventory is opened from the bag (Tab).
 - The bag (grid, bottom-right corner): Tab opens and closes it. Click a slot to use it, or move with the arrow keys and press Enter.
-- Esc opens Settings, or closes it if it's already open. B closes any other open section.
+- Esc closes whatever is open, the bag, the wheel, or a section, one at a time. With nothing open, Esc opens Settings. Esc or Start closes Settings. B closes the same things as Esc, and dismisses a tip when nothing is open.
 - Stuck while placing or boxed in? Esc opens Settings, which cancels any placement. The **Unstick** button in the Game section moves you to the nearest open ground (grass, path, soil, fallow) from the farmhouse door, and works on the farm only.
 - Farming and gathering pause while a panel is open
 
@@ -25,7 +27,7 @@ A top-down farming game with heavy psychological horror, built in Godot 4.7.
 - Move: left stick or D-pad (0.3 deadzone)
 - Use, plant, harvest, gather, sleep: A
 - Close the open panel: B
-- Bag Y, Inventory X, Skills (K on the keyboard only), Gear left bumper, Quests right bumper, House Back/View, Settings Start
+- Bag Y, section wheel left stick click, Settings Start, Close B
 - The bag: Y opens and closes it, the D-pad moves between its slots, A uses the slot in focus, B closes it.
 - While a panel is open, the D-pad or left stick moves focus between its buttons, and A presses the highlighted one. The first usable button is highlighted when a panel opens.
 - Keyboard and gamepad share the same actions, so both work at once.
@@ -39,7 +41,7 @@ A top-down farming game with heavy psychological horror, built in Godot 4.7.
 - Storage labels (Cellar, Smoke, Furnace) stay on screen when their building is at the view's edge.
 - The farm's buildings hug the house: the cellar against the west wall. The workshop is a walled building against the east wall, 5 by 4, with a door on its south side. Its furnace and smokehouse stand inside. The cooler is inside the house. The workshop, coop, and barn are built and moved from the Buildings menu (U).
 
-- A small **Menu** button sits in the bottom-right corner for mouse players. It reopens the last section you had open (Skills at first) and hides while the menu is open. Sections open from their keys, and the menu lists them on the left, so each section is one key or click away. The full-screen menu shows over a dimmed game: the sections down the left (with their keys), the current section's options on the right, and the controls and a Back button in the footer.
+- A small **Menu** button sits in the bottom-right corner for mouse players. It opens the section wheel, and hides while a section is open. A section is shown alone, full screen, with its options and a Close button. It never lists the other sections, so the only way to another section is to close it and open the wheel again.
 - Quests are collapsed to a line: the title, and Done or the progress count. A Details button opens the story, reward, and progress bar, and Hide closes it. The current chapter starts open.
 - Completed quests show their title struck through.
 - Settings sections fold. Each header shows its item count and opens with Enter or A, or a click, so only the headings show until you open one. Every section starts folded.

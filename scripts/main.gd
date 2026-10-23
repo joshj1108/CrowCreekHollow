@@ -226,15 +226,15 @@ const STAGE_NAMES := ["Decrepit", "Boarded", "Patched", "Restored"]
 const TIPS := [
 	{"id": "well", "title": "The well", "text": "The pump by the plots is seized. Repair it from the Well panel, then attach the hose. The hose reaches every plot, so face a crop and press Space to water it. Rain waters everything."},
 	{"id": "sleep", "title": "Sleeping", "text": "Walk to the bed in the bedroom and press Space from 18:00 to save and end the day. Stay up past 03:00 and you collapse, which lowers your sanity limit."},
-	{"id": "chores", "title": "Keeping house", "text": "The house wears down a little each night. Tidy it and mend a board each day from the House menu (H). Chores you skip add wear."},
-	{"id": "repair", "title": "Repairing the farmhouse", "text": "Repair the house from the House menu (H). Each stage restores it inside and out, and unlocks rooms and features."},
-	{"id": "buildings", "title": "Buildings", "text": "Build the workshop, coop, and barn from the Buildings menu (U). Pick a spot on open grass, press Space to place it, and B to cancel."},
-	{"id": "quests", "title": "Quests", "text": "The Quests menu (Q) lists what the farm asks of you. Press Details on a quest to read its story."},
+	{"id": "chores", "title": "Keeping house", "text": "The house wears down a little each night. Tidy it and mend a board each day from the House section on the section wheel (Shift). Chores you skip add wear."},
+	{"id": "repair", "title": "Repairing the farmhouse", "text": "Repair the house from the House section on the section wheel (Shift). Each stage restores it inside and out, and unlocks rooms and features."},
+	{"id": "buildings", "title": "Buildings", "text": "Build the workshop, coop, and barn from the Buildings section on the section wheel (Shift). Pick a spot on open grass, press Space to place it, and B to cancel."},
+	{"id": "quests", "title": "Quests", "text": "The Quests section, on the section wheel (Shift), lists what the farm asks of you. Press Details on a quest to read its story."},
 	{"id": "hens", "title": "Hens", "text": "Stand beside the coop, facing it, and press Space to buy and feed hens. A fed hen lays an egg each morning."},
 	{"id": "goats", "title": "Goats", "text": "Build the barn from the Buildings menu, then stand beside it, facing it, and press Space to buy and feed goats. A fed goat gives milk each morning."},
 	{"id": "cellar", "title": "Storing crops", "text": "Stand beside the root cellar and press Space to store or take crops. Nothing spoils in the cellar."},
 	{"id": "smelt", "title": "Smelting and preserving", "text": "Stand beside the furnace and press Space to smelt ore into bars. The smokehouse preserves food, and the cooler keeps fish fresh."},
-	{"id": "needs", "title": "Food, water, and warmth", "text": "Food and water drain through the day, and warmth drops outside on cold days. Eat from the Inventory menu (I), drink from the pond, and warm up in the house. Sleep to be fully warm again."},
+	{"id": "needs", "title": "Food, water, and warmth", "text": "Food and water drain through the day, and warmth drops outside on cold days. Eat from the bag (Tab), drink from the pond, and warm up in the house. Sleep to be fully warm again."},
 	{"id": "cave", "title": "The mine", "text": "The cave is at the west edge of the farm. Each day it lays out differently, with ore to mine and creatures to watch for."},
 ]
 # Cost to reach the next house stage, and the Carpentry level it needs.
@@ -824,6 +824,7 @@ var sanity_penalty := 0             # permanent cap reduction from collapsing
 var inside := false                 # standing in the farmhouse interior
 var open_tab := ""                  # "" when the action bar panel is closed
 var bag: BagPanel                   # the grid bag in the bottom-right corner (Tab or Y)
+var wheel: SectionWheel             # the section wheel (Shift or left stick click)
 var quest_open := {}              # quest id -> true when its details are open (not saved)
 var craft_tab := "gear"             # which Craft sub-tab shows (not saved)
 var event_fired_day := 0            # the day the night event last happened
@@ -1056,6 +1057,7 @@ func _on_title_start(mode: String, slot: int) -> void:
 	_build_hud()
 	_build_fade()
 	_build_bag()
+	_build_wheel()
 	_build_tip_panel()
 	weather = WeatherScript.new()
 	add_child(weather)
@@ -1101,7 +1103,10 @@ func _process(delta: float) -> void:
 	if weather != null:
 		weather.visible = not inside and not in_cave
 	# Any open menu pauses the day: the clock stops, foes stand still, and only the menu responds.
-	player.paused = open_tab != "" or _bag_open()
+	player.paused = open_tab != "" or _bag_open() or _wheel_open()
+	# The bag's corner button only shows when no section or wheel covers the farm.
+	if bag != null:
+		bag.toggle_button.visible = open_tab == "" and not _wheel_open()
 	placement_ghost.visible = placing != ""
 	if placing != "":
 		placement_ghost.queue_redraw()
@@ -1198,10 +1203,10 @@ func _process(delta: float) -> void:
 
 	# With no panel open, a leftover focused button would take the gamepad's A press instead of
 	# the farm. Dropping that focus lets A reach the use action.
-	if open_tab == "" and not _bag_open() and get_viewport().gui_get_focus_owner() != null:
+	if open_tab == "" and not _bag_open() and not _wheel_open() and get_viewport().gui_get_focus_owner() != null:
 		get_viewport().gui_release_focus()
 	# Farming and gathering pause while a panel is open (the day is already paused above).
-	if Input.is_action_just_pressed("use") and open_tab == "" and not _bag_open() and not _pointer_on_ui():
+	if Input.is_action_just_pressed("use") and open_tab == "" and not _bag_open() and not _wheel_open() and not _pointer_on_ui():
 		_play_use_anim()
 		_interact()
 
@@ -1507,16 +1512,11 @@ func _setup_input() -> void:
 	_ensure_action("ui_right", [], [JOY_BUTTON_DPAD_RIGHT], [[JOY_AXIS_LEFT_X, 1.0]])
 	_ensure_action("ui_accept", [], [JOY_BUTTON_A])
 	_ensure_action("ui_cancel", [], [JOY_BUTTON_B])
-	_ensure_action("skills", [KEY_K], [])
-	_ensure_action("inventory", [KEY_I], [JOY_BUTTON_X, JOY_BUTTON_BACK])
-	# Tab or Y opens the bag grid in the bottom-right corner.
+	# Tab or Y opens the bag, which also holds the way into the Inventory.
 	_ensure_action("bag", [KEY_TAB], [JOY_BUTTON_Y])
-	_ensure_action("gear", [KEY_G], [])
-	_ensure_action("craft", [KEY_C], [])
-	_ensure_action("quests", [KEY_Q], [])
-	_ensure_action("achievements", [KEY_J], [JOY_BUTTON_RIGHT_STICK])
-	_ensure_action("house", [KEY_H], [])
-	_ensure_action("buildings", [KEY_U], [])
+	# Shift or a click on the left stick opens the section wheel: Skills, Gear, Craft, Quests, House,
+	# Buildings and Achievements.
+	_ensure_action("wheel", [KEY_SHIFT], [JOY_BUTTON_LEFT_STICK])
 	_ensure_action("settings", [KEY_ESCAPE], [JOY_BUTTON_START])
 	_ensure_action("close_panel", [], [JOY_BUTTON_B])
 
@@ -1950,7 +1950,7 @@ func _build_hud() -> void:
 func _build_action_bar() -> void:
 	action_bar = ActionBar.new()
 	add_child(action_bar)
-	action_bar.tab_pressed.connect(_toggle_tab)
+	action_bar.menu_pressed.connect(_toggle_wheel)
 	action_bar.action_pressed.connect(_on_panel_action)
 
 
@@ -2234,7 +2234,7 @@ func _prompt_text(q: Dictionary) -> String:
 	text = text.replace("{use}", "RT or A" if pad else "left click or Space")
 	text = text.replace("{switch}", "LB and RB" if pad else "the number keys 1 to 0 or the mouse wheel")
 	text = text.replace("{menus}", "Y for Skills, Back for Inventory, Start for Settings" if pad else "K Skills, I Inventory, C Craft, Q Quests")
-	text = text.replace("{craft}", "the Craft menu from the Menu button" if pad else "the Craft menu (C)")
+	text = text.replace("{craft}", "the Craft section on the section wheel" if pad else "the Craft section on the section wheel (Shift)")
 	text = text.replace("{inv}", "Back" if pad else "I")
 	text = text.replace("{house}", "the Menu button" if pad else "H")
 	for i in HOTBAR_TOOLS.size():
@@ -2327,38 +2327,35 @@ func _tip_rows() -> Array:
 # --- Input and panels --------------------------------------------------------
 
 func _handle_keys() -> void:
-	if Input.is_action_just_pressed("skills"):
-		_toggle_tab("Skills")
-	if Input.is_action_just_pressed("inventory"):
-		_toggle_tab("Inventory")
-	if Input.is_action_just_pressed("gear"):
-		_toggle_tab("Gear")
-	if Input.is_action_just_pressed("craft"):
-		_toggle_tab("Craft")
-	if Input.is_action_just_pressed("quests"):
-		_toggle_tab("Quests")
-	if Input.is_action_just_pressed("achievements"):
-		_toggle_tab("Achievements")
-	if Input.is_action_just_pressed("house"):
-		_toggle_tab("House")
-	if Input.is_action_just_pressed("buildings"):
-		_toggle_tab("Buildings")
-	# Esc or Start opens Settings, or closes it if it's already open.
-	if Input.is_action_just_pressed("settings"):
-		_toggle_tab("Settings")
-	# Tab or Y opens and closes the bag. B closes it too.
+	# Tab or Y opens and closes the bag.
 	if Input.is_action_just_pressed("bag"):
 		_toggle_bag()
-	if Input.is_action_just_pressed("close_panel") and _bag_open():
+	# Shift or a left stick click opens the section wheel, and closes it again.
+	if Input.is_action_just_pressed("wheel"):
+		_toggle_wheel()
+	# Esc or Start closes whatever is open. With nothing open, it opens Settings.
+	if Input.is_action_just_pressed("settings"):
+		_press_back(true)
+	# B dismisses a tip when nothing else is open, and otherwise closes what is open.
+	if Input.is_action_just_pressed("close_panel"):
+		if tip_showing != "" and open_tab == "" and placing == "" and not _bag_open() and not _wheel_open():
+			_hide_tip()
+		else:
+			_press_back(false)
+
+
+# B and Esc close the thing on top: the bag, the wheel, a placement, or the open section.
+func _press_back(open_settings: bool) -> void:
+	if _bag_open():
 		_toggle_bag()
-	# B dismisses a tip when nothing else is open.
-	if Input.is_action_just_pressed("close_panel") and tip_showing != "" and open_tab == "" and placing == "" and not _bag_open():
-		_hide_tip()
-	# B closes whatever panel is open.
-	if Input.is_action_just_pressed("close_panel") and open_tab != "":
-		_close_panel()
-	if Input.is_action_just_pressed("close_panel") and placing != "":
+	elif _wheel_open():
+		_close_wheel()
+	elif placing != "":
 		_cancel_placement()
+	elif open_tab != "":
+		_close_panel()
+	elif open_settings:
+		_toggle_tab("Settings")
 
 
 func _toggle_tab(tab: String) -> void:
@@ -2389,10 +2386,51 @@ func _build_bag() -> void:
 	add_child(bag)
 	bag.slot_chosen.connect(_on_bag_slot)
 	bag.toggle_requested.connect(_toggle_bag)
+	bag.inventory_requested.connect(_on_bag_inventory)
 
 
 func _bag_open() -> bool:
 	return bag != null and bag.open
+
+
+func _on_bag_inventory() -> void:
+	_toggle_bag()
+	_toggle_tab("Inventory")
+
+
+# --- The section wheel --------------------------------------------------------
+
+func _build_wheel() -> void:
+	wheel = SectionWheel.new()
+	add_child(wheel)
+	wheel.section_chosen.connect(_on_wheel_section)
+
+
+func _wheel_open() -> bool:
+	return wheel != null and wheel.open
+
+
+# Shift, a left stick click, or the Menu button. The wheel only opens with nothing else open.
+func _toggle_wheel() -> void:
+	if wheel == null:
+		return
+	if wheel.open:
+		_close_wheel()
+		return
+	if open_tab != "" or _bag_open() or placing != "" or not world_started:
+		return
+	wheel.show_wheel()
+	play_sfx("panel")
+
+
+func _close_wheel() -> void:
+	wheel.hide_wheel()
+	play_sfx("tick")
+
+
+# Choosing a section closes the wheel and shows that section alone.
+func _on_wheel_section(section_name: String) -> void:
+	_toggle_tab(section_name)
 
 
 func _toggle_bag() -> void:
@@ -2403,7 +2441,7 @@ func _toggle_bag() -> void:
 		play_sfx("tick")
 		return
 	# The bag opens only when no other menu or placement is up.
-	if open_tab != "" or placing != "" or not world_started:
+	if open_tab != "" or placing != "" or not world_started or _wheel_open():
 		return
 	bag.set_items(_bag_items())
 	bag.show_bag()
@@ -3379,7 +3417,7 @@ func _house_rows() -> Array:
 			"action": "build_cooler",
 			"enabled": _can_afford(COOLER_COST),
 		})
-	rows.append({"note": "The workshop, the coop, and the barn are in the Buildings menu (U)."})
+	rows.append({"note": "The workshop, the coop, and the barn are in the Buildings section on the section wheel (Shift)."})
 	rows.append({"section": "Features"})
 	for feature in HOUSE_FEATURES:
 		var unlocked: bool = house_stage >= feature["stage"]
@@ -3500,26 +3538,17 @@ func _settings_rows() -> Array:
 		{"section": "Controls"},
 		{"name": "Move", "value": "WASD or arrow keys"},
 		{"name": "Use, plant, harvest, gather, sleep", "value": "Space or Enter"},
-		{"name": "Skills", "value": "K"},
-		{"name": "Bag", "value": "Tab"},
-		{"name": "Inventory", "value": "I"},
-		{"name": "Gear", "value": "G"},
-		{"name": "Craft", "value": "C"},
-		{"name": "Quests", "value": "Q"},
-		{"name": "Achievements", "value": "J"},
-		{"name": "House", "value": "H"},
-		{"name": "Buildings", "value": "U"},
+		{"name": "Bag (Inventory is in the bag)", "value": "Tab"},
+		{"name": "Section wheel: Skills, Gear, Craft, Quests, House, Buildings, Achievements", "value": "Shift, then the mouse"},
 		{"name": "Settings", "value": "Esc"},
+		{"name": "Close the open section, the wheel, or the bag", "value": "B or Esc"},
 		{"section": "Gamepad"},
 		{"name": "Move", "value": "Left stick or D-pad"},
 		{"name": "Use, plant, harvest, gather, sleep", "value": "A"},
-		{"name": "Close panel", "value": "B"},
-		{"name": "Bag / Inventory", "value": "Y / X"},
-		{"name": "Gear / Quests", "value": "Left / Right bumper"},
-		{"name": "Achievements", "value": "Right stick click"},
-		{"name": "House", "value": "Back / View"},
+		{"name": "Close the open section, the wheel, or the bag", "value": "B"},
+		{"name": "Bag (Inventory is in the bag)", "value": "Y"},
+		{"name": "Section wheel", "value": "Left stick click, then right stick and A"},
 		{"name": "Settings", "value": "Start"},
-		{"note": "On a gamepad, open Craft with the Open button on the Gear panel."},
 		{"note": "While a panel is open, the D-pad or left stick moves between its buttons, and A presses the highlighted one."},
 		{"section": "Saving"},
 		{"note": "Progress saves only when you sleep, or when you collapse at 03:00. The save includes your position and open panel."},

@@ -1,17 +1,17 @@
 class_name ActionBar
 extends CanvasLayer
 
-## The game's menu. Opening a section shows a full-screen menu like a console game: the
-## sections down the left, the current section's options on the right, and the controls in
-## the footer. Sections open from their keys or from the list. main.gd decides what each
-## section shows and handles its actions.
+## The game's menu. Opening a section shows only that section, full screen: its options and a
+## footer. Sections open from the section wheel (section_wheel.gd), never from a list of other
+## sections, so a section on screen never offers a way to reach the others. main.gd decides what
+## each section shows and handles its actions.
 
-signal tab_pressed(tab_name: String)
+signal menu_pressed
 var menu_frame: PanelContainer
 # Sections in these menus fold away, so a long list shows only its headings until one is opened.
 const COLLAPSIBLE_TABS := ["Settings"]
-const HINT_DEFAULT := "Click a section or press its key to switch   ·   B to close   ·   Esc for Settings"
-const HINT_SETTINGS := "Click a section or press its key to switch   ·   B or Esc to close"
+const HINT_DEFAULT := "B or Esc to close   ·   Shift or the left stick opens the section wheel"
+const HINT_SETTINGS := "B or Esc to close"
 var hint_label: Label
 const ALWAYS_OPEN_SECTIONS := ["Game"]   # sections that never fold, so their options are always visible
 var collapsed_sections := {}   # "tab|section" -> true while folded (folded is the default)
@@ -19,18 +19,6 @@ var _last_tab := ""
 var _last_rows: Array = []
 var _focus_section := ""       # a header to focus after it folds or unfolds
 signal action_pressed(action_id: String)
-
-const TABS := [
-	{"name": "Skills", "key": "K"},
-	{"name": "Inventory", "key": "I"},
-	{"name": "Gear", "key": "G"},
-	{"name": "Craft", "key": "C"},
-	{"name": "Quests", "key": "Q"},
-	{"name": "House", "key": "H"},
-	{"name": "Buildings", "key": "U"},
-	{"name": "Achievements", "key": "J"},
-	{"name": "Settings", "key": "Esc"},
-]
 
 const SUBTITLES := {
 	"Skills": "How far you have come",
@@ -64,10 +52,8 @@ const COL_MUTED := Color("b3a27c")
 const COL_ACCENT := Color("d9a94e")
 const COL_SHORT := Color("d0705a")   # a cost or level the player does not meet yet
 
-var nav_buttons := {}      # tab name -> Button in the menu's section list
 var panel: Control         # the full-screen menu; visible only while a panel is open
-var menu_button: Button    # small corner button that opens the menu when it is closed
-var last_section := "Skills"  # the last menu section shown, so the Menu button can return to it
+var menu_button: Button    # small corner button that opens the section wheel when no section is open
 var title_label: Label
 var subtitle_label: Label
 var scroll: ScrollContainer
@@ -83,7 +69,7 @@ func _ready() -> void:
 	root.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(root)
 
-	# A small corner button for mouse players. It reopens the last section shown.
+	# A small corner button for mouse players. It opens the section wheel.
 	menu_button = Button.new()
 	menu_button.text = "Menu"
 	menu_button.focus_mode = Control.FOCUS_NONE
@@ -126,46 +112,13 @@ func _build_menu() -> Control:
 	_fit_frame()
 	get_viewport().size_changed.connect(_fit_frame)
 
-	var split := HBoxContainer.new()
-	split.add_theme_constant_override("separation", 0)
-	frame.add_child(split)
-
-	# Left: the sections.
-	var side := PanelContainer.new()
-	side.add_theme_stylebox_override("panel", _box(COL_SIDE, COL_SIDE, 0, 10, 14))
-	side.custom_minimum_size = Vector2(230, 0)
-	split.add_child(side)
-	var nav := VBoxContainer.new()
-	nav.add_theme_constant_override("separation", 4)
-	side.add_child(nav)
-	var brand := Label.new()
-	brand.text = "HALLOWVALE"
-	brand.add_theme_font_size_override("font_size", 13)
-	brand.add_theme_color_override("font_color", COL_BORDER)
-	nav.add_child(brand)
-	var gap := Control.new()
-	gap.custom_minimum_size = Vector2(0, 10)
-	nav.add_child(gap)
-	for tab in TABS:
-		if tab["name"] == "Settings":
-			nav.add_child(HSeparator.new())
-		var button := Button.new()
-		button.text = "%s     %s" % [tab["name"], tab["key"]]
-		button.alignment = HORIZONTAL_ALIGNMENT_LEFT
-		button.custom_minimum_size = Vector2(0, 42)
-		button.focus_mode = Control.FOCUS_ALL
-		button.add_theme_font_size_override("font_size", 17)
-		button.pressed.connect(_on_tab_pressed.bind(tab["name"]))
-		nav.add_child(button)
-		nav_buttons[tab["name"]] = button
-
-	# Right: the section itself.
+	# The section fills the frame. There is no list of other sections here.
 	var margin := MarginContainer.new()
 	margin.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	margin.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	for side_name in ["margin_left", "margin_top", "margin_right", "margin_bottom"]:
 		margin.add_theme_constant_override(side_name, 24)
-	split.add_child(margin)
+	frame.add_child(margin)
 
 	var main := VBoxContainer.new()
 	main.add_theme_constant_override("separation", 12)
@@ -208,13 +161,13 @@ func _build_menu() -> Control:
 	hints.add_theme_color_override("font_color", COL_MUTED)
 	hint_label = hints
 	footer.add_child(hints)
-	var back := Button.new()
-	back.text = "Back"
-	back.custom_minimum_size = Vector2(120, 36)
-	back.focus_mode = Control.FOCUS_ALL
-	_style_button(back, false)
-	back.pressed.connect(_on_action_pressed.bind("close"))
-	footer.add_child(back)
+	var close := Button.new()
+	close.text = "Close"
+	close.custom_minimum_size = Vector2(120, 36)
+	close.focus_mode = Control.FOCUS_ALL
+	_style_button(close, false)
+	close.pressed.connect(_on_action_pressed.bind("close"))
+	footer.add_child(close)
 	return overlay
 
 
@@ -237,16 +190,13 @@ func show_panel(tab: String, rows: Array) -> void:
 	_last_rows = rows
 	panel.visible = true
 	menu_button.visible = false
-	for section in TABS:
-		if section["name"] == tab:
-			last_section = tab
 	if tab != active_tab:
 		scroll.scroll_vertical = 0
 	title_label.text = tab
 	if hint_label != null:
 		hint_label.text = HINT_SETTINGS if tab == "Settings" else HINT_DEFAULT
 	subtitle_label.text = str(SUBTITLES.get(tab, ""))
-	_set_active(tab)
+	active_tab = tab
 	for child in rows_box.get_children():
 		rows_box.remove_child(child)
 		child.queue_free()
@@ -260,7 +210,7 @@ func hide_panel() -> void:
 	_last_key = ""
 	panel.visible = false
 	menu_button.visible = true
-	_set_active("")
+	active_tab = ""
 
 
 # Turns each section of a collapsible menu into a header that shows its item count. The items
@@ -694,24 +644,6 @@ func _build_detail(recipe: Dictionary) -> Control:
 	return card
 
 
-func _set_active(tab: String) -> void:
-	active_tab = tab
-	for tab_name in nav_buttons:
-		_style_nav(nav_buttons[tab_name], tab_name == tab)
-
-
-# The section list: the active section gets a gold edge and a lighter fill.
-func _style_nav(button: Button, active: bool) -> void:
-	var base: Color = COL_NAV_ACTIVE if active else Color(0.0, 0.0, 0.0, 0.0)
-	var normal := _box(base, COL_ACCENT, 0, 6, 10)
-	normal.border_width_left = 4 if active else 0
-	button.add_theme_stylebox_override("normal", normal)
-	button.add_theme_stylebox_override("hover", _box(COL_NAV_HOVER, COL_NAV_HOVER, 0, 6, 10))
-	button.add_theme_stylebox_override("pressed", _box(COL_NAV_HOVER, COL_NAV_HOVER, 0, 6, 10))
-	button.add_theme_stylebox_override("focus", _box(COL_NAV_HOVER, COL_ACCENT, 1, 6, 10))
-	button.add_theme_color_override("font_color", COL_ACCENT if active else COL_TEXT)
-
-
 func _style_button(button: Button, active: bool) -> void:
 	var base: Color = COL_BUTTON_ACTIVE if active else COL_BUTTON
 	button.add_theme_stylebox_override("normal", _box(base, COL_BORDER, 2, 6, 8))
@@ -754,11 +686,7 @@ func _input(event: InputEvent) -> void:
 
 
 func _on_menu_pressed() -> void:
-	tab_pressed.emit(last_section)
-
-
-func _on_tab_pressed(tab: String) -> void:
-	tab_pressed.emit(tab)
+	menu_pressed.emit()
 
 
 func _on_action_pressed(action_id: String) -> void:

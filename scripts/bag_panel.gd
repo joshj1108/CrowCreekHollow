@@ -7,6 +7,7 @@ extends CanvasLayer
 
 signal slot_chosen(index: int)
 signal toggle_requested
+signal inventory_requested
 
 const COLS := 4
 const ROWS := 4
@@ -50,11 +51,25 @@ func _ready() -> void:
 	var col := VBoxContainer.new()
 	col.add_theme_constant_override("separation", 8)
 	panel.add_child(col)
+	# The title row holds the way into the Inventory section, the only one that is not on the wheel.
+	var head := HBoxContainer.new()
+	col.add_child(head)
 	var title := Label.new()
 	title.text = "Bag"
+	title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	title.add_theme_font_size_override("font_size", 20)
 	title.add_theme_color_override("font_color", COL_GOLD)
-	col.add_child(title)
+	head.add_child(title)
+	var inventory_button := Button.new()
+	inventory_button.text = "Inventory"
+	inventory_button.custom_minimum_size = Vector2(120, 32)
+	inventory_button.add_theme_font_size_override("font_size", 14)
+	inventory_button.add_theme_color_override("font_color", COL_TEXT)
+	inventory_button.add_theme_stylebox_override("normal", _box(COL_SLOT, 2, 6))
+	inventory_button.add_theme_stylebox_override("hover", _box(COL_SLOT_HOVER, 2, 6))
+	inventory_button.add_theme_stylebox_override("focus", _box(COL_SLOT_HOVER, 3, 6))
+	inventory_button.pressed.connect(func() -> void: inventory_requested.emit())
+	head.add_child(inventory_button)
 
 	var grid := GridContainer.new()
 	grid.columns = COLS
