@@ -610,6 +610,7 @@ const NO_SPOT := Vector2i(-1, -1)
 const STARTING_SEEDS := 5
 const MESSAGE_SECONDS := 3.0
 const SANITY_MAX := 100.0
+const BOREDOM_ENABLED := false      # paused: no boredom drain while the desk games are reworked
 const BOREDOM_DRAIN := 1.0          # sanity limit lost on a day with no finished desk game
 const BOREDOM_MAX_LOSS := 40.0      # the most boredom can take from the limit
 const SOL_PASSES := 3               # times the solitaire waste can be turned back into the deck
@@ -3929,7 +3930,8 @@ func _read_desk() -> void:
 # of the sanity limit, down to BOREDOM_MAX_LOSS. Leaving a game unfinished does not count.
 
 func _boredom_check() -> String:
-	if entertained_day == day:
+	# Paused while the desk games are reworked. Flip BOREDOM_ENABLED to restore the drain.
+	if not BOREDOM_ENABLED or entertained_day == day:
 		return ""
 	var before := _sanity_max()
 	boredom_loss = minf(boredom_loss + BOREDOM_DRAIN, BOREDOM_MAX_LOSS)
