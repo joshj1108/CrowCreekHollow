@@ -232,7 +232,7 @@ const TIPS := [
 	{"id": "goats", "title": "Goats", "text": "Build the barn from the Buildings menu, then stand beside it, facing it, and press Space to buy and feed goats. A fed goat gives milk each morning."},
 	{"id": "cellar", "title": "Storing crops", "text": "Stand beside the root cellar and press Space to store or take crops. Nothing spoils in the cellar."},
 	{"id": "smelt", "title": "Smelting and preserving", "text": "Stand beside the furnace and press Space to smelt ore into bars. The smokehouse preserves food, and the cooler keeps fish fresh."},
-	{"id": "needs", "title": "Food, water, and warmth", "text": "Food and water drain through the day, and warmth drops outside on cold days. Eat from the bag (Tab), drink from the pond, and warm up in the house. Sleep to be fully warm again."},
+	{"id": "needs", "title": "Food, water, and warmth", "text": "Food and water drain through the day, and warmth drops outside on cold days. Eat from the bag (Tab), drink from the pond, and warm up in the house. Sleep to be fully warm again, but only with a fire lit: feed the hearth from the firewood store at the workshop."},
 	{"id": "cave", "title": "The mine", "text": "The cave is at the west edge of the farm. Each day it lays out differently, with ore to mine and creatures to watch for."},
 ]
 # Cost to reach the next house stage, and the Carpentry level it needs.
@@ -299,6 +299,14 @@ const WORKSHOP_DOOR := Vector2i(34, 5)
 const COOP_SIZE := 2                         # the coop is a 2 by 2 building on open grass
 const COOLER_INTERIOR := Vector2i(11, 6)   # in the hall, inside the house
 const FURNACE_COST := {"wood": 6, "stone": 4, "coins": 80, "level": 4}
+const WOODSHED_COST := {"wood": 4, "fiber": 2, "coins": 40, "level": 2}
+const WOODSTORE_IX := Vector2i(33, 4)   # farm-local, inside the workshop
+const CHOPLOG_IX := Vector2i(35, 4)
+const WOODSTORE_CAP := 30
+const FIREWOOD_PER_WOOD := 2
+const FIREWOOD_HOURS := 3.0         # hours of warmth one firewood gives the hearth
+const FIRE_MAX_HOURS := 12.0        # the hearth holds at most four firewood's worth
+const XP_CHOP_LOG := 6
 const SMELT_LEVEL := {"copper": 1, "iron": 4}
 const XP_SMELT := 10
 # Ammunition is fletched at the Craft panel and used up by each shot.
@@ -637,9 +645,9 @@ const NIGHT_EVENTS := [
 	{"message": "The field is quiet tonight. Too quiet.", "shadow": "none", "sanity": -3},
 ]
 
-enum Tile { TREE, GRASS, SOIL, PATH, WATER, HOUSE, DOOR, FLOOR, WALL, EXIT, BED, STATION, DESK, FALLOW, STALL, CELLAR, COOLER, GATE, SMOKEHOUSE, FURNACE, PORTAL, CAMP, CAVE_MOUTH, CAVE_EXIT, ORE_COPPER, ORE_IRON, COOP, BARN, TABLE, FIREPLACE, WELL, PORCH }
+enum Tile { TREE, GRASS, SOIL, PATH, WATER, HOUSE, DOOR, FLOOR, WALL, EXIT, BED, STATION, DESK, FALLOW, STALL, CELLAR, COOLER, GATE, SMOKEHOUSE, FURNACE, PORTAL, CAMP, CAVE_MOUTH, CAVE_EXIT, ORE_COPPER, ORE_IRON, COOP, BARN, TABLE, FIREPLACE, WELL, PORCH, WOODSTORE, CHOPLOG }
 
-const BLOCKING := [Tile.TREE, Tile.WATER, Tile.HOUSE, Tile.WALL, Tile.BED, Tile.STATION, Tile.DESK, Tile.STALL, Tile.CELLAR, Tile.COOLER, Tile.SMOKEHOUSE, Tile.FURNACE, Tile.CAMP, Tile.ORE_COPPER, Tile.ORE_IRON, Tile.COOP, Tile.BARN, Tile.TABLE, Tile.FIREPLACE, Tile.WELL]
+const BLOCKING := [Tile.TREE, Tile.WATER, Tile.HOUSE, Tile.WALL, Tile.BED, Tile.STATION, Tile.DESK, Tile.STALL, Tile.CELLAR, Tile.COOLER, Tile.SMOKEHOUSE, Tile.FURNACE, Tile.CAMP, Tile.ORE_COPPER, Tile.ORE_IRON, Tile.COOP, Tile.BARN, Tile.TABLE, Tile.FIREPLACE, Tile.WELL, Tile.WOODSTORE, Tile.CHOPLOG]
 
 const TILE_COLORS := {
 	Tile.TREE: Color("2f4f2f"),
@@ -662,6 +670,8 @@ const TILE_COLORS := {
 	Tile.GATE: Color("8f7a4f"),
 	Tile.SMOKEHOUSE: Color("9a5a3a"),
 	Tile.FURNACE: Color("5c5c66"),
+	Tile.WOODSTORE: Color("6b4a2e"),
+	Tile.CHOPLOG: Color("5a3a22"),
 	Tile.PORTAL: Color("6a4fc0"),
 	Tile.CAVE_MOUTH: Color("2a2a30"),
 	Tile.CAVE_EXIT: Color("a08050"),
@@ -728,7 +738,7 @@ var hose_attached := false
 var well_water := 0.0      # hours spent with an empty need, toward the next HP lost
 var weather_kind := ""       # today's weather, rolled each morning: see WEATHER_WEIGHTS
 var skill_xp := {"Farming": 0, "Bushcrafting": 0, "Carpentry": 0, "Cleaning": 0, "Fishing": 0, "Cooking": 0, "Combat": 0, "Forestry": 0, "Mining": 0, "Smithing": 0}
-var inventory := {"seeds": STARTING_SEEDS, "pumpkin_seeds": 0, "crops": 0, "pumpkins": 0, "fish": 0, "eggs": 0, "milk": 0, "fish_meal": 0, "turnip_hash": 0, "smoked_fish": 0, "dried_turnip": 0, "pumpkin_soup": 0, "canned_turnip": 0, "fish_stew": 0, "fermented_turnip": 0, "hearty_stew": 0, "bandage": 0}
+var inventory := {"seeds": STARTING_SEEDS, "pumpkin_seeds": 0, "crops": 0, "pumpkins": 0, "fish": 0, "eggs": 0, "milk": 0, "fish_meal": 0, "turnip_hash": 0, "smoked_fish": 0, "dried_turnip": 0, "pumpkin_soup": 0, "canned_turnip": 0, "fish_stew": 0, "fermented_turnip": 0, "hearty_stew": 0, "bandage": 0, "firewood": 4}
 var materials := {"wood": 0, "sticks": 0, "fiber": 0, "resin": 0, "hardwood": 0, "stone": 0, "copper_ore": 0, "iron_ore": 0, "copper_bar": 0, "iron_bar": 0, "arrows": 0, "bolts": 0}
 # The hotbar, in slot order. Slots after these are empty.
 const HOTBAR_TOOLS := [
@@ -814,6 +824,9 @@ var cellar_built := false
 var cooler_built := false
 var smokehouse_built := false
 var furnace_built := false
+var woodshed_built := false
+var firewood_store := 0
+var fire_hours := 0.0
 var shots: Array = []                 # arrows and bolts in flight, not saved
 var cellar_stock := 0          # crops in the root cellar
 var cooler_stock := 0          # fish in the cooler
@@ -1271,6 +1284,10 @@ func _draw() -> void:
 				FarmArt.draw_smokehouse(self, cell)
 			elif tile == Tile.FURNACE:
 				FarmArt.draw_furnace(self, cell)
+			elif tile == Tile.WOODSTORE:
+				FarmArt.draw_woodstore(self, cell)
+			elif tile == Tile.CHOPLOG:
+				FarmArt.draw_chopping_log(self, cell)
 			elif tile == Tile.PORCH:
 				FarmArt.draw_porch_tile(self, cell, Vector2i(x, y) - _world_tile(PORCH_RECT.position.x, PORCH_RECT.position.y), PORCH_RECT.size, house_stage)
 			elif tile == Tile.STALL:
@@ -1627,6 +1644,9 @@ func _apply_storage_tiles() -> void:
 		map[SMOKEHOUSE_IX.y + BORDER_Y][SMOKEHOUSE_IX.x + BORDER_X] = Tile.SMOKEHOUSE
 	if furnace_built:
 		map[FURNACE_IX.y + BORDER_Y][FURNACE_IX.x + BORDER_X] = Tile.FURNACE
+	if woodshed_built:
+		map[WOODSTORE_IX.y + BORDER_Y][WOODSTORE_IX.x + BORDER_X] = Tile.WOODSTORE
+		map[CHOPLOG_IX.y + BORDER_Y][CHOPLOG_IX.x + BORDER_X] = Tile.CHOPLOG
 	if coop_built and coop_tile.x >= 0:
 		_stamp_footprint(coop_tile, _footprint("coop"), Tile.COOP)
 	if barn_built and barn_tile.x >= 0:
@@ -2520,6 +2540,15 @@ func _on_panel_action(action_id: String) -> void:
 	if action_id == "camp":
 		_place_campsite()
 		return
+	if action_id == "build_woodshed":
+		_build_woodshed()
+		return
+	if action_id.begins_with("wood_take:"):
+		_take_firewood(int(action_id.trim_prefix("wood_take:")))
+		return
+	if action_id == "wood_store":
+		_store_firewood()
+		return
 	if action_id == "build_furnace":
 		_build_furnace()
 		return
@@ -2679,6 +2708,8 @@ func _refresh_panel() -> void:
 			rows = _smokehouse_rows()
 		"Furnace":
 			rows = _furnace_rows()
+		"Woodstore":
+			rows = _woodstore_rows()
 		"House":
 			rows = _house_rows()
 		"Buildings":
@@ -2800,6 +2831,7 @@ func _inventory_rows() -> Array:
 	rows.append({"name": "Food", "progress": roundi(food) / 100.0})
 	rows.append({"name": "Water", "progress": roundi(water) / 100.0})
 	rows.append({"name": "Warmth", "progress": roundi(warmth) / 100.0})
+	rows.append({"name": "Fire", "value": ("lit, about %d hours left" % ceili(fire_hours)) if _fire_lit() else "out. Feed the hearth from the house with firewood."})
 	rows.append({"name": "Outside", "value": "%d°F, %s" % [roundi(_temperature()), str(WEATHER_NAMES.get(weather_kind, "Overcast")).to_lower()]})
 	rows.append({"note": "Food and water drain through the day. Drink from the pond or the pump to refill water. Warmth drains outdoors on cold days, refills in the house, and is full again after a night's sleep. An empty need costs HP."})
 	rows.append({"section": "Planting"})
@@ -2870,6 +2902,10 @@ func _raw_inventory_tiles() -> Array:
 	if n > 0:
 		tiles.append(_stack_tile("pack:bandage", str(BANDAGE["name"]), "bandage", "e8e0d0", n, "in the pack",
 			"Heals %d HP. Use it from here." % int(BANDAGE["heal"]), "use_bandage", "Use"))
+	n = int(inventory["firewood"])
+	if n > 0:
+		tiles.append(_stack_tile("pack:firewood", "Firewood", "firewood", "9a6a3a", n, "in the pack",
+			"Split logs for the hearth. Feed the fire from the hearth in the house.", "", ""))
 	var turnip_ok := true
 	tiles.append(_stack_tile("seed:turnip", "Turnip seeds", "seed", "a8d46f", int(inventory["seeds"]), "in the pouch",
 		"Planted in tilled soil. Kept in the seed pouch.", "", ""))
@@ -3481,6 +3517,16 @@ func _buildings_rows() -> Array:
 			"action": "build_furnace",
 			"enabled": _can_afford(FURNACE_COST),
 		})
+	if woodshed_built:
+		rows.append({"name": "Firewood store and chopping log", "value": "built in the workshop. Stand beside them to store firewood or split wood."})
+	else:
+		rows.append({
+			"name": "Build a firewood store and chopping log",
+			"value": _price_text(WOODSHED_COST) + ("" if smokehouse_built or furnace_built else ", needs the smokehouse or furnace first"),
+			"button": "Build",
+			"action": "build_woodshed",
+			"enabled": _can_afford(WOODSHED_COST) and (smokehouse_built or furnace_built),
+		})
 	rows.append({"note": "The workshop is a walled building against the east wall of the house. Its door is on the south side."})
 	rows.append({"section": "Coop"})
 	if not coop_built:
@@ -3718,6 +3764,8 @@ func _interact() -> void:
 		match _kind_at(tile):
 			Tile.BED:
 				_try_sleep()
+			Tile.FIREPLACE:
+				_feed_fire()
 			Tile.STATION:
 				_tidy_house()
 			Tile.DESK:
@@ -3757,6 +3805,16 @@ func _interact() -> void:
 	if kind == Tile.TREE and GROVE_SPOTS.has(tile - Vector2i(BORDER_X, BORDER_Y)):
 		if _need_tool("axe"):
 			_chop(tile)
+		return
+	if kind == Tile.CHOPLOG:
+		if _tool_press:
+			_chop_firewood()
+		else:
+			_show_message("Stand here with the axe and some wood, then press RT or click to split firewood.")
+		return
+	if kind == Tile.WOODSTORE:
+		if not _tool_press:
+			_toggle_tab("Woodstore")
 		return
 	# Panels, stores and the fallow message are hand actions. Tools work the ground and trees only.
 	if _tool_press and kind != Tile.SOIL:
@@ -4481,7 +4539,7 @@ func _smokehouse_rows() -> Array:
 
 
 func _pack_used() -> int:
-	var used := _slots_for(int(inventory["fish"])) + _slots_for(int(inventory["bandage"]))
+	var used := _slots_for(int(inventory["fish"])) + _slots_for(int(inventory["bandage"])) + _slots_for(int(inventory["firewood"]))
 	for f in Foods.LIST:
 		used += _slots_for(int(inventory[str(f["held"])]))
 	return used
@@ -4643,7 +4701,12 @@ func _update_needs(dh: float) -> void:
 	var thirst := WATER_PER_HOUR * (HOT_WATER_MULT if temp >= HOT_TEMP else 1.0)
 	food = maxf(0.0, food - FOOD_PER_HOUR * dh)
 	water = maxf(0.0, water - thirst * dh)
-	if inside:
+	var was_lit := _fire_lit()
+	fire_hours = maxf(0.0, fire_hours - dh)
+	if was_lit and not _fire_lit():
+		_show_message("The fire has gone out.")
+	# With no fire the house is as cold as outside, so it only warms on mild days.
+	if inside and _fire_lit():
 		var gain := WARMTH_INDOORS if house_stage >= 2 else WARMTH_INDOORS_COLD
 		warmth = minf(100.0, warmth + gain * dh)
 	elif temp >= COLD_TEMP:
@@ -5150,6 +5213,84 @@ func _tiles_to_array(tiles: Dictionary) -> Array:
 
 # --- Smithing -------------------------------------------------------------------
 
+# Whether the hearth has a fire going.
+func _fire_lit() -> bool:
+	return fire_hours > 0.0
+
+
+func _feed_fire() -> void:
+	if int(inventory["firewood"]) <= 0:
+		_show_message("The hearth needs firewood. Take some from the firewood store at the workshop.")
+		return
+	if fire_hours >= FIRE_MAX_HOURS:
+		_show_message("The fire is already roaring.")
+		return
+	inventory["firewood"] -= 1
+	fire_hours = minf(FIRE_MAX_HOURS, fire_hours + FIREWOOD_HOURS)
+	_show_message("You feed the fire. It will burn for about %d more hours." % ceili(fire_hours))
+
+
+# Splits one wood into firewood at the chopping log. Needs the axe in hand and wood in the pack.
+func _chop_firewood() -> void:
+	if not _need_tool("axe"):
+		return
+	if int(materials["wood"]) <= 0:
+		_show_message("You need wood to split. Gather some first.")
+		return
+	if firewood_store >= WOODSTORE_CAP:
+		_show_message("The firewood store is full. Take some firewood out first.")
+		return
+	materials["wood"] -= 1
+	var made := mini(FIREWOOD_PER_WOOD, WOODSTORE_CAP - firewood_store)
+	firewood_store += made
+	_grant_xp("Forestry", XP_CHOP_LOG)
+	_show_message("You split the wood into %d firewood. %d in the store. +%d Forestry XP" % [made, firewood_store, XP_CHOP_LOG])
+
+
+func _woodstore_rows() -> Array:
+	return [
+		{"section": "Firewood store"},
+		{"name": "Firewood in the store", "value": "%d of %d" % [firewood_store, WOODSTORE_CAP], "progress": float(firewood_store) / float(WOODSTORE_CAP)},
+		{"name": "Firewood in your pack", "value": str(int(inventory["firewood"]))},
+		{"name": "Take 5 firewood", "value": "into your pack", "button": "Take", "action": "wood_take:5", "enabled": firewood_store > 0},
+		{"name": "Store your firewood", "value": "all you carry, up to the store's room", "button": "Store", "action": "wood_store",
+			"enabled": int(inventory["firewood"]) > 0 and firewood_store < WOODSTORE_CAP},
+		{"note": "Split wood at the chopping log: stand beside it, facing it, hold the axe, and press RT or click. Feed the hearth in the house with firewood from your pack."},
+	]
+
+
+func _take_firewood(amount: int) -> void:
+	var n := mini(amount, firewood_store)
+	if n <= 0:
+		_show_message("The firewood store is empty.")
+		return
+	firewood_store -= n
+	inventory["firewood"] += n
+	_show_message("You take %d firewood." % n)
+
+
+func _store_firewood() -> void:
+	var n := mini(int(inventory["firewood"]), WOODSTORE_CAP - firewood_store)
+	if n <= 0:
+		_show_message("There is nothing to store, or the store is full.")
+		return
+	inventory["firewood"] -= n
+	firewood_store += n
+	_show_message("You store %d firewood. %d in the store." % [n, firewood_store])
+
+
+func _build_woodshed() -> void:
+	if not (smokehouse_built or furnace_built):
+		_show_message("Build the smokehouse or the furnace first. The workshop is where the firewood goes.")
+		return
+	if not _can_afford(WOODSHED_COST):
+		_show_message("You can't build that yet. Needs %s." % _price_text(WOODSHED_COST))
+		return
+	_pay(WOODSHED_COST)
+	woodshed_built = true
+	_build_interior()
+	_show_message("The firewood store and chopping log stand in the workshop. Split wood there, then feed the hearth.")
+	queue_redraw()
 func _build_furnace() -> void:
 	if not _can_afford(FURNACE_COST):
 		_show_message("You can't build that yet. Needs %s." % _price_text(FURNACE_COST))
@@ -5968,6 +6109,8 @@ func _pack_cells() -> Array:
 	for f in Foods.LIST:
 		for _i in int(inventory[str(f["held"])]):
 			cells.append({"color": str(f["tint"]), "label": str(f["name"]), "tip": "%s. %s" % [str(f["name"]), _food_stats_text(f)]})
+	for _i in int(inventory["firewood"]):
+		cells.append({"color": "9a6a3a", "label": "Firewood", "tip": "Split logs for the hearth."})
 	for _i in int(inventory["fish"]):
 		cells.append({"color": "6fb8d9", "label": "Fish", "tip": "Fish. Spoils overnight unless stored in the cooler."})
 	while cells.size() < _pack_capacity():
@@ -6946,7 +7089,10 @@ func _try_sleep() -> void:
 		return
 	stats["slept"] += 1
 	_change_sanity(SLEEP_SANITY)
-	warmth = 100.0
+	if _fire_lit():
+		warmth = 100.0
+	else:
+		_show_message("The fire is out. Nothing warms the house through the night, and you wake chilled.")
 	# You wake standing beside the bed, so the house is not left.
 	player.position = _wake_spot()
 	_sleep_scene()
@@ -7419,6 +7565,9 @@ func _save_game() -> void:
 		"cooler_stock": cooler_stock,
 		"smokehouse_built": smokehouse_built,
 		"furnace_built": furnace_built,
+		"woodshed_built": woodshed_built,
+		"firewood_store": firewood_store,
+		"fire_hours": fire_hours,
 		"achievements_done": achievements_done,
 		"story_version": 2,
 		"selected_seed": selected_seed,
@@ -7513,6 +7662,9 @@ func _load_game() -> bool:
 	cooler_stock = int(data.get("cooler_stock", 0))
 	smokehouse_built = bool(data.get("smokehouse_built", false))
 	furnace_built = bool(data.get("furnace_built", false))
+	woodshed_built = bool(data.get("woodshed_built", false))
+	firewood_store = int(data.get("firewood_store", 0))
+	fire_hours = float(data.get("fire_hours", 0.0))
 	saved_zone = int(data.get("zone", 0)) if int(data.get("world_version", 0)) >= 1 else 0
 	var saved_camp: Variant = data.get("campsite", null)
 	if typeof(saved_camp) == TYPE_ARRAY and saved_camp.size() == 2:
@@ -7851,7 +8003,7 @@ func _draw_fireplace_tile(cell: Rect2) -> void:
 		draw_line(Vector2(cell.position.x, y), Vector2(cell.end.x, y), Color(0, 0, 0, 0.25), 1.0)
 	var box := Rect2(cell.position + Vector2(8, 14), cell.size - Vector2(16, 20))
 	draw_rect(box, Color("1a0f0a"))
-	if house_stage >= 2:
+	if house_stage >= 2 and _fire_lit():
 		draw_colored_polygon(PackedVector2Array([
 			box.position + Vector2(4, box.size.y),
 			box.position + Vector2(box.size.x * 0.5, box.size.y * 0.2),

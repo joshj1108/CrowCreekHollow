@@ -946,6 +946,11 @@ class RecipeIcon extends Control:
 				draw_circle(_pt(0.4, 0.5), 0.04 * _sz, light)
 				draw_circle(_pt(0.6, 0.62), 0.05 * _sz, light)
 				draw_circle(_pt(0.5, 0.78), 0.035 * _sz, light)
+			"firewood":
+				for k in 3:
+					var fy: float = 0.3 + 0.24 * float(k)
+					_box(Rect2(_pt(0.14, fy), Vector2(0.72, 0.17) * _sz), tint)
+					draw_circle(_pt(0.14, fy + 0.085), 0.09 * _sz, light)
 			"fish":
 				_shape(_ellipse(0.42, 0.5, 0.36, 0.22), tint)
 				_shape(_poly([[0.72, 0.5], [0.98, 0.25], [0.98, 0.75]]), dark)

@@ -753,3 +753,28 @@ static func draw_crop_shimmer(ci: CanvasItem, centres: Array, u: float, time: fl
 			var col := Color(1.0, 1.0, 0.9, 0.3 + 0.6 * tw)
 			ci.draw_line(sp + Vector2(-arm, 0), sp + Vector2(arm, 0), col, 1.0)
 			ci.draw_line(sp + Vector2(0, -arm), sp + Vector2(0, arm), col, 1.0)
+# The firewood store: a lean-to with its roof boards across the top, and split logs stacked in rows below.
+static func draw_woodstore(ci: CanvasItem, cell: Rect2) -> void:
+	ci.draw_rect(cell, Color("4a3424"))
+	var inner := cell.grow(-3.0)
+	ci.draw_rect(Rect2(inner.position, Vector2(inner.size.x, inner.size.y * 0.22)), Color("3a2a1c"))
+	for row in 3:
+		for col in 3:
+			var c := inner.position + Vector2(inner.size.x * (0.2 + 0.3 * float(col)), inner.size.y * (0.46 + 0.2 * float(row)))
+			ci.draw_circle(c, inner.size.x * 0.1, Color("8a5e34"))
+			ci.draw_circle(c, inner.size.x * 0.05, Color("e8c890"))
+
+
+# The chopping log: a round stump with the axe stuck in its top.
+static func draw_chopping_log(ci: CanvasItem, cell: Rect2) -> void:
+	ci.draw_rect(cell, Color("2e2418"))
+	var c := cell.get_center()
+	ci.draw_colored_polygon(ellipse(c + Vector2(0, cell.size.y * 0.12), cell.size.x * 0.38, cell.size.y * 0.26), Color("6b4a2e"))
+	ci.draw_colored_polygon(ellipse(c + Vector2(0, cell.size.y * 0.02), cell.size.x * 0.38, cell.size.y * 0.18), Color("c9a574"))
+	ci.draw_colored_polygon(ellipse(c + Vector2(0, cell.size.y * 0.02), cell.size.x * 0.18, cell.size.y * 0.09), Color("a9824f"))
+	ci.draw_line(c + Vector2(cell.size.x * 0.1, -cell.size.y * 0.32), c + Vector2(cell.size.x * 0.1, cell.size.y * 0.02), Color("5a3a22"), 2.0)
+	ci.draw_colored_polygon(PackedVector2Array([
+		c + Vector2(cell.size.x * 0.1, -cell.size.y * 0.34),
+		c + Vector2(cell.size.x * 0.32, -cell.size.y * 0.3),
+		c + Vector2(cell.size.x * 0.1, -cell.size.y * 0.18),
+	]), Color("b9b4a6"))

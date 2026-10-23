@@ -196,6 +196,15 @@ Achievements track stats and never reset. Each pays a small reward. Earning all 
 
 - New with the needs and well: **Cool Water** (drink from the pond or pump), **Hose Hand** (water a crop), **Working Pump** (repair the pump), **Garden Hose** (attach the hose), **Rain Keeps Them Green** (5 rainy days), and **Tender of the Plots** (water 50 crops). **Turning Seasons** (3 seasonal events) and **A Full Year** (6) count the events below.
 
+## Firewood and warmth
+
+- The **firewood store** and **chopping log** stand inside the workshop, on its two free floor tiles. Build them from the Buildings section (Shift, then Buildings) for 4 wood, 2 fiber, 40 coins, and Carpentry 2. They need the smokehouse or the furnace first.
+- **Split wood** at the chopping log: hold the axe, stand beside the log, facing it, and press RT or click. Each press uses 1 wood and makes 2 firewood, stored up to 30 in the store. It gives Forestry XP.
+- **Take firewood** from the store into your pack, or store what you carry, from the store's panel (Space).
+- **Feed the hearth** in the house with one firewood (Space, facing the hearth). Each firewood burns for 3 hours, up to 12. The hearth's flames show only while it burns.
+- **No fire, no warmth at home.** Indoors with the fire lit, you warm as before. With the fire out the house is as cold as outside, and sleeping does not restore warmth unless the fire is lit when you go to bed.
+- You start with 4 firewood.
+
 ## Cooking
 
 - Cooking is a skill (same level curve as Skills).
