@@ -61,10 +61,10 @@ func hide_wheel() -> void:
 func _process(_delta: float) -> void:
 	if not open:
 		return
-	# The right stick moves the highlight; the mouse does the same when it moves.
+	# The left stick moves the highlight; the mouse does the same when it moves.
 	var pads := Input.get_connected_joypads()
 	var device: int = pads[0] if not pads.is_empty() else 0
-	var stick := Vector2(Input.get_joy_axis(device, JOY_AXIS_RIGHT_X), Input.get_joy_axis(device, JOY_AXIS_RIGHT_Y))
+	var stick := Vector2(Input.get_joy_axis(device, JOY_AXIS_LEFT_X), Input.get_joy_axis(device, JOY_AXIS_LEFT_Y))
 	if stick.length() > STICK_DEADZONE:
 		var i := _segment_at(stick)
 		if i != highlight:
@@ -138,7 +138,7 @@ func _draw_ring() -> void:
 	var sub := str(SECTIONS[highlight]["subtitle"])
 	var sub_width := font.get_string_size(sub, HORIZONTAL_ALIGNMENT_LEFT, -1, 13).x
 	ring.draw_string(font, c + Vector2(-sub_width * 0.5, 16.0), sub, HORIZONTAL_ALIGNMENT_LEFT, -1, 13, COL_MUTED)
-	var hint := "Mouse or right stick to choose   ·   A or click to open   ·   B or Esc to close"
+	var hint := "Mouse or left stick to choose   ·   A or click to open   ·   B or Esc to close"
 	var hint_width := font.get_string_size(hint, HORIZONTAL_ALIGNMENT_LEFT, -1, 14).x
 	ring.draw_string(font, Vector2(c.x - hint_width * 0.5, c.y + OUTER_R + 30.0), hint, HORIZONTAL_ALIGNMENT_LEFT, -1, 14, COL_MUTED)
 

@@ -3559,7 +3559,7 @@ func _settings_rows() -> Array:
 		{"name": "Use, plant, harvest, gather, sleep", "value": "A"},
 		{"name": "Close the open section, the wheel, or the bag", "value": "B"},
 		{"name": "Bag (Inventory is in the bag)", "value": "Y"},
-		{"name": "Section wheel", "value": "Left stick click, then right stick and A"},
+		{"name": "Section wheel", "value": "Left stick click, then left stick and A"},
 		{"name": "Settings", "value": "Start"},
 		{"note": "While a panel is open, the D-pad or left stick moves between its buttons, and A presses the highlighted one."},
 		{"section": "Saving"},
