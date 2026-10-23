@@ -470,6 +470,10 @@ func _tool_dir(t: float, side_view: bool) -> Vector2:
 # The arm on the working side, then the tool in the hand. The tool's angle is the arm's angle plus its lag.
 func _draw_working_arm(bob: float, side_view: bool) -> void:
 	var pose := _pose()
+	var tool_angle := float(pose[0]) + float(pose[1])
+	# A hoe rests over the shoulder with its blade up, rather than dragging on the ground.
+	if _kind() == "idle" and held == "hoe":
+		tool_angle = -2.6
 	var shoulder := _shoulder(bob, side_view)
 	var target := shoulder + _reach(float(pose[0]), side_view)
 	var elbow := _elbow(shoulder, target, side_view)
@@ -477,7 +481,7 @@ func _draw_working_arm(bob: float, side_view: bool) -> void:
 	draw_circle(elbow, 2.0, SHIRT)
 	draw_line(elbow, target, SHIRT_SHADE, 3.4)
 	draw_circle(target, 2.4, SKIN)
-	_draw_tool(target, side_view, float(pose[0]) + float(pose[1]))
+	_draw_tool(target, side_view, tool_angle)
 
 
 func _draw_tool(hand: Vector2, side_view: bool, tool_angle: float) -> void:
@@ -539,14 +543,19 @@ func _draw_blade(hand: Vector2, dir: Vector2, perp: Vector2) -> void:
 		return
 	var steel: Color = BLADE.get(held_item, Color("b8c0c8"))
 	var base := hand + dir * 2.0
-	draw_line(hand, base, WOOD_DARK, 2.4)
+	draw_line(hand, base, WOOD_DARK, 2.6)
 	if held_item == "sharpened_stick":
-		draw_line(base, base + dir * 14.0, steel, 2.0)
+		draw_line(base, base + dir * 17.0, steel, 2.6)
 		return
-	var length := 8.0 if held_item == "hunting_knife" else 15.0
+	var knife := held_item == "hunting_knife"
+	var length := 11.0 if knife else 21.0
+	var half := 1.5 if knife else 2.4
 	var tip := base + dir * length
-	draw_colored_polygon(PackedVector2Array([base + perp * 1.6, tip, base - perp * 1.6]), steel)
-	draw_line(base - perp * 3.5, base + perp * 3.5, IRON_DARK, 1.6)
+	draw_colored_polygon(PackedVector2Array([base + perp * half, tip, base - perp * half]), steel)
+	# A bright edge along one side, so the blade catches the light.
+	draw_line(base + perp * half, tip, steel.lightened(0.45), 0.9)
+	if not knife:
+		draw_line(base - perp * 4.0, base + perp * 4.0, IRON_DARK, 2.0)
 
 
 func _ellipse(center: Vector2, rx: float, ry: float) -> PackedVector2Array:
