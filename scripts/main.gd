@@ -1330,13 +1330,12 @@ func _draw() -> void:
 
 	for pos in crops:
 		var crop: Dictionary = crops[pos]
-		var colors: Array = CROPS[crop["kind"]]["colors"]
 		var stage: int = crop["stage"]
 		var center := _tile_center(pos.x, pos.y)
-		var size := PX * (0.2 + 0.2 * stage)
-		draw_rect(Rect2(center - Vector2.ONE * size * 0.5, Vector2.ONE * size), Color(colors[stage]))
+		var watered_now := int(crop.get("watered_day", 0)) == day
+		FarmArt.draw_crop(self, center, PX, str(crop["kind"]), stage, watered_now)
 		# A blue drop shows the crop was watered today, so it will grow tonight.
-		if int(crop.get("watered_day", 0)) == day:
+		if watered_now:
 			draw_circle(center + Vector2(PX * 0.34, -PX * 0.34), PX * 0.1, Color("6fa8dc"))
 
 	for pos in rocks:
@@ -1840,6 +1839,11 @@ func _draw_water_shimmer() -> void:
 		sky = 2 if current_hour >= DUSK_HOUR else 1
 	var focus := Vector2(LAKE_CENTRE.x + BORDER_X, LAKE_CENTRE.y + BORDER_Y)
 	FarmArt.draw_water_shimmer(water_fx, water_tiles, Time.get_ticks_msec() * 0.001, sky, weather_kind in WATER_RAIN_KINDS, focus)
+	var centres: Array = []
+	for pos in crops:
+		if int(crops[pos].get("watered_day", 0)) == day:
+			centres.append(_tile_center(pos.x, pos.y))
+	FarmArt.draw_crop_shimmer(water_fx, centres, PX, Time.get_ticks_msec() * 0.001)
 
 
 func _build_lantern_light() -> void:
@@ -2491,7 +2495,7 @@ func _bag_items() -> Array:
 		var desc := str(t.get("desc", ""))
 		if usable:
 			desc += "\nClick or press A to use."
-		out.append({"label": str(t["name"]), "usable": usable, "action": action, "desc": desc, "tint": str(t.get("tint", "8a6a3a"))})
+		out.append({"label": str(t["name"]), "usable": usable, "action": action, "desc": desc, "tint": str(t.get("tint", "8a6a3a")), "icon": str(t.get("icon", ""))})
 	return out
 
 
@@ -2806,6 +2810,7 @@ func _inventory_rows() -> Array:
 			var tile: Dictionary = t.duplicate()
 			tile["selected"] = str(t["key"]) == str(chosen["key"])
 			tile["action"] = "inv_pick:" + str(t["key"])
+			tile["names_on_focus"] = true
 			marked.append(tile)
 		rows.append({"split": {"recipes": marked, "columns": 4, "detail": chosen}})
 	rows.append({"name": "Coins", "value": str(money)})
@@ -2882,11 +2887,11 @@ func _raw_inventory_tiles() -> Array:
 	var tiles: Array = []
 	var n := int(inventory["crops"])
 	if n > 0:
-		tiles.append(_stack_tile("pack:crop", "Turnip", "crop", "8fd16b", n, "in the pack",
+		tiles.append(_stack_tile("pack:crop", "Turnip", "turnip", "8fd16b", n, "in the pack",
 			"Harvested from the field. Eat it raw, or cook it for a better meal. Sells for %d coins." % _crop_price("turnip"), "eat_crop", "Eat"))
 	n = int(inventory["pumpkins"])
 	if n > 0:
-		tiles.append(_stack_tile("pack:pumpkin", "Pumpkin", "crop", "e0822a", n, "in the pack",
+		tiles.append(_stack_tile("pack:pumpkin", "Pumpkin", "pumpkin", "e0822a", n, "in the pack",
 			"A large pumpkin. Eat it raw, or cook it. Sells for %d coins. Pumpkins do not keep in the cellar." % _crop_price("pumpkin"), "eat_pumpkin", "Eat"))
 	n = int(inventory["fish"])
 	if n > 0:
@@ -2914,7 +2919,7 @@ func _raw_inventory_tiles() -> Array:
 	tiles.append(_stack_tile("seed:turnip", "Turnip seeds", "seed", "a8d46f", int(inventory["seeds"]), "in the pouch",
 		"Planted in tilled soil. Kept in the seed pouch.", "", ""))
 	var pumpkin_ok := _level("Farming") >= PUMPKIN_LEVEL
-	var pumpkin := _stack_tile("seed:pumpkin", "Pumpkin seeds", "seed", "d98a35", int(inventory["pumpkin_seeds"]), "in the pouch",
+	var pumpkin := _stack_tile("seed:pumpkin", "Pumpkin seeds", "pumpkin_seed", "d98a35", int(inventory["pumpkin_seeds"]), "in the pouch",
 		"Larger harvest of three crops per plant. Needs Farming %d to plant." % PUMPKIN_LEVEL, "", "")
 	pumpkin["enabled"] = pumpkin_ok
 	pumpkin["level_ok"] = pumpkin_ok
@@ -3890,6 +3895,8 @@ func _plant(tile: Vector2i) -> void:
 		return
 	inventory[seed_key] -= 1
 	crops[tile] = {"stage": 0, "kind": kind}
+	if weather_kind in WATER_RAIN_KINDS:
+		crops[tile]["watered_day"] = day
 	stats["planted"] += 1
 	_grant_xp("Farming", XP_PLANT)
 	_show_message("Planted %s. +%d Farming XP" % [_seed_label(kind).to_lower(), XP_PLANT])
@@ -6946,6 +6953,10 @@ func _roll_weather() -> void:
 func _apply_weather() -> void:
 	if weather != null:
 		weather.set_condition(weather_kind)
+	# Rain waters every crop as it falls, so the drops and the shimmer show from the morning.
+	if weather_kind in WATER_RAIN_KINDS:
+		for pos in crops:
+			crops[pos]["watered_day"] = day
 	# A downpour sometimes brings thunder, once a morning.
 	if weather_kind == "downpour" and thunder_day != day:
 		thunder_day = day

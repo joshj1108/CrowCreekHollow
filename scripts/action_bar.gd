@@ -570,6 +570,15 @@ func _build_recipe_tile(recipe: Dictionary, small: bool = false) -> Control:
 	name_label.add_theme_color_override("font_color", COL_TEXT if lit else COL_MUTED)
 	name_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	box.add_child(name_label)
+	# Inventory items show their name only while they are highlighted, so the pictures carry the list.
+	if bool(recipe.get("names_on_focus", false)):
+		name_label.visible = selected
+		var show := func(on: bool) -> void:
+			name_label.visible = on or selected
+		tile.focus_entered.connect(show.bind(true))
+		tile.focus_exited.connect(show.bind(false))
+		tile.mouse_entered.connect(show.bind(true))
+		tile.mouse_exited.connect(show.bind(false))
 	return tile
 
 
@@ -865,6 +874,21 @@ class RecipeIcon extends Control:
 				_shape(_ellipse(0.32, 0.36, 0.2, 0.12), light)
 				_shape(_ellipse(0.68, 0.34, 0.2, 0.12), light)
 				_shape(_ellipse(0.5, 0.66, 0.24, 0.22), tint)
+			"turnip":
+				var leaf_col := Color("5f9a3a")
+				_shape(_poly([[0.5, 0.46], [0.28, 0.14], [0.4, 0.08], [0.54, 0.4]]), leaf_col)
+				_shape(_poly([[0.5, 0.46], [0.72, 0.14], [0.6, 0.08], [0.46, 0.4]]), leaf_col)
+				_shape(_ellipse(0.5, 0.66, 0.3, 0.26), Color("efe8f2"))
+				_shape(_ellipse(0.5, 0.52, 0.28, 0.1), Color("9a5aa8"))
+			"pumpkin":
+				_shape(_poly([[0.54, 0.2], [0.8, 0.08], [0.7, 0.28]]), Color("5f9a3a"))
+				_box(Rect2(_pt(0.46, 0.14), Vector2(0.08, 0.16) * _sz), Color("4f6e2a"))
+				_shape(_ellipse(0.5, 0.58, 0.4, 0.3), tint)
+				draw_polyline(_ellipse(0.32, 0.58, 0.16, 0.3), dark, 0.02 * _sz)
+				draw_polyline(_ellipse(0.68, 0.58, 0.16, 0.3), dark, 0.02 * _sz)
+			"pumpkin_seed":
+				_shape(_ellipse(0.4, 0.55, 0.2, 0.3), Color("efe2a6"))
+				_shape(_ellipse(0.62, 0.48, 0.2, 0.3), Color("efe2a6"))
 			"fish":
 				_shape(_ellipse(0.42, 0.5, 0.36, 0.22), tint)
 				_shape(_poly([[0.72, 0.5], [0.98, 0.25], [0.98, 0.75]]), dark)

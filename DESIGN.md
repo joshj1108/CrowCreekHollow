@@ -74,6 +74,7 @@ The farmer is drawn in code. A straw hat with a band, a shirt under blue overall
 - The bed can be used from **18:00 to 03:00**. Using it saves the game and ends the day.
 - If you aren't in bed by **03:00**, you collapse. The day ends, the game saves, and your **sanity limit drops by 5 permanently**. A cleanse can recover it (see Sanity).
 - Crops grow one stage per day. Brush piles respawn each morning. Thicket piles appear at Bushcrafting 3.
+- Rain (drizzle, rain, or downpour) waters every crop as soon as it starts that morning, and a crop planted on a rainy day is watered too. Watered crops show a sparkle and a faint sheen. Turnips and pumpkins each have four drawn stages: a sprout, leaves (pumpkins add a vine), a swelling fruit, and the ripe crop.
 
 ## Calendar, seasons, and weather
 
@@ -155,7 +156,7 @@ Saves from before this change reset chapter progress. Stat-based achievements re
 ## Pack, bags, and storage
 
 - The **pack** holds crops, fish, and meals. Seeds have their own pouch and don't count. Materials are uncapped for now.
-- The pack starts at **20 slots**. Like items stack up to **28** to a slot, so a kind takes as many slots as its stacks need. Grid menus (Skills, Inventory, Craft, Gear) sit centred in the menu box. The Inventory panel (I) shows what you carry as a grid of picture tiles, one per kind with its count, like the Craft panel: the pack's crops, fish, meals, and preserved goods, then the seed pouch and the materials you hold. Picking a tile fills the detail card beside the grid, which holds the **Eat** button for crops and meals. The pack's slots used and the next bag are listed under the grid. The Body meters and the planting options sit below it.
+- The pack starts at **20 slots**. Like items stack up to **28** to a slot, so a kind takes as many slots as its stacks need. Grid menus (Skills, Inventory, Craft, Gear) sit centred in the menu box. The Inventory panel (I) shows what you carry as a grid of picture tiles, one per kind with its count, like the Craft panel: the pack's crops, fish, meals, and preserved goods, then the seed pouch and the materials you hold. Every item has a drawn picture. The name shows only on the highlighted tile, and the bag works the same way: each slot shows a picture and count, with the name on the slot in focus. Picking a tile fills the detail card beside the grid, which holds the **Eat** button for crops and meals. The pack's slots used and the next bag are listed under the grid. The Body meters and the planting options sit below it.
 - The seed pouch is a small grid with a count on each seed type.
 - The Gear panel is a paper-doll grid of nine slots. The slots and crafting are described under Gear and crafting below.
 - **Bags** (bought with coins, fiber, wood, and Carpentry level):

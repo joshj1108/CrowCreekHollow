@@ -678,3 +678,78 @@ static func draw_water_shimmer(ci: CanvasItem, tiles: Array, time: float, sky: i
 			var age: float = fposmod(time * 0.9 + phase, 1.0)
 			var rr: float = T * (0.08 + 0.3 * age)
 			ci.draw_arc(p + Vector2(frac(h, 3) - 0.5, frac(h, 21) - 0.5) * T * 0.5, rr, 0.0, TAU, 12, Color(0.85, 0.92, 1.0, 0.35 * (1.0 - age)), 1.0)
+
+
+static func _leaf(ci: CanvasItem, base: Vector2, tip: Vector2, width: float, col: Color) -> void:
+	var dir := tip - base
+	var side := Vector2(-dir.y, dir.x).normalized() * width
+	var mid := base + dir * 0.5
+	ci.draw_colored_polygon(PackedVector2Array([base, mid + side, tip, mid - side]), col)
+	ci.draw_line(base, tip, col.darkened(0.35), 1.0)
+
+
+# A crop at one of its four stages. Turnips show leaves that grow into a purple-shouldered bulb.
+# Pumpkins show a sprout, then a vine, then a round fruit with ribs and a stem. Watered soil is darker.
+static func draw_crop(ci: CanvasItem, c: Vector2, u: float, kind: String, stage: int, watered: bool) -> void:
+	var soil := Color("3d2a1c") if watered else Color("5a3d28")
+	var base := c + Vector2(0, u * 0.32)
+	ci.draw_colored_polygon(ellipse(base, u * 0.38, u * 0.11), soil)
+	if kind == "pumpkin":
+		_pumpkin(ci, base, u, stage)
+	else:
+		_turnip(ci, base, u, stage)
+
+
+static func _turnip(ci: CanvasItem, base: Vector2, u: float, stage: int) -> void:
+	var leaf := Color("6fae4a") if stage < 3 else Color("4f9a3a")
+	if stage == 0:
+		_leaf(ci, base, base + Vector2(-0.13, -0.2) * u, 0.05 * u, leaf)
+		_leaf(ci, base, base + Vector2(0.13, -0.2) * u, 0.05 * u, leaf)
+		return
+	if stage >= 2:
+		var bulb := 0.13 if stage == 2 else 0.19
+		ci.draw_colored_polygon(ellipse(base + Vector2(0, -0.03) * u, bulb * u, bulb * 0.75 * u), Color("ece6f2"))
+		ci.draw_colored_polygon(ellipse(base + Vector2(0, -0.09) * u, bulb * u * 0.9, bulb * 0.35 * u), Color("9a5aa8"))
+	var reach := 0.42 if stage == 1 else (0.55 if stage == 2 else 0.68)
+	var width := (0.08 + 0.02 * float(stage)) * u
+	for a in [-0.45, -0.15, 0.15, 0.45]:
+		_leaf(ci, base, base + Vector2(a, -1.0).normalized() * reach * u, width, leaf)
+
+
+static func _pumpkin(ci: CanvasItem, base: Vector2, u: float, stage: int) -> void:
+	var leaf := Color("4f8a34")
+	if stage == 0:
+		_leaf(ci, base, base + Vector2(-0.14, -0.18) * u, 0.06 * u, Color("7ab850"))
+		_leaf(ci, base, base + Vector2(0.14, -0.18) * u, 0.06 * u, Color("7ab850"))
+		return
+	if stage == 1:
+		ci.draw_line(base, base + Vector2(0.2, -0.22) * u, leaf, 1.5)
+		ci.draw_colored_polygon(ellipse(base + Vector2(-0.2, -0.2) * u, 0.14 * u, 0.09 * u), leaf)
+		ci.draw_colored_polygon(ellipse(base + Vector2(0.28, -0.3) * u, 0.13 * u, 0.08 * u), leaf)
+		return
+	var r := 0.2 if stage == 2 else 0.28
+	var fruit := base + Vector2(0, -r * 0.8) * u
+	ci.draw_colored_polygon(ellipse(base + Vector2(-0.26, -0.12) * u, 0.14 * u, 0.09 * u), leaf)
+	ci.draw_colored_polygon(ellipse(base + Vector2(0.28, -0.1) * u, 0.14 * u, 0.09 * u), leaf)
+	ci.draw_colored_polygon(ellipse(fruit, r * u, r * 0.8 * u), Color("d98a35") if stage == 2 else Color("e0822a"))
+	ci.draw_polyline(ellipse(fruit, r * 0.5 * u, r * 0.8 * u), Color("b8601e"), 1.0)
+	ci.draw_rect(Rect2(fruit + Vector2(-0.03, -r * 0.8 - 0.1) * u, Vector2(0.06, 0.1) * u), Color("4f6e2a"))
+	if stage == 3:
+		ci.draw_colored_polygon(ellipse(fruit + Vector2(-r * 0.4, -r * 0.3) * u, 0.05 * u, 0.03 * u), Color("f2a13a"))
+
+
+# Sparkles and a faint sheen over the watered crops, drawn on the animated overlay.
+static func draw_crop_shimmer(ci: CanvasItem, centres: Array, u: float, time: float) -> void:
+	for c in centres:
+		var p: Vector2 = c
+		var ph := fposmod(p.x * 0.37 + p.y * 0.91, TAU)
+		var pulse := 0.5 + 0.5 * sin(time * 2.0 + ph)
+		ci.draw_colored_polygon(ellipse(p + Vector2(0, u * 0.1), u * 0.46, u * 0.3), Color(0.85, 0.95, 1.0, 0.08 + 0.08 * pulse))
+		for k in 3:
+			var a := time * 1.4 + ph + float(k) * 2.1
+			var sp := p + Vector2(cos(a) * u * 0.32, -u * 0.2 + sin(a * 1.7) * u * 0.18)
+			var tw := 0.5 + 0.5 * sin(time * 5.0 + ph + float(k) * 1.3)
+			var arm := u * (0.03 + 0.04 * tw)
+			var col := Color(1.0, 1.0, 0.9, 0.3 + 0.6 * tw)
+			ci.draw_line(sp + Vector2(-arm, 0), sp + Vector2(arm, 0), col, 1.0)
+			ci.draw_line(sp + Vector2(0, -arm), sp + Vector2(0, arm), col, 1.0)

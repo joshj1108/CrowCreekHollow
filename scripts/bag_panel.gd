@@ -86,6 +86,7 @@ func _ready() -> void:
 		b.add_theme_stylebox_override("pressed", _box(COL_SLOT_HOVER, COL_GOLD, 2, 6, 4))
 		b.add_theme_stylebox_override("disabled", _box(COL_SLOT_EMPTY, Color("2a2016"), 1, 6, 4))
 		b.pressed.connect(func() -> void: slot_chosen.emit(i))
+		_add_slot_art(b)
 		grid.add_child(b)
 		slots.append(b)
 
@@ -149,11 +150,19 @@ func hide_bag() -> void:
 func set_items(items: Array) -> void:
 	for i in slots.size():
 		var b := slots[i] as Button
+		var icon := b.get_meta("icon") as ActionBar.RecipeIcon
+		var count_label := b.get_meta("count") as Label
+		var strip := b.get_meta("strip") as PanelContainer
+		var name_label := b.get_meta("name") as Label
 		if i < items.size():
 			var it: Dictionary = items[i]
-			var label := str(it["label"])
-			var parts := label.rsplit(" x", true, 1)
-			b.text = "%s\nx%s" % [parts[0], parts[parts.size() - 1]] if parts.size() == 2 else label
+			var parts := str(it["label"]).rsplit(" x", true, 1)
+			name_label.text = parts[0]
+			count_label.text = "x" + parts[parts.size() - 1] if parts.size() == 2 else ""
+			icon.visible = true
+			icon.kind = str(it.get("icon", ""))
+			icon.tint = Color(str(it.get("tint", DEFAULT_TINT)))
+			icon.queue_redraw()
 			b.tooltip_text = str(it.get("desc", ""))
 			b.disabled = false
 			b.modulate = Color(1, 1, 1) if bool(it.get("usable", false)) else Color(0.78, 0.76, 0.72)
@@ -164,13 +173,64 @@ func set_items(items: Array) -> void:
 				b.add_theme_stylebox_override("normal", _box(COL_SLOT, edge, 2, 6, 4))
 				b.add_theme_stylebox_override("hover", _box(COL_SLOT_HOVER, edge.lightened(0.2), 2, 6, 4))
 		else:
-			b.text = ""
+			icon.visible = false
+			count_label.text = ""
+			strip.visible = false
+			name_label.text = ""
 			b.tooltip_text = ""
 			b.disabled = true
 			b.modulate = Color(1, 1, 1)
 			b.set_meta("tint", "")
 
 
+# A slot's picture, its count, and a name strip that shows only while the slot is highlighted.
+func _add_slot_art(b: Button) -> void:
+	var icon := ActionBar.RecipeIcon.new()
+	icon.set_anchors_preset(Control.PRESET_FULL_RECT)
+	icon.offset_left = 4.0
+	icon.offset_top = 3.0
+	icon.offset_right = -4.0
+	icon.offset_bottom = -3.0
+	b.add_child(icon)
+
+	var count_label := Label.new()
+	count_label.set_anchors_preset(Control.PRESET_BOTTOM_RIGHT)
+	count_label.offset_left = -40.0
+	count_label.offset_top = -17.0
+	count_label.offset_right = -5.0
+	count_label.offset_bottom = -2.0
+	count_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	count_label.add_theme_font_size_override("font_size", 11)
+	count_label.add_theme_color_override("font_color", COL_GOLD)
+	count_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	b.add_child(count_label)
+
+	var strip := PanelContainer.new()
+	strip.set_anchors_preset(Control.PRESET_BOTTOM_WIDE)
+	strip.offset_left = 2.0
+	strip.offset_right = -2.0
+	strip.offset_top = -19.0
+	strip.offset_bottom = -2.0
+	strip.add_theme_stylebox_override("panel", _box(Color(0.06, 0.04, 0.03, 0.9), Color(0, 0, 0, 0), 0, 4, 1))
+	strip.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	strip.visible = false
+	var name_label := Label.new()
+	name_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	name_label.clip_text = true
+	name_label.add_theme_font_size_override("font_size", 11)
+	name_label.add_theme_color_override("font_color", COL_TEXT)
+	name_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	strip.add_child(name_label)
+	b.add_child(strip)
+
+	b.set_meta("icon", icon)
+	b.set_meta("count", count_label)
+	b.set_meta("strip", strip)
+	b.set_meta("name", name_label)
+	b.focus_entered.connect(func() -> void: strip.visible = true)
+	b.focus_exited.connect(func() -> void: strip.visible = false)
+	b.mouse_entered.connect(func() -> void: strip.visible = true)
+	b.mouse_exited.connect(func() -> void: strip.visible = false)
 func _box(color: Color, border: Color, border_width: int, radius: int, margin: int) -> StyleBoxFlat:
 	var sb := StyleBoxFlat.new()
 	sb.bg_color = color
