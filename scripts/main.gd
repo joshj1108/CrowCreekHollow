@@ -739,6 +739,7 @@ var fishing_tile := NO_SPOT            # the spot being fished, or NO_SPOT
 var harvest_tile := NO_SPOT            # the tree or rock being worked, or NO_SPOT
 var harvest_kind := ""                 # "chop" or "mine" while a roll is running, else ""
 var harvest_timer := 0.0
+var harvest_place := ""              # the area a roll started in, so leaving it stops the roll
 var fish_timer := 0.0
 var fish_layer: Node2D
 var plot_two_open := false
@@ -3453,6 +3454,9 @@ func _interact() -> void:
 	if placing != "":
 		_confirm_placement()
 		return
+	if _is_harvesting():
+		_stop_harvest("You stop working.")
+		return
 	if in_cave:
 		_interact_cave()
 		return
@@ -3461,9 +3465,6 @@ func _interact() -> void:
 		return
 	if _is_fishing():
 		_stop_fishing("You reel in your line.")
-		return
-	if _is_harvesting():
-		_stop_harvest("You stop working.")
 		return
 	var tile := _tile_in_front()
 	# Interior tiles sit outside the farm's bounds, so accept either area.
@@ -3632,6 +3633,23 @@ func _fish_spot_count() -> int:
 	return FISH_SPOT_COUNT + (_level("Fishing") - 1) / 2
 
 
+func _place_key() -> String:
+	if in_cave:
+		return "cave"
+	if inside:
+		return "house"
+	if _in_village():
+		return "village"
+	return "farm"
+
+
+func _start_harvest(kind: String, tile: Vector2i) -> void:
+	harvest_kind = kind
+	harvest_tile = tile
+	harvest_timer = 0.0
+	harvest_place = _place_key()
+
+
 func _is_harvesting() -> bool:
 	return harvest_kind != ""
 
@@ -3643,12 +3661,12 @@ func _stop_harvest(reason: String) -> void:
 		_show_message(reason)
 
 
-# Each tick rolls for the tree or rock in front. A better tool raises the odds.
+# Each tick rolls for the thing being worked. A better pick or hatchet raises the odds.
 func _update_harvest(delta: float) -> void:
 	if not _is_harvesting():
 		return
 	var moved := Input.get_vector("move_left", "move_right", "move_up", "move_down") != Vector2.ZERO
-	if moved or inside or in_cave or open_tab != "" or _tile_in_front() != harvest_tile:
+	if moved or open_tab != "" or _place_key() != harvest_place or _tile_in_front() != harvest_tile:
 		_stop_harvest("You stop working.")
 		return
 	harvest_timer -= delta
@@ -3656,29 +3674,41 @@ func _update_harvest(delta: float) -> void:
 		return
 	harvest_timer = HARVEST_TICK_SECONDS
 	var tile := harvest_tile
-	if harvest_kind == "chop":
-		if _kind_at(tile) != Tile.TREE or not GROVE_SPOTS.has(tile - Vector2i(BORDER_X, BORDER_Y)):
+	match harvest_kind:
+		"chop":
+			if _kind_at(tile) != Tile.TREE or not GROVE_SPOTS.has(tile - Vector2i(BORDER_X, BORDER_Y)):
+				_stop_harvest("")
+				return
+			_roll_harvest(CHOP_BASE_CHANCE + TOOL_TIER_CHANCE * float(tool_tier["hatchet"]), "Chip, chip. The tree is still standing.", func() -> void: _finish_chop(tile))
+		"mine":
+			if not rocks.has(tile):
+				_stop_harvest("")
+				return
+			_roll_harvest(MINE_BASE_CHANCE + TOOL_TIER_CHANCE * float(tool_tier["pick"]), "The rock won't give yet.", func() -> void: _finish_mine(tile))
+		"quarry":
+			if not quarry.has(tile):
+				_stop_harvest("")
+				return
+			_roll_harvest(MINE_BASE_CHANCE + TOOL_TIER_CHANCE * float(tool_tier["pick"]), "The quarry rock won't give yet.", func() -> void: _finish_quarry(tile))
+		"cave_ore":
+			if not (_kind_at(tile) == Tile.ORE_COPPER or _kind_at(tile) == Tile.ORE_IRON):
+				_stop_harvest("")
+				return
+			_roll_harvest(MINE_BASE_CHANCE + TOOL_TIER_CHANCE * float(tool_tier["pick"]), "The ore won't give yet.", func() -> void: _finish_cave_ore(tile))
+		_:
 			_stop_harvest("")
-			return
-		var chop_chance := clampf(CHOP_BASE_CHANCE + TOOL_TIER_CHANCE * float(tool_tier["hatchet"]), 0.0, 0.95)
-		if randf() < chop_chance:
-			_stop_harvest("")
-			_finish_chop(tile)
-		else:
-			play_sfx("strike", 0.05)
-			_show_message("Chip, chip. The tree is still standing.")
-	elif harvest_kind == "mine":
-		if not rocks.has(tile):
-			_stop_harvest("")
-			return
-		var mine_chance := clampf(MINE_BASE_CHANCE + TOOL_TIER_CHANCE * float(tool_tier["pick"]), 0.0, 0.95)
-		if randf() < mine_chance:
-			_stop_harvest("")
-			_finish_mine(tile)
-		else:
-			play_sfx("strike", 0.05)
-			_show_message("The rock won't give yet.")
 	queue_redraw()
+
+
+# One roll at the given odds. A success ends the roll and runs the finish; a miss says so.
+func _roll_harvest(base: float, miss: String, finish: Callable) -> void:
+	var chance := clampf(base, 0.0, 0.95)
+	if randf() < chance:
+		_stop_harvest("")
+		finish.call()
+	else:
+		play_sfx("strike", 0.05)
+		_show_message(miss)
 
 
 func _update_fish_spots(delta: float) -> void:
@@ -4531,9 +4561,7 @@ func _chop(tile: Vector2i) -> void:
 		_show_message("You need a hatchet. Craft a crude one from the Craft panel.")
 		return
 	# Chopping keeps rolling each tick until the tree falls. Moving away stops it.
-	harvest_kind = "chop"
-	harvest_tile = tile
-	harvest_timer = 0.0
+	_start_harvest("chop", tile)
 	_show_message("You start chopping. Keep at it.")
 
 
@@ -4622,9 +4650,7 @@ func _fill_rocks(keep_clear: bool = false) -> void:
 
 func _mine(tile: Vector2i) -> void:
 	# Breaking a rock keeps rolling each tick until it gives way. Moving away stops it.
-	harvest_kind = "mine"
-	harvest_tile = tile
-	harvest_timer = 0.0
+	_start_harvest("mine", tile)
 	_show_message("You start working the rock.")
 
 
@@ -4783,6 +4809,12 @@ func _quarry(tile: Vector2i) -> void:
 	if pick < 1:
 		_show_message("The quarry rock is too hard for your hands. Craft a stone pick from the Craft panel.")
 		return
+	_start_harvest("quarry", tile)
+	_show_message("You start working the quarry rock.")
+
+
+func _finish_quarry(tile: Vector2i) -> void:
+	var pick := int(tool_tier["pick"])
 	quarry.erase(tile)
 	var kind := "copper_ore" if _level("Mining") >= 3 else "stone"
 	if _level("Mining") >= 5 and pick >= 2 and randf() < 0.5:
@@ -4992,6 +5024,13 @@ func _mine_cave(tile: Vector2i, kind: int) -> void:
 	if _level("Mining") < need_level:
 		_show_message("You need Mining %d to work %s ore." % [need_level, ore])
 		return
+	_start_harvest("cave_ore", tile)
+	_show_message("You start working the %s ore." % ore)
+
+
+func _finish_cave_ore(tile: Vector2i) -> void:
+	var iron := _kind_at(tile) == Tile.ORE_IRON
+	var ore := "iron" if iron else "copper"
 	cave[tile.y][tile.x] = Tile.FLOOR
 	cave_mined[tile] = true
 	materials[ore + "_ore"] += 1
