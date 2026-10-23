@@ -1206,14 +1206,14 @@ func _process(delta: float) -> void:
 	if open_tab == "" and not _bag_open() and not _wheel_open() and get_viewport().gui_get_focus_owner() != null:
 		get_viewport().gui_release_focus()
 	# Farming and gathering pause while a panel is open (the day is already paused above).
-	# With the trowel in hand, the D-pad up and down cycle the seed you plant.
+	# With the trowel in hand, the D-pad up and down, or Z and X, cycle the seed you plant.
 	var trowel_out := open_tab == "" and not _bag_open() and not _wheel_open() and _active_tool() == "trowel"
 	if player:
 		player.vertical_locked = trowel_out
 	if trowel_out:
-		if Input.is_action_just_pressed("ui_down"):
+		if Input.is_action_just_pressed("ui_down") or Input.is_action_just_pressed("seed_next"):
 			_cycle_seed(1)
-		elif Input.is_action_just_pressed("ui_up"):
+		elif Input.is_action_just_pressed("ui_up") or Input.is_action_just_pressed("seed_prev"):
 			_cycle_seed(-1)
 	var tool_pressed := Input.is_action_just_pressed("tool_use")
 	var hand_pressed := Input.is_action_just_pressed("use")
@@ -1516,6 +1516,9 @@ func _setup_input() -> void:
 	_add_mouse("tool_use", MOUSE_BUTTON_LEFT)
 	_ensure_action("block", [], [], [[JOY_AXIS_TRIGGER_LEFT, 1.0]])
 	_add_mouse("block", MOUSE_BUTTON_RIGHT)
+	# Z and X step through the seeds while the trowel is in hand, as the D-pad does on a controller.
+	_ensure_action("seed_prev", [KEY_Z], [])
+	_ensure_action("seed_next", [KEY_X], [])
 	_ensure_action("hotbar_prev", [], [JOY_BUTTON_LEFT_SHOULDER])
 	_add_mouse("hotbar_prev", MOUSE_BUTTON_WHEEL_UP)
 	_ensure_action("hotbar_next", [], [JOY_BUTTON_RIGHT_SHOULDER])
@@ -3597,6 +3600,7 @@ func _settings_rows() -> Array:
 		{"section": "Controls"},
 		{"name": "Move", "value": "WASD or arrow keys"},
 		{"name": "Talk, sleep, open panels, gather, drink, plant with hands", "value": "Space"},
+		{"name": "Cycle the seed you plant (with the trowel)", "value": "Z and X"},
 		{"name": "Use the tool or weapon in hand: hoe, hose, trowel, axe, pick, rod, sword", "value": "Left click"},
 		{"name": "Bag (Inventory is in the bag)", "value": "Tab"},
 		{"name": "Section wheel: Skills, Gear, Craft, Quests, House, Buildings, Achievements", "value": "Shift, then the mouse"},
