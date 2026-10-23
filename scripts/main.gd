@@ -1206,9 +1206,14 @@ func _process(delta: float) -> void:
 	if open_tab == "" and not _bag_open() and not _wheel_open() and get_viewport().gui_get_focus_owner() != null:
 		get_viewport().gui_release_focus()
 	# Farming and gathering pause while a panel is open (the day is already paused above).
-	if Input.is_action_just_pressed("use") and open_tab == "" and not _bag_open() and not _wheel_open() and not _pointer_on_ui():
-		_play_use_anim()
+	var tool_pressed := Input.is_action_just_pressed("tool_use")
+	var hand_pressed := Input.is_action_just_pressed("use")
+	if (tool_pressed or hand_pressed) and open_tab == "" and not _bag_open() and not _wheel_open() and not _pointer_on_ui():
+		_tool_press = tool_pressed
+		if tool_pressed:
+			_play_use_anim()
 		_interact()
+		_tool_press = false
 
 	if open_tab != "":
 		_refresh_panel()
@@ -1495,8 +1500,11 @@ func _setup_input() -> void:
 	_ensure_action("move_right", [KEY_D, KEY_RIGHT], [JOY_BUTTON_DPAD_RIGHT], [[JOY_AXIS_LEFT_X, 1.0]])
 	for move in ["move_up", "move_down", "move_left", "move_right"]:
 		InputMap.action_set_deadzone(move, 0.3)
-	_ensure_action("use", [KEY_SPACE, KEY_ENTER], [JOY_BUTTON_A], [[JOY_AXIS_TRIGGER_RIGHT, 1.0]])
-	_add_mouse("use", MOUSE_BUTTON_LEFT)
+	# Space or A does everything that isn't a tool or weapon action: panels, talking, sleeping, sticks, the pond.
+	_ensure_action("use", [KEY_SPACE], [JOY_BUTTON_A])
+	# RT or a left click uses the tool or weapon in hand: hoe, hose, trowel, axe, pick, rod, sword, and bow.
+	_ensure_action("tool_use", [], [], [[JOY_AXIS_TRIGGER_RIGHT, 1.0]])
+	_add_mouse("tool_use", MOUSE_BUTTON_LEFT)
 	_ensure_action("block", [], [], [[JOY_AXIS_TRIGGER_LEFT, 1.0]])
 	_add_mouse("block", MOUSE_BUTTON_RIGHT)
 	_ensure_action("hotbar_prev", [], [JOY_BUTTON_LEFT_SHOULDER])
@@ -3579,14 +3587,16 @@ func _settings_rows() -> Array:
 	return [
 		{"section": "Controls"},
 		{"name": "Move", "value": "WASD or arrow keys"},
-		{"name": "Use, plant, harvest, gather, sleep", "value": "Space or Enter"},
+		{"name": "Talk, sleep, open panels, gather, drink, plant with hands", "value": "Space"},
+		{"name": "Use the tool or weapon in hand: hoe, hose, trowel, axe, pick, rod, sword", "value": "Left click"},
 		{"name": "Bag (Inventory is in the bag)", "value": "Tab"},
 		{"name": "Section wheel: Skills, Gear, Craft, Quests, House, Buildings, Achievements", "value": "Shift, then the mouse"},
 		{"name": "Settings", "value": "Esc"},
 		{"name": "Close the open section, the wheel, or the bag", "value": "B or Esc"},
 		{"section": "Gamepad"},
 		{"name": "Move", "value": "Left stick or D-pad"},
-		{"name": "Use, plant, harvest, gather, sleep", "value": "A"},
+		{"name": "Talk, sleep, open panels, gather, drink, plant with hands", "value": "A"},
+		{"name": "Use the tool or weapon in hand: hoe, hose, trowel, axe, pick, rod, sword", "value": "RT"},
 		{"name": "Close the open section, the wheel, or the bag", "value": "B"},
 		{"name": "Bag (Inventory is in the bag)", "value": "Y"},
 		{"name": "Section wheel", "value": "Left stick click, then left stick and A"},
@@ -3676,7 +3686,14 @@ func _pointer_on_ui() -> bool:
 
 
 # Checks that the active slot holds the tool a target needs. Says what to select when it doesn't.
+# True while the current press came from RT or a left click, which are the only presses that work tools.
+var _tool_press := false
+
+
 func _need_tool(id: String) -> bool:
+	if not _tool_press:
+		_show_message("Press RT or click to use the %s." % str(TOOL_LABELS.get(id, id)))
+		return false
 	if _active_tool() == id:
 		return true
 	_show_message("Select the %s on the hotbar to do that." % str(TOOL_LABELS.get(id, id)))
@@ -3715,7 +3732,8 @@ func _play_use_anim() -> void:
 
 func _interact() -> void:
 	if placing != "":
-		_confirm_placement()
+		if not _tool_press:
+			_confirm_placement()
 		return
 	if _is_harvesting():
 		_stop_harvest("You stop working.")
@@ -3735,6 +3753,8 @@ func _interact() -> void:
 		return
 
 	if inside:
+		if _tool_press:
+			return
 		match _kind_at(tile):
 			Tile.BED:
 				_try_sleep()
@@ -3758,15 +3778,18 @@ func _interact() -> void:
 			_mine(tile)
 		return
 	if brush.has(tile):
-		_gather(tile)
+		if not _tool_press:
+			_gather(tile)
 		return
 
 	var kind: int = map[tile.y][tile.x]
 	if kind == Tile.WATER:
-		_drink_pond()
+		if not _tool_press:
+			_drink_pond()
 		return
 	if kind == Tile.WELL:
-		_toggle_tab("Well")
+		if not _tool_press:
+			_toggle_tab("Well")
 		return
 	if kind == Tile.TREE and _in_big_tree(tile):
 		_show_message(BIG_TREE_MESSAGE)
@@ -3774,6 +3797,9 @@ func _interact() -> void:
 	if kind == Tile.TREE and GROVE_SPOTS.has(tile - Vector2i(BORDER_X, BORDER_Y)):
 		if _need_tool("axe"):
 			_chop(tile)
+		return
+	# Panels, stores and the fallow message are hand actions. Tools work the ground and trees only.
+	if _tool_press and kind != Tile.SOIL:
 		return
 	if kind == Tile.HOUSE:
 		_toggle_tab("House")
@@ -6155,14 +6181,16 @@ func _refuse_gate(tile: Vector2i) -> void:
 func _interact_village() -> void:
 	var idx := _npc_index(_tile_in_front())
 	if idx >= 0:
-		_talk(_zone_npcs()[idx])
+		if not _tool_press:
+			_talk(_zone_npcs()[idx])
 		return
 	if zone == Zone.ASHFORD and quarry.has(_tile_in_front()):
 		if _need_tool("pick"):
 			_quarry(_tile_in_front())
 		return
 	if campsite != NO_CAMP and _tile_in_front() == campsite:
-		_rest_at_camp()
+		if not _tool_press:
+			_rest_at_camp()
 		return
 	_swing()
 
@@ -6350,6 +6378,8 @@ func _foe_attack(foe: Dictionary) -> void:
 
 
 func _swing() -> void:
+	if not _tool_press:
+		return
 	if _active_tool() != "sword":
 		return
 	if not _has_weapon():
