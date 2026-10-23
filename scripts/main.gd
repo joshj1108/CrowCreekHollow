@@ -2829,6 +2829,36 @@ func _inventory_rows() -> Array:
 
 # One tile per stack in the pack, then the seed pouch, then the materials you hold.
 func _inventory_tiles() -> Array:
+	return _split_pack_tiles(_raw_inventory_tiles())
+
+
+# A pack kind with more than STACK_SIZE items becomes several tiles, each holding one full or part stack.
+func _split_pack_tiles(tiles: Array) -> Array:
+	var out: Array = []
+	for t in tiles:
+		var key := str(t["key"])
+		if not key.begins_with("pack:"):
+			out.append(t)
+			continue
+		var parts := str(t["name"]).rsplit(" x", true, 1)
+		var base := parts[0]
+		var count := int(parts[1])
+		var unit := str(t["level_text"]).split(" ", true, 1)[1]
+		var left := count
+		var index := 0
+		while left > 0:
+			var n := mini(left, STACK_SIZE)
+			var tile: Dictionary = t.duplicate()
+			tile["key"] = key if index == 0 else "%s:%d" % [key, index]
+			tile["name"] = "%s x%d" % [base, n]
+			tile["level_text"] = "%d %s" % [n, unit]
+			out.append(tile)
+			left -= n
+			index += 1
+	return out
+
+
+func _raw_inventory_tiles() -> Array:
 	var tiles: Array = []
 	var n := int(inventory["crops"])
 	if n > 0:
@@ -3810,7 +3840,8 @@ func _harvest(tile: Vector2i) -> void:
 	var kind: String = crops[tile]["kind"]
 	var yield_count: int = CROPS[kind]["yield"]
 	# Harvests go to the pack only. Storing in the cellar is up to the player.
-	if _pack_free() < yield_count:
+	var held := int(inventory["pumpkins" if kind == "pumpkin" else "crops"])
+	if not _pack_room(held, yield_count):
 		_show_message("Your pack is full. Store crops in the root cellar, or sell them.")
 		return
 	if kind == "pumpkin":
@@ -4193,7 +4224,7 @@ func _is_fishing() -> bool:
 
 
 func _start_fishing(tile: Vector2i) -> void:
-	if _pack_free() < 1:
+	if not _pack_room(int(inventory["fish"]), 1):
 		_show_message("Your pack is full. Store fish in the cooler, or sell or cook them first.")
 		return
 	fishing_tile = tile
@@ -4220,7 +4251,7 @@ func _update_fishing(delta: float) -> void:
 	if fish_timer > 0.0:
 		return
 	fish_timer = FISH_TICK_SECONDS
-	if _pack_free() < 1:
+	if not _pack_room(int(inventory["fish"]), 1):
 		_stop_fishing("Your pack is full. Store fish in the cooler, or sell or cook them.")
 		return
 	_fish_roll()
@@ -4614,14 +4645,28 @@ func _achievement_row(a: Dictionary) -> Dictionary:
 
 # --- Pack and bags -----------------------------------------------------------
 
+# Like items stack in the pack up to STACK_SIZE to a slot. Each kind takes as many slots as its stacks need.
+const STACK_SIZE := 28
+
+
+func _slots_for(count: int) -> int:
+	return ceili(float(maxi(0, count)) / float(STACK_SIZE))
+
+
 func _pack_used() -> int:
-	var used := _crop_total() + int(inventory["fish"]) + int(inventory["meals"])
+	var used := _slots_for(int(inventory["crops"])) + _slots_for(int(inventory["pumpkins"]))
+	used += _slots_for(int(inventory["fish"])) + _slots_for(int(inventory["meals"]))
 	for kind in PRESERVED_KINDS:
-		used += int(inventory[kind])
+		used += _slots_for(int(inventory[kind]))
 	for st in STEWS:
-		used += int(inventory[st["kind"]])
-	used += int(inventory["bandage"])
+		used += _slots_for(int(inventory[st["kind"]]))
+	used += _slots_for(int(inventory["bandage"]))
 	return used
+
+
+# True when adding amount more of a kind that already holds current still fits in the pack's free slots.
+func _pack_room(current: int, amount: int) -> bool:
+	return _slots_for(current + amount) - _slots_for(current) <= _pack_free()
 
 
 func _pack_capacity() -> int:

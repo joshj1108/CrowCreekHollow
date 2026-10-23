@@ -293,10 +293,11 @@ func _first_enabled_button(node: Node) -> Button:
 func _build_row(data: Dictionary) -> Control:
 	if data.has("tabs"):
 		return _build_tabs(data)
+	# Grid menus sit centred in the menu box. Lists keep their normal left-aligned rows.
 	if data.has("split"):
-		return _build_split(data["split"])
+		return _centred(_build_split(data["split"]))
 	if data.has("grid"):
-		return _build_grid(data)
+		return _centred(_build_grid(data))
 	if data.has("section_toggle"):
 		var toggle := Button.new()
 		var sign_text := "+" if bool(data["folded"]) else "-"
@@ -328,6 +329,14 @@ func _build_row(data: Dictionary) -> Control:
 		note.add_theme_color_override("font_color", COL_MUTED)
 		return note
 	return _build_card(data)
+
+
+# Centres a grid menu across the width of the menu box.
+func _centred(content: Control) -> Control:
+	var holder := CenterContainer.new()
+	holder.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	holder.add_child(content)
+	return holder
 
 
 # One option: a name, a value, an optional button, and an optional progress bar.
