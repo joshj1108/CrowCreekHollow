@@ -1153,11 +1153,15 @@ func _process(delta: float) -> void:
 		placement_ghost.queue_redraw()
 	if hotbar != null:
 		hotbar.set_state(_hotbar_entries(), active_slot)
+	player.held = _active_tool()
+	player.held_item = str(equipment["hand_r"]) if _active_tool() == "sword" else ""
+	player.set_loop(_loop_action())
 	if player.paused:
 		_handle_keys()
 		_refresh_panel()
 		return
 	blocking = Input.is_action_pressed("block") and _active_tool() == "sword" and _has_weapon()
+	player.blocking = blocking
 	# Scrolling runs through the tools only; the number keys can still reach any slot.
 	var slot_before := active_slot
 	if Input.is_action_just_pressed("hotbar_next"):
@@ -1242,6 +1246,7 @@ func _process(delta: float) -> void:
 		get_viewport().gui_release_focus()
 	# Farming and gathering pause while a panel is open (the day is already paused above).
 	if Input.is_action_just_pressed("use") and open_tab == "" and not _pointer_on_ui():
+		_play_use_anim()
 		_interact()
 
 	if open_tab != "":
@@ -3556,6 +3561,36 @@ func _need_tool(id: String) -> bool:
 	return false
 
 
+# The looping action while a chop, mine or fishing channel runs.
+func _loop_action() -> String:
+	if harvest_kind == "chop":
+		return "chop"
+	if harvest_kind != "":
+		return "mine"
+	if _is_fishing():
+		return "fish"
+	return ""
+
+
+# The one-shot for the held tool, played each time Use is pressed. Channels already loop, so they are skipped.
+func _play_use_anim() -> void:
+	if _is_harvesting() or _is_fishing() or placing != "":
+		return
+	match _active_tool():
+		"axe":
+			player.play_act("chop", 0.6)
+		"pick":
+			player.play_act("mine", 0.6)
+		"hoe":
+			player.play_act("hoe", 0.5)
+		"trowel":
+			player.play_act("plant", 0.5)
+		"hose":
+			player.play_act("water", 0.8)
+		"rod":
+			player.play_act("cast", 0.8)
+
+
 func _interact() -> void:
 	if placing != "":
 		_confirm_placement()
@@ -4998,6 +5033,7 @@ func _fire(weapon: String) -> void:
 		return
 	materials[ammo] -= 1
 	swing_cool = float(item["cool"])
+	player.play_act("fire", 0.35)
 	var dir: Vector2 = player.facing.normalized()
 	shots.append({"pos": player.position, "vel": dir * SHOT_SPEED, "life": SHOT_LIFE, "dmg": int(item["dmg"])})
 	queue_redraw()
@@ -6106,6 +6142,7 @@ func _swing() -> void:
 		return
 	swing_cool = SWING_COOLDOWN
 	swing_time = SWING_TIME
+	player.play_act("swing", SWING_TIME)
 	swing_dir = player.facing
 	var dmg := _weapon_damage()
 	var combat := _level("Combat")
