@@ -43,22 +43,26 @@ var act_prev := 0.0
 # Small debris: wood chips, sparks, dirt and water drops. Positions are local to the figure.
 var particles: Array = []
 
-const SKIN := Color("f2c9a0")
-const SKIN_SHADE := Color("d9a27c")
-const HAIR := Color("5a3a22")
-const STRAW := Color("d8b050")
-const STRAW_SHADE := Color("9a7a30")
 const BAND := Color("7a3a22")
-const SHIRT := Color("c8553d")
-const SHIRT_SHADE := Color("9a3a2a")
-const OVERALLS := Color("3d5a80")
-const OVERALLS_SHADE := Color("2a3f5c")
-const PANTS := Color("3d5a80")
-const BOOTS := Color("3a2418")
 const BELT := Color("4a2e1a")
 const BUCKLE := Color("e0c060")
-const EYE := Color("2a1f16")
 const CHEEK := Color(0.9, 0.45, 0.4, 0.45)
+
+# The farmer's colours and styles. apply_appearance sets these from the choices; the defaults are the original look.
+var skin := Color("f2c9a0")
+var skin_shade := Color("d9a27c")
+var hair := Color("5a3a22")
+var hat := Color("d8b050")
+var hat_shade := Color("9a7a30")
+var shirt := Color("c8553d")
+var shirt_shade := Color("9a3a2a")
+var pants := Color("3d5a80")
+var pants_shade := Color("2a3f5c")
+var boots := Color("3a2418")
+var eyes := Color("2a1f16")
+var hat_style := 0
+var hair_style := 0
+var facial := 0
 const WOOD := Color("8a6a3a")
 const WOOD_DARK := Color("5a3e22")
 const IRON := Color("9aa0aa")
@@ -256,15 +260,15 @@ func _draw_front_back(bob: float) -> void:
 	_draw_leg(Vector2(4.5, 6.0 + bob), -stride * 2.5)
 	_draw_arm(Vector2(-11.0, -4.0 + bob), -stride * 2.0)
 	# Shirt, then overalls over it, with straps and a belt with a buckle.
-	draw_rect(Rect2(-8, -8 + bob, 16, 16), SHIRT)
-	draw_rect(Rect2(-8, -8 + bob, 16, 2), SHIRT_SHADE)
-	draw_rect(Rect2(-5, -4 + bob, 10, 12), OVERALLS)
-	draw_rect(Rect2(-5, -4 + bob, 10, 1), OVERALLS_SHADE)
-	draw_rect(Rect2(-5, -8 + bob, 2, 5), OVERALLS)
-	draw_rect(Rect2(3, -8 + bob, 2, 5), OVERALLS)
+	draw_rect(Rect2(-8, -8 + bob, 16, 16), shirt)
+	draw_rect(Rect2(-8, -8 + bob, 16, 2), shirt_shade)
+	draw_rect(Rect2(-5, -4 + bob, 10, 12), pants)
+	draw_rect(Rect2(-5, -4 + bob, 10, 1), pants_shade)
+	draw_rect(Rect2(-5, -8 + bob, 2, 5), pants)
+	draw_rect(Rect2(3, -8 + bob, 2, 5), pants)
 	draw_rect(Rect2(-8, 4 + bob, 16, 2), BELT)
 	draw_rect(Rect2(-1, 4 + bob, 2, 2), BUCKLE)
-	draw_rect(Rect2(-3, -11 + bob, 6, 4), SKIN_SHADE)
+	draw_rect(Rect2(-3, -11 + bob, 6, 4), skin_shade)
 	_draw_head(bob)
 	_draw_working_arm(bob, false)
 
@@ -273,15 +277,15 @@ func _draw_front_back(bob: float) -> void:
 # the action, so the far arm, the body, the head and the working arm all tilt together.
 func _draw_side(bob: float, stride: float) -> void:
 	var side := signf(facing.x)
-	_draw_side_leg(-side * 1.5, 6.0 + bob, -stride * 2.5, OVERALLS_SHADE, side)
-	_draw_side_leg(side * 1.5, 6.0 + bob, stride * 2.5, PANTS, side)
+	_draw_side_leg(-side * 1.5, 6.0 + bob, -stride * 2.5, pants_shade, side)
+	_draw_side_leg(side * 1.5, 6.0 + bob, stride * 2.5, pants, side)
 	draw_set_transform(Vector2.ZERO, _lean())
-	_draw_side_arm(Vector2(-side * 1.0, -4.0 + bob), stride * 2.0, SHIRT_SHADE)
+	_draw_side_arm(Vector2(-side * 1.0, -4.0 + bob), stride * 2.0, shirt_shade)
 	# Shirt and overalls, narrower in profile.
-	draw_rect(Rect2(-5, -8 + bob, 10, 16), SHIRT)
-	draw_rect(Rect2(-5, -8 + bob, 10, 2), SHIRT_SHADE)
-	draw_rect(Rect2(-4, -4 + bob, 8, 12), OVERALLS)
-	draw_rect(Rect2(-4, -4 + bob, 8, 1), OVERALLS_SHADE)
+	draw_rect(Rect2(-5, -8 + bob, 10, 16), shirt)
+	draw_rect(Rect2(-5, -8 + bob, 10, 2), shirt_shade)
+	draw_rect(Rect2(-4, -4 + bob, 8, 12), pants)
+	draw_rect(Rect2(-4, -4 + bob, 8, 1), pants_shade)
 	draw_rect(Rect2(-5, 4 + bob, 10, 2), BELT)
 	draw_rect(Rect2(2 if side > 0 else -3, 4 + bob, 2, 2), BUCKLE)
 	_draw_side_head(bob, side)
@@ -293,63 +297,150 @@ func _draw_side_leg(x: float, top: float, lift: float, color: Color, side: float
 	draw_rect(Rect2(x - 2.5, top + lift * 0.3, 5, 9), color)
 	# The boot reaches forward, in the direction of travel.
 	var boot_x := x - 2.5 if side > 0 else x - 4.5
-	draw_rect(Rect2(boot_x, top + 8 + lift * 0.3, 7, 4), BOOTS)
+	draw_rect(Rect2(boot_x, top + 8 + lift * 0.3, 7, 4), boots)
 
 
 func _draw_side_arm(shoulder: Vector2, swing: float, color: Color) -> void:
 	draw_rect(Rect2(shoulder.x - 2, shoulder.y + swing * 0.5, 4, 10), color)
-	draw_circle(Vector2(shoulder.x, shoulder.y + 11 + swing * 0.5), 2.4, SKIN)
+	draw_circle(Vector2(shoulder.x, shoulder.y + 11 + swing * 0.5), 2.4, skin)
 
 
-# The head in profile: the face on the side you're walking toward, hair over the back, and a hat brim that
-# sticks out in front.
+# The head in profile: the face on the side you're walking toward, hair over the back, and the hat in front.
 func _draw_side_head(bob: float, side: float) -> void:
 	var c := Vector2(0, -19 + bob)
-	draw_circle(c + Vector2(0, 1), 7.5, SKIN)
-	# Hair covers the back of the head and runs down behind the ear.
-	draw_colored_polygon(_ellipse(c + Vector2(-side * 2.2, -1.0), 6.6, 7.4), HAIR)
-	draw_colored_polygon(_ellipse(c + Vector2(-side * 3.6, 2.5), 3.2, 3.6), HAIR)
-	draw_circle(c + Vector2(side * 3.5, 0), 1.4, EYE)
+	# The hair sits behind the face, so its back edge shows past the face and the face stays clear.
+	_draw_hair_side(c, side)
+	draw_circle(c + Vector2(0, 1), 7.5, skin)
+	draw_circle(c + Vector2(side * 3.5, 0), 1.4, eyes)
 	draw_circle(c + Vector2(side * 4.0, 3.0), 1.5, CHEEK)
-	# Hat: the brim sticks out further toward the face.
-	draw_colored_polygon(_ellipse(c + Vector2(side * 1.5, -6.5), 13.0, 3.5), STRAW)
-	draw_colored_polygon(_ellipse(c + Vector2(side * 1.5, -6.5), 13.0, 3.5).slice(8, 16), STRAW_SHADE)
-	draw_rect(Rect2(c.x - 6 + side, c.y - 16, 13, 10), STRAW)
-	draw_rect(Rect2(c.x - 6 + side, c.y - 9, 13, 2), BAND)
+	_draw_facial_side(c, side)
+	_draw_hat(c, true, side)
+
+
+# Hair at the back of a profile head, drawn over the face's back edge.
+func _draw_hair_side(c: Vector2, side: float) -> void:
+	draw_circle(c + Vector2(0, -2.0), 8.0, hair)
+	draw_colored_polygon(_ellipse(c + Vector2(-side * 3.2, 1.5), 5.0, 8.0), hair)
+	match hair_style:
+		1:
+			draw_colored_polygon(_ellipse(c + Vector2(-side * 3.5, 8.0), 4.0, 6.5), hair)
+		2:
+			draw_circle(c + Vector2(-side * 5.5, -7.0), 3.4, hair)
+		3:
+			draw_circle(c + Vector2(-side * 6.0, -4.0), 3.4, hair)
+			draw_circle(c + Vector2(-side * 3.0, -9.0), 3.2, hair)
+
+
+# Stubble, a moustache or a full beard, in the hair colour.
+func _draw_facial_side(c: Vector2, side: float) -> void:
+	match facial:
+		1:
+			for pt in [Vector2(2.0, 5.5), Vector2(4.5, 4.5), Vector2(3.0, 2.8), Vector2(5.5, 2.0)]:
+				draw_circle(c + Vector2(side * pt.x, pt.y), 0.8, Color(hair.r, hair.g, hair.b, 0.7))
+		2:
+			draw_rect(Rect2(c.x + side * 2.5 - 1.6, c.y + 3.2, 3.6, 1.8), hair)
+		3:
+			draw_colored_polygon(_ellipse(c + Vector2(side * 1.0, 5.5), 4.2, 3.8), hair)
+			draw_rect(Rect2(c.x + side * 2.5 - 1.6, c.y + 3.2, 3.6, 1.8), hair)
 
 
 func _draw_leg(hip: Vector2, lift: float) -> void:
-	draw_rect(Rect2(hip.x - 2.5, hip.y + lift * 0.3, 5, 9), PANTS)
-	draw_rect(Rect2(hip.x - 3.5, hip.y + 8 + lift * 0.3, 7, 4), BOOTS)
+	draw_rect(Rect2(hip.x - 2.5, hip.y + lift * 0.3, 5, 9), pants)
+	draw_rect(Rect2(hip.x - 3.5, hip.y + 8 + lift * 0.3, 7, 4), boots)
 
 
 func _draw_arm(shoulder: Vector2, swing: float) -> void:
-	draw_rect(Rect2(shoulder.x - 2, shoulder.y + swing * 0.5, 4, 10), SHIRT)
-	draw_rect(Rect2(shoulder.x - 2, shoulder.y + swing * 0.5 + 8, 4, 2), SHIRT_SHADE)
-	draw_circle(Vector2(shoulder.x, shoulder.y + 11 + swing * 0.5), 2.4, SKIN)
+	draw_rect(Rect2(shoulder.x - 2, shoulder.y + swing * 0.5, 4, 10), shirt)
+	draw_rect(Rect2(shoulder.x - 2, shoulder.y + swing * 0.5 + 8, 4, 2), shirt_shade)
+	draw_circle(Vector2(shoulder.x, shoulder.y + 11 + swing * 0.5), 2.4, skin)
 
 
-# The head: hair behind, the face when you're facing the viewer or to the side, a straw hat with a band on top.
+# The head seen from the front or back: hair behind, the face when you're facing the viewer or to the side,
+# and the hat on top.
 func _draw_head(bob: float) -> void:
 	var c := Vector2(0, -19 + bob)
-	draw_circle(c + Vector2(0, -1), 9.2, HAIR)
+	_draw_hair_front(c)
 	if facing != Vector2.UP:
-		draw_circle(c + Vector2(0, 1), 7.5, SKIN)
+		draw_circle(c + Vector2(0, 1), 7.5, skin)
 		if facing == Vector2.DOWN:
 			draw_circle(c + Vector2(-4.5, 3), 1.6, CHEEK)
 			draw_circle(c + Vector2(4.5, 3), 1.6, CHEEK)
-			draw_circle(c + Vector2(-3, 0), 1.4, EYE)
-			draw_circle(c + Vector2(3, 0), 1.4, EYE)
-			draw_line(c + Vector2(-1.5, 4.5), c + Vector2(1.5, 4.5), EYE, 1.0)
+			draw_circle(c + Vector2(-3, 0), 1.4, eyes)
+			draw_circle(c + Vector2(3, 0), 1.4, eyes)
+			draw_line(c + Vector2(-1.5, 4.5), c + Vector2(1.5, 4.5), eyes, 1.0)
 		elif facing == Vector2.LEFT:
-			draw_circle(c + Vector2(-3.5, 0), 1.4, EYE)
+			draw_circle(c + Vector2(-3.5, 0), 1.4, eyes)
 		elif facing == Vector2.RIGHT:
-			draw_circle(c + Vector2(3.5, 0), 1.4, EYE)
-	# Hat: a wide brim, a crown, and a band.
-	draw_colored_polygon(_ellipse(c + Vector2(0, -6.5), 13.0, 3.5), STRAW)
-	draw_colored_polygon(_ellipse(c + Vector2(0, -6.5), 13.0, 3.5).slice(8, 16), STRAW_SHADE)
-	draw_rect(Rect2(c.x - 7, c.y - 16, 14, 10), STRAW)
-	draw_rect(Rect2(c.x - 7, c.y - 9, 14, 2), BAND)
+			draw_circle(c + Vector2(3.5, 0), 1.4, eyes)
+		_draw_facial_front(c)
+	_draw_hat(c, false, 1.0)
+
+
+func _draw_hair_front(c: Vector2) -> void:
+	draw_circle(c + Vector2(0, -1), 9.2, hair)
+	match hair_style:
+		1:
+			draw_colored_polygon(_ellipse(c + Vector2(0, 3.5), 9.4, 5.5), hair)
+		2:
+			draw_circle(c + Vector2(0, -11.0), 3.6, hair)
+		3:
+			draw_circle(c + Vector2(-7, -5), 3.4, hair)
+			draw_circle(c + Vector2(7, -5), 3.4, hair)
+			draw_circle(c + Vector2(-4, -10), 3.2, hair)
+			draw_circle(c + Vector2(4, -10), 3.2, hair)
+
+
+func _draw_facial_front(c: Vector2) -> void:
+	match facial:
+		1:
+			for pt in [Vector2(-3.5, 6.0), Vector2(0, 7.0), Vector2(3.5, 6.0), Vector2(-5, 3.5), Vector2(5, 3.5)]:
+				draw_circle(c + pt, 0.8, Color(hair.r, hair.g, hair.b, 0.7))
+		2:
+			draw_rect(Rect2(c.x - 3.0, c.y + 3.2, 6.0, 1.8), hair)
+		3:
+			draw_colored_polygon(_ellipse(c + Vector2(0, 5.5), 5.0, 3.8), hair)
+			draw_rect(Rect2(c.x - 3.0, c.y + 3.2, 6.0, 1.8), hair)
+
+
+# The hat in its chosen style. Straw and felt have a brim and a band; the cap is pulled low; the bandana is
+# tied at the back; a bare head shows the hair.
+func _draw_hat(c: Vector2, side_view: bool, side: float) -> void:
+	var h := c + Vector2(side * 1.5, 0) if side_view else c
+	match hat_style:
+		0, 1:
+			var brim_rx := 13.0 if hat_style == 0 else 14.5
+			var brim_ry := 3.5 if hat_style == 0 else 4.0
+			draw_colored_polygon(_ellipse(h + Vector2(0, -6.5), brim_rx, brim_ry), hat)
+			draw_colored_polygon(_ellipse(h + Vector2(0, -6.5), brim_rx, brim_ry).slice(8, 16), hat_shade)
+			draw_rect(Rect2(h.x - 6.5, h.y - 16, 13, 10), hat)
+			draw_rect(Rect2(h.x - 6.5, h.y - 9, 13, 2), BAND)
+		2:
+			draw_colored_polygon(_ellipse(h + Vector2(0, -9.0), 8.0, 7.0), hat)
+			draw_rect(Rect2(h.x - 8.0, h.y - 5.5, 16, 3), hat_shade)
+		3:
+			draw_colored_polygon(_ellipse(h + Vector2(0, -5.0), 9.2, 5.5), hat)
+			var knot := Vector2(-side * 8.0, 0.0) if side_view else Vector2(7.0, 0.0)
+			draw_colored_polygon(PackedVector2Array([h + knot + Vector2(0, -3), h + knot + Vector2(3, 1), h + knot + Vector2(0, 4)]), hat_shade)
+
+
+# Sets the figure's colours and styles from the chosen appearance, and redraws it.
+func apply_appearance(choices: Dictionary) -> void:
+	var a := Appearance.clean(choices)
+	skin = Appearance.colour("skin", int(a["skin"]))
+	skin_shade = skin.darkened(0.12)
+	hair = Appearance.colour("hair_colour", int(a["hair_colour"]))
+	hat = Appearance.colour("hat_colour", int(a["hat_colour"]))
+	hat_shade = hat.darkened(0.25)
+	shirt = Appearance.colour("shirt", int(a["shirt"]))
+	shirt_shade = shirt.darkened(0.25)
+	pants = Appearance.colour("pants", int(a["pants"]))
+	pants_shade = pants.darkened(0.25)
+	boots = Appearance.colour("boots", int(a["boots"]))
+	eyes = Appearance.colour("eyes", int(a["eyes"]))
+	hat_style = int(a["hat_style"])
+	hair_style = int(a["hair_style"])
+	facial = int(a["facial_hair"])
+	queue_redraw()
 
 
 # --- Poses -----------------------------------------------------------------
@@ -477,10 +568,10 @@ func _draw_working_arm(bob: float, side_view: bool) -> void:
 	var shoulder := _shoulder(bob, side_view)
 	var target := shoulder + _reach(float(pose[0]), side_view)
 	var elbow := _elbow(shoulder, target, side_view)
-	draw_line(shoulder, elbow, SHIRT, 4.0)
-	draw_circle(elbow, 2.0, SHIRT)
-	draw_line(elbow, target, SHIRT_SHADE, 3.4)
-	draw_circle(target, 2.4, SKIN)
+	draw_line(shoulder, elbow, shirt, 4.0)
+	draw_circle(elbow, 2.0, shirt)
+	draw_line(elbow, target, shirt_shade, 3.4)
+	draw_circle(target, 2.4, skin)
 	_draw_tool(target, side_view, tool_angle)
 
 

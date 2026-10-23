@@ -899,6 +899,7 @@ var swing_cool := 0.0
 var swing_time := 0.0
 var swing_dir := Vector2.DOWN
 var invuln := 0.0
+var appearance: Dictionary = Appearance.default_choices()   # the farmer's look, set in the creator
 var equipment := {"hand_r": "hoe", "offhand": "", "head": "", "neck": "", "chest": "", "wrist": "", "legs": "", "feet": ""}
 
 # Set by loading, applied once the world exists.
@@ -1063,7 +1064,9 @@ func _load_sfx() -> void:
 
 # Plays one sound effect. A little random pitch keeps repeated sounds from sounding identical.
 # Loudness in decibels for each sound. Anything not listed plays at the default.
-const SFX_VOLUME := {"step": -16.0}
+const SFX_VOLUME := {"step": -24.0}
+# Playback pitch for sounds that sound brighter than they should. Below 1.0 is warmer and softer.
+const SFX_PITCH := {"step": 0.82}
 const SFX_DEFAULT_VOLUME := -4.0
 
 
@@ -1074,7 +1077,7 @@ func play_sfx(name: String, jitter: float = 0.0) -> void:
 	sfx_next = (sfx_next + 1) % sfx_players.size()
 	p.stream = sfx_streams[name]
 	p.volume_db = float(SFX_VOLUME.get(name, SFX_DEFAULT_VOLUME))
-	p.pitch_scale = 1.0 + randf_range(-jitter, jitter)
+	p.pitch_scale = float(SFX_PITCH.get(name, 1.0)) + randf_range(-jitter, jitter)
 	p.play()
 
 
@@ -1098,6 +1101,7 @@ func _on_title_start(mode: String, slot: int) -> void:
 	var loaded := mode != "new" and _load_game()
 	if not loaded:
 		_respawn_brush()
+		appearance = Appearance.clean(TitleMenu.pending_appearance)
 	_build_interior()
 	_build_world()
 	_build_hud()
@@ -1784,8 +1788,9 @@ func _build_world() -> void:
 	player.set_script(load("res://scripts/player.gd"))
 	player.position = _tile_center(BORDER_X + INNER_W / 2, BORDER_Y + INNER_H / 2)
 	player.is_blocked = _is_blocked_world
-	player.stepped.connect(func() -> void: play_sfx("step", 0.08))
+	player.stepped.connect(func() -> void: play_sfx("step", 0.03))
 	add_child(player)
+	player.apply_appearance(appearance)
 	_build_lantern_light()
 
 	camera = Camera2D.new()
@@ -7234,6 +7239,7 @@ func _save_game() -> void:
 		"sanity_penalty": sanity_penalty,
 		"player_pos": _save_pos(),
 		"inside": inside,
+		"appearance": appearance,
 		"open_tab": open_tab,
 		"crops": _crops_to_array(),
 		"brush": _brush_to_array(),
@@ -7331,6 +7337,7 @@ func _load_game() -> bool:
 	sanity_penalty = int(data.get("sanity_penalty", 0))
 	sanity = float(data.get("sanity", SANITY_MAX))
 	saved_inside = bool(data.get("inside", false))
+	appearance = Appearance.clean(data.get("appearance", {}))
 	saved_panel = str(data.get("open_tab", ""))
 	var pos: Variant = data.get("player_pos", null)
 	if typeof(pos) == TYPE_ARRAY and pos.size() == 2:

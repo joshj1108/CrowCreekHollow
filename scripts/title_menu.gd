@@ -22,6 +22,22 @@ var settings_rows: Array = []   # the controls list, from main.gd
 var root_panel: Control
 var content: VBoxContainer
 var overwrite_armed := -1       # slot waiting for a second press in New Game
+var center: CenterContainer     # the start screen's centred column, hidden while the creator is open
+var creator_root: Control       # the character creator, or null
+var creator_slot := 1           # the slot the new game will use
+var creator_choices: Dictionary = {}
+var creator_values: Dictionary = {}   # part -> the Label showing its current choice
+var creator_preview: Node2D           # the figure, drawn with the same code as the farmer
+var creator_first: Button             # focused when the creator opens
+# The look chosen in the creator, handed to the game when it starts a new game.
+static var pending_appearance: Dictionary = {}
+
+const CREATOR_ORDER := ["hat_style", "hat_colour", "hair_style", "hair_colour", "eyes", "skin", "facial_hair", "shirt", "pants", "boots"]
+const PART_NAMES := {
+	"hat_style": "Hat", "hat_colour": "Hat colour", "hair_style": "Hair", "hair_colour": "Hair colour",
+	"eyes": "Eye colour", "skin": "Skin", "facial_hair": "Facial hair", "shirt": "Shirt", "pants": "Pants", "boots": "Shoes",
+}
+const FACING_ORDER := [Vector2.DOWN, Vector2.RIGHT, Vector2.UP, Vector2.LEFT]
 
 
 static func slot_path(slot: int) -> String:
@@ -70,6 +86,7 @@ func _ready() -> void:
 	var column := CenterContainer.new()
 	column.set_anchors_preset(Control.PRESET_FULL_RECT)
 	root_panel.add_child(column)
+	center = column
 
 	var box := VBoxContainer.new()
 	box.add_theme_constant_override("separation", 14)
@@ -131,7 +148,7 @@ func _show_slots(mode: String) -> void:
 		if mode == "new":
 			var slot_number := slot
 			if data.is_empty():
-				_add_button(text, true, func() -> void: start_requested.emit("new", slot_number))
+				_add_button(text, true, func() -> void: _open_creator(slot_number))
 			else:
 				_add_button(text, true, func() -> void: _arm_overwrite(slot_number))
 		else:
@@ -146,7 +163,7 @@ func _arm_overwrite(slot: int) -> void:
 		overwrite_armed = slot
 		_show_slots_refresh_armed(slot)
 		return
-	start_requested.emit("new", slot)
+	_open_creator(slot)
 
 
 func _show_slots_refresh_armed(slot: int) -> void:
@@ -251,3 +268,151 @@ func _focus_first() -> void:
 		if button != null and not button.disabled:
 			button.grab_focus.call_deferred()
 			return
+
+
+# --- Character creator -----------------------------------------------------
+
+# Shows the creator for a new game in this slot. The figure on the left turns and changes as the choices do.
+func _open_creator(slot: int) -> void:
+	creator_slot = slot
+	creator_choices = Appearance.default_choices()
+	if creator_root != null:
+		creator_root.queue_free()
+	center.visible = false
+	creator_root = Control.new()
+	creator_root.set_anchors_preset(Control.PRESET_FULL_RECT)
+	root_panel.add_child(creator_root)
+
+	var split := HBoxContainer.new()
+	split.set_anchors_preset(Control.PRESET_FULL_RECT)
+	split.add_theme_constant_override("separation", 48)
+	creator_root.add_child(split)
+
+	var stage := Control.new()
+	stage.custom_minimum_size = Vector2(360, 0)
+	stage.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	split.add_child(stage)
+	creator_preview = Node2D.new()
+	creator_preview.set_script(load("res://scripts/player.gd"))
+	creator_preview.paused = true
+	creator_preview.facing = Vector2.DOWN
+	creator_preview.scale = Vector2(4.5, 4.5)
+	creator_preview.position = Vector2(180, 330)
+	stage.add_child(creator_preview)
+
+	var right := VBoxContainer.new()
+	right.add_theme_constant_override("separation", 10)
+	right.custom_minimum_size = Vector2(480, 0)
+	right.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	split.add_child(right)
+	var heading := Label.new()
+	heading.text = "Create your farmer"
+	heading.add_theme_font_size_override("font_size", 30)
+	heading.add_theme_color_override("font_color", COL_GOLD)
+	right.add_child(heading)
+
+	var scroll := ScrollContainer.new()
+	scroll.custom_minimum_size = Vector2(480, 380)
+	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	scroll.follow_focus = true
+	right.add_child(scroll)
+	var rows := VBoxContainer.new()
+	rows.add_theme_constant_override("separation", 6)
+	rows.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	scroll.add_child(rows)
+	creator_first = null
+	for key in CREATOR_ORDER:
+		_creator_row(rows, key)
+
+	var buttons := HBoxContainer.new()
+	buttons.add_theme_constant_override("separation", 8)
+	right.add_child(buttons)
+	_creator_button(buttons, "Randomise", _randomise_creator)
+	_creator_button(buttons, "Turn", _turn_creator)
+	_creator_button(buttons, "Back", _close_creator)
+	_creator_button(buttons, "Begin", _begin_game)
+	_refresh_creator()
+	if creator_first != null:
+		creator_first.grab_focus.call_deferred()
+
+
+func _creator_row(parent: Control, key: String) -> void:
+	var line := HBoxContainer.new()
+	line.add_theme_constant_override("separation", 8)
+	var name_label := Label.new()
+	name_label.text = str(PART_NAMES[key])
+	name_label.custom_minimum_size = Vector2(150, 0)
+	name_label.add_theme_color_override("font_color", COL_TEXT)
+	name_label.add_theme_font_size_override("font_size", 18)
+	line.add_child(name_label)
+	var prev := _creator_button(line, "<", func() -> void: _cycle_creator(key, -1))
+	prev.custom_minimum_size = Vector2(44, 40)
+	if creator_first == null:
+		creator_first = prev
+	var value := Label.new()
+	value.custom_minimum_size = Vector2(180, 0)
+	value.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	value.add_theme_color_override("font_color", COL_GOLD)
+	value.add_theme_font_size_override("font_size", 18)
+	line.add_child(value)
+	creator_values[key] = value
+	var next := _creator_button(line, ">", func() -> void: _cycle_creator(key, 1))
+	next.custom_minimum_size = Vector2(44, 40)
+	parent.add_child(line)
+
+
+func _creator_button(parent: Node, text: String, on_press: Callable) -> Button:
+	var button := Button.new()
+	button.text = text
+	button.custom_minimum_size = Vector2(0, 40)
+	button.add_theme_font_size_override("font_size", 18)
+	button.add_theme_color_override("font_color", COL_TEXT)
+	button.add_theme_stylebox_override("normal", _box(COL_BUTTON))
+	button.add_theme_stylebox_override("hover", _box(COL_BUTTON_HOVER))
+	button.add_theme_stylebox_override("focus", _box(COL_BUTTON_HOVER))
+	button.add_theme_stylebox_override("pressed", _box(COL_BUTTON_HOVER))
+	button.pressed.connect(on_press)
+	parent.add_child(button)
+	return button
+
+
+func _cycle_creator(key: String, step: int) -> void:
+	var n := Appearance.count(key)
+	creator_choices[key] = posmod(int(creator_choices[key]) + step, n)
+	_refresh_creator()
+
+
+func _randomise_creator() -> void:
+	for key in CREATOR_ORDER:
+		creator_choices[key] = randi() % Appearance.count(key)
+	_refresh_creator()
+
+
+func _turn_creator() -> void:
+	var at := FACING_ORDER.find(creator_preview.facing)
+	creator_preview.facing = FACING_ORDER[(at + 1) % FACING_ORDER.size()]
+	creator_preview.queue_redraw()
+
+
+func _refresh_creator() -> void:
+	for key in CREATOR_ORDER:
+		(creator_values[key] as Label).text = Appearance.label(key, int(creator_choices[key]))
+	creator_preview.apply_appearance(creator_choices)
+
+
+func _close_creator() -> void:
+	if creator_root != null:
+		creator_root.queue_free()
+		creator_root = null
+	center.visible = true
+	_show_slots("new")
+
+
+func _begin_game() -> void:
+	pending_appearance = Appearance.clean(creator_choices)
+	if creator_root != null:
+		creator_root.queue_free()
+		creator_root = null
+	center.visible = true
+	start_requested.emit("new", creator_slot)
