@@ -217,9 +217,6 @@ const STAGE_NAMES := ["Decrepit", "Boarded", "Patched", "Restored"]
 # The tutorial: short tips that appear one at a time as the player reaches each part of the farm.
 # Each shows once, and the Settings menu keeps the ones already seen. When the condition is met, see _tip_ready.
 const TIPS := [
-	{"id": "move", "title": "Moving and using things", "text": "Walk with WASD or the arrow keys. Pick a tool on the hotbar with 1 to 0, or scroll with the mouse wheel. Left click or Space uses the tool on whatever you face. Right click blocks with a weapon."},
-	{"id": "menus", "title": "Menus", "text": "K Skills, I Inventory, G Gear, C Craft, Q Quests, H House, U Buildings, J Achievements. Esc opens Settings, and time stops while it's open."},
-	{"id": "farm", "title": "Growing food", "text": "Face a soil tile and press Space to plant a seed. Crops need water each day to grow. Face a ripe crop and press Space to harvest it."},
 	{"id": "well", "title": "The well", "text": "The pump by the plots is seized. Repair it from the Well panel, then attach the hose. The hose reaches every plot, so face a crop and press Space to water it. Rain waters everything."},
 	{"id": "sleep", "title": "Sleeping", "text": "Walk to the bed in the bedroom and press Space from 18:00 to save and end the day. Stay up past 03:00 and you collapse, which lowers your sanity limit."},
 	{"id": "chores", "title": "Keeping house", "text": "The house wears down a little each night. Tidy it and mend a board each day from the House menu (H). Chores you skip add wear."},
@@ -484,21 +481,38 @@ const GUARDIAN_QUESTS := [
 
 # Story chapters run in order. The first unfinished one is the Current chapter.
 # "story" is the narrative beat, "text" the goal, and "stat" what it reads.
+# The first chapters teach the game one piece at a time. Each one asks for something to be done.
+const TUTORIAL_IDS := ["t_walk", "t_hotbar", "t_menus", "t_craft", "t_chop"]
 const STORY := [
+	{"id": "t_walk", "title": "Wake Up",
+		"story": "You wake at the edge of Hallowvale with a hoe, a few seeds, and a house that is falling down around you. Get your feet under you and walk the yard.",
+		"text": "Walk 15 steps. Use WASD, the arrow keys, or the left stick.", "stat": "walked", "goal": 15, "reward": {"seeds": 3}},
+	{"id": "t_hotbar", "title": "Your Hands Are Full",
+		"story": "A pair of hands can only hold one tool at a time. The hotbar along the bottom of the screen holds the rest, and each slot does a different job.",
+		"text": "Switch tools 3 times. Press 1 to 0, scroll the mouse wheel, or use LB and RB.", "stat": "tool_switches", "goal": 3, "reward": {"coins": 10}},
+	{"id": "t_menus", "title": "The Books",
+		"story": "Everything you own, know, and need is kept in a menu. Skills, your pack, crafting, and quests each have their own key.",
+		"text": "Open 3 menus. K Skills, I Inventory, C Craft, Q Quests. On a controller: Y, Back, and Start for Settings.", "stat": "panels_opened", "goal": 3, "reward": {"seeds": 2}},
 	{"id": "ground", "title": "Unfamiliar Ground",
 		"story": "You wake at the edge of Hallowvale with a hoe and a few seeds. The farmhouse is rotting, the pond is still, and nothing here will feed you unless you put it in the ground.",
-		"text": "Plant 3 seeds on the tilled soil.", "stat": "planted", "goal": 3, "reward": {"seeds": 5}},
-	{"id": "first_crop", "title": "Food Takes Time",
-		"story": "Seeds need days to become food. Each night they grow a stage. Come back when something is ripe, and take it.",
-		"text": "Harvest one ripe crop.", "stat": "harvested", "goal": 1, "reward": {"skill": "Farming", "xp": 50}},
+		"text": "Select the trowel on the hotbar and plant 3 seeds on the tilled soil.", "stat": "planted", "goal": 3, "reward": {"seeds": 5}},
 	{"id": "wood", "title": "Wood Before Walls",
 		"story": "The brush piles around the homestead hide wood and fiber. The house will need both before it can keep the cold out.",
 		"text": "Gather from 3 brush piles.", "stat": "gathered", "goal": 3, "reward": {"wood": 2, "fiber": 2}},
+	{"id": "t_craft", "title": "Your First Tool",
+		"story": "A bare hand cannot fell a tree. Sticks and fiber from the brush make a crude hatchet. Open the Craft menu (C) and make one.",
+		"text": "Craft a crude hatchet.", "stat": "crafted", "goal": 1, "reward": {"coins": 10}},
+	{"id": "t_chop", "title": "Timber",
+		"story": "The trees on the property give wood. Select the axe in slot 2, face a tree, and keep chopping. Each tick has a chance to fell it, and a better axe has better odds.",
+		"text": "Fell a tree with the axe.", "stat": "felled", "goal": 1, "reward": {"wood": 3}},
+	{"id": "first_crop", "title": "Food Takes Time",
+		"story": "Seeds need days to become food. Each night they grow a stage. Come back when something is ripe, and take it.",
+		"text": "Select the hoe and harvest one ripe crop.", "stat": "harvested", "goal": 1, "reward": {"skill": "Farming", "xp": 50}},
 	{"id": "hold_door", "title": "Hold the Door",
 		"story": "The walls are open to the wind. Board them up so the house can hold a night.",
 		"text": "Repair the farmhouse to Boarded.", "stat": "house_stage", "goal": 1, "reward": {"wood": 2, "fiber": 2}},
 	{"id": "pond", "title": "Work the Pond",
-		"story": "The pond is the only other food on the land. Its fish move in the shallows. Face a sparkling spot and press Space to try for one.",
+		"story": "The pond is the only other food on the land. Its fish move in the shallows. Select the fishing pole in slot 7 and face a sparkling spot to try for one.",
 		"text": "Catch 3 fish.", "stat": "caught", "goal": 3, "reward": {"skill": "Fishing", "xp": 40}},
 	{"id": "cook", "title": "A Fire and a Pan",
 		"story": "Raw fish sits badly on an empty stomach. Burn a little wood under a pan and cook one of your catches into a meal.",
@@ -736,6 +750,7 @@ var brush := {}                     # Vector2i world tile -> true while unharves
 var pond_edges: Array = []          # water tiles with land beside them
 var fish_spots: Dictionary = {}        # tile -> seconds left before the spot moves
 var fishing_tile := NO_SPOT            # the spot being fished, or NO_SPOT
+var last_walk_tile := NO_SPOT           # the tile the player stood on last frame, for the walking chapter
 var harvest_tile := NO_SPOT            # the tree or rock being worked, or NO_SPOT
 var harvest_kind := ""                 # "chop" or "mine" while a roll is running, else ""
 var harvest_timer := 0.0
@@ -1101,6 +1116,7 @@ func _process(delta: float) -> void:
 		return
 	blocking = Input.is_action_pressed("block") and _active_tool() == "sword" and _has_weapon()
 	# Scrolling runs through the tools only; the number keys can still reach any slot.
+	var slot_before := active_slot
 	if Input.is_action_just_pressed("hotbar_next"):
 		active_slot = posmod(active_slot + 1, HOTBAR_TOOLS.size())
 	if Input.is_action_just_pressed("hotbar_prev"):
@@ -1108,6 +1124,13 @@ func _process(delta: float) -> void:
 	for i in Hotbar.SLOT_COUNT:
 		if Input.is_action_just_pressed("slot_%d" % (i + 1)):
 			active_slot = i
+	if active_slot != slot_before:
+		_bump("tool_switches")
+	# Walking counts each step to a neighbouring tile. Jumps such as sleeping or going inside don't count.
+	var walk_tile := _player_tile()
+	if last_walk_tile != NO_SPOT and walk_tile != last_walk_tile and absi(walk_tile.x - last_walk_tile.x) + absi(walk_tile.y - last_walk_tile.y) == 1:
+		_bump("walked")
+	last_walk_tile = walk_tile
 	_update_tips(delta)
 	clock += delta
 	_update_hens(delta)
@@ -2107,8 +2130,6 @@ func _update_minimap() -> void:
 # while nothing else is open. A tip shows once, and its text stays in the Settings menu.
 func _tip_ready(id: String) -> bool:
 	match id:
-		"move", "menus", "farm":
-			return true
 		"sleep":
 			return current_hour >= 17.0
 		"chores", "repair", "buildings", "quests":
@@ -2265,6 +2286,7 @@ func _toggle_tab(tab: String) -> void:
 		_close_panel()
 	else:
 		open_tab = tab
+		_bump("panels_opened")
 		play_sfx("panel")
 		_refresh_panel()
 
@@ -4628,6 +4650,7 @@ func _craft_tool(kind: String) -> void:
 	if not _can_craft_tool(kind):
 		_show_message("You need the materials and skill level for the next %s." % kind)
 		return
+	_bump("crafted")
 	var tier: Dictionary = TOOL_TIERS[kind][int(tool_tier[kind])]
 	for mat in tier["cost"].keys():
 		materials[mat] -= int(tier["cost"][mat])
@@ -6585,6 +6608,11 @@ func _stat_value(stat: String) -> int:
 
 
 # Story chapters run in order, so only the first unfinished one can complete.
+# Adds one to a counter the questline reads. Saves from before a counter existed start it at zero.
+func _bump(stat: String) -> void:
+	stats[stat] = int(stats.get(stat, 0)) + 1
+
+
 func _check_story() -> void:
 	for q in STORY:
 		if quests_done.has(q["id"]):
@@ -6823,6 +6851,7 @@ func _save_game() -> void:
 		"materials": materials,
 		"stats": stats,
 		"quests_done": quests_done,
+		"tutorial_v2": true,
 		"zone": zone,
 		"world_version": 1,
 		"campsite": [campsite.x, campsite.y],
@@ -6910,6 +6939,10 @@ func _load_game() -> bool:
 	# Stat-based achievements re-check from saved stats on the next frame.
 	var story_v := int(data.get("story_version", 1))
 	quests_done = data.get("quests_done", {}) if story_v >= 2 else {}
+	# Saves from before the questline was rewritten count its opening chapters as done.
+	if story_v >= 2 and not data.has("tutorial_v2"):
+		for tid in TUTORIAL_IDS:
+			quests_done[tid] = true
 	achievements_done = data.get("achievements_done", {}) if story_v >= 2 else {}
 	selected_seed = str(data.get("selected_seed", "turnip"))
 	lantern_tier = int(data.get("lantern_tier", 0))
