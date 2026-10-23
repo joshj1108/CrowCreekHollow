@@ -76,6 +76,12 @@ const GROVE_SPOTS := [
 # Weeping willows lean over the back fence and the pond. The bare tree at the top of the field is dead.
 const WILLOW_TREES := [Vector2i(2, 17), Vector2i(30, 15)]
 const DEAD_TREES := [Vector2i(20, 1)]
+# The great tree: a 3 by 3 block of the field that can't be felled or used. Crows roost in its crown from dusk.
+const BIG_TREE_INNER := Vector2i(21, 4)
+const BIG_TREE_MESSAGE := "Too old and too thick to fell. Something moves in its branches."
+const ROOST_HOUR := 20.0      # from this hour the crows come home to the great tree
+const ROOST_SIZE := 4         # perches in its crown
+const ROOST_ALT := 3.4        # how high the crown perches sit, in tiles
 const XP_FELL := 20
 # Rocks on the farm. Breaking one gives stone. A pick gives more, and from Mining 2 a small chance of copper ore.
 # Some sit inside the plots: a rock must be broken before that soil can be planted.
@@ -817,6 +823,7 @@ var sanity := SANITY_MAX
 var sanity_penalty := 0             # permanent cap reduction from collapsing
 var inside := false                 # standing in the farmhouse interior
 var open_tab := ""                  # "" when the action bar panel is closed
+var bag: BagPanel                   # the grid bag in the bottom-right corner (Tab or Y)
 var quest_open := {}              # quest id -> true when its details are open (not saved)
 var craft_tab := "gear"             # which Craft sub-tab shows (not saved)
 var event_fired_day := 0            # the day the night event last happened
@@ -1048,6 +1055,7 @@ func _on_title_start(mode: String, slot: int) -> void:
 	_build_world()
 	_build_hud()
 	_build_fade()
+	_build_bag()
 	_build_tip_panel()
 	weather = WeatherScript.new()
 	add_child(weather)
@@ -1093,7 +1101,7 @@ func _process(delta: float) -> void:
 	if weather != null:
 		weather.visible = not inside and not in_cave
 	# Any open menu pauses the day: the clock stops, foes stand still, and only the menu responds.
-	player.paused = open_tab != ""
+	player.paused = open_tab != "" or _bag_open()
 	placement_ghost.visible = placing != ""
 	if placing != "":
 		placement_ghost.queue_redraw()
@@ -1105,6 +1113,8 @@ func _process(delta: float) -> void:
 	if player.paused:
 		_handle_keys()
 		_refresh_panel()
+		if _bag_open():
+			bag.set_items(_bag_items())
 		return
 	blocking = Input.is_action_pressed("block") and _active_tool() == "sword" and _has_weapon()
 	player.blocking = blocking
@@ -1188,10 +1198,10 @@ func _process(delta: float) -> void:
 
 	# With no panel open, a leftover focused button would take the gamepad's A press instead of
 	# the farm. Dropping that focus lets A reach the use action.
-	if open_tab == "" and get_viewport().gui_get_focus_owner() != null:
+	if open_tab == "" and not _bag_open() and get_viewport().gui_get_focus_owner() != null:
 		get_viewport().gui_release_focus()
 	# Farming and gathering pause while a panel is open (the day is already paused above).
-	if Input.is_action_just_pressed("use") and open_tab == "" and not _pointer_on_ui():
+	if Input.is_action_just_pressed("use") and open_tab == "" and not _bag_open() and not _pointer_on_ui():
 		_play_use_anim()
 		_interact()
 
@@ -1236,7 +1246,7 @@ func _draw() -> void:
 					FarmArt.draw_stump(self, gcell)
 	for y in range(fy0, fy1 + 1):
 		for x in range(fx0, fx1 + 1):
-			if map[y][x] == Tile.TREE:
+			if map[y][x] == Tile.TREE and not _in_big_tree(Vector2i(x, y)):
 				var scell := _tile_rect(Vector2i(x, y))
 				draw_colored_polygon(_ellipse_at(scell.get_center() + Vector2(PX * 0.2, PX * 0.26), PX * 0.42, PX * 0.2), Color(0, 0, 0, 0.26))
 	for y in range(fy0, fy1 + 1):
@@ -1245,7 +1255,10 @@ func _draw() -> void:
 			var cell := _tile_rect(Vector2i(x, y))
 			if _is_ground(tile):
 				continue
-			if tile == Tile.TREE:
+			if tile == Tile.TREE and _in_big_tree(Vector2i(x, y)):
+				# The great tree's footprint is plain grass; its shadow and crown are drawn on top later.
+				draw_rect(cell, _ground_color(TILE_COLORS[Tile.GRASS], x, y))
+			elif tile == Tile.TREE:
 				FarmArt.draw_tree_floor(self, cell, FarmArt.hash_int(x, y, 8))
 				_draw_tree_tile(cell, x, y)
 			elif tile == Tile.WALL:
@@ -1279,6 +1292,8 @@ func _draw() -> void:
 				var label_x := maxf(cell.position.x + 2, view_left + 6)
 				draw_string(ThemeDB.fallback_font, Vector2(label_x, cell.position.y + PX * 0.6), label, HORIZONTAL_ALIGNMENT_LEFT, -1, 11, Color(0.05, 0.03, 0.02))
 
+	# The great tree goes last, so its crown is never painted over by the ground around it.
+	_draw_big_tree()
 	for y in INT_H:
 		for x in INT_W:
 			var kind: int = interior[y][x]
@@ -1492,8 +1507,10 @@ func _setup_input() -> void:
 	_ensure_action("ui_right", [], [JOY_BUTTON_DPAD_RIGHT], [[JOY_AXIS_LEFT_X, 1.0]])
 	_ensure_action("ui_accept", [], [JOY_BUTTON_A])
 	_ensure_action("ui_cancel", [], [JOY_BUTTON_B])
-	_ensure_action("skills", [KEY_K], [JOY_BUTTON_Y])
+	_ensure_action("skills", [KEY_K], [])
 	_ensure_action("inventory", [KEY_I], [JOY_BUTTON_X, JOY_BUTTON_BACK])
+	# Tab or Y opens the bag grid in the bottom-right corner.
+	_ensure_action("bag", [KEY_TAB], [JOY_BUTTON_Y])
 	_ensure_action("gear", [KEY_G], [])
 	_ensure_action("craft", [KEY_C], [])
 	_ensure_action("quests", [KEY_Q], [])
@@ -1593,6 +1610,8 @@ func _build_map() -> void:
 				if ix == HOUSE_DOOR_IX and iy == HOUSE_DOOR_IY:
 					t = Tile.DOOR
 				if GROVE_SPOTS.has(Vector2i(ix, iy)):
+					t = Tile.TREE
+				if _in_big_tree(Vector2i(ix + BORDER_X, iy + BORDER_Y)):
 					t = Tile.TREE
 				if Vector2i(ix, iy) == WELL_IX:
 					t = Tile.WELL
@@ -2043,6 +2062,28 @@ func _restore_saved_state() -> void:
 		_toggle_tab(saved_panel)
 
 
+# The great tree's footprint, in map tiles, and the ground point at the foot of its trunk.
+func _big_tree_origin() -> Vector2i:
+	return BIG_TREE_INNER + Vector2i(BORDER_X, BORDER_Y)
+
+
+func _in_big_tree(tile: Vector2i) -> bool:
+	var ix := tile - _big_tree_origin()
+	return ix.x >= 0 and ix.x < 3 and ix.y >= 0 and ix.y < 3
+
+
+func _big_tree_base() -> Vector2:
+	var origin := _big_tree_origin()
+	return Vector2(origin.x * PX + PX * 1.5, origin.y * PX + PX * 2.9)
+
+
+func _draw_big_tree() -> void:
+	var base := _big_tree_base()
+	draw_colored_polygon(_ellipse_at(base + Vector2(PX * 0.5, PX * 0.12), PX * 1.9, PX * 0.5), Color(0, 0, 0, 0.3))
+	var origin := _big_tree_origin()
+	FarmArt.draw_big_tree(self, base, FarmArt.hash_int(origin.x, origin.y, 5))
+
+
 # A tree is drawn from its baked picture once that exists. Until then it is drawn directly.
 func _draw_tree_tile(cell: Rect2, x: int, y: int) -> void:
 	var variant := _tree_variant(Vector2i(x, y))
@@ -2305,8 +2346,13 @@ func _handle_keys() -> void:
 	# Esc or Start opens Settings, or closes it if it's already open.
 	if Input.is_action_just_pressed("settings"):
 		_toggle_tab("Settings")
+	# Tab or Y opens and closes the bag. B closes it too.
+	if Input.is_action_just_pressed("bag"):
+		_toggle_bag()
+	if Input.is_action_just_pressed("close_panel") and _bag_open():
+		_toggle_bag()
 	# B dismisses a tip when nothing else is open.
-	if Input.is_action_just_pressed("close_panel") and tip_showing != "" and open_tab == "" and placing == "":
+	if Input.is_action_just_pressed("close_panel") and tip_showing != "" and open_tab == "" and placing == "" and not _bag_open():
 		_hide_tip()
 	# B closes whatever panel is open.
 	if Input.is_action_just_pressed("close_panel") and open_tab != "":
@@ -2318,6 +2364,8 @@ func _handle_keys() -> void:
 func _toggle_tab(tab: String) -> void:
 	if placing != "":
 		_cancel_placement()
+	if _bag_open():
+		bag.hide_bag()
 	if open_tab == tab:
 		_close_panel()
 	else:
@@ -2332,6 +2380,61 @@ func _close_panel() -> void:
 		play_sfx("tick")
 	open_tab = ""
 	action_bar.hide_panel()
+
+
+# --- The bag ------------------------------------------------------------------
+
+func _build_bag() -> void:
+	bag = BagPanel.new()
+	add_child(bag)
+	bag.slot_chosen.connect(_on_bag_slot)
+	bag.toggle_requested.connect(_toggle_bag)
+
+
+func _bag_open() -> bool:
+	return bag != null and bag.open
+
+
+func _toggle_bag() -> void:
+	if bag == null:
+		return
+	if bag.open:
+		bag.hide_bag()
+		play_sfx("tick")
+		return
+	# The bag opens only when no other menu or placement is up.
+	if open_tab != "" or placing != "" or not world_started:
+		return
+	bag.set_items(_bag_items())
+	bag.show_bag()
+	play_sfx("panel")
+
+
+# The pack stacks in grid order. Meals, stews and bandages can be used from here; the rest show their description.
+func _bag_items() -> Array:
+	var out: Array = []
+	for t in _inventory_tiles():
+		if str(t["name"]).ends_with(" x0"):
+			continue
+		var action := str(t.get("action", ""))
+		var usable := action == "eat_meal" or action == "use_bandage" or action.begins_with("eat_stew:")
+		var desc := str(t.get("desc", ""))
+		if usable:
+			desc += "\nClick or press A to use."
+		out.append({"label": str(t["name"]), "usable": usable, "action": action, "desc": desc})
+	return out
+
+
+func _on_bag_slot(index: int) -> void:
+	var items := _bag_items()
+	if index < 0 or index >= items.size():
+		return
+	var it: Dictionary = items[index]
+	if bool(it["usable"]):
+		_on_panel_action(str(it["action"]))
+		bag.set_items(_bag_items())
+	else:
+		_show_message(str(it["desc"]).split("\n")[0])
 
 
 func _on_panel_action(action_id: String) -> void:
@@ -3398,6 +3501,7 @@ func _settings_rows() -> Array:
 		{"name": "Move", "value": "WASD or arrow keys"},
 		{"name": "Use, plant, harvest, gather, sleep", "value": "Space or Enter"},
 		{"name": "Skills", "value": "K"},
+		{"name": "Bag", "value": "Tab"},
 		{"name": "Inventory", "value": "I"},
 		{"name": "Gear", "value": "G"},
 		{"name": "Craft", "value": "C"},
@@ -3410,7 +3514,7 @@ func _settings_rows() -> Array:
 		{"name": "Move", "value": "Left stick or D-pad"},
 		{"name": "Use, plant, harvest, gather, sleep", "value": "A"},
 		{"name": "Close panel", "value": "B"},
-		{"name": "Skills / Inventory", "value": "Y / X"},
+		{"name": "Bag / Inventory", "value": "Y / X"},
 		{"name": "Gear / Quests", "value": "Left / Right bumper"},
 		{"name": "Achievements", "value": "Right stick click"},
 		{"name": "House", "value": "Back / View"},
@@ -3593,6 +3697,9 @@ func _interact() -> void:
 	if kind == Tile.WELL:
 		_toggle_tab("Well")
 		return
+	if kind == Tile.TREE and _in_big_tree(tile):
+		_show_message(BIG_TREE_MESSAGE)
+		return
 	if kind == Tile.TREE and GROVE_SPOTS.has(tile - Vector2i(BORDER_X, BORDER_Y)):
 		if _need_tool("axe"):
 			_chop(tile)
@@ -3755,6 +3862,9 @@ func _stop_harvest(reason: String) -> void:
 # sits on the ground below it and shrinks and fades as it climbs. Only the farm has them.
 const CROW_FLY_ALT := 70.0
 const CROW_ALT_SPEED := 60.0
+var roost_perches: Array = []   # perches in the great tree's crown, each {ground, alt}
+var roost_timer := 0.0          # seconds until the next crow comes home to the roost
+var roost_lights: Array = []    # one red PointLight2D per roost perch
 
 func _build_crows() -> void:
 	crow_layer = Node2D.new()
@@ -3767,8 +3877,47 @@ func _build_crows() -> void:
 		crow_perches.append({"ground": Vector2(house.position.x + house.size.x * (0.3 + 0.4 * i), house.position.y + house.size.y), "alt": PX * 2.6})
 	for y in MAP_H:
 		for x in MAP_W:
-			if map[y][x] == Tile.TREE:
+			if map[y][x] == Tile.TREE and not _in_big_tree(Vector2i(x, y)):
 				crow_perches.append({"ground": Vector2((x + 0.5) * PX, (y + 0.8) * PX), "alt": PX * 1.5})
+	# The great tree's crown: a few perches spread across the top, where the crows roost at night.
+	roost_perches.clear()
+	var base := _big_tree_base()
+	for o in [Vector2(-0.8, 0.1), Vector2(-0.25, -0.05), Vector2(0.35, 0.12), Vector2(0.85, 0.0)]:
+		roost_perches.append({"ground": base + o * PX, "alt": PX * ROOST_ALT})
+	# A faint red light at each perch, lit only while a crow roosts there, so the red eyes show in the dark.
+	for light in roost_lights:
+		(light as Node).queue_free()
+	roost_lights.clear()
+	var glow := GradientTexture2D.new()
+	glow.width = 64
+	glow.height = 64
+	glow.fill = GradientTexture2D.FILL_RADIAL
+	glow.fill_from = Vector2(0.5, 0.5)
+	glow.fill_to = Vector2(1.0, 0.5)
+	var grad := Gradient.new()
+	grad.set_color(0, Color(1, 1, 1, 1))
+	grad.set_color(1, Color(0, 0, 0, 0))
+	glow.gradient = grad
+	for rp in roost_perches:
+		var light := PointLight2D.new()
+		light.texture = glow
+		light.color = Color(1.0, 0.2, 0.15)
+		light.energy = 0.8
+		light.texture_scale = 0.9
+		light.enabled = false
+		light.position = (rp["ground"] as Vector2) + Vector2(0, -float(rp["alt"]) - PX * 0.2)
+		add_child(light)
+		roost_lights.append(light)
+
+
+# Each roost light is on while a crow sits or is coming in to that perch.
+func _set_roost_lights() -> void:
+	for i in roost_lights.size():
+		var lit := false
+		for c in crows:
+			if c.has("slot") and int(c["slot"]) == i and str(c["state"]) != "fly_out":
+				lit = true
+		(roost_lights[i] as PointLight2D).enabled = lit
 
 
 func _update_crows(delta: float) -> void:
@@ -3778,12 +3927,42 @@ func _update_crows(delta: float) -> void:
 	if not on_farm:
 		crows.clear()
 		crow_layer.visible = false
+		_set_roost_lights()
 		return
 	crow_layer.visible = true
 	var view := get_viewport_rect().size / camera.zoom
 	var centre := camera.get_screen_center_position()
+	var night := current_hour >= ROOST_HOUR
+	# At night the crows come home to the great tree, one at a time. In the morning the roost flies off.
+	if night and not roost_perches.is_empty():
+		roost_timer -= delta
+		var roosting := 0
+		var taken: Array = []
+		for c in crows:
+			if c.has("slot") and str(c["state"]) != "fly_out":
+				roosting += 1
+				taken.append(int(c["slot"]))
+		if roost_timer <= 0.0 and roosting < ROOST_SIZE:
+			roost_timer = randf_range(3.0, 8.0)
+			for i in roost_perches.size():
+				if taken.has(i):
+					continue
+				var side := -1.0 if randf() < 0.5 else 1.0
+				var start := centre + Vector2(side * (view.x * 0.5 + 40.0), randf_range(-view.y * 0.4, view.y * 0.4))
+				var rp: Dictionary = roost_perches[i]
+				crows.append({"ground": start, "alt": CROW_FLY_ALT, "target": rp["ground"], "target_alt": float(rp["alt"]), "state": "fly_in", "timer": 0.0, "flap": randf() * TAU, "facing": -side, "slot": i})
+				break
+	elif not night:
+		roost_timer = 0.0
+		for c in crows:
+			if c.has("slot") and str(c["state"]) != "fly_out":
+				var g: Vector2 = c["ground"]
+				var away := 1.0 if g.x >= centre.x else -1.0
+				c["state"] = "fly_out"
+				c["target"] = centre + Vector2(away * (view.x * 0.5 + 80.0), -view.y * 0.5 - 60.0)
+				c["target_alt"] = CROW_FLY_ALT
 	crow_spawn_timer -= delta
-	if crow_spawn_timer <= 0.0 and crows.size() < MAX_CROWS and not crow_perches.is_empty():
+	if not night and crow_spawn_timer <= 0.0 and crows.size() < MAX_CROWS and not crow_perches.is_empty():
 		crow_spawn_timer = randf_range(10.0, 30.0)
 		var side := -1.0 if randf() < 0.5 else 1.0
 		var start := centre + Vector2(side * (view.x * 0.5 + 40.0), randf_range(-view.y * 0.4, view.y * 0.4))
@@ -3811,6 +3990,9 @@ func _update_crows(delta: float) -> void:
 				if absf(alt - final_alt) < 1.0:
 					if state == "fly_out":
 						gone = true
+					elif c.has("slot"):
+						# Roosting crows stay put until morning, with no timer.
+						c["state"] = "roost"
 					else:
 						c["state"] = "perched"
 						c["timer"] = randf_range(8.0, 30.0)
@@ -3837,6 +4019,7 @@ func _update_crows(delta: float) -> void:
 		if not gone:
 			keep.append(c)
 	crows = keep
+	_set_roost_lights()
 	crow_layer.queue_redraw()
 
 
@@ -3853,7 +4036,7 @@ func _draw_crow_layer() -> void:
 	for c in crows:
 		var facing := float(c["facing"])
 		var st := str(c["state"])
-		var perched := st == "perched"
+		var perched := st == "perched" or st == "roost"
 		var p: Vector2 = (c["ground"] as Vector2) + Vector2(0, -float(c["alt"]))
 		var flap := sin(float(c["flap"])) * (0.6 if st == "hop" else 1.0)
 		if perched:
@@ -3864,7 +4047,8 @@ func _draw_crow_layer() -> void:
 		var far_tip: Vector2
 		var near_tip: Vector2
 		if perched:
-			far_tip = root + Vector2(-facing * 4.5, 1.5)
+			# Not level with the wing root, or the wing becomes a flat sliver the triangulator rejects.
+			far_tip = root + Vector2(-facing * 4.5, 1.0)
 			near_tip = root + Vector2(-facing * 6.0, 1.8)
 		else:
 			far_tip = root + Vector2(-facing * 3.0, -2.0 + flap * 6.5)
@@ -3876,7 +4060,11 @@ func _draw_crow_layer() -> void:
 		var head := p + Vector2(facing * 4.8, -3.2)
 		crow_layer.draw_circle(head, 2.8, ink)
 		crow_layer.draw_colored_polygon(PackedVector2Array([head + Vector2(facing * 2.2, -0.9), head + Vector2(facing * 6.8, 0.4), head + Vector2(facing * 2.2, 1.2)]), Color("3b3428"))
-		crow_layer.draw_circle(head + Vector2(facing * 1.0, -0.6), 0.75, Color(0.92, 0.86, 0.5))
+		# Roosting crows, the ones that come home to the great tree, have red eyes that glow a little.
+		var roost_crow: bool = c.has("slot")
+		if roost_crow:
+			crow_layer.draw_circle(head + Vector2(facing * 1.0, -0.6), 2.2, Color(1.0, 0.1, 0.08, 0.3))
+		crow_layer.draw_circle(head + Vector2(facing * 1.0, -0.6), 0.75, Color(1.0, 0.18, 0.14) if roost_crow else Color(0.92, 0.86, 0.5))
 		# Near wing in front of the body.
 		crow_layer.draw_colored_polygon(PackedVector2Array([root + Vector2(facing * 2.0, 0.0), near_tip, root + Vector2(-facing * 2.0, 0.8)]), wing_near)
 		crow_layer.draw_line(root + Vector2(facing * 1.0, 0.0), near_tip.lerp(root, 0.35), Color(0.45, 0.45, 0.55, 0.45), 0.8)
@@ -7440,9 +7628,11 @@ func _is_blocked_world(p: Vector2) -> bool:
 	var t := Vector2i(floori(p.x / PX), floori(p.y / PX))
 	if BLOCKING.has(_kind_at(t)):
 		return true
+	# Rocks are solid like the trees: the farm's rocks and the village quarry rocks. Inside the cave the
+	# farm rocks' coordinates mean nothing, so they only count out on the farm.
 	if _in_village():
-		return _npc_index(t) != -1
-	return not inside and brush.has(t)
+		return _npc_index(t) != -1 or quarry.has(t)
+	return not inside and (brush.has(t) or (not in_cave and rocks.has(t)))
 
 
 func _world_tile(ix: int, iy: int) -> Vector2i:

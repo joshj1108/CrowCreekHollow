@@ -109,7 +109,7 @@ static func draw_tree_floor(ci: CanvasItem, cell: Rect2, h: int) -> void:
 # cool, slightly uneasy palette with warm light in the leaves, so it reads as cosy and eerie at once.
 static func draw_tree(ci: CanvasItem, cell: Rect2, h: int, variant: int) -> void:
 	var base := Vector2(cell.get_center().x, cell.end.y - T * 0.1)
-	var trunk := Color("3b2c21")
+	var trunk := Color("2a2019")
 	if variant == 2:
 		_dead_tree(ci, base, h)
 		return
@@ -131,20 +131,67 @@ static func draw_tree(ci: CanvasItem, cell: Rect2, h: int, variant: int) -> void
 # A round canopy: dark underside, mid leaves, lit crown, and a few warm light spots.
 static func _oak(ci: CanvasItem, c: Vector2, h: int) -> void:
 	var r: float = T * 1.0
-	var clumps: Array = _clumps(c, r, h, 9, 0.8)
-	_canopy_layers(ci, clumps, [Color("1c3430"), Color("2e4d43"), Color("4a7363"), Color("6b9480")])
-	_strands(ci, c, r, h, 5, T * 0.7, Color(0.62, 0.7, 0.62, 0.42))
-	for i in 4:
+	# A thinner, greyer crown with gaps where the light gets through, and grey moss hanging from it.
+	var clumps: Array = _clumps(c, r, h, 7, 0.8)
+	_canopy_layers(ci, clumps, [Color("111c1d"), Color("1d2e2e"), Color("2f4544"), Color("485c57")])
+	_strands(ci, c, r, h, 9, T * 0.8, Color(0.5, 0.56, 0.5, 0.5))
+	for i in 2:
 		var sp := c + Vector2((frac(h, 130 + i * 6) - 0.5) * r * 1.2, (frac(h, 140 + i * 6) - 0.5) * r * 0.8)
-		ci.draw_circle(sp, T * 0.05, Color(0.85, 0.72, 0.42, 0.32))
+		ci.draw_circle(sp, T * 0.04, Color(0.8, 0.66, 0.4, 0.22))
+	# A dead limb or two break out of the crown.
+	for i in 2:
+		var side := -1.0 if i == 0 else 1.0
+		var from := c + Vector2(side * r * 0.5, -r * 0.2 + frac(h, 150 + i * 4) * r * 0.3)
+		var to := from + Vector2(side * T * (0.5 + 0.3 * frac(h, 160 + i * 3)), -T * 0.5)
+		ci.draw_line(from, to, Color("2a211a"), 2.2)
+		ci.draw_line(to, to + Vector2(side * T * 0.2, -T * 0.15), Color("2a211a"), 1.2)
 
 
 # A weeping willow: a low, wide canopy with long strands hanging almost to the ground.
 static func _willow(ci: CanvasItem, c: Vector2, h: int) -> void:
 	var r: float = T * 1.12
-	var clumps: Array = _clumps(c + Vector2(0, T * 0.12), r, h, 8, 0.55)
-	_canopy_layers(ci, clumps, [Color("28402f"), Color("3d5c40"), Color("5f7f58"), Color("86a478")])
-	_strands(ci, c + Vector2(0, T * 0.2), r * 0.9, h, 12, T * 1.5, Color(0.66, 0.74, 0.5, 0.5))
+	var clumps: Array = _clumps(c + Vector2(0, T * 0.12), r, h, 7, 0.55)
+	_canopy_layers(ci, clumps, [Color("141f1b"), Color("1f3029"), Color("34463d"), Color("4d5f52")])
+	_strands(ci, c + Vector2(0, T * 0.2), r * 0.9, h, 14, T * 1.6, Color(0.55, 0.6, 0.5, 0.5))
+
+
+# The great tree at the edge of the field. It is hollow and gnarled, with crooked limbs and a crown
+# that never thins. It is drawn once per frame on the map, and the crows roost in its top.
+static func draw_big_tree(ci: CanvasItem, base: Vector2, h: int) -> void:
+	var bark := Color("221915")
+	var r: float = T * 1.75
+	var crown := base + Vector2(0, -T * 2.4)
+	# Roots spread over the ground, one on each side.
+	for i in 6:
+		var side := -1.0 if i % 2 == 0 else 1.0
+		var reach := T * (0.5 + 0.3 * frac(h, 200 + i * 3))
+		var end := base + Vector2(side * reach, T * (0.08 + 0.1 * frac(h, 210 + i * 2)))
+		ci.draw_line(base + Vector2(side * T * 0.2, -T * 0.08), end, bark, 4.0 - 0.3 * float(i % 3))
+	# The trunk tapers up from a wide base, leaning a little, and the hollow sits near the bottom.
+	ci.draw_colored_polygon(PackedVector2Array([
+		base + Vector2(-T * 0.5, T * 0.06), base + Vector2(-T * 0.36, -T * 1.6), base + Vector2(-T * 0.24, -T * 2.3),
+		base + Vector2(T * 0.22, -T * 2.3), base + Vector2(T * 0.36, -T * 1.6), base + Vector2(T * 0.48, T * 0.06)]), bark)
+	ci.draw_colored_polygon(PackedVector2Array([
+		base + Vector2(T * 0.08, -T * 0.1), base + Vector2(T * 0.36, -T * 1.6), base + Vector2(T * 0.22, -T * 2.3), base + Vector2(T * 0.02, -T * 2.3)]), Color("33261e"))
+	ci.draw_colored_polygon(ellipse(base + Vector2(-T * 0.06, -T * 0.85), T * 0.2, T * 0.26), Color("0b0705"))
+	ci.draw_arc(base + Vector2(-T * 0.06, -T * 0.85), T * 0.2, 0.0, TAU, 14, Color("4a3a2c"), 1.2)
+	# Crooked limbs reach out from the top of the trunk, and each one ends in a bare twig.
+	for i in 6:
+		var side := -1.0 if i % 2 == 0 else 1.0
+		var s := base + Vector2(side * T * 0.14, -T * (1.9 + 0.12 * float(i % 3)))
+		var m := s + Vector2(side * T * (0.7 + 0.3 * frac(h, 210 + i * 4)), -T * (0.55 + 0.2 * frac(h, 220 + i * 3)))
+		var tip := m + Vector2(side * T * (0.5 + 0.3 * frac(h, 230 + i * 5)), -T * (0.35 + 0.3 * frac(h, 240 + i * 3)))
+		ci.draw_line(s, m, bark, 5.0)
+		ci.draw_line(m, tip, bark, 2.4)
+		ci.draw_line(tip, tip + Vector2(side * T * 0.18, -T * 0.12), bark, 1.2)
+	# A dark, dense crown with grey moss hanging from it.
+	var clumps: Array = _clumps(crown, r, h, 11, 0.75)
+	_canopy_layers(ci, clumps, [Color("0a1212"), Color("15211f"), Color("213330"), Color("344541")])
+	_strands(ci, crown + Vector2(0, T * 0.2), r * 1.1, h, 18, T * 1.5, Color(0.5, 0.56, 0.5, 0.55))
+	# Pale leaves that never fell, scattered on the ground under the crown.
+	for i in 6:
+		var lp := base + Vector2((frac(h, 250 + i * 4) - 0.5) * T * 3.2, T * (0.02 + 0.2 * frac(h, 260 + i * 3)))
+		ci.draw_colored_polygon(ellipse(lp, T * 0.1, T * 0.05), Color(0.62, 0.52, 0.3, 0.6))
 
 
 # A bare tree with a few branches and a handful of pale leaves that have not fallen.

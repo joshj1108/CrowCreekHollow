@@ -15,6 +15,7 @@ A top-down farming game with heavy psychological horror, built in Godot 4.7.
 - Use, plant, harvest, gather, sleep, tidy, cleanse, cook, talk, swing, or read: Space / Enter (face the tile)
 - Walk into the farmhouse door to go inside. Walk onto the exit mat to leave.
 - Menu sections (key, or click in the menu list): Skills K, Inventory I, Gear G, Craft C, Quests Q, House H, Buildings U, Achievements J, Settings
+- The bag (grid, bottom-right corner): Tab opens and closes it. Click a slot to use it, or move with the arrow keys and press Enter.
 - Esc opens Settings, or closes it if it's already open. B closes any other open section.
 - Stuck while placing or boxed in? Esc opens Settings, which cancels any placement. The **Unstick** button in the Game section moves you to the nearest open ground (grass, path, soil, fallow) from the farmhouse door, and works on the farm only.
 - Farming and gathering pause while a panel is open
@@ -24,14 +25,17 @@ A top-down farming game with heavy psychological horror, built in Godot 4.7.
 - Move: left stick or D-pad (0.3 deadzone)
 - Use, plant, harvest, gather, sleep: A
 - Close the open panel: B
-- Inventory X, Skills Y, Gear left bumper, Quests right bumper, House Back/View, Settings Start
+- Bag Y, Inventory X, Skills (K on the keyboard only), Gear left bumper, Quests right bumper, House Back/View, Settings Start
+- The bag: Y opens and closes it, the D-pad moves between its slots, A uses the slot in focus, B closes it.
 - While a panel is open, the D-pad or left stick moves focus between its buttons, and A presses the highlighted one. The first usable button is highlighted when a panel opens.
 - Keyboard and gamepad share the same actions, so both work at once.
 
 ## Action bar
 
 - Messages sit at the bottom-left of the screen, clear of the farm's labels. HUD and message text have a dark outline so they read over any ground.
-- Trees are drawn as canopies of overlapping crowns, so the outer forest reads as dense woodland. Trees block movement.
+- Trees are drawn as canopies of overlapping crowns, so the outer forest reads as dense woodland. Trees block movement. The farm's trees are darker and greyer, with moss hanging from the crowns.
+- **The great tree** is a 3 by 3 block of trees in the middle of the yard. It can't be felled, and the game says so when you face it. The crows roost in its crown from 20:00 and leave at dawn. Their eyes glow red, and each roost perch has a faint red light while a crow sits there.
+- Rocks on the farm, and quarry rocks in the village, block movement like trees. You can still break a rock from the tile next to it.
 - Storage labels (Cellar, Smoke, Furnace) stay on screen when their building is at the view's edge.
 - The farm's buildings hug the house: the cellar against the west wall. The workshop is a walled building against the east wall, 5 by 4, with a door on its south side. Its furnace and smokehouse stand inside. The cooler is inside the house. The workshop, coop, and barn are built and moved from the Buildings menu (U).
 
