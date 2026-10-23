@@ -1423,6 +1423,13 @@ func _setup_input() -> void:
 	for move in ["move_up", "move_down", "move_left", "move_right"]:
 		InputMap.action_set_deadzone(move, 0.3)
 	_ensure_action("use", [KEY_SPACE, KEY_ENTER], [JOY_BUTTON_A])
+	# Menus move focus and press buttons through the ui_ actions, so the gamepad needs them too.
+	_ensure_action("ui_up", [], [JOY_BUTTON_DPAD_UP], [[JOY_AXIS_LEFT_Y, -1.0]])
+	_ensure_action("ui_down", [], [JOY_BUTTON_DPAD_DOWN], [[JOY_AXIS_LEFT_Y, 1.0]])
+	_ensure_action("ui_left", [], [JOY_BUTTON_DPAD_LEFT], [[JOY_AXIS_LEFT_X, -1.0]])
+	_ensure_action("ui_right", [], [JOY_BUTTON_DPAD_RIGHT], [[JOY_AXIS_LEFT_X, 1.0]])
+	_ensure_action("ui_accept", [], [JOY_BUTTON_A])
+	_ensure_action("ui_cancel", [], [JOY_BUTTON_B])
 	_ensure_action("skills", [KEY_K], [JOY_BUTTON_Y])
 	_ensure_action("inventory", [KEY_I], [JOY_BUTTON_X])
 	_ensure_action("gear", [KEY_G], [JOY_BUTTON_LEFT_SHOULDER])
