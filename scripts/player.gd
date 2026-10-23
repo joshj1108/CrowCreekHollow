@@ -89,8 +89,6 @@ func _draw() -> void:
 		_draw_side(bob, stride)
 	else:
 		_draw_front_back(bob)
-	# Small marker showing the direction the player faces, so you can tell what you'll interact with.
-	draw_circle(facing * 22, 3, Color(1.0, 0.95, 0.7, 0.8))
 
 
 # The figure seen from the front or the back: both arms and legs, a wide body, and the face or hair.
