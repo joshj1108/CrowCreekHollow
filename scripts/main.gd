@@ -1134,6 +1134,10 @@ func _process(delta: float) -> void:
 
 	_handle_keys()
 
+	# With no panel open, a leftover focused button would take the gamepad's A press instead of
+	# the farm. Dropping that focus lets A reach the use action.
+	if open_tab == "" and get_viewport().gui_get_focus_owner() != null:
+		get_viewport().gui_release_focus()
 	# Farming and gathering pause while a panel is open (the day is already paused above).
 	if Input.is_action_just_pressed("use") and open_tab == "":
 		_interact()
