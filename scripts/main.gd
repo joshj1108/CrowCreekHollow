@@ -933,6 +933,7 @@ var transitioning := false
 var fade_layer: CanvasLayer
 var fade_rect: ColorRect
 var card_label: Label
+var shake_tw: Tween
 var last_minimap_key: Array = []
 var last_cam_tile := Vector2i(-99, -99)   # the tile the camera was last drawn from
 var lantern_light: PointLight2D
@@ -6808,7 +6809,10 @@ func _show_card(text: String, fade_in: float, hold: float, fade_out: float) -> v
 
 
 func _shake_camera(seconds: float, strength: float) -> void:
+	if shake_tw != null and shake_tw.is_valid():
+		shake_tw.kill()
 	var tw := create_tween()
+	shake_tw = tw
 	for i in int(seconds / 0.05):
 		tw.tween_property(camera, "offset", Vector2(randf_range(-strength, strength), randf_range(-strength, strength)), 0.05)
 	tw.tween_property(camera, "offset", Vector2.ZERO, 0.08)
@@ -6834,6 +6838,12 @@ func _build_fade() -> void:
 	card_label.modulate.a = 0.0
 	card_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	fade_layer.add_child(card_label)
+	player.struck.connect(_on_player_struck)
+
+
+# A tool strike gives the camera a small jolt, so the impact reads.
+func _on_player_struck(kind: String) -> void:
+	_shake_camera(0.12, 1.6 if kind == "mine" else 1.2)
 
 
 func _can_tidy() -> bool:

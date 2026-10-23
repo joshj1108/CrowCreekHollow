@@ -5,6 +5,8 @@ extends Node2D
 ## and brush piles block movement; the player slides along walls.
 ## The figure holds the selected hotbar tool and plays its action: one-shot actions when the
 ## player uses a tool, and loops while a chop, mine or fishing channel runs.
+## Each action is a set of keyframes (arm, tool lag, body lean, crouch), so the wind-up,
+## the strike and the recovery read as one motion.
 
 const SPEED := 180.0
 const FEET_OFFSET := Vector2(0, 8)
@@ -22,6 +24,7 @@ var walk_t := 0.0             # advances while walking, drives the stride
 var moving := false
 var step_timer := 0.0         # seconds walked since the last footstep
 signal stepped                # emitted once per footstep, so the game can play a sound
+signal struck(kind: String)   # a tool connected with the ground or a tree; main gives the camera a small jolt
 
 # What the figure holds, set by main.gd each frame.
 var held := ""                # hotbar tool: sword, axe, pick, hoe, trowel, hose, rod, or ""
@@ -72,10 +75,31 @@ const BLADE := {
 	"iron_sword": Color("c8ccd6"),
 }
 
+# Arm lengths: upper arm, forearm, and how far the hand can reach from the shoulder.
+const ARM_UPPER := 5.5
+const ARM_FORE := 5.5
+const REACH := 10.5
+
 # Where in its action each strike lands, as a fraction of the action.
-const STRIKE := {"chop": 0.6, "mine": 0.6, "hoe": 0.5, "plant": 0.5}
+const STRIKE := {"chop": 0.6, "mine": 0.6, "hoe": 0.6, "plant": 0.5}
 # How long one cycle of each looping action takes, in seconds.
 const LOOP_PERIOD := {"chop": 0.7, "mine": 0.8, "fish": 2.4}
+
+# Keyframes for each action: [phase, arm angle, tool lag, body lean, crouch].
+# The arm angle is 0 straight down, PI/2 forward and PI overhead. The tool lag is added to the arm
+# angle, so a tool trails behind on the wind-up and whips ahead at the strike. Lean tips the upper body
+# forward (positive) or back (negative), and crouch drops the body in units of pixels.
+const KEYS := {
+	"chop": [[0.0, 0.3, 0.0, 0.0, 0.0], [0.34, 2.6, -0.45, -0.06, 0.0], [0.42, 2.95, -0.7, -0.08, 0.0], [0.6, 0.4, 0.45, 0.22, 1.0], [0.68, 0.22, 0.12, 0.26, 1.0], [0.84, 0.35, 0.0, 0.12, 0.0], [1.0, 0.3, 0.0, 0.0, 0.0]],
+	"mine": [[0.0, 0.3, 0.0, 0.0, 0.0], [0.34, 2.8, -0.5, -0.06, 0.0], [0.42, 3.05, -0.75, -0.09, 0.0], [0.6, 0.35, 0.5, 0.26, 1.5], [0.7, 0.2, 0.1, 0.3, 1.5], [0.85, 0.35, 0.0, 0.12, 0.0], [1.0, 0.3, 0.0, 0.0, 0.0]],
+	"hoe": [[0.0, 0.35, 0.0, 0.12, 0.5], [0.4, -1.5, -0.6, -0.05, 0.0], [0.6, 1.0, 0.2, 0.35, 3.0], [0.72, 1.1, 0.1, 0.35, 3.0], [1.0, 0.35, 0.0, 0.1, 0.0]],
+	"plant": [[0.0, 0.3, 0.0, 0.0, 0.0], [0.4, 0.9, -0.2, 0.3, 4.0], [0.5, 1.0, 0.0, 0.38, 5.0], [0.8, 0.6, 0.1, 0.2, 2.0], [1.0, 0.3, 0.0, 0.0, 0.0]],
+	"swing": [[0.0, -2.0, -0.5, -0.08, 0.0], [0.5, -1.6, -0.8, -0.05, 0.0], [0.68, 1.4, 0.45, 0.18, 0.0], [0.8, 1.3, 0.2, 0.12, 0.0], [1.0, 0.4, 0.0, 0.0, 0.0]],
+	"water": [[0.0, 0.3, 0.0, 0.0, 0.0], [0.18, 1.2, 0.0, 0.08, 0.0], [0.85, 1.25, 0.0, 0.1, 0.0], [1.0, 0.3, 0.0, 0.0, 0.0]],
+	"cast": [[0.0, 0.4, 0.0, 0.0, 0.0], [0.35, -1.5, -0.6, -0.12, 0.0], [0.55, 1.3, 0.5, 0.15, 0.0], [0.7, 1.0, 0.1, 0.1, 0.0], [1.0, 0.3, 0.0, 0.0, 0.0]],
+	"fish": [[0.0, 0.95, 0.1, 0.04, 0.0], [0.5, 1.05, -0.1, 0.06, 0.0], [1.0, 0.95, 0.1, 0.04, 0.0]],
+	"fire": [[0.0, 1.45, 0.0, 0.04, 0.0], [0.3, 1.35, 0.0, 0.0, 0.0], [1.0, 1.45, 0.0, 0.04, 0.0]],
+}
 
 
 func _process(delta: float) -> void:
@@ -155,11 +179,13 @@ func _strike(kind: String) -> void:
 	var col_a := Color("b07a48")
 	var col_b := Color("e0b070")
 	var n := 6
+	var spread := 70.0
 	match kind:
 		"mine":
 			col_a = Color("ffd27a")
 			col_b = Color("fff6d0")
-			n = 7
+			n = 8
+			spread = 90.0
 		"hoe", "plant":
 			col_a = Color("6b4a2e")
 			col_b = Color("8a6a3e")
@@ -167,11 +193,12 @@ func _strike(kind: String) -> void:
 	for i in n:
 		particles.append({
 			"p": hand + Vector2(randf_range(-2.0, 2.0), randf_range(-2.0, 2.0)),
-			"v": Vector2(randf_range(-70.0, 70.0), randf_range(-120.0, -30.0)),
+			"v": Vector2(randf_range(-spread, spread), randf_range(-130.0, -35.0)),
 			"life": randf_range(0.3, 0.5),
 			"col": col_a if i % 2 == 0 else col_b,
 			"size": randf_range(1.5, 2.5),
 		})
+	struck.emit(kind)
 
 
 # Water drops from the hose nozzle while watering.
@@ -242,12 +269,13 @@ func _draw_front_back(bob: float) -> void:
 	_draw_working_arm(bob, false)
 
 
-# The figure seen from the side, facing left or right. The far arm and leg sit behind the body in shade,
-# the near leg in front, and the boots point the way the player faces.
+# The figure seen from the side, facing left or right. The legs stay planted; the upper body leans with
+# the action, so the far arm, the body, the head and the working arm all tilt together.
 func _draw_side(bob: float, stride: float) -> void:
 	var side := signf(facing.x)
-	# Far leg and arm, drawn first so the body covers them.
 	_draw_side_leg(-side * 1.5, 6.0 + bob, -stride * 2.5, OVERALLS_SHADE, side)
+	_draw_side_leg(side * 1.5, 6.0 + bob, stride * 2.5, PANTS, side)
+	draw_set_transform(Vector2.ZERO, _lean())
 	_draw_side_arm(Vector2(-side * 1.0, -4.0 + bob), stride * 2.0, SHIRT_SHADE)
 	# Shirt and overalls, narrower in profile.
 	draw_rect(Rect2(-5, -8 + bob, 10, 16), SHIRT)
@@ -256,10 +284,9 @@ func _draw_side(bob: float, stride: float) -> void:
 	draw_rect(Rect2(-4, -4 + bob, 8, 1), OVERALLS_SHADE)
 	draw_rect(Rect2(-5, 4 + bob, 10, 2), BELT)
 	draw_rect(Rect2(2 if side > 0 else -3, 4 + bob, 2, 2), BUCKLE)
-	# Near leg, in front of the body.
-	_draw_side_leg(side * 1.5, 6.0 + bob, stride * 2.5, PANTS, side)
 	_draw_side_head(bob, side)
 	_draw_working_arm(bob, true)
+	draw_set_transform(Vector2.ZERO, 0.0)
 
 
 func _draw_side_leg(x: float, top: float, lift: float, color: Color, side: float) -> void:
@@ -325,37 +352,12 @@ func _draw_head(bob: float) -> void:
 	draw_rect(Rect2(c.x - 7, c.y - 9, 14, 2), BAND)
 
 
-# --- The working arm and the held tool --------------------------------------
+# --- Poses -----------------------------------------------------------------
 
-# The vertical bob of the body: the walk bounce, plus the crouch while planting.
+# The body's vertical position: the walk bounce, plus any crouch from the current action.
 func _bob() -> float:
 	var stride := sin(walk_t) if moving else 0.0
-	return -absf(stride) * 1.2 + _crouch()
-
-
-func _crouch() -> float:
-	if act == "plant":
-		return 3.0 * sin(PI * clampf(act_t / act_dur, 0.0, 1.0))
-	return 0.0
-
-
-# The working arm's shoulder, in local coordinates.
-func _shoulder(bob: float, side_view: bool) -> Vector2:
-	if side_view:
-		return Vector2(signf(facing.x) * 2.0, -4.0 + bob)
-	return Vector2(11.0, -4.0 + bob)
-
-
-# Where the hand sits relative to the shoulder for the arm angle a (0 = straight down, positive = forward).
-func _hand_offset(a: float, side_view: bool) -> Vector2:
-	if side_view:
-		return Vector2(signf(facing.x) * sin(a) * 11.0, cos(a) * 11.0)
-	return Vector2(sin(a) * 2.5, cos(a) * 11.0)
-
-
-func _hand_pos() -> Vector2:
-	var side_view := facing.x != 0.0
-	return _shoulder(_bob(), side_view) + _hand_offset(_arm_angle(), side_view)
+	return -absf(stride) * 1.2 + float(_pose()[3])
 
 
 # Which action the figure is doing right now: a one-shot, a loop, a raised guard, or idle.
@@ -379,51 +381,84 @@ func _phase() -> Vector2:
 	return Vector2(0.0, walk_t)
 
 
-func _ease(x: float) -> float:
-	var c := clampf(x, 0.0, 1.0)
-	return c * c * (3.0 - 2.0 * c)
-
-
-# The arm angle for the current action. 0 is straight down, PI/2 forward, PI overhead.
-func _arm_angle() -> float:
+# The pose for this moment: [arm angle, tool lag, lean, crouch].
+func _pose() -> Array:
 	var k := _kind()
 	var ph := _phase()
-	var p := ph.x
-	var t := ph.y
+	var out: Array
 	match k:
-		"swing":
-			return lerpf(-2.1, 1.5, _ease(p))
-		"chop", "mine":
-			var st := float(STRIKE[k])
-			if p < st:
-				return lerpf(0.1, 2.9, _ease(p / st))
-			return lerpf(2.9, 0.25, _ease((p - st) / (1.0 - st)))
-		"hoe":
-			if p < 0.5:
-				return lerpf(0.35, -1.5, _ease(p / 0.5))
-			return lerpf(-1.5, 1.0, _ease((p - 0.5) / 0.5))
-		"plant":
-			return 0.6
-		"water":
-			return 1.2 + 0.06 * sin(t * 26.0)
-		"cast":
-			if p < 0.4:
-				return lerpf(0.5, -1.4, _ease(p / 0.4))
-			return lerpf(-1.4, 1.2, _ease((p - 0.4) / 0.6))
-		"fish":
-			return 1.0 + 0.05 * sin(t * 3.0)
-		"fire":
-			return 1.45
 		"block":
-			return 1.9
-	return 0.25 + (sin(walk_t) * 0.2 if moving else 0.0)
+			out = [1.9, 0.6, 0.05, 0.0]
+		"idle":
+			out = [0.25 + (sin(walk_t) * 0.2 if moving else 0.0), -0.15, 0.0, 0.0]
+		_:
+			out = _sample(KEYS[k], ph.x)
+	if k == "water":
+		out[0] = float(out[0]) + 0.05 * sin(ph.y * 26.0)
+	return out
 
 
-# The tool's own angle. A raised sword points up and forward; everything else follows the arm.
-func _tool_angle() -> float:
-	if _kind() == "block":
-		return 2.5
-	return _arm_angle()
+# Interpolates between the keyframes around phase p. Each segment eases in and out, so the motion
+# slows into a pose and leaves it smoothly.
+func _sample(keys: Array, p: float) -> Array:
+	if p <= float(keys[0][0]):
+		return (keys[0] as Array).slice(1)
+	for i in range(keys.size() - 1):
+		var k0: Array = keys[i]
+		var k1: Array = keys[i + 1]
+		var p0 := float(k0[0])
+		var p1 := float(k1[0])
+		if p <= p1:
+			var t := clampf((p - p0) / maxf(p1 - p0, 0.0001), 0.0, 1.0)
+			t = t * t * (3.0 - 2.0 * t)
+			var out: Array = []
+			for j in range(1, k0.size()):
+				out.append(lerpf(float(k0[j]), float(k1[j]), t))
+			return out
+	return (keys[keys.size() - 1] as Array).slice(1)
+
+
+# Body lean in radians, turned to face the way the figure is walking. Only the side view leans.
+func _lean() -> float:
+	if facing.x == 0.0:
+		return 0.0
+	return float(_pose()[2]) * signf(facing.x)
+
+
+# The working arm's shoulder, in local coordinates.
+func _shoulder(bob: float, side_view: bool) -> Vector2:
+	if side_view:
+		return Vector2(signf(facing.x) * 2.0, -4.0 + bob)
+	return Vector2(11.0, -4.0 + bob)
+
+
+# Where the hand reaches from the shoulder for arm angle a.
+func _reach(a: float, side_view: bool) -> Vector2:
+	if side_view:
+		return Vector2(signf(facing.x) * sin(a) * REACH, cos(a) * REACH)
+	return Vector2(sin(a) * 2.5, cos(a) * REACH)
+
+
+# The elbow: two bones of equal length meet the hand. The elbow hinges backward in profile and outward
+# from the front, which is how an arm bends.
+func _elbow(s: Vector2, t: Vector2, side_view: bool) -> Vector2:
+	var delta := t - s
+	var d := clampf(delta.length(), 1.0, ARM_UPPER + ARM_FORE - 0.3)
+	var base := delta.angle()
+	var ang := acos(clampf(d * 0.5 / ARM_UPPER, -1.0, 1.0))
+	var c1 := s + Vector2.from_angle(base + ang) * ARM_UPPER
+	var c2 := s + Vector2.from_angle(base - ang) * ARM_UPPER
+	if side_view:
+		var fwd := signf(facing.x)
+		return c1 if c1.x * fwd < c2.x * fwd else c2
+	return c1 if absf(c1.x) > absf(c2.x) else c2
+
+
+# The hand's position in the figure's own space, after the lean. Used for debris.
+func _hand_pos() -> Vector2:
+	var side_view := facing.x != 0.0
+	var hand := _shoulder(_bob(), side_view) + _reach(float(_pose()[0]), side_view)
+	return hand.rotated(_lean())
 
 
 func _tool_dir(t: float, side_view: bool) -> Vector2:
@@ -432,19 +467,23 @@ func _tool_dir(t: float, side_view: bool) -> Vector2:
 	return Vector2(sin(t) * 0.3, cos(t)).normalized()
 
 
-# The arm on the working side, then the tool in the hand.
+# The arm on the working side, then the tool in the hand. The tool's angle is the arm's angle plus its lag.
 func _draw_working_arm(bob: float, side_view: bool) -> void:
+	var pose := _pose()
 	var shoulder := _shoulder(bob, side_view)
-	var hand := shoulder + _hand_offset(_arm_angle(), side_view)
-	draw_line(shoulder, hand, SHIRT, 4.0)
-	draw_circle(hand, 2.4, SKIN)
-	_draw_tool(hand, side_view)
+	var target := shoulder + _reach(float(pose[0]), side_view)
+	var elbow := _elbow(shoulder, target, side_view)
+	draw_line(shoulder, elbow, SHIRT, 4.0)
+	draw_circle(elbow, 2.0, SHIRT)
+	draw_line(elbow, target, SHIRT_SHADE, 3.4)
+	draw_circle(target, 2.4, SKIN)
+	_draw_tool(target, side_view, float(pose[0]) + float(pose[1]))
 
 
-func _draw_tool(hand: Vector2, side_view: bool) -> void:
+func _draw_tool(hand: Vector2, side_view: bool, tool_angle: float) -> void:
 	if held == "":
 		return
-	var dir := _tool_dir(_tool_angle(), side_view)
+	var dir := _tool_dir(tool_angle, side_view)
 	var perp := Vector2(-dir.y, dir.x)
 	match held:
 		"sword":
