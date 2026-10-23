@@ -1076,6 +1076,7 @@ func _on_title_start(mode: String, slot: int) -> void:
 		_show_message("Welcome back. Day %d." % day)
 	else:
 		_show_message("A new season begins. Day 1. %s." % WEATHER_NAMES.get(weather_kind, "Overcast"))
+		_show_welcome()
 	world_started = true
 	title_menu.queue_free()
 	title_menu = null
@@ -2167,6 +2168,15 @@ func _update_tips(delta: float) -> void:
 	tip_cooldown = maxf(tip_cooldown - delta, 0.0)
 	if tip_queue.size() > 0 and tip_cooldown <= 0.0 and open_tab == "" and placing == "":
 		_show_tip(str(tip_queue.pop_front()))
+
+
+# The first thing a new player sees: the quests run in order, and the first one is the tutorial.
+func _show_welcome() -> void:
+	tip_showing = "welcome"
+	tip_timer = 30.0
+	tip_title_label.text = "Welcome to Hallowvale"
+	tip_body_label.text = "Your quests run in order, and they teach you the farm as you go. Open the Quests menu (Q, or the Menu button) to start with \"Wake Up\"."
+	tip_panel.visible = true
 
 
 func _show_tip(id: String) -> void:
