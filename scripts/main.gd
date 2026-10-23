@@ -2471,7 +2471,7 @@ func _bag_items() -> Array:
 		var desc := str(t.get("desc", ""))
 		if usable:
 			desc += "\nClick or press A to use."
-		out.append({"label": str(t["name"]), "usable": usable, "action": action, "desc": desc})
+		out.append({"label": str(t["name"]), "usable": usable, "action": action, "desc": desc, "tint": str(t.get("tint", "8a6a3a"))})
 	return out
 
 
