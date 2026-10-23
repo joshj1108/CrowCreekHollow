@@ -624,6 +624,10 @@ const FISH_SPOT_COUNT := 3
 const FISH_SPOT_MIN_LIFE := 15.0   # seconds a spot stays active before it moves
 const FISH_SPOT_MAX_LIFE := 30.0
 const FISH_TICK_SECONDS := 3.0     # one catch roll per tick while fishing
+const HARVEST_TICK_SECONDS := 1.0  # one roll per tick while chopping or mining
+const CHOP_BASE_CHANCE := 0.2      # odds of felling a tree per roll, before the hatchet's tier
+const MINE_BASE_CHANCE := 0.2      # odds of breaking a rock per roll, before the pick's tier
+const TOOL_TIER_CHANCE := 0.15     # each tool tier adds this to the odds
 const FISH_BASE_CHANCE := 0.5      # chance to catch on a tick at Fishing 1
 const FISH_CHANCE_PER_LEVEL := 0.03
 const FISH_CHANCE_CAP := 0.9
@@ -732,6 +736,9 @@ var brush := {}                     # Vector2i world tile -> true while unharves
 var pond_edges: Array = []          # water tiles with land beside them
 var fish_spots: Dictionary = {}        # tile -> seconds left before the spot moves
 var fishing_tile := NO_SPOT            # the spot being fished, or NO_SPOT
+var harvest_tile := NO_SPOT            # the tree or rock being worked, or NO_SPOT
+var harvest_kind := ""                 # "chop" or "mine" while a roll is running, else ""
+var harvest_timer := 0.0
 var fish_timer := 0.0
 var fish_layer: Node2D
 var plot_two_open := false
@@ -1128,6 +1135,7 @@ func _process(delta: float) -> void:
 	_check_guardian()
 	_update_fish_spots(delta)
 	_update_fishing(delta)
+	_update_harvest(delta)
 	_update_foes(delta)
 	_update_shots(delta)
 	_update_region()
@@ -3454,6 +3462,9 @@ func _interact() -> void:
 	if _is_fishing():
 		_stop_fishing("You reel in your line.")
 		return
+	if _is_harvesting():
+		_stop_harvest("You stop working.")
+		return
 	var tile := _tile_in_front()
 	# Interior tiles sit outside the farm's bounds, so accept either area.
 	if not _in_bounds(tile) and not _in_interior(tile):
@@ -3619,6 +3630,55 @@ func _find_pond_edges() -> void:
 # Fishing level 3 and up adds spots: one more at 3, another at 5.
 func _fish_spot_count() -> int:
 	return FISH_SPOT_COUNT + (_level("Fishing") - 1) / 2
+
+
+func _is_harvesting() -> bool:
+	return harvest_kind != ""
+
+
+func _stop_harvest(reason: String) -> void:
+	harvest_kind = ""
+	harvest_tile = NO_SPOT
+	if reason != "":
+		_show_message(reason)
+
+
+# Each tick rolls for the tree or rock in front. A better tool raises the odds.
+func _update_harvest(delta: float) -> void:
+	if not _is_harvesting():
+		return
+	var moved := Input.get_vector("move_left", "move_right", "move_up", "move_down") != Vector2.ZERO
+	if moved or inside or in_cave or open_tab != "" or _tile_in_front() != harvest_tile:
+		_stop_harvest("You stop working.")
+		return
+	harvest_timer -= delta
+	if harvest_timer > 0.0:
+		return
+	harvest_timer = HARVEST_TICK_SECONDS
+	var tile := harvest_tile
+	if harvest_kind == "chop":
+		if _kind_at(tile) != Tile.TREE or not GROVE_SPOTS.has(tile - Vector2i(BORDER_X, BORDER_Y)):
+			_stop_harvest("")
+			return
+		var chop_chance := clampf(CHOP_BASE_CHANCE + TOOL_TIER_CHANCE * float(tool_tier["hatchet"]), 0.0, 0.95)
+		if randf() < chop_chance:
+			_stop_harvest("")
+			_finish_chop(tile)
+		else:
+			play_sfx("strike", 0.05)
+			_show_message("Chip, chip. The tree is still standing.")
+	elif harvest_kind == "mine":
+		if not rocks.has(tile):
+			_stop_harvest("")
+			return
+		var mine_chance := clampf(MINE_BASE_CHANCE + TOOL_TIER_CHANCE * float(tool_tier["pick"]), 0.0, 0.95)
+		if randf() < mine_chance:
+			_stop_harvest("")
+			_finish_mine(tile)
+		else:
+			play_sfx("strike", 0.05)
+			_show_message("The rock won't give yet.")
+	queue_redraw()
 
 
 func _update_fish_spots(delta: float) -> void:
@@ -4466,10 +4526,18 @@ func _storage_label(tile: int) -> String:
 # --- Forestry and tools -------------------------------------------------------
 
 func _chop(tile: Vector2i) -> void:
-	play_sfx("strike", 0.08)
 	if int(tool_tier["hatchet"]) < 1:
+		play_sfx("strike", 0.08)
 		_show_message("You need a hatchet. Craft a crude one from the Craft panel.")
 		return
+	# Chopping keeps rolling each tick until the tree falls. Moving away stops it.
+	harvest_kind = "chop"
+	harvest_tile = tile
+	harvest_timer = 0.0
+	_show_message("You start chopping. Keep at it.")
+
+
+func _finish_chop(tile: Vector2i) -> void:
 	grove_felled[tile] = true
 	_apply_grove()
 	materials["wood"] += 3
@@ -4553,6 +4621,14 @@ func _fill_rocks(keep_clear: bool = false) -> void:
 
 
 func _mine(tile: Vector2i) -> void:
+	# Breaking a rock keeps rolling each tick until it gives way. Moving away stops it.
+	harvest_kind = "mine"
+	harvest_tile = tile
+	harvest_timer = 0.0
+	_show_message("You start working the rock.")
+
+
+func _finish_mine(tile: Vector2i) -> void:
 	play_sfx("strike", 0.08)
 	rocks.erase(tile)
 	var pick := int(tool_tier["pick"])
