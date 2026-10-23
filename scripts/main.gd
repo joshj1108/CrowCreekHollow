@@ -1188,9 +1188,9 @@ func _process(delta: float) -> void:
 	if player:
 		player.vertical_locked = trowel_out
 	if trowel_out:
-		if Input.is_action_just_pressed("ui_down") or Input.is_action_just_pressed("seed_next"):
+		if Input.is_action_just_pressed("seed_next"):
 			_cycle_seed(1)
-		elif Input.is_action_just_pressed("ui_up") or Input.is_action_just_pressed("seed_prev"):
+		elif Input.is_action_just_pressed("seed_prev"):
 			_cycle_seed(-1)
 	var tool_pressed := Input.is_action_just_pressed("tool_use")
 	var hand_pressed := Input.is_action_just_pressed("use")
@@ -1493,8 +1493,9 @@ func _setup_input() -> void:
 	_ensure_action("block", [], [], [[JOY_AXIS_TRIGGER_LEFT, 1.0]])
 	_add_mouse("block", MOUSE_BUTTON_RIGHT)
 	# Z and X step through the seeds while the trowel is in hand, as the D-pad does on a controller.
-	_ensure_action("seed_prev", [KEY_Z], [])
-	_ensure_action("seed_next", [KEY_X], [])
+	# The D-pad only, so the left stick never changes seeds. Z and X do the same on the keyboard.
+	_ensure_action("seed_prev", [KEY_Z], [JOY_BUTTON_DPAD_UP])
+	_ensure_action("seed_next", [KEY_X], [JOY_BUTTON_DPAD_DOWN])
 	_ensure_action("hotbar_prev", [], [JOY_BUTTON_LEFT_SHOULDER])
 	_add_mouse("hotbar_prev", MOUSE_BUTTON_WHEEL_UP)
 	_ensure_action("hotbar_next", [], [JOY_BUTTON_RIGHT_SHOULDER])
