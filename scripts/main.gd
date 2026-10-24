@@ -905,6 +905,8 @@ var player    # Node2D with player.gd attached
 var house_roof_layer: Node2D  # the farm house roof: walkable, drawn over the player north of the walls
 var house_roof_bottom := -1  # first row below the roof, cached; -1 until found
 var house_roof_drawn_stage := -1  # the house stage the layer last drew
+var stall_layer: Node2D  # the market stall's art; over the player while they are north of its footprint
+var well_layer: Node2D  # the well's art; over the player while they are north of its footprint
 var big_tree_layer: Node2D  # the great tree's art; drawn over the player north of its base, under it south of it
 var camera: Camera2D
 # Full-screen fade for sleeping and collapsing. While a scene plays the world is frozen.
@@ -1100,6 +1102,7 @@ func _on_title_start(mode: String, slot: int) -> void:
 func _process(delta: float) -> void:
 	_update_big_tree_depth()
 	_update_house_roof_depth()
+	_update_prop_depth()
 	# F3 toggles the performance readout, even while a menu is open.
 	var f3_down := Input.is_physical_key_pressed(KEY_F3)
 	if f3_down and not perf_was_down:
@@ -1781,6 +1784,14 @@ func _build_world() -> void:
 	house_roof_layer.draw.connect(_draw_house_roof_layer)
 	add_child(house_roof_layer)
 
+	stall_layer = Node2D.new()
+	stall_layer.draw.connect(_draw_stall_layer)
+	add_child(stall_layer)
+
+	well_layer = Node2D.new()
+	well_layer.draw.connect(_draw_well_layer)
+	add_child(well_layer)
+
 	big_tree_layer = Node2D.new()
 	big_tree_layer.draw.connect(_draw_big_tree_layer)
 	add_child(big_tree_layer)
@@ -2304,6 +2315,37 @@ func _house_origin() -> Vector2i:
 	return best
 
 
+# The stall and the well are drawn over the player only while the player is north of their footprint.
+func _update_prop_depth() -> void:
+	if stall_layer == null or well_layer == null or player == null:
+		return
+	var stall_bottom := _stall_cell().end.y
+	stall_layer.z_index = 1 if player.position.y < stall_bottom else 0
+	var well_bottom := _well_cell().end.y
+	well_layer.z_index = 1 if player.position.y < well_bottom else 0
+
+
+func _stall_cell() -> Rect2:
+	return Rect2(_tile_rect(_world_tile(STALL_IX, STALL_IY)).position, Vector2(PX * 2, PX * 2))
+
+
+func _well_cell() -> Rect2:
+	return _tile_rect(_world_tile(WELL_IX.x, WELL_IX.y))
+
+
+# The stall covers 2 by 2 tiles and its art is drawn larger, centred on the footprint and standing on its bottom edge.
+func _draw_stall_layer() -> void:
+	var cell := _stall_cell()
+	var stall_size := PX * 3.0
+	stall_layer.draw_texture_rect(FarmSprites.tex("prop_stall"), Rect2(cell.get_center().x - stall_size * 0.5, cell.end.y - stall_size, stall_size, stall_size), false)
+
+
+# The well covers one tile; its art stands 1.5 tiles wide and 1.9 tiles tall on that tile's bottom edge.
+func _draw_well_layer() -> void:
+	var cell := _well_cell()
+	well_layer.draw_texture_rect(FarmSprites.tex("prop_well"), Rect2(cell.get_center().x - PX * 0.75, cell.end.y - PX * 1.9, PX * 1.5, PX * 1.9), false)
+
+
 func _update_big_tree_depth() -> void:
 	if big_tree_layer == null or player == null:
 		return
@@ -2322,15 +2364,6 @@ func _draw_big_tree_layer() -> void:
 
 # Trees, the stall, the well and stumps, drawn after the ground so their bases sit on their tiles.
 func _draw_farm_props() -> void:
-	# The stall covers 2 by 2 tiles and its art is drawn larger, centred on the footprint and standing on its bottom edge.
-	var stall_at := _world_tile(STALL_IX, STALL_IY)
-	var stall_cell := Rect2(_tile_rect(stall_at).position, Vector2(PX * 2, PX * 2))
-	var stall_size := PX * 3.0
-	draw_texture_rect(FarmSprites.tex("prop_stall"), Rect2(stall_cell.get_center().x - stall_size * 0.5, stall_cell.end.y - stall_size, stall_size, stall_size), false)
-	# The well covers one tile; its art stands 1.5 tiles wide and 1.9 tiles tall on that tile's bottom edge.
-	var well_at := _world_tile(WELL_IX.x, WELL_IX.y)
-	var well_cell := _tile_rect(well_at)
-	draw_texture_rect(FarmSprites.tex("prop_well"), Rect2(well_cell.get_center().x - PX * 0.75, well_cell.end.y - PX * 1.9, PX * 1.5, PX * 1.9), false)
 	for y in range(0, MAP_H):
 		for x in range(0, MAP_W):
 			var t := Vector2i(x, y)
