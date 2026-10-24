@@ -1524,6 +1524,8 @@ func _update_ambience() -> void:
 
 
 func _draw_house() -> void:
+	if FARM_SPRITES:
+		return  # the house is drawn as one sprite by house_roof_layer
 	var origin := _world_tile(HOUSE_IX, HOUSE_IY)
 	var rect := Rect2(Vector2(origin) * PX, Vector2(HOUSE_W, HOUSE_H) * PX)
 	FarmArt.draw_house(self, rect, house_stage, HOUSE_WALLS[house_stage], HOUSE_ROOFS[house_stage])
