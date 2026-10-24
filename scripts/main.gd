@@ -2148,9 +2148,12 @@ func _draw_sprite_ground(t: Vector2i, kind: int, cell: Rect2) -> bool:
 			name = "rock_%d" % v
 		Tile.CAVE_MOUTH:
 			name = "cave_mouth"
-		Tile.HOUSE, Tile.DOOR, Tile.PORCH:
+		Tile.HOUSE, Tile.DOOR:
 			# The house is one sprite, drawn by house_roof_layer over its footprint, so its tiles are grass.
 			name = "grass_%d" % v
+		Tile.PORCH:
+			# The entrance is path, so the path runs up to the steps.
+			name = "path_%d" % v
 		Tile.ROOF:
 			name = "grass_%d" % v
 		Tile.TREE:
@@ -2185,7 +2188,7 @@ func _material_name(t: Vector2i, kind: int, v: int) -> String:
 			Tile.WATER:
 				return k != Tile.WATER
 			Tile.PATH:
-				return k != Tile.PATH and k != Tile.WATER
+				return k != Tile.PATH and k != Tile.WATER and k != Tile.PORCH
 		return k != kind
 	var mask := 0
 	if outside.call(Vector2i(0, -1)):
