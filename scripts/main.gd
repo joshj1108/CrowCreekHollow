@@ -916,6 +916,7 @@ var shake_tw: Tween
 var last_minimap_key: Array = []
 var last_cam_tile := Vector2i(-99, -99)   # the tile the camera was last drawn from
 var panels: PanelRows
+var mining: MiningSystem
 var fishing: FishingSystem
 var crafting: CraftSystem
 var saver: SaveSystem
@@ -953,6 +954,7 @@ func _ready() -> void:
 	saver = SaveSystem.new(self)
 	crafting = CraftSystem.new(self)
 	fishing = FishingSystem.new(self)
+	mining = MiningSystem.new(self)
 	_setup_input()
 	_load_settings()
 	_start_music()
@@ -1738,7 +1740,7 @@ func _set_interior(x: int, y: int, kind: int) -> void:
 func _respawn_brush() -> void:
 	_fill_brush()
 	_fill_rocks()
-	_fill_quarry()
+	mining._fill_quarry()
 	brush_day = day
 	rock_day = day
 	queue_redraw()
@@ -1746,7 +1748,7 @@ func _respawn_brush() -> void:
 
 # Brush and trees grow back once a week, and rocks once a month. The quarry refills each morning.
 func _regrow_wild() -> void:
-	_fill_quarry()
+	mining._fill_quarry()
 	if day - brush_day >= BRUSH_REGROW_DAYS:
 		_fill_brush()
 		brush_day = day
@@ -2540,7 +2542,7 @@ func _on_panel_action(action_id: String) -> void:
 		stall._sell(action_id.trim_prefix("sell:"))
 		return
 	if action_id.begins_with("smelt:"):
-		_smelt(action_id.trim_prefix("smelt:"))
+		mining._smelt(action_id.trim_prefix("smelt:"))
 		return
 	if action_id.begins_with("buy:"):
 		stall._buy_material(action_id.trim_prefix("buy:"))
@@ -3156,11 +3158,11 @@ func _interact() -> void:
 
 	if rocks.has(tile):
 		if _need_tool("pick"):
-			_mine(tile)
+			mining._mine(tile)
 		return
 	if brush.has(tile):
 		if not _tool_press:
-			_gather(tile)
+			mining._gather(tile)
 		return
 
 	var kind: int = map[tile.y][tile.x]
@@ -3245,21 +3247,6 @@ func _interact() -> void:
 
 
 # --- Solitaire (one card at a time, to the four foundations) ---
-
-
-func _gather(tile: Vector2i) -> void:
-	play_sfx("gather", 0.05)
-	brush.erase(tile)
-	materials["sticks"] += 2
-	materials["fiber"] += 1
-	stats["gathered"] += 1
-	var found := "sticks and fiber"
-	if randf() < 0.34:
-		materials["resin"] += 1
-		found = "sticks, fiber, and resin"
-	progression._grant_xp("Bushcrafting", XP_GATHER)
-	_show_message("Gathered %s from the brush. +%d Bushcrafting XP" % [found, XP_GATHER])
-	queue_redraw()
 
 
 # --- Fishing ----------------------------------------------------------------
@@ -3810,28 +3797,6 @@ func _fill_rocks(keep_clear: bool = false) -> void:
 		rocks[t] = true
 
 
-func _mine(tile: Vector2i) -> void:
-	# Breaking a rock keeps rolling each tick until it gives way. Moving away stops it.
-	farm._start_harvest("mine", tile)
-	_show_message("You start working the rock.")
-
-
-func _finish_mine(tile: Vector2i) -> void:
-	play_sfx("strike", 0.08)
-	rocks.erase(tile)
-	var pick := int(tool_tier["pick"])
-	var amount := 2 if pick >= 1 else 1
-	materials["stone"] += amount
-	var found := "%d stone" % amount
-	if pick >= 1 and progression._level("Mining") >= ORE_MINING_LEVEL and randf() < ORE_CHANCE:
-		materials["copper_ore"] += 1
-		found += " and copper ore"
-	stats["mined"] += 1
-	progression._grant_xp("Mining", XP_MINE)
-	_show_message("You break the rock. +%s. +%d Mining XP" % [found, XP_MINE])
-	queue_redraw()
-
-
 func _tiles_to_array(tiles: Dictionary) -> Array:
 	var arr: Array = []
 	for tile in tiles.keys():
@@ -3863,28 +3828,6 @@ func _build_furnace() -> void:
 	_build_interior()
 	_show_message("The furnace is built beside the house. Smelt ore into bars there.")
 	queue_redraw()
-
-
-func _can_smelt(kind: String) -> bool:
-	if not furnace_built:
-		return false
-	if progression._level("Smithing") < int(SMELT_LEVEL[kind]):
-		return false
-	return int(materials[kind + "_ore"]) >= 1 and int(materials["wood"]) >= 1
-
-
-func _smelt(kind: String) -> void:
-	if not furnace_built:
-		_show_message("Build a furnace from the House panel first.")
-		return
-	if not _can_smelt(kind):
-		_show_message("You need %s ore, a piece of wood, and Smithing %d." % [kind, int(SMELT_LEVEL[kind])])
-		return
-	materials[kind + "_ore"] -= 1
-	materials["wood"] -= 1
-	materials[kind + "_bar"] += 1
-	progression._grant_xp("Smithing", XP_SMELT)
-	_show_message("You smelt a %s bar. +%d Smithing XP" % [kind, XP_SMELT])
 
 
 # --- Ranged combat and ammunition ----------------------------------------------
@@ -3945,33 +3888,6 @@ func _shot_hits(foe: Dictionary, amount: int) -> void:
 
 
 # --- The Ashford quarry ------------------------------------------------------------
-
-func _fill_quarry() -> void:
-	quarry.clear()
-	for spot in ASHFORD_QUARRY:
-		quarry[ASHFORD_ORIGIN + spot] = true
-
-
-func _quarry(tile: Vector2i) -> void:
-	var pick := int(tool_tier["pick"])
-	if pick < 1:
-		_show_message("The quarry rock is too hard for your hands. Craft a stone pick from the Craft panel.")
-		return
-	farm._start_harvest("quarry", tile)
-	_show_message("You start working the quarry rock.")
-
-
-func _finish_quarry(tile: Vector2i) -> void:
-	var pick := int(tool_tier["pick"])
-	quarry.erase(tile)
-	var kind := "copper_ore" if progression._level("Mining") >= 3 else "stone"
-	if progression._level("Mining") >= 5 and pick >= 2 and randf() < 0.5:
-		kind = "iron_ore"
-	materials[kind] += 1
-	stats["mined"] += 1
-	progression._grant_xp("Mining", XP_MINE)
-	_show_message("You work the quarry rock. +1 %s. +%d Mining XP" % [kind.replace("_", " "), XP_MINE])
-	queue_redraw()
 
 
 # --- The world ----------------------------------------------------------------
@@ -4155,36 +4071,9 @@ func _interact_cave() -> void:
 	var kind := _kind_at(tile)
 	if kind == Tile.ORE_COPPER or kind == Tile.ORE_IRON:
 		if _need_tool("pick"):
-			_mine_cave(tile, kind)
+			mining._mine_cave(tile, kind)
 		return
 	_swing()
-
-
-# Copper needs a stone pick and Mining 2. Iron needs a copper pick and Mining 5.
-func _mine_cave(tile: Vector2i, kind: int) -> void:
-	var iron := kind == Tile.ORE_IRON
-	var need_pick := 2 if iron else 1
-	var need_level := 5 if iron else 2
-	var ore := "iron" if iron else "copper"
-	if int(tool_tier["pick"]) < need_pick:
-		_show_message("The %s ore is too hard for your hands. Craft a %s pick from the Craft panel." % [ore, "copper" if iron else "stone"])
-		return
-	if progression._level("Mining") < need_level:
-		_show_message("You need Mining %d to work %s ore." % [need_level, ore])
-		return
-	farm._start_harvest("cave_ore", tile)
-	_show_message("You start working the %s ore." % ore)
-
-
-func _finish_cave_ore(tile: Vector2i) -> void:
-	var iron := _kind_at(tile) == Tile.ORE_IRON
-	var ore := "iron" if iron else "copper"
-	cave[tile.y][tile.x] = Tile.FLOOR
-	cave_mined[tile] = true
-	materials[ore + "_ore"] += 1
-	progression._grant_xp("Mining", XP_MINE)
-	_show_message("You break the %s ore. +1 %s ore. +%d Mining XP" % [ore, ore, XP_MINE])
-	queue_redraw()
 
 
 func _draw_cave() -> void:
@@ -4688,7 +4577,7 @@ func _interact_village() -> void:
 		return
 	if zone == Zone.ASHFORD and quarry.has(_tile_in_front()):
 		if _need_tool("pick"):
-			_quarry(_tile_in_front())
+			mining._quarry(_tile_in_front())
 		return
 	if campsite != NO_CAMP and _tile_in_front() == campsite:
 		if not _tool_press:
