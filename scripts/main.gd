@@ -2162,6 +2162,9 @@ func _draw_sprite_ground(t: Vector2i, kind: int, cell: Rect2) -> bool:
 			if not _in_big_tree(t):
 				return false
 			name = "grass_%d" % v
+		Tile.STALL, Tile.WELL:
+			# The stall and well are drawn as props over grass, not as flat colour blocks.
+			name = "grass_%d" % v
 		_:
 			return false
 	draw_texture_rect(FarmSprites.tex(name, flip), cell, false)
@@ -2249,11 +2252,15 @@ func _draw_big_tree_layer() -> void:
 
 # Trees, the stall, the well and stumps, drawn after the ground so their bases sit on their tiles.
 func _draw_farm_props() -> void:
+	# The stall covers 2 by 2 tiles and its art is drawn larger, centred on the footprint and standing on its bottom edge.
 	var stall_at := _world_tile(STALL_IX, STALL_IY)
-	draw_texture_rect(FarmSprites.tex("prop_stall"), Rect2(_tile_rect(stall_at).position, Vector2(PX * 2, PX * 2)), false)
+	var stall_cell := Rect2(_tile_rect(stall_at).position, Vector2(PX * 2, PX * 2))
+	var stall_size := PX * 3.0
+	draw_texture_rect(FarmSprites.tex("prop_stall"), Rect2(stall_cell.get_center().x - stall_size * 0.5, stall_cell.end.y - stall_size, stall_size, stall_size), false)
+	# The well covers one tile; its art stands 1.5 tiles wide and 1.9 tiles tall on that tile's bottom edge.
 	var well_at := _world_tile(WELL_IX.x, WELL_IX.y)
 	var well_cell := _tile_rect(well_at)
-	draw_texture_rect(FarmSprites.tex("prop_well"), Rect2(well_cell.position.x, well_cell.end.y - PX * 1.2, PX, PX * 1.2), false)
+	draw_texture_rect(FarmSprites.tex("prop_well"), Rect2(well_cell.get_center().x - PX * 0.75, well_cell.end.y - PX * 1.9, PX * 1.5, PX * 1.9), false)
 	for y in range(0, MAP_H):
 		for x in range(0, MAP_W):
 			var t := Vector2i(x, y)
