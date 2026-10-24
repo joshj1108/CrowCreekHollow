@@ -23,18 +23,18 @@ const MAP_H := INNER_H + BORDER_Y * 2
 
 # Farmhouse footprint in inner coordinates. It starts at its full final size
 # in a decrepit state; repairs change its condition and unlock rooms.
-const HOUSE_IX := 26
-const HOUSE_IY := 3
-const HOUSE_W := 6
-const HOUSE_H := 5
+const HOUSE_IX := FarmLayout.HOUSE_IX
+const HOUSE_IY := FarmLayout.HOUSE_IY
+const HOUSE_W := FarmLayout.HOUSE_W
+const HOUSE_H := FarmLayout.HOUSE_H
 const HOUSE_DOOR_IX := HOUSE_IX + 2
 const HOUSE_DOOR_IY := HOUSE_IY + HOUSE_H - 1
 
 # The first plot is open from the start. The second is overgrown until Farming 2.
-const PLOT_ONE := Rect2i(4, 4, 8, 6)     # inner x, y, width, height
-const PLOT_TWO := Rect2i(4, 14, 8, 6)
+const PLOT_ONE := FarmLayout.PLOT_ONE
+const PLOT_TWO := FarmLayout.PLOT_TWO
 # The third plot opens at Farming 4 once the house is Patched. It sits between the paths.
-const PLOT_THREE := Rect2i(14, 14, 5, 6)
+const PLOT_THREE := FarmLayout.PLOT_THREE
 const PLOT_THREE_LEVEL := 4
 
 # The walk-in interior sits below the farm, out of view of it.
@@ -51,34 +51,23 @@ const QUILTS := [Color("6a5a4a"), Color("3e5a80"), Color("3f6b4a"), Color("8a2e3
 
 # Brush piles for bushcrafting, in inner coordinates. They grow back once a week, as a clean-up job.
 # Each one gives sticks and fiber. Brush and trees come back on a weekly cycle; rocks take a month.
-const BRUSH_SPOTS := [
-	Vector2i(3, 3), Vector2i(16, 2), Vector2i(34, 11), Vector2i(24, 20),
-	Vector2i(6, 21), Vector2i(33, 8), Vector2i(14, 21),
-]
+const BRUSH_SPOTS := FarmLayout.BRUSH_SPOTS
 const BRUSH_REGROW_DAYS := 7
 const ROCK_REGROW_DAYS := 30
 # Extra piles that appear once Bushcrafting reaches level 3.
-const THICKET_SPOTS := [Vector2i(10, 21), Vector2i(23, 14), Vector2i(38, 16)]
+const THICKET_SPOTS := FarmLayout.THICKET_SPOTS
 # The porch: four tiles of boards in front of the door, starting one row below the house.
-const PORCH_RECT := Rect2i(26, 8, 4, 2)
-# The yard paths run from the porch and the stall down to the road. The road itself is the middle row.
-const YARD_PATH := [Vector2i(28, 10), Vector2i(28, 11), Vector2i(22, 10), Vector2i(22, 11), Vector2i(12, 11)]
-# The pond is an uneven lake in the south-east, centred here in inner tiles.
-const LAKE_CENTRE := Vector2(33.0, 19.0)
-const LAKE_RADIUS := Vector2(4.6, 3.6)
+const PORCH_RECT := FarmLayout.PORCH_RECT
+const LAKE_FOCUS := FarmLayout.LAKE_FOCUS
 const THICKET_LEVEL := 3
 # Trees on the property. Felling one with a hatchet gives wood. They grow back with the brush, once a week.
 # The first five are the grove in the north-west corner. The rest frame the house, the yard, and the pond.
-const GROVE_SPOTS := [
-	Vector2i(0, 0), Vector2i(1, 0), Vector2i(2, 0), Vector2i(0, 1), Vector2i(1, 1),
-	Vector2i(9, 1), Vector2i(20, 1), Vector2i(38, 4), Vector2i(36, 9), Vector2i(2, 8),
-	Vector2i(2, 17), Vector2i(30, 15), Vector2i(21, 21), Vector2i(17, 22),
-]
+const GROVE_SPOTS := FarmLayout.GROVE_SPOTS
 # Weeping willows lean over the back fence and the pond. The bare tree at the top of the field is dead.
-const WILLOW_TREES := [Vector2i(2, 17), Vector2i(30, 15)]
-const DEAD_TREES := [Vector2i(20, 1)]
+const WILLOW_TREES := FarmLayout.WILLOW_TREES
+const DEAD_TREES := FarmLayout.DEAD_TREES
 # The great tree: a 3 by 3 block of the field that can't be felled or used. Crows roost in its crown from dusk.
-const BIG_TREE_INNER := Vector2i(21, 4)
+const BIG_TREE_INNER := FarmLayout.BIG_TREE_INNER
 const BIG_TREE_MESSAGE := "Too old and too thick to fell. Something moves in its branches."
 const ROOST_HOUR := 20.0      # from this hour the crows come home to the great tree
 const ROOST_SIZE := 4         # perches in its crown
@@ -198,7 +187,7 @@ const WARMTH_INDOORS := 25.0     # warmth regained per hour in a patched or rest
 const WARMTH_INDOORS_COLD := 10.0  # ... and in a decrepit or boarded one
 const NEED_HARM_HOURS := 2.0     # one HP lost every this many hours while a need is empty
 const POND_WATER := 40.0
-const WELL_IX := Vector2i(12, 10)     # farm tile between plot one and the path, beside plot one
+const WELL_IX := FarmLayout.WELL_IX
 const WELL_CAPACITY := 40.0           # water in the tank when it refills each morning
 const DRINK_WELL := 35.0
 const WELL_REPAIR := {"wood": 4, "fiber": 3, "level": 2}
@@ -293,18 +282,18 @@ const COOLER_COST := {"wood": 4, "fiber": 4, "coins": 40, "level": 2}
 # The root cellar sits against the house's west wall, like a cellar dug in beside it.
 # The workshop, with the furnace and smokehouse, stands against the east wall.
 # The cooler lives inside the house. House walls are at x 26 to 32 and y 3 to 8 (local to the farm).
-const CELLAR_IX := Vector2i(25, 5)
-const SMOKEHOUSE_IX := Vector2i(35, 3)
-const FURNACE_IX := Vector2i(33, 3)
+const CELLAR_IX := FarmLayout.CELLAR_IX
+const SMOKEHOUSE_IX := FarmLayout.SMOKEHOUSE_IX
+const FURNACE_IX := FarmLayout.FURNACE_IX
 # The workshop is a walled building against the house's east wall, with a door on its south side.
-const WORKSHOP_RECT := Rect2i(32, 2, 5, 4)   # farm-local: outer walls, x 32 to 36, y 2 to 5
-const WORKSHOP_DOOR := Vector2i(34, 5)
+const WORKSHOP_RECT := FarmLayout.WORKSHOP_RECT
+const WORKSHOP_DOOR := FarmLayout.WORKSHOP_DOOR
 const COOP_SIZE := 2                         # the coop is a 2 by 2 building on open grass
 const COOLER_INTERIOR := Vector2i(11, 6)   # in the hall, inside the house
 const FURNACE_COST := {"wood": 6, "stone": 4, "coins": 80, "level": 4}
 const WOODSHED_COST := {"wood": 4, "fiber": 2, "coins": 40, "level": 2}
-const WOODSTORE_IX := Vector2i(33, 4)   # farm-local, inside the workshop
-const CHOPLOG_IX := Vector2i(35, 4)
+const WOODSTORE_IX := FarmLayout.WOODSTORE_IX
+const CHOPLOG_IX := FarmLayout.CHOPLOG_IX
 const WOODSTORE_CAP := 30
 const FIREWOOD_PER_WOOD := 2
 const FIREWOOD_HOURS := 3.0         # hours of warmth one firewood gives the hearth
@@ -323,8 +312,8 @@ const SMOKEHOUSE_COST := {"wood": 5, "fiber": 3, "coins": 60, "level": 3}
 # Preserving turns food into goods that keep in the pack. Each method needs a skill
 # level and makes one item per press at the smokehouse.
 # The stall sells what you carry and buys seeds. It is open 06:00 to 18:00.
-const STALL_IX := 22
-const STALL_IY := 9
+const STALL_IX := FarmLayout.STALL_IX
+const STALL_IY := FarmLayout.STALL_IY
 const STALL_CLOSE_HOUR := 18.0
 const SELL_FISH := 6
 const SELL_EGG := 4                 # farm stand price for an egg
@@ -672,9 +661,9 @@ const NIGHT_EVENTS := [
 	{"message": "The field is quiet tonight. Too quiet.", "shadow": "none", "sanity": -3},
 ]
 
-enum Tile { TREE, GRASS, SOIL, PATH, WATER, HOUSE, DOOR, FLOOR, WALL, EXIT, BED, STATION, DESK, FALLOW, STALL, CELLAR, COOLER, GATE, SMOKEHOUSE, FURNACE, PORTAL, CAMP, CAVE_MOUTH, CAVE_EXIT, ORE_COPPER, ORE_IRON, COOP, BARN, TABLE, FIREPLACE, WELL, PORCH, WOODSTORE, CHOPLOG }
+enum Tile { TREE, GRASS, SOIL, PATH, WATER, HOUSE, DOOR, FLOOR, WALL, EXIT, BED, STATION, DESK, FALLOW, STALL, CELLAR, COOLER, GATE, SMOKEHOUSE, FURNACE, PORTAL, CAMP, CAVE_MOUTH, CAVE_EXIT, ORE_COPPER, ORE_IRON, COOP, BARN, TABLE, FIREPLACE, WELL, PORCH, WOODSTORE, CHOPLOG, FENCE, ROCK }
 
-const BLOCKING := [Tile.TREE, Tile.WATER, Tile.HOUSE, Tile.WALL, Tile.BED, Tile.STATION, Tile.DESK, Tile.STALL, Tile.CELLAR, Tile.COOLER, Tile.SMOKEHOUSE, Tile.FURNACE, Tile.CAMP, Tile.ORE_COPPER, Tile.ORE_IRON, Tile.COOP, Tile.BARN, Tile.TABLE, Tile.FIREPLACE, Tile.WELL, Tile.WOODSTORE, Tile.CHOPLOG]
+const BLOCKING := [Tile.TREE, Tile.WATER, Tile.HOUSE, Tile.WALL, Tile.BED, Tile.STATION, Tile.DESK, Tile.STALL, Tile.CELLAR, Tile.COOLER, Tile.SMOKEHOUSE, Tile.FURNACE, Tile.CAMP, Tile.ORE_COPPER, Tile.ORE_IRON, Tile.COOP, Tile.BARN, Tile.TABLE, Tile.FIREPLACE, Tile.WELL, Tile.WOODSTORE, Tile.CHOPLOG, Tile.FENCE, Tile.ROCK]
 
 const TILE_COLORS := {
 	Tile.TREE: Color("2f4f2f"),
@@ -707,6 +696,8 @@ const TILE_COLORS := {
 	Tile.COOP: Color("8a6a3a"),
 	Tile.WELL: Color("6e6a64"),
 	Tile.BARN: Color("7a2e26"),
+	Tile.FENCE: Color("8a6a4a"),
+	Tile.ROCK: Color("7f7f80"),
 	Tile.TABLE: Color("7a5230"),
 	Tile.FIREPLACE: Color("5a5650"),
 	Tile.CAMP: Color("d07a30"),
@@ -1591,13 +1582,6 @@ func _ensure_action(action: String, keys: Array, buttons: Array = [], axes: Arra
 
 
 # The pond: an uneven lake. Its edge wobbles a little from tile to tile.
-func _in_lake(ix: int, iy: int) -> bool:
-	var dx: float = (float(ix) - LAKE_CENTRE.x) / LAKE_RADIUS.x
-	var dy: float = (float(iy) - LAKE_CENTRE.y) / LAKE_RADIUS.y
-	var wobble: float = float(FarmArt.hash_int(ix, iy, 9) % 100) / 100.0 * 0.3 - 0.15
-	return dx * dx + dy * dy < 1.0 + wobble
-
-
 # Which sides of a pond tile touch land: 1 north, 2 east, 4 south, 8 west.
 func _land_mask(x: int, y: int) -> int:
 	var mask := 0
@@ -1628,37 +1612,19 @@ func _build_map() -> void:
 			var iy := y - BORDER_Y
 			var t := Tile.TREE
 			if ix >= 0 and ix < INNER_W and iy >= 0 and iy < INNER_H:
-				t = Tile.GRASS
-				if iy == INNER_H / 2 or YARD_PATH.has(Vector2i(ix, iy)):
-					t = Tile.PATH
-				if PLOT_ONE.has_point(Vector2i(ix, iy)):
-					t = Tile.SOIL
-				if PLOT_TWO.has_point(Vector2i(ix, iy)):
-					t = Tile.FALLOW   # cleared once Farming reaches level 2
-				if PLOT_THREE.has_point(Vector2i(ix, iy)):
-					t = Tile.FALLOW   # cleared once Farming 4 and a Patched house
-				if _in_lake(ix, iy):
-					t = Tile.WATER
-				if ix >= HOUSE_IX and ix < HOUSE_IX + HOUSE_W and iy >= HOUSE_IY and iy < HOUSE_IY + HOUSE_H:
-					t = Tile.HOUSE
-				if PORCH_RECT.has_point(Vector2i(ix, iy)):
-					t = Tile.PORCH
+				t = TERRAIN_CODES[FarmLayout.TERRAIN[iy].substr(ix, 1)]
 				if WORLD_ENABLED and ix == INNER_W - 1 and iy == INNER_H / 2:
 					t = Tile.PORTAL
-				if ix == 0 and iy == INNER_H / 2:
-					t = Tile.CAVE_MOUTH
-				if ix == STALL_IX and iy == STALL_IY:
-					t = Tile.STALL
-				if ix == HOUSE_DOOR_IX and iy == HOUSE_DOOR_IY:
-					t = Tile.DOOR
-				if GROVE_SPOTS.has(Vector2i(ix, iy)):
-					t = Tile.TREE
-				if _in_big_tree(Vector2i(ix + BORDER_X, iy + BORDER_Y)):
-					t = Tile.TREE
-				if Vector2i(ix, iy) == WELL_IX:
-					t = Tile.WELL
 			row.append(t)
 		map.append(row)
+
+
+# Terrain codes from farm_layout.gd, one per tile.
+const TERRAIN_CODES := {
+	".": Tile.GRASS, "S": Tile.SOIL, "F": Tile.FALLOW, "P": Tile.PATH, "~": Tile.WATER,
+	"H": Tile.HOUSE, "D": Tile.DOOR, "A": Tile.STALL, "W": Tile.WELL, "R": Tile.PORCH,
+	"C": Tile.CAVE_MOUTH, "G": Tile.TREE, "B": Tile.TREE, "X": Tile.FENCE, "K": Tile.ROCK,
+}
 
 
 # The interior is a fixed layout. Rooms open up as the house is repaired.
@@ -1863,7 +1829,7 @@ func _draw_water_shimmer() -> void:
 	var sky := 0
 	if weather_kind == "sunny":
 		sky = 2 if current_hour >= DUSK_HOUR else 1
-	var focus := Vector2(LAKE_CENTRE.x + BORDER_X, LAKE_CENTRE.y + BORDER_Y)
+	var focus := Vector2(LAKE_FOCUS.x + BORDER_X, LAKE_FOCUS.y + BORDER_Y)
 	FarmArt.draw_water_shimmer(water_fx, water_tiles, Time.get_ticks_msec() * 0.001, sky, weather_kind in WATER_RAIN_KINDS, focus)
 	var centres: Array = []
 	for pos in crops:
