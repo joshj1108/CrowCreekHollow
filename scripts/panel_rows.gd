@@ -440,10 +440,10 @@ func _desk_rows() -> Array:
 		rows.append({"note": "No post. The mail slot in the front door drops letters here."})
 	for letter in m.desk_mail:
 		rows.append({"note": "%s%s\n%s" % [str(letter["title"]), "  (new)" if bool(letter["unread"]) else "", str(letter["text"])]})
-	rows.append({"name": "Property value", "value": "%d a quarter" % m._property_value()})
-	rows.append({"note": m._property_text()})
-	rows.append({"name": "Property tax", "value": m._tax_text(), "button": "Pay", "action": "pay_tax", "enabled": m.tax_owed > 0 and m.money >= m.tax_owed})
-	rows.append({"name": "Put letters away", "value": "read letters go in the drawer", "button": "Clear", "action": "mail_clear", "enabled": m._has_read_mail()})
+	rows.append({"name": "Property value", "value": "%d a quarter" % m.desk._property_value()})
+	rows.append({"note": m.desk._property_text()})
+	rows.append({"name": "Property tax", "value": m.desk._tax_text(), "button": "Pay", "action": "pay_tax", "enabled": m.tax_owed > 0 and m.money >= m.tax_owed})
+	rows.append({"name": "Put letters away", "value": "read letters go in the drawer", "button": "Clear", "action": "mail_clear", "enabled": m.desk._has_read_mail()})
 	rows.append({"section": "Games"})
 	var entertained := m.entertained_day == m.day
 	rows.append({"name": "Entertained today", "value": "yes" if entertained else "no, finish a game or your limit slips"})
@@ -485,7 +485,7 @@ func _solitaire_rows() -> Array:
 	var stock: Array = m.desk_game["stock"]
 	var waste: Array = m.desk_game["waste"]
 	var found: Array = m.desk_game["found"]
-	var top := "empty" if waste.is_empty() else m._card_name(int(waste.back()))
+	var top := "empty" if waste.is_empty() else m.desk._card_name(int(waste.back()))
 	var piles: Array = []
 	for s in 4:
 		piles.append("%s %d" % [m.DESK_SUITS[s], int(found[s])])
@@ -493,8 +493,8 @@ func _solitaire_rows() -> Array:
 		{"section": "Solitaire"},
 		{"name": "Waste top", "value": top},
 		{"name": "Stock", "value": "%d left, %d of %d deck passes used" % [stock.size(), int(m.desk_game["passes"]), m.SOL_PASSES]},
-		{"name": "Turn a card", "value": "from the stock", "button": "Turn", "action": "sol_draw", "enabled": m._sol_can_turn()},
-		{"name": "Play the waste card", "value": "up to its foundation, if it is next", "button": "Play", "action": "sol_play", "enabled": m._sol_can_play()},
+		{"name": "Turn a card", "value": "from the stock", "button": "Turn", "action": "sol_draw", "enabled": m.desk._sol_can_turn()},
+		{"name": "Play the waste card", "value": "up to its foundation, if it is next", "button": "Play", "action": "sol_play", "enabled": m.desk._sol_can_play()},
 		{"note": "Foundations (cards played): " + ", ".join(PackedStringArray(piles))},
 		{"name": "Put the game away", "value": "unfinished, so it does not count today", "button": "Put away", "action": "game_quit"},
 	]

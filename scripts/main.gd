@@ -916,6 +916,7 @@ var shake_tw: Tween
 var last_minimap_key: Array = []
 var last_cam_tile := Vector2i(-99, -99)   # the tile the camera was last drawn from
 var panels: PanelRows
+var desk: DeskSystem
 var lantern_light: PointLight2D
 var window_lights: Array = []   # glows for the lit windows, one PointLight2D each
 var porch_light: PointLight2D     # the lamp by the door, once the house is restored
@@ -933,6 +934,7 @@ var perf_was_down := false
 
 func _ready() -> void:
 	panels = PanelRows.new(self)
+	desk = DeskSystem.new(self)
 	_setup_input()
 	_load_settings()
 	_start_music()
@@ -1138,7 +1140,7 @@ func _process(delta: float) -> void:
 	clock += delta
 	_update_hens(delta)
 	_update_goats(delta)
-	_update_desk_light()
+	desk._update_desk_light()
 	current_hour = START_HOUR + clock / DAY_LENGTH * (DAY_END_HOUR - START_HOUR)
 	_update_needs(delta * (DAY_END_HOUR - START_HOUR) / DAY_LENGTH)
 
@@ -2502,7 +2504,7 @@ func _on_bag_slot(index: int) -> void:
 
 func _on_panel_action(action_id: String) -> void:
 	if action_id.begins_with("game_") or action_id.begins_with("sudoku_") or action_id.begins_with("sol_") or action_id == "pay_tax" or action_id == "mail_clear":
-		_desk_action(action_id)
+		desk._desk_action(action_id)
 		return
 	if action_id.begins_with("cook:"):
 		_make_food(action_id.trim_prefix("cook:"))
@@ -3401,7 +3403,7 @@ func _interact() -> void:
 			Tile.STATION:
 				_tidy_house()
 			Tile.DESK:
-				_read_desk()
+				desk._read_desk()
 			Tile.CELLAR:
 				_toggle_tab("Cellar")
 			Tile.COOLER:
@@ -3538,220 +3540,15 @@ func _harvest(tile: Vector2i) -> void:
 	_show_message("Harvested %s for %d %s. +%d Farming XP" % [_seed_label(kind).to_lower(), yield_count, "pumpkins" if kind == "pumpkin" else "crops", xp])
 
 
-func _read_desk() -> void:
-	for letter in desk_mail:
-		letter["unread"] = false
-	_toggle_tab("Desk")
-
-
 # --- Desk games ---
 # Finishing a game at the desk entertains you for that day. A day without one costs a little
 # of the sanity limit, down to BOREDOM_MAX_LOSS. Leaving a game unfinished does not count.
 
-func _boredom_check() -> String:
-	# Paused while the desk games are reworked. Flip BOREDOM_ENABLED to restore the drain.
-	if not BOREDOM_ENABLED or entertained_day == day:
-		return ""
-	var before := _sanity_max()
-	boredom_loss = minf(boredom_loss + BOREDOM_DRAIN, BOREDOM_MAX_LOSS)
-	sanity = minf(sanity, _sanity_max())
-	if _sanity_max() < before:
-		return " Nothing to occupy you today, so your sanity limit slips to %d." % int(_sanity_max())
-	return ""
-
-
-func _desk_action(action_id: String) -> void:
-	if action_id == "pay_tax":
-		_pay_tax()
-	elif action_id == "mail_clear":
-		_clear_read_mail()
-	elif action_id.begins_with("game_new:"):
-		if action_id.ends_with("sudoku"):
-			_start_sudoku()
-		else:
-			_start_solitaire()
-	elif action_id == "game_quit":
-		desk_game = {}
-	elif desk_game.get("kind", "") == "sudoku":
-		if action_id.begins_with("sudoku_next:"):
-			_sudoku_next(int(action_id.trim_prefix("sudoku_next:")))
-		elif action_id == "sudoku_check":
-			_sudoku_check()
-	elif desk_game.get("kind", "") == "solitaire":
-		if action_id == "sol_draw":
-			_sol_draw()
-		elif action_id == "sol_play":
-			_sol_play()
-	_refresh_panel()
-
-
-func _finish_game(result: String) -> void:
-	entertained_day = day
-	desk_game = {}
-	_show_message("%s You are entertained for the day." % result)
-
-
-func _zeros(n: int) -> Array:
-	var out: Array = []
-	for i in n:
-		out.append(0)
-	return out
-
 
 # --- Sudoku (4 by 4) ---
 
-func _start_sudoku() -> void:
-	# Relabelling the digits of a valid grid still gives a valid grid, so each game differs.
-	var digits := [1, 2, 3, 4]
-	digits.shuffle()
-	var solution: Array = []
-	for r in 4:
-		for c in 4:
-			solution.append(digits[SUDOKU_BASE[r][c] - 1])
-	var puzzle: Array = solution.duplicate()
-	var order: Array = range(16)
-	order.shuffle()
-	# Clear cells one at a time, keeping any clear that would leave more than one answer.
-	for i in order:
-		var keep: int = puzzle[i]
-		puzzle[i] = 0
-		if _sudoku_solutions(puzzle, 2) != 1:
-			puzzle[i] = keep
-	desk_game = {"kind": "sudoku", "solution": solution, "puzzle": puzzle, "guess": _zeros(16)}
-
-
-func _sudoku_solutions(board: Array, limit: int) -> int:
-	var idx := board.find(0)
-	if idx == -1:
-		return 1
-	var found := 0
-	for v in range(1, 5):
-		if _sudoku_fits(board, idx / 4, idx % 4, v):
-			board[idx] = v
-			found += _sudoku_solutions(board, limit - found)
-			board[idx] = 0
-			if found >= limit:
-				break
-	return found
-
-
-func _sudoku_fits(board: Array, r: int, c: int, v: int) -> bool:
-	for k in 4:
-		if int(board[r * 4 + k]) == v or int(board[k * 4 + c]) == v:
-			return false
-	var br := r / 2 * 2
-	var bc := c / 2 * 2
-	for dr in 2:
-		for dc in 2:
-			if int(board[(br + dr) * 4 + bc + dc]) == v:
-				return false
-	return true
-
-
-func _sudoku_next(i: int) -> void:
-	var guess: Array = desk_game["guess"]
-	guess[i] = (int(guess[i]) + 1) % 5
-
-
-func _sudoku_check() -> void:
-	var puzzle: Array = desk_game["puzzle"]
-	var guess: Array = desk_game["guess"]
-	var solution: Array = desk_game["solution"]
-	var right := 0
-	var wrong := 0
-	for i in 16:
-		if int(puzzle[i]) != 0 or int(guess[i]) == 0:
-			continue
-		if int(guess[i]) == int(solution[i]):
-			puzzle[i] = solution[i]
-			right += 1
-		else:
-			wrong += 1
-		guess[i] = 0
-	if right == 0 and wrong == 0:
-		_show_message("Choose some numbers first, then check them.")
-		return
-	if not puzzle.has(0):
-		_finish_game("The sudoku is solved.")
-		return
-	_show_message("%d right and locked in, %d wrong and cleared." % [right, wrong])
-
 
 # --- Solitaire (one card at a time, to the four foundations) ---
-
-func _start_solitaire() -> void:
-	var stock: Array = []
-	for card in 52:
-		stock.append(card)
-	stock.shuffle()
-	# A card is 0 to 51: suit = card / 13, rank = card % 13 + 1.
-	desk_game = {"kind": "solitaire", "stock": stock, "waste": [], "found": [0, 0, 0, 0], "passes": 0}
-
-
-func _card_name(card: int) -> String:
-	return "%s of %s" % [DESK_RANKS[card % 13], DESK_SUITS[card / 13]]
-
-
-func _sol_can_play() -> bool:
-	var waste: Array = desk_game["waste"]
-	if waste.is_empty():
-		return false
-	var card := int(waste.back())
-	var found: Array = desk_game["found"]
-	return int(found[card / 13]) == card % 13
-
-
-func _sol_can_turn() -> bool:
-	var stock: Array = desk_game["stock"]
-	var waste: Array = desk_game["waste"]
-	if not stock.is_empty():
-		return true
-	return not waste.is_empty() and int(desk_game["passes"]) < SOL_PASSES
-
-
-func _sol_draw() -> void:
-	if not _sol_can_turn():
-		_show_message("Nothing left to turn over.")
-		return
-	var stock: Array = desk_game["stock"]
-	var waste: Array = desk_game["waste"]
-	if not stock.is_empty():
-		waste.append(stock.pop_back())
-	else:
-		# The waste goes back face down: one more pass through the deck.
-		var back: Array = waste.duplicate()
-		back.reverse()
-		desk_game["stock"] = back
-		desk_game["waste"] = []
-		desk_game["passes"] = int(desk_game["passes"]) + 1
-	_sol_check_end()
-
-
-func _sol_play() -> void:
-	if not _sol_can_play():
-		_show_message("That card cannot go up yet.")
-		return
-	var waste: Array = desk_game["waste"]
-	var card := int(waste.pop_back())
-	var found: Array = desk_game["found"]
-	found[card / 13] = int(found[card / 13]) + 1
-	_sol_check_end()
-
-
-func _sol_check_end() -> void:
-	var found: Array = desk_game["found"]
-	var total := 0
-	for n in found:
-		total += int(n)
-	if total == 52:
-		_finish_game("You built all four foundations. Solitaire won.")
-	elif _sol_stuck():
-		_finish_game("No card can move. Solitaire is over with %d of 52 played." % total)
-
-
-func _sol_stuck() -> bool:
-	var stock: Array = desk_game["stock"]
-	return stock.is_empty() and not _sol_can_turn() and not _sol_can_play()
 
 
 func _gather(tile: Vector2i) -> void:
@@ -6583,121 +6380,6 @@ func _light_tint() -> Color:
 # Post comes through the mail slot in the front door and lands on the desk. Unread post turns
 # on a red light at the desk. The property tax comes quarterly and must be paid, or the land is lost.
 
-func _add_letter(title: String, text: String) -> void:
-	desk_mail.append({"title": title, "text": text, "unread": true})
-
-
-func _unread_count() -> int:
-	var n := 0
-	for letter in desk_mail:
-		if bool(letter["unread"]):
-			n += 1
-	return n
-
-
-func _has_read_mail() -> bool:
-	for letter in desk_mail:
-		if not bool(letter["unread"]):
-			return true
-	return false
-
-
-func _clear_read_mail() -> void:
-	var kept: Array = []
-	for letter in desk_mail:
-		if bool(letter["unread"]):
-			kept.append(letter)
-	desk_mail = kept
-	_show_message("You put the read letters away in the drawer.")
-
-
-func _date_text(day_number: int) -> String:
-	var d := _calendar_date(day_number)
-	return "%s %d" % [MONTH_NAMES[int(d["month"])], int(d["day"])]
-
-
-func _tax_text() -> String:
-	if tax_owed <= 0:
-		return "paid up for this quarter"
-	return "%d coins owed, due %s" % [tax_owed, _date_text(tax_due_day)]
-
-
-# Buildings on the farm, for the property value.
-func _building_count() -> int:
-	var n := 0
-	for built in [coop_built, barn_built, cellar_built, cooler_built, smokehouse_built, furnace_built, woodshed_built]:
-		if built:
-			n += 1
-	return n
-
-
-# The property value: the quarterly bill, from the house, the buildings, the plots and how clean the farm is kept.
-func _property_value() -> int:
-	var house_mult := pow(PROPERTY_HOUSE_GROWTH, house_stage)
-	var building_mult := 1.0 + PROPERTY_PER_BUILDING * _building_count()
-	var plot_mult := 1.0 + PROPERTY_PER_PLOT * (int(plot_two_open) + int(plot_three_open))
-	var clean_mult := 1.0 + PROPERTY_PER_CLEAN_NIGHT * mini(clean_nights, PROPERTY_CLEAN_NIGHTS_MAX)
-	return roundi(PROPERTY_TAX * house_mult * building_mult * plot_mult * clean_mult)
-
-
-func _property_text() -> String:
-	return "%d coins a quarter. Starts at %d; x%.1f per house upgrade, +%d%% per building (%d), +%d%% per farm plot past the first (%d), +%d%% for %d clean nights in a row (up to %d)." % [
-		_property_value(), PROPERTY_TAX, PROPERTY_HOUSE_GROWTH, int(PROPERTY_PER_BUILDING * 100), _building_count(),
-		int(PROPERTY_PER_PLOT * 100), int(plot_two_open) + int(plot_three_open),
-		int(PROPERTY_PER_CLEAN_NIGHT * 100), clean_nights, PROPERTY_CLEAN_NIGHTS_MAX]
-
-
-func _tax_evicts() -> bool:
-	return tax_owed > 0 and day - tax_due_day >= TAX_EVICT_DAYS
-
-
-# Each morning: a new quarterly bill, then reminders for any unpaid tax. Returns a note for the morning message.
-func _mail_day() -> String:
-	var note := ""
-	var date := _calendar_date(day)
-	if int(date["day"]) == 1 and TAX_MONTHS.has(int(date["month"])) and day > 1:
-		if tax_owed == 0:
-			tax_due_day = day + TAX_GRACE_DAYS
-			tax_stage = 0
-		var bill := _property_value()
-		tax_owed += bill
-		_add_letter("Property tax bill", "Your quarterly property tax is %d coins, based on the value of the farm. Pay it at this desk by %s, or the land will be taken." % [bill, _date_text(tax_due_day)])
-		note += " Post came through the mail slot, and a property tax bill is on the desk."
-	if tax_owed > 0:
-		var late := day - tax_due_day
-		if late >= TAX_FINAL_DAYS and tax_stage < 2:
-			tax_stage = 2
-			_add_letter("Final notice", "You still owe %d coins in property tax. Pay within %d days or the land will be taken." % [tax_owed, TAX_EVICT_DAYS - late])
-			note += " A final notice is on the desk."
-		elif late >= 1 and tax_stage < 1:
-			tax_stage = 1
-			_add_letter("Payment overdue", "The property tax of %d coins was due %s. Please pay at this desk." % [tax_owed, _date_text(tax_due_day)])
-			note += " A payment reminder is on the desk."
-	return note
-
-
-func _pay_tax() -> void:
-	if tax_owed <= 0:
-		_show_message("Nothing is owed on the property tax.")
-		return
-	if money < tax_owed:
-		_show_message("You need %d coins to pay the property tax." % tax_owed)
-		return
-	var paid := tax_owed
-	money -= paid
-	tax_owed = 0
-	tax_due_day = 0
-	tax_stage = 0
-	_add_letter("Receipt", "Property tax of %d coins paid in full. The land is yours for another quarter." % paid)
-	_show_message("You pay the property tax of %d coins." % paid)
-
-
-# The land is lost: the save is removed and the start screen says why.
-func _evict() -> void:
-	DirAccess.remove_absolute(ProjectSettings.globalize_path(_save_path()))
-	TitleMenu.notice = "The farm was taken. The property tax went unpaid, and you lost the land."
-	_quit_to_title()
-
 
 func _build_desk_light() -> void:
 	desk_light = PointLight2D.new()
@@ -6707,16 +6389,6 @@ func _build_desk_light() -> void:
 	desk_light.position = _tile_center(INT_ORIGIN.x + DESK_IX.x, INT_ORIGIN.y + DESK_IX.y)
 	desk_light.enabled = false
 	add_child(desk_light)
-
-
-# Blinks red once a second while there is unread post and the player is in the house.
-func _update_desk_light() -> void:
-	if desk_light == null:
-		return
-	var blinking := inside and _unread_count() > 0
-	desk_light.enabled = blinking
-	if blinking:
-		desk_light.energy = 1.4 if fmod(Time.get_ticks_msec() / 1000.0, 1.0) < 0.5 else 0.0
 
 
 # --- Animal ages: young animals do not lay or give until they are grown ---
@@ -7205,7 +6877,7 @@ func _end_day(base: String, leave_house: bool = true) -> void:
 	stats["spoiled"] += spoiled
 	var spoil_note := (" %d fish spoiled in your pack overnight." % spoiled) if spoiled > 0 else ""
 	var upkeep_note := _settle_day()
-	upkeep_note += _boredom_check()
+	upkeep_note += desk._boredom_check()
 	# Rain waters every crop. Otherwise a crop must have been watered today to grow.
 	if weather_kind in WATER_RAIN_KINDS:
 		stats["rain_days"] += 1
@@ -7232,11 +6904,11 @@ func _end_day(base: String, leave_house: bool = true) -> void:
 	tonight_shadow = Vector2i(-1, -1)
 	_regrow_wild()
 	_update_shadow_tile()
-	var mail_note := _mail_day()
+	var mail_note := desk._mail_day()
 	_show_message("%s Your crops grew overnight.%s%s The morning is %s.%s" % [
 		base, spoil_note, upkeep_note, str(WEATHER_NAMES.get(weather_kind, "overcast")).to_lower(), event_note + mail_note])
-	if _tax_evicts():
-		_evict()
+	if desk._tax_evicts():
+		desk._evict()
 		return
 	_save_game()
 	queue_redraw()
