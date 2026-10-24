@@ -134,15 +134,17 @@ def snap_rectangles(cells, labels, bounds):
         cy1 = min(INNER_H, int(round((sy.stop - y0) / ch)))
         return cx0, cy0, cx1, cy1
 
-    def fill(name, rect):
+    def fill(name, rect, clear_all=()):
         cx0, cy0, cx1, cy1 = rect
         for yy in range(INNER_H):
             for xx in range(INNER_W):
-                if cells[yy][xx] == name and cx0 <= xx < cx1 and cy0 <= yy < cy1:
+                if cells[yy][xx] in clear_all or (cells[yy][xx] == name and cx0 <= xx < cx1 and cy0 <= yy < cy1):
                     cells[yy][xx] = "grass"
         for yy in range(cy0, cy1):
             for xx in range(cx0, cx1):
-                cells[yy][xx] = name
+                # Fence brackets sit on the edges of plots, so they are kept.
+                if cells[yy][xx] != "fence":
+                    cells[yy][xx] = name
 
     def biggest(names):
         mask = np.isin(labels, [NAMES.index(n) for n in names])
@@ -163,9 +165,16 @@ def snap_rectangles(cells, labels, bounds):
         return found
 
     # House: roof and body together.
-    for lab, k, _ in biggest(["roof", "body"])[:1]:
-        sl = nd.find_objects(lab)[k - 1]
-        fill("body", to_cells(sl[1], sl[0]))
+    # The roof and the body are separate pixel regions that meet at the house's wall line, so their boxes are joined.
+    parts = biggest(["roof", "body"])
+    if parts:
+        lab = parts[0][0]
+        boxes = [nd.find_objects(lab)[k - 1] for _, k, _ in parts]
+        top = min(b[0].start for b in boxes)
+        bottom = max(b[0].stop for b in boxes)
+        left = min(b[1].start for b in boxes)
+        right = max(b[1].stop for b in boxes)
+        fill("body", to_cells(slice(left, right), slice(top, bottom)), clear_all=("roof", "body"))
     # Plots: each brown or olive block.
     for names in (["brown"], ["olive"]):
         mask = np.isin(labels, [NAMES.index(n) for n in names])
@@ -370,7 +379,7 @@ def convert(path, drop_grove=None):
     terrain[door[1]][door[0]] = "D"
 
     # Porch: four tiles of boards starting one row below the house, as before.
-    porch = (hx0, hy1 + 1, 4, 2)
+    porch = (door[0], door[1] + 1, 1, 1)
     for y in range(porch[1], porch[1] + porch[3]):
         for x in range(porch[0], porch[0] + porch[2]):
             if terrain[y][x] in (".", "P"):
