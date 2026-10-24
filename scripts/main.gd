@@ -2260,6 +2260,8 @@ func _find_house_roof_bottom() -> int:
 # The house is one sprite over its footprint: the roof and walls, the door, the porch and the steps.
 # Its footprint is six tiles wide and seven tall, from the top of the roof down to the steps.
 const HOUSE_SPRITE_TILES := Vector2i(6, 7)
+# Where the sprite's walls end, in tiles from the sprite's top (measured from house_stage_0.png: 5.88 of 7).
+const HOUSE_WALL_BOTTOM_TILES := 5.88
 
 
 func _draw_house_roof_layer() -> void:
@@ -2268,7 +2270,11 @@ func _draw_house_roof_layer() -> void:
 	var origin := _house_origin()
 	if origin.x < 0:
 		return
-	var rect := Rect2(origin.x * PX, origin.y * PX, HOUSE_SPRITE_TILES.x * PX, HOUSE_SPRITE_TILES.y * PX)
+	# The sprite's walls end HOUSE_WALL_BOTTOM_TILES below its top, so its top sits that far above the porch row.
+	# The porch row is two rows below the wall line (the walls are two rows tall).
+	var porch_top := float(_find_house_roof_bottom() + 2)
+	var top := porch_top - HOUSE_WALL_BOTTOM_TILES
+	var rect := Rect2(origin.x * PX, top * PX, HOUSE_SPRITE_TILES.x * PX, HOUSE_SPRITE_TILES.y * PX)
 	house_roof_layer.draw_texture_rect(FarmSprites.tex("house_stage_%d" % house_stage), rect, false)
 	house_roof_drawn_stage = house_stage
 
