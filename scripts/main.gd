@@ -916,6 +916,7 @@ var shake_tw: Tween
 var last_minimap_key: Array = []
 var last_cam_tile := Vector2i(-99, -99)   # the tile the camera was last drawn from
 var panels: PanelRows
+var saver: SaveSystem
 var progression: ProgressionSystem
 var stall: StallSystem
 var sanity_sys: SanitySystem
@@ -947,6 +948,7 @@ func _ready() -> void:
 	sanity_sys = SanitySystem.new(self)
 	stall = StallSystem.new(self)
 	progression = ProgressionSystem.new(self)
+	saver = SaveSystem.new(self)
 	_setup_input()
 	_load_settings()
 	_start_music()
@@ -1057,7 +1059,7 @@ func _quit_to_title() -> void:
 func _on_title_start(mode: String, slot: int) -> void:
 	save_slot = slot
 	TitleMenu.active_slot = slot
-	var loaded := mode != "new" and _load_game()
+	var loaded := mode != "new" and saver._load_game()
 	if not loaded:
 		_respawn_brush()
 		appearance = Appearance.clean(TitleMenu.pending_appearance)
@@ -3846,16 +3848,6 @@ func _food_stats_text(f: Dictionary) -> String:
 	return "Restores %d food, %d sanity, %d HP." % [int(Foods.food_restore(f)), int(Foods.sanity_restore(f)), Foods.hp_restore(f)]
 
 
-# Saves from before foods were named for what made them keep their food under the new names.
-func _migrate_legacy_food(saved: Variant) -> void:
-	if typeof(saved) != TYPE_DICTIONARY:
-		return
-	var moves := {"meals": "turnip_hash", "smoked": "smoked_fish", "dried": "dried_turnip", "canned": "canned_turnip",
-		"fermented": "fermented_turnip", "stew": "fish_stew", "hearty": "hearty_stew"}
-	for old in moves.keys():
-		if saved.has(old):
-			inventory[moves[old]] = int(inventory[moves[old]]) + int(saved[old])
-
 func _can_repair_well() -> bool:
 	return not well_repaired and materials["wood"] >= WELL_REPAIR["wood"] \
 		and materials["fiber"] >= WELL_REPAIR["fiber"] and progression._level("Carpentry") >= WELL_REPAIR["level"]
@@ -4572,14 +4564,6 @@ func _draw_cave() -> void:
 	_draw_combat()
 
 
-# Where a save puts you: in the cave, the save records the homestead instead.
-func _save_pos() -> Array:
-	if in_cave:
-		var home := _tile_center(HOMESTEAD_ARRIVE.x, HOMESTEAD_ARRIVE.y)
-		return [home.x, home.y]
-	return [player.position.x, player.position.y]
-
-
 # Foes, arrows in flight, and the swing arc. Shared by the world and the cave.
 func _draw_combat() -> void:
 	for foe in foes:
@@ -4885,7 +4869,7 @@ func _place_campsite() -> void:
 	campsite = tile
 	_apply_campsite()
 	progression._grant_xp("Bushcrafting", 15)
-	_save_game()
+	saver._save_game()
 	_show_message("You set up camp. Rest there from 18:00. +15 Bushcrafting XP")
 	queue_redraw()
 
@@ -6018,7 +6002,7 @@ func _end_day(base: String, leave_house: bool = true) -> void:
 	if desk._tax_evicts():
 		desk._evict()
 		return
-	_save_game()
+	saver._save_game()
 	queue_redraw()
 
 
@@ -6106,247 +6090,6 @@ func _set_bounds() -> void:
 
 
 # --- Save and load ----------------------------------------------------------
-
-func _save_game() -> void:
-	var data := {
-		"day": day,
-		"weather_kind": weather_kind,
-		"food": food,
-		"water": water,
-		"warmth": warmth,
-		"starve_timer": starve_timer,
-		"well_repaired": well_repaired,
-		"hose_attached": hose_attached,
-		"well_water": well_water,
-		"skill_xp": skill_xp,
-		"inventory": inventory,
-		"materials": materials,
-		"stats": stats,
-		"quests_done": quests_done,
-		"tutorial_v2": true,
-		"zone": zone,
-		"world_version": 1,
-		"campsite": [campsite.x, campsite.y],
-		"hp": hp,
-		"guardian_done": guardian_done,
-		"equipment": equipment,
-		"money": money,
-		"bag_tier": bag_tier,
-		"cellar_built": cellar_built,
-		"cooler_built": cooler_built,
-		"cellar_stock": cellar_stock,
-		"cooler_stock": cooler_stock,
-		"smokehouse_built": smokehouse_built,
-		"furnace_built": furnace_built,
-		"woodshed_built": woodshed_built,
-		"firewood_store": firewood_store,
-		"fire_hours": fire_hours,
-		"achievements_done": achievements_done,
-		"story_version": 2,
-		"selected_seed": selected_seed,
-		"lantern_tier": lantern_tier,
-		"house_stage": house_stage,
-		"tidied_day": tidied_day,
-		"job_done_day": job_done_day,
-		"mend_day": mend_day,
-		"mends_today": mends_today,
-		"cleanse_day": cleanse_day,
-		"event_fired_day": event_fired_day,
-		"sanity": sanity,
-		"sanity_penalty": sanity_penalty,
-		"boredom_loss": boredom_loss,
-		"entertained_day": entertained_day,
-		"player_pos": _save_pos(),
-		"inside": inside,
-		"appearance": appearance,
-		"open_tab": open_tab,
-		"crops": farm._crops_to_array(),
-		"brush": _brush_to_array(),
-		"brush_day": brush_day,
-		"rock_day": rock_day,
-		"felled": _felled_to_array(),
-		"rocks": _tiles_to_array(rocks),
-		"quarry": _tiles_to_array(quarry),
-		"tool_tier": tool_tier,
-		"bank_materials": bank_materials,
-		"bank_coins": bank_coins,
-		"cave_mined": _tiles_to_array(cave_mined),
-		"cave_mined_day": cave_mined_day,
-		"wear": wear,
-		"coop_built": coop_built,
-		"coop_x": coop_tile.x,
-		"coop_y": coop_tile.y,
-		"barn_built": barn_built,
-		"barn_x": barn_tile.x,
-		"barn_y": barn_tile.y,
-		"hens": hens,
-		"hens_fed_day": hens_fed_day,
-		"hen_unfed_days": hen_unfed_days,
-		"goats": goats,
-		"goats_fed_day": goats_fed_day,
-		"goat_unfed_days": goat_unfed_days,
-		"hen_ages": hen_ages,
-		"goat_ages": goat_ages,
-		"tax_owed": tax_owed,
-		"tax_due_day": tax_due_day,
-		"tax_stage": tax_stage,
-		"clean_nights": clean_nights,
-		"desk_mail": desk_mail,
-		"tips_seen": tips_seen.keys(),
-	}
-	var file := FileAccess.open(_save_path(), FileAccess.WRITE)
-	if file != null:
-		file.store_string(JSON.stringify(data))
-
-
-func _load_game() -> bool:
-	if not FileAccess.file_exists(_save_path()):
-		return false
-	var parsed: Variant = JSON.parse_string(FileAccess.get_file_as_string(_save_path()))
-	if typeof(parsed) != TYPE_DICTIONARY:
-		return false
-	var data: Dictionary = parsed
-
-	day = int(data.get("day", 1))
-	weather_kind = str(data.get("weather_kind", ""))
-	food = float(data.get("food", 100.0))
-	water = float(data.get("water", 100.0))
-	warmth = float(data.get("warmth", 100.0))
-	starve_timer = float(data.get("starve_timer", 0.0))
-	well_repaired = bool(data.get("well_repaired", false))
-	hose_attached = bool(data.get("hose_attached", false))
-	well_water = float(data.get("well_water", 0.0))
-	_merge_ints(skill_xp, data.get("skill_xp"))
-	_merge_ints(inventory, data.get("inventory"))
-	_migrate_legacy_food(data.get("inventory"))
-	_merge_ints(materials, data.get("materials"))
-	_merge_ints(stats, data.get("stats"))
-	# Saves before version 2 used the old quest list, so their progress is reset.
-	# Stat-based achievements re-check from saved stats on the next frame.
-	var story_v := int(data.get("story_version", 1))
-	quests_done = data.get("quests_done", {}) if story_v >= 2 else {}
-	achievements_done = data.get("achievements_done", {}) if story_v >= 2 else {}
-	selected_seed = str(data.get("selected_seed", "turnip"))
-	lantern_tier = int(data.get("lantern_tier", 0))
-	house_stage = int(data.get("house_stage", 0))
-	tidied_day = int(data.get("tidied_day", 0))
-	job_done_day = int(data.get("job_done_day", -1))
-	mend_day = int(data.get("mend_day", 0))
-	mends_today = int(data.get("mends_today", 0))
-	cleanse_day = int(data.get("cleanse_day", 0))
-	money = int(data.get("money", 0))
-	_merge_ints(bank_materials, data.get("bank_materials"))
-	bank_coins = int(data.get("bank_coins", 0))
-	bag_tier = int(data.get("bag_tier", 0))
-	cellar_built = bool(data.get("cellar_built", false))
-	cooler_built = bool(data.get("cooler_built", false))
-	cellar_stock = int(data.get("cellar_stock", 0))
-	cooler_stock = int(data.get("cooler_stock", 0))
-	smokehouse_built = bool(data.get("smokehouse_built", false))
-	furnace_built = bool(data.get("furnace_built", false))
-	woodshed_built = bool(data.get("woodshed_built", false))
-	firewood_store = int(data.get("firewood_store", 0))
-	fire_hours = float(data.get("fire_hours", 0.0))
-	saved_zone = int(data.get("zone", 0)) if int(data.get("world_version", 0)) >= 1 else 0
-	var saved_camp: Variant = data.get("campsite", null)
-	if typeof(saved_camp) == TYPE_ARRAY and saved_camp.size() == 2:
-		campsite = Vector2i(int(saved_camp[0]), int(saved_camp[1]))
-		_apply_campsite()
-	hp = int(data.get("hp", BASE_HP))
-	guardian_done = data.get("guardian_done", {})
-	var saved_eq: Variant = data.get("equipment", {})
-	if typeof(saved_eq) == TYPE_DICTIONARY:
-		for slot in equipment.keys():
-			if saved_eq.has(slot):
-				equipment[slot] = str(saved_eq[slot])
-	event_fired_day = int(data.get("event_fired_day", 0))
-	sanity_penalty = int(data.get("sanity_penalty", 0))
-	boredom_loss = float(data.get("boredom_loss", 0.0))
-	entertained_day = int(data.get("entertained_day", 0))
-	sanity = float(data.get("sanity", SANITY_MAX))
-	saved_inside = bool(data.get("inside", false))
-	appearance = Appearance.clean(data.get("appearance", {}))
-	saved_panel = str(data.get("open_tab", ""))
-	var pos: Variant = data.get("player_pos", null)
-	if typeof(pos) == TYPE_ARRAY and pos.size() == 2:
-		saved_pos = Vector2(float(pos[0]), float(pos[1]))
-		has_saved_pos = true
-
-	# Rebuild the interior so the saved house stage shows the right rooms.
-	# Crops and brush are restored here, after the map exists.
-	crops.clear()
-	for c in data.get("crops", []):
-		var kind := str(c.get("kind", "turnip"))
-		# Saves from before watering existed have no record. Those crops count as watered today,
-		# so they grow tonight like they used to.
-		var watered := int(c["watered_day"]) if c.has("watered_day") else day
-		var stage := int(c["stage"])
-		# Saves from before crops counted days convert their stage to days.
-		var days := int(c["days"]) if c.has("days") else stage * int(CROP_GROW_DAYS[kind]) / MAX_STAGE
-		crops[Vector2i(int(c["x"]), int(c["y"]))] = {"stage": stage, "kind": kind, "days": days, "watered_day": watered}
-	brush_day = int(data.get("brush_day", data.get("day", 0)))
-	rock_day = int(data.get("rock_day", data.get("day", 0)))
-	brush.clear()
-	for b in data.get("brush", []):
-		brush[Vector2i(int(b[0]), int(b[1]))] = true
-	for g in data.get("felled", []):
-		grove_felled[Vector2i(int(g[0]), int(g[1]))] = true
-	_apply_grove()
-	_merge_ints(tool_tier, data.get("tool_tier"))
-	if data.has("rocks"):
-		rocks.clear()
-		for r in data["rocks"]:
-			rocks[Vector2i(int(r[0]), int(r[1]))] = true
-	else:
-		_fill_rocks()
-	cave_mined_day = int(data.get("cave_mined_day", -1))
-	wear = int(data.get("wear", 0))
-	coop_built = bool(data.get("coop_built", false))
-	coop_tile = Vector2i(int(data.get("coop_x", -1)), int(data.get("coop_y", -1)))
-	barn_built = bool(data.get("barn_built", false))
-	barn_tile = Vector2i(int(data.get("barn_x", -1)), int(data.get("barn_y", -1)))
-	hens = int(data.get("hens", 0))
-	hens_fed_day = int(data.get("hens_fed_day", -1))
-	hen_unfed_days = int(data.get("hen_unfed_days", 0))
-	goats = int(data.get("goats", 0))
-	goats_fed_day = int(data.get("goats_fed_day", -1))
-	goat_unfed_days = int(data.get("goat_unfed_days", 0))
-	# Saves from before ages existed count the animals they had as already grown.
-	hen_ages = animals._int_list(data["hen_ages"]) if data.has("hen_ages") else animals._filled(hens, HEN_MATURE_DAYS)
-	goat_ages = animals._int_list(data["goat_ages"]) if data.has("goat_ages") else animals._filled(goats, GOAT_MATURE_DAYS)
-	tax_owed = int(data.get("tax_owed", 0))
-	tax_due_day = int(data.get("tax_due_day", 0))
-	tax_stage = int(data.get("tax_stage", 0))
-	clean_nights = int(data.get("clean_nights", 0))
-	desk_mail = data.get("desk_mail", [])
-	animals._sync_ages()
-	if data.has("tips_seen"):
-		tips_seen = {}
-		for id in data["tips_seen"]:
-			tips_seen[str(id)] = true
-	else:
-		# Saves from before tips existed have seen the tutorial already, so it doesn't flood them.
-		for tip in TIPS:
-			tips_seen[str(tip["id"])] = true
-	if data.has("cave_mined"):
-		cave_mined.clear()
-		for c in data["cave_mined"]:
-			cave_mined[Vector2i(int(c[0]), int(c[1]))] = true
-	if data.has("quarry"):
-		quarry.clear()
-		for q in data["quarry"]:
-			quarry[Vector2i(int(q[0]), int(q[1]))] = true
-	else:
-		_fill_quarry()
-	return true
-
-
-func _merge_ints(target: Dictionary, saved: Variant) -> void:
-	if typeof(saved) != TYPE_DICTIONARY:
-		return
-	for key in target.keys():
-		if saved.has(key):
-			target[key] = int(saved[key])
 
 
 func _brush_to_array() -> Array:
