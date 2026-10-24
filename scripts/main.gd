@@ -2229,11 +2229,14 @@ func _big_tree_base_bottom() -> Vector2:
 	return Vector2((o.x + 1.5) * PX, (o.y + 3) * PX)
 
 
-# Behind the canopy when the player is north of the trunk base, in front of the base when south of it.
+# Behind the canopy when the player is north of the base's bottom row, in front of it from that row down.
+# The roots spread past the base into that row, so a player beside them is in front, not behind.
 func _update_big_tree_depth() -> void:
 	if big_tree_layer == null or player == null:
 		return
-	big_tree_layer.z_index = 1 if player.position.y < _big_tree_base_bottom().y else 0
+	var o := _big_tree_origin()
+	var line := (o.y + 2) * PX
+	big_tree_layer.z_index = 1 if player.position.y < line else 0
 
 
 func _draw_big_tree_layer() -> void:
