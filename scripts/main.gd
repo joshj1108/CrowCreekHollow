@@ -2166,16 +2166,15 @@ func _draw_sprite_ground(t: Vector2i, kind: int, cell: Rect2) -> bool:
 			name = "grass_%d" % v
 		_:
 			return false
-	var rect := cell
-	# Interior tiles repeat, so each one is flipped by its position to break up the pattern.
-	# Edge pieces are never flipped: their open sides would move.
+	# Interior tiles repeat, so each one is mirrored by its position to break up the pattern.
+	# Edge pieces are never mirrored: their open sides would move.
+	var flip_x := false
+	var flip_y := false
 	if not name.contains("_edge_") and not name.contains("_shore_") and not name.contains("_inner_") and not name.begins_with("grass"):
 		var bits := FarmSprites.variant(t.x, t.y, 4)
-		if bits & 1:
-			rect = Rect2(rect.position.x + rect.size.x, rect.position.y, -rect.size.x, rect.size.y)
-		if bits & 2:
-			rect = Rect2(rect.position.x, rect.position.y + rect.size.y, rect.size.x, -rect.size.y)
-	draw_texture_rect(FarmSprites.tex(name), rect, false)
+		flip_x = (bits & 1) == 1
+		flip_y = (bits & 2) == 2
+	draw_texture_rect(FarmSprites.tex_flipped(name, flip_x, flip_y), cell, false)
 	return true
 
 

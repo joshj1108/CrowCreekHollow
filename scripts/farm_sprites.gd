@@ -8,10 +8,17 @@ static var _cache := {}
 
 
 static func tex(name: String, flip_y := false) -> Texture2D:
-	var key := "%s|%s" % [name, flip_y]
+	return tex_flipped(name, false, flip_y)
+
+
+# The texture, mirrored across x and/or y. Mirrored copies are made once and cached.
+static func tex_flipped(name: String, flip_x: bool, flip_y: bool) -> Texture2D:
+	var key := "%s|%s|%s" % [name, flip_x, flip_y]
 	if _cache.has(key):
 		return _cache[key]
 	var img: Image = load(DIR + name + ".png").get_image()
+	if flip_x:
+		img.flip_x()
 	if flip_y:
 		img.flip_y()
 	var t := ImageTexture.create_from_image(img)
