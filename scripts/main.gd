@@ -916,6 +916,7 @@ var shake_tw: Tween
 var last_minimap_key: Array = []
 var last_cam_tile := Vector2i(-99, -99)   # the tile the camera was last drawn from
 var panels: PanelRows
+var animals: AnimalSystem
 var desk: DeskSystem
 var lantern_light: PointLight2D
 var window_lights: Array = []   # glows for the lit windows, one PointLight2D each
@@ -935,6 +936,7 @@ var perf_was_down := false
 func _ready() -> void:
 	panels = PanelRows.new(self)
 	desk = DeskSystem.new(self)
+	animals = AnimalSystem.new(self)
 	_setup_input()
 	_load_settings()
 	_start_music()
@@ -2579,15 +2581,15 @@ func _on_panel_action(action_id: String) -> void:
 		_buy_hen()
 		return
 	if action_id == "feed_hens":
-		_feed_hens()
+		animals._feed_hens()
 	if action_id == "sell_hen":
-		_sell_hen()
+		animals._sell_hen()
 	if action_id == "sell_goat":
-		_sell_goat()
+		animals._sell_goat()
 	if action_id == "buy_goat":
 		_buy_goat()
 	if action_id == "feed_goats":
-		_feed_goats()
+		animals._feed_goats()
 		return
 	if action_id == "build_smokehouse":
 		_build_smokehouse()
@@ -6144,23 +6146,15 @@ func _draw_placement_ghost() -> void:
 			placement_ghost.draw_rect(_tile_rect(top + Vector2i(dx, dy)), fill)
 
 
-func _can_buy_hen() -> bool:
-	return coop_built and hens < COOP_HENS_MAX and money >= HEN_PRICE
-
-
 func _buy_hen() -> void:
 	play_sfx("coin")
-	if not _can_buy_hen():
+	if not animals._can_buy_hen():
 		_show_message("A hen costs %d coins, and the coop holds %d." % [HEN_PRICE, COOP_HENS_MAX])
 		return
 	money -= HEN_PRICE
 	hens += 1
 	queue_redraw()
 	_show_message("A hen settles into the coop.")
-
-
-func _can_buy_goat() -> bool:
-	return barn_built and goats < BARN_GOATS_MAX and money >= GOAT_PRICE
 
 
 func _buy_goat() -> void:
@@ -6179,38 +6173,6 @@ func _buy_goat() -> void:
 	stats["goats_bought"] += 1
 	queue_redraw()
 	_show_message("A goat trots into the barn yard.")
-
-
-func _can_feed_goats() -> bool:
-	return goats > 0 and goats_fed_day != day and _crop_total() >= goats * GOAT_FEED_CROPS
-
-
-func _feed_goats() -> void:
-	if goats > 0 and goats_fed_day == day:
-		_show_message("The goats are fed for today.")
-		return
-	if not _can_feed_goats():
-		_show_message("The goats need %d crops." % (goats * GOAT_FEED_CROPS))
-		return
-	_spend_crops(goats * GOAT_FEED_CROPS)
-	goats_fed_day = day
-	_show_message("You feed the goats.")
-
-
-func _can_feed_hens() -> bool:
-	return hens > 0 and hens_fed_day != day and _crop_total() >= hens * HEN_FEED_CROPS
-
-
-func _feed_hens() -> void:
-	if hens > 0 and hens_fed_day == day:
-		_show_message("The hens are fed for today.")
-		return
-	if not _can_feed_hens():
-		_show_message("The hens need %d crops." % (hens * HEN_FEED_CROPS))
-		return
-	_spend_crops(hens * HEN_FEED_CROPS)
-	hens_fed_day = day
-	_show_message("You feed the hens.")
 
 
 # The day's chores. Each is done or not. Chores left undone wear the house overnight.
@@ -6393,81 +6355,6 @@ func _build_desk_light() -> void:
 
 # --- Animal ages: young animals do not lay or give until they are grown ---
 
-func _sync_ages() -> void:
-	while hen_ages.size() < hens:
-		hen_ages.append(0)
-	while hen_ages.size() > hens:
-		hen_ages.pop_back()
-	while goat_ages.size() < goats:
-		goat_ages.append(0)
-	while goat_ages.size() > goats:
-		goat_ages.pop_back()
-
-
-func _age_animals() -> void:
-	_sync_ages()
-	for i in hen_ages.size():
-		hen_ages[i] = int(hen_ages[i]) + 1
-	for i in goat_ages.size():
-		goat_ages[i] = int(goat_ages[i]) + 1
-
-
-func _grown_count(ages: Array, mature_days: int) -> int:
-	var n := 0
-	for a in ages:
-		if int(a) >= mature_days:
-			n += 1
-	return n
-
-
-func _grown_index(ages: Array, mature_days: int) -> int:
-	for i in ages.size():
-		if int(ages[i]) >= mature_days:
-			return i
-	return -1
-
-
-func _sell_hen() -> void:
-	_sync_ages()
-	var i := _grown_index(hen_ages, HEN_MATURE_DAYS)
-	if i < 0:
-		_show_message("No hen is grown yet. A grown hen sells for %d coins." % HEN_SELL)
-		return
-	hen_ages.remove_at(i)
-	hens -= 1
-	money += HEN_SELL
-	stats["sold"] += 1
-	_sync_ages()
-	_show_message("You sell a grown hen for %d coins, %d more than you paid." % [HEN_SELL, HEN_SELL - HEN_PRICE])
-
-
-func _sell_goat() -> void:
-	_sync_ages()
-	var i := _grown_index(goat_ages, GOAT_MATURE_DAYS)
-	if i < 0:
-		_show_message("No goat is grown yet. A grown goat sells for %d coins." % GOAT_SELL)
-		return
-	goat_ages.remove_at(i)
-	goats -= 1
-	money += GOAT_SELL
-	stats["sold"] += 1
-	_sync_ages()
-	_show_message("You sell a grown goat for %d coins, %d more than you paid." % [GOAT_SELL, GOAT_SELL - GOAT_PRICE])
-
-
-func _int_list(values: Array) -> Array:
-	var out: Array = []
-	for v in values:
-		out.append(int(v))
-	return out
-
-
-func _filled(n: int, value: int) -> Array:
-	var out: Array = []
-	for i in n:
-		out.append(value)
-	return out
-
 
 # Runs at the end of each day, before the crops grow: the house wears, hens lay or leave,
 # and rain or a fox may strike. Returns a note for the morning message.
@@ -6484,12 +6371,12 @@ func _settle_day() -> String:
 	else:
 		_change_sanity(WELL_KEPT_SANITY)
 		notes += " The house is kept well, and you sleep easier. +%d sanity." % WELL_KEPT_SANITY
-	_age_animals()
+	animals._age_animals()
 	if hens > 0:
 		if hens_fed_day == day:
 			hen_unfed_days = 0
 			var room := maxi(0, _pack_capacity() - _pack_used())
-			var layers := _grown_count(hen_ages, HEN_MATURE_DAYS)
+			var layers := animals._grown_count(hen_ages, HEN_MATURE_DAYS)
 			var eggs := mini(layers, room)
 			if eggs > 0:
 				inventory["eggs"] += eggs
@@ -6506,7 +6393,7 @@ func _settle_day() -> String:
 		if goats_fed_day == day:
 			goat_unfed_days = 0
 			var room := maxi(0, _pack_capacity() - _pack_used())
-			var givers := _grown_count(goat_ages, GOAT_MATURE_DAYS)
+			var givers := animals._grown_count(goat_ages, GOAT_MATURE_DAYS)
 			var milk := mini(givers, room)
 			if milk > 0:
 				inventory["milk"] += milk
@@ -6522,7 +6409,7 @@ func _settle_day() -> String:
 	if wear >= WEAR_FOX and hens > 0 and randf() < 0.5:
 		hens -= 1
 		notes += " A fox got into the coop and took a hen."
-	_sync_ages()
+	animals._sync_ages()
 	if wear >= WEAR_RUNDOWN and not crops.is_empty():
 		var spot = crops.keys().pick_random()
 		crops.erase(spot)
@@ -7204,14 +7091,14 @@ func _load_game() -> bool:
 	goats_fed_day = int(data.get("goats_fed_day", -1))
 	goat_unfed_days = int(data.get("goat_unfed_days", 0))
 	# Saves from before ages existed count the animals they had as already grown.
-	hen_ages = _int_list(data["hen_ages"]) if data.has("hen_ages") else _filled(hens, HEN_MATURE_DAYS)
-	goat_ages = _int_list(data["goat_ages"]) if data.has("goat_ages") else _filled(goats, GOAT_MATURE_DAYS)
+	hen_ages = animals._int_list(data["hen_ages"]) if data.has("hen_ages") else animals._filled(hens, HEN_MATURE_DAYS)
+	goat_ages = animals._int_list(data["goat_ages"]) if data.has("goat_ages") else animals._filled(goats, GOAT_MATURE_DAYS)
 	tax_owed = int(data.get("tax_owed", 0))
 	tax_due_day = int(data.get("tax_due_day", 0))
 	tax_stage = int(data.get("tax_stage", 0))
 	clean_nights = int(data.get("clean_nights", 0))
 	desk_mail = data.get("desk_mail", [])
-	_sync_ages()
+	animals._sync_ages()
 	if data.has("tips_seen"):
 		tips_seen = {}
 		for id in data["tips_seen"]:

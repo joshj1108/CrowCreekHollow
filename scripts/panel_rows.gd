@@ -311,16 +311,16 @@ func _coop_rows() -> Array:
 		"value": "%d of %d, %d coins each" % [m.hens, m.COOP_HENS_MAX, m.HEN_PRICE],
 		"button": "Buy hen",
 		"action": "buy_hen",
-		"enabled": m._can_buy_hen(),
+		"enabled": m.animals._can_buy_hen(),
 	})
 	rows.append({
 		"name": "Feed hens",
 		"value": "%d crops, once a day" % (m.hens * m.HEN_FEED_CROPS),
 		"button": "Feed",
 		"action": "feed_hens",
-		"enabled": m._can_feed_hens(),
+		"enabled": m.animals._can_feed_hens(),
 	})
-	rows.append({"name": "Grown hens", "value": "%d of %d, %d coins each" % [m._grown_count(m.hen_ages, m.HEN_MATURE_DAYS), m.hens, m.HEN_SELL], "button": "Sell a hen", "action": "sell_hen", "enabled": m._grown_count(m.hen_ages, m.HEN_MATURE_DAYS) > 0})
+	rows.append({"name": "Grown hens", "value": "%d of %d, %d coins each" % [m.animals._grown_count(m.hen_ages, m.HEN_MATURE_DAYS), m.hens, m.HEN_SELL], "button": "Sell a hen", "action": "sell_hen", "enabled": m.animals._grown_count(m.hen_ages, m.HEN_MATURE_DAYS) > 0})
 	rows.append({"note": "A grown hen (%d nights) lays an egg each morning when fed, kept as a meal or sold at the farm stand. Young hens do not lay. Two unfed days in a row and a hen wanders off." % m.HEN_MATURE_DAYS})
 	return rows
 
@@ -333,16 +333,16 @@ func _barn_rows() -> Array:
 		"value": "%d of %d, %d coins each" % [m.goats, m.BARN_GOATS_MAX, m.GOAT_PRICE],
 		"button": "Buy goat",
 		"action": "buy_goat",
-		"enabled": m._can_buy_goat(),
+		"enabled": m.animals._can_buy_goat(),
 	})
 	rows.append({
 		"name": "Feed goats",
 		"value": "%d crops, once a day" % (m.goats * m.GOAT_FEED_CROPS),
 		"button": "Feed",
 		"action": "feed_goats",
-		"enabled": m._can_feed_goats(),
+		"enabled": m.animals._can_feed_goats(),
 	})
-	rows.append({"name": "Grown goats", "value": "%d of %d, %d coins each" % [m._grown_count(m.goat_ages, m.GOAT_MATURE_DAYS), m.goats, m.GOAT_SELL], "button": "Sell a goat", "action": "sell_goat", "enabled": m._grown_count(m.goat_ages, m.GOAT_MATURE_DAYS) > 0})
+	rows.append({"name": "Grown goats", "value": "%d of %d, %d coins each" % [m.animals._grown_count(m.goat_ages, m.GOAT_MATURE_DAYS), m.goats, m.GOAT_SELL], "button": "Sell a goat", "action": "sell_goat", "enabled": m.animals._grown_count(m.goat_ages, m.GOAT_MATURE_DAYS) > 0})
 	rows.append({"note": "A grown goat (%d nights) gives milk each morning when fed, kept to drink or sold at the farm stand. Young goats do not give milk. Two unfed days in a row and a goat wanders off." % m.GOAT_MATURE_DAYS})
 	return rows
 
