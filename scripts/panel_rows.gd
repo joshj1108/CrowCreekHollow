@@ -155,7 +155,7 @@ func _gear_rows() -> Array:
 	return [
 		{"split": {"recipes": marked, "figure": true, "detail": chosen}},
 		{"name": "Defense", "value": str(m._defense())},
-		{"name": "Hit damage", "value": str(m._weapon_damage())},
+		{"name": "Hit damage", "value": str(m.combat_sys._weapon_damage())},
 		{"note": "Worn gear sets your defense, and your main hand sets how hard you hit. Crafting a piece equips it at once and swaps out what was in that slot. Press C for the Craft panel."},
 	]
 

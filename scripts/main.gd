@@ -916,6 +916,7 @@ var shake_tw: Tween
 var last_minimap_key: Array = []
 var last_cam_tile := Vector2i(-99, -99)   # the tile the camera was last drawn from
 var panels: PanelRows
+var combat_sys: CombatSystem
 var mining: MiningSystem
 var fishing: FishingSystem
 var crafting: CraftSystem
@@ -955,6 +956,7 @@ func _ready() -> void:
 	crafting = CraftSystem.new(self)
 	fishing = FishingSystem.new(self)
 	mining = MiningSystem.new(self)
+	combat_sys = CombatSystem.new(self)
 	_setup_input()
 	_load_settings()
 	_start_music()
@@ -1187,8 +1189,8 @@ func _process(delta: float) -> void:
 	fishing._update_fishing(delta)
 	farm._update_harvest(delta)
 	_update_crows(delta)
-	_update_foes(delta)
-	_update_shots(delta)
+	combat_sys._update_foes(delta)
+	combat_sys._update_shots(delta)
 	_update_region()
 	if _in_village() and current_hour >= STALL_CLOSE_HOUR and not _at_campsite():
 		_go_home("Night falls. You are driven back to the homestead.")
@@ -2102,7 +2104,7 @@ func _restore_saved_state() -> void:
 		player.position = _tile_center(HOMESTEAD_ARRIVE.x, HOMESTEAD_ARRIVE.y)
 	if _in_village():
 		_sync_region()
-		_spawn_foes()
+		combat_sys._spawn_foes()
 	if saved_inside:
 		inside = true
 	_set_bounds()
@@ -3839,54 +3841,6 @@ func _can_fletch(kind: String) -> bool:
 	return _has_materials(ammo["cost"])
 
 
-func _fire(weapon: String) -> void:
-	if swing_cool > 0.0:
-		return
-	var item: Dictionary = GEAR_ITEMS[weapon]
-	var ammo := str(item["ammo"])
-	if int(materials[ammo]) < 1:
-		_show_message("You're out of %s. Make more from the Craft panel." % ammo)
-		return
-	materials[ammo] -= 1
-	swing_cool = float(item["cool"])
-	player.play_act("fire", 0.35)
-	var dir: Vector2 = player.facing.normalized()
-	shots.append({"pos": player.position, "vel": dir * SHOT_SPEED, "life": SHOT_LIFE, "dmg": int(item["dmg"])})
-	queue_redraw()
-
-
-func _update_shots(delta: float) -> void:
-	if not _in_village():
-		shots.clear()
-		return
-	if shots.is_empty():
-		return
-	for shot in shots.duplicate():
-		var pos: Vector2 = shot["pos"] + shot["vel"] * delta
-		shot["pos"] = pos
-		shot["life"] = float(shot["life"]) - delta
-		var hit := false
-		for foe in foes.duplicate():
-			var gap: Vector2 = foe["pos"] - pos
-			if gap.length() < PX * 0.45:
-				_shot_hits(foe, int(shot["dmg"]))
-				hit = true
-				break
-		if hit or float(shot["life"]) <= 0.0 or _is_blocked_world(pos):
-			shots.erase(shot)
-	queue_redraw()
-
-
-func _shot_hits(foe: Dictionary, amount: int) -> void:
-	foe["hp"] = int(foe["hp"]) - amount
-	foe["flash"] = 0.2
-	progression._grant_xp("Combat", XP_HIT)
-	if int(foe["hp"]) <= 0:
-		_kill_foe(foe)
-	else:
-		_show_message("Your shot hits the %s for %d." % [str(foe["kind"]), amount])
-
-
 # --- The Ashford quarry ------------------------------------------------------------
 
 
@@ -4051,7 +4005,7 @@ func _enter_cave() -> void:
 		cave[tile.y][tile.x] = Tile.FLOOR
 	player.position = _tile_center(CAVE_START.x, CAVE_START.y)
 	_set_bounds()
-	_spawn_foes()
+	combat_sys._spawn_foes()
 	queue_redraw()
 	_show_message("You step into the cave. It smells of damp stone, and something skitters in the dark.")
 
@@ -4538,7 +4492,7 @@ func _enter_zone(z: int, arrive: Vector2i, reason: String) -> void:
 func _on_region_change() -> void:
 	if zone == Zone.ASHFORD:
 		stats["visited"] += 1
-	_spawn_foes()
+	combat_sys._spawn_foes()
 
 
 # Keeps the region in step with where the player is walking in the world.
@@ -4667,106 +4621,6 @@ func _draw_world() -> void:
 
 # --- Foes and combat ----------------------------------------------------------
 
-func _new_foe(kind: String, tile: Vector2i) -> Dictionary:
-	var center := _tile_center(tile.x, tile.y)
-	return {
-		"kind": kind, "pos": center, "home": center,
-		"hp": int(FOES[kind]["hp"]), "cool": 0.0, "dir": Vector2.ZERO,
-		"wander_t": 0.0, "flash": 0.0,
-	}
-
-
-func _spawn_foes() -> void:
-	foes = []
-	if in_cave:
-		for spawn in cave_spawns:
-			foes.append(_new_foe(str(spawn["kind"]), spawn["tile"]))
-		queue_redraw()
-		return
-	var origin := _region_origin()
-	if zone == Zone.VILLAGE:
-		for spot in HOLLOW_SPAWNS:
-			foes.append(_new_foe("hollow", origin + spot))
-	elif zone == Zone.ASHFORD:
-		for spot in STALKER_SPAWNS:
-			foes.append(_new_foe("stalker", origin + spot))
-	queue_redraw()
-
-
-func _update_foes(delta: float) -> void:
-	swing_cool = maxf(0.0, swing_cool - delta)
-	swing_time = maxf(0.0, swing_time - delta)
-	invuln = maxf(0.0, invuln - delta)
-	if not (_in_village() or in_cave):
-		player.modulate = Color.WHITE
-		return
-	player.modulate = Color(1.0, 0.55, 0.55) if invuln > 0.0 else Color.WHITE
-	for foe in foes:
-		var st: Dictionary = FOES[foe["kind"]]
-		foe["cool"] = maxf(0.0, float(foe["cool"]) - delta)
-		foe["flash"] = maxf(0.0, float(foe["flash"]) - delta)
-		var pos: Vector2 = foe["pos"]
-		var to_player: Vector2 = player.position - pos
-		var dist := to_player.length()
-		if dist < float(st["aggro"]) * PX:
-			_move_foe(foe, to_player.normalized() * float(st["chase"]) * delta)
-			if dist < PX * 0.6 and float(foe["cool"]) <= 0.0:
-				foe["cool"] = float(st["cool"])
-				_foe_attack(foe)
-		else:
-			foe["wander_t"] = float(foe["wander_t"]) - delta
-			if float(foe["wander_t"]) <= 0.0:
-				foe["wander_t"] = randf_range(1.0, 3.0)
-				foe["dir"] = Vector2.from_angle(randf() * TAU) if randf() < 0.7 else Vector2.ZERO
-			var wander_dir: Vector2 = foe["dir"]
-			var home: Vector2 = foe["home"]
-			if pos.distance_to(home) > PX * 2.5:
-				wander_dir = (home - pos).normalized()
-			_move_foe(foe, wander_dir * float(st["speed"]) * delta)
-	queue_redraw()
-
-
-# Moves one axis at a time so a foe slides along walls.
-func _move_foe(foe: Dictionary, step: Vector2) -> void:
-	var pos: Vector2 = foe["pos"]
-	var nx := pos + Vector2(step.x, 0)
-	if _foe_free(nx):
-		pos = nx
-	var ny := pos + Vector2(0, step.y)
-	if _foe_free(ny):
-		pos = ny
-	foe["pos"] = pos
-
-
-func _foe_free(p: Vector2) -> bool:
-	var t := Vector2i(floori(p.x / PX), floori(p.y / PX))
-	return not BLOCKING.has(_kind_at(t)) and _npc_index(t) == -1 and not _near_campsite(t)
-
-
-func _foe_attack(foe: Dictionary) -> void:
-	if _at_campsite():
-		return
-	if invuln > 0.0:
-		return
-	# A held block turns aside a blow from the front.
-	if blocking and (foe["pos"] - player.position).normalized().dot(player.facing) > 0.3:
-		invuln = INVULN_TIME * 0.5
-		play_sfx("tick", 0.05)
-		return
-	var st: Dictionary = FOES[foe["kind"]]
-	var dmg := maxi(1, int(st["dmg"]) - _defense())
-	hp -= dmg
-	invuln = INVULN_TIME
-	# Knock the player back a little, if there's room.
-	var away: Vector2 = (player.position - foe["pos"]).normalized()
-	var np: Vector2 = player.position + away * PX * 0.5
-	if not _is_blocked_world(np):
-		player.position = np
-	if hp <= 0:
-		_fallen()
-		return
-	_show_message("The %s strikes you for %d. HP %d/%d" % [str(foe["kind"]).capitalize(), dmg, hp, max_hp()])
-
 
 func _swing() -> void:
 	if not _tool_press:
@@ -4778,7 +4632,7 @@ func _swing() -> void:
 		return
 	var weapon := str(equipment["hand_r"])
 	if weapon != "" and GEAR_ITEMS[weapon].has("ammo"):
-		_fire(weapon)
+		combat_sys._fire(weapon)
 		return
 	if swing_cool > 0.0:
 		return
@@ -4786,7 +4640,7 @@ func _swing() -> void:
 	swing_time = SWING_TIME
 	player.play_act("swing", SWING_TIME)
 	swing_dir = player.facing
-	var dmg := _weapon_damage()
+	var dmg := combat_sys._weapon_damage()
 	var combat := progression._level("Combat")
 	var hit_any := false
 	for foe in foes.duplicate():
@@ -4801,34 +4655,12 @@ func _swing() -> void:
 		hit_any = true
 		progression._grant_xp("Combat", XP_HIT)
 		if int(foe["hp"]) <= 0:
-			_kill_foe(foe)
+			combat_sys._kill_foe(foe)
 		else:
 			_show_message("You hit the %s for %d." % [str(foe["kind"]), amount])
 	if not hit_any:
 		_show_message("You swing at empty air.")
 	queue_redraw()
-
-
-func _kill_foe(foe: Dictionary) -> void:
-	var st: Dictionary = FOES[foe["kind"]]
-	foes.erase(foe)
-	stats["defeated"] += 1
-	if foe["kind"] == "stalker":
-		stats["stalkers"] += 1
-	progression._grant_xp("Combat", int(st["xp"]))
-	var note := "+%d Combat XP" % int(st["xp"])
-	var drop := str(st["drop"])
-	if randf() < 0.6:
-		materials[drop] += 1
-		note += ", 1 %s" % drop
-	_show_message("The %s falls. %s" % [str(foe["kind"]), note])
-
-
-func _weapon_damage() -> int:
-	var item := str(equipment["hand_r"])
-	if item == "":
-		return 1
-	return int(GEAR_ITEMS[item]["dmg"])
 
 
 func _defense() -> int:
