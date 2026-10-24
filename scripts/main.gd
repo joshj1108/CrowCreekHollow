@@ -2157,6 +2157,11 @@ func _draw_sprite_ground(t: Vector2i, kind: int, cell: Rect2) -> bool:
 			name = "door"
 		Tile.PORCH:
 			name = "porch"
+		Tile.TREE:
+			# The great tree's base sits on grass; its art is drawn over it. Grove trees are drawn as props.
+			if not _in_big_tree(t):
+				return false
+			name = "grass_%d" % v
 		_:
 			return false
 	draw_texture_rect(FarmSprites.tex(name, flip), cell, false)
