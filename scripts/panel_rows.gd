@@ -124,7 +124,7 @@ func _inventory_rows() -> Array:
 	rows.append({"name": "Food", "progress": roundi(m.food) / 100.0})
 	rows.append({"name": "Water", "progress": roundi(m.water) / 100.0})
 	rows.append({"name": "Warmth", "progress": roundi(m.warmth) / 100.0})
-	rows.append({"name": "Fire", "value": ("lit, about %d hours left" % ceili(m.fire_hours)) if m._fire_lit() else "out. Feed the hearth from the house with firewood."})
+	rows.append({"name": "Fire", "value": ("lit, about %d hours left" % ceili(m.fire_hours)) if m.firewood._fire_lit() else "out. Feed the hearth from the house with firewood."})
 	rows.append({"name": "Outside", "value": "%d°F, %s" % [roundi(m._temperature()), str(m.WEATHER_NAMES.get(m.weather_kind, "Overcast")).to_lower()]})
 	rows.append({"note": "Food and water drain through the day. Drink from the pond or the pump to refill water. Warmth drains outdoors on cold days, refills in the house, and is full again after a night's sleep. An empty need costs HP."})
 	rows.append({"section": "Planting"})

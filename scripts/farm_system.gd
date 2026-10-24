@@ -139,7 +139,7 @@ func _update_harvest(delta: float) -> void:
 			if m._kind_at(tile) != m.Tile.TREE or not m.GROVE_SPOTS.has(tile - Vector2i(m.BORDER_X, m.BORDER_Y)):
 				_stop_harvest("")
 				return
-			_roll_harvest(m.CHOP_BASE_CHANCE + m.TOOL_TIER_CHANCE * float(m.tool_tier["hatchet"]), "Chip, chip. The tree is still standing.", func() -> void: m._finish_chop(tile))
+			_roll_harvest(m.CHOP_BASE_CHANCE + m.TOOL_TIER_CHANCE * float(m.tool_tier["hatchet"]), "Chip, chip. The tree is still standing.", func() -> void: m.firewood._finish_chop(tile))
 		"mine":
 			if not m.rocks.has(tile):
 				_stop_harvest("")

@@ -916,6 +916,7 @@ var shake_tw: Tween
 var last_minimap_key: Array = []
 var last_cam_tile := Vector2i(-99, -99)   # the tile the camera was last drawn from
 var panels: PanelRows
+var firewood: FirewoodSystem
 var farm: FarmSystem
 var animals: AnimalSystem
 var desk: DeskSystem
@@ -939,6 +940,7 @@ func _ready() -> void:
 	desk = DeskSystem.new(self)
 	animals = AnimalSystem.new(self)
 	farm = FarmSystem.new(self)
+	firewood = FirewoodSystem.new(self)
 	_setup_input()
 	_load_settings()
 	_start_music()
@@ -2544,10 +2546,10 @@ func _on_panel_action(action_id: String) -> void:
 		_build_woodshed()
 		return
 	if action_id.begins_with("wood_take:"):
-		_take_firewood(int(action_id.trim_prefix("wood_take:")))
+		firewood._take_firewood(int(action_id.trim_prefix("wood_take:")))
 		return
 	if action_id == "wood_store":
-		_store_firewood()
+		firewood._store_firewood()
 		return
 	if action_id == "build_furnace":
 		_build_furnace()
@@ -3351,7 +3353,7 @@ func _interact() -> void:
 			Tile.BED:
 				_try_sleep()
 			Tile.FIREPLACE:
-				_feed_fire()
+				firewood._feed_fire()
 			Tile.STATION:
 				_tidy_house()
 			Tile.DESK:
@@ -3390,11 +3392,11 @@ func _interact() -> void:
 		return
 	if kind == Tile.TREE and GROVE_SPOTS.has(tile - Vector2i(BORDER_X, BORDER_Y)):
 		if _need_tool("axe"):
-			_chop(tile)
+			firewood._chop(tile)
 		return
 	if kind == Tile.CHOPLOG:
 		if _tool_press:
-			_chop_firewood()
+			firewood._chop_firewood()
 		else:
 			_show_message("Stand here with the axe and some wood, then press RT or click to split firewood.")
 		return
@@ -4069,12 +4071,12 @@ func _update_needs(dh: float) -> void:
 	var thirst := WATER_PER_HOUR * (HOT_WATER_MULT if temp >= HOT_TEMP else 1.0)
 	food = maxf(0.0, food - FOOD_PER_HOUR * dh)
 	water = maxf(0.0, water - thirst * dh)
-	var was_lit := _fire_lit()
+	var was_lit := firewood._fire_lit()
 	fire_hours = maxf(0.0, fire_hours - dh)
-	if was_lit and not _fire_lit():
+	if was_lit and not firewood._fire_lit():
 		_show_message("The fire has gone out.")
 	# With no fire the house is as cold as outside, so it only warms on mild days.
-	if inside and _fire_lit():
+	if inside and firewood._fire_lit():
 		var gain := WARMTH_INDOORS if house_stage >= 2 else WARMTH_INDOORS_COLD
 		warmth = minf(100.0, warmth + gain * dh)
 	elif temp >= COLD_TEMP:
@@ -4292,29 +4294,6 @@ func _storage_label(tile: int) -> String:
 
 # --- Forestry and tools -------------------------------------------------------
 
-func _chop(tile: Vector2i) -> void:
-	if int(tool_tier["hatchet"]) < 1:
-		play_sfx("strike", 0.08)
-		_show_message("You need a hatchet. Craft a crude one from the Craft panel.")
-		return
-	# Chopping keeps rolling each tick until the tree falls. Moving away stops it.
-	farm._start_harvest("chop", tile)
-	_show_message("You start chopping. Keep at it.")
-
-
-func _finish_chop(tile: Vector2i) -> void:
-	grove_felled[tile] = true
-	_apply_grove()
-	materials["wood"] += 3
-	var found := "3 wood"
-	if int(tool_tier["hatchet"]) >= 3:
-		materials["hardwood"] += 2
-		found += ", 2 hardwood"
-	stats["felled"] += 1
-	_grant_xp("Forestry", XP_FELL)
-	_show_message("You fell the tree. +%s. +%d Forestry XP" % [found, XP_FELL])
-	queue_redraw()
-
 
 func _apply_grove() -> void:
 	for spot in GROVE_SPOTS:
@@ -4416,59 +4395,6 @@ func _tiles_to_array(tiles: Dictionary) -> Array:
 
 
 # --- Smithing -------------------------------------------------------------------
-
-# Whether the hearth has a fire going.
-func _fire_lit() -> bool:
-	return fire_hours > 0.0
-
-
-func _feed_fire() -> void:
-	if int(inventory["firewood"]) <= 0:
-		_show_message("The hearth needs firewood. Take some from the firewood store at the workshop.")
-		return
-	if fire_hours >= FIRE_MAX_HOURS:
-		_show_message("The fire is already roaring.")
-		return
-	inventory["firewood"] -= 1
-	fire_hours = minf(FIRE_MAX_HOURS, fire_hours + FIREWOOD_HOURS)
-	_show_message("You feed the fire. It will burn for about %d more hours." % ceili(fire_hours))
-
-
-# Splits one wood into firewood at the chopping log. Needs the axe in hand and wood in the pack.
-func _chop_firewood() -> void:
-	if not _need_tool("axe"):
-		return
-	if int(materials["wood"]) <= 0:
-		_show_message("You need wood to split. Gather some first.")
-		return
-	if firewood_store >= WOODSTORE_CAP:
-		_show_message("The firewood store is full. Take some firewood out first.")
-		return
-	materials["wood"] -= 1
-	var made := mini(FIREWOOD_PER_WOOD, WOODSTORE_CAP - firewood_store)
-	firewood_store += made
-	_grant_xp("Forestry", XP_CHOP_LOG)
-	_show_message("You split the wood into %d firewood. %d in the store. +%d Forestry XP" % [made, firewood_store, XP_CHOP_LOG])
-
-
-func _take_firewood(amount: int) -> void:
-	var n := mini(amount, firewood_store)
-	if n <= 0:
-		_show_message("The firewood store is empty.")
-		return
-	firewood_store -= n
-	inventory["firewood"] += n
-	_show_message("You take %d firewood." % n)
-
-
-func _store_firewood() -> void:
-	var n := mini(int(inventory["firewood"]), WOODSTORE_CAP - firewood_store)
-	if n <= 0:
-		_show_message("There is nothing to store, or the store is full.")
-		return
-	inventory["firewood"] -= n
-	firewood_store += n
-	_show_message("You store %d firewood. %d in the store." % [n, firewood_store])
 
 
 func _build_woodshed() -> void:
@@ -6184,7 +6110,7 @@ func _try_sleep() -> void:
 		return
 	stats["slept"] += 1
 	_change_sanity(SLEEP_SANITY)
-	if _fire_lit():
+	if firewood._fire_lit():
 		warmth = 100.0
 	else:
 		_show_message("The fire is out. Nothing warms the house through the night, and you wake chilled.")
@@ -7120,7 +7046,7 @@ func _draw_fireplace_tile(cell: Rect2) -> void:
 		draw_line(Vector2(cell.position.x, y), Vector2(cell.end.x, y), Color(0, 0, 0, 0.25), 1.0)
 	var box := Rect2(cell.position + Vector2(8, 14), cell.size - Vector2(16, 20))
 	draw_rect(box, Color("1a0f0a"))
-	if house_stage >= 2 and _fire_lit():
+	if house_stage >= 2 and firewood._fire_lit():
 		draw_colored_polygon(PackedVector2Array([
 			box.position + Vector2(4, box.size.y),
 			box.position + Vector2(box.size.x * 0.5, box.size.y * 0.2),
