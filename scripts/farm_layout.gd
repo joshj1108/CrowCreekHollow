@@ -19,22 +19,22 @@ const TERRAIN := [
 	".KKKK....G..HHHHHH......G.~~~~~~~~~~~~~.",
 	"KK.KKK......HHHHHH........~~~~~~~~~~~~~.",
 	"KKC.KK......HHHHHH........~~~~~~~~.~~~~~",
-	"KKPP.XXX...XHHHHHHX.A.X....P~~~~~~~~~~~.",
-	"..PP.XXX...XHHDHHHXXXXX....PP~~~~~~~~~..",
+	"KKPP.X.....XHHHHHHX.A......P~~~~~~~~~~~.",
+	"..PP.XX....XHHDHHHXXXXX....PP~~~~~~~~~..",
 	"...PPPPPPPPPRRRRPPPPPPPPPPPP.~~~~~~~~...",
 	".XXX.......XXXRR...............~~~~~....",
 	".SSSSSSSSSSSSX..............G...~~~.....",
-	".SSSSSSSSSSSS.XXXXXX....XXX...........G.",
-	".SSSSSSSSSSSS.X.X.FFFFFFFFX.....G.......",
-	".SSSSSSSSSSSS.XW..FFFFFFFF..............",
-	"XSSSSSSSSSSSSXXXX.FFFFFFFFX.............",
-	".XXX.......XXX...XFFFFFFFFX.............",
-	".FFFFFFFFFFFFX....XXX...X.X....BBB...G..",
+	".SSSSSSSSSSSS.....XX....XXX...........G.",
+	".SSSSSSSSSSSS.X.X.FFFFFFFF......G.......",
+	".SSSSSSSSSSSS.XWX.FFFFFFFF..............",
+	".SSSSSSSSSSSSXXXX.FFFFFFFF..............",
+	".X...........X....FFFFFFFFX.............",
+	".FFFFFFFFFFFFX.......................G..",
 	".FFFFFFFFFFFF..............G...BBB......",
 	".FFFFFFFFFFFF........G.........BBB......",
-	".FFFFFFFFFFFF...G.......................",
+	".FFFFFFFFFFFF...G..............BBB......",
 	".FFFFFFFFFFFFX..........G.............G.",
-	".XX........XXX..........................",
+	".XX.........XX..........................",
 	"........................................",
 ]
 
@@ -56,15 +56,15 @@ const WORKSHOP_RECT := Rect2i(25, 19, 5, 4)
 const WORKSHOP_DOOR := Vector2i(27, 22)
 const WOODSTORE_IX := Vector2i(26, 21)
 const CHOPLOG_IX := Vector2i(28, 21)
-const BIG_TREE_INNER := Vector2i(31, 17)
+const BIG_TREE_INNER := Vector2i(31, 18)
 const LAKE_FOCUS := Vector2(32.6, 5.6)
 const GROVE_SPOTS := [Vector2i(19, 1), Vector2i(9, 4), Vector2i(24, 4), Vector2i(28, 11), Vector2i(38, 12), Vector2i(32, 13), Vector2i(37, 17), Vector2i(27, 18), Vector2i(21, 19), Vector2i(16, 20), Vector2i(24, 21), Vector2i(38, 21)]
 const WILLOW_TREES := [Vector2i(24, 4), Vector2i(28, 11), Vector2i(32, 13)]
 const DEAD_TREES := []
-const BRUSH_SPOTS := [Vector2i(30, 12), Vector2i(12, 1), Vector2i(38, 15), Vector2i(26, 1), Vector2i(22, 3), Vector2i(7, 4), Vector2i(35, 17)]
-const THICKET_SPOTS := [Vector2i(29, 19), Vector2i(26, 21), Vector2i(19, 5)]
-const ROCK_SPOTS := [Vector2i(28, 14), Vector2i(18, 19), Vector2i(21, 11), Vector2i(1, 1), Vector2i(38, 10), Vector2i(16, 1), Vector2i(15, 22), Vector2i(36, 12)]
+const BRUSH_SPOTS := [Vector2i(30, 12), Vector2i(12, 1), Vector2i(18, 18), Vector2i(38, 15), Vector2i(26, 1), Vector2i(22, 3), Vector2i(27, 14)]
+const THICKET_SPOTS := [Vector2i(29, 19), Vector2i(26, 21), Vector2i(7, 4)]
+const ROCK_SPOTS := [Vector2i(35, 17), Vector2i(19, 5), Vector2i(21, 11), Vector2i(1, 1), Vector2i(38, 10), Vector2i(16, 1), Vector2i(15, 22), Vector2i(36, 12)]
 # Farm tiles that the coop and barn must not be placed on, so they never overlap a building the player unlocks later.
 const RESERVED := [Vector2i(10, 5), Vector2i(25, 19), Vector2i(25, 20), Vector2i(25, 21), Vector2i(25, 22), Vector2i(26, 19), Vector2i(26, 20), Vector2i(26, 21), Vector2i(26, 22), Vector2i(27, 19), Vector2i(27, 20), Vector2i(27, 21), Vector2i(27, 22), Vector2i(28, 19), Vector2i(28, 20), Vector2i(28, 21), Vector2i(28, 22), Vector2i(29, 19), Vector2i(29, 20), Vector2i(29, 21), Vector2i(29, 22)]
 # Changes whenever the layout changes. Saves record it, so a save from another layout is migrated.
-const VERSION := "f4389479"
+const VERSION := "1e0c2a1f"

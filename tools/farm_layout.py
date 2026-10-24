@@ -42,7 +42,7 @@ PALETTE = {
 NAMES = list(PALETTE)
 COLOURS = np.array([PALETTE[n][0] for n in NAMES], dtype=float)
 MAX_DIST = 40.0  # pixels further than this from every colour are ignored
-MIN_FRACTION = {"fence": 0.04}  # thin strokes need a lower share than solid blocks
+MIN_FRACTION = {"fence": 0.15}  # thin strokes need a lower share than solid blocks
 DEFAULT_FRACTION = 0.4
 
 
@@ -119,6 +119,78 @@ def place_small_features(cells, labels, bounds):
             cells[iy][ix] = name
 
 
+def snap_rectangles(cells, labels, bounds):
+    """Rectangular features (house, plots, great tree) are filled as the rectangle their pixels
+    cover, with edges rounded to the nearest tile boundary. Majority sampling loses their edges."""
+    import scipy.ndimage as nd
+    x0, y0, x1, y1 = bounds
+    cw = (x1 - x0) / INNER_W
+    ch = (y1 - y0) / INNER_H
+
+    def to_cells(sx, sy):
+        cx0 = max(0, int(round((sx.start - x0) / cw)))
+        cx1 = min(INNER_W, int(round((sx.stop - x0) / cw)))
+        cy0 = max(0, int(round((sy.start - y0) / ch)))
+        cy1 = min(INNER_H, int(round((sy.stop - y0) / ch)))
+        return cx0, cy0, cx1, cy1
+
+    def fill(name, rect):
+        cx0, cy0, cx1, cy1 = rect
+        for yy in range(INNER_H):
+            for xx in range(INNER_W):
+                if cells[yy][xx] == name and cx0 <= xx < cx1 and cy0 <= yy < cy1:
+                    cells[yy][xx] = "grass"
+        for yy in range(cy0, cy1):
+            for xx in range(cx0, cx1):
+                cells[yy][xx] = name
+
+    def biggest(names):
+        mask = np.isin(labels, [NAMES.index(n) for n in names])
+        lab, n = nd.label(mask)
+        if n == 0:
+            return []
+        sizes = nd.sum(mask, lab, range(1, n + 1))
+        order = np.argsort(sizes)[::-1]
+        found = []
+        slices = nd.find_objects(lab)
+        for i in order:
+            sl = slices[i]
+            # The tree border shares the great tree's colour and touches the edge of the picture; skip it.
+            if sl[0].start == 0 or sl[1].start == 0 or sl[0].stop >= labels.shape[0] or sl[1].stop >= labels.shape[1]:
+                continue
+            if sizes[i] > 0.02 * (x1 - x0) * (y1 - y0) / 100:
+                found.append((lab, i + 1, sizes[i]))
+        return found
+
+    # House: roof and body together.
+    for lab, k, _ in biggest(["roof", "body"])[:1]:
+        sl = nd.find_objects(lab)[k - 1]
+        fill("body", to_cells(sl[1], sl[0]))
+    # Plots: each brown or olive block.
+    for names in (["brown"], ["olive"]):
+        mask = np.isin(labels, [NAMES.index(n) for n in names])
+        lab, n = nd.label(mask)
+        for sl in nd.find_objects(lab):
+            if sl is None:
+                continue
+            area = (sl[1].stop - sl[1].start) * (sl[0].stop - sl[0].start)
+            if area < 0.3 * cw * ch:
+                continue
+            fill(names[0], to_cells(sl[1], sl[0]))
+    # Great tree: a 3 by 3 block at the centre of its footprint.
+    for lab, k, _ in biggest(["tree_big"])[:1]:
+        sl = nd.find_objects(lab)[k - 1]
+        cx0, cy0, cx1, cy1 = to_cells(sl[1], sl[0])
+        cx, cy = (cx0 + cx1) // 2, (cy0 + cy1) // 2
+        for yy in range(INNER_H):
+            for xx in range(INNER_W):
+                if cells[yy][xx] == "tree_big":
+                    cells[yy][xx] = "grass"
+        for yy in range(cy - 1, cy + 2):
+            for xx in range(cx - 1, cx + 2):
+                cells[yy][xx] = "tree_big"
+
+
 def components(cells, names):
     """4-connected groups of cells whose class is in names. Returns a list of sets."""
     seen, groups = set(), []
@@ -179,6 +251,7 @@ def convert(path, drop_grove=None):
     labels = classify_pixels(rgb)
     cells = sample_grid(labels, bounds)
     place_small_features(cells, labels, bounds)
+    snap_rectangles(cells, labels, bounds)
     warnings = []
 
     # Plot blocks: the upper brown block is soil, the lower one fallow, the olive one is plot three.
