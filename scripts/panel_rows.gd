@@ -144,8 +144,8 @@ func _inventory_rows() -> Array:
 
 
 func _gear_rows() -> Array:
-	var tiles := m._gear_tiles()
-	var chosen := m._gear_chosen(tiles)
+	var tiles := m.crafting._gear_tiles()
+	var chosen := m.crafting._gear_chosen(tiles)
 	var marked: Array = []
 	for t in tiles:
 		var tile: Dictionary = t.duplicate()
@@ -165,8 +165,8 @@ func _craft_rows() -> Array:
 	for tab in m.CRAFT_TABS:
 		tabs.append({"id": tab["id"], "name": tab["name"], "action": "craft_tab:" + str(tab["id"])})
 	var rows: Array = [{"tabs": tabs, "active": m.craft_tab}]
-	var recipes := m._craft_recipes()
-	var chosen := m._chosen_recipe(recipes)
+	var recipes := m.crafting._craft_recipes()
+	var chosen := m.crafting._chosen_recipe(recipes)
 	if recipes.is_empty():
 		rows.append({"note": "Nothing to make here yet."})
 	else:
@@ -177,7 +177,7 @@ func _craft_rows() -> Array:
 			tile["action"] = "craft_pick:" + str(r["key"])
 			tiles.append(tile)
 		rows.append({"split": {"recipes": tiles, "columns": 4, "detail": chosen}})
-	rows.append({"note": m._craft_footer()})
+	rows.append({"note": m.crafting._craft_footer()})
 	if m.craft_tab == "other":
 		rows.append_array(_craft_camp_rows())
 	return rows
