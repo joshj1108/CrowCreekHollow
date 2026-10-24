@@ -2253,8 +2253,8 @@ func _update_house_roof_depth() -> void:
 		house_roof_bottom = _find_house_roof_bottom()
 	if house_roof_bottom < 0:
 		return
-	# The house is drawn over the player until one tile south of the walls' top edge.
-	house_roof_layer.z_index = 1 if player.position.y < (house_roof_bottom + 1) * PX else 0
+	# The house is drawn over the player until two tiles south of the walls' top edge.
+	house_roof_layer.z_index = 1 if player.position.y < (house_roof_bottom + 2) * PX else 0
 	if house_roof_drawn_stage != house_stage:
 		house_roof_layer.queue_redraw()
 
