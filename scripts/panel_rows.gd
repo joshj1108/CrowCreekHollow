@@ -742,7 +742,7 @@ func _furnace_rows() -> Array:
 			"value": "Smithing %d, +%d XP. Held: %d ore, %d bars" % [int(m.SMELT_LEVEL[kind]), m.XP_SMELT, int(m.materials[kind + "_ore"]), int(m.materials[kind + "_bar"])],
 			"button": "Smelt",
 			"action": "smelt:" + kind,
-			"enabled": m._can_smelt(kind),
+			"enabled": m.mining._can_smelt(kind),
 		})
 	return rows
 

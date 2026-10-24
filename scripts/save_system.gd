@@ -257,7 +257,7 @@ func _load_game() -> bool:
 		for q in data["quarry"]:
 			m.quarry[Vector2i(int(q[0]), int(q[1]))] = true
 	else:
-		m._fill_quarry()
+		m.mining._fill_quarry()
 	return true
 
 
