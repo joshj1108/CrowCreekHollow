@@ -904,6 +904,7 @@ var message_label: Label
 var player    # Node2D with player.gd attached
 var house_roof_layer: Node2D  # the farm house roof: walkable, drawn over the player north of the walls
 var house_roof_bottom := -1  # first row below the roof, cached; -1 until found
+var house_roof_drawn_stage := -1  # the house stage the layer last drew
 var big_tree_layer: Node2D  # the great tree's art; drawn over the player north of its base, under it south of it
 var camera: Camera2D
 # Full-screen fade for sleeping and collapsing. While a scene plays the world is frozen.
@@ -2145,15 +2146,11 @@ func _draw_sprite_ground(t: Vector2i, kind: int, cell: Rect2) -> bool:
 			name = "rock_%d" % v
 		Tile.CAVE_MOUTH:
 			name = "cave_mouth"
-		Tile.HOUSE:
-			name = "house_wall"
-		Tile.ROOF:
-			# The roof is walkable and its art is drawn by house_roof_layer, so the ground here is grass.
+		Tile.HOUSE, Tile.DOOR, Tile.PORCH:
+			# The house is one sprite, drawn by house_roof_layer over its footprint, so its tiles are grass.
 			name = "grass_%d" % v
-		Tile.DOOR:
-			name = "house_door"
-		Tile.PORCH:
-			name = "porch"
+		Tile.ROOF:
+			name = "grass_%d" % v
 		Tile.TREE:
 			# The great tree's base sits on grass; its art is drawn over it. Grove trees are drawn as props.
 			if not _in_big_tree(t):
@@ -2244,6 +2241,8 @@ func _update_house_roof_depth() -> void:
 	if house_roof_bottom < 0:
 		return
 	house_roof_layer.z_index = 1 if player.position.y < house_roof_bottom * PX else 0
+	if house_roof_drawn_stage != house_stage:
+		house_roof_layer.queue_redraw()
 
 
 # The row just below the roof, found from the map; -1 when the map has no roof.
@@ -2256,16 +2255,30 @@ func _find_house_roof_bottom() -> int:
 	return last + 1 if last >= 0 else -1
 
 
+# The house is one sprite over its footprint: the roof and walls, the door, the porch and the steps.
+# Its footprint is six tiles wide and seven tall, from the top of the roof down to the steps.
+const HOUSE_SPRITE_TILES := Vector2i(6, 7)
+
+
 func _draw_house_roof_layer() -> void:
 	if not FARM_SPRITES:
 		return
+	var origin := _house_origin()
+	if origin.x < 0:
+		return
+	var rect := Rect2(origin.x * PX, origin.y * PX, HOUSE_SPRITE_TILES.x * PX, HOUSE_SPRITE_TILES.y * PX)
+	house_roof_layer.draw_texture_rect(FarmSprites.tex("house_stage_%d" % house_stage), rect, false)
+	house_roof_drawn_stage = house_stage
+
+
+# Top-left tile of the house footprint, from the map's roof tiles. (-1, -1) when there is no roof.
+func _house_origin() -> Vector2i:
+	var best := Vector2i(-1, -1)
 	for y in MAP_H:
 		for x in MAP_W:
-			if map[y][x] != Tile.ROOF:
-				continue
-			var below: int = map[y + 1][x] if y + 1 < MAP_H else Tile.WALL
-			var name := "house_roof_bottom" if below != Tile.ROOF else "house_roof_top"
-			house_roof_layer.draw_texture_rect(FarmSprites.tex(name), _tile_rect(Vector2i(x, y)), false)
+			if map[y][x] == Tile.ROOF and (best.x < 0 or y < best.y or (y == best.y and x < best.x)):
+				best = Vector2i(x, y)
+	return best
 
 
 func _update_big_tree_depth() -> void:
