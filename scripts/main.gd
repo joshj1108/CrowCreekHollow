@@ -667,7 +667,7 @@ const NIGHT_EVENTS := [
 
 enum Tile { TREE, GRASS, SOIL, PATH, WATER, HOUSE, DOOR, FLOOR, WALL, EXIT, BED, STATION, DESK, FALLOW, STALL, CELLAR, COOLER, GATE, SMOKEHOUSE, FURNACE, PORTAL, CAMP, CAVE_MOUTH, CAVE_EXIT, ORE_COPPER, ORE_IRON, COOP, BARN, TABLE, FIREPLACE, WELL, PORCH, WOODSTORE, CHOPLOG, FENCE, ROCK, ROOF }
 
-const BLOCKING := [Tile.TREE, Tile.WATER, Tile.HOUSE, Tile.WALL, Tile.BED, Tile.STATION, Tile.DESK, Tile.STALL, Tile.CELLAR, Tile.COOLER, Tile.SMOKEHOUSE, Tile.FURNACE, Tile.CAMP, Tile.ORE_COPPER, Tile.ORE_IRON, Tile.COOP, Tile.BARN, Tile.TABLE, Tile.FIREPLACE, Tile.WELL, Tile.WOODSTORE, Tile.CHOPLOG, Tile.FENCE, Tile.ROCK, Tile.ROOF]
+const BLOCKING := [Tile.TREE, Tile.WATER, Tile.HOUSE, Tile.WALL, Tile.BED, Tile.STATION, Tile.DESK, Tile.STALL, Tile.CELLAR, Tile.COOLER, Tile.SMOKEHOUSE, Tile.FURNACE, Tile.CAMP, Tile.ORE_COPPER, Tile.ORE_IRON, Tile.COOP, Tile.BARN, Tile.TABLE, Tile.FIREPLACE, Tile.WELL, Tile.WOODSTORE, Tile.CHOPLOG, Tile.FENCE, Tile.ROCK]
 
 const TILE_COLORS := {
 	Tile.TREE: Color("2f4f2f"),
@@ -902,6 +902,8 @@ var warmth_bar: ProgressBar
 var needs_temp: Label
 var message_label: Label
 var player    # Node2D with player.gd attached
+var house_roof_layer: Node2D  # the farm house roof: walkable, drawn over the player north of the walls
+var house_roof_bottom := -1  # first row below the roof, cached; -1 until found
 var big_tree_layer: Node2D  # the great tree's art; drawn over the player north of its base, under it south of it
 var camera: Camera2D
 # Full-screen fade for sleeping and collapsing. While a scene plays the world is frozen.
@@ -1096,6 +1098,7 @@ func _on_title_start(mode: String, slot: int) -> void:
 
 func _process(delta: float) -> void:
 	_update_big_tree_depth()
+	_update_house_roof_depth()
 	# F3 toggles the performance readout, even while a menu is open.
 	var f3_down := Input.is_physical_key_pressed(KEY_F3)
 	if f3_down and not perf_was_down:
@@ -1771,6 +1774,10 @@ func _build_world() -> void:
 	goat_layer.visible = false
 	add_child(goat_layer)
 
+	house_roof_layer = Node2D.new()
+	house_roof_layer.draw.connect(_draw_house_roof_layer)
+	add_child(house_roof_layer)
+
 	big_tree_layer = Node2D.new()
 	big_tree_layer.draw.connect(_draw_big_tree_layer)
 	add_child(big_tree_layer)
@@ -2151,8 +2158,8 @@ func _draw_sprite_ground(t: Vector2i, kind: int, cell: Rect2) -> bool:
 		Tile.HOUSE:
 			name = "house_wall"
 		Tile.ROOF:
-			var below: int = map[t.y + 1][t.x] if t.y + 1 < MAP_H else Tile.WALL
-			name = "roof_bottom" if below != Tile.ROOF else "roof_top"
+			# The roof is walkable and its art is drawn by house_roof_layer, so the ground here is grass.
+			name = "grass_%d" % v
 		Tile.DOOR:
 			name = "door"
 		Tile.PORCH:
@@ -2234,6 +2241,39 @@ func _big_tree_base_bottom() -> Vector2:
 
 # Behind the canopy when the player is north of the base's middle row, in front of it from that row down.
 # The roots spread past the base into the middle row, so a player beside them is in front, not behind.
+# The roof is over the player while they stand north of the walls, and under them on the walls.
+func _update_house_roof_depth() -> void:
+	if house_roof_layer == null or player == null:
+		return
+	if house_roof_bottom < 0:
+		house_roof_bottom = _find_house_roof_bottom()
+	if house_roof_bottom < 0:
+		return
+	house_roof_layer.z_index = 1 if player.position.y < house_roof_bottom * PX else 0
+
+
+# The row just below the roof, found from the map; -1 when the map has no roof.
+func _find_house_roof_bottom() -> int:
+	var last := -1
+	for y in MAP_H:
+		for x in MAP_W:
+			if map[y][x] == Tile.ROOF:
+				last = max(last, y)
+	return last + 1 if last >= 0 else -1
+
+
+func _draw_house_roof_layer() -> void:
+	if not FARM_SPRITES:
+		return
+	for y in MAP_H:
+		for x in MAP_W:
+			if map[y][x] != Tile.ROOF:
+				continue
+			var below: int = map[y + 1][x] if y + 1 < MAP_H else Tile.WALL
+			var name := "roof_bottom" if below != Tile.ROOF else "roof_top"
+			house_roof_layer.draw_texture_rect(FarmSprites.tex(name), _tile_rect(Vector2i(x, y)), false)
+
+
 func _update_big_tree_depth() -> void:
 	if big_tree_layer == null or player == null:
 		return

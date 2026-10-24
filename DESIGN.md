@@ -559,7 +559,7 @@ Each class holds `var m: MainGame` and reads main's state through it. A member i
 
 The farm is a hand-read grid. `tools/farm_grid.txt` holds one character per inner tile (40×24), read tile by tile from the layout diagram. `tools/hand_layout.py` reads that grid, derives the anchors (plots, house, porch, well, stall, great tree, grove spots) and writes `scripts/farm_layout.gd`. Regenerate with `python3 tools/hand_layout.py`; edit the grid, not the generated file.
 
-- Terrain codes are listed in the header of `scripts/farm_layout.gd`. The roof (`O`) is a separate tile from the house body (`H`), so the two can differ in colour. The stall is 2×2. The well is one tile.
+- Terrain codes are listed in the header of `scripts/farm_layout.gd`. The roof (`O`) is a separate tile from the house body (`H`), so the two can differ in colour. The roof is walkable: the player walks over it, the walls and door block. The roof art is drawn in its own layer, over the player while they are north of the walls and under them on the walls, the same rule as the great tree's canopy. The stall is 2×2. The well is one tile.
 - The layout has no fences. The reference image removed them, and the grid has no `X` tiles.
 - The great tree's base is a 3 by 3 block. Its middle and bottom rows (`B`) block movement; its top row (`b`) is walkable grass. Its art is drawn larger than that base, 9 by 9 tiles, with the base at the bottom centre. The art above the base does not block. The player walks behind the canopy when north of the base, and in front of the base when south of it (`_update_big_tree_depth` in `main.gd`).
 - Plot one and plot two are soil (brown in the diagram); plot three is fallow (olive).
