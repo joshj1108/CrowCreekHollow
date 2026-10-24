@@ -916,6 +916,7 @@ var shake_tw: Tween
 var last_minimap_key: Array = []
 var last_cam_tile := Vector2i(-99, -99)   # the tile the camera was last drawn from
 var panels: PanelRows
+var progression: ProgressionSystem
 var stall: StallSystem
 var sanity_sys: SanitySystem
 var firewood: FirewoodSystem
@@ -945,6 +946,7 @@ func _ready() -> void:
 	firewood = FirewoodSystem.new(self)
 	sanity_sys = SanitySystem.new(self)
 	stall = StallSystem.new(self)
+	progression = ProgressionSystem.new(self)
 	_setup_input()
 	_load_settings()
 	_start_music()
@@ -1140,11 +1142,11 @@ func _process(delta: float) -> void:
 		if Input.is_action_just_pressed("slot_%d" % (i + 1)):
 			active_slot = i
 	if active_slot != slot_before:
-		_bump("tool_switches")
+		progression._bump("tool_switches")
 	# Walking counts each step to a neighbouring tile. Jumps such as sleeping or going inside don't count.
 	var walk_tile := _player_tile()
 	if last_walk_tile != NO_SPOT and walk_tile != last_walk_tile and absi(walk_tile.x - last_walk_tile.x) + absi(walk_tile.y - last_walk_tile.y) == 1:
-		_bump("walked")
+		progression._bump("walked")
 	last_walk_tile = walk_tile
 	_update_tips(delta)
 	clock += delta
@@ -1170,8 +1172,8 @@ func _process(delta: float) -> void:
 
 	_check_doors()
 	farm._check_unlocks()
-	_check_story()
-	_check_achievements()
+	progression._check_story()
+	progression._check_achievements()
 	_check_guardian()
 	_update_fish_spots(delta)
 	_update_fishing(delta)
@@ -1752,7 +1754,7 @@ func _fill_brush() -> void:
 	brush.clear()
 	for spot in BRUSH_SPOTS:
 		brush[_world_tile(spot.x, spot.y)] = true
-	if _level("Bushcrafting") >= THICKET_LEVEL:
+	if progression._level("Bushcrafting") >= THICKET_LEVEL:
 		for spot in THICKET_SPOTS:
 			brush[_world_tile(spot.x, spot.y)] = true
 	grove_felled.clear()
@@ -2404,7 +2406,7 @@ func _toggle_tab(tab: String) -> void:
 		_close_panel()
 	else:
 		open_tab = tab
-		_bump("panels_opened")
+		progression._bump("panels_opened")
 		play_sfx("panel")
 		_refresh_panel()
 
@@ -2841,7 +2843,7 @@ func _raw_inventory_tiles() -> Array:
 	var turnip_ok := true
 	tiles.append(_stack_tile("seed:turnip", "Turnip seeds", "seed", "a8d46f", int(inventory["seeds"]), "in the pouch",
 		"Planted in tilled soil. Kept in the seed pouch.", "", ""))
-	var pumpkin_ok := _level("Farming") >= PUMPKIN_LEVEL
+	var pumpkin_ok := progression._level("Farming") >= PUMPKIN_LEVEL
 	var pumpkin := _stack_tile("seed:pumpkin", "Pumpkin seeds", "pumpkin_seed", "d98a35", int(inventory["pumpkin_seeds"]), "in the pouch",
 		"Larger harvest of three crops per plant. Needs Farming %d to plant." % PUMPKIN_LEVEL, "", "")
 	pumpkin["enabled"] = pumpkin_ok
@@ -3034,7 +3036,7 @@ func _held(mat: String) -> int:
 
 
 func _level_text(skill: String, level: int) -> String:
-	return "Needs %s %d (you have %d)" % [skill, level, _level(skill)]
+	return "Needs %s %d (you have %d)" % [skill, level, progression._level(skill)]
 
 
 func _slot_icon(item: Dictionary) -> String:
@@ -3088,7 +3090,7 @@ func _recipes_gear() -> Array:
 		out.append({
 			"key": "gear:" + str(id), "name": str(item["name"]), "icon": _slot_icon(item), "tint": tint,
 			"desc": desc, "costs": _cost_lines(item["cost"]), "level_text": _level_text(skill, level),
-			"level_ok": _level(skill) >= level, "enabled": _can_craft(str(id)), "action": "craft:" + str(id),
+			"level_ok": progression._level(skill) >= level, "enabled": _can_craft(str(id)), "action": "craft:" + str(id),
 			"button": "Worn" if worn else "Make",
 		})
 	return out
@@ -3112,7 +3114,7 @@ func _recipes_tools() -> Array:
 			"key": "tool:" + kind, "name": str(tier["name"]), "icon": icon, "tint": TINT_TOOL,
 			"desc": _tool_desc(kind, tier, have),
 			"costs": _cost_lines(tier["cost"]), "level_text": _level_text(str(tier["skill"]), int(tier["level"])),
-			"level_ok": _level(str(tier["skill"])) >= int(tier["level"]), "enabled": _can_craft_tool(kind),
+			"level_ok": progression._level(str(tier["skill"])) >= int(tier["level"]), "enabled": _can_craft_tool(kind),
 			"action": "tool:" + kind, "button": "Make",
 		})
 	for kind in ["arrows", "bolts"]:
@@ -3121,7 +3123,7 @@ func _recipes_tools() -> Array:
 			"key": "ammo:" + kind, "name": str(ammo["name"]), "icon": "arrow", "tint": TINT_TOOL,
 			"desc": "Makes %d at a time. You hold %d." % [int(ammo["yield"]), int(materials[kind])],
 			"costs": _cost_lines(ammo["cost"]), "level_text": _level_text(str(ammo["skill"]), int(ammo["level"])),
-			"level_ok": _level(str(ammo["skill"])) >= int(ammo["level"]), "enabled": _can_fletch(kind),
+			"level_ok": progression._level(str(ammo["skill"])) >= int(ammo["level"]), "enabled": _can_fletch(kind),
 			"action": "ammo:" + kind, "button": "Make",
 		})
 	return out
@@ -3143,7 +3145,7 @@ func _recipes_other() -> Array:
 		out.append({
 			"key": "lantern", "name": str(t["name"]), "icon": "lantern", "tint": TINT_LIGHT,
 			"desc": desc, "costs": costs, "level_text": _level_text("Bushcrafting", int(t["level"])),
-			"level_ok": _level("Bushcrafting") >= int(t["level"]), "enabled": _can_advance_lantern(),
+			"level_ok": progression._level("Bushcrafting") >= int(t["level"]), "enabled": _can_advance_lantern(),
 			"action": "advance_lantern", "button": "Build" if lantern_tier == 0 else "Upgrade",
 		})
 	out.append(_recipes_other_bandage())
@@ -3159,7 +3161,7 @@ func _recipes_other_bandage() -> Dictionary:
 		"key": "bandage", "name": str(BANDAGE["name"]), "icon": "bandage", "tint": "e8e0d0",
 		"desc": "Heals %d HP when used from the Inventory panel. +%d Bushcrafting XP." % [int(BANDAGE["heal"]), int(BANDAGE["xp"])],
 		"costs": costs, "level_text": _level_text("Bushcrafting", int(BANDAGE["level"])),
-		"level_ok": _level("Bushcrafting") >= int(BANDAGE["level"]), "enabled": stall._can_make_bandage(),
+		"level_ok": progression._level("Bushcrafting") >= int(BANDAGE["level"]), "enabled": stall._can_make_bandage(),
 		"action": "make_bandage", "button": "Make",
 	}
 
@@ -3171,7 +3173,7 @@ func _make_bandage() -> void:
 	materials["fiber"] -= int(BANDAGE["fiber"])
 	materials["resin"] -= int(BANDAGE["resin"])
 	inventory["bandage"] += 1
-	_grant_xp("Bushcrafting", int(BANDAGE["xp"]))
+	progression._grant_xp("Bushcrafting", int(BANDAGE["xp"]))
 	_show_message("You roll a bandage. +%d Bushcrafting XP" % int(BANDAGE["xp"]))
 
 
@@ -3194,7 +3196,7 @@ func _quest_row(q: Dictionary, expanded: bool) -> Dictionary:
 	var id := str(q["id"])
 	var done: bool = quests_done.has(q["id"])
 	var is_open: bool = bool(quest_open.get(id, expanded))
-	var shown := mini(_stat_value(q["stat"]), q["goal"])
+	var shown := mini(progression._stat_value(q["stat"]), q["goal"])
 	var row := {
 		"name": str(q["title"]),
 		"struck": done,
@@ -3204,7 +3206,7 @@ func _quest_row(q: Dictionary, expanded: bool) -> Dictionary:
 		"enabled": true,
 	}
 	if is_open:
-		var note := "%s  Reward: %s" % [q["text"], _reward_text(q["reward"])]
+		var note := "%s  Reward: %s" % [q["text"], progression._reward_text(q["reward"])]
 		if expanded:
 			note = "%s\n%s" % [q["story"], note]
 		row["note"] = note
@@ -3464,7 +3466,7 @@ func _gather(tile: Vector2i) -> void:
 	if randf() < 0.34:
 		materials["resin"] += 1
 		found = "sticks, fiber, and resin"
-	_grant_xp("Bushcrafting", XP_GATHER)
+	progression._grant_xp("Bushcrafting", XP_GATHER)
 	_show_message("Gathered %s from the brush. +%d Bushcrafting XP" % [found, XP_GATHER])
 	queue_redraw()
 
@@ -3487,7 +3489,7 @@ func _find_pond_edges() -> void:
 
 # Fishing level 3 and up adds spots: one more at 3, another at 5.
 func _fish_spot_count() -> int:
-	return FISH_SPOT_COUNT + (_level("Fishing") - 1) / 2
+	return FISH_SPOT_COUNT + (progression._level("Fishing") - 1) / 2
 
 
 func _place_key() -> String:
@@ -3817,11 +3819,11 @@ func _rod_bonus() -> float:
 
 func _fish_roll() -> void:
 	stats["fished"] += 1
-	var chance := clampf(FISH_BASE_CHANCE + FISH_CHANCE_PER_LEVEL * float(_level("Fishing") - 1) + _rod_bonus(), 0.0, FISH_CHANCE_CAP)
+	var chance := clampf(FISH_BASE_CHANCE + FISH_CHANCE_PER_LEVEL * float(progression._level("Fishing") - 1) + _rod_bonus(), 0.0, FISH_CHANCE_CAP)
 	if randf() < chance:
 		stats["caught"] += 1
 		inventory["fish"] += 1
-		_grant_xp("Fishing", XP_FISH)
+		progression._grant_xp("Fishing", XP_FISH)
 		_show_message("You hook a fish! +%d Fishing XP" % XP_FISH)
 	else:
 		_show_message("Nothing yet. Keep still.")
@@ -3856,7 +3858,7 @@ func _migrate_legacy_food(saved: Variant) -> void:
 
 func _can_repair_well() -> bool:
 	return not well_repaired and materials["wood"] >= WELL_REPAIR["wood"] \
-		and materials["fiber"] >= WELL_REPAIR["fiber"] and _level("Carpentry") >= WELL_REPAIR["level"]
+		and materials["fiber"] >= WELL_REPAIR["fiber"] and progression._level("Carpentry") >= WELL_REPAIR["level"]
 
 
 func _repair_well() -> void:
@@ -3869,7 +3871,7 @@ func _repair_well() -> void:
 	play_sfx("repair")
 	well_water = WELL_CAPACITY
 	stats["pump"] = 1
-	_grant_xp("Carpentry", XP_REPAIR)
+	progression._grant_xp("Carpentry", XP_REPAIR)
 	_show_message("You rebuild the pump and the water comes up cold. +%d Carpentry XP" % XP_REPAIR)
 	queue_redraw()
 
@@ -3973,12 +3975,12 @@ func _temperature() -> float:
 
 func _achievement_row(a: Dictionary) -> Dictionary:
 	var done: bool = achievements_done.has(a["id"])
-	var shown := mini(_stat_value(a["stat"]), a["goal"])
+	var shown := mini(progression._stat_value(a["stat"]), a["goal"])
 	return {
 		"name": "%s%s" % [a["title"], "   (done)" if done else ""],
 		"value": "%d/%d" % [shown, a["goal"]],
 		"progress": float(shown) / float(a["goal"]),
-		"note": "%s  Reward: %s" % [a["text"], _reward_text(a["reward"])],
+		"note": "%s  Reward: %s" % [a["text"], progression._reward_text(a["reward"])],
 	}
 
 # --- Pack and bags -----------------------------------------------------------
@@ -4010,7 +4012,7 @@ func _upgrade_bag() -> void:
 func _can_afford(cost: Dictionary) -> bool:
 	if money < int(cost.get("coins", 0)):
 		return false
-	if _level("Carpentry") < int(cost.get("level", 1)):
+	if progression._level("Carpentry") < int(cost.get("level", 1)):
 		return false
 	for key in cost.keys():
 		if key == "coins" or key == "level":
@@ -4138,7 +4140,7 @@ func _can_craft_tool(kind: String) -> bool:
 	if have >= tiers.size():
 		return false
 	var tier: Dictionary = tiers[have]
-	if _level(str(tier["skill"])) < int(tier["level"]):
+	if progression._level(str(tier["skill"])) < int(tier["level"]):
 		return false
 	return _has_materials(tier["cost"])
 
@@ -4147,12 +4149,12 @@ func _craft_tool(kind: String) -> void:
 	if not _can_craft_tool(kind):
 		_show_message("You need the materials and skill level for the next %s." % kind)
 		return
-	_bump("crafted")
+	progression._bump("crafted")
 	var tier: Dictionary = TOOL_TIERS[kind][int(tool_tier[kind])]
 	for mat in tier["cost"].keys():
 		materials[mat] -= int(tier["cost"][mat])
 	tool_tier[kind] += 1
-	_grant_xp(str(tier["skill"]), 10)
+	progression._grant_xp(str(tier["skill"]), 10)
 	_show_message("You make a %s. +10 %s XP" % [tier["name"], tier["skill"]])
 
 
@@ -4181,11 +4183,11 @@ func _finish_mine(tile: Vector2i) -> void:
 	var amount := 2 if pick >= 1 else 1
 	materials["stone"] += amount
 	var found := "%d stone" % amount
-	if pick >= 1 and _level("Mining") >= ORE_MINING_LEVEL and randf() < ORE_CHANCE:
+	if pick >= 1 and progression._level("Mining") >= ORE_MINING_LEVEL and randf() < ORE_CHANCE:
 		materials["copper_ore"] += 1
 		found += " and copper ore"
 	stats["mined"] += 1
-	_grant_xp("Mining", XP_MINE)
+	progression._grant_xp("Mining", XP_MINE)
 	_show_message("You break the rock. +%s. +%d Mining XP" % [found, XP_MINE])
 	queue_redraw()
 
@@ -4226,7 +4228,7 @@ func _build_furnace() -> void:
 func _can_smelt(kind: String) -> bool:
 	if not furnace_built:
 		return false
-	if _level("Smithing") < int(SMELT_LEVEL[kind]):
+	if progression._level("Smithing") < int(SMELT_LEVEL[kind]):
 		return false
 	return int(materials[kind + "_ore"]) >= 1 and int(materials["wood"]) >= 1
 
@@ -4241,7 +4243,7 @@ func _smelt(kind: String) -> void:
 	materials[kind + "_ore"] -= 1
 	materials["wood"] -= 1
 	materials[kind + "_bar"] += 1
-	_grant_xp("Smithing", XP_SMELT)
+	progression._grant_xp("Smithing", XP_SMELT)
 	_show_message("You smelt a %s bar. +%d Smithing XP" % [kind, XP_SMELT])
 
 
@@ -4249,7 +4251,7 @@ func _smelt(kind: String) -> void:
 
 func _can_fletch(kind: String) -> bool:
 	var ammo: Dictionary = AMMO[kind]
-	if _level(str(ammo["skill"])) < int(ammo["level"]):
+	if progression._level(str(ammo["skill"])) < int(ammo["level"]):
 		return false
 	return _has_materials(ammo["cost"])
 
@@ -4262,7 +4264,7 @@ func _craft_ammo(kind: String) -> void:
 	for mat in ammo["cost"].keys():
 		materials[mat] -= int(ammo["cost"][mat])
 	materials[kind] += int(ammo["yield"])
-	_grant_xp(str(ammo["skill"]), 6)
+	progression._grant_xp(str(ammo["skill"]), 6)
 	_show_message("You make %d %s. +6 %s XP" % [int(ammo["yield"]), kind, ammo["skill"]])
 
 
@@ -4307,7 +4309,7 @@ func _update_shots(delta: float) -> void:
 func _shot_hits(foe: Dictionary, amount: int) -> void:
 	foe["hp"] = int(foe["hp"]) - amount
 	foe["flash"] = 0.2
-	_grant_xp("Combat", XP_HIT)
+	progression._grant_xp("Combat", XP_HIT)
 	if int(foe["hp"]) <= 0:
 		_kill_foe(foe)
 	else:
@@ -4334,12 +4336,12 @@ func _quarry(tile: Vector2i) -> void:
 func _finish_quarry(tile: Vector2i) -> void:
 	var pick := int(tool_tier["pick"])
 	quarry.erase(tile)
-	var kind := "copper_ore" if _level("Mining") >= 3 else "stone"
-	if _level("Mining") >= 5 and pick >= 2 and randf() < 0.5:
+	var kind := "copper_ore" if progression._level("Mining") >= 3 else "stone"
+	if progression._level("Mining") >= 5 and pick >= 2 and randf() < 0.5:
 		kind = "iron_ore"
 	materials[kind] += 1
 	stats["mined"] += 1
-	_grant_xp("Mining", XP_MINE)
+	progression._grant_xp("Mining", XP_MINE)
 	_show_message("You work the quarry rock. +1 %s. +%d Mining XP" % [kind.replace("_", " "), XP_MINE])
 	queue_redraw()
 
@@ -4539,7 +4541,7 @@ func _mine_cave(tile: Vector2i, kind: int) -> void:
 	if int(tool_tier["pick"]) < need_pick:
 		_show_message("The %s ore is too hard for your hands. Craft a %s pick from the Craft panel." % [ore, "copper" if iron else "stone"])
 		return
-	if _level("Mining") < need_level:
+	if progression._level("Mining") < need_level:
 		_show_message("You need Mining %d to work %s ore." % [need_level, ore])
 		return
 	farm._start_harvest("cave_ore", tile)
@@ -4552,7 +4554,7 @@ func _finish_cave_ore(tile: Vector2i) -> void:
 	cave[tile.y][tile.x] = Tile.FLOOR
 	cave_mined[tile] = true
 	materials[ore + "_ore"] += 1
-	_grant_xp("Mining", XP_MINE)
+	progression._grant_xp("Mining", XP_MINE)
 	_show_message("You break the %s ore. +1 %s ore. +%d Mining XP" % [ore, ore, XP_MINE])
 	queue_redraw()
 
@@ -4861,7 +4863,7 @@ func _town_at(tile: Vector2i) -> int:
 # --- Campsites ----------------------------------------------------------------
 
 func _can_camp() -> bool:
-	return _level("Bushcrafting") >= CAMP_LEVEL and _has_materials(CAMP_COST)
+	return progression._level("Bushcrafting") >= CAMP_LEVEL and _has_materials(CAMP_COST)
 
 
 func _place_campsite() -> void:
@@ -4882,7 +4884,7 @@ func _place_campsite() -> void:
 		world[campsite.y * WORLD_W + campsite.x] = Tile.GRASS
 	campsite = tile
 	_apply_campsite()
-	_grant_xp("Bushcrafting", 15)
+	progression._grant_xp("Bushcrafting", 15)
 	_save_game()
 	_show_message("You set up camp. Rest there from 18:00. +15 Bushcrafting XP")
 	queue_redraw()
@@ -5003,7 +5005,7 @@ func _npc_index(tile: Vector2i) -> int:
 
 
 func max_hp() -> int:
-	return BASE_HP + _level("Combat") - 1
+	return BASE_HP + progression._level("Combat") - 1
 
 
 func _go_home(reason: String) -> void:
@@ -5118,11 +5120,11 @@ func _check_guardian() -> void:
 	for q in GUARDIAN_QUESTS:
 		if guardian_done.has(q["id"]):
 			continue
-		if _stat_value(q["stat"]) < q["goal"]:
+		if progression._stat_value(q["stat"]) < q["goal"]:
 			break
 		guardian_done[q["id"]] = true
-		_grant_reward(q["reward"])
-		_show_message("Guardian quest complete: %s. Reward: %s" % [q["title"], _reward_text(q["reward"])])
+		progression._grant_reward(q["reward"])
+		_show_message("Guardian quest complete: %s. Reward: %s" % [q["title"], progression._reward_text(q["reward"])])
 
 
 func _draw_world() -> void:
@@ -5276,7 +5278,7 @@ func _swing() -> void:
 	player.play_act("swing", SWING_TIME)
 	swing_dir = player.facing
 	var dmg := _weapon_damage()
-	var combat := _level("Combat")
+	var combat := progression._level("Combat")
 	var hit_any := false
 	for foe in foes.duplicate():
 		var to_foe: Vector2 = foe["pos"] - player.position
@@ -5288,7 +5290,7 @@ func _swing() -> void:
 		foe["hp"] = int(foe["hp"]) - amount
 		foe["flash"] = 0.2
 		hit_any = true
-		_grant_xp("Combat", XP_HIT)
+		progression._grant_xp("Combat", XP_HIT)
 		if int(foe["hp"]) <= 0:
 			_kill_foe(foe)
 		else:
@@ -5304,7 +5306,7 @@ func _kill_foe(foe: Dictionary) -> void:
 	stats["defeated"] += 1
 	if foe["kind"] == "stalker":
 		stats["stalkers"] += 1
-	_grant_xp("Combat", int(st["xp"]))
+	progression._grant_xp("Combat", int(st["xp"]))
 	var note := "+%d Combat XP" % int(st["xp"])
 	var drop := str(st["drop"])
 	if randf() < 0.6:
@@ -5335,7 +5337,7 @@ func _can_craft(id: String) -> bool:
 	var item: Dictionary = GEAR_ITEMS[id]
 	if str(equipment[item["slot"]]) == id:
 		return false
-	if _level(str(item.get("skill", "Bushcrafting"))) < int(item["level"]):
+	if progression._level(str(item.get("skill", "Bushcrafting"))) < int(item["level"]):
 		return false
 	var cost: Dictionary = item["cost"]
 	for mat in cost.keys():
@@ -5353,7 +5355,7 @@ func _craft_gear(id: String) -> void:
 	for mat in cost.keys():
 		materials[mat] -= int(cost[mat])
 	equipment[item["slot"]] = id
-	_grant_xp(str(item.get("skill", "Bushcrafting")), 10)
+	progression._grant_xp(str(item.get("skill", "Bushcrafting")), 10)
 	_show_message("You fashion a %s and equip it. +10 %s XP" % [item["name"], item.get("skill", "Bushcrafting")])
 
 
@@ -5365,7 +5367,7 @@ func _can_repair() -> bool:
 	var cost: Dictionary = REPAIR_COSTS[house_stage]
 	return materials["wood"] >= cost["wood"] \
 		and materials["fiber"] >= cost["fiber"] \
-		and _level("Carpentry") >= cost["level"]
+		and progression._level("Carpentry") >= cost["level"]
 
 
 func _repair_house() -> void:
@@ -5379,7 +5381,7 @@ func _repair_house() -> void:
 	house_stage += 1
 	wear = maxi(0, wear - WEAR_REPAIR)
 	farm._check_plot_three()
-	_grant_xp("Carpentry", XP_REPAIR)
+	progression._grant_xp("Carpentry", XP_REPAIR)
 	_build_interior()
 	_show_message("Repaired. The farmhouse is now %s. +%d Carpentry XP" % [STAGE_NAMES[house_stage], XP_REPAIR])
 	queue_redraw()
@@ -5411,7 +5413,7 @@ func _mend_house() -> void:
 	materials["fiber"] -= MEND_FIBER
 	stats["mended"] += 1
 	wear = maxi(0, wear - WEAR_MEND)
-	_grant_xp("Carpentry", XP_MEND)
+	progression._grant_xp("Carpentry", XP_MEND)
 	_show_message("You mend a board. +%d Carpentry XP" % XP_MEND)
 
 
@@ -5438,7 +5440,7 @@ func _can_build(kind: String) -> bool:
 	if _is_built(kind):
 		return false
 	var cost := _build_cost(kind)
-	return _level("Carpentry") >= int(cost["level"]) \
+	return progression._level("Carpentry") >= int(cost["level"]) \
 		and int(materials["wood"]) >= int(cost["wood"]) and int(materials["fiber"]) >= int(cost["fiber"])
 
 
@@ -5522,7 +5524,7 @@ func _confirm_placement() -> void:
 			barn_built = true
 		else:
 			coop_built = true
-		_grant_xp("Carpentry", XP_REPAIR)
+		progression._grant_xp("Carpentry", XP_REPAIR)
 	elif _placed_tile(kind).x >= 0:
 		# Moving is free: the old footprint goes back to grass first.
 		_stamp_footprint(_placed_tile(kind), size, Tile.GRASS)
@@ -5627,7 +5629,7 @@ func _do_job() -> void:
 		else:
 			inventory[item] -= n
 	money += int(job["coins"])
-	_grant_xp(str(job["skill"]), int(job["xp"]))
+	progression._grant_xp(str(job["skill"]), int(job["xp"]))
 	job_done_day = day
 	stats["jobs"] += 1
 	play_sfx("coin")
@@ -5922,7 +5924,7 @@ func _can_advance_lantern() -> bool:
 	return materials["wood"] >= t["wood"] \
 		and materials["fiber"] >= t["fiber"] \
 		and materials["resin"] >= t["resin"] \
-		and _level("Bushcrafting") >= t["level"]
+		and progression._level("Bushcrafting") >= t["level"]
 
 
 func _advance_lantern() -> void:
@@ -5964,81 +5966,6 @@ func _update_lantern(darkness: float) -> void:
 
 
 # --- Quests ------------------------------------------------------------------
-
-func _stat_value(stat: String) -> int:
-	match stat:
-		"house_stage":
-			return house_stage
-		"lantern_tier":
-			return lantern_tier
-		"story":
-			return quests_done.size()
-	if stat.begins_with("level_"):
-		return _level(stat.trim_prefix("level_"))
-	return int(stats.get(stat, 0))
-
-
-# Story chapters run in order, so only the first unfinished one can complete.
-# Adds one to a counter the questline reads. Saves from before a counter existed start it at zero.
-func _bump(stat: String) -> void:
-	stats[stat] = int(stats.get(stat, 0)) + 1
-
-
-func _check_story() -> void:
-	var finished := false
-	for q in STORY:
-		if quests_done.has(q["id"]):
-			continue
-		if _stat_value(q["stat"]) < q["goal"]:
-			break
-		quests_done[q["id"]] = true
-		_grant_reward(q["reward"])
-		_show_message("Chapter complete: %s. Reward: %s" % [q["title"], _reward_text(q["reward"])])
-		finished = true
-	# The next chapter is announced straight away, so the player always knows what to do next.
-	if finished:
-		_show_quest_prompt()
-
-
-func _check_achievements() -> void:
-	for a in ACHIEVEMENTS:
-		if achievements_done.has(a["id"]):
-			continue
-		if _stat_value(a["stat"]) >= a["goal"]:
-			achievements_done[a["id"]] = true
-			play_sfx("chime")
-			_grant_reward(a["reward"])
-			_show_message("Achievement: %s. Reward: %s" % [a["title"], _reward_text(a["reward"])])
-
-
-func _grant_reward(reward: Dictionary) -> void:
-	if reward.has("seeds"):
-		inventory["seeds"] += reward["seeds"]
-	if reward.has("pumpkin_seeds"):
-		inventory["pumpkin_seeds"] += reward["pumpkin_seeds"]
-	for mat in ["wood", "fiber", "resin"]:
-		if reward.has(mat):
-			materials[mat] += reward[mat]
-	if reward.has("coins"):
-		money += reward["coins"]
-	if reward.has("xp"):
-		_grant_xp(reward["skill"], reward["xp"])
-
-
-func _reward_text(reward: Dictionary) -> String:
-	var parts: Array = []
-	if reward.has("seeds"):
-		parts.append("%d turnip seeds" % reward["seeds"])
-	if reward.has("pumpkin_seeds"):
-		parts.append("%d pumpkin seeds" % reward["pumpkin_seeds"])
-	for mat in ["wood", "fiber", "resin"]:
-		if reward.has(mat):
-			parts.append("%d %s" % [reward[mat], mat])
-	if reward.has("coins"):
-		parts.append("%d coins" % reward["coins"])
-	if reward.has("xp"):
-		parts.append("%d %s XP" % [reward["xp"], reward["skill"]])
-	return ", ".join(parts)
 
 
 # --- Sanity and night events ------------------------------------------------
@@ -6430,30 +6357,6 @@ func _brush_to_array() -> Array:
 
 
 # --- Helpers -----------------------------------------------------------------
-
-# Each level costs more XP than the last. Reaching level L takes 50 * (L - 1) * L XP in total:
-# level 2 at 100, level 3 at 300, level 4 at 600, level 5 at 1000, level 6 at 1500.
-func _level(skill: String) -> int:
-	var xp := int(skill_xp[skill])
-	var n := int(floor((-1.0 + sqrt(1.0 + 4.0 * float(xp) / 50.0)) / 2.0))
-	return n + 1
-
-
-# The XP needed to reach a level, counted from the start.
-func _xp_for_level(level: int) -> int:
-	return 50 * (level - 1) * level
-
-
-# How far through the current level the skill is, from 0.0 to 1.0.
-func _level_progress(skill: String) -> float:
-	var level := _level(skill)
-	var start := _xp_for_level(level)
-	var span := _xp_for_level(level + 1) - start
-	return clampf(float(int(skill_xp[skill]) - start) / float(span), 0.0, 1.0)
-
-
-func _grant_xp(skill: String, amount: int) -> void:
-	skill_xp[skill] += amount
 
 
 func _cost_text(cost: Dictionary) -> String:

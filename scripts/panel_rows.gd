@@ -64,7 +64,7 @@ func _skill_rows() -> Array:
 	for skill in m.SKILLS:
 		var info: Dictionary = m.SKILL_INFO[skill]
 		tiles.append({
-			"key": "skill:" + skill, "name": "%s\nLevel %d" % [skill, m._level(skill)],
+			"key": "skill:" + skill, "name": "%s\nLevel %d" % [skill, m.progression._level(skill)],
 			"icon": str(info["icon"]), "tint": str(info["tint"]), "enabled": true, "costs": [], "level_ok": true,
 			"desc": str(info["desc"]), "action": "",
 		})
@@ -78,10 +78,10 @@ func _skill_rows() -> Array:
 	# The detail card shows the XP bar and what is left to the next level.
 	var detail: Dictionary = chosen.duplicate()
 	var skill := str(chosen["key"]).trim_prefix("skill:")
-	var level := m._level(skill)
+	var level := m.progression._level(skill)
 	detail["name"] = skill
-	detail["level_text"] = "Level %d. %d XP, %d more to level %d." % [level, int(m.skill_xp[skill]), m._xp_for_level(level + 1) - int(m.skill_xp[skill]), level + 1]
-	detail["progress"] = m._level_progress(skill)
+	detail["level_text"] = "Level %d. %d XP, %d more to level %d." % [level, int(m.skill_xp[skill]), m.progression._xp_for_level(level + 1) - int(m.skill_xp[skill]), level + 1]
+	detail["progress"] = m.progression._level_progress(skill)
 	return [
 		{"split": {"recipes": marked, "columns": 4, "detail": detail}},
 		{"note": "Skills grow by doing. Each action gives XP to the skill it trains. Levels unlock recipes, crops, and tools."},
@@ -132,7 +132,7 @@ func _inventory_rows() -> Array:
 	var growing := m.crops.size()
 	if growing > 0:
 		rows.append({"name": "Watered today", "value": "%d of %d growing crops" % [m.farm._watered_today(), growing], "progress": float(m.farm._watered_today()) / float(growing)})
-	if m._level("Farming") >= m.PUMPKIN_LEVEL:
+	if m.progression._level("Farming") >= m.PUMPKIN_LEVEL:
 		rows.append({
 			"name": "Switch seed",
 			"value": "Turnip or Pumpkin",
@@ -661,7 +661,7 @@ func _trade_rows() -> Array:
 			"value": "3 for %d coins, Farming %d" % [pumpkin_pack, m.PUMPKIN_LEVEL],
 			"button": "Buy 3",
 			"action": "buy_pumpkin",
-			"enabled": m._level("Farming") >= m.PUMPKIN_LEVEL and m.money >= pumpkin_pack,
+			"enabled": m.progression._level("Farming") >= m.PUMPKIN_LEVEL and m.money >= pumpkin_pack,
 		},
 		{"note": "The farm stand is open from 06:00 to 18:00. It only buys what you carry, so take crops or fish out of storage first."},
 	]

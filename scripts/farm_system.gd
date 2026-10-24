@@ -16,7 +16,7 @@ func _seed_label(kind: String) -> String:
 func _cycle_seed(step: int) -> void:
 	var options: Array = []
 	for kind in ["turnip", "pumpkin"]:
-		if kind == "pumpkin" and m._level("Farming") < m.PUMPKIN_LEVEL:
+		if kind == "pumpkin" and m.progression._level("Farming") < m.PUMPKIN_LEVEL:
 			continue
 		if int(m.inventory[m.CROPS[kind]["seed"]]) > 0:
 			options.append(kind)
@@ -40,7 +40,7 @@ func _switch_seed() -> void:
 
 # Opens the third plot once Farming reaches level 4 and the house is at least Patched.
 func _check_plot_three() -> void:
-	if m.plot_three_open or m._level("Farming") < m.PLOT_THREE_LEVEL or m.house_stage < 2:
+	if m.plot_three_open or m.progression._level("Farming") < m.PLOT_THREE_LEVEL or m.house_stage < 2:
 		return
 	m.plot_three_open = true
 	for y in range(m.PLOT_THREE.position.y, m.PLOT_THREE.end.y):
@@ -52,7 +52,7 @@ func _check_plot_three() -> void:
 # Opens the second plot once Farming reaches level 2. It stays open afterward.
 func _check_unlocks() -> void:
 	_check_plot_three()
-	if m.plot_two_open or m._level("Farming") < 2:
+	if m.plot_two_open or m.progression._level("Farming") < 2:
 		return
 	m.plot_two_open = true
 	for y in range(m.PLOT_TWO.position.y, m.PLOT_TWO.end.y):
@@ -64,7 +64,7 @@ func _check_unlocks() -> void:
 func _plant(tile: Vector2i) -> void:
 	m.play_sfx("plant", 0.06)
 	var kind := m.selected_seed
-	if kind == "pumpkin" and m._level("Farming") < m.PUMPKIN_LEVEL:
+	if kind == "pumpkin" and m.progression._level("Farming") < m.PUMPKIN_LEVEL:
 		kind = "turnip"
 	var seed_key: String = m.CROPS[kind]["seed"]
 	if m.inventory[seed_key] <= 0:
@@ -75,7 +75,7 @@ func _plant(tile: Vector2i) -> void:
 	if m.weather_kind in m.WATER_RAIN_KINDS:
 		m.crops[tile]["watered_day"] = m.day
 	m.stats["planted"] += 1
-	m._grant_xp("Farming", m.XP_PLANT)
+	m.progression._grant_xp("Farming", m.XP_PLANT)
 	m._show_message("Planted %s. +%d Farming XP" % [_seed_label(kind).to_lower(), m.XP_PLANT])
 
 
@@ -85,7 +85,7 @@ func _harvest(tile: Vector2i) -> void:
 	var yield_count: int = m.CROPS[kind]["yield"]
 	# Harvests go to the pack only. Storing in the cellar is up to the player.
 	var held := int(m.inventory["pumpkins" if kind == "pumpkin" else "crops"])
-	if not m._pack_room(held, yield_count):
+	if not m.stall._pack_room(held, yield_count):
 		m._show_message("Your pack is full. Store crops in the root cellar, or sell them.")
 		return
 	if kind == "pumpkin":
@@ -100,7 +100,7 @@ func _harvest(tile: Vector2i) -> void:
 	else:
 		m.inventory["seeds"] += 1
 	var xp: int = m.CROPS[kind]["xp"]
-	m._grant_xp("Farming", xp)
+	m.progression._grant_xp("Farming", xp)
 	m._show_message("Harvested %s for %d %s. +%d Farming XP" % [_seed_label(kind).to_lower(), yield_count, "pumpkins" if kind == "pumpkin" else "crops", xp])
 
 
@@ -214,7 +214,7 @@ func _crop_price(kind: String) -> int:
 
 func _buy_seeds(kind: String) -> void:
 	if kind == "pumpkin":
-		if m._level("Farming") < m.PUMPKIN_LEVEL:
+		if m.progression._level("Farming") < m.PUMPKIN_LEVEL:
 			m._show_message("Pumpkin seeds need Farming level %d." % m.PUMPKIN_LEVEL)
 			return
 		var pumpkin_total := m.SEED_PUMPKIN_PRICE * 3
@@ -245,7 +245,7 @@ func _store_crops() -> void:
 
 
 func _take_crops() -> void:
-	var amount := mini(m.cellar_stock, m._pack_free())
+	var amount := mini(m.cellar_stock, m.stall._pack_free())
 	if amount <= 0:
 		m._show_message("Your pack is full, or the cellar is empty.")
 		return

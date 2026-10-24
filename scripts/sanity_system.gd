@@ -61,8 +61,8 @@ func _tidy_house() -> void:
 	m.tidied_day = m.day
 	m.stats["tidied"] += 1
 	m.wear = maxi(0, m.wear - m.WEAR_TIDY)
-	m._grant_xp("Cleaning", m.XP_TIDY)
-	var bonus := m.TIDY_CLEANING_BONUS if m._level("Cleaning") >= 2 else 0
+	m.progression._grant_xp("Cleaning", m.XP_TIDY)
+	var bonus := m.TIDY_CLEANING_BONUS if m.progression._level("Cleaning") >= 2 else 0
 	_change_sanity(m.TIDY_SANITY + bonus)
 	m._show_message("You tidy the house. The air feels a little lighter. +%d Cleaning XP" % m.XP_TIDY)
 
@@ -70,7 +70,7 @@ func _tidy_house() -> void:
 # Cleansing offers crops to the house to lift the permanent sanity penalty.
 func _can_cleanse() -> bool:
 	return m.sanity_penalty > 0 and m.cleanse_day != m.day \
-		and m._level("Cleaning") >= m.CLEANSE_LEVEL \
+		and m.progression._level("Cleaning") >= m.CLEANSE_LEVEL \
 		and m.farm._crop_total() >= m.CLEANSE_CROPS
 
 

@@ -27,7 +27,7 @@ func _finish_chop(tile: Vector2i) -> void:
 		m.materials["hardwood"] += 2
 		found += ", 2 hardwood"
 	m.stats["felled"] += 1
-	m._grant_xp("Forestry", m.XP_FELL)
+	m.progression._grant_xp("Forestry", m.XP_FELL)
 	m._show_message("You fell the tree. +%s. +%d Forestry XP" % [found, m.XP_FELL])
 	m.queue_redraw()
 
@@ -62,7 +62,7 @@ func _chop_firewood() -> void:
 	m.materials["wood"] -= 1
 	var made := mini(m.FIREWOOD_PER_WOOD, m.WOODSTORE_CAP - m.firewood_store)
 	m.firewood_store += made
-	m._grant_xp("Forestry", m.XP_CHOP_LOG)
+	m.progression._grant_xp("Forestry", m.XP_CHOP_LOG)
 	m._show_message("You split the wood into %d firewood. %d in the store. +%d Forestry XP" % [made, m.firewood_store, m.XP_CHOP_LOG])
 
 

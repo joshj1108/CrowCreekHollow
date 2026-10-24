@@ -9,7 +9,7 @@ func _init(main: MainGame) -> void:
 
 
 func _can_make_bandage() -> bool:
-	return m._level("Bushcrafting") >= int(m.BANDAGE["level"]) and m.materials["fiber"] >= int(m.BANDAGE["fiber"]) \
+	return m.progression._level("Bushcrafting") >= int(m.BANDAGE["level"]) and m.materials["fiber"] >= int(m.BANDAGE["fiber"]) \
 		and m.materials["resin"] >= int(m.BANDAGE["resin"])
 
 
@@ -42,7 +42,7 @@ func _recipe_card(r: Dictionary) -> Dictionary:
 		"key": "cook:" + str(f["id"]), "name": str(f["name"]), "icon": str(f["icon"]), "tint": str(f["tint"]),
 		"desc": "%s %s +%d %s XP." % [str(f["desc"]), m._food_stats_text(f), int(r["xp"]), skill],
 		"costs": costs, "level_text": m._level_text(skill, level) if level > 0 else "",
-		"level_ok": m._level(skill) >= level, "enabled": _can_make(str(f["id"])),
+		"level_ok": m.progression._level(skill) >= level, "enabled": _can_make(str(f["id"])),
 		"action": "cook:" + str(f["id"]), "button": "Cook",
 	}
 
@@ -68,7 +68,7 @@ func _can_make(food_id: String) -> bool:
 	if r["station"] == "smokehouse" and not m.smokehouse_built:
 		return false
 	var f := Foods.find(food_id)
-	if m._level(str(f["skill"])) < int(f["level"]):
+	if m.progression._level(str(f["skill"])) < int(f["level"]):
 		return false
 	for key in r["needs"].keys():
 		if _recipe_held(str(key)) < int(r["needs"][key]):
@@ -85,7 +85,7 @@ func _make_food(food_id: String) -> void:
 		m._show_message("Build a smokehouse from the House panel first.")
 		return
 	var skill := str(f["skill"])
-	if m._level(skill) < int(f["level"]):
+	if m.progression._level(skill) < int(f["level"]):
 		m._show_message("%s needs %s %d." % [str(f["name"]), skill, int(f["level"])])
 		return
 	if not _can_make(food_id):
@@ -95,7 +95,7 @@ func _make_food(food_id: String) -> void:
 		m._spend_recipe_input(str(key), int(r["needs"][key]))
 	m.inventory[food_id] += 1
 	m.stats["cooked"] += 1
-	m._grant_xp(skill, int(r["xp"]))
+	m.progression._grant_xp(skill, int(r["xp"]))
 	m._show_message("You make %s. +%d %s XP" % [str(f["name"]).to_lower(), int(r["xp"]), skill])
 
 
