@@ -902,6 +902,7 @@ var warmth_bar: ProgressBar
 var needs_temp: Label
 var message_label: Label
 var player    # Node2D with player.gd attached
+var big_tree_layer: Node2D  # the great tree's art; drawn over the player north of its base, under it south of it
 var camera: Camera2D
 # Full-screen fade for sleeping and collapsing. While a scene plays the world is frozen.
 var transitioning := false
@@ -1094,6 +1095,7 @@ func _on_title_start(mode: String, slot: int) -> void:
 
 
 func _process(delta: float) -> void:
+	_update_big_tree_depth()
 	# F3 toggles the performance readout, even while a menu is open.
 	var f3_down := Input.is_physical_key_pressed(KEY_F3)
 	if f3_down and not perf_was_down:
@@ -1769,6 +1771,10 @@ func _build_world() -> void:
 	goat_layer.visible = false
 	add_child(goat_layer)
 
+	big_tree_layer = Node2D.new()
+	big_tree_layer.draw.connect(_draw_big_tree_layer)
+	add_child(big_tree_layer)
+
 	player = Node2D.new()
 	player.set_script(load("res://scripts/player.gd"))
 	player.position = _tile_center(BORDER_X + INNER_W / 2, BORDER_Y + INNER_H / 2)
@@ -2208,6 +2214,31 @@ func _shore_piece(t: Vector2i, kind: int) -> Array:
 	return []
 
 
+# The great tree's art is larger than its 3 by 3 base. The base blocks movement; the art above it does not.
+# BIG_TREE_ART_TILES is the art's size in tiles, and its bottom centre sits on the base's bottom centre.
+const BIG_TREE_ART_TILES := 9.0
+
+
+func _big_tree_base_bottom() -> Vector2:
+	var o := _big_tree_origin()
+	return Vector2((o.x + 1.5) * PX, (o.y + 3) * PX)
+
+
+# Behind the canopy when the player is north of the trunk base, in front of the base when south of it.
+func _update_big_tree_depth() -> void:
+	if big_tree_layer == null or player == null:
+		return
+	big_tree_layer.z_index = 1 if player.position.y < _big_tree_base_bottom().y else 0
+
+
+func _draw_big_tree_layer() -> void:
+	if not FARM_SPRITES:
+		return
+	var bottom := _big_tree_base_bottom()
+	var size := PX * BIG_TREE_ART_TILES
+	big_tree_layer.draw_texture_rect(FarmSprites.tex("prop_great_tree"), Rect2(bottom.x - size * 0.5, bottom.y - size, size, size), false)
+
+
 # Trees, the stall, the well and stumps, drawn after the ground so their bases sit on their tiles.
 func _draw_farm_props() -> void:
 	var stall_at := _world_tile(STALL_IX, STALL_IY)
@@ -2215,8 +2246,6 @@ func _draw_farm_props() -> void:
 	var well_at := _world_tile(WELL_IX.x, WELL_IX.y)
 	var well_cell := _tile_rect(well_at)
 	draw_texture_rect(FarmSprites.tex("prop_well"), Rect2(well_cell.position.x, well_cell.end.y - PX * 1.2, PX, PX * 1.2), false)
-	var big := _big_tree_origin()
-	draw_texture_rect(FarmSprites.tex("prop_great_tree"), Rect2(_tile_rect(big).position, Vector2(PX * 3, PX * 3)), false)
 	for y in range(0, MAP_H):
 		for x in range(0, MAP_W):
 			var t := Vector2i(x, y)
