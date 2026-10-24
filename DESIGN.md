@@ -557,15 +557,17 @@ Each class holds `var m: MainGame` and reads main's state through it. A member i
 
 ## Farm layout
 
-The farm's terrain and fixed positions are generated, not typed in. `tools/farm_layout.py` reads a flat layout diagram (flat colour blocks, one per feature) and writes `scripts/farm_layout.gd`:
+The farm is a hand-read grid. `tools/farm_grid.txt` holds one character per inner tile (40×24), read tile by tile from the layout diagram. `tools/hand_layout.py` reads that grid, derives the anchors (plots, house, porch, well, stall, great tree, grove spots) and writes `scripts/farm_layout.gd`. Regenerate with `python3 tools/hand_layout.py`; edit the grid, not the generated file.
 
-- The diagram's yellow-green area is the 40×24 walkable farm. Each tile takes the colour that covers most of it, matched against the palette in the tool. Small features (single trees, the well, the stall, the cave mouth) go to the tile under their centre.
-- The tree border is not read from the diagram. The game draws it from code, 14 tiles deep on the sides and 8 on the top and bottom.
-- Two brown plots are plot one (soil) and plot two (fallow). The olive plot is plot three.
-- The great tree is the centre 3 by 3 of the big tree in the diagram.
-- The workshop, furnace, smokehouse, woodshed, chopping log and cellar are not drawn. Their spots are chosen in open grass. Those tiles are listed as reserved, so a coop or barn is never placed on them.
-- Rocks and brush are placed on open grass.
-- The tool reports anything it cannot place cleanly: a fence that cuts off the well, for example, is opened by one tile, and the tool says which.
+- Terrain codes are listed in the header of `scripts/farm_layout.gd`. The roof (`O`) is a separate tile from the house body (`H`), so the two can differ in colour. The stall is 2×2 and the well 2 tiles wide, as in the diagram.
+- Fences (`X`) block movement. In the flat view they are drawn as thin bars toward neighbouring fence tiles, over grass.
+- The great tree's trunk is the centre 3 by 3 (`B`), which is the only part that blocks. The big dark square in the diagram is drawn as canopy art over the grass around it, so the canopy is walkable.
+- Plot one and plot two are soil (brown in the diagram); plot three is fallow (olive).
+- The grove keeps twelve trees. The thirteenth tree in the diagram, at the top-left of the field, is dropped.
+- The workshop, furnace, smokehouse, woodshed, chopping log and cellar are not drawn. Their spots are open grass, listed as reserved, so a coop or barn is never placed on them.
+- Rocks and brush spots are kept only where they still sit on open grass.
+
+The older `tools/farm_layout.py` converter sampled the diagram by colour. It produced too many misreads and is no longer the source of the layout.
 
 A save records the layout's version. When the version changes, the save is migrated: crops, brush and felled trees reset, the player starts at the farm centre, and the coop and barn move to the nearest clear grass. Money, skills, tools and animals are kept, and the player is told what happened.
 

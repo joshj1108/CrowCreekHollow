@@ -663,9 +663,9 @@ const NIGHT_EVENTS := [
 	{"message": "The field is quiet tonight. Too quiet.", "shadow": "none", "sanity": -3},
 ]
 
-enum Tile { TREE, GRASS, SOIL, PATH, WATER, HOUSE, DOOR, FLOOR, WALL, EXIT, BED, STATION, DESK, FALLOW, STALL, CELLAR, COOLER, GATE, SMOKEHOUSE, FURNACE, PORTAL, CAMP, CAVE_MOUTH, CAVE_EXIT, ORE_COPPER, ORE_IRON, COOP, BARN, TABLE, FIREPLACE, WELL, PORCH, WOODSTORE, CHOPLOG, FENCE, ROCK }
+enum Tile { TREE, GRASS, SOIL, PATH, WATER, HOUSE, DOOR, FLOOR, WALL, EXIT, BED, STATION, DESK, FALLOW, STALL, CELLAR, COOLER, GATE, SMOKEHOUSE, FURNACE, PORTAL, CAMP, CAVE_MOUTH, CAVE_EXIT, ORE_COPPER, ORE_IRON, COOP, BARN, TABLE, FIREPLACE, WELL, PORCH, WOODSTORE, CHOPLOG, FENCE, ROCK, ROOF }
 
-const BLOCKING := [Tile.TREE, Tile.WATER, Tile.HOUSE, Tile.WALL, Tile.BED, Tile.STATION, Tile.DESK, Tile.STALL, Tile.CELLAR, Tile.COOLER, Tile.SMOKEHOUSE, Tile.FURNACE, Tile.CAMP, Tile.ORE_COPPER, Tile.ORE_IRON, Tile.COOP, Tile.BARN, Tile.TABLE, Tile.FIREPLACE, Tile.WELL, Tile.WOODSTORE, Tile.CHOPLOG, Tile.FENCE, Tile.ROCK]
+const BLOCKING := [Tile.TREE, Tile.WATER, Tile.HOUSE, Tile.WALL, Tile.BED, Tile.STATION, Tile.DESK, Tile.STALL, Tile.CELLAR, Tile.COOLER, Tile.SMOKEHOUSE, Tile.FURNACE, Tile.CAMP, Tile.ORE_COPPER, Tile.ORE_IRON, Tile.COOP, Tile.BARN, Tile.TABLE, Tile.FIREPLACE, Tile.WELL, Tile.WOODSTORE, Tile.CHOPLOG, Tile.FENCE, Tile.ROCK, Tile.ROOF]
 
 const TILE_COLORS := {
 	Tile.TREE: Color("2f4f2f"),
@@ -700,6 +700,7 @@ const TILE_COLORS := {
 	Tile.BARN: Color("7a2e26"),
 	Tile.FENCE: Color("8a6a4a"),
 	Tile.ROCK: Color("7f7f80"),
+	Tile.ROOF: Color("905636"),
 	Tile.TABLE: Color("7a5230"),
 	Tile.FIREPLACE: Color("5a5650"),
 	Tile.CAMP: Color("d07a30"),
@@ -1268,7 +1269,7 @@ func _draw() -> void:
 	if FLAT_FARM_ART:
 		for y in range(fy0, fy1 + 1):
 			for x in range(fx0, fx1 + 1):
-				draw_rect(_tile_rect(Vector2i(x, y)), TILE_COLORS[map[y][x]])
+				_draw_flat_tile(Vector2i(x, y))
 	# Pass one: the ground, with small details. Pass two: shadows, which fall on the ground only.
 	# Pass three: trees and buildings, drawn over both.
 	for y in range(fy0, fy1 + 1):
@@ -1630,7 +1631,7 @@ func _build_map() -> void:
 const TERRAIN_CODES := {
 	".": Tile.GRASS, "S": Tile.SOIL, "F": Tile.FALLOW, "P": Tile.PATH, "~": Tile.WATER,
 	"H": Tile.HOUSE, "D": Tile.DOOR, "A": Tile.STALL, "W": Tile.WELL, "R": Tile.PORCH,
-	"C": Tile.CAVE_MOUTH, "G": Tile.TREE, "B": Tile.TREE, "X": Tile.FENCE, "K": Tile.ROCK,
+	"C": Tile.CAVE_MOUTH, "G": Tile.TREE, "B": Tile.TREE, "X": Tile.FENCE, "K": Tile.ROCK, "O": Tile.ROOF,
 }
 
 
@@ -2085,6 +2086,45 @@ func _restore_saved_state() -> void:
 	_set_bounds()
 	if saved_panel != "":
 		_toggle_tab(saved_panel)
+
+
+# Flat view. A fence is thin bars toward its neighbouring fences over grass. The great tree's
+# canopy square is painted as art over the grass around its trunk. Neither changes what blocks movement.
+const CANOPY_RECT := Rect2i(29, 15, 7, 8)
+const CANOPY_COLOR := Color("2d5234")
+const FENCE_BAR := 0.16
+
+
+func _draw_flat_tile(t: Vector2i) -> void:
+	var cell := _tile_rect(t)
+	var kind: int = map[t.y][t.x]
+	if kind == Tile.FENCE:
+		draw_rect(cell, TILE_COLORS[Tile.GRASS])
+		var bar := PX * FENCE_BAR
+		var mid := cell.get_center()
+		var c: Color = TILE_COLORS[Tile.FENCE]
+		if _is_fence(t + Vector2i(-1, 0)):
+			draw_rect(Rect2(cell.position.x, mid.y - bar * 0.5, PX * 0.5, bar), c)
+		if _is_fence(t + Vector2i(1, 0)):
+			draw_rect(Rect2(mid.x, mid.y - bar * 0.5, PX * 0.5, bar), c)
+		if _is_fence(t + Vector2i(0, -1)):
+			draw_rect(Rect2(mid.x - bar * 0.5, cell.position.y, bar, PX * 0.5), c)
+		if _is_fence(t + Vector2i(0, 1)):
+			draw_rect(Rect2(mid.x - bar * 0.5, mid.y, bar, PX * 0.5), c)
+		draw_rect(Rect2(mid - Vector2(bar, bar) * 0.5, Vector2(bar, bar)), c)
+	elif kind == Tile.GRASS and _in_canopy(t):
+		draw_rect(cell, CANOPY_COLOR)
+	else:
+		draw_rect(cell, TILE_COLORS[kind])
+
+
+func _is_fence(t: Vector2i) -> bool:
+	return t.x >= 0 and t.y >= 0 and t.x < MAP_W and t.y < MAP_H and map[t.y][t.x] == Tile.FENCE
+
+
+func _in_canopy(t: Vector2i) -> bool:
+	var ix := t - Vector2i(BORDER_X, BORDER_Y)
+	return CANOPY_RECT.has_point(ix)
 
 
 # The great tree's footprint, in map tiles, and the ground point at the foot of its trunk.

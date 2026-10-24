@@ -58,7 +58,7 @@ def build(grid):
     plot_one = rect_of(soil[0])
     plot_two = rect_of(soil[1])
     plot_three = next(rect_of(p) for p in fallow if rect_of(p)[1] < 17)
-    house = rect_of(find(grid, "H"))
+    house = rect_of(find(grid, "H") + find(grid, "O"))  # roof and body together
     porch = find(grid, "R")[0]
     well = find(grid, "W")[0]
     stall = find(grid, "A")[0]

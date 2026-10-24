@@ -533,7 +533,7 @@ extends RefCounted
 # TERRAIN codes, one character per tile:
 #   . grass     S soil (plot one)     F fallow (plots two and three, cleared later)
 #   P path      ~ water               R porch boards
-#   H house     D door                A market stall     W well
+#   H house     O roof (house top)    D door    A market stall     W well
 #   C cave mouth                      K rock (blocks)    X fence (blocks)
 #   G grove tree (felled for wood)    B great tree (3 by 3, not felled)
 
