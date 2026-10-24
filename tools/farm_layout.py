@@ -535,7 +535,8 @@ extends RefCounted
 #   P path      ~ water               R porch boards
 #   H house     O roof (house top)    D door    A market stall     W well
 #   C cave mouth                      K rock (blocks)    X fence (blocks)
-#   G grove tree (felled for wood)    B great tree (3 by 3, not felled)
+#   G grove tree (felled for wood)    B great tree base (3 by 3, not felled)
+#   b great tree's walkable top row (grass)
 
 const TERRAIN := [
 	{rows},

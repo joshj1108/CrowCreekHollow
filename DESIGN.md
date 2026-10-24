@@ -561,7 +561,7 @@ The farm is a hand-read grid. `tools/farm_grid.txt` holds one character per inne
 
 - Terrain codes are listed in the header of `scripts/farm_layout.gd`. The roof (`O`) is a separate tile from the house body (`H`), so the two can differ in colour. The stall is 2×2. The well is one tile.
 - The layout has no fences. The reference image removed them, and the grid has no `X` tiles.
-- The great tree's base is the 3 by 3 block (`B`), the only part that blocks movement. Its art is drawn larger than that base, 9 by 9 tiles, with the base at the bottom centre. The art above the base does not block. The player walks behind the canopy when north of the base, and in front of the base when south of it (`_update_big_tree_depth` in `main.gd`).
+- The great tree's base is a 3 by 3 block. Its middle and bottom rows (`B`) block movement; its top row (`b`) is walkable grass. Its art is drawn larger than that base, 9 by 9 tiles, with the base at the bottom centre. The art above the base does not block. The player walks behind the canopy when north of the base, and in front of the base when south of it (`_update_big_tree_depth` in `main.gd`).
 - Plot one and plot two are soil (brown in the diagram); plot three is fallow (olive).
 - The grove keeps twelve trees. The thirteenth tree in the diagram, at the top-left of the field, is dropped.
 - The workshop, furnace, smokehouse, woodshed, chopping log and cellar are not drawn. Their spots are open grass, listed as reserved, so a coop or barn is never placed on them.

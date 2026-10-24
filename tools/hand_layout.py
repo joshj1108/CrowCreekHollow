@@ -62,7 +62,7 @@ def build(grid):
     porch = find(grid, "R")[0]
     well = find(grid, "W")[0]
     stall = find(grid, "A")[0]
-    big = rect_of(find(grid, "B"))
+    big = rect_of(find(grid, "B") + find(grid, "b"))  # the 3 by 3 footprint, including its walkable top row
     groves = find(grid, "G")
     grass = lambda p: grid[p[1]][p[0]] == "."  # noqa: E731
     free = lambda p: grass(p) and p not in RESERVED  # noqa: E731

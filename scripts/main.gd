@@ -1637,7 +1637,7 @@ func _build_map() -> void:
 const TERRAIN_CODES := {
 	".": Tile.GRASS, "S": Tile.SOIL, "F": Tile.FALLOW, "P": Tile.PATH, "~": Tile.WATER,
 	"H": Tile.HOUSE, "D": Tile.DOOR, "A": Tile.STALL, "W": Tile.WELL, "R": Tile.PORCH,
-	"C": Tile.CAVE_MOUTH, "G": Tile.TREE, "B": Tile.TREE, "X": Tile.FENCE, "K": Tile.ROCK, "O": Tile.ROOF,
+	"C": Tile.CAVE_MOUTH, "G": Tile.TREE, "B": Tile.TREE, "b": Tile.GRASS, "X": Tile.FENCE, "K": Tile.ROCK, "O": Tile.ROOF,
 }
 
 
