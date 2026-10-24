@@ -2136,21 +2136,11 @@ func _draw_flat_tile(t: Vector2i) -> void:
 func _draw_sprite_ground(t: Vector2i, kind: int, cell: Rect2) -> bool:
 	var v := FarmSprites.variant(t.x, t.y, 3)
 	var name := ""
-	var flip := false
 	match kind:
 		Tile.GRASS:
 			name = "grass_%d" % v
-		Tile.SOIL:
-			name = "soil_%d" % v
-		Tile.FALLOW:
-			name = "fallow_%d" % v
-		Tile.PATH, Tile.WATER:
-			var edge := _shore_piece(t, kind)
-			if edge.size() == 2:
-				name = edge[0]
-				flip = edge[1]
-			else:
-				name = ("path_%d" if kind == Tile.PATH else "water_%d") % v
+		Tile.SOIL, Tile.FALLOW, Tile.PATH, Tile.WATER:
+			name = _material_name(t, kind, v)
 		Tile.ROCK:
 			name = "rock_%d" % v
 		Tile.CAVE_MOUTH:
@@ -2161,7 +2151,7 @@ func _draw_sprite_ground(t: Vector2i, kind: int, cell: Rect2) -> bool:
 			# The roof is walkable and its art is drawn by house_roof_layer, so the ground here is grass.
 			name = "grass_%d" % v
 		Tile.DOOR:
-			name = "door"
+			name = "house_door"
 		Tile.PORCH:
 			name = "porch"
 		Tile.TREE:
@@ -2174,59 +2164,63 @@ func _draw_sprite_ground(t: Vector2i, kind: int, cell: Rect2) -> bool:
 			name = "grass_%d" % v
 		_:
 			return false
-	draw_texture_rect(FarmSprites.tex(name, flip), cell, false)
+	draw_texture_rect(FarmSprites.tex(name), cell, false)
 	return true
 
 
 # Which side or corner of a path or water tile faces the other material. Returns [name, flip] or [].
-func _shore_piece(t: Vector2i, kind: int) -> Array:
+# The art name for a tile of a shore or edge material, from which neighbours are a different material.
+# Water sits against anything that is not water. Path also ignores water, so the water shore is what shows.
+# Soil and fallow sit against any neighbour that is not the same material.
+# Sides are n, e, s, w; a side set picks the piece of that name, and a lone diagonal picks the inner piece.
+func _material_name(t: Vector2i, kind: int, v: int) -> String:
+	var edge_prefix: String = {Tile.WATER: "water_shore", Tile.PATH: "path_edge", Tile.SOIL: "soil_edge", Tile.FALLOW: "fallow_edge"}[kind]
+	var inner_prefix: String = {Tile.WATER: "water_inner", Tile.PATH: "path_inner", Tile.SOIL: "soil_inner", Tile.FALLOW: "fallow_inner"}[kind]
+	var base: String = {Tile.WATER: "water", Tile.PATH: "path", Tile.SOIL: "soil", Tile.FALLOW: "fallow"}[kind]
 	var outside := func(d: Vector2i) -> bool:
 		var n := t + d
 		if n.x < 0 or n.y < 0 or n.x >= MAP_W or n.y >= MAP_H:
 			return false
 		var k: int = map[n.y][n.x]
-		if kind == Tile.WATER:
-			return k != Tile.WATER
-		return k != Tile.PATH and k != Tile.WATER
-	var north: bool = outside.call(Vector2i(0, -1))
-	var south: bool = outside.call(Vector2i(0, 1))
-	var west: bool = outside.call(Vector2i(-1, 0))
-	var east: bool = outside.call(Vector2i(1, 0))
-	if kind == Tile.WATER:
-		if south:
-			return ["wedge_top", false]
-		if north:
-			return ["wedge_bottom", true]
-		if west:
-			return ["wedge_left", false]
-		if east:
-			return ["wedge_right", false]
-		if outside.call(Vector2i(-1, -1)):
-			return ["wedge_tl", false]
+		match kind:
+			Tile.WATER:
+				return k != Tile.WATER
+			Tile.PATH:
+				return k != Tile.PATH and k != Tile.WATER
+		return k != kind
+	var mask := 0
+	if outside.call(Vector2i(0, -1)):
+		mask |= 1  # n
+	if outside.call(Vector2i(1, 0)):
+		mask |= 2  # e
+	if outside.call(Vector2i(0, 1)):
+		mask |= 4  # s
+	if outside.call(Vector2i(-1, 0)):
+		mask |= 8  # w
+	if mask == 0:
+		var diag := ""
 		if outside.call(Vector2i(1, -1)):
-			return ["wedge_tr", false]
-		if outside.call(Vector2i(-1, 1)):
-			return ["wedge_bl", false]
-		if outside.call(Vector2i(1, 1)):
-			return ["wedge_br", false]
-		return []
-	if north:
-		return ["pedge_top", false]
-	if south:
-		return ["pedge_top", true]
-	if east:
-		return ["pedge_left", false]
-	if west:
-		return ["pedge_right", false]
-	if outside.call(Vector2i(-1, -1)):
-		return ["pedge_tl", false]
-	if outside.call(Vector2i(1, -1)):
-		return ["pedge_tr", false]
-	if outside.call(Vector2i(-1, 1)):
-		return ["pedge_bl", false]
-	if outside.call(Vector2i(1, 1)):
-		return ["pedge_br", false]
-	return []
+			diag = "ne"
+		elif outside.call(Vector2i(1, 1)):
+			diag = "se"
+		elif outside.call(Vector2i(-1, 1)):
+			diag = "sw"
+		elif outside.call(Vector2i(-1, -1)):
+			diag = "nw"
+		if diag != "":
+			return "%s_%s" % [inner_prefix, diag]
+		return "%s_%d" % [base, v]
+	return "%s_%s" % [edge_prefix, SHORE_SUFFIX[mask]]
+
+
+# Edge piece suffix by side mask (n=1, e=2, s=4, w=8).
+const SHORE_SUFFIX := {
+	1: "n", 2: "e", 4: "s", 8: "w",
+	3: "ne", 6: "se", 12: "sw", 9: "nw",
+	5: "ns", 10: "ew",
+	7: "nes", 13: "nsw", 11: "new", 14: "esw",
+	15: "all",
+}
 
 
 # The great tree's art is larger than its 3 by 3 base. The base blocks movement; the art above it does not.
@@ -2270,7 +2264,7 @@ func _draw_house_roof_layer() -> void:
 			if map[y][x] != Tile.ROOF:
 				continue
 			var below: int = map[y + 1][x] if y + 1 < MAP_H else Tile.WALL
-			var name := "roof_bottom" if below != Tile.ROOF else "roof_top"
+			var name := "house_roof_bottom" if below != Tile.ROOF else "house_roof_top"
 			house_roof_layer.draw_texture_rect(FarmSprites.tex(name), _tile_rect(Vector2i(x, y)), false)
 
 
