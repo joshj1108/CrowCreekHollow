@@ -916,6 +916,7 @@ var shake_tw: Tween
 var last_minimap_key: Array = []
 var last_cam_tile := Vector2i(-99, -99)   # the tile the camera was last drawn from
 var panels: PanelRows
+var farm: FarmSystem
 var animals: AnimalSystem
 var desk: DeskSystem
 var lantern_light: PointLight2D
@@ -937,6 +938,7 @@ func _ready() -> void:
 	panels = PanelRows.new(self)
 	desk = DeskSystem.new(self)
 	animals = AnimalSystem.new(self)
+	farm = FarmSystem.new(self)
 	_setup_input()
 	_load_settings()
 	_start_music()
@@ -1161,13 +1163,13 @@ func _process(delta: float) -> void:
 	_update_sanity(darkness, delta)
 
 	_check_doors()
-	_check_unlocks()
+	farm._check_unlocks()
 	_check_story()
 	_check_achievements()
 	_check_guardian()
 	_update_fish_spots(delta)
 	_update_fishing(delta)
-	_update_harvest(delta)
+	farm._update_harvest(delta)
 	_update_crows(delta)
 	_update_foes(delta)
 	_update_shots(delta)
@@ -1212,9 +1214,9 @@ func _process(delta: float) -> void:
 		player.vertical_locked = trowel_out
 	if trowel_out:
 		if Input.is_action_just_pressed("seed_next"):
-			_cycle_seed(1)
+			farm._cycle_seed(1)
 		elif Input.is_action_just_pressed("seed_prev"):
-			_cycle_seed(-1)
+			farm._cycle_seed(-1)
 	var tool_pressed := Input.is_action_just_pressed("tool_use")
 	var hand_pressed := Input.is_action_just_pressed("use")
 	if (tool_pressed or hand_pressed) and open_tab == "" and not _bag_open() and not _wheel_open() and not _pointer_on_ui():
@@ -2068,7 +2070,7 @@ func _bar_box(color: Color) -> StyleBoxFlat:
 
 # Applies what loading saved: position, indoors or not, and the open panel.
 func _restore_saved_state() -> void:
-	_check_unlocks()
+	farm._check_unlocks()
 	zone = saved_zone
 	if not WORLD_ENABLED:
 		zone = Zone.HOMESTEAD
@@ -2650,7 +2652,7 @@ func _on_panel_action(action_id: String) -> void:
 		"advance_lantern":
 			_advance_lantern()
 		"switch_seed":
-			_switch_seed()
+			farm._switch_seed()
 		"sell_crops":
 			_sell("crops")
 		"sell_pumpkins":
@@ -2662,9 +2664,9 @@ func _on_panel_action(action_id: String) -> void:
 		"sell_milk":
 			_sell("milk")
 		"buy_turnip":
-			_buy_seeds("turnip")
+			farm._buy_seeds("turnip")
 		"buy_pumpkin":
-			_buy_seeds("pumpkin")
+			farm._buy_seeds("pumpkin")
 		"upgrade_bag":
 			_upgrade_bag()
 		"build_cellar":
@@ -2672,9 +2674,9 @@ func _on_panel_action(action_id: String) -> void:
 		"build_cooler":
 			_build_storage("cooler")
 		"store_crops":
-			_store_crops()
+			farm._store_crops()
 		"take_crops":
-			_take_crops()
+			farm._take_crops()
 		"store_fish":
 			_store_fish()
 		"take_fish":
@@ -3019,7 +3021,7 @@ func _held(mat: String) -> int:
 	if mat == "coins":
 		return money
 	if mat == "crops":
-		return _crop_total()
+		return farm._crop_total()
 	if materials.has(mat):
 		return int(materials[mat])
 	return int(inventory.get(mat, 0))
@@ -3231,58 +3233,6 @@ func _placed_row(label: String, kind: String, tile: Vector2i, action: String) ->
 
 # --- Farming ----------------------------------------------------------------
 
-func _seed_label(kind: String) -> String:
-	return "Pumpkin" if kind == "pumpkin" else "Turnip"
-
-
-# Steps through the seeds you have in the pouch: turnip always, pumpkin once Farming reaches its level.
-func _cycle_seed(step: int) -> void:
-	var options: Array = []
-	for kind in ["turnip", "pumpkin"]:
-		if kind == "pumpkin" and _level("Farming") < PUMPKIN_LEVEL:
-			continue
-		if int(inventory[CROPS[kind]["seed"]]) > 0:
-			options.append(kind)
-	if options.is_empty():
-		_show_message("You have no seeds to plant.")
-		return
-	var at := options.find(selected_seed)
-	var idx: int
-	if at == -1:
-		idx = 0 if step > 0 else options.size() - 1
-	else:
-		idx = posmod(at + step, options.size())
-	selected_seed = str(options[idx])
-	_show_message("Planting %s seeds now. %d left." % [_seed_label(selected_seed).to_lower(), int(inventory[CROPS[selected_seed]["seed"]])])
-
-
-func _switch_seed() -> void:
-	selected_seed = "turnip" if selected_seed == "pumpkin" else "pumpkin"
-	_show_message("You'll plant %s seeds now." % _seed_label(selected_seed).to_lower())
-
-
-# Opens the third plot once Farming reaches level 4 and the house is at least Patched.
-func _check_plot_three() -> void:
-	if plot_three_open or _level("Farming") < PLOT_THREE_LEVEL or house_stage < 2:
-		return
-	plot_three_open = true
-	for y in range(PLOT_THREE.position.y, PLOT_THREE.end.y):
-		for x in range(PLOT_THREE.position.x, PLOT_THREE.end.x):
-			map[y + BORDER_Y][x + BORDER_X] = Tile.SOIL
-	queue_redraw()
-
-
-# Opens the second plot once Farming reaches level 2. It stays open afterward.
-func _check_unlocks() -> void:
-	_check_plot_three()
-	if plot_two_open or _level("Farming") < 2:
-		return
-	plot_two_open = true
-	for y in range(PLOT_TWO.position.y, PLOT_TWO.end.y):
-		for x in range(PLOT_TWO.position.x, PLOT_TWO.end.x):
-			map[y + BORDER_Y][x + BORDER_X] = Tile.SOIL
-	queue_redraw()
-
 
 # The tool in the active hotbar slot, or "" for an empty slot.
 func _active_tool() -> String:
@@ -3355,7 +3305,7 @@ func _loop_action() -> String:
 
 # The one-shot for the held tool, played each time Use is pressed. Channels already loop, so they are skipped.
 func _play_use_anim() -> void:
-	if _is_harvesting() or _is_fishing() or placing != "":
+	if farm._is_harvesting() or _is_fishing() or placing != "":
 		return
 	match _active_tool():
 		"axe":
@@ -3377,8 +3327,8 @@ func _interact() -> void:
 		if not _tool_press:
 			_confirm_placement()
 		return
-	if _is_harvesting():
-		_stop_harvest("You stop working.")
+	if farm._is_harvesting():
+		farm._stop_harvest("You stop working.")
 		return
 	if in_cave:
 		_interact_cave()
@@ -3488,58 +3438,15 @@ func _interact() -> void:
 	if crops.has(tile):
 		if crops[tile]["stage"] >= MAX_STAGE:
 			if _need_tool("hoe"):
-				_harvest(tile)
+				farm._harvest(tile)
 		elif int(crops[tile].get("watered_day", 0)) == day:
 			_show_message("Already watered today. It isn't ready yet.")
 		elif _need_tool("hose"):
-			_water_crop(tile)
+			farm._water_crop(tile)
 	elif _need_tool("trowel"):
-		_plant(tile)
+		farm._plant(tile)
 
 	queue_redraw()
-
-
-func _plant(tile: Vector2i) -> void:
-	play_sfx("plant", 0.06)
-	var kind := selected_seed
-	if kind == "pumpkin" and _level("Farming") < PUMPKIN_LEVEL:
-		kind = "turnip"
-	var seed_key: String = CROPS[kind]["seed"]
-	if inventory[seed_key] <= 0:
-		_show_message("You're out of %s seeds." % _seed_label(kind).to_lower())
-		return
-	inventory[seed_key] -= 1
-	crops[tile] = {"stage": 0, "kind": kind, "days": 0}
-	if weather_kind in WATER_RAIN_KINDS:
-		crops[tile]["watered_day"] = day
-	stats["planted"] += 1
-	_grant_xp("Farming", XP_PLANT)
-	_show_message("Planted %s. +%d Farming XP" % [_seed_label(kind).to_lower(), XP_PLANT])
-
-
-func _harvest(tile: Vector2i) -> void:
-	play_sfx("harvest", 0.06)
-	var kind: String = crops[tile]["kind"]
-	var yield_count: int = CROPS[kind]["yield"]
-	# Harvests go to the pack only. Storing in the cellar is up to the player.
-	var held := int(inventory["pumpkins" if kind == "pumpkin" else "crops"])
-	if not _pack_room(held, yield_count):
-		_show_message("Your pack is full. Store crops in the root cellar, or sell them.")
-		return
-	if kind == "pumpkin":
-		inventory["pumpkins"] += yield_count
-	else:
-		inventory["crops"] += yield_count
-	crops.erase(tile)
-	stats["harvested"] += 1
-	if kind == "pumpkin":
-		stats["pumpkins"] += 1
-		inventory["pumpkin_seeds"] += 1
-	else:
-		inventory["seeds"] += 1
-	var xp: int = CROPS[kind]["xp"]
-	_grant_xp("Farming", xp)
-	_show_message("Harvested %s for %d %s. +%d Farming XP" % [_seed_label(kind).to_lower(), yield_count, "pumpkins" if kind == "pumpkin" else "crops", xp])
 
 
 # --- Desk games ---
@@ -3597,24 +3504,6 @@ func _place_key() -> String:
 	if _in_village():
 		return "village"
 	return "farm"
-
-
-func _start_harvest(kind: String, tile: Vector2i) -> void:
-	harvest_kind = kind
-	harvest_tile = tile
-	harvest_timer = 0.0
-	harvest_place = _place_key()
-
-
-func _is_harvesting() -> bool:
-	return harvest_kind != ""
-
-
-func _stop_harvest(reason: String) -> void:
-	harvest_kind = ""
-	harvest_tile = NO_SPOT
-	if reason != "":
-		_show_message(reason)
 
 
 # Each tick rolls for the thing being worked. A better pick or hatchet raises the odds.
@@ -3839,55 +3728,6 @@ func _draw_crow_layer() -> void:
 		# Near wing in front of the body.
 		crow_layer.draw_colored_polygon(_wing_shape(root + Vector2(facing * 2.0, 0.0), near_tip, root + Vector2(-facing * 2.0, 0.8)), wing_near)
 		crow_layer.draw_line(root + Vector2(facing * 1.0, 0.0), near_tip.lerp(root, 0.35), Color(0.45, 0.45, 0.55, 0.45), 0.8)
-
-
-func _update_harvest(delta: float) -> void:
-	if not _is_harvesting():
-		return
-	var moved := Input.get_vector("move_left", "move_right", "move_up", "move_down") != Vector2.ZERO
-	if moved or open_tab != "" or _place_key() != harvest_place or _tile_in_front() != harvest_tile:
-		_stop_harvest("You stop working.")
-		return
-	harvest_timer -= delta
-	if harvest_timer > 0.0:
-		return
-	harvest_timer = HARVEST_TICK_SECONDS
-	var tile := harvest_tile
-	match harvest_kind:
-		"chop":
-			if _kind_at(tile) != Tile.TREE or not GROVE_SPOTS.has(tile - Vector2i(BORDER_X, BORDER_Y)):
-				_stop_harvest("")
-				return
-			_roll_harvest(CHOP_BASE_CHANCE + TOOL_TIER_CHANCE * float(tool_tier["hatchet"]), "Chip, chip. The tree is still standing.", func() -> void: _finish_chop(tile))
-		"mine":
-			if not rocks.has(tile):
-				_stop_harvest("")
-				return
-			_roll_harvest(MINE_BASE_CHANCE + TOOL_TIER_CHANCE * float(tool_tier["pick"]), "The rock won't give yet.", func() -> void: _finish_mine(tile))
-		"quarry":
-			if not quarry.has(tile):
-				_stop_harvest("")
-				return
-			_roll_harvest(MINE_BASE_CHANCE + TOOL_TIER_CHANCE * float(tool_tier["pick"]), "The quarry rock won't give yet.", func() -> void: _finish_quarry(tile))
-		"cave_ore":
-			if not (_kind_at(tile) == Tile.ORE_COPPER or _kind_at(tile) == Tile.ORE_IRON):
-				_stop_harvest("")
-				return
-			_roll_harvest(MINE_BASE_CHANCE + TOOL_TIER_CHANCE * float(tool_tier["pick"]), "The ore won't give yet.", func() -> void: _finish_cave_ore(tile))
-		_:
-			_stop_harvest("")
-	queue_redraw()
-
-
-# One roll at the given odds. A success ends the roll and runs the finish; a miss says so.
-func _roll_harvest(base: float, miss: String, finish: Callable) -> void:
-	var chance := clampf(base, 0.0, 0.95)
-	if randf() < chance:
-		_stop_harvest("")
-		finish.call()
-	else:
-		play_sfx("strike", 0.05)
-		_show_message(miss)
 
 
 func _update_fish_spots(delta: float) -> void:
@@ -4118,9 +3958,9 @@ func _first_cooked() -> String:
 
 func _food_price(food_id: String) -> int:
 	if food_id == "turnip":
-		return _crop_price("turnip")
+		return farm._crop_price("turnip")
 	if food_id == "pumpkin":
-		return _crop_price("pumpkin")
+		return farm._crop_price("pumpkin")
 	return int(Foods.find(food_id).get("price", 0))
 
 
@@ -4205,47 +4045,6 @@ func _drink_well() -> void:
 	play_sfx("drink", 0.05)
 	stats["drank"] += 1
 	_show_message("Cold water from the pump. Water %d/100" % water)
-
-
-# Watering uses one unit from the tank, and a crop only needs to be watered once a day.
-func _water_crop(tile: Vector2i) -> void:
-	if not well_repaired or not hose_attached:
-		_show_message("Nothing comes out of the hose. Repair the pump and attach the hose from the Well.")
-		return
-	if well_water < 1.0:
-		_show_message("The tank is dry. It refills each morning.")
-		return
-	well_water -= 1.0
-	play_sfx("water", 0.08)
-	crops[tile]["watered_day"] = day
-	stats["watered"] += 1
-	_show_message("Watered. The tank has %d left." % int(well_water))
-	queue_redraw()
-
-
-func _watered_today() -> int:
-	var n := 0
-	for pos in crops:
-		if int(crops[pos].get("watered_day", 0)) == day:
-			n += 1
-	return n
-
-
-# Turnips and pumpkins both feed you and cook into meals. Food and cooking count them together.
-func _crop_total() -> int:
-	return int(inventory["crops"]) + int(inventory["pumpkins"])
-
-
-# Uses crops for food or cooking, taking turnips first and then pumpkins.
-func _spend_crops(amount: int) -> void:
-	var from_crops := mini(amount, int(inventory["crops"]))
-	inventory["crops"] -= from_crops
-	inventory["pumpkins"] -= amount - from_crops
-
-
-# How much one crop sells for: its seed's cost spread over its yield, plus its difficulty.
-func _crop_price(kind: String) -> int:
-	return int(CROP_VALUE[kind])
 
 
 # The picture stage (0 to MAX_STAGE) for a crop that has been watered this many days.
@@ -4414,7 +4213,7 @@ func _sell(kind: String) -> void:
 	if count <= 0:
 		_show_message("You have nothing to sell.")
 		return
-	var price := _crop_price("pumpkin") if kind == "pumpkins" else _crop_price("turnip")
+	var price := farm._crop_price("pumpkin") if kind == "pumpkins" else farm._crop_price("turnip")
 	if kind == "fish":
 		price = SELL_FISH
 	if kind == "eggs":
@@ -4425,28 +4224,6 @@ func _sell(kind: String) -> void:
 	money += count * price
 	stats["sold"] += count
 	_show_message("Sold %d for %d coins." % [count, count * price])
-
-
-func _buy_seeds(kind: String) -> void:
-	if kind == "pumpkin":
-		if _level("Farming") < PUMPKIN_LEVEL:
-			_show_message("Pumpkin seeds need Farming level %d." % PUMPKIN_LEVEL)
-			return
-		var pumpkin_total := SEED_PUMPKIN_PRICE * 3
-		if money < pumpkin_total:
-			_show_message("Three pumpkin seeds cost %d coins." % pumpkin_total)
-			return
-		money -= pumpkin_total
-		inventory["pumpkin_seeds"] += 3
-		_show_message("You buy 3 pumpkin seeds for %d coins." % pumpkin_total)
-		return
-	var turnip_total := SEED_TURNIP_PRICE * 5
-	if money < turnip_total:
-		_show_message("Five turnip seeds cost %d coins." % turnip_total)
-		return
-	money -= turnip_total
-	inventory["seeds"] += 5
-	_show_message("You buy 5 turnip seeds for %d coins." % turnip_total)
 
 
 # --- Storage -----------------------------------------------------------------
@@ -4465,26 +4242,6 @@ func _build_storage(which: String) -> void:
 		_show_message("The cooler is built beside the house. It keeps %d fish fresh." % COOLER_CAP)
 	_build_interior()
 	queue_redraw()
-
-
-func _store_crops() -> void:
-	var amount := mini(int(inventory["crops"]), CELLAR_CAP - cellar_stock)
-	if amount <= 0:
-		_show_message("Nothing to store, or the cellar is full.")
-		return
-	inventory["crops"] -= amount
-	cellar_stock += amount
-	_show_message("You store %d crops in the cellar." % amount)
-
-
-func _take_crops() -> void:
-	var amount := mini(cellar_stock, _pack_free())
-	if amount <= 0:
-		_show_message("Your pack is full, or the cellar is empty.")
-		return
-	cellar_stock -= amount
-	inventory["crops"] += amount
-	_show_message("You take %d crops from the cellar." % amount)
 
 
 func _store_fish() -> void:
@@ -4541,7 +4298,7 @@ func _chop(tile: Vector2i) -> void:
 		_show_message("You need a hatchet. Craft a crude one from the Craft panel.")
 		return
 	# Chopping keeps rolling each tick until the tree falls. Moving away stops it.
-	_start_harvest("chop", tile)
+	farm._start_harvest("chop", tile)
 	_show_message("You start chopping. Keep at it.")
 
 
@@ -4631,7 +4388,7 @@ func _fill_rocks(keep_clear: bool = false) -> void:
 
 func _mine(tile: Vector2i) -> void:
 	# Breaking a rock keeps rolling each tick until it gives way. Moving away stops it.
-	_start_harvest("mine", tile)
+	farm._start_harvest("mine", tile)
 	_show_message("You start working the rock.")
 
 
@@ -4841,7 +4598,7 @@ func _quarry(tile: Vector2i) -> void:
 	if pick < 1:
 		_show_message("The quarry rock is too hard for your hands. Craft a stone pick from the Craft panel.")
 		return
-	_start_harvest("quarry", tile)
+	farm._start_harvest("quarry", tile)
 	_show_message("You start working the quarry rock.")
 
 
@@ -5056,7 +4813,7 @@ func _mine_cave(tile: Vector2i, kind: int) -> void:
 	if _level("Mining") < need_level:
 		_show_message("You need Mining %d to work %s ore." % [need_level, ore])
 		return
-	_start_harvest("cave_ore", tile)
+	farm._start_harvest("cave_ore", tile)
 	_show_message("You start working the %s ore." % ore)
 
 
@@ -5491,13 +5248,6 @@ func _pack_cells() -> Array:
 	return cells
 
 
-func _seed_cells() -> Array:
-	return [
-		{"color": "a8d46f", "label": "Turnip", "count": str(inventory["seeds"]), "tip": "Turnip seeds. Kept in the seed pouch."},
-		{"color": "d98a35", "label": "Pumpkin", "count": str(inventory["pumpkin_seeds"]), "tip": "Pumpkin seeds. Farming %d to plant." % PUMPKIN_LEVEL},
-	]
-
-
 # Ten slots in four columns. The top row holds the back, head, neck, and belt.
 # The lantern hangs from the belt, so the offhand is free for a shield.
 # --- Lowmere and the road ---------------------------------------------------
@@ -5677,8 +5427,8 @@ func _talk(npc: Dictionary) -> void:
 		stats["delivered"] += 1
 		_show_message("Tomas: Bread and thanks. The village eats tonight.")
 		return
-	if npc["id"] == "harrow" and _crop_total() >= 5 and int(stats["crops_given"]) < 5:
-		_spend_crops(5)
+	if npc["id"] == "harrow" and farm._crop_total() >= 5 and int(stats["crops_given"]) < 5:
+		farm._spend_crops(5)
 		stats["crops_given"] += 5
 		_show_message("Harrow: Five crops. The wheel will turn again.")
 		return
@@ -5960,7 +5710,7 @@ func _repair_house() -> void:
 	materials["fiber"] -= cost["fiber"]
 	house_stage += 1
 	wear = maxi(0, wear - WEAR_REPAIR)
-	_check_plot_three()
+	farm._check_plot_three()
 	_grant_xp("Carpentry", XP_REPAIR)
 	_build_interior()
 	_show_message("Repaired. The farmhouse is now %s. +%d Carpentry XP" % [STAGE_NAMES[house_stage], XP_REPAIR])
@@ -6558,14 +6308,14 @@ func _tidy_house() -> void:
 func _can_cleanse() -> bool:
 	return sanity_penalty > 0 and cleanse_day != day \
 		and _level("Cleaning") >= CLEANSE_LEVEL \
-		and _crop_total() >= CLEANSE_CROPS
+		and farm._crop_total() >= CLEANSE_CROPS
 
 
 func _cleanse_house() -> void:
 	if not _can_cleanse():
 		_show_message("Cleansing needs Cleaning %d, %d crops, and one try a day." % [CLEANSE_LEVEL, CLEANSE_CROPS])
 		return
-	_spend_crops(CLEANSE_CROPS)
+	farm._spend_crops(CLEANSE_CROPS)
 	cleanse_day = day
 	sanity_penalty = maxi(0, sanity_penalty - CLEANSE_RELIEF)
 	sanity = minf(sanity, _sanity_max())
@@ -6939,7 +6689,7 @@ func _save_game() -> void:
 		"inside": inside,
 		"appearance": appearance,
 		"open_tab": open_tab,
-		"crops": _crops_to_array(),
+		"crops": farm._crops_to_array(),
 		"brush": _brush_to_array(),
 		"brush_day": brush_day,
 		"rock_day": rock_day,
@@ -7126,14 +6876,6 @@ func _merge_ints(target: Dictionary, saved: Variant) -> void:
 	for key in target.keys():
 		if saved.has(key):
 			target[key] = int(saved[key])
-
-
-func _crops_to_array() -> Array:
-	var arr: Array = []
-	for pos in crops:
-		var crop: Dictionary = crops[pos]
-		arr.append({"x": pos.x, "y": pos.y, "stage": crop["stage"], "days": int(crop.get("days", 0)), "kind": crop["kind"], "watered_day": int(crop.get("watered_day", 0))})
-	return arr
 
 
 func _brush_to_array() -> Array:

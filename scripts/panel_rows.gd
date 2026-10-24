@@ -128,10 +128,10 @@ func _inventory_rows() -> Array:
 	rows.append({"name": "Outside", "value": "%d°F, %s" % [roundi(m._temperature()), str(m.WEATHER_NAMES.get(m.weather_kind, "Overcast")).to_lower()]})
 	rows.append({"note": "Food and water drain through the day. Drink from the pond or the pump to refill water. Warmth drains outdoors on cold days, refills in the house, and is full again after a night's sleep. An empty need costs HP."})
 	rows.append({"section": "Planting"})
-	rows.append({"name": "Planting with", "value": m._seed_label(m.selected_seed)})
+	rows.append({"name": "Planting with", "value": m.farm._seed_label(m.selected_seed)})
 	var growing := m.crops.size()
 	if growing > 0:
-		rows.append({"name": "Watered today", "value": "%d of %d growing crops" % [m._watered_today(), growing], "progress": float(m._watered_today()) / float(growing)})
+		rows.append({"name": "Watered today", "value": "%d of %d growing crops" % [m.farm._watered_today(), growing], "progress": float(m.farm._watered_today()) / float(growing)})
 	if m._level("Farming") >= m.PUMPKIN_LEVEL:
 		rows.append({
 			"name": "Switch seed",
@@ -613,14 +613,14 @@ func _trade_rows() -> Array:
 		{"name": "Coins", "value": str(m.money)},
 		{"section": "Sell from your pack"},
 		{
-			"name": "Turnips (%d each)" % m._crop_price("turnip"),
+			"name": "Turnips (%d each)" % m.farm._crop_price("turnip"),
 			"value": "%d held" % int(m.inventory["crops"]),
 			"button": "Sell all",
 			"action": "sell_crops",
 			"enabled": int(m.inventory["crops"]) > 0,
 		},
 		{
-			"name": "Pumpkins (%d each)" % m._crop_price("pumpkin"),
+			"name": "Pumpkins (%d each)" % m.farm._crop_price("pumpkin"),
 			"value": "%d held" % int(m.inventory["pumpkins"]),
 			"button": "Sell all",
 			"action": "sell_pumpkins",

@@ -17,7 +17,7 @@ func _can_buy_goat() -> bool:
 
 
 func _can_feed_goats() -> bool:
-	return m.goats > 0 and m.goats_fed_day != m.day and m._crop_total() >= m.goats * m.GOAT_FEED_CROPS
+	return m.goats > 0 and m.goats_fed_day != m.day and m.farm._crop_total() >= m.goats * m.GOAT_FEED_CROPS
 
 
 func _feed_goats() -> void:
@@ -27,13 +27,13 @@ func _feed_goats() -> void:
 	if not _can_feed_goats():
 		m._show_message("The goats need %d crops." % (m.goats * m.GOAT_FEED_CROPS))
 		return
-	m._spend_crops(m.goats * m.GOAT_FEED_CROPS)
+	m.farm._spend_crops(m.goats * m.GOAT_FEED_CROPS)
 	m.goats_fed_day = m.day
 	m._show_message("You feed the goats.")
 
 
 func _can_feed_hens() -> bool:
-	return m.hens > 0 and m.hens_fed_day != m.day and m._crop_total() >= m.hens * m.HEN_FEED_CROPS
+	return m.hens > 0 and m.hens_fed_day != m.day and m.farm._crop_total() >= m.hens * m.HEN_FEED_CROPS
 
 
 func _feed_hens() -> void:
@@ -43,7 +43,7 @@ func _feed_hens() -> void:
 	if not _can_feed_hens():
 		m._show_message("The hens need %d crops." % (m.hens * m.HEN_FEED_CROPS))
 		return
-	m._spend_crops(m.hens * m.HEN_FEED_CROPS)
+	m.farm._spend_crops(m.hens * m.HEN_FEED_CROPS)
 	m.hens_fed_day = m.day
 	m._show_message("You feed the hens.")
 
