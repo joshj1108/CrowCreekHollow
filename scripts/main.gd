@@ -315,6 +315,8 @@ const RESERVED := FarmLayout.RESERVED
 # Draws every farm tile as one flat colour block, with no ground detail, shadows, tree or building art.
 # Use it to read the layout itself. Set it to false for the full placeholder art.
 const FLAT_FARM_ART := true
+# Pixel art from art/farm/ instead of flat blocks. Off falls back to the flat view.
+const FARM_SPRITES := true
 const LAYOUT_VERSION := FarmLayout.VERSION
 const STALL_CLOSE_HOUR := 18.0
 const SELL_FISH := 6
@@ -1270,6 +1272,8 @@ func _draw() -> void:
 		for y in range(fy0, fy1 + 1):
 			for x in range(fx0, fx1 + 1):
 				_draw_flat_tile(Vector2i(x, y))
+		if FARM_SPRITES:
+			_draw_farm_props()
 	# Pass one: the ground, with small details. Pass two: shadows, which fall on the ground only.
 	# Pass three: trees and buildings, drawn over both.
 	for y in range(fy0, fy1 + 1):
@@ -2095,6 +2099,8 @@ const FENCE_BAR := 0.16
 func _draw_flat_tile(t: Vector2i) -> void:
 	var cell := _tile_rect(t)
 	var kind: int = map[t.y][t.x]
+	if FARM_SPRITES and _draw_sprite_ground(t, kind, cell):
+		return
 	if kind == Tile.FENCE:
 		draw_rect(cell, TILE_COLORS[Tile.GRASS])
 		var bar := PX * FENCE_BAR
@@ -2111,6 +2117,115 @@ func _draw_flat_tile(t: Vector2i) -> void:
 		draw_rect(Rect2(mid - Vector2(bar, bar) * 0.5, Vector2(bar, bar)), c)
 	else:
 		draw_rect(cell, TILE_COLORS[kind])
+
+
+# Sprite ground. Returns false for tiles without art, which then take the flat colour.
+func _draw_sprite_ground(t: Vector2i, kind: int, cell: Rect2) -> bool:
+	var v := FarmSprites.variant(t.x, t.y, 3)
+	var name := ""
+	var flip := false
+	match kind:
+		Tile.GRASS:
+			name = "grass_%d" % v
+		Tile.SOIL:
+			name = "soil_%d" % v
+		Tile.FALLOW:
+			name = "fallow_%d" % v
+		Tile.PATH, Tile.WATER:
+			var edge := _shore_piece(t, kind)
+			if edge.size() == 2:
+				name = edge[0]
+				flip = edge[1]
+			else:
+				name = ("path_%d" if kind == Tile.PATH else "water_%d") % v
+		Tile.ROCK:
+			name = "rock_%d" % v
+		Tile.CAVE_MOUTH:
+			name = "cave_mouth"
+		Tile.HOUSE:
+			name = "house_wall"
+		Tile.ROOF:
+			var below: int = map[t.y + 1][t.x] if t.y + 1 < MAP_H else Tile.WALL
+			name = "roof_bottom" if below != Tile.ROOF else "roof_top"
+		Tile.DOOR:
+			name = "door"
+		Tile.PORCH:
+			name = "porch"
+		_:
+			return false
+	draw_texture_rect(FarmSprites.tex(name, flip), cell, false)
+	return true
+
+
+# Which side or corner of a path or water tile faces the other material. Returns [name, flip] or [].
+func _shore_piece(t: Vector2i, kind: int) -> Array:
+	var outside := func(d: Vector2i) -> bool:
+		var n := t + d
+		if n.x < 0 or n.y < 0 or n.x >= MAP_W or n.y >= MAP_H:
+			return false
+		var k: int = map[n.y][n.x]
+		if kind == Tile.WATER:
+			return k != Tile.WATER
+		return k != Tile.PATH and k != Tile.WATER
+	var north: bool = outside.call(Vector2i(0, -1))
+	var south: bool = outside.call(Vector2i(0, 1))
+	var west: bool = outside.call(Vector2i(-1, 0))
+	var east: bool = outside.call(Vector2i(1, 0))
+	if kind == Tile.WATER:
+		if south:
+			return ["wedge_top", false]
+		if north:
+			return ["wedge_bottom", true]
+		if west:
+			return ["wedge_left", false]
+		if east:
+			return ["wedge_right", false]
+		if outside.call(Vector2i(-1, -1)):
+			return ["wedge_tl", false]
+		if outside.call(Vector2i(1, -1)):
+			return ["wedge_tr", false]
+		if outside.call(Vector2i(-1, 1)):
+			return ["wedge_bl", false]
+		if outside.call(Vector2i(1, 1)):
+			return ["wedge_br", false]
+		return []
+	if north:
+		return ["pedge_top", false]
+	if south:
+		return ["pedge_top", true]
+	if east:
+		return ["pedge_left", false]
+	if west:
+		return ["pedge_right", false]
+	if outside.call(Vector2i(-1, -1)):
+		return ["pedge_tl", false]
+	if outside.call(Vector2i(1, -1)):
+		return ["pedge_tr", false]
+	if outside.call(Vector2i(-1, 1)):
+		return ["pedge_bl", false]
+	if outside.call(Vector2i(1, 1)):
+		return ["pedge_br", false]
+	return []
+
+
+# Trees, the stall, the well and stumps, drawn after the ground so their bases sit on their tiles.
+func _draw_farm_props() -> void:
+	var stall_at := _world_tile(STALL_IX, STALL_IY)
+	draw_texture_rect(FarmSprites.tex("prop_stall"), Rect2(_tile_rect(stall_at).position, Vector2(PX * 2, PX * 2)), false)
+	var well_at := _world_tile(WELL_IX.x, WELL_IX.y)
+	var well_cell := _tile_rect(well_at)
+	draw_texture_rect(FarmSprites.tex("prop_well"), Rect2(well_cell.position.x, well_cell.end.y - PX * 1.2, PX, PX * 1.2), false)
+	var big := _big_tree_origin()
+	draw_texture_rect(FarmSprites.tex("prop_great_tree"), Rect2(_tile_rect(big).position, Vector2(PX * 3, PX * 3)), false)
+	for y in range(0, MAP_H):
+		for x in range(0, MAP_W):
+			var t := Vector2i(x, y)
+			var kind: int = map[y][x]
+			if kind == Tile.TREE and not _in_big_tree(t):
+				var cell := _tile_rect(t)
+				draw_texture_rect(FarmSprites.tex("prop_grove_tree"), Rect2(cell.position.x, cell.end.y - PX * 1.44, PX, PX * 1.44), false)
+			elif kind == Tile.GRASS and grove_felled.has(t):
+				draw_texture_rect(FarmSprites.tex("prop_stump"), _tile_rect(t), false)
 
 
 func _is_fence(t: Vector2i) -> bool:

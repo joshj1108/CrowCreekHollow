@@ -567,6 +567,8 @@ The farm is a hand-read grid. `tools/farm_grid.txt` holds one character per inne
 - The workshop, furnace, smokehouse, woodshed, chopping log and cellar are not drawn. Their spots are open grass, listed as reserved, so a coop or barn is never placed on them.
 - Rocks and brush spots are kept only where they still sit on open grass.
 
+Farm art. `art/farm/` holds the pixel art cut from the tileset sheet: 16-pixel tiles at native size, and props with transparent backgrounds. `FARM_SPRITES` in `main.gd` switches the farm from the flat view to this art. `scripts/farm_sprites.gd` loads it, and edge pieces are chosen from neighbouring tiles. Path and water edges are picked by which side faces the other material; the sheet has no piece for land to the north of water or grass to the south of a path, so those use a flipped copy. Tiles without art (coop, barn, workshop and other unlocked buildings, decorations) keep the flat colour until they get their own art.
+
 The older `tools/farm_layout.py` converter sampled the diagram by colour. It produced too many misreads and is no longer the source of the layout.
 
 A save records the layout's version. When the version changes, the save is migrated: crops, brush and felled trees reset, the player starts at the farm centre, and the coop and barn move to the nearest clear grass. Money, skills, tools and animals are kept, and the player is told what happened.
