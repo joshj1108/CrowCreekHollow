@@ -18,11 +18,11 @@ func _boredom_check() -> String:
 	# Paused while the desk games are reworked. Flip BOREDOM_ENABLED to restore the drain.
 	if not m.BOREDOM_ENABLED or m.entertained_day == m.day:
 		return ""
-	var before := m._sanity_max()
+	var before := m.sanity_sys._sanity_max()
 	m.boredom_loss = minf(m.boredom_loss + m.BOREDOM_DRAIN, m.BOREDOM_MAX_LOSS)
-	m.sanity = minf(m.sanity, m._sanity_max())
-	if m._sanity_max() < before:
-		return " Nothing to occupy you today, so your sanity limit slips to %d." % int(m._sanity_max())
+	m.sanity = minf(m.sanity, m.sanity_sys._sanity_max())
+	if m.sanity_sys._sanity_max() < before:
+		return " Nothing to occupy you today, so your sanity limit slips to %d." % int(m.sanity_sys._sanity_max())
 	return ""
 
 

@@ -263,13 +263,13 @@ func _house_rows() -> Array:
 	rows.append({"note": "The house wears a little each night. Mending, tidying, and repairs bring it down. At %d wear, rain ruins a crop overnight. At %d, a fox can get into the coop. A third plot opens at Farming %d once the house is Patched." % [m.WEAR_RUNDOWN, m.WEAR_FOX, m.PLOT_THREE_LEVEL]})
 	rows.append({"section": "Rest"})
 	rows.append({"note": "The bed is in the bedroom. Walk there and press Space from 18:00 to save and end the day. If you aren't in bed by 03:00 you collapse, and your sanity limit drops permanently."})
-	rows.append({"name": "Sanity limit", "value": "%d of %d" % [m._sanity_max(), int(m.SANITY_MAX)]})
+	rows.append({"name": "Sanity limit", "value": "%d of %d" % [m.sanity_sys._sanity_max(), int(m.SANITY_MAX)]})
 	rows.append({
 		"name": "Cleanse the house",
 		"value": "%d crops, Cleaning %d, once a day: +%d limit" % [m.CLEANSE_CROPS, m.CLEANSE_LEVEL, m.CLEANSE_RELIEF],
 		"button": "Cleanse",
 		"action": "cleanse",
-		"enabled": m._can_cleanse(),
+		"enabled": m.sanity_sys._can_cleanse(),
 	})
 	rows.append({"section": "Storage"})
 	if m.cellar_built:

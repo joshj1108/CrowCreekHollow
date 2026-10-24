@@ -916,6 +916,7 @@ var shake_tw: Tween
 var last_minimap_key: Array = []
 var last_cam_tile := Vector2i(-99, -99)   # the tile the camera was last drawn from
 var panels: PanelRows
+var sanity_sys: SanitySystem
 var firewood: FirewoodSystem
 var farm: FarmSystem
 var animals: AnimalSystem
@@ -941,6 +942,7 @@ func _ready() -> void:
 	animals = AnimalSystem.new(self)
 	farm = FarmSystem.new(self)
 	firewood = FirewoodSystem.new(self)
+	sanity_sys = SanitySystem.new(self)
 	_setup_input()
 	_load_settings()
 	_start_music()
@@ -1155,14 +1157,14 @@ func _process(delta: float) -> void:
 		return
 
 	if current_hour >= EVENT_HOUR and event_fired_day != day:
-		_trigger_night_event()
+		sanity_sys._trigger_night_event()
 
 	var darkness := smoothstep(DUSK_HOUR, DUSK_HOUR + 2.0, current_hour)
-	darkness *= 1.0 - _night_relief()
-	darkness = clampf(darkness + _low_sanity_boost(), 0.0, 1.0)
+	darkness *= 1.0 - sanity_sys._night_relief()
+	darkness = clampf(darkness + sanity_sys._low_sanity_boost(), 0.0, 1.0)
 	canvas_modulate.color = _light_tint().lerp(NIGHT_TINT, darkness)
 	_update_lantern(darkness)
-	_update_sanity(darkness, delta)
+	sanity_sys._update_sanity(darkness, delta)
 
 	_check_doors()
 	farm._check_unlocks()
@@ -1190,7 +1192,7 @@ func _process(delta: float) -> void:
 	needs_temp.text = "%d°F" % roundi(_temperature())
 	var date := _calendar_date(day)
 	var event_name := ""
-	for ev in _active_events():
+	for ev in sanity_sys._active_events():
 		event_name = " · %s" % ev["title"]
 		break
 	hud_day_label.text = "Day %d" % day
@@ -1200,7 +1202,7 @@ func _process(delta: float) -> void:
 	hud_weather_icon.kind = "sun" if weather_kind == "sunny" else ("rain" if weather_kind in WATER_RAIN_KINDS else "cloud")
 	hud_weather_icon.queue_redraw()
 	hud_hp_label.text = "%d / %d" % [hp, max_hp()]
-	hud_sanity_label.text = "%d / %d" % [int(sanity), _sanity_max()]
+	hud_sanity_label.text = "%d / %d" % [int(sanity), sanity_sys._sanity_max()]
 	hud_coins_label.text = "%d" % money
 
 	_handle_keys()
@@ -2648,9 +2650,9 @@ func _on_panel_action(action_id: String) -> void:
 		"mend":
 			_mend_house()
 		"cleanse":
-			_cleanse_house()
+			sanity_sys._cleanse_house()
 		"tidy":
-			_tidy_house()
+			sanity_sys._tidy_house()
 		"advance_lantern":
 			_advance_lantern()
 		"switch_seed":
@@ -3355,7 +3357,7 @@ func _interact() -> void:
 			Tile.FIREPLACE:
 				firewood._feed_fire()
 			Tile.STATION:
-				_tidy_house()
+				sanity_sys._tidy_house()
 			Tile.DESK:
 				desk._read_desk()
 			Tile.CELLAR:
@@ -3941,7 +3943,7 @@ func _eat_food(food_id: String) -> void:
 		return
 	inventory[key] -= 1
 	stats["eaten"] += 1
-	_change_sanity(Foods.sanity_restore(f))
+	sanity_sys._change_sanity(Foods.sanity_restore(f))
 	hp = mini(max_hp(), hp + Foods.hp_restore(f))
 	food = minf(100.0, food + Foods.food_restore(f))
 	play_sfx("eat", 0.05)
@@ -4082,7 +4084,7 @@ func _update_needs(dh: float) -> void:
 	elif temp >= COLD_TEMP:
 		warmth = minf(100.0, warmth + WARMTH_OUTDOORS * dh)
 	else:
-		var frost := 1.6 if _event_active("frost") else 1.0
+		var frost := 1.6 if sanity_sys._event_active("frost") else 1.0
 		warmth = maxf(0.0, warmth - (COLD_TEMP - temp) * WARMTH_LOSS * frost * dh)
 	if food <= 0.0 or water <= 0.0 or warmth <= 0.0:
 		starve_timer += dh
@@ -5153,7 +5155,7 @@ func _rest_at_camp() -> void:
 		_show_message("You aren't tired yet. You can rest at the camp after 18:00.")
 		return
 	stats["slept"] += 1
-	_change_sanity(SLEEP_SANITY)
+	sanity_sys._change_sanity(SLEEP_SANITY)
 	warmth = 100.0
 	_end_day("You rest by the campsite through the night.", false)
 
@@ -5365,7 +5367,7 @@ func _talk(npc: Dictionary) -> void:
 # Each tick, you swing and the hollow answers. Moving away breaks the fight.
 # Losing a fight sends you home, shaken. You're back at full health by morning.
 func _fallen() -> void:
-	_change_sanity(-10.0)
+	sanity_sys._change_sanity(-10.0)
 	hp = max_hp()
 	_go_home("You collapse in the wood. You wake at the homestead, shaken. Sanity -10.")
 
@@ -5894,7 +5896,7 @@ func _do_job() -> void:
 
 func _chore_list() -> Array:
 	var chores: Array = []
-	chores.append({"name": "Tidy the house", "detail": "+%d XP, once a day" % XP_TIDY, "done": tidied_day == day, "button": "Tidy", "action": "tidy", "enabled": _can_tidy()})
+	chores.append({"name": "Tidy the house", "detail": "+%d XP, once a day" % XP_TIDY, "done": tidied_day == day, "button": "Tidy", "action": "tidy", "enabled": sanity_sys._can_tidy()})
 	chores.append({"name": "Mend a board", "detail": "%d wood, %d fiber, +%d XP. %d left today" % [MEND_WOOD, MEND_FIBER, XP_MEND, _mends_left()], "done": mend_day == day and mends_today > 0, "button": "Mend", "action": "mend", "enabled": _can_mend()})
 	if hens > 0:
 		chores.append({"name": "Feed the hens", "detail": "at the coop, %d crops" % (hens * HEN_FEED_CROPS), "done": hens_fed_day == day, "button": "", "action": "", "enabled": false})
@@ -5932,52 +5934,10 @@ func _day_of_year(month: int, dom: int) -> int:
 	return total + dom - 1
 
 
-# How many days into an event the current day is. Negative values mean the event is still to come.
-func _event_offset(ev: Dictionary) -> int:
-	var today := _calendar_date(day)
-	var now := _day_of_year(int(today["month"]), int(today["day"]))
-	var start := _day_of_year(MONTH_NAMES.find(ev["month"]), int(ev["day"]))
-	return posmod(now - start, 365)
-
-
-func _active_events() -> Array:
-	var out: Array = []
-	for ev in SEASON_EVENTS:
-		if _event_offset(ev) < int(ev["span"]):
-			out.append(ev)
-	return out
-
-
-func _event_active(effect: String) -> bool:
-	for ev in _active_events():
-		if ev["effect"] == effect:
-			return true
-	return false
-
-
-# Runs as a new day begins. Events that start today announce themselves and may give something once.
-func _begin_day_events() -> String:
-	var note := ""
-	for ev in _active_events():
-		if _event_offset(ev) != 0:
-			continue
-		stats["events_seen"] += 1
-		if ev["effect"] == "supper":
-			inventory["turnip_hash"] += 2
-			_change_sanity(10.0)
-		elif ev["effect"] == "fair":
-			inventory["seeds"] += 5
-		elif ev["effect"] == "feast":
-			inventory["fish_meal"] += 2
-			inventory["bandage"] += 1
-		note += " %s: %s" % [ev["title"], ev["text"]]
-	return note
-
-
 # Picks the day's weather from the season's weights.
 func _roll_weather() -> void:
 	# Midsummer heat keeps the sky clear for its days.
-	if _event_active("heat"):
+	if sanity_sys._event_active("heat"):
 		weather_kind = "sunny"
 		_apply_weather()
 		return
@@ -6045,7 +6005,7 @@ func _settle_day() -> String:
 	if missed > 0:
 		notes += " %d chore%s left undone, so the house wears faster." % [missed, "" if missed == 1 else "s"]
 	else:
-		_change_sanity(WELL_KEPT_SANITY)
+		sanity_sys._change_sanity(WELL_KEPT_SANITY)
 		notes += " The house is kept well, and you sleep easier. +%d sanity." % WELL_KEPT_SANITY
 	animals._age_animals()
 	if hens > 0:
@@ -6109,7 +6069,7 @@ func _try_sleep() -> void:
 		_show_message("You aren't tired yet. The bed will be there after 18:00.")
 		return
 	stats["slept"] += 1
-	_change_sanity(SLEEP_SANITY)
+	sanity_sys._change_sanity(SLEEP_SANITY)
 	if firewood._fire_lit():
 		warmth = 100.0
 	else:
@@ -6125,7 +6085,7 @@ func _collapse() -> void:
 		return
 	sanity_penalty += COLLAPSE_SANITY_PENALTY
 	stats["collapses"] += 1
-	sanity = minf(sanity, _sanity_max())
+	sanity = minf(sanity, sanity_sys._sanity_max())
 	_collapse_scene()
 
 
@@ -6213,42 +6173,6 @@ func _on_player_struck(kind: String) -> void:
 	_shake_camera(0.12, 1.6 if kind == "mine" else 1.2)
 
 
-func _can_tidy() -> bool:
-	return house_stage >= 2 and tidied_day != day
-
-
-func _tidy_house() -> void:
-	if not _can_tidy():
-		_show_message("The house is already tidy for today.")
-		return
-	tidied_day = day
-	stats["tidied"] += 1
-	wear = maxi(0, wear - WEAR_TIDY)
-	_grant_xp("Cleaning", XP_TIDY)
-	var bonus := TIDY_CLEANING_BONUS if _level("Cleaning") >= 2 else 0
-	_change_sanity(TIDY_SANITY + bonus)
-	_show_message("You tidy the house. The air feels a little lighter. +%d Cleaning XP" % XP_TIDY)
-
-
-# Cleansing offers crops to the house to lift the permanent sanity penalty.
-func _can_cleanse() -> bool:
-	return sanity_penalty > 0 and cleanse_day != day \
-		and _level("Cleaning") >= CLEANSE_LEVEL \
-		and farm._crop_total() >= CLEANSE_CROPS
-
-
-func _cleanse_house() -> void:
-	if not _can_cleanse():
-		_show_message("Cleansing needs Cleaning %d, %d crops, and one try a day." % [CLEANSE_LEVEL, CLEANSE_CROPS])
-		return
-	farm._spend_crops(CLEANSE_CROPS)
-	cleanse_day = day
-	sanity_penalty = maxi(0, sanity_penalty - CLEANSE_RELIEF)
-	sanity = minf(sanity, _sanity_max())
-	stats["cleansed"] += 1
-	_show_message("You burn the offering and open the windows. Your limit recovers by %d." % CLEANSE_RELIEF)
-
-
 # --- Lanterns ---------------------------------------------------------------
 
 func _can_advance_lantern() -> bool:
@@ -6297,14 +6221,6 @@ func _update_lantern(darkness: float) -> void:
 		light.energy = glow
 	porch_light.enabled = outdoors and house_stage == 3 and darkness > 0.1
 	porch_light.energy = glow
-
-
-func _night_relief() -> float:
-	# The restored house dims the night overall. The lantern lights a ring instead.
-	var relief := 0.0
-	if house_stage >= 3:
-		relief += HOUSE_RELIEF
-	return minf(relief, 0.9)
 
 
 # --- Quests ------------------------------------------------------------------
@@ -6387,44 +6303,6 @@ func _reward_text(reward: Dictionary) -> String:
 
 # --- Sanity and night events ------------------------------------------------
 
-func _sanity_max() -> float:
-	return SANITY_MAX - sanity_penalty - boredom_loss
-
-
-func _change_sanity(amount: float) -> void:
-	sanity = clampf(sanity + amount, 0.0, _sanity_max())
-
-
-func _update_sanity(darkness: float, delta: float) -> void:
-	var rate := 0.02                 # slow recovery outdoors in daylight
-	if inside:
-		rate = 0.1 + (0.05 if house_stage >= 1 else 0.0)   # the house is shelter
-	elif darkness > 0.5:
-		rate = -0.05 * (0.5 if _event_active("ward") else 1.0)   # the dark wears on you; lanterns ward it on All Hallows
-	_change_sanity(rate * delta)
-
-
-func _low_sanity_boost() -> float:
-	# Low sanity makes everything darker, a visible warning.
-	return maxf(0.0, (LOW_SANITY - sanity) / LOW_SANITY) * 0.25
-
-
-func _trigger_night_event() -> void:
-	event_fired_day = day
-	stats["events"] += 1
-	var ev: Dictionary = NIGHT_EVENTS[(day * 3) % NIGHT_EVENTS.size()]
-	match ev["shadow"]:
-		"field":
-			tonight_shadow = shadow_tile
-		"house":
-			tonight_shadow = _world_tile(HOUSE_IX + HOUSE_W, HOUSE_IY + 1)
-		_:
-			tonight_shadow = Vector2i(-1, -1)
-	var hit: float = float(ev["sanity"]) * (2.0 if _event_active("dread") else 1.0) * (0.5 if _event_active("ward") else 1.0)
-	_change_sanity(hit)
-	_show_message(ev["message"])
-	queue_redraw()
-
 
 # Ends the day and saves. Both sleeping and collapsing come through here.
 func _end_day(base: String, leave_house: bool = true) -> void:
@@ -6449,7 +6327,7 @@ func _end_day(base: String, leave_house: bool = true) -> void:
 	var thirsty := 0
 	for pos in crops.keys():
 		if int(crops[pos].get("watered_day", 0)) == day:
-			var bonus := 1 if _event_active("thaw") else 0
+			var bonus := 1 if sanity_sys._event_active("thaw") else 0
 			var kind := str(crops[pos]["kind"])
 			crops[pos]["days"] = mini(int(crops[pos].get("days", 0)) + 1 + bonus, int(CROP_GROW_DAYS[kind]))
 			crops[pos]["stage"] = _stage_for(kind, int(crops[pos]["days"]))
@@ -6462,7 +6340,7 @@ func _end_day(base: String, leave_house: bool = true) -> void:
 		well_water = WELL_CAPACITY
 	day += 1
 	_roll_weather()
-	var event_note := _begin_day_events()
+	var event_note := sanity_sys._begin_day_events()
 	clock = 0.0
 	tonight_shadow = Vector2i(-1, -1)
 	_regrow_wild()
