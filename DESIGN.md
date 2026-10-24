@@ -62,7 +62,8 @@ The farmer is drawn in code. A straw hat with a band, a shirt under blue overall
 ## Map
 
 - A 40×24 walkable farm surrounded by a tree border, so the camera stays centered on the player all the way to the farm's edge.
-- Two plots: **Plot one** is tilled from the start. **Plot two** is overgrown and opens at Farming 2.
+- Two plots: **Plot one** is tilled from the start. **Plot two** is overgrown and opens at Farming 2. A third fallow plot sits beside them and opens at Farming 4 once the house is Patched.
+- The layout comes from a diagram (see Code layout). Fences and rocks block movement; the dock, the island and the path are walkable.
 - Trees, water, the house walls, and brush piles block movement. The player slides along walls.
 - A minimap in the top-right shows the farm, the house, brush piles, the well (a blue square), the player, and the shadow on event nights.
 - The farmhouse interior sits below the farm and has its own camera bounds.
@@ -420,7 +421,7 @@ A campsite lets you stay out in the wider land overnight. It is built, not place
 
 ## Forestry and tools
 
-- **Forestry** trains by felling trees. A grove of five trees sits in the top-left corner of the farm. Each tree gives 3 wood, and 2 hardwood with a copper hatchet or better, and 20 Forestry XP. Felled trees come back each morning.
+- **Forestry** trains by felling trees. A grove of twelve trees is scattered across the property. Each tree gives 3 wood, and 2 hardwood with a copper hatchet or better, and 20 Forestry XP. Felled trees come back each morning.
 - **Hatchets** and **picks** are tools with tiers. They are crafted from the Tools tab of the Craft panel and are kept by tier rather than worn in a slot. Hatchet tiers: crude, stone, copper, iron. Pick tiers: stone, copper, iron.
 - A hatchet is needed to fell trees. Hardwood needs a copper hatchet or better.
 
@@ -553,6 +554,20 @@ Particles do not run indoors, in the cave, or in the village. Nothing in the gra
 - `combat_system.gd` (`combat_sys`): foes, shots and weapon damage.
 
 Each class holds `var m: MainGame` and reads main's state through it. A member is named after its job, and never after a name main already uses as a local or variable (main has a local `combat`, which is why the combat member is `combat_sys`). Drawing (`_draw_*`), the engine callbacks, and anything connected to a signal stays on main, because it needs the node.
+
+## Farm layout
+
+The farm's terrain and fixed positions are generated, not typed in. `tools/farm_layout.py` reads a flat layout diagram (flat colour blocks, one per feature) and writes `scripts/farm_layout.gd`:
+
+- The diagram's yellow-green area is the 40×24 walkable farm. Each tile takes the colour that covers most of it, matched against the palette in the tool. Small features (single trees, the well, the stall, the cave mouth) go to the tile under their centre.
+- The tree border is not read from the diagram. The game draws it from code, 14 tiles deep on the sides and 8 on the top and bottom.
+- Two brown plots are plot one (soil) and plot two (fallow). The olive plot is plot three.
+- The great tree is the centre 3 by 3 of the big tree in the diagram.
+- The workshop, furnace, smokehouse, woodshed, chopping log and cellar are not drawn. Their spots are chosen in open grass. Those tiles are listed as reserved, so a coop or barn is never placed on them.
+- Rocks and brush are placed on open grass.
+- The tool reports anything it cannot place cleanly: a fence that cuts off the well, for example, is opened by one tile, and the tool says which.
+
+A save records the layout's version. When the version changes, the save is migrated: crops, brush and felled trees reset, the player starts at the farm centre, and the coop and barn move to the nearest clear grass. Money, skills, tools and animals are kept, and the player is told what happened.
 
 ## Deferred
 

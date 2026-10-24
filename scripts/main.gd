@@ -75,10 +75,7 @@ const ROOST_ALT := 3.4        # how high the crown perches sit, in tiles
 const XP_FELL := 20
 # Rocks on the farm. Breaking one gives stone. A pick gives more, and from Mining 2 a small chance of copper ore.
 # Some sit inside the plots: a rock must be broken before that soil can be planted.
-const ROCK_SPOTS := [
-	Vector2i(5, 5), Vector2i(10, 8), Vector2i(6, 16), Vector2i(10, 18), Vector2i(15, 15),
-	Vector2i(18, 6), Vector2i(24, 15), Vector2i(35, 13),
-]
+const ROCK_SPOTS := FarmLayout.ROCK_SPOTS
 const XP_MINE := 12
 const ORE_CHANCE := 0.15
 const ORE_MINING_LEVEL := 2
@@ -314,6 +311,8 @@ const SMOKEHOUSE_COST := {"wood": 5, "fiber": 3, "coins": 60, "level": 3}
 # The stall sells what you carry and buys seeds. It is open 06:00 to 18:00.
 const STALL_IX := FarmLayout.STALL_IX
 const STALL_IY := FarmLayout.STALL_IY
+const RESERVED := FarmLayout.RESERVED
+const LAYOUT_VERSION := FarmLayout.VERSION
 const STALL_CLOSE_HOUR := 18.0
 const SELL_FISH := 6
 const SELL_EGG := 4                 # farm stand price for an egg
@@ -1729,10 +1728,12 @@ func _regrow_wild() -> void:
 func _fill_brush() -> void:
 	brush.clear()
 	for spot in BRUSH_SPOTS:
-		brush[_world_tile(spot.x, spot.y)] = true
+		if _is_open_grass(spot):
+			brush[_world_tile(spot.x, spot.y)] = true
 	if progression._level("Bushcrafting") >= THICKET_LEVEL:
 		for spot in THICKET_SPOTS:
-			brush[_world_tile(spot.x, spot.y)] = true
+			if _is_open_grass(spot):
+				brush[_world_tile(spot.x, spot.y)] = true
 	grove_felled.clear()
 	_apply_grove()
 
@@ -3760,6 +3761,8 @@ func _fill_rocks(keep_clear: bool = false) -> void:
 	rocks.clear()
 	for spot in ROCK_SPOTS:
 		var t := _world_tile(spot.x, spot.y)
+		if not _is_open_grass(spot):
+			continue
 		if keep_clear and crops.has(t):
 			continue
 		rocks[t] = true
@@ -4822,6 +4825,59 @@ func _confirm_placement() -> void:
 		_show_message("The coop stands here now. Stand beside it, facing it, and press Space to tend the hens.")
 
 
+# True when an inner farm tile is plain grass in the layout itself, ignoring anything built or planted.
+func _is_open_grass(inner: Vector2i) -> bool:
+	if inner.x < 0 or inner.y < 0 or inner.x >= INNER_W or inner.y >= INNER_H:
+		return false
+	return FarmLayout.TERRAIN[inner.y].substr(inner.x, 1) == "." and not RESERVED.has(inner)
+
+
+# Moves a coop or barn to the nearest spot that fits, for a save from another layout or one whose spot no
+# longer fits. Refunds its cost if nothing fits at all.
+func _relocate_building(kind: String, other: Vector2i, other_size: Vector2i) -> void:
+	var size := _footprint(kind)
+	var from := _placed_tile(kind)
+	if from.x < 0:
+		from = Vector2i(INNER_W / 2, INNER_H / 2) + Vector2i(BORDER_X, BORDER_Y)
+	var from_inner := from - Vector2i(BORDER_X, BORDER_Y)
+	var best := Vector2i(-1, -1)
+	var best_d := 1 << 30
+	for y in range(0, INNER_H - size.y + 1):
+		for x in range(0, INNER_W - size.x + 1):
+			var ok := true
+			for dy in size.y:
+				for dx in size.x:
+					var c := Vector2i(x + dx, y + dy)
+					if not _is_open_grass(c) or crops.has(c + Vector2i(BORDER_X, BORDER_Y)) or rocks.has(c + Vector2i(BORDER_X, BORDER_Y)) or brush.has(c + Vector2i(BORDER_X, BORDER_Y)) or fish_spots.has(c + Vector2i(BORDER_X, BORDER_Y)):
+						ok = false
+			# The other building must not share any tile with this one.
+			if other.x >= 0 and x < other.x - BORDER_X + other_size.x and x + size.x > other.x - BORDER_X and y < other.y - BORDER_Y + other_size.y and y + size.y > other.y - BORDER_Y:
+				ok = false
+			if ok:
+				var d: int = absi(x - from_inner.x) + absi(y - from_inner.y)
+				if d < best_d:
+					best_d = d
+					best = Vector2i(x, y)
+	if best.x < 0:
+		var cost := _build_cost(kind)
+		materials["wood"] += int(cost.get("wood", 0))
+		materials["fiber"] += int(cost.get("fiber", 0))
+		if kind == "barn":
+			barn_built = false
+			barn_tile = Vector2i(-1, -1)
+		else:
+			coop_built = false
+			coop_tile = Vector2i(-1, -1)
+		_show_message("There was no room left for the %s after the farm changed, so it was taken down and its materials returned." % kind)
+		return
+	var placed := best + Vector2i(BORDER_X, BORDER_Y)
+	if kind == "barn":
+		barn_tile = placed
+	else:
+		coop_tile = placed
+	_show_message("The %s was moved to a clear spot on the new farm." % kind)
+
+
 # A spot fits when all of its tiles are open grass, clear of crops, rocks, brush, fishing spots, and you.
 func _spot_ok(top: Vector2i, size: Vector2i) -> bool:
 	var here := _player_tile()
@@ -4831,6 +4887,8 @@ func _spot_ok(top: Vector2i, size: Vector2i) -> bool:
 			if t.x < BORDER_X or t.y < BORDER_Y or t.x >= BORDER_X + INNER_W or t.y >= BORDER_Y + INNER_H:
 				return false
 			if map[t.y][t.x] != Tile.GRASS:
+				return false
+			if RESERVED.has(t - Vector2i(BORDER_X, BORDER_Y)):
 				return false
 			if crops.has(t) or rocks.has(t) or brush.has(t) or fish_spots.has(t) or t == here:
 				return false

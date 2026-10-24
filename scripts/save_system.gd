@@ -94,6 +94,7 @@ func _save_game() -> void:
 		"cave_mined_day": m.cave_mined_day,
 		"wear": m.wear,
 		"coop_built": m.coop_built,
+		"layout": m.LAYOUT_VERSION,
 		"coop_x": m.coop_tile.x,
 		"coop_y": m.coop_tile.y,
 		"barn_built": m.barn_built,
@@ -190,12 +191,16 @@ func _load_game() -> bool:
 	var pos: Variant = data.get("player_pos", null)
 	if typeof(pos) == TYPE_ARRAY and pos.size() == 2:
 		m.saved_pos = Vector2(float(pos[0]), float(pos[1]))
-		m.has_saved_pos = true
+		# A position from another layout may now be a fence or water, so the player starts at the farm centre.
+		m.has_saved_pos = str(data.get("layout", "")) == m.LAYOUT_VERSION
 
 	# Rebuild the interior so the saved house stage shows the right rooms.
 	# Crops and brush are restored here, after the map exists.
+	# A save made on another layout has its plants, brush and trees on tiles that may now be water or a
+	# fence, so the farm's planted and gathered state is reset. Money, skills, tools and animals are kept.
+	var same_layout := str(data.get("layout", "")) == m.LAYOUT_VERSION
 	m.crops.clear()
-	for c in data.get("crops", []):
+	for c in (data.get("crops", []) if same_layout else []):
 		var kind := str(c.get("kind", "turnip"))
 		# Saves from before watering existed have no record. Those crops count as watered today,
 		# so they grow tonight like they used to.
@@ -207,13 +212,16 @@ func _load_game() -> bool:
 	m.brush_day = int(data.get("brush_day", data.get("day", 0)))
 	m.rock_day = int(data.get("rock_day", data.get("day", 0)))
 	m.brush.clear()
-	for b in data.get("brush", []):
-		m.brush[Vector2i(int(b[0]), int(b[1]))] = true
-	for g in data.get("felled", []):
-		m.grove_felled[Vector2i(int(g[0]), int(g[1]))] = true
-	m._apply_grove()
+	if same_layout:
+		for b in data.get("brush", []):
+			m.brush[Vector2i(int(b[0]), int(b[1]))] = true
+		for g in data.get("felled", []):
+			m.grove_felled[Vector2i(int(g[0]), int(g[1]))] = true
+		m._apply_grove()
+	else:
+		m._fill_brush()
 	_merge_ints(m.tool_tier, data.get("tool_tier"))
-	if data.has("rocks"):
+	if same_layout and data.has("rocks"):
 		m.rocks.clear()
 		for r in data["rocks"]:
 			m.rocks[Vector2i(int(r[0]), int(r[1]))] = true
@@ -225,6 +233,13 @@ func _load_game() -> bool:
 	m.coop_tile = Vector2i(int(data.get("coop_x", -1)), int(data.get("coop_y", -1)))
 	m.barn_built = bool(data.get("barn_built", false))
 	m.barn_tile = Vector2i(int(data.get("barn_x", -1)), int(data.get("barn_y", -1)))
+	if not same_layout:
+		# The saved spots belong to the old farm, so each building is placed again.
+		m._show_message("The farm was redrawn since this save. Plantings, brush and felled trees were reset.")
+		if m.coop_built:
+			m._relocate_building("coop", m.barn_tile if m.barn_built else Vector2i(-1, -1), m._footprint("barn"))
+		if m.barn_built:
+			m._relocate_building("barn", m.coop_tile if m.coop_built else Vector2i(-1, -1), m._footprint("coop"))
 	m.hens = int(data.get("hens", 0))
 	m.hens_fed_day = int(data.get("hens_fed_day", -1))
 	m.hen_unfed_days = int(data.get("hen_unfed_days", 0))
