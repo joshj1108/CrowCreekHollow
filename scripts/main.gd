@@ -2088,10 +2088,7 @@ func _restore_saved_state() -> void:
 		_toggle_tab(saved_panel)
 
 
-# Flat view. A fence is thin bars toward its neighbouring fences over grass. The great tree's
-# canopy square is painted as art over the grass around its trunk. Neither changes what blocks movement.
-const CANOPY_RECT := Rect2i(29, 15, 7, 8)
-const CANOPY_COLOR := Color("2d5234")
+# Flat view. A fence is thin bars toward its neighbouring fences over grass.
 const FENCE_BAR := 0.16
 
 
@@ -2112,19 +2109,12 @@ func _draw_flat_tile(t: Vector2i) -> void:
 		if _is_fence(t + Vector2i(0, 1)):
 			draw_rect(Rect2(mid.x - bar * 0.5, mid.y, bar, PX * 0.5), c)
 		draw_rect(Rect2(mid - Vector2(bar, bar) * 0.5, Vector2(bar, bar)), c)
-	elif kind == Tile.GRASS and _in_canopy(t):
-		draw_rect(cell, CANOPY_COLOR)
 	else:
 		draw_rect(cell, TILE_COLORS[kind])
 
 
 func _is_fence(t: Vector2i) -> bool:
 	return t.x >= 0 and t.y >= 0 and t.x < MAP_W and t.y < MAP_H and map[t.y][t.x] == Tile.FENCE
-
-
-func _in_canopy(t: Vector2i) -> bool:
-	var ix := t - Vector2i(BORDER_X, BORDER_Y)
-	return CANOPY_RECT.has_point(ix)
 
 
 # The great tree's footprint, in map tiles, and the ground point at the foot of its trunk.

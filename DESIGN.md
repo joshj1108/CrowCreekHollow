@@ -559,9 +559,9 @@ Each class holds `var m: MainGame` and reads main's state through it. A member i
 
 The farm is a hand-read grid. `tools/farm_grid.txt` holds one character per inner tile (40×24), read tile by tile from the layout diagram. `tools/hand_layout.py` reads that grid, derives the anchors (plots, house, porch, well, stall, great tree, grove spots) and writes `scripts/farm_layout.gd`. Regenerate with `python3 tools/hand_layout.py`; edit the grid, not the generated file.
 
-- Terrain codes are listed in the header of `scripts/farm_layout.gd`. The roof (`O`) is a separate tile from the house body (`H`), so the two can differ in colour. The stall is 2×2 and the well 2 tiles wide, as in the diagram.
+- Terrain codes are listed in the header of `scripts/farm_layout.gd`. The roof (`O`) is a separate tile from the house body (`H`), so the two can differ in colour. The stall is 2×2. The well is one tile.
 - The layout has no fences. The reference image removed them, and the grid has no `X` tiles.
-- The great tree's trunk is the centre 3 by 3 (`B`), which is the only part that blocks. The big dark square in the diagram is drawn as canopy art over the grass around it, so the canopy is walkable.
+- The great tree is the 3 by 3 block (`B`) and nothing more. Its art is drawn at that size, so it does not fill the big dark square in the diagram.
 - Plot one and plot two are soil (brown in the diagram); plot three is fallow (olive).
 - The grove keeps twelve trees. The thirteenth tree in the diagram, at the top-left of the field, is dropped.
 - The workshop, furnace, smokehouse, woodshed, chopping log and cellar are not drawn. Their spots are open grass, listed as reserved, so a coop or barn is never placed on them.
