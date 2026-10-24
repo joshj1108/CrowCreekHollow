@@ -534,6 +534,26 @@ The farm reads as a finished picture rather than flat colour blocks. Four layers
 
 Particles do not run indoors, in the cave, or in the village. Nothing in the grade pass changes game logic, so the save and the rules are untouched.
 
+## Code layout
+
+`scripts/main.gd` (`class_name MainGame`) is the scene root. It owns the shared state, the drawing, the input and panel glue, the HUD, the world and map build, the lights, the crows, and the title and settings flow. The rules for each domain live in their own `RefCounted` script, which is built once in `_ready` and kept as a member on main:
+
+- `panel_rows.gd` (`panels`): the row lists for every panel.
+- `desk_system.gd` (`desk`): desk games, mail, the property tax and eviction.
+- `animal_system.gd` (`animals`): hens and goats, feeding, ageing and sales.
+- `farm_system.gd` (`farm`): seeds, planting, watering, harvest and crop unlocks.
+- `firewood_system.gd` (`firewood`): chopping, the fire, and warmth.
+- `sanity_system.gd` (`sanity_sys`): the day's events, tidying, cleansing and the night relief.
+- `stall_system.gd` (`stall`): the farm stand, cooking, food, the pack and the bank.
+- `progression_system.gd` (`progression`): skill XP, levels, story, achievements and rewards.
+- `save_system.gd` (`saver`): saving, loading and the saved position.
+- `craft_system.gd` (`crafting`): recipes, gear, tools and bandages.
+- `fishing_system.gd` (`fishing`): fish spots, casting and reeling, and the cooler.
+- `mining_system.gd` (`mining`): rocks, the Ashford quarry, cave ore, smelting and brush gathering.
+- `combat_system.gd` (`combat_sys`): foes, shots and weapon damage.
+
+Each class holds `var m: MainGame` and reads main's state through it. A member is named after its job, and never after a name main already uses as a local or variable (main has a local `combat`, which is why the combat member is `combat_sys`). Drawing (`_draw_*`), the engine callbacks, and anything connected to a signal stays on main, because it needs the node.
+
 ## Deferred
 
 - The story beyond the survival chapters: mystery and horror escalation.
