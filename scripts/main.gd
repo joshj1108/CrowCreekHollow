@@ -2260,8 +2260,8 @@ func _find_house_roof_bottom() -> int:
 # The house is one sprite over its footprint: the roof and walls, the door, the porch and the steps.
 # Its footprint is six tiles wide and seven tall, from the top of the roof down to the steps.
 const HOUSE_SPRITE_TILES := Vector2i(6, 7)
-# Shifts the house sprite across, in tiles, from the roof's top-left tile. -0.4 moves it four tenths of a tile left.
-const HOUSE_SPRITE_OFFSET_X := -0.4
+# Shifts the house sprite across, in tiles, from the roof's top-left tile. -0.5 centres the steps on the entrance tile.
+const HOUSE_SPRITE_OFFSET_X := -0.5
 # Where the sprite's walls end, in tiles from the sprite's top (measured from house_stage_0.png: 5.88 of 7).
 const HOUSE_WALL_BOTTOM_TILES := 5.88
 
