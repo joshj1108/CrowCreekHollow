@@ -1,3 +1,4 @@
+class_name MainGame
 extends Node2D
 
 ## The farm and farmhouse: two plots, turnips and pumpkins, bushcrafting,
@@ -914,6 +915,7 @@ var card_label: Label
 var shake_tw: Tween
 var last_minimap_key: Array = []
 var last_cam_tile := Vector2i(-99, -99)   # the tile the camera was last drawn from
+var panels: PanelRows
 var lantern_light: PointLight2D
 var window_lights: Array = []   # glows for the lit windows, one PointLight2D each
 var porch_light: PointLight2D     # the lamp by the door, once the house is restored
@@ -930,6 +932,7 @@ var perf_was_down := false
 
 
 func _ready() -> void:
+	panels = PanelRows.new(self)
 	_setup_input()
 	_load_settings()
 	_start_music()
@@ -940,7 +943,7 @@ func _ready() -> void:
 	save_slot = TitleMenu.active_slot
 	# The start screen comes first. The world is built once the player picks Continue, New Game, or a slot.
 	title_menu = TitleMenu.new()
-	title_menu.settings_rows = _settings_rows()
+	title_menu.settings_rows = panels._settings_rows()
 	title_menu.start_requested.connect(_on_title_start)
 	title_menu.quit_requested.connect(func() -> void: get_tree().quit())
 	add_child(title_menu)
@@ -948,41 +951,6 @@ func _ready() -> void:
 
 func _save_path() -> String:
 	return TitleMenu.slot_path(save_slot)
-
-
-# The Game section of Settings: leaving the farm for the start screen.
-func _game_rows() -> Array:
-	return [
-		{"section": "Game"},
-		{
-			"name": "Music",
-			"value": "On" if music_on else "Off",
-			"button": "Turn off" if music_on else "Turn on",
-			"action": "toggle_music",
-			"enabled": true,
-		},
-		{
-			"name": "Sound effects",
-			"value": "On" if sfx_on else "Off",
-			"button": "Turn off" if sfx_on else "Turn on",
-			"action": "toggle_sfx",
-			"enabled": true,
-		},
-		{
-			"name": "Unstick me",
-			"value": "Cancels any placement and moves you to the path outside the farmhouse door",
-			"button": "Unstick",
-			"action": "unstick",
-			"enabled": true,
-		},
-		{
-			"name": "Quit to the main menu",
-			"value": "Returns to the start screen without saving. Progress since your last sleep is lost.",
-			"button": "Quit",
-			"action": "quit_title",
-			"enabled": true,
-		},
-	]
 
 
 # The lo-fi loop plays from the start screen on, and can be turned off in Settings. The choice is remembered.
@@ -2369,19 +2337,6 @@ func _build_tip_panel() -> void:
 	host.add_child(tip_panel)
 
 
-# The seen tips, for the Settings menu.
-func _tip_rows() -> Array:
-	var rows: Array = [{"section": "Tips"}]
-	var any := false
-	for tip in TIPS:
-		if tips_seen.has(tip["id"]):
-			rows.append({"name": tip["title"], "value": tip["text"]})
-			any = true
-	if not any:
-		rows.append({"note": "Tips appear as you reach each part of the farm. The first ones show as soon as you start."})
-	return rows
-
-
 # --- Input and panels --------------------------------------------------------
 
 func _handle_keys() -> void:
@@ -2730,47 +2685,47 @@ func _refresh_panel() -> void:
 	var rows: Array = []
 	match open_tab:
 		"Skills":
-			rows = _skill_rows()
+			rows = panels._skill_rows()
 		"Inventory":
-			rows = _inventory_rows()
+			rows = panels._inventory_rows()
 		"Gear":
-			rows = _gear_rows()
+			rows = panels._gear_rows()
 		"Craft":
-			rows = _craft_rows()
+			rows = panels._craft_rows()
 		"Quests":
-			rows = _quest_rows()
+			rows = panels._quest_rows()
 		"Achievements":
-			rows = _achievement_rows()
+			rows = panels._achievement_rows()
 		"Trade":
-			rows = _trade_rows()
+			rows = panels._trade_rows()
 		"Shop":
-			rows = _general_shop_rows()
+			rows = panels._general_shop_rows()
 		"Bank":
-			rows = _bank_rows()
+			rows = panels._bank_rows()
 		"Cellar":
-			rows = _cellar_rows()
+			rows = panels._cellar_rows()
 		"Cooler":
-			rows = _cooler_rows()
+			rows = panels._cooler_rows()
 		"Smokehouse":
-			rows = _smokehouse_rows()
+			rows = panels._smokehouse_rows()
 		"Furnace":
-			rows = _furnace_rows()
+			rows = panels._furnace_rows()
 		"Woodstore":
-			rows = _woodstore_rows()
+			rows = panels._woodstore_rows()
 		"Desk":
-			rows = _desk_rows()
+			rows = panels._desk_rows()
 		"House":
-			rows = _house_rows()
+			rows = panels._house_rows()
 		"Buildings":
-			rows = _buildings_rows()
+			rows = panels._buildings_rows()
 		"Coop":
-			rows = _coop_rows()
+			rows = panels._coop_rows()
 		"Barn":
-			rows = _barn_rows()
+			rows = panels._barn_rows()
 		"Well":
-			rows = _well_rows()
+			rows = panels._well_rows()
 		"Settings":
-			rows = _settings_rows() + _tip_rows() + _game_rows()
+			rows = panels._settings_rows() + panels._tip_rows() + panels._game_rows()
 	action_bar.show_panel(open_tab, rows)
 
 
@@ -2788,35 +2743,6 @@ const SKILL_INFO := {
 	"Smithing": {"icon": "anvil", "tint": "7a5a2a", "desc": "Turns ore into bars and metal gear."},
 }
 var skill_selected := ""   # the skill whose details show; remembered while the panel is open
-
-
-func _skill_rows() -> Array:
-	var tiles: Array = []
-	for skill in SKILLS:
-		var info: Dictionary = SKILL_INFO[skill]
-		tiles.append({
-			"key": "skill:" + skill, "name": "%s\nLevel %d" % [skill, _level(skill)],
-			"icon": str(info["icon"]), "tint": str(info["tint"]), "enabled": true, "costs": [], "level_ok": true,
-			"desc": str(info["desc"]), "action": "",
-		})
-	var chosen := _skill_chosen(tiles)
-	var marked: Array = []
-	for t in tiles:
-		var tile: Dictionary = t.duplicate()
-		tile["selected"] = str(t["key"]) == str(chosen["key"])
-		tile["action"] = "skill_pick:" + str(t["key"])
-		marked.append(tile)
-	# The detail card shows the XP bar and what is left to the next level.
-	var detail: Dictionary = chosen.duplicate()
-	var skill := str(chosen["key"]).trim_prefix("skill:")
-	var level := _level(skill)
-	detail["name"] = skill
-	detail["level_text"] = "Level %d. %d XP, %d more to level %d." % [level, int(skill_xp[skill]), _xp_for_level(level + 1) - int(skill_xp[skill]), level + 1]
-	detail["progress"] = _level_progress(skill)
-	return [
-		{"split": {"recipes": marked, "columns": 4, "detail": detail}},
-		{"note": "Skills grow by doing. Each action gives XP to the skill it trains. Levels unlock recipes, crops, and tools."},
-	]
 
 
 func _skill_chosen(tiles: Array) -> Dictionary:
@@ -2842,61 +2768,6 @@ const MATERIAL_INFO := {
 	"bolts": {"name": "Bolts", "icon": "arrow", "tint": "6b6b6b", "desc": "Ammunition for ranged weapons. Each shot uses one."},
 }
 var inventory_selected := ""   # the pack item whose details show; remembered while the panel is open
-
-
-func _inventory_rows() -> Array:
-	var rows: Array = [{"section": "Pack"}]
-	var tiles := _inventory_tiles()
-	if tiles.is_empty():
-		rows.append({"note": "Nothing in the pack yet. Harvest, catch, or gather to fill it."})
-	else:
-		var marked: Array = []
-		var chosen := _inventory_chosen(tiles)
-		for t in tiles:
-			var tile: Dictionary = t.duplicate()
-			tile["selected"] = str(t["key"]) == str(chosen["key"])
-			tile["action"] = "inv_pick:" + str(t["key"])
-			tile["names_on_focus"] = true
-			marked.append(tile)
-		rows.append({"split": {"recipes": marked, "columns": 4, "detail": chosen}})
-	rows.append({"name": "Coins", "value": str(money)})
-	rows.append({
-		"name": "Pack space",
-		"value": "%d/%d" % [_pack_used(), _pack_capacity()],
-		"progress": float(_pack_used()) / float(_pack_capacity()),
-	})
-	if bag_tier < BAG_TIERS.size():
-		var tier: Dictionary = BAG_TIERS[bag_tier]
-		rows.append({
-			"name": "Next bag: %s (+%d slots)" % [tier["name"], tier["slots"]],
-			"value": _price_text(tier),
-			"button": "Upgrade",
-			"action": "upgrade_bag",
-			"enabled": _can_upgrade_bag(),
-		})
-	rows.append({"note": "Crops, fish, meals, and preserved goods fill the pack. Seeds have their own pouch, and materials are uncapped for now."})
-	rows.append({"section": "Body"})
-	# Meters are rounded so the panel only rebuilds when a shown number changes.
-	rows.append({"name": "Food", "progress": roundi(food) / 100.0})
-	rows.append({"name": "Water", "progress": roundi(water) / 100.0})
-	rows.append({"name": "Warmth", "progress": roundi(warmth) / 100.0})
-	rows.append({"name": "Fire", "value": ("lit, about %d hours left" % ceili(fire_hours)) if _fire_lit() else "out. Feed the hearth from the house with firewood."})
-	rows.append({"name": "Outside", "value": "%d°F, %s" % [roundi(_temperature()), str(WEATHER_NAMES.get(weather_kind, "Overcast")).to_lower()]})
-	rows.append({"note": "Food and water drain through the day. Drink from the pond or the pump to refill water. Warmth drains outdoors on cold days, refills in the house, and is full again after a night's sleep. An empty need costs HP."})
-	rows.append({"section": "Planting"})
-	rows.append({"name": "Planting with", "value": _seed_label(selected_seed)})
-	var growing := crops.size()
-	if growing > 0:
-		rows.append({"name": "Watered today", "value": "%d of %d growing crops" % [_watered_today(), growing], "progress": float(_watered_today()) / float(growing)})
-	if _level("Farming") >= PUMPKIN_LEVEL:
-		rows.append({
-			"name": "Switch seed",
-			"value": "Turnip or Pumpkin",
-			"button": "Switch",
-			"action": "switch_seed",
-			"enabled": true,
-		})
-	return rows
 
 
 # One tile per stack in the pack, then the seed pouch, then the materials you hold.
@@ -3005,23 +2876,6 @@ const CRAFT_TABS := [
 var gear_selected := ""   # the slot or tool whose details show; remembered while the panel is open
 
 
-func _gear_rows() -> Array:
-	var tiles := _gear_tiles()
-	var chosen := _gear_chosen(tiles)
-	var marked: Array = []
-	for t in tiles:
-		var tile: Dictionary = t.duplicate()
-		tile["selected"] = str(t["key"]) == str(chosen["key"])
-		tile["action"] = "gear_pick:" + str(t["key"])
-		marked.append(tile)
-	return [
-		{"split": {"recipes": marked, "figure": true, "detail": chosen}},
-		{"name": "Defense", "value": str(_defense())},
-		{"name": "Hit damage", "value": str(_weapon_damage())},
-		{"note": "Worn gear sets your defense, and your main hand sets how hard you hit. Crafting a piece equips it at once and swaps out what was in that slot. Press C for the Craft panel."},
-	]
-
-
 func _gear_tiles() -> Array:
 	var tiles: Array = []
 	var bag_name := "Pack" if bag_tier == 0 else str(BAG_TIERS[bag_tier - 1]["name"])
@@ -3115,29 +2969,6 @@ const TINT_TOOL := "4f6b3a"
 const TINT_FOOD := "8a4f2a"
 const TINT_LIGHT := "8a7a2a"
 var craft_selected := ""     # the recipe whose details show; remembered while the panel is open
-
-
-func _craft_rows() -> Array:
-	var tabs: Array = []
-	for tab in CRAFT_TABS:
-		tabs.append({"id": tab["id"], "name": tab["name"], "action": "craft_tab:" + str(tab["id"])})
-	var rows: Array = [{"tabs": tabs, "active": craft_tab}]
-	var recipes := _craft_recipes()
-	var chosen := _chosen_recipe(recipes)
-	if recipes.is_empty():
-		rows.append({"note": "Nothing to make here yet."})
-	else:
-		var tiles: Array = []
-		for r in recipes:
-			var tile: Dictionary = r.duplicate()
-			tile["selected"] = not chosen.is_empty() and r["key"] == chosen["key"]
-			tile["action"] = "craft_pick:" + str(r["key"])
-			tiles.append(tile)
-		rows.append({"split": {"recipes": tiles, "columns": 4, "detail": chosen}})
-	rows.append({"note": _craft_footer()})
-	if craft_tab == "other":
-		rows.append_array(_craft_camp_rows())
-	return rows
 
 
 func _chosen_recipe(recipes: Array) -> Dictionary:
@@ -3350,58 +3181,11 @@ func _use_bandage() -> void:
 	_show_message("You bind your wounds. HP %d/%d" % [hp, max_hp()])
 
 
-func _craft_camp_rows() -> Array:
-	if not _in_village():
-		return []
-	return [
-		{"section": "Campsite"},
-		{
-			"name": "Set up camp here",
-			"value": "%d wood, %d fiber, Bushcrafting %d. Face open ground." % [int(CAMP_COST["wood"]), int(CAMP_COST["fiber"]), CAMP_LEVEL],
-			"button": "Camp",
-			"action": "camp",
-			"enabled": _can_camp(),
-		},
-		{"note": "A campsite is safe from foes. Rest there from 18:00 like a bed. It saves the game and ends the day. Setting up a new camp moves the old one."},
-	]
-
-
 func _price_text_items(cost: Dictionary) -> String:
 	var parts: Array = []
 	for mat in cost.keys():
 		parts.append("%d %s" % [int(cost[mat]), mat])
 	return ", ".join(parts) if parts.size() > 0 else "free"
-
-
-func _quest_rows() -> Array:
-	var rows: Array = []
-	var current: Variant = null
-	for q in STORY:
-		if not quests_done.has(q["id"]):
-			current = q
-			break
-	if current != null:
-		rows.append({"section": "Current chapter"})
-		rows.append(_quest_row(current, true))
-	else:
-		rows.append({"note": "You have reached the end of the story for now. More chapters are coming."})
-	rows.append({"section": "Chapters"})
-	for q in STORY:
-		rows.append(_quest_row(q, false))
-	if WORLD_ENABLED:
-		rows.append({"section": "Guardian of Lowmere"})
-		var guardian_current: Variant = null
-		for q in GUARDIAN_QUESTS:
-			if not guardian_done.has(q["id"]):
-				guardian_current = q
-				break
-		if guardian_current != null:
-			rows.append(_quest_row(guardian_current, true))
-		else:
-			rows.append({"note": "Lowmere is safe for now."})
-		for q in GUARDIAN_QUESTS:
-			rows.append(_quest_row(q, false))
-	return rows
 
 
 # A quest is a single line: its name, and Done or its progress. Details open with a button.
@@ -3428,183 +3212,6 @@ func _quest_row(q: Dictionary, expanded: bool) -> Dictionary:
 	return row
 
 
-func _house_rows() -> Array:
-	var rows: Array = [
-		{"section": "Condition"},
-		{"name": "Farmhouse", "value": STAGE_NAMES[house_stage]},
-	]
-	if house_stage < MAX_STAGE:
-		var cost: Dictionary = REPAIR_COSTS[house_stage]
-		rows.append({
-			"name": "Repair to %s" % STAGE_NAMES[house_stage + 1],
-			"value": "%d wood, %d fiber, Carpentry %d" % [cost["wood"], cost["fiber"], cost["level"]],
-			"button": "Repair",
-			"action": "repair",
-			"enabled": _can_repair(),
-		})
-	rows.append({"section": "Today's chores"})
-	for chore in _chore_list():
-		var row := {"name": chore["name"]}
-		if bool(chore["done"]):
-			row["value"] = "Done"
-		else:
-			row["value"] = str(chore["detail"])
-			if str(chore["action"]) != "":
-				row["button"] = chore["button"]
-				row["action"] = chore["action"]
-				row["enabled"] = chore["enabled"]
-		rows.append(row)
-	rows.append({"note": "Each chore left undone adds 1 wear overnight. A night with every chore done brings back %d sanity." % WELL_KEPT_SANITY})
-	rows.append_array(_job_rows())
-	rows.append({"section": "Upkeep"})
-	rows.append({"name": "Wear", "value": "%d of %d" % [wear, WEAR_MAX], "progress": float(wear) / float(WEAR_MAX)})
-	rows.append({"note": "The house wears a little each night. Mending, tidying, and repairs bring it down. At %d wear, rain ruins a crop overnight. At %d, a fox can get into the coop. A third plot opens at Farming %d once the house is Patched." % [WEAR_RUNDOWN, WEAR_FOX, PLOT_THREE_LEVEL]})
-	rows.append({"section": "Rest"})
-	rows.append({"note": "The bed is in the bedroom. Walk there and press Space from 18:00 to save and end the day. If you aren't in bed by 03:00 you collapse, and your sanity limit drops permanently."})
-	rows.append({"name": "Sanity limit", "value": "%d of %d" % [_sanity_max(), int(SANITY_MAX)]})
-	rows.append({
-		"name": "Cleanse the house",
-		"value": "%d crops, Cleaning %d, once a day: +%d limit" % [CLEANSE_CROPS, CLEANSE_LEVEL, CLEANSE_RELIEF],
-		"button": "Cleanse",
-		"action": "cleanse",
-		"enabled": _can_cleanse(),
-	})
-	rows.append({"section": "Storage"})
-	if cellar_built:
-		rows.append({"name": "Root cellar", "value": "built, holds %d crops. Stand beside it, facing it, and press Space." % CELLAR_CAP})
-	else:
-		rows.append({
-			"name": "Build a root cellar (holds %d crops)" % CELLAR_CAP,
-			"value": _price_text(CELLAR_COST),
-			"button": "Build",
-			"action": "build_cellar",
-			"enabled": _can_afford(CELLAR_COST),
-		})
-	if cooler_built:
-		rows.append({"name": "Cooler", "value": "built, keeps %d fish fresh. Stand beside it, facing it, and press Space." % COOLER_CAP})
-	else:
-		rows.append({
-			"name": "Build a cooler (keeps %d fish fresh)" % COOLER_CAP,
-			"value": _price_text(COOLER_COST),
-			"button": "Build",
-			"action": "build_cooler",
-			"enabled": _can_afford(COOLER_COST),
-		})
-	rows.append({"note": "The workshop, the coop, and the barn are in the Buildings section on the section wheel (Shift)."})
-	rows.append({"section": "Features"})
-	for feature in HOUSE_FEATURES:
-		var unlocked: bool = house_stage >= feature["stage"]
-		rows.append({
-			"name": feature["text"],
-			"value": "unlocked" if unlocked else "at %s" % STAGE_NAMES[feature["stage"]],
-		})
-	return rows
-
-
-# The coop panel: the hens are bought and fed here, not from the House panel.
-func _coop_rows() -> Array:
-	var rows: Array = [{"section": "Hens"}]
-	rows.append({
-		"name": "Hens",
-		"value": "%d of %d, %d coins each" % [hens, COOP_HENS_MAX, HEN_PRICE],
-		"button": "Buy hen",
-		"action": "buy_hen",
-		"enabled": _can_buy_hen(),
-	})
-	rows.append({
-		"name": "Feed hens",
-		"value": "%d crops, once a day" % (hens * HEN_FEED_CROPS),
-		"button": "Feed",
-		"action": "feed_hens",
-		"enabled": _can_feed_hens(),
-	})
-	rows.append({"name": "Grown hens", "value": "%d of %d, %d coins each" % [_grown_count(hen_ages, HEN_MATURE_DAYS), hens, HEN_SELL], "button": "Sell a hen", "action": "sell_hen", "enabled": _grown_count(hen_ages, HEN_MATURE_DAYS) > 0})
-	rows.append({"note": "A grown hen (%d nights) lays an egg each morning when fed, kept as a meal or sold at the farm stand. Young hens do not lay. Two unfed days in a row and a hen wanders off." % HEN_MATURE_DAYS})
-	return rows
-
-
-# The barn panel. Livestock aren't in the game yet, so for now it only says so.
-func _barn_rows() -> Array:
-	var rows: Array = [{"section": "Goats"}]
-	rows.append({
-		"name": "Goats",
-		"value": "%d of %d, %d coins each" % [goats, BARN_GOATS_MAX, GOAT_PRICE],
-		"button": "Buy goat",
-		"action": "buy_goat",
-		"enabled": _can_buy_goat(),
-	})
-	rows.append({
-		"name": "Feed goats",
-		"value": "%d crops, once a day" % (goats * GOAT_FEED_CROPS),
-		"button": "Feed",
-		"action": "feed_goats",
-		"enabled": _can_feed_goats(),
-	})
-	rows.append({"name": "Grown goats", "value": "%d of %d, %d coins each" % [_grown_count(goat_ages, GOAT_MATURE_DAYS), goats, GOAT_SELL], "button": "Sell a goat", "action": "sell_goat", "enabled": _grown_count(goat_ages, GOAT_MATURE_DAYS) > 0})
-	rows.append({"note": "A grown goat (%d nights) gives milk each morning when fed, kept to drink or sold at the farm stand. Young goats do not give milk. Two unfed days in a row and a goat wanders off." % GOAT_MATURE_DAYS})
-	return rows
-
-
-# The Buildings menu: the workshop, the coop, and the barn. Each one is placed on open grass.
-func _buildings_rows() -> Array:
-	var rows: Array = [{"section": "Workshop"}]
-	if smokehouse_built:
-		rows.append({"name": "Smokehouse", "value": "built. Stand beside it, facing it, and press Space to preserve food."})
-	else:
-		rows.append({
-			"name": "Build a smokehouse (smokes and preserves food)",
-			"value": _price_text(SMOKEHOUSE_COST),
-			"button": "Build",
-			"action": "build_smokehouse",
-			"enabled": _can_afford(SMOKEHOUSE_COST),
-		})
-	if furnace_built:
-		rows.append({"name": "Furnace", "value": "built. Stand beside it, facing it, and press Space to smelt ore."})
-	else:
-		rows.append({
-			"name": "Build a furnace (smelts ore into bars)",
-			"value": _price_text(FURNACE_COST),
-			"button": "Build",
-			"action": "build_furnace",
-			"enabled": _can_afford(FURNACE_COST),
-		})
-	if woodshed_built:
-		rows.append({"name": "Firewood store and chopping log", "value": "built in the workshop. Stand beside them to store firewood or split wood."})
-	else:
-		rows.append({
-			"name": "Build a firewood store and chopping log",
-			"value": _price_text(WOODSHED_COST) + ("" if smokehouse_built or furnace_built else ", needs the smokehouse or furnace first"),
-			"button": "Build",
-			"action": "build_woodshed",
-			"enabled": _can_afford(WOODSHED_COST) and (smokehouse_built or furnace_built),
-		})
-	rows.append({"note": "The workshop is a walled building against the east wall of the house. Its door is on the south side."})
-	rows.append({"section": "Coop"})
-	if not coop_built:
-		rows.append({
-			"name": "Build a coop (holds %d hens)" % COOP_HENS_MAX,
-			"value": _price_text(COOP_COST),
-			"button": "Build",
-			"action": "build_coop",
-			"enabled": _can_build("coop"),
-		})
-	else:
-		rows.append(_placed_row("Coop", "coop", coop_tile, "move_coop"))
-	rows.append({"section": "Barn"})
-	if not barn_built:
-		rows.append({
-			"name": "Build a barn (for livestock)",
-			"value": _price_text(BARN_COST),
-			"button": "Build",
-			"action": "build_barn",
-			"enabled": _can_build("barn"),
-		})
-		rows.append({"note": "The barn is for livestock. Livestock are still to come, so for now it simply stands."})
-	else:
-		rows.append(_placed_row("Barn", "barn", barn_tile, "move_barn"))
-	return rows
-
-
 # A standing building can be moved; one that is paid for but not yet placed gets a Place button.
 func _placed_row(label: String, kind: String, tile: Vector2i, action: String) -> Dictionary:
 	var placed := tile.x >= 0
@@ -3616,32 +3223,6 @@ func _placed_row(label: String, kind: String, tile: Vector2i, action: String) ->
 		"action": action,
 		"enabled": true,
 	}
-
-
-func _settings_rows() -> Array:
-	return [
-		{"section": "Controls"},
-		{"name": "Move", "value": "WASD or arrow keys"},
-		{"name": "Talk, sleep, open panels, gather, drink, plant with hands", "value": "Space"},
-		{"name": "Cycle the seed you plant (with the trowel)", "value": "Z and X"},
-		{"name": "Use the tool or weapon in hand: hoe, hose, trowel, axe, pick, rod, sword", "value": "Left click"},
-		{"name": "Bag (Inventory is in the bag)", "value": "Tab"},
-		{"name": "Section wheel: Skills, Gear, Craft, Quests, House, Buildings, Achievements", "value": "Shift, then the mouse"},
-		{"name": "Settings", "value": "Esc"},
-		{"name": "Close the open section, the wheel, or the bag", "value": "B or Esc"},
-		{"section": "Gamepad"},
-		{"name": "Move", "value": "Left stick or D-pad"},
-		{"name": "Talk, sleep, open panels, gather, drink, plant with hands", "value": "A"},
-		{"name": "Use the tool or weapon in hand: hoe, hose, trowel, axe, pick, rod, sword", "value": "RT"},
-		{"name": "Close the open section, the wheel, or the bag", "value": "B"},
-		{"name": "Bag (Inventory is in the bag)", "value": "Y"},
-		{"name": "Section wheel", "value": "Left stick click, then left stick and A"},
-		{"name": "Settings", "value": "Start"},
-		{"note": "While a panel is open, the D-pad or left stick moves between its buttons, and A presses the highlighted one."},
-		{"section": "Saving"},
-		{"note": "Progress saves only when you sleep, or when you collapse at 03:00. The save includes your position and open panel."},
-		{"note": "Sound effects and display options are coming later."},
-	]
 
 
 # --- Farming ----------------------------------------------------------------
@@ -3979,32 +3560,6 @@ func _boredom_check() -> String:
 	return ""
 
 
-func _desk_rows() -> Array:
-	var rows: Array = [{"section": "Desk"}]
-	rows.append({"section": "Post on the desk"})
-	if desk_mail.is_empty():
-		rows.append({"note": "No post. The mail slot in the front door drops letters here."})
-	for letter in desk_mail:
-		rows.append({"note": "%s%s\n%s" % [str(letter["title"]), "  (new)" if bool(letter["unread"]) else "", str(letter["text"])]})
-	rows.append({"name": "Property value", "value": "%d a quarter" % _property_value()})
-	rows.append({"note": _property_text()})
-	rows.append({"name": "Property tax", "value": _tax_text(), "button": "Pay", "action": "pay_tax", "enabled": tax_owed > 0 and money >= tax_owed})
-	rows.append({"name": "Put letters away", "value": "read letters go in the drawer", "button": "Clear", "action": "mail_clear", "enabled": _has_read_mail()})
-	rows.append({"section": "Games"})
-	var entertained := entertained_day == day
-	rows.append({"name": "Entertained today", "value": "yes" if entertained else "no, finish a game or your limit slips"})
-	if boredom_loss > 0.0:
-		rows.append({"name": "Sanity limit lost to boredom", "value": str(int(boredom_loss))})
-	if desk_game.is_empty():
-		rows.append({"name": "Sudoku", "value": "fill the 4 by 4 grid so each row, column and 2 by 2 box has 1 to 4", "button": "Play", "action": "game_new:sudoku"})
-		rows.append({"name": "Solitaire", "value": "turn cards and build the four suit foundations", "button": "Play", "action": "game_new:solitaire"})
-	elif desk_game["kind"] == "sudoku":
-		rows.append_array(_sudoku_rows())
-	else:
-		rows.append_array(_solitaire_rows())
-	return rows
-
-
 func _desk_action(action_id: String) -> void:
 	if action_id == "pay_tax":
 		_pay_tax()
@@ -4091,28 +3646,6 @@ func _sudoku_fits(board: Array, r: int, c: int, v: int) -> bool:
 			if int(board[(br + dr) * 4 + bc + dc]) == v:
 				return false
 	return true
-
-
-func _sudoku_rows() -> Array:
-	var puzzle: Array = desk_game["puzzle"]
-	var guess: Array = desk_game["guess"]
-	var lines: Array = []
-	for r in 4:
-		var cells: Array = []
-		for c in 4:
-			var i := r * 4 + c
-			var v := int(puzzle[i]) if int(puzzle[i]) != 0 else int(guess[i])
-			cells.append(str(v) if v != 0 else ".")
-		lines.append(" ".join(PackedStringArray(cells)))
-	var rows: Array = [{"section": "Sudoku"}, {"note": "\n".join(PackedStringArray(lines))}]
-	for i in 16:
-		if int(puzzle[i]) != 0:
-			continue
-		var g := int(guess[i])
-		rows.append({"name": "Row %d, column %d" % [i / 4 + 1, i % 4 + 1], "value": str(g) if g != 0 else "empty", "button": "Next", "action": "sudoku_next:%d" % i})
-	rows.append({"name": "Check your numbers", "value": "right ones are locked in, wrong ones clear", "button": "Check", "action": "sudoku_check"})
-	rows.append({"name": "Put the game away", "value": "unfinished, so it does not count today", "button": "Put away", "action": "game_quit"})
-	return rows
 
 
 func _sudoku_next(i: int) -> void:
@@ -4219,25 +3752,6 @@ func _sol_check_end() -> void:
 func _sol_stuck() -> bool:
 	var stock: Array = desk_game["stock"]
 	return stock.is_empty() and not _sol_can_turn() and not _sol_can_play()
-
-
-func _solitaire_rows() -> Array:
-	var stock: Array = desk_game["stock"]
-	var waste: Array = desk_game["waste"]
-	var found: Array = desk_game["found"]
-	var top := "empty" if waste.is_empty() else _card_name(int(waste.back()))
-	var piles: Array = []
-	for s in 4:
-		piles.append("%s %d" % [DESK_SUITS[s], int(found[s])])
-	return [
-		{"section": "Solitaire"},
-		{"name": "Waste top", "value": top},
-		{"name": "Stock", "value": "%d left, %d of %d deck passes used" % [stock.size(), int(desk_game["passes"]), SOL_PASSES]},
-		{"name": "Turn a card", "value": "from the stock", "button": "Turn", "action": "sol_draw", "enabled": _sol_can_turn()},
-		{"name": "Play the waste card", "value": "up to its foundation, if it is next", "button": "Play", "action": "sol_play", "enabled": _sol_can_play()},
-		{"note": "Foundations (cards played): " + ", ".join(PackedStringArray(piles))},
-		{"name": "Put the game away", "value": "unfinished, so it does not count today", "button": "Put away", "action": "game_quit"},
-	]
 
 
 func _gather(tile: Vector2i) -> void:
@@ -4827,47 +4341,6 @@ func _sell_food(food_id: String) -> void:
 	_show_message("Sold %d for %d coins." % [count, count * price])
 
 
-func _cooked_sell_rows() -> Array:
-	var rows: Array = []
-	for r in Foods.RECIPES:
-		var f := Foods.find(str(r["food"]))
-		var held := int(inventory[str(f["held"])])
-		if held <= 0:
-			continue
-		rows.append({
-			"name": "%s (%d each)" % [str(f["name"]), _food_price(str(f["id"]))],
-			"value": "%d held" % held,
-			"button": "Sell all",
-			"action": "sell_food:" + str(f["id"]),
-			"enabled": true,
-		})
-	return rows
-
-
-func _smokehouse_rows() -> Array:
-	var rows: Array = [
-		{"section": "Smokehouse"},
-		{"note": "Preserved goods keep in your pack, so nothing spoils. Stand beside the smokehouse, facing it, and press Space to open this panel."},
-	]
-	var held: Array = []
-	for r in Foods.RECIPES:
-		if r["station"] != "smokehouse":
-			continue
-		var f := Foods.find(str(r["food"]))
-		rows.append({
-			"name": "%s (%s)" % [str(f["name"]), _recipe_needs_text(r)],
-			"value": "%s %d, +%d XP, sells %d" % [str(f["skill"]), int(f["level"]), int(r["xp"]), _food_price(str(f["id"]))],
-			"button": "Make",
-			"action": "cook:" + str(f["id"]),
-			"enabled": _can_make(str(f["id"])),
-		})
-		var n := int(inventory[str(f["held"])])
-		if n > 0:
-			held.append("%s %d" % [str(f["name"]).to_lower(), n])
-	rows.append({"name": "Held", "value": ", ".join(held) if not held.is_empty() else "nothing yet"})
-	return rows
-
-
 func _pack_used() -> int:
 	var used := _slots_for(int(inventory["fish"])) + _slots_for(int(inventory["bandage"])) + _slots_for(int(inventory["firewood"]))
 	for f in Foods.LIST:
@@ -4959,42 +4432,6 @@ func _watered_today() -> int:
 	return n
 
 
-func _well_rows() -> Array:
-	var rows: Array = [{"section": "Pump"}]
-	if not well_repaired:
-		rows.append({"name": "Pump", "value": "Seized. The pipe has rotted through, and the crank won't turn."})
-		rows.append({
-			"name": "Repair the pump",
-			"value": "%d wood, %d fiber, Carpentry %d" % [WELL_REPAIR["wood"], WELL_REPAIR["fiber"], WELL_REPAIR["level"]],
-			"button": "Repair",
-			"action": "repair_well",
-			"enabled": _can_repair_well(),
-		})
-		rows.append({"note": "Repairing the pump also refills the tank and gives Carpentry XP."})
-		return rows
-	rows.append({"name": "Water in the tank", "value": "%d of %d" % [int(well_water), int(WELL_CAPACITY)], "progress": well_water / WELL_CAPACITY})
-	rows.append({"note": "The tank refills each morning. Drinking from the pump costs nothing."})
-	rows.append({
-		"name": "Drink from the pump",
-		"value": "+%d water" % int(DRINK_WELL),
-		"button": "Drink",
-		"action": "drink_well",
-		"enabled": water < 100.0,
-	})
-	rows.append({"section": "Hose"})
-	if hose_attached:
-		rows.append({"name": "Hose", "value": "Attached. It reaches every plot on the farm. Face a crop and press Space to water it."})
-	else:
-		rows.append({
-			"name": "Attach the hose",
-			"value": "%d fiber, %d resin. It reaches every plot on the farm." % [HOSE_COST["fiber"], HOSE_COST["resin"]],
-			"button": "Attach",
-			"action": "attach_hose",
-			"enabled": _can_attach_hose(),
-		})
-	return rows
-
-
 # Turnips and pumpkins both feed you and cook into meals. Food and cooking count them together.
 func _crop_total() -> int:
 	return int(inventory["crops"]) + int(inventory["pumpkins"])
@@ -5077,33 +4514,6 @@ func _temperature() -> float:
 
 
 # --- Achievements ------------------------------------------------------------
-
-func _achievement_rows() -> Array:
-	var total := ACHIEVEMENTS.size()
-	var done_count := achievements_done.size()
-	var rows: Array = [
-		{"section": "Completion"},
-		{
-			"name": "Achievements",
-			"value": "%d/%d  (%d%%)" % [done_count, total, int(100.0 * done_count / total)],
-			"progress": float(done_count) / float(total),
-		},
-	]
-	if done_count == total:
-		rows.append({"note": "Every achievement earned. Hallowvale has nothing left to teach you."})
-	for tier in ACHIEVEMENT_TIERS.size():
-		var in_tier: Array = []
-		for a in ACHIEVEMENTS:
-			if a["tier"] == tier:
-				in_tier.append(a)
-		var tier_done := 0
-		for a in in_tier:
-			if achievements_done.has(a["id"]):
-				tier_done += 1
-		rows.append({"section": "%s   %d/%d" % [ACHIEVEMENT_TIERS[tier], tier_done, in_tier.size()]})
-		for a in in_tier:
-			rows.append(_achievement_row(a))
-	return rows
 
 
 func _achievement_row(a: Dictionary) -> Dictionary:
@@ -5300,119 +4710,6 @@ func _take_fish() -> void:
 
 # --- Trade, cellar, and cooler panels ------------------------------------------
 
-func _trade_rows() -> Array:
-	var turnip_pack := SEED_TURNIP_PRICE * 5
-	var pumpkin_pack := SEED_PUMPKIN_PRICE * 3
-	return [
-		{"section": "Purse"},
-		{"name": "Coins", "value": str(money)},
-		{"section": "Sell from your pack"},
-		{
-			"name": "Turnips (%d each)" % _crop_price("turnip"),
-			"value": "%d held" % int(inventory["crops"]),
-			"button": "Sell all",
-			"action": "sell_crops",
-			"enabled": int(inventory["crops"]) > 0,
-		},
-		{
-			"name": "Pumpkins (%d each)" % _crop_price("pumpkin"),
-			"value": "%d held" % int(inventory["pumpkins"]),
-			"button": "Sell all",
-			"action": "sell_pumpkins",
-			"enabled": int(inventory["pumpkins"]) > 0,
-		},
-		{
-			"name": "Fish (%d each)" % SELL_FISH,
-			"value": "%d held" % int(inventory["fish"]),
-			"button": "Sell all",
-			"action": "sell_fish",
-			"enabled": int(inventory["fish"]) > 0,
-		},
-		{
-			"name": "Eggs (%d each)" % SELL_EGG,
-			"value": "%d held" % int(inventory["eggs"]),
-			"button": "Sell all",
-			"action": "sell_eggs",
-			"enabled": int(inventory["eggs"]) > 0,
-		},
-		{
-			"name": "Goat milk (%d each)" % SELL_MILK,
-			"value": "%d held" % int(inventory["milk"]),
-			"button": "Sell all",
-			"action": "sell_milk",
-			"enabled": int(inventory["milk"]) > 0,
-		},
-		] + _cooked_sell_rows() + [
-		{"section": "Buy seeds"},
-		{
-			"name": "Turnip seeds (%d each)" % SEED_TURNIP_PRICE,
-			"value": "5 for %d coins" % turnip_pack,
-			"button": "Buy 5",
-			"action": "buy_turnip",
-			"enabled": money >= turnip_pack,
-		},
-		{
-			"name": "Pumpkin seeds (%d each)" % SEED_PUMPKIN_PRICE,
-			"value": "3 for %d coins, Farming %d" % [pumpkin_pack, PUMPKIN_LEVEL],
-			"button": "Buy 3",
-			"action": "buy_pumpkin",
-			"enabled": _level("Farming") >= PUMPKIN_LEVEL and money >= pumpkin_pack,
-		},
-		{"note": "The farm stand is open from 06:00 to 18:00. It only buys what you carry, so take crops or fish out of storage first."},
-	]
-
-
-func _cellar_rows() -> Array:
-	return [
-		{"section": "Root cellar"},
-		{
-			"name": "Crops stored",
-			"value": "%d/%d" % [cellar_stock, CELLAR_CAP],
-			"progress": float(cellar_stock) / float(CELLAR_CAP),
-		},
-		{
-			"name": "Store crops from your pack",
-			"value": "%d in pack" % int(inventory["crops"]),
-			"button": "Store",
-			"action": "store_crops",
-			"enabled": int(inventory["crops"]) > 0 and cellar_stock < CELLAR_CAP,
-		},
-		{
-			"name": "Take crops into your pack",
-			"value": "%d free slots" % _pack_free(),
-			"button": "Take",
-			"action": "take_crops",
-			"enabled": cellar_stock > 0 and _pack_free() > 0,
-		},
-		{"note": "Crops keep here. Nothing spoils in the cellar."},
-	]
-
-
-func _cooler_rows() -> Array:
-	return [
-		{"section": "Cooler"},
-		{
-			"name": "Fish stored",
-			"value": "%d/%d" % [cooler_stock, COOLER_CAP],
-			"progress": float(cooler_stock) / float(COOLER_CAP),
-		},
-		{
-			"name": "Store fish from your pack",
-			"value": "%d in pack" % int(inventory["fish"]),
-			"button": "Store",
-			"action": "store_fish",
-			"enabled": int(inventory["fish"]) > 0 and cooler_stock < COOLER_CAP,
-		},
-		{
-			"name": "Take fish into your pack",
-			"value": "%d free slots" % _pack_free(),
-			"button": "Take",
-			"action": "take_fish",
-			"enabled": cooler_stock > 0 and _pack_free() > 0,
-		},
-		{"note": "Fish in your pack spoil overnight. Fish kept here do not."},
-	]
-
 
 # --- Smokehouse and preserving ---------------------------------------------
 
@@ -5598,18 +4895,6 @@ func _chop_firewood() -> void:
 	_show_message("You split the wood into %d firewood. %d in the store. +%d Forestry XP" % [made, firewood_store, XP_CHOP_LOG])
 
 
-func _woodstore_rows() -> Array:
-	return [
-		{"section": "Firewood store"},
-		{"name": "Firewood in the store", "value": "%d of %d" % [firewood_store, WOODSTORE_CAP], "progress": float(firewood_store) / float(WOODSTORE_CAP)},
-		{"name": "Firewood in your pack", "value": str(int(inventory["firewood"]))},
-		{"name": "Take 5 firewood", "value": "into your pack", "button": "Take", "action": "wood_take:5", "enabled": firewood_store > 0},
-		{"name": "Store your firewood", "value": "all you carry, up to the store's room", "button": "Store", "action": "wood_store",
-			"enabled": int(inventory["firewood"]) > 0 and firewood_store < WOODSTORE_CAP},
-		{"note": "Split wood at the chopping log: stand beside it, facing it, hold the axe, and press RT or click. Feed the hearth in the house with firewood from your pack."},
-	]
-
-
 func _take_firewood(amount: int) -> void:
 	var n := mini(amount, firewood_store)
 	if n <= 0:
@@ -5673,22 +4958,6 @@ func _smelt(kind: String) -> void:
 	materials[kind + "_bar"] += 1
 	_grant_xp("Smithing", XP_SMELT)
 	_show_message("You smelt a %s bar. +%d Smithing XP" % [kind, XP_SMELT])
-
-
-func _furnace_rows() -> Array:
-	var rows: Array = [
-		{"section": "Furnace"},
-		{"note": "Smelting turns ore into bars, with wood as fuel. Bars make metal tools and gear. Stand beside the furnace, facing it, and press Space to open this panel."},
-	]
-	for kind in ["copper", "iron"]:
-		rows.append({
-			"name": "Smelt a %s bar (1 %s ore, 1 wood)" % [kind, kind],
-			"value": "Smithing %d, +%d XP. Held: %d ore, %d bars" % [int(SMELT_LEVEL[kind]), XP_SMELT, int(materials[kind + "_ore"]), int(materials[kind + "_bar"])],
-			"button": "Smelt",
-			"action": "smelt:" + kind,
-			"enabled": _can_smelt(kind),
-		})
-	return rows
 
 
 # --- Ranged combat and ammunition ----------------------------------------------
@@ -6303,33 +5572,6 @@ func _town_at(tile: Vector2i) -> int:
 
 # --- Shops and the bank ------------------------------------------------------
 
-func _general_shop_rows() -> Array:
-	var rows: Array = [
-		{"section": "Purse"},
-		{"name": "Coins", "value": str(money)},
-		{"section": "Buy materials (%d at a time)" % GENERAL_BUY_QTY},
-	]
-	for key in GENERAL_BUY.keys():
-		var price := int(GENERAL_BUY[key])
-		rows.append({
-			"name": "%s (%d each)" % [str(key).capitalize(), price],
-			"value": "%d held" % int(materials[key]),
-			"button": "Buy %d" % GENERAL_BUY_QTY,
-			"action": "buy:%s" % key,
-			"enabled": money >= price * GENERAL_BUY_QTY,
-		})
-	rows.append({"section": "Sell materials (half price)"})
-	for key in GENERAL_BUY.keys():
-		var sell := maxi(1, int(GENERAL_BUY[key]) / 2)
-		rows.append({
-			"name": "%s (%d each)" % [str(key).capitalize(), sell],
-			"value": "%d held" % int(materials[key]),
-			"button": "Sell all",
-			"action": "sellmat:%s" % key,
-			"enabled": int(materials[key]) > 0,
-		})
-	return rows
-
 
 func _buy_material(key: String) -> void:
 	if not GENERAL_BUY.has(key):
@@ -6354,25 +5596,6 @@ func _sell_material(key: String) -> void:
 	materials[key] = 0
 	money += count * price
 	_show_message("Sold %d %s for %d coins." % [count, key, count * price])
-
-
-func _bank_rows() -> Array:
-	var rows: Array = [
-		{"section": "Coins"},
-		{"name": "Held", "value": str(money), "button": "Bank all", "action": "dep:coins", "enabled": money > 0},
-		{"name": "Banked", "value": str(bank_coins), "button": "Take all", "action": "wd:coins", "enabled": bank_coins > 0},
-		{"section": "Goods"},
-	]
-	for key in bank_materials.keys():
-		var held := int(materials[key])
-		var banked := int(bank_materials[key])
-		if held == 0 and banked == 0:
-			continue
-		rows.append({"name": "%s: held" % str(key).capitalize(), "value": str(held), "button": "Bank all", "action": "dep:%s" % key, "enabled": held > 0})
-		rows.append({"name": "%s: banked" % str(key).capitalize(), "value": str(banked), "button": "Take all", "action": "wd:%s" % key, "enabled": banked > 0})
-	if rows.size() == 4:
-		rows.append({"note": "Nothing to bank yet. Goods you deposit are kept safe here, even if you lose them in the wild."})
-	return rows
 
 
 func _bank_move(action_id: String) -> void:
@@ -7232,17 +6455,6 @@ func _do_job() -> void:
 	stats["jobs"] += 1
 	play_sfx("coin")
 	_show_message("Job done: %s. +%d coins, +%d %s XP" % [str(job["name"]).to_lower(), int(job["coins"]), int(job["xp"]), job["skill"]])
-
-
-func _job_rows() -> Array:
-	var job := _job_today()
-	var done := job_done_day == day
-	var detail := "Done for today." if done else "Needs %s. Pays %d coins and %d %s XP." % [_job_need_text(job), int(job["coins"]), int(job["xp"]), job["skill"]]
-	var row := {"name": str(job["name"]), "value": detail, "enabled": _can_do_job()}
-	if not done:
-		row["button"] = "Deliver"
-		row["action"] = "job"
-	return [{"section": "Daily job"}, row, {"note": "One job a day, separate from the chores. It doesn't add wear to the house."}]
 
 
 func _chore_list() -> Array:
