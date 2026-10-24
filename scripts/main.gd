@@ -916,6 +916,7 @@ var shake_tw: Tween
 var last_minimap_key: Array = []
 var last_cam_tile := Vector2i(-99, -99)   # the tile the camera was last drawn from
 var panels: PanelRows
+var fishing: FishingSystem
 var crafting: CraftSystem
 var saver: SaveSystem
 var progression: ProgressionSystem
@@ -951,6 +952,7 @@ func _ready() -> void:
 	progression = ProgressionSystem.new(self)
 	saver = SaveSystem.new(self)
 	crafting = CraftSystem.new(self)
+	fishing = FishingSystem.new(self)
 	_setup_input()
 	_load_settings()
 	_start_music()
@@ -1179,8 +1181,8 @@ func _process(delta: float) -> void:
 	progression._check_story()
 	progression._check_achievements()
 	_check_guardian()
-	_update_fish_spots(delta)
-	_update_fishing(delta)
+	fishing._update_fish_spots(delta)
+	fishing._update_fishing(delta)
 	farm._update_harvest(delta)
 	_update_crows(delta)
 	_update_foes(delta)
@@ -2690,9 +2692,9 @@ func _on_panel_action(action_id: String) -> void:
 		"take_crops":
 			farm._take_crops()
 		"store_fish":
-			_store_fish()
+			fishing._store_fish()
 		"take_fish":
-			_take_fish()
+			fishing._take_fish()
 
 
 func _refresh_panel() -> void:
@@ -3083,14 +3085,14 @@ func _loop_action() -> String:
 		return "chop"
 	if harvest_kind != "":
 		return "mine"
-	if _is_fishing():
+	if fishing._is_fishing():
 		return "fish"
 	return ""
 
 
 # The one-shot for the held tool, played each time Use is pressed. Channels already loop, so they are skipped.
 func _play_use_anim() -> void:
-	if farm._is_harvesting() or _is_fishing() or placing != "":
+	if farm._is_harvesting() or fishing._is_fishing() or placing != "":
 		return
 	match _active_tool():
 		"axe":
@@ -3121,8 +3123,8 @@ func _interact() -> void:
 	if _in_village():
 		_interact_village()
 		return
-	if _is_fishing():
-		_stop_fishing("You reel in your line.")
+	if fishing._is_fishing():
+		fishing._stop_fishing("You reel in your line.")
 		return
 	var tile := _tile_in_front()
 	# Interior tiles sit outside the farm's bounds, so accept either area.
@@ -3149,7 +3151,7 @@ func _interact() -> void:
 
 	if fish_spots.has(tile):
 		if _need_tool("rod"):
-			_start_fishing(tile)
+			fishing._start_fishing(tile)
 		return
 
 	if rocks.has(tile):
@@ -3274,11 +3276,6 @@ func _find_pond_edges() -> void:
 				if _in_bounds(n) and map[n.y][n.x] == Tile.GRASS:
 					pond_edges.append(Vector2i(x, y))
 					break
-
-
-# Fishing level 3 and up adds spots: one more at 3, another at 5.
-func _fish_spot_count() -> int:
-	return FISH_SPOT_COUNT + (progression._level("Fishing") - 1) / 2
 
 
 func _place_key() -> String:
@@ -3515,72 +3512,6 @@ func _draw_crow_layer() -> void:
 		crow_layer.draw_line(root + Vector2(facing * 1.0, 0.0), near_tip.lerp(root, 0.35), Color(0.45, 0.45, 0.55, 0.45), 0.8)
 
 
-func _update_fish_spots(delta: float) -> void:
-	# Each spot runs down its life. When it goes quiet, it moves to a new place.
-	for tile in fish_spots.keys():
-		fish_spots[tile] -= delta
-		if fish_spots[tile] <= 0.0:
-			fish_spots.erase(tile)
-			if tile == fishing_tile:
-				_stop_fishing("The fish have moved on from your spot.")
-	# Refill up to the count for the current Fishing level.
-	while fish_spots.size() < _fish_spot_count() and _spawn_fish_spot():
-		pass
-	# The sparkle pulses and fades, so the layer redraws every frame.
-	if fish_layer != null:
-		fish_layer.queue_redraw()
-
-
-func _spawn_fish_spot() -> bool:
-	var options: Array = []
-	for edge in pond_edges:
-		if not fish_spots.has(edge):
-			options.append(edge)
-	if options.is_empty():
-		return false
-	var pick: Vector2i = options.pick_random()
-	fish_spots[pick] = randf_range(FISH_SPOT_MIN_LIFE, FISH_SPOT_MAX_LIFE)
-	return true
-
-
-func _is_fishing() -> bool:
-	return fishing_tile != NO_SPOT
-
-
-func _start_fishing(tile: Vector2i) -> void:
-	if not stall._pack_room(int(inventory["fish"]), 1):
-		_show_message("Your pack is full. Store fish in the cooler, or sell or cook them first.")
-		return
-	fishing_tile = tile
-	fish_timer = FISH_TICK_SECONDS
-	_show_message("You cast your line. Stay put and keep fishing.")
-
-
-func _stop_fishing(reason: String) -> void:
-	fishing_tile = NO_SPOT
-	if reason != "":
-		_show_message(reason)
-
-
-# While fishing, roll for a catch every tick. Moving, going inside, or
-# opening a panel reels the line in.
-func _update_fishing(delta: float) -> void:
-	if not _is_fishing():
-		return
-	var moved := Input.get_vector("move_left", "move_right", "move_up", "move_down") != Vector2.ZERO
-	if moved or inside or open_tab != "" or _tile_in_front() != fishing_tile:
-		_stop_fishing("You reel in your line.")
-		return
-	fish_timer -= delta
-	if fish_timer > 0.0:
-		return
-	fish_timer = FISH_TICK_SECONDS
-	if not stall._pack_room(int(inventory["fish"]), 1):
-		_stop_fishing("Your pack is full. Store fish in the cooler, or sell or cook them.")
-		return
-	_fish_roll()
-
-
 func _draw_fish_spots() -> void:
 	var t := Time.get_ticks_msec() / 1000.0
 	var i := 0
@@ -3604,18 +3535,6 @@ func _rod_bonus() -> float:
 	for i in int(tool_tier["rod"]):
 		total += float(TOOL_TIERS["rod"][i]["bonus"])
 	return total
-
-
-func _fish_roll() -> void:
-	stats["fished"] += 1
-	var chance := clampf(FISH_BASE_CHANCE + FISH_CHANCE_PER_LEVEL * float(progression._level("Fishing") - 1) + _rod_bonus(), 0.0, FISH_CHANCE_CAP)
-	if randf() < chance:
-		stats["caught"] += 1
-		inventory["fish"] += 1
-		progression._grant_xp("Fishing", XP_FISH)
-		_show_message("You hook a fish! +%d Fishing XP" % XP_FISH)
-	else:
-		_show_message("Nothing yet. Keep still.")
 
 
 func _need_label(key: String) -> String:
@@ -3828,26 +3747,6 @@ func _build_storage(which: String) -> void:
 		_show_message("The cooler is built beside the house. It keeps %d fish fresh." % COOLER_CAP)
 	_build_interior()
 	queue_redraw()
-
-
-func _store_fish() -> void:
-	var amount := mini(int(inventory["fish"]), COOLER_CAP - cooler_stock)
-	if amount <= 0:
-		_show_message("Nothing to store, or the cooler is full.")
-		return
-	inventory["fish"] -= amount
-	cooler_stock += amount
-	_show_message("You store %d fish in the cooler." % amount)
-
-
-func _take_fish() -> void:
-	var amount := mini(cooler_stock, stall._pack_free())
-	if amount <= 0:
-		_show_message("Your pack is full, or the cooler is empty.")
-		return
-	cooler_stock -= amount
-	inventory["fish"] += amount
-	_show_message("You take %d fish from the cooler." % amount)
 
 
 # --- Trade, cellar, and cooler panels ------------------------------------------
@@ -4225,7 +4124,7 @@ func _touches_cave_floor(t: Vector2i) -> bool:
 func _enter_cave() -> void:
 	in_cave = true
 	inside = false
-	_stop_fishing("")
+	fishing._stop_fishing("")
 	swing_time = 0.0
 	# The cave is laid out fresh each day, so yesterday's mined ore is gone.
 	if cave_mined_day != day:
@@ -4736,7 +4635,7 @@ func _go_home(reason: String) -> void:
 func _enter_zone(z: int, arrive: Vector2i, reason: String) -> void:
 	zone = z
 	in_cave = false
-	_stop_fishing("")
+	fishing._stop_fishing("")
 	swing_time = 0.0
 	player.position = _tile_center(arrive.x, arrive.y)
 	_on_region_change()
