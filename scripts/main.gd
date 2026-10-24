@@ -312,6 +312,9 @@ const SMOKEHOUSE_COST := {"wood": 5, "fiber": 3, "coins": 60, "level": 3}
 const STALL_IX := FarmLayout.STALL_IX
 const STALL_IY := FarmLayout.STALL_IY
 const RESERVED := FarmLayout.RESERVED
+# Draws every farm tile as one flat colour block, with no ground detail, shadows, tree or building art.
+# Use it to read the layout itself. Set it to false for the full placeholder art.
+const FLAT_FARM_ART := true
 const LAYOUT_VERSION := FarmLayout.VERSION
 const STALL_CLOSE_HOUR := 18.0
 const SELL_FISH := 6
@@ -1262,12 +1265,16 @@ func _draw() -> void:
 	var fy0 := clampi(floori(top_left.y / PX) - 1, 0, MAP_H - 1)
 	var fx1 := clampi(ceili((top_left.x + view.x) / PX) + 1, 0, MAP_W - 1)
 	var fy1 := clampi(ceili((top_left.y + view.y) / PX) + 1, 0, MAP_H - 1)
+	if FLAT_FARM_ART:
+		for y in range(fy0, fy1 + 1):
+			for x in range(fx0, fx1 + 1):
+				draw_rect(_tile_rect(Vector2i(x, y)), TILE_COLORS[map[y][x]])
 	# Pass one: the ground, with small details. Pass two: shadows, which fall on the ground only.
 	# Pass three: trees and buildings, drawn over both.
 	for y in range(fy0, fy1 + 1):
 		for x in range(fx0, fx1 + 1):
 			var ground: int = map[y][x]
-			if _is_ground(ground):
+			if _is_ground(ground) and not FLAT_FARM_ART:
 				var gcell := _tile_rect(Vector2i(x, y))
 				draw_rect(gcell, _ground_color(TILE_COLORS[ground], x, y))
 				_draw_ground_detail(gcell, ground, x, y)
@@ -1275,14 +1282,14 @@ func _draw() -> void:
 					FarmArt.draw_stump(self, gcell)
 	for y in range(fy0, fy1 + 1):
 		for x in range(fx0, fx1 + 1):
-			if map[y][x] == Tile.TREE and not _in_big_tree(Vector2i(x, y)):
+			if map[y][x] == Tile.TREE and not _in_big_tree(Vector2i(x, y)) and not FLAT_FARM_ART:
 				var scell := _tile_rect(Vector2i(x, y))
 				draw_colored_polygon(_ellipse_at(scell.get_center() + Vector2(PX * 0.2, PX * 0.26), PX * 0.42, PX * 0.2), Color(0, 0, 0, 0.26))
 	for y in range(fy0, fy1 + 1):
 		for x in range(fx0, fx1 + 1):
 			var tile: int = map[y][x]
 			var cell := _tile_rect(Vector2i(x, y))
-			if _is_ground(tile):
+			if _is_ground(tile) or FLAT_FARM_ART:
 				continue
 			if tile == Tile.TREE and _in_big_tree(Vector2i(x, y)):
 				# The great tree's footprint is plain grass; its shadow and crown are drawn on top later.
@@ -1326,7 +1333,8 @@ func _draw() -> void:
 				draw_string(ThemeDB.fallback_font, Vector2(label_x, cell.position.y + PX * 0.6), label, HORIZONTAL_ALIGNMENT_LEFT, -1, 11, Color(0.05, 0.03, 0.02))
 
 	# The great tree goes last, so its crown is never painted over by the ground around it.
-	_draw_big_tree()
+	if not FLAT_FARM_ART:
+		_draw_big_tree()
 	for y in INT_H:
 		for x in INT_W:
 			var kind: int = interior[y][x]
