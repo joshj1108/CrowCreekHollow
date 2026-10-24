@@ -106,14 +106,14 @@ func _inventory_rows() -> Array:
 	rows.append({"name": "Coins", "value": str(m.money)})
 	rows.append({
 		"name": "Pack space",
-		"value": "%d/%d" % [m._pack_used(), m._pack_capacity()],
-		"progress": float(m._pack_used()) / float(m._pack_capacity()),
+		"value": "%d/%d" % [m.stall._pack_used(), m.stall._pack_capacity()],
+		"progress": float(m.stall._pack_used()) / float(m.stall._pack_capacity()),
 	})
 	if m.bag_tier < m.BAG_TIERS.size():
 		var tier: Dictionary = m.BAG_TIERS[m.bag_tier]
 		rows.append({
 			"name": "Next bag: %s (+%d slots)" % [tier["name"], tier["slots"]],
-			"value": m._price_text(tier),
+			"value": m.stall._price_text(tier),
 			"button": "Upgrade",
 			"action": "upgrade_bag",
 			"enabled": m._can_upgrade_bag(),
@@ -277,7 +277,7 @@ func _house_rows() -> Array:
 	else:
 		rows.append({
 			"name": "Build a root cellar (holds %d crops)" % m.CELLAR_CAP,
-			"value": m._price_text(m.CELLAR_COST),
+			"value": m.stall._price_text(m.CELLAR_COST),
 			"button": "Build",
 			"action": "build_cellar",
 			"enabled": m._can_afford(m.CELLAR_COST),
@@ -287,7 +287,7 @@ func _house_rows() -> Array:
 	else:
 		rows.append({
 			"name": "Build a cooler (keeps %d fish fresh)" % m.COOLER_CAP,
-			"value": m._price_text(m.COOLER_COST),
+			"value": m.stall._price_text(m.COOLER_COST),
 			"button": "Build",
 			"action": "build_cooler",
 			"enabled": m._can_afford(m.COOLER_COST),
@@ -355,7 +355,7 @@ func _buildings_rows() -> Array:
 	else:
 		rows.append({
 			"name": "Build a smokehouse (smokes and preserves food)",
-			"value": m._price_text(m.SMOKEHOUSE_COST),
+			"value": m.stall._price_text(m.SMOKEHOUSE_COST),
 			"button": "Build",
 			"action": "build_smokehouse",
 			"enabled": m._can_afford(m.SMOKEHOUSE_COST),
@@ -365,7 +365,7 @@ func _buildings_rows() -> Array:
 	else:
 		rows.append({
 			"name": "Build a furnace (smelts ore into bars)",
-			"value": m._price_text(m.FURNACE_COST),
+			"value": m.stall._price_text(m.FURNACE_COST),
 			"button": "Build",
 			"action": "build_furnace",
 			"enabled": m._can_afford(m.FURNACE_COST),
@@ -375,7 +375,7 @@ func _buildings_rows() -> Array:
 	else:
 		rows.append({
 			"name": "Build a firewood store and chopping log",
-			"value": m._price_text(m.WOODSHED_COST) + ("" if m.smokehouse_built or m.furnace_built else ", needs the smokehouse or furnace first"),
+			"value": m.stall._price_text(m.WOODSHED_COST) + ("" if m.smokehouse_built or m.furnace_built else ", needs the smokehouse or furnace first"),
 			"button": "Build",
 			"action": "build_woodshed",
 			"enabled": m._can_afford(m.WOODSHED_COST) and (m.smokehouse_built or m.furnace_built),
@@ -385,7 +385,7 @@ func _buildings_rows() -> Array:
 	if not m.coop_built:
 		rows.append({
 			"name": "Build a coop (holds %d hens)" % m.COOP_HENS_MAX,
-			"value": m._price_text(m.COOP_COST),
+			"value": m.stall._price_text(m.COOP_COST),
 			"button": "Build",
 			"action": "build_coop",
 			"enabled": m._can_build("coop"),
@@ -396,7 +396,7 @@ func _buildings_rows() -> Array:
 	if not m.barn_built:
 		rows.append({
 			"name": "Build a barn (for livestock)",
-			"value": m._price_text(m.BARN_COST),
+			"value": m.stall._price_text(m.BARN_COST),
 			"button": "Build",
 			"action": "build_barn",
 			"enabled": m._can_build("barn"),
@@ -508,7 +508,7 @@ func _cooked_sell_rows() -> Array:
 		if held <= 0:
 			continue
 		rows.append({
-			"name": "%s (%d each)" % [str(f["name"]), m._food_price(str(f["id"]))],
+			"name": "%s (%d each)" % [str(f["name"]), m.stall._food_price(str(f["id"]))],
 			"value": "%d held" % held,
 			"button": "Sell all",
 			"action": "sell_food:" + str(f["id"]),
@@ -528,11 +528,11 @@ func _smokehouse_rows() -> Array:
 			continue
 		var f := Foods.find(str(r["food"]))
 		rows.append({
-			"name": "%s (%s)" % [str(f["name"]), m._recipe_needs_text(r)],
-			"value": "%s %d, +%d XP, sells %d" % [str(f["skill"]), int(f["level"]), int(r["xp"]), m._food_price(str(f["id"]))],
+			"name": "%s (%s)" % [str(f["name"]), m.stall._recipe_needs_text(r)],
+			"value": "%s %d, +%d XP, sells %d" % [str(f["skill"]), int(f["level"]), int(r["xp"]), m.stall._food_price(str(f["id"]))],
 			"button": "Make",
 			"action": "cook:" + str(f["id"]),
-			"enabled": m._can_make(str(f["id"])),
+			"enabled": m.stall._can_make(str(f["id"])),
 		})
 		var n := int(m.inventory[str(f["held"])])
 		if n > 0:
@@ -684,10 +684,10 @@ func _cellar_rows() -> Array:
 		},
 		{
 			"name": "Take crops into your pack",
-			"value": "%d free slots" % m._pack_free(),
+			"value": "%d free slots" % m.stall._pack_free(),
 			"button": "Take",
 			"action": "take_crops",
-			"enabled": m.cellar_stock > 0 and m._pack_free() > 0,
+			"enabled": m.cellar_stock > 0 and m.stall._pack_free() > 0,
 		},
 		{"note": "Crops keep here. Nothing spoils in the cellar."},
 	]
@@ -710,10 +710,10 @@ func _cooler_rows() -> Array:
 		},
 		{
 			"name": "Take fish into your pack",
-			"value": "%d free slots" % m._pack_free(),
+			"value": "%d free slots" % m.stall._pack_free(),
 			"button": "Take",
 			"action": "take_fish",
-			"enabled": m.cooler_stock > 0 and m._pack_free() > 0,
+			"enabled": m.cooler_stock > 0 and m.stall._pack_free() > 0,
 		},
 		{"note": "Fish in your pack spoil overnight. Fish kept here do not."},
 	]

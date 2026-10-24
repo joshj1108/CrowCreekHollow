@@ -916,6 +916,7 @@ var shake_tw: Tween
 var last_minimap_key: Array = []
 var last_cam_tile := Vector2i(-99, -99)   # the tile the camera was last drawn from
 var panels: PanelRows
+var stall: StallSystem
 var sanity_sys: SanitySystem
 var firewood: FirewoodSystem
 var farm: FarmSystem
@@ -943,6 +944,7 @@ func _ready() -> void:
 	farm = FarmSystem.new(self)
 	firewood = FirewoodSystem.new(self)
 	sanity_sys = SanitySystem.new(self)
+	stall = StallSystem.new(self)
 	_setup_input()
 	_load_settings()
 	_start_music()
@@ -2515,10 +2517,10 @@ func _on_panel_action(action_id: String) -> void:
 		desk._desk_action(action_id)
 		return
 	if action_id.begins_with("cook:"):
-		_make_food(action_id.trim_prefix("cook:"))
+		stall._make_food(action_id.trim_prefix("cook:"))
 		return
 	if action_id.begins_with("sell_food:"):
-		_sell_food(action_id.trim_prefix("sell_food:"))
+		stall._sell_food(action_id.trim_prefix("sell_food:"))
 		return
 	if action_id.begins_with("ammo:"):
 		_craft_ammo(action_id.trim_prefix("ammo:"))
@@ -2527,19 +2529,19 @@ func _on_panel_action(action_id: String) -> void:
 		_craft_tool(action_id.trim_prefix("tool:"))
 		return
 	if action_id.begins_with("sell:"):
-		_sell(action_id.trim_prefix("sell:"))
+		stall._sell(action_id.trim_prefix("sell:"))
 		return
 	if action_id.begins_with("smelt:"):
 		_smelt(action_id.trim_prefix("smelt:"))
 		return
 	if action_id.begins_with("buy:"):
-		_buy_material(action_id.trim_prefix("buy:"))
+		stall._buy_material(action_id.trim_prefix("buy:"))
 		return
 	if action_id.begins_with("sellmat:"):
-		_sell_material(action_id.trim_prefix("sellmat:"))
+		stall._sell_material(action_id.trim_prefix("sellmat:"))
 		return
 	if action_id.begins_with("dep:") or action_id.begins_with("wd:"):
-		_bank_move(action_id)
+		stall._bank_move(action_id)
 		return
 	if action_id == "camp":
 		_place_campsite()
@@ -2629,7 +2631,7 @@ func _on_panel_action(action_id: String) -> void:
 		_make_bandage()
 		return
 	if action_id.begins_with("eat_food:"):
-		_eat_food(action_id.trim_prefix("eat_food:"))
+		stall._eat_food(action_id.trim_prefix("eat_food:"))
 		return
 	if action_id.begins_with("inv_pick:"):
 		inventory_selected = action_id.trim_prefix("inv_pick:")
@@ -2658,15 +2660,15 @@ func _on_panel_action(action_id: String) -> void:
 		"switch_seed":
 			farm._switch_seed()
 		"sell_crops":
-			_sell("crops")
+			stall._sell("crops")
 		"sell_pumpkins":
-			_sell("pumpkins")
+			stall._sell("pumpkins")
 		"sell_fish":
-			_sell("fish")
+			stall._sell("fish")
 		"sell_eggs":
-			_sell("eggs")
+			stall._sell("eggs")
 		"sell_milk":
-			_sell("milk")
+			stall._sell("milk")
 		"buy_turnip":
 			farm._buy_seeds("turnip")
 		"buy_pumpkin":
@@ -2819,7 +2821,7 @@ func _raw_inventory_tiles() -> Array:
 		if n <= 0:
 			continue
 		var desc := "%s %s" % [str(f["desc"]), _food_stats_text(f)]
-		var sells := _food_price(str(f["id"]))
+		var sells := stall._food_price(str(f["id"]))
 		if sells > 0:
 			desc += " Sells for %d coins." % sells
 		tiles.append(_stack_tile("pack:" + str(f["id"]), str(f["name"]), str(f["icon"]), str(f["tint"]), n, "in the pack",
@@ -2891,7 +2893,7 @@ func _gear_tiles() -> Array:
 	var bag_name := "Pack" if bag_tier == 0 else str(BAG_TIERS[bag_tier - 1]["name"])
 	tiles.append({
 		"key": "slot:back", "name": bag_name, "icon": "pack", "tint": "7a5a3a", "enabled": true,
-		"desc": "Your bag. Upgrade it from the Inventory panel.", "level_text": "%d pack slots" % _pack_capacity(),
+		"desc": "Your bag. Upgrade it from the Inventory panel.", "level_text": "%d pack slots" % stall._pack_capacity(),
 		"level_ok": true, "costs": [], "action": "",
 	})
 	tiles.append(_gear_slot_tile("head", "Head", "hat"))
@@ -2991,7 +2993,7 @@ func _chosen_recipe(recipes: Array) -> Dictionary:
 func _craft_recipes() -> Array:
 	match craft_tab:
 		"cooking":
-			return _recipes_cooking()
+			return stall._recipes_cooking()
 		"tools":
 			return _recipes_tools()
 		"other":
@@ -3157,18 +3159,13 @@ func _recipes_other_bandage() -> Dictionary:
 		"key": "bandage", "name": str(BANDAGE["name"]), "icon": "bandage", "tint": "e8e0d0",
 		"desc": "Heals %d HP when used from the Inventory panel. +%d Bushcrafting XP." % [int(BANDAGE["heal"]), int(BANDAGE["xp"])],
 		"costs": costs, "level_text": _level_text("Bushcrafting", int(BANDAGE["level"])),
-		"level_ok": _level("Bushcrafting") >= int(BANDAGE["level"]), "enabled": _can_make_bandage(),
+		"level_ok": _level("Bushcrafting") >= int(BANDAGE["level"]), "enabled": stall._can_make_bandage(),
 		"action": "make_bandage", "button": "Make",
 	}
 
 
-func _can_make_bandage() -> bool:
-	return _level("Bushcrafting") >= int(BANDAGE["level"]) and materials["fiber"] >= int(BANDAGE["fiber"]) \
-		and materials["resin"] >= int(BANDAGE["resin"])
-
-
 func _make_bandage() -> void:
-	if not _can_make_bandage():
+	if not stall._can_make_bandage():
 		_show_message("You need %d fiber, %d resin, and Bushcrafting %d." % [int(BANDAGE["fiber"]), int(BANDAGE["resin"]), int(BANDAGE["level"])])
 		return
 	materials["fiber"] -= int(BANDAGE["fiber"])
@@ -3189,13 +3186,6 @@ func _use_bandage() -> void:
 	hp = mini(max_hp(), hp + int(BANDAGE["heal"]))
 	play_sfx("eat", 0.05)
 	_show_message("You bind your wounds. HP %d/%d" % [hp, max_hp()])
-
-
-func _price_text_items(cost: Dictionary) -> String:
-	var parts: Array = []
-	for mat in cost.keys():
-		parts.append("%d %s" % [int(cost[mat]), mat])
-	return ", ".join(parts) if parts.size() > 0 else "free"
 
 
 # A quest is a single line: its name, and Done or its progress. Details open with a button.
@@ -3413,7 +3403,7 @@ func _interact() -> void:
 		_toggle_tab("House")
 		return
 	if kind == Tile.STALL:
-		_open_stall()
+		stall._open_stall()
 		return
 	if kind == Tile.COOP:
 		_toggle_tab("Coop")
@@ -3767,7 +3757,7 @@ func _is_fishing() -> bool:
 
 
 func _start_fishing(tile: Vector2i) -> void:
-	if not _pack_room(int(inventory["fish"]), 1):
+	if not stall._pack_room(int(inventory["fish"]), 1):
 		_show_message("Your pack is full. Store fish in the cooler, or sell or cook them first.")
 		return
 	fishing_tile = tile
@@ -3794,7 +3784,7 @@ func _update_fishing(delta: float) -> void:
 	if fish_timer > 0.0:
 		return
 	fish_timer = FISH_TICK_SECONDS
-	if not _pack_room(int(inventory["fish"]), 1):
+	if not stall._pack_room(int(inventory["fish"]), 1):
 		_stop_fishing("Your pack is full. Store fish in the cooler, or sell or cook them.")
 		return
 	_fish_roll()
@@ -3837,42 +3827,8 @@ func _fish_roll() -> void:
 		_show_message("Nothing yet. Keep still.")
 
 
-# --- Cooking -----------------------------------------------------------------
-# The Craft panel's cooking list: every recipe made at the fire.
-func _recipes_cooking() -> Array:
-	var out: Array = []
-	for r in Foods.RECIPES:
-		if r["station"] == "fire":
-			out.append(_recipe_card(r))
-	return out
-
-
-func _recipe_card(r: Dictionary) -> Dictionary:
-	var f := Foods.find(str(r["food"]))
-	var costs: Array = []
-	for key in r["needs"].keys():
-		var need := int(r["needs"][key])
-		costs.append({"label": "%d %s" % [need, _need_label(str(key))], "have": _recipe_held(str(key)), "need": need})
-	var skill := str(f["skill"])
-	var level := int(f["level"])
-	return {
-		"key": "cook:" + str(f["id"]), "name": str(f["name"]), "icon": str(f["icon"]), "tint": str(f["tint"]),
-		"desc": "%s %s +%d %s XP." % [str(f["desc"]), _food_stats_text(f), int(r["xp"]), skill],
-		"costs": costs, "level_text": _level_text(skill, level) if level > 0 else "",
-		"level_ok": _level(skill) >= level, "enabled": _can_make(str(f["id"])),
-		"action": "cook:" + str(f["id"]), "button": "Cook",
-	}
-
-
 func _need_label(key: String) -> String:
 	return key.replace("_", " ")
-
-
-# What a recipe input is held as. Turnips are the crops in the pack; the rest are pack or material counts.
-func _recipe_held(key: String) -> int:
-	if key == "turnips":
-		return int(inventory["crops"])
-	return _held(key)
 
 
 func _spend_recipe_input(key: String, n: int) -> void:
@@ -3884,111 +3840,8 @@ func _spend_recipe_input(key: String, n: int) -> void:
 		inventory[key] -= n
 
 
-func _recipe_needs_text(r: Dictionary) -> String:
-	var parts: Array = []
-	for key in r["needs"].keys():
-		parts.append("%d %s" % [int(r["needs"][key]), _need_label(str(key))])
-	return ", ".join(parts)
-
-
 func _food_stats_text(f: Dictionary) -> String:
 	return "Restores %d food, %d sanity, %d HP." % [int(Foods.food_restore(f)), int(Foods.sanity_restore(f)), Foods.hp_restore(f)]
-
-
-func _can_make(food_id: String) -> bool:
-	var r := Foods.recipe(food_id)
-	if r.is_empty():
-		return false
-	if r["station"] == "smokehouse" and not smokehouse_built:
-		return false
-	var f := Foods.find(food_id)
-	if _level(str(f["skill"])) < int(f["level"]):
-		return false
-	for key in r["needs"].keys():
-		if _recipe_held(str(key)) < int(r["needs"][key]):
-			return false
-	return true
-
-
-func _make_food(food_id: String) -> void:
-	var r := Foods.recipe(food_id)
-	var f := Foods.find(food_id)
-	if r.is_empty() or f.is_empty():
-		return
-	if r["station"] == "smokehouse" and not smokehouse_built:
-		_show_message("Build a smokehouse from the House panel first.")
-		return
-	var skill := str(f["skill"])
-	if _level(skill) < int(f["level"]):
-		_show_message("%s needs %s %d." % [str(f["name"]), skill, int(f["level"])])
-		return
-	if not _can_make(food_id):
-		_show_message("You need %s to make %s." % [_recipe_needs_text(r), str(f["name"]).to_lower()])
-		return
-	for key in r["needs"].keys():
-		_spend_recipe_input(str(key), int(r["needs"][key]))
-	inventory[food_id] += 1
-	stats["cooked"] += 1
-	_grant_xp(skill, int(r["xp"]))
-	_show_message("You make %s. +%d %s XP" % [str(f["name"]).to_lower(), int(r["xp"]), skill])
-
-
-func _eat_food(food_id: String) -> void:
-	var f := Foods.find(food_id)
-	if f.is_empty():
-		return
-	var key := str(f["held"])
-	if int(inventory[key]) <= 0:
-		_show_message("You have no %s left." % str(f["name"]).to_lower())
-		return
-	inventory[key] -= 1
-	stats["eaten"] += 1
-	sanity_sys._change_sanity(Foods.sanity_restore(f))
-	hp = mini(max_hp(), hp + Foods.hp_restore(f))
-	food = minf(100.0, food + Foods.food_restore(f))
-	play_sfx("eat", 0.05)
-	var verb := str(f.get("verb", "Eat")).to_lower()
-	_show_message("You %s the %s. Food %d/100, HP %d/%d" % [verb, str(f["name"]).to_lower(), food, hp, max_hp()])
-
-
-# The first cooked food in the pack, for the miller's bread. Empty when there is none.
-func _first_cooked() -> String:
-	for r in Foods.RECIPES:
-		var f := Foods.find(str(r["food"]))
-		if int(inventory[str(f["held"])]) > 0:
-			return str(f["id"])
-	return ""
-
-
-func _food_price(food_id: String) -> int:
-	if food_id == "turnip":
-		return farm._crop_price("turnip")
-	if food_id == "pumpkin":
-		return farm._crop_price("pumpkin")
-	return int(Foods.find(food_id).get("price", 0))
-
-
-func _sell_food(food_id: String) -> void:
-	var f := Foods.find(food_id)
-	if f.is_empty():
-		return
-	var key := str(f["held"])
-	var count := int(inventory[key])
-	if count <= 0:
-		_show_message("You have nothing to sell.")
-		return
-	var price := _food_price(food_id)
-	inventory[key] = 0
-	money += count * price
-	stats["sold"] += count
-	_show_message("Sold %d for %d coins." % [count, count * price])
-
-
-func _pack_used() -> int:
-	var used := _slots_for(int(inventory["fish"])) + _slots_for(int(inventory["bandage"])) + _slots_for(int(inventory["firewood"]))
-	for f in Foods.LIST:
-		used += _slots_for(int(inventory[str(f["held"])]))
-	return used
 
 
 # Saves from before foods were named for what made them keep their food under the new names.
@@ -4138,34 +3991,18 @@ func _slots_for(count: int) -> int:
 	return ceili(float(maxi(0, count)) / float(STACK_SIZE))
 
 
-# True when adding amount more of a kind that already holds current still fits in the pack's free slots.
-func _pack_room(current: int, amount: int) -> bool:
-	return _slots_for(current + amount) - _slots_for(current) <= _pack_free()
-
-
-func _pack_capacity() -> int:
-	var cap := BAG_BASE
-	for i in bag_tier:
-		cap += int(BAG_TIERS[i]["slots"])
-	return cap
-
-
-func _pack_free() -> int:
-	return _pack_capacity() - _pack_used()
-
-
 func _can_upgrade_bag() -> bool:
 	return bag_tier < BAG_TIERS.size() and _can_afford(BAG_TIERS[bag_tier])
 
 
 func _upgrade_bag() -> void:
 	if not _can_upgrade_bag():
-		_show_message("You can't afford the next bag yet. Needs %s." % _price_text(BAG_TIERS[bag_tier]))
+		_show_message("You can't afford the next bag yet. Needs %s." % stall._price_text(BAG_TIERS[bag_tier]))
 		return
 	var tier: Dictionary = BAG_TIERS[bag_tier]
 	_pay(tier)
 	bag_tier += 1
-	_show_message("You get a %s. Your pack now holds %d items." % [tier["name"], _pack_capacity()])
+	_show_message("You get a %s. Your pack now holds %d items." % [tier["name"], stall._pack_capacity()])
 
 
 # --- Money and costs ---------------------------------------------------------
@@ -4191,43 +4028,7 @@ func _pay(cost: Dictionary) -> void:
 		materials[key] -= int(cost[key])
 
 
-func _price_text(cost: Dictionary) -> String:
-	var parts: Array = []
-	if int(cost.get("coins", 0)) > 0:
-		parts.append("%d coins" % int(cost["coins"]))
-	for key in cost.keys():
-		if key == "coins" or key == "level" or int(cost[key]) <= 0:
-			continue
-		parts.append("%d %s" % [int(cost[key]), key])
-	parts.append("Carpentry %d" % int(cost.get("level", 1)))
-	return ", ".join(parts)
-
-
 # --- Stall -------------------------------------------------------------------
-
-func _open_stall() -> void:
-	if current_hour >= STALL_CLOSE_HOUR:
-		_show_message("The farm stand is shut for the night. It opens at 06:00.")
-		return
-	_toggle_tab("Trade")
-
-
-func _sell(kind: String) -> void:
-	var count := int(inventory[kind])
-	if count <= 0:
-		_show_message("You have nothing to sell.")
-		return
-	var price := farm._crop_price("pumpkin") if kind == "pumpkins" else farm._crop_price("turnip")
-	if kind == "fish":
-		price = SELL_FISH
-	if kind == "eggs":
-		price = SELL_EGG
-	if kind == "milk":
-		price = SELL_MILK
-	inventory[kind] = 0
-	money += count * price
-	stats["sold"] += count
-	_show_message("Sold %d for %d coins." % [count, count * price])
 
 
 # --- Storage -----------------------------------------------------------------
@@ -4235,7 +4036,7 @@ func _sell(kind: String) -> void:
 func _build_storage(which: String) -> void:
 	var cost: Dictionary = CELLAR_COST if which == "cellar" else COOLER_COST
 	if not _can_afford(cost):
-		_show_message("You can't build that yet. Needs %s." % _price_text(cost))
+		_show_message("You can't build that yet. Needs %s." % stall._price_text(cost))
 		return
 	_pay(cost)
 	if which == "cellar":
@@ -4259,7 +4060,7 @@ func _store_fish() -> void:
 
 
 func _take_fish() -> void:
-	var amount := mini(cooler_stock, _pack_free())
+	var amount := mini(cooler_stock, stall._pack_free())
 	if amount <= 0:
 		_show_message("Your pack is full, or the cooler is empty.")
 		return
@@ -4275,7 +4076,7 @@ func _take_fish() -> void:
 
 func _build_smokehouse() -> void:
 	if not _can_afford(SMOKEHOUSE_COST):
-		_show_message("You can't build that yet. Needs %s." % _price_text(SMOKEHOUSE_COST))
+		_show_message("You can't build that yet. Needs %s." % stall._price_text(SMOKEHOUSE_COST))
 		return
 	_pay(SMOKEHOUSE_COST)
 	smokehouse_built = true
@@ -4404,7 +4205,7 @@ func _build_woodshed() -> void:
 		_show_message("Build the smokehouse or the furnace first. The workshop is where the firewood goes.")
 		return
 	if not _can_afford(WOODSHED_COST):
-		_show_message("You can't build that yet. Needs %s." % _price_text(WOODSHED_COST))
+		_show_message("You can't build that yet. Needs %s." % stall._price_text(WOODSHED_COST))
 		return
 	_pay(WOODSHED_COST)
 	woodshed_built = true
@@ -4413,7 +4214,7 @@ func _build_woodshed() -> void:
 	queue_redraw()
 func _build_furnace() -> void:
 	if not _can_afford(FURNACE_COST):
-		_show_message("You can't build that yet. Needs %s." % _price_text(FURNACE_COST))
+		_show_message("You can't build that yet. Needs %s." % stall._price_text(FURNACE_COST))
 		return
 	_pay(FURNACE_COST)
 	furnace_built = true
@@ -5057,54 +4858,6 @@ func _town_at(tile: Vector2i) -> int:
 # --- Shops and the bank ------------------------------------------------------
 
 
-func _buy_material(key: String) -> void:
-	if not GENERAL_BUY.has(key):
-		return
-	var price := int(GENERAL_BUY[key]) * GENERAL_BUY_QTY
-	if money < price:
-		_show_message("That costs %d coins. You have %d." % [price, money])
-		return
-	money -= price
-	materials[key] += GENERAL_BUY_QTY
-	_show_message("You buy %d %s for %d coins." % [GENERAL_BUY_QTY, key, price])
-
-
-func _sell_material(key: String) -> void:
-	if not GENERAL_BUY.has(key):
-		return
-	var count := int(materials[key])
-	if count <= 0:
-		_show_message("You have none of that to sell.")
-		return
-	var price := maxi(1, int(GENERAL_BUY[key]) / 2)
-	materials[key] = 0
-	money += count * price
-	_show_message("Sold %d %s for %d coins." % [count, key, count * price])
-
-
-func _bank_move(action_id: String) -> void:
-	var deposit := action_id.begins_with("dep:")
-	var key := action_id.trim_prefix("dep:") if deposit else action_id.trim_prefix("wd:")
-	if key == "coins":
-		if deposit:
-			bank_coins += money
-			_show_message("You bank %d coins." % money)
-			money = 0
-		else:
-			money += bank_coins
-			_show_message("You take %d coins from the bank." % bank_coins)
-			bank_coins = 0
-		return
-	if not bank_materials.has(key):
-		return
-	if deposit:
-		bank_materials[key] += int(materials[key])
-		materials[key] = 0
-	else:
-		materials[key] += int(bank_materials[key])
-		bank_materials[key] = 0
-
-
 # --- Campsites ----------------------------------------------------------------
 
 func _can_camp() -> bool:
@@ -5161,19 +4914,6 @@ func _rest_at_camp() -> void:
 
 
 # --- Slot grids for the pack, seed pouch, and equipment ---------------------
-
-func _pack_cells() -> Array:
-	var cells: Array = []
-	for f in Foods.LIST:
-		for _i in int(inventory[str(f["held"])]):
-			cells.append({"color": str(f["tint"]), "label": str(f["name"]), "tip": "%s. %s" % [str(f["name"]), _food_stats_text(f)]})
-	for _i in int(inventory["firewood"]):
-		cells.append({"color": "9a6a3a", "label": "Firewood", "tip": "Split logs for the hearth."})
-	for _i in int(inventory["fish"]):
-		cells.append({"color": "6fb8d9", "label": "Fish", "tip": "Fish. Spoils overnight unless stored in the cooler."})
-	while cells.size() < _pack_capacity():
-		cells.append({"empty": true, "tip": "Empty slot"})
-	return cells
 
 
 # Ten slots in four columns. The top row holds the back, head, neck, and belt.
@@ -5350,8 +5090,8 @@ func _talk(npc: Dictionary) -> void:
 	if npc.has("role"):
 		_show_message("%s: %s" % [npc["name"], lines[int(stats["talks"]) % lines.size()]])
 		return
-	if npc["id"] == "tomas" and _first_cooked() != "" and int(stats["delivered"]) == 0:
-		inventory[_first_cooked()] -= 1
+	if npc["id"] == "tomas" and stall._first_cooked() != "" and int(stats["delivered"]) == 0:
+		inventory[stall._first_cooked()] -= 1
 		stats["delivered"] += 1
 		_show_message("Tomas: Bread and thanks. The village eats tonight.")
 		return
@@ -5754,7 +5494,7 @@ func _start_placement(kind: String) -> void:
 		_show_message("You can only build on the farm.")
 		return
 	if not _is_built(kind) and not _can_build(kind):
-		_show_message("A %s needs %s." % [kind, _price_text(_build_cost(kind))])
+		_show_message("A %s needs %s." % [kind, stall._price_text(_build_cost(kind))])
 		return
 	placing = kind
 	_close_panel()
@@ -6011,7 +5751,7 @@ func _settle_day() -> String:
 	if hens > 0:
 		if hens_fed_day == day:
 			hen_unfed_days = 0
-			var room := maxi(0, _pack_capacity() - _pack_used())
+			var room := maxi(0, stall._pack_capacity() - stall._pack_used())
 			var layers := animals._grown_count(hen_ages, HEN_MATURE_DAYS)
 			var eggs := mini(layers, room)
 			if eggs > 0:
@@ -6028,7 +5768,7 @@ func _settle_day() -> String:
 	if goats > 0:
 		if goats_fed_day == day:
 			goat_unfed_days = 0
-			var room := maxi(0, _pack_capacity() - _pack_used())
+			var room := maxi(0, stall._pack_capacity() - stall._pack_used())
 			var givers := animals._grown_count(goat_ages, GOAT_MATURE_DAYS)
 			var milk := mini(givers, room)
 			if milk > 0:
