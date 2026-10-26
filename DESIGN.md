@@ -53,11 +53,22 @@ A top-down farming game with heavy psychological horror, built in Godot 4.7.
 
 ## Art
 
-The farmer is drawn in code. A straw hat with a band, a shirt under blue overalls with straps and a buckle, and boots. The face turns with the facing direction: eyes and a mouth when facing you, one eye to the side, and hair only from behind. While walking, the legs and arms swing in opposition and the body bobs with each step. A small marker in front shows what you'll interact with.
+The farmer is a SpriteCook sprite (`art/player/`): a 16×32 figure in a straw hat, rust shirt and blue overalls, with an idle facing you and 8-frame walks down, up and right. Walking left mirrors the right walk. The held tool is still drawn in code over the sprite until tool animations are made, and the appearance choices don't recolour the sprite yet. If the sheets are missing, the code-drawn farmer below is used. The code-drawn farmer has a straw hat with a band, a shirt under blue overalls with straps and a buckle, and boots. The face turns with the facing direction: eyes and a mouth when facing you, one eye to the side, and hair only from behind. While walking, the legs and arms swing in opposition and the body bobs with each step. A small marker in front shows what you'll interact with.
 
 - 16×16 base tiles, scaled 3× in-game (`SCALE = 3`), nearest-neighbor filtering.
 - Warm, saturated daytime palette. Night uses a cool, shadowy tint via `CanvasModulate`.
 - Placeholder art is drawn in code. Real licensed or commissioned pixel art replaces it later without touching game logic.
+
+### Art style (locked)
+
+All sprites are being remade in SpriteCook in one style. The older ChatGPT art in `art/farm/` is replaced piece by piece.
+
+- **Chunky 16px pixel art.** Every sprite is drawn at 16 pixels per tile and shown at 3×. Never resample a sprite to fit: one art pixel is always three screen pixels.
+- **Sizes are whole tiles.** A tile is 16×16. Characters are 16 wide and 32 tall (two tiles). Buildings and props are multiples of 16 where they can be, such as the farmhouse at 48×64.
+- **Straight-on top-down 3/4 view**, like Stardew Valley. Fronts face the camera. No angled or isometric views.
+- **Muted, desaturated palette** with a Pacific Northwest autumn feel: mossy greens, weathered browns, grey stone. Dark outlines on every sprite. The horror comes from lighting and the night tint, not from gore in the art.
+- **Style anchor:** `art/style_tests/house_chunky_b.png` (SpriteCook asset `f24bb014-3b8b-4d3c-9dde-a4a118c6d07d`). New sprites use it as a style reference.
+- **Generation:** `pixel-engine-image-v1` for sprites drawn at an exact size. Models that take references use the style anchor. Every asset's ID is recorded in `spritecook-assets.json`.
 
 ## Map
 

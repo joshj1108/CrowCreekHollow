@@ -1,0 +1,21 @@
+{
+  "project_id": "2c65b72c-db5c-4139-8e53-c9648e700b42",
+  "assets": {
+    "art/style_tests/house_chunky_a.png": { "asset_id": "907f94d2-de4f-47b8-a855-0188d4b4f7a0", "label": "Style test: farmhouse, chunky 16px" },
+    "art/style_tests/house_chunky_b.png": { "asset_id": "f24bb014-3b8b-4d3c-9dde-a4a118c6d07d", "label": "Style anchor: farmhouse, chunky 16px" },
+    "art/style_tests/house_detailed_a.png": { "asset_id": "8673b5d8-6caa-41af-abb1-d1e985792719", "label": "Style test: farmhouse, detailed (rejected)" },
+    "art/style_tests/house_detailed_b.png": { "asset_id": "ac05809b-abf5-440f-8a6f-ebff71304cc0", "label": "Style test: farmhouse, detailed (rejected)" },
+    "art/style_tests/farmer_1.png": { "asset_id": "6b145b7c-58df-457c-85ca-5227cc0fcc51", "label": "Farmer option 1" },
+    "art/style_tests/farmer_2.png": { "asset_id": "571fd0a3-1989-4ac3-935f-3eeabf20be04", "label": "Farmer option 2 (chosen)" },
+    "art/style_tests/farmer_3.png": { "asset_id": "3f7fcc05-f624-436f-96fd-91e5efc05537", "label": "Farmer option 3" },
+    "art/style_tests/farmer_4.png": { "asset_id": "12af734f-1a11-4a90-9c55-c9d06c0b5576", "label": "Farmer option 4" },
+    "art/player/farmer_base.png": { "asset_id": "571fd0a3-1989-4ac3-935f-3eeabf20be04", "label": "Farmer base (character_id for animations)" },
+    "art/player/farmer_idle.png": { "asset_id": "900db6a4-dc01-41b9-8e63-5c8e8d6c1dde", "label": "Farmer idle, 8 frames 36x36" },
+    "art/player/farmer_walk_down.png": { "asset_id": "e0dbd720-4aa5-4830-9419-244910036199", "label": "Farmer walk down, 8 frames 36x36" },
+    "art/player/farmer_walk_up.png": { "asset_id": "b21e405e-47c5-4320-a6a9-b557a08d565f", "label": "Farmer walk up, 8 frames 36x36" },
+    "art/player/farmer_walk_right.png": { "asset_id": "bd528606-9834-4d5f-83e8-6cd5b2849b4a", "label": "Farmer walk right, 8 frames 36x36" }
+  },
+  "animation_runs": {
+    "farmer_topdown": "31532ffb-fab2-4152-9b50-6794ac95e0e9"
+  }
+}

@@ -1,6 +1,6 @@
 extends Node2D
 
-## Placeholder player: a simple drawn figure that walks the farm.
+## The player: the SpriteCook farmer from art/player/, or a simple drawn figure if the sheets are missing.
 ## main.gd sets min_pos, max_pos, and is_blocked. Trees, water, the house,
 ## and brush piles block movement; the player slides along walls.
 ## The figure holds the selected hotbar tool and plays its action: one-shot actions when the
@@ -106,8 +106,34 @@ const KEYS := {
 }
 
 
+# The farmer's SpriteCook sheets in art/player/: 8 frames of 36×36 in a row, drawn at 3× with the feet on
+# the bottom row. Walking left is the right walk mirrored. Facing away or sideways, the idle is the walk's
+# first frame. If the sheets are missing, the figure is drawn in code as before.
+const SHEET_DIR := "res://art/player/"
+const SHEETS := ["idle", "walk_down", "walk_up", "walk_right"]
+const FRAME := 36
+const FRAMES := 8
+const ART_SCALE := 3.0
+const GROUND_Y := 18.0      # where the sheet's bottom row (the feet) sits, in local units
+const IDLE_FPS := 6.0
+# The held tool is still drawn in code, scaled up to suit the sprite, from a shoulder at TOOL_ORIGIN.
+const TOOL_SCALE := 2.5
+const TOOL_ORIGIN := Vector2(0, -29)
+var sheets := {}
+var idle_t := 0.0
+
+
 # Set by the game each frame: true while the trowel is in hand and no panel is open.
 var vertical_locked := false
+
+
+func _ready() -> void:
+	for s in SHEETS:
+		var path: String = SHEET_DIR + "farmer_%s.png" % s
+		if ResourceLoader.exists(path):
+			sheets[s] = load(path)
+	if sheets.size() < SHEETS.size():
+		sheets.clear()
 
 
 func _dpad_vertical() -> bool:
@@ -160,6 +186,7 @@ func set_loop(kind: String) -> void:
 
 
 func _advance_anim(delta: float) -> void:
+	idle_t += delta
 	if act != "":
 		act_t += delta
 		var p := clampf(act_t / act_dur, 0.0, 1.0)
@@ -254,14 +281,51 @@ func _draw() -> void:
 	var stride := sin(walk_t) if moving else 0.0
 	var bob := _bob()
 	# The shadow stays on the ground while the body bobs above it.
-	draw_colored_polygon(_ellipse(Vector2(0, 17), 11.0, 4.0), Color(0, 0, 0, 0.3))
-	if facing == Vector2.LEFT or facing == Vector2.RIGHT:
-		_draw_side(bob, stride)
+	if not sheets.is_empty():
+		draw_colored_polygon(_ellipse(Vector2(0, GROUND_Y - 2.0), 20.0, 6.0), Color(0, 0, 0, 0.3))
+		_draw_sprite()
 	else:
-		_draw_front_back(bob)
+		draw_colored_polygon(_ellipse(Vector2(0, 17), 11.0, 4.0), Color(0, 0, 0, 0.3))
+		if facing == Vector2.LEFT or facing == Vector2.RIGHT:
+			_draw_side(bob, stride)
+		else:
+			_draw_front_back(bob)
 	for pt in particles:
 		var s := float(pt["size"])
 		draw_rect(Rect2((pt["p"] as Vector2) - Vector2(s, s) * 0.5, Vector2(s, s)), pt["col"])
+
+
+# The farmer from the sprite sheets. Walking steps through the cycle with walk_t, so the stride matches
+# the footsteps. A crouch from the current action dips the sprite in whole art pixels. The held tool is
+# drawn over it in code.
+func _draw_sprite() -> void:
+	var sheet: Texture2D = sheets["walk_down"]
+	if facing == Vector2.UP:
+		sheet = sheets["walk_up"]
+	elif facing.x != 0.0:
+		sheet = sheets["walk_right"]
+	var frame := 0
+	if moving:
+		frame = int(fposmod(walk_t, TAU) / TAU * FRAMES) % FRAMES
+	elif facing == Vector2.DOWN and _kind() == "idle":
+		sheet = sheets["idle"]
+		frame = int(idle_t * IDLE_FPS) % FRAMES
+	var dip := snappedf(float(_pose()[3]), ART_SCALE)
+	var size := Vector2(FRAME, FRAME) * ART_SCALE
+	if facing == Vector2.LEFT:
+		draw_set_transform(Vector2.ZERO, 0.0, Vector2(-1, 1))
+	draw_texture_rect_region(sheet, Rect2(Vector2(-size.x * 0.5, GROUND_Y - size.y + dip), size), Rect2(frame * FRAME, 0, FRAME, FRAME))
+	var side_view := facing.x != 0.0
+	if held != "":
+		draw_set_transform(TOOL_ORIGIN + Vector2(0, dip), _lean(), Vector2(TOOL_SCALE, TOOL_SCALE))
+		var pose := _pose()
+		var tool_angle := float(pose[0]) + float(pose[1])
+		if _kind() == "idle" and held == "hoe":
+			tool_angle = -2.6
+		var hand := _shoulder(0.0, side_view) + _reach(float(pose[0]), side_view)
+		draw_circle(hand, 1.6, skin)
+		_draw_tool(hand, side_view, tool_angle)
+	draw_set_transform(Vector2.ZERO, 0.0)
 
 
 # The figure seen from the front or the back: both arms and legs, a wide body, and the face or hair.
@@ -560,6 +624,9 @@ func _elbow(s: Vector2, t: Vector2, side_view: bool) -> Vector2:
 # The hand's position in the figure's own space, after the lean. Used for debris.
 func _hand_pos() -> Vector2:
 	var side_view := facing.x != 0.0
+	if not sheets.is_empty():
+		var tool_hand := _shoulder(0.0, side_view) + _reach(float(_pose()[0]), side_view)
+		return TOOL_ORIGIN + (tool_hand * TOOL_SCALE).rotated(_lean())
 	var hand := _shoulder(_bob(), side_view) + _reach(float(_pose()[0]), side_view)
 	return hand.rotated(_lean())
 
