@@ -13,59 +13,75 @@ extends RefCounted
 #   b great tree's walkable top row (grass)
 
 const TERRAIN := [
-	"........................................",
-	"...................G............~~~.....",
-	".............................~~~~~~~~...",
-	"...KK.......OOOOOO.........~~~~~~~~~~~..",
-	"..KKKK...G..OOOOOO......G.~~~~~~~~~~~~~.",
-	"KKKKKK......OOOOOO........~~~~~~~~..~~~.",
-	"KKCKKK......HHHHH...AA....~~~~~~~~..~~~.",
-	"KKPPK.......HHDHH...AA.....PP~~~~~~~~~..",
-	"..PPP.........RP...........PP~~~~~~~~~..",
-	"...PPPPPPPPPPPPPPPPPPPPPPPPPP~~~~~~~~...",
-	"...............................~~~~~....",
-	"..SSSSSSSSSSS...............G...~~~.....",
-	"..SSSSSSSSSSS.........................G.",
-	"..SSSSSSSSSSS.....FFFFFFFF......G.......",
-	"..SSSSSSSSSSS..W..FFFFFFFF..............",
-	"..SSSSSSSSSSS.....FFFFFFFF..............",
-	"..................FFFFFFFF..............",
-	"...............................bbb...G..",
-	"..SSSSSSSSSSS..............G...BBB......",
-	"..SSSSSSSSSSS........G.........BBB......",
-	"..SSSSSSSSSSS...G.......................",
-	"..SSSSSSSSSSS...........................",
-	"........................G.............G.",
-	"........................................",
+	"................................................................",
+	".......................................G........................",
+	"..............................G......................~~~~.......",
+	".................................................~~~~~~~~~~~....",
+	".................................................~~~~~~~~~~~....",
+	"...KK..............OOOOOOOOOOO................~~~~~~~~~~~~~~~...",
+	"..KKKK.............OOOOOOOOOOO..............~~~~~~~~~~~~~~~~~~~.",
+	"KKKKKK........G....OOOOOOOOOOO........G.....~~~~~~~~~~~~..~~~~~.",
+	"KKCKKK.............OOOOOOOOOOO..............~~~~~~~~~~~~..~~~~~.",
+	"KKPPK..............OOOOOOOOOOO..............~~~~~~~~~~~~..~~~~~.",
+	"..PPP..............HHHHHHHHHHH................PPP~~~~~~~~~~~~...",
+	"..P................HHHHHDHHHHH..G..AA.........PPP~~~~~~~~~~~~...",
+	"..P.....................RP.........AA.........PPP~~~~~~~~~~~~...",
+	"..PPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPP~~~~~~~~~~~....",
+	"...................................................~~~~~~~......",
+	"..........G........................................~~~~~~~......",
+	".................................................G...~~~~.......",
+	"................................................................",
+	".............................................G.............G....",
+	"...SSSSSSSSSSSSSSS..............................................",
+	"...SSSSSSSSSSSSSSS..............................................",
+	"...SSSSSSSSSSSSSSS.......G......................................",
+	"...SSSSSSSSSSSSSSS.................................G............",
+	"...SSSSSSSSSSSSSSS...........FFFFFFFFFFFF.......................",
+	"...SSSSSSSSSSSSSSS....WW.....FFFFFFFFFFFF.....G.................",
+	"...SSSSSSSSSSSSSSS....WW.....FFFFFFFFFFFF.......................",
+	".............................FFFFFFFFFFFF.......................",
+	".............................FFFFFFFFFFFF.......................",
+	".............................FFFFFFFFFFFF.........bbb......G....",
+	"......................G...................G.......BBB...........",
+	"..................................................BBB...........",
+	"...SSSSSSSSSSSSSSS..............................................",
+	"...SSSSSSSSSSSSSSS................G.............................",
+	"...SSSSSSSSSSSSSSS........G.....................................",
+	"...SSSSSSSSSSSSSSS..............................................",
+	"...SSSSSSSSSSSSSSS..............................................",
+	"...SSSSSSSSSSSSSSS..............................................",
+	"......................................G......................G..",
+	".................G..............................................",
+	"................................................................",
 ]
 
-const PLOT_ONE := Rect2i(2, 11, 11, 5)
-const PLOT_TWO := Rect2i(2, 18, 11, 4)
-const PLOT_THREE := Rect2i(18, 13, 8, 4)
-const HOUSE_IX := 12
-const HOUSE_IY := 3
-const HOUSE_W := 6
-const HOUSE_H := 5
-const PORCH_RECT := Rect2i(14, 8, 1, 1)
-const WELL_IX := Vector2i(15, 14)
-const STALL_IX := 20
-const STALL_IY := 6
-const CELLAR_IX := Vector2i(10, 5)
-const SMOKEHOUSE_IX := Vector2i(28, 20)
-const FURNACE_IX := Vector2i(26, 20)
-const WORKSHOP_RECT := Rect2i(25, 19, 5, 4)
-const WORKSHOP_DOOR := Vector2i(27, 22)
-const WOODSTORE_IX := Vector2i(26, 21)
-const CHOPLOG_IX := Vector2i(28, 21)
-const BIG_TREE_INNER := Vector2i(31, 17)
-const LAKE_FOCUS := Vector2(32.6, 5.6)
-const GROVE_SPOTS := [Vector2i(19, 1), Vector2i(9, 4), Vector2i(24, 4), Vector2i(28, 11), Vector2i(38, 12), Vector2i(32, 13), Vector2i(37, 17), Vector2i(27, 18), Vector2i(21, 19), Vector2i(16, 20), Vector2i(24, 22), Vector2i(38, 22)]
-const WILLOW_TREES := [Vector2i(24, 4), Vector2i(28, 11), Vector2i(32, 13)]
+const PLOT_ONE := Rect2i(3, 19, 15, 7)
+const PLOT_TWO := Rect2i(3, 31, 15, 6)
+const PLOT_THREE := Rect2i(29, 23, 12, 6)
+const HOUSE_IX := 19
+const HOUSE_IY := 5
+const HOUSE_W := 11
+const HOUSE_H := 7
+const PORCH_RECT := Rect2i(24, 12, 1, 1)
+const WELL_IX := Vector2i(22, 24)
+const STALL_IX := 35
+const STALL_IY := 11
+const CELLAR_IX := Vector2i(17, 7)
+const SMOKEHOUSE_IX := Vector2i(43, 33)
+const FURNACE_IX := Vector2i(41, 33)
+const WORKSHOP_RECT := Rect2i(40, 32, 5, 4)
+const WORKSHOP_DOOR := Vector2i(42, 35)
+const WOODSTORE_IX := Vector2i(41, 34)
+const CHOPLOG_IX := Vector2i(43, 34)
+const BIG_TREE_INNER := Vector2i(50, 28)
+const LAKE_FOCUS := Vector2(53.5, 8.5)
+const GROVE_SPOTS := [Vector2i(39, 1), Vector2i(30, 2), Vector2i(14, 7), Vector2i(38, 7), Vector2i(32, 11), Vector2i(10, 15), Vector2i(49, 16), Vector2i(45, 18), Vector2i(59, 18), Vector2i(25, 21), Vector2i(51, 22), Vector2i(46, 24), Vector2i(59, 28), Vector2i(22, 29), Vector2i(42, 29), Vector2i(34, 32), Vector2i(26, 33), Vector2i(38, 37), Vector2i(61, 37), Vector2i(17, 38)]
+const WILLOW_TREES := [Vector2i(49, 16)]
 const DEAD_TREES := []
-const BRUSH_SPOTS := [Vector2i(30, 12), Vector2i(12, 1), Vector2i(18, 18), Vector2i(38, 15), Vector2i(26, 1), Vector2i(22, 3), Vector2i(27, 14)]
-const THICKET_SPOTS := [Vector2i(7, 4)]
-const ROCK_SPOTS := [Vector2i(35, 17), Vector2i(19, 5), Vector2i(21, 11), Vector2i(1, 1), Vector2i(38, 10), Vector2i(16, 1), Vector2i(15, 22), Vector2i(36, 12)]
+const BRUSH_SPOTS := [Vector2i(48, 20), Vector2i(19, 2), Vector2i(29, 30), Vector2i(61, 25), Vector2i(42, 2), Vector2i(35, 5), Vector2i(43, 23)]
+const THICKET_SPOTS := [Vector2i(11, 7)]
+const ROCK_SPOTS := [Vector2i(56, 28), Vector2i(31, 7), Vector2i(34, 18), Vector2i(2, 2), Vector2i(61, 17), Vector2i(26, 2), Vector2i(24, 37), Vector2i(58, 20)]
 # Farm tiles that the coop and barn must not be placed on, so they never overlap a building the player unlocks later.
-const RESERVED := [Vector2i(10, 5), Vector2i(25, 19), Vector2i(26, 19), Vector2i(27, 19), Vector2i(28, 19), Vector2i(29, 19), Vector2i(25, 20), Vector2i(26, 20), Vector2i(27, 20), Vector2i(28, 20), Vector2i(29, 20), Vector2i(25, 21), Vector2i(26, 21), Vector2i(27, 21), Vector2i(28, 21), Vector2i(29, 21), Vector2i(25, 22), Vector2i(26, 22), Vector2i(27, 22), Vector2i(28, 22), Vector2i(29, 22)]
+const RESERVED := [Vector2i(17, 7), Vector2i(40, 32), Vector2i(40, 33), Vector2i(40, 34), Vector2i(40, 35), Vector2i(41, 32), Vector2i(41, 33), Vector2i(41, 34), Vector2i(41, 35), Vector2i(42, 32), Vector2i(42, 33), Vector2i(42, 34), Vector2i(42, 35), Vector2i(43, 32), Vector2i(43, 33), Vector2i(43, 34), Vector2i(43, 35), Vector2i(44, 32), Vector2i(44, 33), Vector2i(44, 34), Vector2i(44, 35)]
 # Changes whenever the layout changes. Saves record it, so a save from another layout is migrated.
-const VERSION := "24f7fc12"
+const VERSION := "286b8939"

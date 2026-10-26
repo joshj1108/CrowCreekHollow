@@ -1,6 +1,10 @@
 #!/usr/bin/env python3
 """Turn a flat layout diagram of the farm into scripts/farm_layout.gd.
 
+Superseded: this made the old 40 by 24 farm from the diagram. The layout now comes from
+tools/farm_grid.txt through tools/hand_layout.py, which still uses emit() from here. Running this
+script would overwrite the 64 by 40 farm with the old size.
+
 The diagram is a picture of the farm's walkable land (the yellow-green area), made of
 flat colour blocks. The land is sampled into a 40 by 24 grid of inner farm tiles. Each
 tile takes the colour that covers most of it, matched against PALETTE. The border of
@@ -17,8 +21,11 @@ import argparse
 import sys
 from collections import deque
 
-import numpy as np
-from PIL import Image
+try:
+    import numpy as np
+    from PIL import Image
+except ImportError:  # hand_layout.py only uses emit(), which needs neither
+    np = Image = None
 
 INNER_W, INNER_H = 40, 24
 BORDER_X, BORDER_Y = 14, 8
@@ -40,7 +47,7 @@ PALETTE = {
     "cave": ((44, 42, 43), "C"),
 }
 NAMES = list(PALETTE)
-COLOURS = np.array([PALETTE[n][0] for n in NAMES], dtype=float)
+COLOURS = np.array([PALETTE[n][0] for n in NAMES], dtype=float) if np else None
 MAX_DIST = 40.0  # pixels further than this from every colour are ignored
 MIN_FRACTION = {"fence": 0.15}  # thin strokes need a lower share than solid blocks
 DEFAULT_FRACTION = 0.4

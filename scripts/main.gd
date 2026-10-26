@@ -14,8 +14,8 @@ const SCALE := 3
 const PX := TILE_SIZE * SCALE  # one tile in world units
 
 # The farm is INNER_W x INNER_H tiles of walkable land, surrounded by trees.
-const INNER_W := 40
-const INNER_H := 24
+const INNER_W := 64
+const INNER_H := 40
 const BORDER_X := 14
 const BORDER_Y := 8
 const MAP_W := INNER_W + BORDER_X * 2
@@ -27,7 +27,7 @@ const HOUSE_IX := FarmLayout.HOUSE_IX
 const HOUSE_IY := FarmLayout.HOUSE_IY
 const HOUSE_W := FarmLayout.HOUSE_W
 const HOUSE_H := FarmLayout.HOUSE_H
-const HOUSE_DOOR_IX := HOUSE_IX + 2
+const HOUSE_DOOR_IX := HOUSE_IX + HOUSE_W / 2
 const HOUSE_DOOR_IY := HOUSE_IY + HOUSE_H - 1
 
 # The first plot is open from the start. The second is overgrown until Farming 2.
@@ -184,7 +184,8 @@ const WARMTH_INDOORS := 25.0     # warmth regained per hour in a patched or rest
 const WARMTH_INDOORS_COLD := 10.0  # ... and in a decrepit or boarded one
 const NEED_HARM_HOURS := 2.0     # one HP lost every this many hours while a need is empty
 const POND_WATER := 40.0
-const WELL_IX := FarmLayout.WELL_IX
+const WELL_IX := FarmLayout.WELL_IX   # the top-left tile of the well's footprint
+const WELL_TILES := 2
 const WELL_CAPACITY := 40.0           # water in the tank when it refills each morning
 const DRINK_WELL := 35.0
 const WELL_REPAIR := {"wood": 4, "fiber": 3, "level": 2}
@@ -908,6 +909,8 @@ var house_roof_drawn_stage := -1  # the house stage the layer last drew
 var stall_layer: Node2D  # the market stall's art; over the player while they are north of its footprint
 var well_layer: Node2D  # the well's art; over the player while they are north of its footprint
 var big_tree_layer: Node2D  # the great tree's art; drawn over the player north of its base, under it south of it
+var tree_front_layer: Node2D  # trees standing south of the player's row, drawn over the player
+var tree_view := Rect2i()     # the tile range the farm was last drawn over, for tree_front_layer
 var camera: Camera2D
 # Full-screen fade for sleeping and collapsing. While a scene plays the world is frozen.
 var transitioning := false
@@ -1282,7 +1285,11 @@ func _draw() -> void:
 			for x in range(fx0, fx1 + 1):
 				_draw_flat_tile(Vector2i(x, y))
 		if FARM_SPRITES:
-			_draw_farm_props()
+			_draw_dual_ground(fx0, fy0, fx1, fy1)
+			tree_view = Rect2i(fx0, fy0, fx1 - fx0 + 1, fy1 - fy0 + 1)
+			_draw_trees(self, false)
+			if tree_front_layer != null:
+				tree_front_layer.queue_redraw()
 	# Pass one: the ground, with small details. Pass two: shadows, which fall on the ground only.
 	# Pass three: trees and buildings, drawn over both.
 	for y in range(fy0, fy1 + 1):
@@ -1318,7 +1325,8 @@ func _draw() -> void:
 			elif tile == Tile.BARN:
 				FarmArt.draw_gable_tile(self, cell, Vector2i(x, y) - barn_tile, _footprint("barn"), BARN_ROOF, BARN_WALL, "barn")
 			elif tile == Tile.WELL:
-				FarmArt.draw_well(self, cell, well_repaired)
+				if Vector2i(x, y) == _world_tile(WELL_IX.x, WELL_IX.y):
+					FarmArt.draw_well(self, _well_cell(), well_repaired)
 			elif tile == Tile.CELLAR:
 				FarmArt.draw_cellar(self, cell)
 			elif tile == Tile.SMOKEHOUSE:
@@ -1369,7 +1377,10 @@ func _draw() -> void:
 		var stage: int = crop["stage"]
 		var center := _tile_center(pos.x, pos.y)
 		var watered_now := int(crop.get("watered_day", 0)) == day
-		FarmArt.draw_crop(self, center, PX, str(crop["kind"]), stage, watered_now)
+		if FARM_SPRITES:
+			_draw_crop_sprite(_tile_rect(pos), str(crop["kind"]), stage, watered_now)
+		else:
+			FarmArt.draw_crop(self, center, PX, str(crop["kind"]), stage, watered_now)
 
 	for pos in rocks:
 		FarmArt.draw_rock(self, _tile_center(pos.x, pos.y), PX * 0.3, FarmArt.hash_int(pos.x, pos.y, 4))
@@ -1795,6 +1806,10 @@ func _build_world() -> void:
 	big_tree_layer = Node2D.new()
 	big_tree_layer.draw.connect(_draw_big_tree_layer)
 	add_child(big_tree_layer)
+	tree_front_layer = Node2D.new()
+	tree_front_layer.z_index = 1
+	tree_front_layer.draw.connect(func() -> void: _draw_trees(tree_front_layer, true))
+	add_child(tree_front_layer)
 
 	player = Node2D.new()
 	player.set_script(load("res://scripts/player.gd"))
@@ -1832,13 +1847,22 @@ func _glow_texture() -> GradientTexture2D:
 # One warm light for each window, and a lamp by the door. They come on at dusk once the house has glass.
 func _build_window_lights() -> void:
 	var house := Rect2(Vector2(_world_tile(HOUSE_IX, HOUSE_IY)) * PX, Vector2(HOUSE_W, HOUSE_H) * PX)
+	var centres: Array = []
+	if FARM_SPRITES:
+		# The sprite's two front windows, measured from house_stage_0.png, in tiles from the sprite's top-left.
+		var sprite_origin := house.position + Vector2(HOUSE_SPRITE_OFFSET_X * PX, 0)
+		for c in HOUSE_SPRITE_WINDOWS:
+			centres.append(sprite_origin + (c as Vector2) * PX)
+	else:
+		for w in FarmArt.window_rects(house):
+			centres.append((w as Rect2).get_center())
 	var texture := _glow_texture()
-	for w in FarmArt.window_rects(house):
+	for c in centres:
 		var light := PointLight2D.new()
 		light.texture = texture
 		light.color = Color("ffc878")
 		light.texture_scale = 0.9
-		light.position = w.get_center()
+		light.position = c
 		light.enabled = false
 		add_child(light)
 		window_lights.append(light)
@@ -2147,106 +2171,111 @@ func _draw_flat_tile(t: Vector2i) -> void:
 
 
 # Sprite ground. Returns false for tiles without art, which then take the flat colour.
+# Grass is drawn under every ground tile; water, fallow, soil and path are laid over it by _draw_dual_ground.
 func _draw_sprite_ground(t: Vector2i, kind: int, cell: Rect2) -> bool:
 	var v := FarmSprites.variant(t.x, t.y, 3)
 	var name := ""
 	match kind:
-		Tile.GRASS:
-			name = "grass_%d" % v
-		Tile.SOIL, Tile.FALLOW, Tile.PATH, Tile.WATER:
-			name = _material_name(t, kind, v)
+		Tile.GRASS, Tile.SOIL, Tile.FALLOW, Tile.PATH, Tile.WATER:
+			_draw_grass(t, cell)
+			return true
 		Tile.ROCK:
 			name = "rock_%d" % v
 		Tile.CAVE_MOUTH:
 			name = "cave_mouth"
-		Tile.HOUSE, Tile.DOOR:
-			# The house is one sprite, drawn by house_roof_layer over its footprint, so its tiles are grass.
-			name = "grass_%d" % v
-		Tile.PORCH:
-			# The entrance is path, so the path runs up to the steps.
-			name = "path_%d" % v
-		Tile.ROOF:
-			name = "grass_%d" % v
+		Tile.HOUSE, Tile.DOOR, Tile.ROOF, Tile.PORCH, Tile.STALL, Tile.WELL:
+			# The house, stall and well are sprites drawn over their footprints, and the porch is path laid over
+			# grass by _draw_dual_ground, so all of these start as grass.
+			_draw_grass(t, cell)
+			return true
 		Tile.TREE:
-			# The great tree's base sits on grass; its art is drawn over it. Grove trees are drawn as props.
-			if not _in_big_tree(t):
-				return false
-			name = "grass_%d" % v
-		Tile.STALL, Tile.WELL:
-			# The stall and well are drawn as props over grass, not as flat colour blocks.
-			name = "grass_%d" % v
+			# Every tree stands on grass; the trees and the great tree are drawn over it by _draw_trees.
+			_draw_grass(t, cell)
+			return true
 		_:
 			return false
-	# Interior tiles repeat, so each one is mirrored by its position to break up the pattern.
-	# Edge pieces are never mirrored: their open sides would move.
-	var flip_x := false
-	var flip_y := false
-	if not name.contains("_edge_") and not name.contains("_shore_") and not name.contains("_inner_") and not name.begins_with("grass"):
-		var bits := FarmSprites.variant(t.x, t.y, 4)
-		flip_x = (bits & 1) == 1
-		flip_y = (bits & 2) == 2
-	draw_texture_rect(FarmSprites.tex_flipped(name, flip_x, flip_y), cell, false)
+	# Rocks repeat, so each one is mirrored by its position to break up the pattern.
+	var bits := FarmSprites.variant(t.x, t.y, 4)
+	draw_texture_rect(FarmSprites.tex_flipped(name, (bits & 1) == 1, (bits & 2) == 2), cell, false)
 	return true
 
 
-# Which side or corner of a path or water tile faces the other material. Returns [name, flip] or [].
-# The art name for a tile of a shore or edge material, from which neighbours are a different material.
-# Water sits against anything that is not water. Path also ignores water, so the water shore is what shows.
-# Soil and fallow sit against any neighbour that is not the same material.
-# Sides are n, e, s, w; a side set picks the piece of that name, and a lone diagonal picks the inner piece.
-func _material_name(t: Vector2i, kind: int, v: int) -> String:
-	var edge_prefix: String = {Tile.WATER: "water_shore", Tile.PATH: "path_edge", Tile.SOIL: "soil_edge", Tile.FALLOW: "fallow_edge"}[kind]
-	var inner_prefix: String = {Tile.WATER: "water_inner", Tile.PATH: "path_inner", Tile.SOIL: "soil_inner", Tile.FALLOW: "fallow_inner"}[kind]
-	var base: String = {Tile.WATER: "water", Tile.PATH: "path", Tile.SOIL: "soil", Tile.FALLOW: "fallow"}[kind]
-	var outside := func(d: Vector2i) -> bool:
-		var n := t + d
-		if n.x < 0 or n.y < 0 or n.x >= MAP_W or n.y >= MAP_H:
-			return false
-		var k: int = map[n.y][n.x]
-		match kind:
-			Tile.WATER:
-				return k != Tile.WATER
-			Tile.PATH:
-				return k != Tile.PATH and k != Tile.WATER and k != Tile.PORCH
-		return k != kind
-	var mask := 0
-	if outside.call(Vector2i(0, -1)):
-		mask |= 1  # n
-	if outside.call(Vector2i(1, 0)):
-		mask |= 2  # e
-	if outside.call(Vector2i(0, 1)):
-		mask |= 4  # s
-	if outside.call(Vector2i(-1, 0)):
-		mask |= 8  # w
-	if mask == 0:
-		var diag := ""
-		if outside.call(Vector2i(1, -1)):
-			diag = "ne"
-		elif outside.call(Vector2i(1, 1)):
-			diag = "se"
-		elif outside.call(Vector2i(-1, 1)):
-			diag = "sw"
-		elif outside.call(Vector2i(-1, -1)):
-			diag = "nw"
-		if diag != "":
-			return "%s_%s" % [inner_prefix, diag]
-		return "%s_%d" % [base, v]
-	return "%s_%s" % [edge_prefix, SHORE_SUFFIX[mask]]
+# Ground art: SpriteCook 15-piece dual-grid tilesets, 4 by 4 frames of 16 pixels in art/farm/ground_*.png.
+# Grass is the filled frame of its set, mirrored by position so the repeat is less obvious.
+const GROUND_FRAME := 16
+const GROUND_FILLED_FRAME := 6
+# Frame in the 4 by 4 atlas for each corner mask (top-left 1, top-right 2, bottom-left 4, bottom-right 8).
+const DUAL_FRAME_BY_MASK := [-1, 15, 8, 9, 0, 11, 14, 7, 13, 4, 1, 10, 3, 2, 5, 6]
+# Layers laid over the grass, bottom first, and the map tiles that count as each. The path goes last, so the
+# dock and the porch sit over the pond's shore and the plots' edges.
+const DUAL_LAYERS := [
+	["water", [Tile.WATER]],
+	["fallow", [Tile.FALLOW]],
+	["soil", [Tile.SOIL]],
+	["path", [Tile.PATH, Tile.PORCH]],
+]
 
 
-# Edge piece suffix by side mask (n=1, e=2, s=4, w=8).
-const SHORE_SUFFIX := {
-	1: "n", 2: "e", 4: "s", 8: "w",
-	3: "ne", 6: "se", 12: "sw", 9: "nw",
-	5: "ns", 10: "ew",
-	7: "nes", 13: "nsw", 11: "new", 14: "esw",
-	15: "all",
-}
+func _ground_frame_rect(frame: int) -> Rect2:
+	return Rect2((frame % 4) * GROUND_FRAME, (frame / 4) * GROUND_FRAME, GROUND_FRAME, GROUND_FRAME)
+
+
+func _draw_grass(t: Vector2i, cell: Rect2) -> void:
+	var bits := FarmSprites.variant(t.x, t.y, 4)
+	var tex := FarmSprites.tex_flipped("ground_grass", (bits & 1) == 1, (bits & 2) == 2)
+	# A mirrored atlas moves the filled frame; mirror its position to match.
+	var src := _ground_frame_rect(GROUND_FILLED_FRAME)
+	if (bits & 1) == 1:
+		src.position.x = tex.get_width() - src.end.x
+	if (bits & 2) == 2:
+		src.position.y = tex.get_height() - src.end.y
+	draw_texture_rect_region(tex, cell, src)
+
+
+# Each layer is drawn on the dual grid: a tile sits on every corner where four map tiles meet, half a tile
+# up and left of the map tile at (x, y), and its frame comes from which of those four tiles are the layer's.
+func _draw_dual_ground(fx0: int, fy0: int, fx1: int, fy1: int) -> void:
+	for layer in DUAL_LAYERS:
+		var tex := FarmSprites.tex("ground_%s" % layer[0])
+		var kinds: Array = layer[1]
+		for y in range(fy0, fy1 + 2):
+			for x in range(fx0, fx1 + 2):
+				var mask := 0
+				if _tile_is(x - 1, y - 1, kinds):
+					mask |= 1
+				if _tile_is(x, y - 1, kinds):
+					mask |= 2
+				if _tile_is(x - 1, y, kinds):
+					mask |= 4
+				if _tile_is(x, y, kinds):
+					mask |= 8
+				var frame: int = DUAL_FRAME_BY_MASK[mask]
+				if frame < 0:
+					continue
+				var dest := Rect2((Vector2(x, y) - Vector2(0.5, 0.5)) * PX, Vector2(PX, PX))
+				draw_texture_rect_region(tex, dest, _ground_frame_rect(frame))
+
+
+# Crop art: art/farm/crop_<kind>.png is a strip of four 16-pixel frames, one per stage from sprout to ripe.
+# Watered soil is darkened under the plant.
+const CROP_FRAME := 16
+const WATERED_SOIL := Color(0.08, 0.05, 0.03, 0.32)
+
+
+func _draw_crop_sprite(cell: Rect2, kind: String, stage: int, watered: bool) -> void:
+	if watered:
+		draw_rect(cell, WATERED_SOIL)
+	var frame := clampi(stage, 0, MAX_STAGE)
+	draw_texture_rect_region(FarmSprites.tex("crop_%s" % kind), cell, Rect2(frame * CROP_FRAME, 0, CROP_FRAME, CROP_FRAME))
+
+
+func _tile_is(x: int, y: int, kinds: Array) -> bool:
+	return x >= 0 and y >= 0 and x < MAP_W and y < MAP_H and kinds.has(map[y][x])
 
 
 # The great tree's art is larger than its 3 by 3 base. The base blocks movement; the art above it does not.
 # BIG_TREE_ART_TILES is the art's size in tiles, and its bottom centre sits on the base's bottom centre.
-const BIG_TREE_ART_TILES := 9.0
+const BIG_TREE_ART_TILES := 8.0
 
 
 func _big_tree_base_bottom() -> Vector2:
@@ -2281,12 +2310,15 @@ func _find_house_roof_bottom() -> int:
 
 
 # The house is one sprite over its footprint: the roof and walls, the door, the porch and the steps.
-# Its footprint is six tiles wide and seven tall, from the top of the roof down to the steps.
-const HOUSE_SPRITE_TILES := Vector2i(6, 7)
-# Shifts the house sprite across, in tiles, from the roof's top-left tile. -0.5 centres the steps on the entrance tile.
+# The sprite is twelve tiles wide and ten tall (192×160 art at 3×), from the chimney down to the steps.
+const HOUSE_SPRITE_TILES := Vector2i(12, 10)
+# Shifts the house sprite across, in tiles, from the roof's top-left tile. The door and steps are centred at
+# 96 of 192 art pixels, so -0.5 puts them on the door tile, the middle of the eleven-tile footprint.
 const HOUSE_SPRITE_OFFSET_X := -0.5
-# Where the sprite's walls end, in tiles from the sprite's top (measured from house_stage_0.png: 5.88 of 7).
-const HOUSE_WALL_BOTTOM_TILES := 5.88
+# Where the sprite's walls end, in tiles from the sprite's top (measured from house_stage_0.png: 149 of 160 pixels).
+const HOUSE_WALL_BOTTOM_TILES := 9.3125
+# The centres of the sprite's two front windows, in tiles from its top-left (art pixels 48,112 and 143,112).
+const HOUSE_SPRITE_WINDOWS := [Vector2(3.0, 7.0), Vector2(8.94, 7.0)]
 
 
 func _draw_house_roof_layer() -> void:
@@ -2330,7 +2362,9 @@ func _stall_cell() -> Rect2:
 
 
 func _well_cell() -> Rect2:
-	return _tile_rect(_world_tile(WELL_IX.x, WELL_IX.y))
+	var r := _tile_rect(_world_tile(WELL_IX.x, WELL_IX.y))
+	r.size *= WELL_TILES
+	return r
 
 
 # The stall covers 2 by 2 tiles and its art is drawn larger, centred on the footprint and standing on its bottom edge.
@@ -2340,10 +2374,11 @@ func _draw_stall_layer() -> void:
 	stall_layer.draw_texture_rect(FarmSprites.tex("prop_stall"), Rect2(cell.get_center().x - stall_size * 0.5, cell.end.y - stall_size, stall_size, stall_size), false)
 
 
-# The well covers one tile; its art stands 1.5 tiles wide and 1.9 tiles tall on that tile's bottom edge.
+# The well covers WELL_TILES by WELL_TILES tiles; its art (32×48 at 3×) stands on the footprint's bottom edge,
+# with the roof rising a tile above it.
 func _draw_well_layer() -> void:
 	var cell := _well_cell()
-	well_layer.draw_texture_rect(FarmSprites.tex("prop_well"), Rect2(cell.get_center().x - PX * 0.75, cell.end.y - PX * 1.9, PX * 1.5, PX * 1.9), false)
+	well_layer.draw_texture_rect(FarmSprites.tex("prop_well"), Rect2(cell.position.x, cell.end.y - PX * 3.0, PX * 2.0, PX * 3.0), false)
 
 
 func _update_big_tree_depth() -> void:
@@ -2362,17 +2397,52 @@ func _draw_big_tree_layer() -> void:
 	big_tree_layer.draw_texture_rect(FarmSprites.tex("prop_great_tree"), Rect2(bottom.x - size * 0.5, bottom.y - size, size, size), false)
 
 
-# Trees, the stall, the well and stumps, drawn after the ground so their bases sit on their tiles.
-func _draw_farm_props() -> void:
-	for y in range(0, MAP_H):
-		for x in range(0, MAP_W):
+# Tree art: 32×48 sprites, two tiles wide and three tall, standing on the bottom centre of their tile.
+# Grove trees are mostly oaks, the forest border mostly firs, with a few dead trees in both; willows grow
+# where the layout puts them by the pond. Each tree is nudged a little by its position so the forest's
+# rows don't line up.
+const TREE_KINDS := {"oak": 3, "fir": 3, "willow": 2, "dead": 2}
+
+
+func _tree_art(t: Vector2i) -> String:
+	var ix := t - Vector2i(BORDER_X, BORDER_Y)
+	var inside := ix.x >= 0 and ix.y >= 0 and ix.x < INNER_W and ix.y < INNER_H
+	# Out of 12: one dead tree, then firs (4 inside the farm, 7 in the forest border), the rest oaks.
+	var roll := FarmArt.hash_int(t.x, t.y, 17) % 12
+	var kind := "oak"
+	if WILLOW_TREES.has(ix):
+		kind = "willow"
+	elif DEAD_TREES.has(ix) or roll == 0:
+		kind = "dead"
+	elif roll <= (4 if inside else 7):
+		kind = "fir"
+	return "tree_%s_%d" % [kind, FarmArt.hash_int(t.x, t.y, 19) % int(TREE_KINDS[kind])]
+
+
+# Trees and stumps, drawn after the ground so their bases sit on their tiles. A tree's crown rises two tiles
+# above its tile, so rows below the view are drawn too. Trees on or north of the player's row are drawn
+# with the ground, behind the player; the rest go on tree_front_layer, over the player.
+func _draw_trees(ci: CanvasItem, front: bool) -> void:
+	if player == null or tree_view.size == Vector2i.ZERO:
+		return
+	var player_row := floori(player.position.y / PX)
+	var x0 := maxi(tree_view.position.x - 1, 0)
+	var x1 := mini(tree_view.end.x, MAP_W - 1)
+	var y0 := tree_view.position.y
+	var y1 := mini(tree_view.end.y + 2, MAP_H - 1)
+	for y in range(y0, y1 + 1):
+		# Stumps lie flat, so they are always drawn with the ground, whichever side of them the player is.
+		var trees_here := (y > player_row) == front
+		for x in range(x0, x1 + 1):
 			var t := Vector2i(x, y)
 			var kind: int = map[y][x]
+			var cell := _tile_rect(t)
 			if kind == Tile.TREE and not _in_big_tree(t):
-				var cell := _tile_rect(t)
-				draw_texture_rect(FarmSprites.tex("prop_grove_tree"), Rect2(cell.position.x, cell.end.y - PX * 1.44, PX, PX * 1.44), false)
-			elif kind == Tile.GRASS and grove_felled.has(t):
-				draw_texture_rect(FarmSprites.tex("prop_stump"), _tile_rect(t), false)
+				if trees_here:
+					var nudge := float(FarmArt.hash_int(x, y, 13) % 7 - 3) * SCALE
+					ci.draw_texture_rect(FarmSprites.tex(_tree_art(t)), Rect2(cell.get_center().x - PX + nudge, cell.end.y - PX * 3.0, PX * 2.0, PX * 3.0), false)
+			elif kind == Tile.GRASS and grove_felled.has(t) and not front:
+				ci.draw_texture_rect(FarmSprites.tex("prop_stump"), cell, false)
 
 
 func _is_fence(t: Vector2i) -> bool:

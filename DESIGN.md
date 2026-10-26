@@ -36,7 +36,7 @@ A top-down farming game with heavy psychological horror, built in Godot 4.7.
 ## Action bar
 
 - Messages sit at the bottom-left of the screen, clear of the farm's labels. HUD and message text have a dark outline so they read over any ground.
-- Trees are drawn as canopies of overlapping crowns, so the outer forest reads as dense woodland. Trees block movement. The farm's trees are darker and greyer, with moss hanging from the crowns.
+- Trees are SpriteCook sprites (`art/farm/tree_*.png`), 32×48: two tiles wide and three tall, standing on the bottom centre of their tile. Kinds are autumn oaks, Douglas firs, willows and dead trees, picked by a hash of the tile. The forest border is mostly firs with oaks mixed in; the grove inside the farm is mostly oaks. Out of every twelve trees, one is dead. Willows grow where the layout lists them, by the pond. Each tree is nudged a few pixels by its position, and border trees overlap, so the outer forest reads as dense woodland. Trees block movement. Trees on or north of the player's row are drawn with the ground, behind the player; those south of it are drawn over the player (`tree_front_layer`). A felled grove tree leaves a stump.
 - **The great tree** is a 3 by 3 block of trees in the middle of the yard. It can't be felled, and the game says so when you face it. The crows roost in its crown from 20:00 and leave at dawn. Their eyes glow red, and each roost perch has a faint red light while a crow sits there.
 - Rocks on the farm, and quarry rocks in the village, block movement like trees. You can still break a rock from the tile next to it.
 - Storage labels (Cellar, Smoke, Furnace) stay on screen when their building is at the view's edge.
@@ -53,7 +53,7 @@ A top-down farming game with heavy psychological horror, built in Godot 4.7.
 
 ## Art
 
-The farmer is a SpriteCook sprite (`art/player/`): a 16×32 figure in a straw hat, rust shirt and blue overalls, with 8-frame idles and walks facing down, up and right. Facing left mirrors the right-facing sheets. The held tool is still drawn in code over the sprite until tool animations are made, and the appearance choices don't recolour the sprite yet. If the sheets are missing, the code-drawn farmer below is used. The code-drawn farmer has a straw hat with a band, a shirt under blue overalls with straps and a buckle, and boots. The face turns with the facing direction: eyes and a mouth when facing you, one eye to the side, and hair only from behind. While walking, the legs and arms swing in opposition and the body bobs with each step. A small marker in front shows what you'll interact with.
+The farmer is a SpriteCook sprite (`art/player/`): a 16×32 figure in a straw hat, rust shirt and blue overalls, with 8-frame idles and walks facing down, up and right. Facing left mirrors the right-facing sheets. The idle facing away is one SpriteCook frame held still with a one-pixel breathing bob on the head and shoulders, because the generated back idles kept stepping in place. Tool actions have their own SpriteCook sheets, `farmer_<action>_<down|up|right>.png`, for the hoe, hose, axe, pickaxe, trowel, sword and casting: each plays across its action, and chop and mine loop with their cycle from frame 2 (the first two frames are the empty-handed idle). Waiting for a bite holds the cast's last frame, with a line drawn from the rod's tip to a bobber. The tool only shows while it is being used. A raised sword guard and firing a bow have no sheets yet, so those still draw the held tool in code over the sprite. The appearance choices don't recolour the sprite yet. If the sheets are missing, the code-drawn farmer below is used. The code-drawn farmer has a straw hat with a band, a shirt under blue overalls with straps and a buckle, and boots. The face turns with the facing direction: eyes and a mouth when facing you, one eye to the side, and hair only from behind. While walking, the legs and arms swing in opposition and the body bobs with each step. A small marker in front shows what you'll interact with.
 
 - 16×16 base tiles, scaled 3× in-game (`SCALE = 3`), nearest-neighbor filtering.
 - Warm, saturated daytime palette. Night uses a cool, shadowy tint via `CanvasModulate`.
@@ -64,7 +64,7 @@ The farmer is a SpriteCook sprite (`art/player/`): a 16×32 figure in a straw ha
 All sprites are being remade in SpriteCook in one style. The older ChatGPT art in `art/farm/` is replaced piece by piece.
 
 - **Chunky 16px pixel art.** Every sprite is drawn at 16 pixels per tile and shown at 3×. Never resample a sprite to fit: one art pixel is always three screen pixels.
-- **Sizes are whole tiles.** A tile is 16×16. Characters are 16 wide and 32 tall (two tiles). Buildings and props are multiples of 16 where they can be, such as the farmhouse at 48×64.
+- **Sizes are whole tiles.** A tile is 16×16. Characters are 16 wide and 32 tall (two tiles). Buildings and props are multiples of 16 where they can be, such as the farmhouse at 192×160 (12×10 tiles) and the well at 32×48 (2×3 tiles).
 - **Straight-on top-down 3/4 view**, like Stardew Valley. Fronts face the camera. No angled or isometric views.
 - **Muted, desaturated palette** with a Pacific Northwest autumn feel: mossy greens, weathered browns, grey stone. Dark outlines on every sprite. The horror comes from lighting and the night tint, not from gore in the art.
 - **Style anchor:** `art/style_tests/house_chunky_b.png` (SpriteCook asset `f24bb014-3b8b-4d3c-9dde-a4a118c6d07d`). New sprites use it as a style reference.
@@ -72,7 +72,7 @@ All sprites are being remade in SpriteCook in one style. The older ChatGPT art i
 
 ## Map
 
-- A 40×24 walkable farm surrounded by a tree border, so the camera stays centered on the player all the way to the farm's edge.
+- A 64×40 walkable farm surrounded by a tree border, so the camera stays centered on the player all the way to the farm's edge.
 - Two plots: **Plot one** is tilled from the start. **Plot two** is overgrown and opens at Farming 2. A third fallow plot sits beside them and opens at Farming 4 once the house is Patched.
 - The layout comes from a diagram (see Code layout). Fences and rocks block movement; the dock, the island and the path are walkable.
 - Trees, water, the house walls, and brush piles block movement. The player slides along walls.
@@ -86,7 +86,7 @@ All sprites are being remade in SpriteCook in one style. The older ChatGPT art i
 - The bed can be used from **18:00 to 03:00**. Using it saves the game and ends the day.
 - If you aren't in bed by **03:00**, you collapse. The day ends, the game saves, and your **sanity limit drops by 5 permanently**. A cleanse can recover it (see Sanity).
 - Crops grow one watered day at a time: **turnips take 7 days** and **pumpkins take 10 days** from seed to ripe, with the four stages spread across those days. Brush piles respawn each morning. Thicket piles appear at Bushcrafting 3.
-- Rain (drizzle, rain, or downpour) waters every crop as soon as it starts that morning, and a crop planted on a rainy day is watered too. Watered crops show a sparkle and a faint sheen (there is no blue drop). Turnips and pumpkins each have four drawn stages: a sprout, leaves (pumpkins add a vine), a swelling fruit, and the ripe crop.
+- Rain (drizzle, rain, or downpour) waters every crop as soon as it starts that morning, and a crop planted on a rainy day is watered too. Watered crops show a sparkle and a faint sheen (there is no blue drop), and the soil under them is darker. Turnips and pumpkins each have four stages: a sprout, leaves (pumpkins add a vine), a swelling fruit, and the ripe crop. Each crop's stages are one SpriteCook strip, `art/farm/crop_<kind>.png`, four 16-pixel frames side by side, so the stages match.
 
 ## Calendar, seasons, and weather
 
@@ -568,17 +568,21 @@ Each class holds `var m: MainGame` and reads main's state through it. A member i
 
 ## Farm layout
 
-The farm is a hand-read grid. `tools/farm_grid.txt` holds one character per inner tile (40×24), read tile by tile from the layout diagram. `tools/hand_layout.py` reads that grid, derives the anchors (plots, house, porch, well, stall, great tree, grove spots) and writes `scripts/farm_layout.gd`. Regenerate with `python3 tools/hand_layout.py`; edit the grid, not the generated file.
+The farm is a hand-read grid. `tools/farm_grid.txt` holds one character per inner tile (64×40). It was first read tile by tile from the layout diagram at 40×24, then spread out to 64×40 by the one-off `tools/grow_farm.py` when the farmer became a full-tile sprite. `tools/hand_layout.py` reads that grid, derives the anchors (plots, house, porch, well, stall, great tree, grove spots) and writes `scripts/farm_layout.gd`. Regenerate with `python3 tools/hand_layout.py`; edit the grid, not the generated file.
 
-- Terrain codes are listed in the header of `scripts/farm_layout.gd`. The roof (`O`) is a separate tile from the house body (`H`), so the two can differ in colour. The roof is walkable: the player walks over it, the walls and door block. The roof art is drawn in its own layer, over the player while they are north of the walls and under them on the walls, the same rule as the great tree's canopy. The stall is 2×2. The well is one tile.
+- Terrain codes are listed in the header of `scripts/farm_layout.gd`. The roof (`O`) is a separate tile from the house body (`H`), so the two can differ in colour. The roof is walkable: the player walks over it, the walls and door block. The roof art is drawn in its own layer, over the player while they are north of the walls and under them on the walls, the same rule as the great tree's canopy. The stall is 2×2. The well is 2×2; `WELL_IX` is its top-left tile.
+- The farmhouse footprint is 11 tiles wide: five rows of roof, then two of wall with the door in the middle of the bottom row, and the porch below the door. Its sprite is 12 tiles wide and 10 tall, shifted half a tile so the steps sit on the door tile. The door is a little taller than the farmer, so the house reads at the farmer's scale. Each repair stage is a SpriteCook edit of the ruined house (`gemini-3-pro-image`, since the exact-size model stops at 128 pixels), placed on the same 192×160 canvas with the door and steps lined up. The Boarded stage came out about 11 pixels narrower; it is centred on the door.
+- The plots are 15×7 (plot one), 15×6 (plot two) and 12×6 (plot three).
 - The layout has no fences. The reference image removed them, and the grid has no `X` tiles.
-- The great tree's base is a 3 by 3 block. Its middle and bottom rows (`B`) block movement; its top row (`b`) is walkable grass. Its art is drawn larger than that base, 9 by 9 tiles, with the base at the bottom centre. The art above the base does not block. The player walks behind the canopy when north of the base, and in front of the base when south of it (`_update_big_tree_depth` in `main.gd`).
+- The great tree's base is a 3 by 3 block. Its middle and bottom rows (`B`) block movement; its top row (`b`) is walkable grass. Its art (a SpriteCook sprite, 128×128) is drawn larger than that base, 8 by 8 tiles, with the base at the bottom centre. The art above the base does not block. The player walks behind the canopy when north of the base, and in front of the base when south of it (`_update_big_tree_depth` in `main.gd`).
 - Plot one and plot two are soil (brown in the diagram); plot three is fallow (olive).
 - The grove keeps twelve trees. The thirteenth tree in the diagram, at the top-left of the field, is dropped.
 - The workshop, furnace, smokehouse, woodshed, chopping log and cellar are not drawn. Their spots are open grass, listed as reserved, so a coop or barn is never placed on them.
 - Rocks and brush spots are kept only where they still sit on open grass.
 
-Farm art. `art/farm/` holds the pixel art cut from the tileset sheet: 16-pixel tiles at native size, and props with transparent backgrounds. `FARM_SPRITES` in `main.gd` switches the farm from the flat view to this art. `scripts/farm_sprites.gd` loads it, and edge pieces are chosen from neighbouring tiles. Path and water edges are picked by which side faces the other material; the sheet has no piece for land to the north of water or grass to the south of a path, so those use a flipped copy. Tiles without art (coop, barn, workshop and other unlocked buildings, decorations) keep the flat colour until they get their own art.
+Farm art. `art/farm/` holds the farm's pixel art: 16-pixel tiles at native size, and props with transparent backgrounds. `FARM_SPRITES` in `main.gd` switches the farm from the flat view to this art, and `scripts/farm_sprites.gd` loads it. Tiles without art (coop, barn, workshop and other unlocked buildings, decorations) keep the flat colour until they get their own art.
+
+The ground is five SpriteCook 15-piece dual-grid tilesets, `art/farm/ground_*.png`, each a 4 by 4 atlas of 16-pixel frames. Grass is drawn under every ground tile, using the filled frame of its set, mirrored by position. Water, fallow, soil and path (the porch counts as path) are laid over it in that order, each on the dual grid: a frame sits on every corner where four map tiles meet, half a tile up and left of a map tile, chosen by which of the four tiles are that material (`_draw_dual_ground` in `main.gd`). Edges, corners, inner corners and one-tile paths all come from the same 15 frames, and the path goes last so the dock and porch cross the shore and the plot edges.
 
 The older `tools/farm_layout.py` converter sampled the diagram by colour. It produced too many misreads and is no longer the source of the layout.
 

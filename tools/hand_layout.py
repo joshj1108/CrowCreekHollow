@@ -13,12 +13,12 @@ sys.path.insert(0, HERE)
 import farm_layout as fl  # noqa: E402  (reuses the emitter)
 
 ROOT = os.path.dirname(HERE)
-RESERVED = [(10, 5)] + [(c, r) for r in range(19, 23) for c in range(25, 30)]
-CELLAR = (10, 5)
+INNER_W, INNER_H = 64, 40
+WORKSHOP = (40, 32, 5, 4)
 OLD_SPOTS = {
-    "brush": [(30, 12), (12, 1), (18, 18), (38, 15), (26, 1), (22, 3), (27, 14)],
-    "thicket": [(29, 19), (26, 21), (7, 4)],
-    "rocks": [(35, 17), (19, 5), (21, 11), (1, 1), (38, 10), (16, 1), (15, 22), (36, 12)],
+    "brush": [(48, 20), (19, 2), (29, 30), (61, 25), (42, 2), (35, 5), (43, 23)],
+    "thicket": [(11, 7)],
+    "rocks": [(56, 28), (31, 7), (34, 18), (2, 2), (61, 17), (26, 2), (24, 37), (58, 20)],
 }
 
 
@@ -50,22 +50,26 @@ def find(grid, code):
 
 
 def build(grid):
-    assert len(grid) == 24 and all(len(row) == 40 for row in grid), "grid must be 24 rows of 40"
-    plots = sorted(components(grid, "S") + components(grid, "F"), key=lambda p: (rect_of(p)[1], rect_of(p)[0]))
+    assert len(grid) == INNER_H and all(len(row) == INNER_W for row in grid), "grid must be %d rows of %d" % (INNER_H, INNER_W)
     fallow = components(grid, "F")
     fallow.sort(key=lambda p: (rect_of(p)[1], rect_of(p)[0]))
     soil = sorted(components(grid, "S"), key=lambda p: rect_of(p)[1])
     plot_one = rect_of(soil[0])
     plot_two = rect_of(soil[1])
-    plot_three = next(rect_of(p) for p in fallow if rect_of(p)[1] < 17)
+    plot_three = rect_of(fallow[0])
     house = rect_of(find(grid, "H") + find(grid, "O"))  # roof and body together
     porch = find(grid, "R")[0]
-    well = find(grid, "W")[0]
+    well = min(find(grid, "W"))  # the well's top-left tile; it covers 2 by 2
     stall = find(grid, "A")[0]
     big = rect_of(find(grid, "B") + find(grid, "b"))  # the 3 by 3 footprint, including its walkable top row
     groves = find(grid, "G")
+    water = find(grid, "~")
+    # The cellar stands two tiles west of the house, two rows down from the roof's top.
+    cellar = (house[0] - 2, house[1] + 2)
+    wx, wy, ww, wh = WORKSHOP
+    reserved = sorted([cellar] + [(c, r) for r in range(wy, wy + wh) for c in range(wx, wx + ww)])
     grass = lambda p: grid[p[1]][p[0]] == "."  # noqa: E731
-    free = lambda p: grass(p) and p not in RESERVED  # noqa: E731
+    free = lambda p: grass(p) and p not in reserved  # noqa: E731
     d = {
         "terrain": grid,
         "plot_one": plot_one,
@@ -75,16 +79,17 @@ def build(grid):
         "porch": (porch[0], porch[1], 1, 1),
         "well": well,
         "stall": stall,
-        "cellar": CELLAR,
-        "workshop": (25, 19, 5, 4),
+        "cellar": cellar,
+        "workshop": WORKSHOP,
         "big_inner": (big[0], big[1]),
-        "lake_focus": (32.6, 5.6),
+        "lake_focus": (sum(p[0] for p in water) / len(water), sum(p[1] for p in water) / len(water)),
         "groves": groves,
-        "willows": [p for p in [(24, 4), (28, 11), (32, 13)] if p in groves],
+        # Willows are the grove trees within two tiles of the water.
+        "willows": [g for g in groves if any(abs(g[0] - w[0]) <= 2 and abs(g[1] - w[1]) <= 2 for w in water)],
         "brush": [p for p in OLD_SPOTS["brush"] if free(p)],
         "thicket": [p for p in OLD_SPOTS["thicket"] if free(p)],
         "rocks": [p for p in OLD_SPOTS["rocks"] if free(p)],
-        "reserved": RESERVED,
+        "reserved": reserved,
     }
     return d
 

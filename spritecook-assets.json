@@ -1,21 +1,246 @@
 {
   "project_id": "2c65b72c-db5c-4139-8e53-c9648e700b42",
   "assets": {
-    "art/style_tests/house_chunky_a.png": { "asset_id": "907f94d2-de4f-47b8-a855-0188d4b4f7a0", "label": "Style test: farmhouse, chunky 16px" },
-    "art/style_tests/house_chunky_b.png": { "asset_id": "f24bb014-3b8b-4d3c-9dde-a4a118c6d07d", "label": "Style anchor: farmhouse, chunky 16px" },
-    "art/style_tests/house_detailed_a.png": { "asset_id": "8673b5d8-6caa-41af-abb1-d1e985792719", "label": "Style test: farmhouse, detailed (rejected)" },
-    "art/style_tests/house_detailed_b.png": { "asset_id": "ac05809b-abf5-440f-8a6f-ebff71304cc0", "label": "Style test: farmhouse, detailed (rejected)" },
-    "art/style_tests/farmer_1.png": { "asset_id": "6b145b7c-58df-457c-85ca-5227cc0fcc51", "label": "Farmer option 1" },
-    "art/style_tests/farmer_2.png": { "asset_id": "571fd0a3-1989-4ac3-935f-3eeabf20be04", "label": "Farmer option 2 (chosen)" },
-    "art/style_tests/farmer_3.png": { "asset_id": "3f7fcc05-f624-436f-96fd-91e5efc05537", "label": "Farmer option 3" },
-    "art/style_tests/farmer_4.png": { "asset_id": "12af734f-1a11-4a90-9c55-c9d06c0b5576", "label": "Farmer option 4" },
-    "art/player/farmer_base.png": { "asset_id": "571fd0a3-1989-4ac3-935f-3eeabf20be04", "label": "Farmer base (character_id for animations)" },
-    "art/player/farmer_idle.png": { "asset_id": "900db6a4-dc01-41b9-8e63-5c8e8d6c1dde", "label": "Farmer idle, 8 frames 36x36" },
-    "art/player/farmer_walk_down.png": { "asset_id": "e0dbd720-4aa5-4830-9419-244910036199", "label": "Farmer walk down, 8 frames 36x36" },
-    "art/player/farmer_walk_up.png": { "asset_id": "b21e405e-47c5-4320-a6a9-b557a08d565f", "label": "Farmer walk up, 8 frames 36x36" },
-    "art/player/farmer_walk_right.png": { "asset_id": "bd528606-9834-4d5f-83e8-6cd5b2849b4a", "label": "Farmer walk right, 8 frames 36x36" },
-    "art/player/farmer_idle_up.png": { "asset_id": "de2555af-027a-4e5a-b129-ae4c4fee98a4", "label": "Farmer idle facing away, 8 frames 36x36" },
-    "art/player/farmer_idle_right.png": { "asset_id": "e5c7b122-e347-4518-b652-c281bedb0ac2", "label": "Farmer idle facing right, 8 frames 36x36" }
+    "art/style_tests/house_chunky_a.png": {
+      "asset_id": "907f94d2-de4f-47b8-a855-0188d4b4f7a0",
+      "label": "Style test: farmhouse, chunky 16px"
+    },
+    "art/style_tests/house_chunky_b.png": {
+      "asset_id": "f24bb014-3b8b-4d3c-9dde-a4a118c6d07d",
+      "label": "Style anchor: farmhouse, chunky 16px"
+    },
+    "art/style_tests/house_detailed_a.png": {
+      "asset_id": "8673b5d8-6caa-41af-abb1-d1e985792719",
+      "label": "Style test: farmhouse, detailed (rejected)"
+    },
+    "art/style_tests/house_detailed_b.png": {
+      "asset_id": "ac05809b-abf5-440f-8a6f-ebff71304cc0",
+      "label": "Style test: farmhouse, detailed (rejected)"
+    },
+    "art/style_tests/farmer_1.png": {
+      "asset_id": "6b145b7c-58df-457c-85ca-5227cc0fcc51",
+      "label": "Farmer option 1"
+    },
+    "art/style_tests/farmer_2.png": {
+      "asset_id": "571fd0a3-1989-4ac3-935f-3eeabf20be04",
+      "label": "Farmer option 2 (chosen)"
+    },
+    "art/style_tests/farmer_3.png": {
+      "asset_id": "3f7fcc05-f624-436f-96fd-91e5efc05537",
+      "label": "Farmer option 3"
+    },
+    "art/style_tests/farmer_4.png": {
+      "asset_id": "12af734f-1a11-4a90-9c55-c9d06c0b5576",
+      "label": "Farmer option 4"
+    },
+    "art/player/farmer_base.png": {
+      "asset_id": "571fd0a3-1989-4ac3-935f-3eeabf20be04",
+      "label": "Farmer base (character_id for animations)"
+    },
+    "art/player/farmer_idle.png": {
+      "asset_id": "900db6a4-dc01-41b9-8e63-5c8e8d6c1dde",
+      "label": "Farmer idle, 8 frames 36x36"
+    },
+    "art/player/farmer_walk_down.png": {
+      "asset_id": "e0dbd720-4aa5-4830-9419-244910036199",
+      "label": "Farmer walk down, 8 frames 36x36"
+    },
+    "art/player/farmer_walk_up.png": {
+      "asset_id": "b21e405e-47c5-4320-a6a9-b557a08d565f",
+      "label": "Farmer walk up, 8 frames 36x36"
+    },
+    "art/player/farmer_walk_right.png": {
+      "asset_id": "bd528606-9834-4d5f-83e8-6cd5b2849b4a",
+      "label": "Farmer walk right, 8 frames 36x36"
+    },
+    "art/player/farmer_idle_up.png": {
+      "asset_id": "de2555af-027a-4e5a-b129-ae4c4fee98a4",
+      "label": "Farmer idle facing away: frame 4 of the SpriteCook idle held still, with a 1px breathing bob on rows 0-25 (feet never move). Original sheet kept at art/style_tests/farmer_idle_up_spritecook.png"
+    },
+    "art/player/farmer_idle_right.png": {
+      "asset_id": "e5c7b122-e347-4518-b652-c281bedb0ac2",
+      "label": "Farmer idle facing right, 8 frames 36x36"
+    },
+    "art/farm/house_stage_0.png": {
+      "asset_id": "6061f840-ecb5-4f4f-963e-add1326a4046",
+      "label": "Farmhouse A, ruined (stage 0), placed on 192x160"
+    },
+    "art/farm/house_stage_1.png": {
+      "asset_id": "bd149e6e-08d0-49c9-849d-b0541f50c085",
+      "label": "Farmhouse A, Boarded (stage 1), edit of stage 0, placed on 192x160"
+    },
+    "art/farm/house_stage_2.png": {
+      "asset_id": "05836ac2-191d-4a05-ab47-a31dd16e5697",
+      "label": "Farmhouse A, Patched (stage 2), edit of stage 0, placed on 192x160"
+    },
+    "art/farm/house_stage_3.png": {
+      "asset_id": "3c0da6d0-941c-4d1f-bb41-001c0d324617",
+      "label": "Farmhouse A, Restored (stage 3), edit of stage 0, placed on 192x160"
+    },
+    "art/farm/prop_well.png": {
+      "asset_id": "a7a2f893-504c-4ae4-aad8-90c39649f891",
+      "label": "Well, 32x48 on a 2x2 footprint"
+    },
+    "art/farm/ground_grass.png": {
+      "asset_id": "73ddf65c-33af-4583-b0e7-0edc34ad23af",
+      "label": "Grass, 15-piece dual-grid tileset 16px (filled frame used as the base)"
+    },
+    "art/farm/ground_path.png": {
+      "asset_id": "4851d24e-bf42-437a-8745-6cfe4c0c1c75",
+      "label": "Path, 15-piece dual-grid tileset 16px"
+    },
+    "art/farm/ground_soil.png": {
+      "asset_id": "86944857-38c8-434e-a4db-64a05b4413bb",
+      "label": "Tilled soil, 15-piece dual-grid tileset 16px"
+    },
+    "art/farm/ground_fallow.png": {
+      "asset_id": "dd12b71e-de0a-48a4-a060-5f870884f3c6",
+      "label": "Fallow ground, 15-piece dual-grid tileset 16px"
+    },
+    "art/farm/ground_water.png": {
+      "asset_id": "a9e26228-939c-42d4-baf9-2567f3a3760f",
+      "label": "Pond water with shore, 15-piece dual-grid tileset 16px"
+    },
+    "art/farm/tree_oak_0.png": {
+      "asset_id": "4644be77-9044-4e66-90c7-2779e7608f05",
+      "label": "Autumn oak 32x48"
+    },
+    "art/farm/tree_oak_1.png": {
+      "asset_id": "e21ebc10-1fcc-492a-a864-3f59084a59a3",
+      "label": "Autumn oak 32x48"
+    },
+    "art/farm/tree_oak_2.png": {
+      "asset_id": "a5ccd41b-40a4-4cf8-87ba-ce9f8f1fafb8",
+      "label": "Autumn oak 32x48"
+    },
+    "art/farm/tree_fir_0.png": {
+      "asset_id": "2052fb01-8a1b-4d30-b0a0-c5ccb3d65013",
+      "label": "Douglas fir 32x48"
+    },
+    "art/farm/tree_fir_1.png": {
+      "asset_id": "48ed584a-5e1f-4363-8078-b5fdea3f1826",
+      "label": "Douglas fir 32x48"
+    },
+    "art/farm/tree_fir_2.png": {
+      "asset_id": "8043a4c1-36db-45b5-ac0e-444071b6f9df",
+      "label": "Douglas fir 32x48"
+    },
+    "art/farm/tree_willow_0.png": {
+      "asset_id": "de6b8a19-ca79-4481-a1a3-5dc30dbcc816",
+      "label": "Willow 32x48"
+    },
+    "art/farm/tree_willow_1.png": {
+      "asset_id": "0d06844a-7fa0-4503-81e6-75839f9a3d75",
+      "label": "Willow 32x48"
+    },
+    "art/farm/tree_dead_0.png": {
+      "asset_id": "75aafa40-ae5b-49f2-8bb7-26cfb3d207ef",
+      "label": "Dead tree 32x48"
+    },
+    "art/farm/tree_dead_1.png": {
+      "asset_id": "32cfcd8e-a7b9-4dbe-b9c8-fb7082962350",
+      "label": "Dead tree 32x48"
+    },
+    "art/farm/prop_stump.png": {
+      "asset_id": "9a856280-bf52-42d2-bdc3-fac50de4501b",
+      "label": "Stump 16x16"
+    },
+    "art/farm/prop_great_tree.png": {
+      "asset_id": "13f66ac0-81e2-4091-b101-5310e988f512",
+      "label": "Great tree 128x128 (no crows; the game draws them)"
+    },
+    "art/farm/crop_turnip.png": {
+      "asset_id": "97df83d8-b335-4f34-abb5-b4ec40aaa705",
+      "label": "Turnip stages 0-3, 64x16 strip"
+    },
+    "art/farm/crop_pumpkin.png": {
+      "asset_id": "69336d6b-212b-4aee-935b-ba6252f97b87",
+      "label": "Pumpkin stages 0-3, 64x16 strip"
+    },
+    "art/player/farmer_hoe_down.png": {
+      "asset_id": "8525742c-d45f-467b-910a-442245163712",
+      "label": "Farmer hoe down, 8 frames 36x36"
+    },
+    "art/player/farmer_water_down.png": {
+      "asset_id": "daa5ec6b-eebe-4271-815c-de9ea3c546ba",
+      "label": "Farmer water down, 8 frames 36x36"
+    },
+    "art/player/farmer_chop_down.png": {
+      "asset_id": "4401a00e-4ec7-4c31-9716-afacefa9bcf1",
+      "label": "Farmer chop down, 8 frames 36x36"
+    },
+    "art/player/farmer_mine_down.png": {
+      "asset_id": "7467d4f0-8056-49d0-9f98-6dbd1af1d17a",
+      "label": "Farmer mine down, 8 frames 36x36"
+    },
+    "art/player/farmer_plant_down.png": {
+      "asset_id": "7a506111-1bbc-41c3-b1b1-907ce0a6dd8e",
+      "label": "Farmer plant down, 8 frames 36x36"
+    },
+    "art/player/farmer_swing_down.png": {
+      "asset_id": "24f441ff-210b-4bf5-a716-9ebefe0c93c2",
+      "label": "Farmer swing down, 8 frames 36x36"
+    },
+    "art/player/farmer_cast_down.png": {
+      "asset_id": "fe0b6dad-c4a1-4d79-b888-82aa1e77fc6c",
+      "label": "Farmer cast down, 8 frames 36x36"
+    },
+    "art/player/farmer_hoe_up.png": {
+      "asset_id": "d07aabf7-10f9-44ef-8e2f-25d7b89cddea",
+      "label": "Farmer hoe up, 8 frames 36x36"
+    },
+    "art/player/farmer_water_up.png": {
+      "asset_id": "dd637965-7a96-4cda-87ce-dfbf67879c41",
+      "label": "Farmer water up, 8 frames 36x36"
+    },
+    "art/player/farmer_chop_up.png": {
+      "asset_id": "d0d13ead-c728-4e70-8caa-2c949d8472fd",
+      "label": "Farmer chop up, 8 frames 36x36"
+    },
+    "art/player/farmer_mine_up.png": {
+      "asset_id": "80a4ad14-cc5d-4ce8-8c51-514dc9106a07",
+      "label": "Farmer mine up, 8 frames 36x36"
+    },
+    "art/player/farmer_plant_up.png": {
+      "asset_id": "f6de5305-295c-4e4c-91b7-02472d9c4297",
+      "label": "Farmer plant up, 8 frames 36x36"
+    },
+    "art/player/farmer_swing_up.png": {
+      "asset_id": "587d4385-1749-4a6c-9eca-7e6b0622e398",
+      "label": "Farmer swing up, 8 frames 36x36"
+    },
+    "art/player/farmer_cast_up.png": {
+      "asset_id": "db11416d-df28-4544-97c9-d7bcfbd43d70",
+      "label": "Farmer cast up, 8 frames 36x36"
+    },
+    "art/player/farmer_hoe_right.png": {
+      "asset_id": "f1f06032-0ff3-41c7-b015-08e2cb550597",
+      "label": "Farmer hoe right, 8 frames 36x36"
+    },
+    "art/player/farmer_water_right.png": {
+      "asset_id": "7db13dad-8aba-4dde-9202-2bd02ddb1ccf",
+      "label": "Farmer water right, 8 frames 36x36"
+    },
+    "art/player/farmer_chop_right.png": {
+      "asset_id": "803fbeb2-a1f0-4dcf-96be-71ab162219fe",
+      "label": "Farmer chop right, 8 frames 36x36"
+    },
+    "art/player/farmer_mine_right.png": {
+      "asset_id": "5e8775d7-05cc-4767-b300-163c13227dbe",
+      "label": "Farmer mine right, 8 frames 36x36"
+    },
+    "art/player/farmer_plant_right.png": {
+      "asset_id": "7e4fa2e8-d453-4ebb-9d1b-38318dca3bb2",
+      "label": "Farmer plant right, 8 frames 36x36"
+    },
+    "art/player/farmer_swing_right.png": {
+      "asset_id": "47468c51-6d11-4596-83a0-7871d43367d2",
+      "label": "Farmer swing right, 8 frames 36x36"
+    },
+    "art/player/farmer_cast_right.png": {
+      "asset_id": "d97e309b-604c-4d8d-9817-744ebc9a5199",
+      "label": "Farmer cast right, 8 frames 36x36"
+    }
   },
   "animation_runs": {
     "farmer_topdown": "31532ffb-fab2-4152-9b50-6794ac95e0e9",

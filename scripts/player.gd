@@ -116,7 +116,15 @@ const FRAMES := 8
 const ART_SCALE := 3.0
 const GROUND_Y := 18.0      # where the sheet's bottom row (the feet) sits, in local units
 const IDLE_FPS := 6.0
-# The held tool is still drawn in code, scaled up to suit the sprite, from a shoulder at TOOL_ORIGIN.
+# Tool actions have their own sheets, farmer_<action>_<down|up|right>.png, and play once across the action
+# (or once per cycle for chop and mine). The tool is only seen while it is used. An action without a sheet
+# (a raised guard, firing a bow) still draws the held tool in code, scaled up to suit the sprite, from a
+# shoulder at TOOL_ORIGIN.
+const ACTION_SHEETS := ["hoe", "water", "chop", "mine", "plant", "swing", "cast"]
+# The generated swings start from the empty-handed idle pose, so the looping ones play from this frame on.
+const LOOP_FIRST_FRAME := {"chop": 2, "mine": 2}
+# Waiting for a bite holds the end of the cast, with the rod out.
+const SHEET_FOR := {"fish": "cast"}
 const TOOL_SCALE := 2.5
 const TOOL_ORIGIN := Vector2(0, -29)
 var sheets := {}
@@ -134,6 +142,12 @@ func _ready() -> void:
 			sheets[s] = load(path)
 	if sheets.size() < SHEETS.size():
 		sheets.clear()
+		return
+	for a in ACTION_SHEETS:
+		for d in ["down", "up", "right"]:
+			var path: String = SHEET_DIR + "farmer_%s_%s.png" % [a, d]
+			if ResourceLoader.exists(path):
+				sheets["%s_%s" % [a, d]] = load(path)
 
 
 func _dpad_vertical() -> bool:
@@ -295,42 +309,67 @@ func _draw() -> void:
 		draw_rect(Rect2((pt["p"] as Vector2) - Vector2(s, s) * 0.5, Vector2(s, s)), pt["col"])
 
 
-# The farmer from the sprite sheets. Walking steps through the cycle with walk_t, so the stride matches
-# the footsteps. A crouch from the current action dips the sprite in whole art pixels. The held tool is
-# drawn over it in code.
+# The farmer from the sprite sheets. A tool action plays its own sheet, frame by frame through the action.
+# Walking steps through the cycle with walk_t, so the stride matches the footsteps. Otherwise the idle plays.
+# An action without a sheet dips the sprite by its crouch, in whole art pixels, and draws the tool in code.
 func _draw_sprite() -> void:
-	var sheet: Texture2D = sheets["walk_down"]
+	var dir := "down"
 	if facing == Vector2.UP:
-		sheet = sheets["walk_up"]
+		dir = "up"
 	elif facing.x != 0.0:
-		sheet = sheets["walk_right"]
+		dir = "right"
+	var kind := _kind()
+	var action_key := "%s_%s" % [SHEET_FOR.get(kind, kind), dir]
+	var sheet: Texture2D = sheets["walk_%s" % dir]
 	var frame := 0
-	if moving:
+	var dip := 0.0
+	var code_tool := false
+	if sheets.has(action_key):
+		sheet = sheets[action_key]
+		var first: int = LOOP_FIRST_FRAME.get(kind, 0)
+		frame = first + mini(int(_phase().x * (FRAMES - first)), FRAMES - first - 1)
+		if SHEET_FOR.has(kind):
+			frame = FRAMES - 1
+	elif moving:
 		frame = int(fposmod(walk_t, TAU) / TAU * FRAMES) % FRAMES
-	elif _kind() == "idle":
-		if facing == Vector2.UP:
-			sheet = sheets["idle_up"]
-		elif facing.x != 0.0:
-			sheet = sheets["idle_right"]
-		else:
-			sheet = sheets["idle"]
+	elif kind == "idle":
+		sheet = sheets["idle" if dir == "down" else "idle_%s" % dir]
 		frame = int(idle_t * IDLE_FPS) % FRAMES
-	var dip := snappedf(float(_pose()[3]), ART_SCALE)
+	else:
+		dip = snappedf(float(_pose()[3]), ART_SCALE)
+		code_tool = true
 	var size := Vector2(FRAME, FRAME) * ART_SCALE
 	if facing == Vector2.LEFT:
 		draw_set_transform(Vector2.ZERO, 0.0, Vector2(-1, 1))
 	draw_texture_rect_region(sheet, Rect2(Vector2(-size.x * 0.5, GROUND_Y - size.y + dip), size), Rect2(frame * FRAME, 0, FRAME, FRAME))
+	draw_set_transform(Vector2.ZERO, 0.0)
+	if kind == "fish" and sheets.has(action_key):
+		_draw_fishing_line(dir)
 	var side_view := facing.x != 0.0
-	if held != "":
+	if held != "" and code_tool:
 		draw_set_transform(TOOL_ORIGIN + Vector2(0, dip), _lean(), Vector2(TOOL_SCALE, TOOL_SCALE))
 		var pose := _pose()
 		var tool_angle := float(pose[0]) + float(pose[1])
-		if _kind() == "idle" and held == "hoe":
-			tool_angle = -2.6
 		var hand := _shoulder(0.0, side_view) + _reach(float(pose[0]), side_view)
 		draw_circle(hand, 1.6, skin)
 		_draw_tool(hand, side_view, tool_angle)
 	draw_set_transform(Vector2.ZERO, 0.0)
+
+
+# While waiting for a bite, a line runs from the rod's tip to a bobber on the water ahead. The tips are the
+# rod's last pixel in the cast sheets' final frames (down 31,34; up 32,4; right 35,21), in local units.
+const ROD_TIP := {"down": Vector2(40.5, 13.5), "up": Vector2(43.5, -76.5), "right": Vector2(52.5, -25.5)}
+const BOBBER_FROM_TIP := {"down": Vector2(-6, 30), "up": Vector2(-6, -24), "right": Vector2(26, 34)}
+
+
+func _draw_fishing_line(dir: String) -> void:
+	var side := -1.0 if facing == Vector2.LEFT else 1.0
+	var tip: Vector2 = ROD_TIP[dir] * Vector2(side, 1)
+	var bob := Vector2(0, sin(loop_t * 3.0) * 1.5)
+	var bobber: Vector2 = tip + (BOBBER_FROM_TIP[dir] as Vector2) * Vector2(side, 1) + bob
+	draw_line(tip, bobber, LINE, 1.5)
+	draw_circle(bobber, 3.0, BOBBER)
+	draw_circle(bobber + Vector2(0, -1.5), 1.5, Color.WHITE)
 
 
 # The figure seen from the front or the back: both arms and legs, a wide body, and the face or hair.

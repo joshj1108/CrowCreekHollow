@@ -4,7 +4,7 @@ extends Control
 ## Small overview of the whole map: terrain, house, brush piles, the player,
 ## and the shadow on event nights. main.gd pushes the current state each frame.
 
-const PX_PER_TILE := 3.0
+const PX_PER_TILE := 2.0
 const FRAME_COLOR := Color("1d1611")
 const BORDER_COLOR := Color("8a6a3a")
 const BUSH_COLOR := Color("3d6b2a")
