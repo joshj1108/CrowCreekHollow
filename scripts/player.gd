@@ -107,10 +107,10 @@ const KEYS := {
 
 
 # The farmer's SpriteCook sheets in art/player/: 8 frames of 36×36 in a row, drawn at 3× with the feet on
-# the bottom row. Walking left is the right walk mirrored. Facing away or sideways, the idle is the walk's
-# first frame. If the sheets are missing, the figure is drawn in code as before.
+# the bottom row. Facing left mirrors the right-facing sheets. If the sheets are missing, the figure is
+# drawn in code as before.
 const SHEET_DIR := "res://art/player/"
-const SHEETS := ["idle", "walk_down", "walk_up", "walk_right"]
+const SHEETS := ["idle", "idle_up", "idle_right", "walk_down", "walk_up", "walk_right"]
 const FRAME := 36
 const FRAMES := 8
 const ART_SCALE := 3.0
@@ -307,8 +307,13 @@ func _draw_sprite() -> void:
 	var frame := 0
 	if moving:
 		frame = int(fposmod(walk_t, TAU) / TAU * FRAMES) % FRAMES
-	elif facing == Vector2.DOWN and _kind() == "idle":
-		sheet = sheets["idle"]
+	elif _kind() == "idle":
+		if facing == Vector2.UP:
+			sheet = sheets["idle_up"]
+		elif facing.x != 0.0:
+			sheet = sheets["idle_right"]
+		else:
+			sheet = sheets["idle"]
 		frame = int(idle_t * IDLE_FPS) % FRAMES
 	var dip := snappedf(float(_pose()[3]), ART_SCALE)
 	var size := Vector2(FRAME, FRAME) * ART_SCALE

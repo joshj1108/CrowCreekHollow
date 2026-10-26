@@ -13,9 +13,12 @@
     "art/player/farmer_idle.png": { "asset_id": "900db6a4-dc01-41b9-8e63-5c8e8d6c1dde", "label": "Farmer idle, 8 frames 36x36" },
     "art/player/farmer_walk_down.png": { "asset_id": "e0dbd720-4aa5-4830-9419-244910036199", "label": "Farmer walk down, 8 frames 36x36" },
     "art/player/farmer_walk_up.png": { "asset_id": "b21e405e-47c5-4320-a6a9-b557a08d565f", "label": "Farmer walk up, 8 frames 36x36" },
-    "art/player/farmer_walk_right.png": { "asset_id": "bd528606-9834-4d5f-83e8-6cd5b2849b4a", "label": "Farmer walk right, 8 frames 36x36" }
+    "art/player/farmer_walk_right.png": { "asset_id": "bd528606-9834-4d5f-83e8-6cd5b2849b4a", "label": "Farmer walk right, 8 frames 36x36" },
+    "art/player/farmer_idle_up.png": { "asset_id": "de2555af-027a-4e5a-b129-ae4c4fee98a4", "label": "Farmer idle facing away, 8 frames 36x36" },
+    "art/player/farmer_idle_right.png": { "asset_id": "e5c7b122-e347-4518-b652-c281bedb0ac2", "label": "Farmer idle facing right, 8 frames 36x36" }
   },
   "animation_runs": {
-    "farmer_topdown": "31532ffb-fab2-4152-9b50-6794ac95e0e9"
+    "farmer_topdown": "31532ffb-fab2-4152-9b50-6794ac95e0e9",
+    "farmer_idles": "124ec018-82b2-4570-8777-2a2732db408c"
   }
 }
