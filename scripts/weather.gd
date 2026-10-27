@@ -4,10 +4,20 @@ extends CanvasLayer
 ## The weather over the farm. Each morning the game picks a kind of weather for the season, and this
 ## overlay shows it: a grey wash, drifting clouds, a darkened edge, and rain, drizzle, or snow.
 ## Indoors and in the cave the overlay is hidden.
+##
+## With the SpriteCook art (art/farm/weather_*.png) rain falls as crisp pixel streaks that splash where
+## they land, snow falls as flakes and clumps, and fog rolls by in wisps. Without it the old soft shapes
+## are drawn.
 
 const MAX_DROPS := 320
 const CLOUDS := 6
 const WIND := 30.0          # sideways drift of the rain, in pixels per second
+const ART := "res://art/farm/"
+const CELL := 16            # each cell of the drops and splash strips
+const PIX := 3.0            # one art pixel on screen, matching the world's 3x scale
+const SPLASH_FPS := 14.0
+const SPLASH_SCALE := 2.0
+const FOG_WISPS := 7
 
 # How each kind of weather looks. Rain speeds are already halved from the first version.
 const PRESETS := {
@@ -30,6 +40,11 @@ var wash_rect: ColorRect
 var edge_rect: TextureRect
 var rain_canvas: Control
 var rng := RandomNumberGenerator.new()
+var splashes: Array = []    # each: {"p": Vector2, "t": seconds since it landed}
+var wisps: Array = []       # each: {"p": Vector2, "v": drift speed, "s": scale, "a": alpha}
+var drops_tex: Texture2D
+var splash_tex: Texture2D
+var fog_tex: Texture2D
 
 
 func _ready() -> void:
@@ -62,8 +77,19 @@ func _ready() -> void:
 	rain_canvas.draw.connect(_draw_weather)
 	add_child(rain_canvas)
 
+	drops_tex = _art("weather_drops")
+	splash_tex = _art("weather_splash")
+	fog_tex = _art("weather_fog")
 	for i in MAX_DROPS:
 		drops.append({"p": Vector2(rng.randf() * size.x, rng.randf() * size.y), "v": 250.0})
+		_new_landing(drops[i], size)
+	for i in FOG_WISPS:
+		wisps.append({
+			"p": Vector2(rng.randf_range(-400.0, size.x), rng.randf_range(-40.0, size.y)),
+			"v": rng.randf_range(6.0, 16.0),
+			"s": rng.randf_range(2.5, 4.0),
+			"a": rng.randf_range(0.16, 0.3),
+		})
 	for i in CLOUDS:
 		clouds.append({
 			"c": Vector2(rng.randf() * size.x, rng.randf_range(-40.0, 120.0)),
@@ -89,6 +115,21 @@ func set_condition(new_kind: String) -> void:
 		d["v"] = rng.randf_range(speed.x, speed.y)
 
 
+func _art(name: String) -> Texture2D:
+	var path := ART + name + ".png"
+	return load(path) if ResourceLoader.exists(path) else null
+
+
+# Where a drop will hit the ground, somewhere on the screen, and how it is drawn: snow picks one of the
+# flake cells, mostly the small clump, and some flakes are nearer and bigger.
+func _new_landing(d: Dictionary, size: Vector2) -> void:
+	d["land"] = rng.randf_range(size.y * 0.15, size.y + 20.0)
+	d["len"] = rng.randi_range(4, 6)
+	var r := rng.randf()
+	d["cell"] = 1 if r < 0.12 else (3 if r < 0.22 else 2)
+	d["near"] = rng.randf() < 0.3
+
+
 func _fill(control: Control) -> void:
 	control.set_anchors_preset(Control.PRESET_FULL_RECT)
 	control.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -101,9 +142,14 @@ func _process(delta: float) -> void:
 		var p: Vector2 = d["p"]
 		p.y += float(d["v"]) * delta
 		p.x += WIND * delta
-		if p.y > size.y:
-			p.y = -20.0
+		# Rain with art lands at its own spot and splashes; snow and the old rain fall off the bottom.
+		var lands := drops_tex != null and not snowing
+		if (lands and p.y > float(d["land"])) or p.y > size.y + 20.0:
+			if lands and splash_tex != null and splashes.size() < 120:
+				splashes.append({"p": p, "t": 0.0})
+			p.y = rng.randf_range(-40.0, -10.0)
 			p.x = rng.randf() * size.x
+			_new_landing(d, size)
 		if p.x > size.x:
 			p.x -= size.x
 		d["p"] = p
@@ -114,6 +160,20 @@ func _process(delta: float) -> void:
 		if centre.x - r > size.x:
 			centre.x = -r
 		c["c"] = centre
+	if active_drops == 0 or snowing:
+		splashes.clear()
+	for s in splashes.duplicate():
+		s["t"] = float(s["t"]) + delta
+		if float(s["t"]) * SPLASH_FPS >= 3.0:
+			splashes.erase(s)
+	if kind == "fog":
+		for w in wisps:
+			var wp: Vector2 = w["p"]
+			wp.x += float(w["v"]) * delta
+			if wp.x > size.x:
+				wp.x = -128.0 * float(w["s"])
+				wp.y = rng.randf_range(-40.0, size.y)
+			w["p"] = wp
 	rain_canvas.queue_redraw()
 
 
@@ -125,9 +185,38 @@ func _draw_weather() -> void:
 		for i in 4:
 			var offset := Vector2((i - 1.5) * r * 0.45, sin(float(i)) * r * 0.12)
 			rain_canvas.draw_circle(centre + offset, r * 0.55, cloud)
+	if kind == "fog" and fog_tex != null:
+		for w in wisps:
+			var sc := float(w["s"])
+			var wp: Vector2 = w["p"]
+			rain_canvas.draw_texture_rect(fog_tex, Rect2(wp.snapped(Vector2(PIX, PIX)), fog_tex.get_size() * sc),
+				false, Color(1, 1, 1, float(w["a"])))
+	if drops_tex == null:
+		for i in active_drops:
+			var p: Vector2 = drops[i]["p"]
+			if snowing:
+				rain_canvas.draw_circle(p, 2.2, Color(0.95, 0.97, 1.0, 0.7))
+			else:
+				rain_canvas.draw_line(p, p + Vector2(WIND * 0.05, 14.0), Color(0.75, 0.82, 0.9, 0.35), 1.0)
+		return
 	for i in active_drops:
-		var p: Vector2 = drops[i]["p"]
+		var d: Dictionary = drops[i]
+		var p: Vector2 = (d["p"] as Vector2).snapped(Vector2(PIX, PIX))
 		if snowing:
-			rain_canvas.draw_circle(p, 2.2, Color(0.95, 0.97, 1.0, 0.7))
+			# The flake cells at 1x (a clump is a few pixels; a full flake is a near one); some clumps nearer, at 2x.
+			var sc := 2.0 if bool(d["near"]) and int(d["cell"]) == 2 else 1.0
+			var src := Rect2(int(d["cell"]) * CELL, 0, CELL, CELL)
+			rain_canvas.draw_texture_rect_region(drops_tex, Rect2(p, Vector2(CELL, CELL) * sc), src, Color(1, 1, 1, 0.85))
 		else:
-			rain_canvas.draw_line(p, p + Vector2(WIND * 0.05, 14.0), Color(0.75, 0.82, 0.9, 0.35), 1.0)
+			# A crisp streak one art pixel wide: a pale head over a fading tail.
+			var n := int(d["len"])
+			for k in n:
+				var a := 0.55 * (1.0 - float(k) / float(n))
+				rain_canvas.draw_rect(Rect2(p - Vector2(0, k * PIX), Vector2(PIX, PIX)), Color(0.72, 0.8, 0.9, a))
+	for s in splashes:
+		# Frame 0 is a standing drop; a landing streak goes straight to the burst, ring and ripple.
+		var f := mini(3, 1 + int(float(s["t"]) * SPLASH_FPS))
+		var box := Vector2(CELL, CELL) * SPLASH_SCALE
+		var at: Vector2 = (s["p"] as Vector2) - Vector2(box.x * 0.5, box.y * 0.75)
+		rain_canvas.draw_texture_rect_region(splash_tex, Rect2(at.snapped(Vector2(2, 2)), box),
+			Rect2(f * CELL, 0, CELL, CELL), Color(1, 1, 1, 0.7))

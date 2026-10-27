@@ -1474,6 +1474,11 @@ func _build_ambience() -> void:
 	leaves_fx.amount = 46
 	petals_fx = _make_ambience(petal, Color(1.0, 0.82, 0.88), 1.9, 0.9, Vector2(0, 14), 16.0, 4.0)
 	petals_fx.amount = 40
+	if FARM_SPRITES:
+		# SpriteCook leaves and petals: four 16-pixel kinds in a strip, one picked at random for each particle,
+		# drawn at 2× and tumbling as they fall.
+		_use_strip(leaves_fx, "weather_leaves", 2.0)
+		_use_strip(petals_fx, "weather_petals", 1.5)
 	# Fireflies are bright dots that blink on and off as they drift.
 	fireflies_fx = _make_ambience(dot, Color(0.85, 1.0, 0.45), 1.3, 1.0, Vector2.ZERO, 10.0, 6.0)
 	fireflies_fx.spread = 180.0
@@ -1502,6 +1507,22 @@ func _soft_dot(gradient: Gradient, width: int, height: int) -> Texture2D:
 	tex.width = width
 	tex.height = height
 	return tex
+
+
+func _use_strip(fx: CPUParticles2D, art: String, scale_px: float) -> void:
+	fx.texture = FarmSprites.tex(art)
+	var mat := CanvasItemMaterial.new()
+	mat.particles_animation = true
+	mat.particles_anim_h_frames = 4
+	mat.particles_anim_v_frames = 1
+	fx.material = mat
+	fx.anim_speed_min = 0.0
+	fx.anim_speed_max = 0.0
+	fx.anim_offset_min = 0.0
+	fx.anim_offset_max = 1.0
+	fx.scale_amount_min = scale_px
+	fx.scale_amount_max = scale_px
+	fx.color = Color(1, 1, 1, 0.95)
 
 
 func _make_ambience(dot: Texture2D, color: Color, scale_px: float, alpha: float, gravity: Vector2, speed: float, life: float) -> CPUParticles2D:
