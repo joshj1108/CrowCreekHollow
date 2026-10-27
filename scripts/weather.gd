@@ -32,7 +32,7 @@ const PRESETS := {
 
 var kind := ""
 var drops: Array = []       # each: {"p": Vector2, "v": falling speed}
-var clouds: Array = []      # each: {"c": Vector2, "r": radius, "v": drift speed}
+var clouds: Array = []      # each: {"c": Vector2, "r": radius, "v": drift speed, "s": art scale, "flip": mirrored}
 var active_drops := 0
 var snowing := false
 var cloud_alpha := 0.25
@@ -45,6 +45,7 @@ var wisps: Array = []       # each: {"p": Vector2, "v": drift speed, "s": scale,
 var drops_tex: Texture2D
 var splash_tex: Texture2D
 var fog_tex: Texture2D
+var cloud_tex: Texture2D
 
 
 func _ready() -> void:
@@ -80,6 +81,7 @@ func _ready() -> void:
 	drops_tex = _art("weather_drops")
 	splash_tex = _art("weather_splash")
 	fog_tex = _art("weather_fog")
+	cloud_tex = _art("weather_cloud")
 	for i in MAX_DROPS:
 		drops.append({"p": Vector2(rng.randf() * size.x, rng.randf() * size.y), "v": 250.0})
 		_new_landing(drops[i], size)
@@ -95,7 +97,12 @@ func _ready() -> void:
 			"c": Vector2(rng.randf() * size.x, rng.randf_range(-40.0, 120.0)),
 			"r": rng.randf_range(160.0, 280.0),
 			"v": rng.randf_range(8.0, 18.0),
+			"s": PIX + float(rng.randi_range(0, 1)),
+			"flip": rng.randf() < 0.5,
 		})
+		# With the art, a cloud is as wide as its sprite, so it wraps once the whole shadow is off screen.
+		if cloud_tex != null:
+			clouds[i]["r"] = cloud_tex.get_width() * float(clouds[i]["s"]) * 0.5
 	set_condition("rain")
 
 
@@ -182,6 +189,18 @@ func _draw_weather() -> void:
 		var centre: Vector2 = c["c"]
 		var r := float(c["r"])
 		var cloud := Color(0.18, 0.2, 0.24, cloud_alpha)
+		# The SpriteCook cloud, darkened into a shadow passing over the land: its pale billows multiply to
+		# the shadow colour and its greyer undersides a little darker. Some are mirrored and some drawn larger.
+		if cloud_tex != null:
+			# The circles overlapped, so one sprite needs a little more weight to match them.
+			cloud.a = minf(cloud_alpha * 1.5, 1.0)
+			var sz := cloud_tex.get_size() * float(c["s"])
+			var at := (centre - sz * 0.5).snapped(Vector2(PIX, PIX))
+			if c["flip"]:
+				rain_canvas.draw_texture_rect(cloud_tex, Rect2(at + Vector2(sz.x, 0.0), Vector2(-sz.x, sz.y)), false, cloud)
+			else:
+				rain_canvas.draw_texture_rect(cloud_tex, Rect2(at, sz), false, cloud)
+			continue
 		for i in 4:
 			var offset := Vector2((i - 1.5) * r * 0.45, sin(float(i)) * r * 0.12)
 			rain_canvas.draw_circle(centre + offset, r * 0.55, cloud)

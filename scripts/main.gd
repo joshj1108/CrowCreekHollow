@@ -2244,10 +2244,12 @@ func _draw_sprite_ground(t: Vector2i, kind: int, cell: Rect2) -> bool:
 		Tile.GRASS, Tile.SOIL, Tile.FALLOW, Tile.PATH, Tile.WATER:
 			_draw_grass(t, cell)
 			return true
-		Tile.ROCK:
-			name = "rock_%d" % v
-		Tile.CAVE_MOUTH:
-			# Rock underneath; the entrance itself is drawn over it and its neighbours by _draw_trees.
+		Tile.ROCK, Tile.CAVE_MOUTH:
+			# The rocks around the cave are one hillside sprite, drawn with the entrance by _draw_trees, so they
+			# start as grass. Rocks below the hill's foot keep their own sprite, as boulders at its base.
+			if kind == Tile.CAVE_MOUTH or _under_hillside(t):
+				_draw_grass(t, cell)
+				return true
 			name = "rock_%d" % v
 		Tile.HOUSE, Tile.DOOR, Tile.ROOF, Tile.PORCH, Tile.STALL, Tile.WELL:
 			# The house, stall and well are sprites drawn over their footprints, and the porch is path laid over
@@ -2572,6 +2574,7 @@ func _draw_trees(ci: CanvasItem, front: bool) -> void:
 				# 64×48: an entrance in the rock face, four tiles wide and three tall, its doorway centred on this
 				# tile. The doorway's sill is 4 px above the sprite's bottom, so it sits that far below the tile.
 				if trees_here:
+					ci.draw_texture_rect(FarmSprites.tex("hillside"), _hillside_rect(cell), false)
 					ci.draw_texture_rect(FarmSprites.tex("cave_mouth"), Rect2(cell.position.x - PX * 1.5, cell.end.y + 4.0 * SCALE - PX * 3.0, PX * 4.0, PX * 3.0), false)
 			elif (kind == Tile.COOP or kind == Tile.BARN) and trees_here:
 				# The coop (48×64) and barn (80×80) are drawn once, from their footprint's bottom-left tile, as wide
@@ -2703,8 +2706,14 @@ func _update_minimap() -> void:
 	if key == last_minimap_key:
 		return
 	last_minimap_key = key
-	var well_tile := Vector2(WELL_IX.x + BORDER_X, WELL_IX.y + BORDER_Y)
-	minimap.update_view(map, TILE_COLORS, brush.keys(), player_tile, tonight_shadow, [] if inside else [well_tile])
+	# Landmark icons sit on the centres of the house's door, the well and the cave entrance.
+	var half := Vector2(0.5, 0.5)
+	var marks := [
+		[Vector2(HOUSE_DOOR_IX + BORDER_X, HOUSE_DOOR_IY + BORDER_Y) + half, Minimap.Icon.HOUSE],
+		[Vector2(WELL_IX.x + BORDER_X, WELL_IX.y + BORDER_Y) + half, Minimap.Icon.WELL],
+		[Vector2(_cave_mouth_tile()) + half, Minimap.Icon.CAVE],
+	]
+	minimap.update_view(map, TILE_COLORS, brush.keys(), player_tile, tonight_shadow, [] if inside else marks)
 
 
 # --- Tutorial tips ----------------------------------------------------------
@@ -4443,8 +4452,7 @@ func _build_world_minimap() -> void:
 	for y in h:
 		for x in w:
 			var k: int = world[(y * step + step / 2) * WORLD_W + x * step + step / 2]
-			var c: Color = TILE_COLORS[k]
-			img.set_pixel(x, y, c)
+			img.set_pixel(x, y, Minimap.grade(TILE_COLORS[k]))
 	world_map_tex = ImageTexture.create_from_image(img)
 
 
@@ -4558,6 +4566,17 @@ func _leave_cave() -> void:
 	_set_bounds()
 	queue_redraw()
 	_show_message("You step back out into the light.")
+
+
+# The hillside around the cave: 96×80, six tiles wide and five tall, its foot level with the entrance's sill
+# and reaching two tiles left and three right of the entrance tile, over the rocks in the layout.
+func _hillside_rect(mouth_cell: Rect2) -> Rect2:
+	return Rect2(mouth_cell.position.x - PX * 2.0, mouth_cell.end.y + 4.0 * SCALE - PX * 5.0, PX * 6.0, PX * 5.0)
+
+
+func _under_hillside(t: Vector2i) -> bool:
+	var c := _cave_mouth_tile()
+	return t.x >= c.x - 2 and t.x <= c.x + 3 and t.y >= c.y - 4 and t.y <= c.y
 
 
 func _cave_mouth_tile() -> Vector2i:

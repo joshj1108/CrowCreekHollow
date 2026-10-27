@@ -525,6 +525,9 @@
     "int_rug": "6bfc9a15-fa85-409f-a8a4-a764b92d3a13",
     "int_mat": "1bb664f0-446f-4e1d-84e9-be9f3e709e7c",
     "int_table": "114a95e4-0d5d-45ad-bb25-3f64f3b0c4da",
-    "int_chairs": "0763aa7d-a626-4d91-9770-5940d2f111c3 (facing you, from behind)"
+    "int_chairs": "0763aa7d-a626-4d91-9770-5940d2f111c3 (facing you, from behind)",
+    "hillside": "3b59f477-fd32-43d5-999a-6fd9de0a3a11 (96x80; alt f0039c17-c0d6-4e21-a913-eb58a6aad6b5 unused)",
+    "weather_cloud": "69c1f589-063a-4f19-943a-5a35d07d6ec6 (128x64; alt 6be63f98-2989-44e5-8414-f32647e5391b unused)",
+    "ui/minimap_icons": "e61444e5-853b-484e-88a5-97d986f6116e (64x16: house, well, cave, farmer; alt 796c398c-62fd-4578-8823-d4d9eca2e13a unused)"
   }
 }

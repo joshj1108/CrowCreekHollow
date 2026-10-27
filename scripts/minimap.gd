@@ -11,7 +11,14 @@ const BORDER_COLOR := Color("8a6a3a")
 const BUSH_COLOR := Color("3d6b2a")
 const SHADOW_COLOR := Color("b02a2a")
 const PLAYER_COLOR := Color("fff2b0")
-const MARKER_COLOR := Color("6fb8d9")   # landmarks such as the well
+const GRADE_GREY := 0.45   # how far tile colours are pulled toward grey
+const GRADE_DARK := 0.22
+const GRADE_TINT := Color("2e3640")
+const MARKER_COLOR := Color("6fb8d9")   # landmarks, when the icon art is missing
+# SpriteCook icons, 16 px cells in a row: the house, the well, the cave and the farmer (the player).
+const ICONS_PATH := "res://art/ui/minimap_icons.png"
+const ICON := 16
+enum Icon { HOUSE, WELL, CAVE, PLAYER }
 
 var tiles: Array = []
 var tile_colors: Dictionary = {}
@@ -20,7 +27,8 @@ var player_tile := Vector2.ZERO
 var shadow := Vector2i(-1, -1)   # (-1, -1) hides the shadow
 var world_texture: Texture2D = null   # the whole land, one pixel per WORLD_PX_PER_TILE tiles
 var world_tiles := Vector2i.ZERO
-var markers: Array = []   # landmark tiles, drawn as small blue squares on the farm map
+var markers: Array = []   # landmarks on the farm map, each [tile centre, Icon]
+var icons_tex: Texture2D = load(ICONS_PATH) if ResourceLoader.exists(ICONS_PATH) else null
 
 # The whole world at 1 pixel per 4 tiles. Each pixel is a sampled tile, not an average.
 const WORLD_PX_PER_TILE := 0.25
@@ -53,7 +61,7 @@ func _draw() -> void:
 		draw_rect(Rect2(Vector2.ZERO, size), FRAME_COLOR)
 		draw_texture_rect(world_texture, Rect2(Vector2.ZERO, size), false)
 		var k := size / Vector2(world_tiles)
-		draw_circle(player_tile * k, 3.0, PLAYER_COLOR)
+		_draw_player(player_tile * k)
 		_draw_frame()
 		return
 	var s := PX_PER_TILE
@@ -61,15 +69,48 @@ func _draw() -> void:
 	for y in tiles.size():
 		var row: Array = tiles[y]
 		for x in row.size():
-			draw_rect(Rect2(x * s, y * s, s, s), tile_colors[row[x]])
+			# Each tile is a shade lighter or darker than its neighbours, so fields and woods read as
+			# texture rather than flat blocks.
+			var shade := float((x * 7 + y * 13 + (x * y) % 5) % 5) * 0.025 - 0.05
+			draw_rect(Rect2(x * s, y * s, s, s), _shaded(tile_colors[row[x]], shade))
 	for b in bushes:
-		draw_rect(Rect2(b.x * s, b.y * s, s, s), BUSH_COLOR)
+		draw_rect(Rect2(b.x * s, b.y * s, s, s), grade(BUSH_COLOR))
 	if shadow.x >= 0:
 		draw_rect(Rect2(shadow.x * s, shadow.y * s, s, s), SHADOW_COLOR)
 	for m in markers:
-		draw_rect(Rect2(m.x * s, m.y * s, s, s), MARKER_COLOR)
-	draw_circle(player_tile * s + Vector2(s, s) * 0.5, 2.5, PLAYER_COLOR)
+		var at: Vector2 = m[0] * s
+		if icons_tex != null:
+			_draw_icon(at, m[1])
+		else:
+			draw_rect(Rect2(at - Vector2(s, s) * 0.5, Vector2(s, s)), MARKER_COLOR)
+	_draw_player(player_tile * s + Vector2(s, s) * 0.5)
 	_draw_frame()
+
+
+func _shaded(c: Color, amount: float) -> Color:
+	c = grade(c)
+	return c.lightened(amount) if amount > 0.0 else c.darkened(-amount)
+
+
+# The map's colours pulled toward the game's muted look: part way to grey, then a little darker and cooler,
+# so the bright tile colours don't stand out against the dark wood frame.
+static func grade(c: Color) -> Color:
+	var grey := c.get_luminance()
+	var muted := c.lerp(Color(grey, grey, grey), GRADE_GREY).darkened(GRADE_DARK)
+	return muted.lerp(GRADE_TINT, 0.08)
+
+
+# One icon from the strip, centred on a point and snapped to whole pixels so it stays crisp.
+func _draw_icon(centre: Vector2, icon: int) -> void:
+	var at := (centre - Vector2(ICON, ICON) * 0.5).round()
+	draw_texture_rect_region(icons_tex, Rect2(at, Vector2(ICON, ICON)), Rect2(icon * ICON, 0, ICON, ICON))
+
+
+func _draw_player(at: Vector2) -> void:
+	if icons_tex != null:
+		_draw_icon(at, Icon.PLAYER)
+	else:
+		draw_circle(at, 2.5, PLAYER_COLOR)
 
 
 # The wood-and-iron frame from the UI skin, its rail just outside the map; a thin border without the art.
