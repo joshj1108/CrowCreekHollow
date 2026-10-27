@@ -653,6 +653,7 @@ const SLEEP_SANITY := 25.0
 const TIDY_SANITY := 10.0
 const COLLAPSE_SANITY_PENALTY := 5   # permanent cap reduction, curable with a cleanse
 var save_slot := 1                  # which save slot this game reads and writes
+var save_name := ""                 # the name given to the save when the game was started
 var world_started := false         # false while the start screen is up
 var title_menu: TitleMenu
 const SETTINGS_PATH := "user://hallowvale_settings.json"
@@ -1092,6 +1093,7 @@ func _on_title_start(mode: String, slot: int) -> void:
 	var loaded := mode != "new" and saver._load_game()
 	if not loaded:
 		_respawn_brush()
+		save_name = TitleMenu.pending_name
 	_build_interior()
 	_build_world()
 	_build_hud()

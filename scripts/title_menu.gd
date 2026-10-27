@@ -23,6 +23,9 @@ var settings_rows: Array = []   # the controls list, from main.gd
 var root_panel: Control
 var content: VBoxContainer
 var overwrite_armed := -1       # slot waiting for a second press in New Game
+# The name typed for a new game, handed to the game when it starts.
+static var pending_name := ""
+const NAME_MAX := 24
 
 
 static func slot_path(slot: int) -> String:
@@ -141,7 +144,7 @@ func _show_slots(mode: String) -> void:
 		if mode == "new":
 			var slot_number := slot
 			if data.is_empty():
-				_add_button(text, true, func() -> void: start_requested.emit("new", slot_number))
+				_add_button(text, true, func() -> void: _show_name(slot_number))
 			else:
 				_add_button(text, true, func() -> void: _arm_overwrite(slot_number))
 		else:
@@ -156,7 +159,7 @@ func _arm_overwrite(slot: int) -> void:
 		overwrite_armed = slot
 		_show_slots_refresh_armed(slot)
 		return
-	start_requested.emit("new", slot)
+	_show_name(slot)
 
 
 func _show_slots_refresh_armed(slot: int) -> void:
@@ -168,6 +171,33 @@ func _show_slots_refresh_armed(slot: int) -> void:
 			# Keep focus on the armed slot, so a gamepad's second press overwrites it.
 			# Queued after _show_slots' own focus call, so this one wins.
 			button.grab_focus.call_deferred()
+
+
+# A new game asks for a save name, so the slots are easy to tell apart. It starts filled in, so a
+# gamepad player can just press Begin.
+func _show_name(slot: int) -> void:
+	_clear()
+	_add_heading("Name this save")
+	var field := LineEdit.new()
+	field.text = "Farm %d" % slot
+	field.max_length = NAME_MAX
+	field.select_all_on_focus = true
+	field.custom_minimum_size = Vector2(420, 44)
+	field.add_theme_font_size_override("font_size", 20)
+	field.add_theme_color_override("font_color", COL_TEXT)
+	field.add_theme_stylebox_override("normal", _box(COL_BUTTON))
+	field.add_theme_stylebox_override("focus", _box(COL_BUTTON_HOVER))
+	content.add_child(field)
+	var begin := func() -> void:
+		pending_name = field.text.strip_edges()
+		if pending_name == "":
+			pending_name = "Farm %d" % slot
+		start_requested.emit("new", slot)
+	field.text_submitted.connect(func(_t: String) -> void: begin.call())
+	_add_button("Begin", true, begin)
+	_add_button("Back", true, func() -> void: _show_slots("new"))
+	_add_hint("Type a name, then press Enter or Begin.")
+	field.grab_focus.call_deferred()
 
 
 func _show_settings() -> void:
@@ -200,7 +230,12 @@ func _slot_text(slot: int, data: Dictionary) -> String:
 		return "Slot %d: empty" % slot
 	var stages := ["Decrepit", "Boarded", "Patched", "Restored"]
 	var stage := clampi(int(data.get("house_stage", 0)), 0, stages.size() - 1)
-	return "Slot %d: day %d, %d coins, house %s" % [slot, int(data.get("day", 1)), int(data.get("money", 0)), stages[stage]]
+	var details := "day %d, %d coins, house %s" % [int(data.get("day", 1)), int(data.get("money", 0)), stages[stage]]
+	var save_name := str(data.get("save_name", ""))
+	if save_name == "":
+		return "Slot %d: %s" % [slot, details]
+	return "Slot %d: %s
+%s" % [slot, save_name, details]
 
 
 func _clear() -> void:
