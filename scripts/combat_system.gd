@@ -124,6 +124,10 @@ func _move_foe(foe: Dictionary, step: Vector2) -> void:
 	var ny := pos + Vector2(0, step.y)
 	if _foe_free(ny):
 		pos = ny
+	# Kept for drawing: whether it actually moved this frame, and which way it last moved sideways.
+	foe["moving"] = pos != foe["pos"]
+	if absf(pos.x - float(foe["pos"].x)) > 0.01:
+		foe["face"] = signf(pos.x - float(foe["pos"].x))
 	foe["pos"] = pos
 
 

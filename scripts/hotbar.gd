@@ -77,7 +77,10 @@ func set_state(entries: Array, active: int) -> void:
 	_name_label.text = active_name
 
 
-func _slot_box(lit: bool) -> StyleBoxFlat:
+func _slot_box(lit: bool) -> StyleBox:
+	var skinned := UiSkin.slot(lit, 4)
+	if skinned != null:
+		return skinned
 	var box := StyleBoxFlat.new()
 	box.bg_color = Color(0.09, 0.065, 0.05, 0.9)
 	box.border_color = Color("f2d27a") if lit else Color("8a6a3a")

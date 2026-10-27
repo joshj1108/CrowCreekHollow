@@ -28,6 +28,9 @@ const COL_BORDER := Color("8a6a3a")
 const COL_ACCENT := Color("d9a94e")
 const COL_TEXT := Color("f1e4c8")
 const COL_MUTED := Color("b3a27c")
+const COL_IRON := Color("5f5b55")
+const WOOD_SHADE := Color(0.72, 0.68, 0.64)   # the wood's tint on a segment that isn't highlighted
+const WOOD_HOT := Color(1.35, 1.2, 1.0)        # and on the highlighted one
 
 var open := false
 var highlight := 0
@@ -125,18 +128,32 @@ func _draw_ring() -> void:
 		for k in range(steps, -1, -1):
 			points.append(c + _dir(lerpf(a0, a1, float(k) / steps)) * INNER_R)
 		var hot := i == highlight
-		ring.draw_colored_polygon(points, COL_SEGMENT_HOT if hot else COL_SEGMENT)
+		var wood := UiSkin.wood()
+		if wood != null:
+			# The UI's wood, mapped across the whole ring so the grain runs on from one segment to the next;
+			# the highlighted segment is lit, the rest shaded. Edges are iron, gold on the highlight.
+			var uvs := PackedVector2Array()
+			for p in points:
+				uvs.append((p - c) / (OUTER_R * 2.0) + Vector2(0.5, 0.5))
+			ring.draw_colored_polygon(points, WOOD_HOT if hot else WOOD_SHADE, uvs, wood)
+		else:
+			ring.draw_colored_polygon(points, COL_SEGMENT_HOT if hot else COL_SEGMENT)
 		var edge := PackedVector2Array(points)
 		edge.append(points[0])
-		ring.draw_polyline(edge, COL_ACCENT if hot else COL_BORDER, 3.0 if hot else 1.5)
+		var border := COL_IRON if wood != null else COL_BORDER
+		ring.draw_polyline(edge, COL_ACCENT if hot else border, 3.0 if hot else 2.0)
 		var at := c + _dir(mid) * ((INNER_R + OUTER_R) * 0.5)
 		_icon(str(SECTIONS[i]["icon"]), at, 17.0, Color(str(SECTIONS[i]["color"])), hot)
-	# The middle names the highlighted section.
+	# The middle names the highlighted section, on a wooden plaque when the UI art is there.
 	var name_text := str(SECTIONS[highlight]["name"])
 	var name_width := font.get_string_size(name_text, HORIZONTAL_ALIGNMENT_LEFT, -1, 24).x
-	ring.draw_string(font, c + Vector2(-name_width * 0.5, -4.0), name_text, HORIZONTAL_ALIGNMENT_LEFT, -1, 24, COL_ACCENT)
 	var sub := str(SECTIONS[highlight]["subtitle"])
 	var sub_width := font.get_string_size(sub, HORIZONTAL_ALIGNMENT_LEFT, -1, 13).x
+	var plaque := UiSkin.slot(false)
+	if plaque != null:
+		var w := minf(maxf(name_width, sub_width) + 44.0, INNER_R * 2.0 - 8.0)
+		ring.draw_style_box(plaque, Rect2(c - Vector2(w * 0.5, 40.0), Vector2(w, 74.0)))
+	ring.draw_string(font, c + Vector2(-name_width * 0.5, -4.0), name_text, HORIZONTAL_ALIGNMENT_LEFT, -1, 24, COL_ACCENT)
 	ring.draw_string(font, c + Vector2(-sub_width * 0.5, 16.0), sub, HORIZONTAL_ALIGNMENT_LEFT, -1, 13, COL_MUTED)
 	var hint := "Mouse or left stick to choose   ·   A or click to open   ·   B or Esc to close"
 	var hint_width := font.get_string_size(hint, HORIZONTAL_ALIGNMENT_LEFT, -1, 14).x

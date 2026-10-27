@@ -541,7 +541,7 @@ extends RefCounted
 #   . grass     S soil (plot one)     F fallow (plots two and three, cleared later)
 #   P path      ~ water               R porch boards
 #   H house     O roof (house top)    D door    A market stall     W well
-#   C cave mouth                      K rock (blocks)    X fence (blocks)
+#   C cave mouth                      K rock (blocks)    X fence (blocks)    Y scarecrow (blocks)
 #   G grove tree (felled for wood)    B great tree base (3 by 3, not felled)
 #   b great tree's walkable top row (grass)
 

@@ -234,11 +234,12 @@ func _add_button(text: String, enabled: bool, on_press: Callable) -> void:
 	button.add_theme_font_size_override("font_size", 20)
 	button.add_theme_color_override("font_color", COL_TEXT)
 	button.add_theme_color_override("font_disabled_color", COL_DIM)
-	button.add_theme_stylebox_override("normal", _box(COL_BUTTON))
-	button.add_theme_stylebox_override("hover", _box(COL_BUTTON_HOVER))
-	button.add_theme_stylebox_override("focus", _box(COL_BUTTON_HOVER))
-	button.add_theme_stylebox_override("pressed", _box(COL_BUTTON_HOVER))
-	button.add_theme_stylebox_override("disabled", _box(COL_BUTTON_DISABLED))
+	if not UiSkin.style_button(button):
+		button.add_theme_stylebox_override("normal", _box(COL_BUTTON))
+		button.add_theme_stylebox_override("hover", _box(COL_BUTTON_HOVER))
+		button.add_theme_stylebox_override("focus", _box(COL_BUTTON_HOVER))
+		button.add_theme_stylebox_override("pressed", _box(COL_BUTTON_HOVER))
+		button.add_theme_stylebox_override("disabled", _box(COL_BUTTON_DISABLED))
 	if enabled:
 		button.pressed.connect(on_press)
 	content.add_child(button)
@@ -378,10 +379,11 @@ func _creator_button(parent: Node, text: String, on_press: Callable) -> Button:
 	button.custom_minimum_size = Vector2(0, 40)
 	button.add_theme_font_size_override("font_size", 18)
 	button.add_theme_color_override("font_color", COL_TEXT)
-	button.add_theme_stylebox_override("normal", _box(COL_BUTTON))
-	button.add_theme_stylebox_override("hover", _box(COL_BUTTON_HOVER))
-	button.add_theme_stylebox_override("focus", _box(COL_BUTTON_HOVER))
-	button.add_theme_stylebox_override("pressed", _box(COL_BUTTON_HOVER))
+	if not UiSkin.style_button(button):
+		button.add_theme_stylebox_override("normal", _box(COL_BUTTON))
+		button.add_theme_stylebox_override("hover", _box(COL_BUTTON_HOVER))
+		button.add_theme_stylebox_override("focus", _box(COL_BUTTON_HOVER))
+		button.add_theme_stylebox_override("pressed", _box(COL_BUTTON_HOVER))
 	button.pressed.connect(on_press)
 	parent.add_child(button)
 	return button

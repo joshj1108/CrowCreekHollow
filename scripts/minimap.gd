@@ -5,6 +5,7 @@ extends Control
 ## and the shadow on event nights. main.gd pushes the current state each frame.
 
 const PX_PER_TILE := 2.0
+const FRAME_RAIL := 15.0   # how far the frame's rail reaches out past the map
 const FRAME_COLOR := Color("1d1611")
 const BORDER_COLOR := Color("8a6a3a")
 const BUSH_COLOR := Color("3d6b2a")
@@ -53,7 +54,7 @@ func _draw() -> void:
 		draw_texture_rect(world_texture, Rect2(Vector2.ZERO, size), false)
 		var k := size / Vector2(world_tiles)
 		draw_circle(player_tile * k, 3.0, PLAYER_COLOR)
-		draw_rect(Rect2(Vector2.ZERO, size), BORDER_COLOR, false, 2.0)
+		_draw_frame()
 		return
 	var s := PX_PER_TILE
 	draw_rect(Rect2(Vector2.ZERO, size), FRAME_COLOR)
@@ -68,4 +69,13 @@ func _draw() -> void:
 	for m in markers:
 		draw_rect(Rect2(m.x * s, m.y * s, s, s), MARKER_COLOR)
 	draw_circle(player_tile * s + Vector2(s, s) * 0.5, 2.5, PLAYER_COLOR)
-	draw_rect(Rect2(Vector2.ZERO, size), BORDER_COLOR, false, 2.0)
+	_draw_frame()
+
+
+# The wood-and-iron frame from the UI skin, its rail just outside the map; a thin border without the art.
+func _draw_frame() -> void:
+	var skin_frame := UiSkin.frame()
+	if skin_frame != null:
+		draw_style_box(skin_frame, Rect2(Vector2.ZERO, size).grow(FRAME_RAIL))
+	else:
+		draw_rect(Rect2(Vector2.ZERO, size), BORDER_COLOR, false, 2.0)

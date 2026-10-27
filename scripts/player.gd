@@ -10,9 +10,11 @@ extends Node2D
 
 const SPEED := 180.0
 const FEET_OFFSET := Vector2(0, 8)
+# The feet's box for collisions. It is nearly as wide as the sprite's boots and body (about 42 of a tile's
+# 48 units), so the farmer can't push into the well, the stall or a wall, and still fits a one-tile gap.
 const CORNERS := [
-	Vector2(-8, -6), Vector2(8, -6),
-	Vector2(-8, 6), Vector2(8, 6),
+	Vector2(-15, -6), Vector2(15, -6),
+	Vector2(-15, 6), Vector2(15, 6),
 ]
 
 var min_pos := Vector2.ZERO
@@ -133,6 +135,12 @@ var idle_t := 0.0
 
 # Set by the game each frame: true while the trowel is in hand and no panel is open.
 var vertical_locked := false
+
+
+# Where the farmer's feet meet the ground, in world units. Props and buildings compare against this to
+# decide whether they are drawn over the farmer.
+func ground_y() -> float:
+	return position.y + (GROUND_Y if not sheets.is_empty() else 17.0)
 
 
 func _ready() -> void:
@@ -319,7 +327,9 @@ func _draw_sprite() -> void:
 	elif facing.x != 0.0:
 		dir = "right"
 	var kind := _kind()
-	var action_key := "%s_%s" % [SHEET_FOR.get(kind, kind), dir]
+	# Only tool actions have action sheets; "idle" must not pick up the idle sheets here, or walking would freeze.
+	var action := str(SHEET_FOR.get(kind, kind)) if ACTION_SHEETS.has(SHEET_FOR.get(kind, kind)) else ""
+	var action_key := "%s_%s" % [action, dir]
 	var sheet: Texture2D = sheets["walk_%s" % dir]
 	var frame := 0
 	var dip := 0.0

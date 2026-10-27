@@ -103,7 +103,7 @@ func _build_menu() -> Control:
 	overlay.add_child(dim)
 
 	var frame := PanelContainer.new()
-	frame.add_theme_stylebox_override("panel", _box(COL_FRAME, COL_BORDER, 2, 10, 0))
+	frame.add_theme_stylebox_override("panel", _skin(UiSkin.panel(14), _box(COL_FRAME, COL_BORDER, 2, 10, 0)))
 	frame.set_anchors_preset(Control.PRESET_CENTER)
 	frame.grow_horizontal = Control.GROW_DIRECTION_BOTH
 	frame.grow_vertical = Control.GROW_DIRECTION_BOTH
@@ -342,7 +342,7 @@ func _centred(content: Control) -> Control:
 # One option: a name, a value, an optional button, and an optional progress bar.
 func _build_card(data: Dictionary) -> Control:
 	var card := PanelContainer.new()
-	card.add_theme_stylebox_override("panel", _box(COL_CARD, COL_CARD, 0, 8, 12))
+	card.add_theme_stylebox_override("panel", _skin(UiSkin.slot(false, 12), _box(COL_CARD, COL_CARD, 0, 8, 12)))
 	var block := VBoxContainer.new()
 	block.add_theme_constant_override("separation", 6)
 	card.add_child(block)
@@ -541,10 +541,16 @@ func _build_recipe_tile(recipe: Dictionary, small: bool = false) -> Control:
 	tile.tooltip_text = str(recipe.get("name", ""))
 	tile.clip_contents = true
 	var base := COL_BUTTON_ACTIVE if selected else COL_BUTTON
-	tile.add_theme_stylebox_override("normal", _box(base, COL_ACCENT if selected else COL_BORDER, 2, 8, 4))
-	tile.add_theme_stylebox_override("hover", _box(COL_BUTTON_HOVER, COL_ACCENT, 2, 8, 4))
-	tile.add_theme_stylebox_override("pressed", _box(COL_BUTTON_ACTIVE, COL_ACCENT, 2, 8, 4))
-	tile.add_theme_stylebox_override("focus", _box(base, COL_ACCENT, 2, 8, 4))
+	if UiSkin.slot(false) != null:
+		tile.add_theme_stylebox_override("normal", UiSkin.slot(selected, 4))
+		tile.add_theme_stylebox_override("hover", UiSkin.slot(true, 4))
+		tile.add_theme_stylebox_override("pressed", UiSkin.slot(true, 4))
+		tile.add_theme_stylebox_override("focus", UiSkin.slot(true, 4))
+	else:
+		tile.add_theme_stylebox_override("normal", _box(base, COL_ACCENT if selected else COL_BORDER, 2, 8, 4))
+		tile.add_theme_stylebox_override("hover", _box(COL_BUTTON_HOVER, COL_ACCENT, 2, 8, 4))
+		tile.add_theme_stylebox_override("pressed", _box(COL_BUTTON_ACTIVE, COL_ACCENT, 2, 8, 4))
+		tile.add_theme_stylebox_override("focus", _box(base, COL_ACCENT, 2, 8, 4))
 	tile.pressed.connect(_on_action_pressed.bind(str(recipe.get("action", ""))))
 
 	var box := VBoxContainer.new()
@@ -587,7 +593,7 @@ func _build_detail(recipe: Dictionary) -> Control:
 	var card := PanelContainer.new()
 	card.custom_minimum_size = Vector2(280, 0)
 	card.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
-	card.add_theme_stylebox_override("panel", _box(COL_CARD, COL_BORDER, 1, 8, 14))
+	card.add_theme_stylebox_override("panel", _skin(UiSkin.slot(false, 14), _box(COL_CARD, COL_BORDER, 1, 8, 14)))
 	var block := VBoxContainer.new()
 	block.add_theme_constant_override("separation", 10)
 	card.add_child(block)
@@ -663,6 +669,13 @@ func _build_detail(recipe: Dictionary) -> Control:
 
 
 func _style_button(button: Button, active: bool) -> void:
+	button.add_theme_color_override("font_color", COL_TEXT)
+	button.add_theme_color_override("font_disabled_color", COL_MUTED)
+	if UiSkin.style_button(button):
+		# The active button (the open tab) wears the gold-edged look.
+		if active:
+			button.add_theme_stylebox_override("normal", UiSkin.button("hover"))
+		return
 	var base: Color = COL_BUTTON_ACTIVE if active else COL_BUTTON
 	button.add_theme_stylebox_override("normal", _box(base, COL_BORDER, 2, 6, 8))
 	button.add_theme_stylebox_override("hover", _box(COL_BUTTON_HOVER, COL_ACCENT, 2, 6, 8))
@@ -671,6 +684,11 @@ func _style_button(button: Button, active: bool) -> void:
 	button.add_theme_stylebox_override("focus", _box(base, COL_ACCENT, 2, 6, 8))
 	button.add_theme_color_override("font_color", COL_TEXT)
 	button.add_theme_color_override("font_disabled_color", COL_MUTED)
+
+
+# The skinned style when the UI art is there, otherwise the flat one.
+func _skin(skinned: StyleBox, flat: StyleBox) -> StyleBox:
+	return skinned if skinned != null else flat
 
 
 func _box(bg: Color, border: Color, border_width: int, radius: int, margin: int) -> StyleBoxFlat:
@@ -769,6 +787,14 @@ class RecipeIcon extends Control:
 		_org = (size - Vector2(_sz, _sz)) * 0.5
 		# A soft shadow under each picture, so the items sit on something.
 		draw_colored_polygon(_ellipse(0.5, 0.93, 0.3, 0.05), Color(0, 0, 0, 0.35))
+		# SpriteCook icon art when there is some for this kind, drawn at a whole multiple of its 16 pixels so it
+		# stays crisp; otherwise the picture is drawn from shapes below.
+		var art := UiSkin.icon_rect(kind, tint)
+		if art.size != Vector2.ZERO:
+			var scale_px := maxf(1.0, floorf(_sz / 16.0))
+			var side := 16.0 * scale_px
+			draw_texture_rect_region(UiSkin.icons(), Rect2(_org + Vector2(_sz - side, _sz - side) * 0.5, Vector2(side, side)), art)
+			return
 		var light := tint.lightened(0.3)
 		var dark := tint.darkened(0.45)
 		var metal := Color("b9b4a6")

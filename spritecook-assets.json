@@ -240,10 +240,142 @@
     "art/player/farmer_cast_right.png": {
       "asset_id": "d97e309b-604c-4d8d-9817-744ebc9a5199",
       "label": "Farmer cast right, 8 frames 36x36"
+    },
+    "art/farm/prop_stall.png": {
+      "asset_id": "6f54e315-aa6e-406c-95a4-98fccc9b1ec4",
+      "label": "Farm stand 48x48 on a 2x2 footprint"
+    },
+    "art/farm/boulder_0.png": {
+      "asset_id": "53620d35-7fec-4df7-a40d-6ba1fa750efe",
+      "label": "Breakable boulder 16x16"
+    },
+    "art/farm/boulder_1.png": {
+      "asset_id": "3ebdeafc-12b5-4389-b2ec-aeee0a543338",
+      "label": "Breakable boulder 16x16"
+    },
+    "art/farm/boulder_2.png": {
+      "asset_id": "48357b36-3e59-4ba7-b3a0-617e23b188c8",
+      "label": "Breakable boulder 16x16"
+    },
+    "art/farm/rock_0.png": {
+      "asset_id": "1a713d3a-db5a-4692-be04-ac40fe3e455a",
+      "label": "Mossy cliff rock 16x16 (cave outcrop)"
+    },
+    "art/farm/rock_1.png": {
+      "asset_id": "9779479e-c02e-40a0-bbcb-1fdc3d7fe800",
+      "label": "Mossy cliff rock 16x16 (cave outcrop)"
+    },
+    "art/farm/rock_2.png": {
+      "asset_id": "50c5e5b9-095a-4163-b282-d5a45221ad5e",
+      "label": "Mossy cliff rock 16x16 (cave outcrop)"
+    },
+    "art/farm/brush_0.png": {
+      "asset_id": "64c55d1c-894a-445a-9828-e36aa5fac785",
+      "label": "Brush pile 16x16"
+    },
+    "art/farm/brush_1.png": {
+      "asset_id": "7807ab27-bca4-4b28-a6c6-aedd96063919",
+      "label": "Brush pile 16x16"
+    },
+    "art/farm/brush_2.png": {
+      "asset_id": "714bb057-3ec2-4978-9b27-e9de6076cc5d",
+      "label": "Brush pile 16x16"
+    },
+    "art/farm/thicket_0.png": {
+      "asset_id": "ba483592-86c7-4a28-b9a0-61dcc07de732",
+      "label": "Bramble thicket 16x16"
+    },
+    "art/farm/fence.png": {
+      "asset_id": "55f15b6f-360a-4403-8403-8cda238387cc",
+      "label": "Split-rail fence section, frame 2 of a 64x16 strip"
+    },
+    "art/farm/scarecrow.png": {
+      "asset_id": "8f18cc78-4dd4-4129-99e1-4264ee22249f",
+      "label": "Scarecrow 16x32"
+    },
+    "art/farm/clutter.png": {
+      "asset_id": "1702c36d-1315-49a3-a2db-a9c9be6955d5",
+      "label": "Ground clutter strip 64x16: pebbles, leaves, mushrooms, grass tuft"
+    },
+    "art/farm/cave_mouth.png": {
+      "asset_id": "ffe18683-ee53-40ce-af22-5c77d3246ade",
+      "label": "Cave entrance 48x32, timber-framed opening in a mossy rock face"
+    },
+    "art/farm/cave_floor.png": {
+      "asset_id": "976298a4-21e2-4cba-909e-bceec4eaa1ed",
+      "label": "Cave floor, 15-piece tileset 16px (filled frame used)"
+    },
+    "art/farm/cave_wall.png": {
+      "asset_id": "e9d8ea82-ebd8-45cf-9ae9-b2ad09629314",
+      "label": "Cave rock wall, 15-piece dual-grid tileset 16px (stray black right column replaced)"
+    },
+    "art/farm/cave_ore.png": {
+      "asset_id": "1d847baf-ed4c-40e0-abe1-59557586f050",
+      "label": "Ore strip 32x16: copper, iron"
+    },
+    "art/farm/cave_exit.png": {
+      "asset_id": "d64fcb12-9b2a-4d3c-8bd5-f4043f99041f",
+      "label": "Cave exit steps into daylight 16x16"
+    },
+    "art/farm/hen_walk.png": {
+      "asset_id": "0a829419-8b03-4d83-874b-0376d20a9641",
+      "label": "Hen walk, 4 frames 20x20, facing right (from hen 16x16 bddf7995)"
+    },
+    "art/farm/goat_walk.png": {
+      "asset_id": "f014aec6-fc59-4171-8798-f5062a96f706",
+      "label": "Goat walk, 4 frames 36x36, facing right (from goat 32x24 9991adca)"
+    },
+    "art/farm/foe_bat.png": {
+      "asset_id": "5876842c-f965-4d6d-ba1b-e36ffd1afe7f",
+      "label": "Bat flapping, 4 frames 20x20 (from bat 99226969)"
+    },
+    "art/farm/foe_lizard.png": {
+      "asset_id": "f4ac82d7-70da-4afd-a146-8aa541e35dfb",
+      "label": "Lizard scuttle, 4 frames 20x20, facing right (from lizard 7cfe79c2)"
+    },
+    "art/farm/foe_snake.png": {
+      "asset_id": "6bcc2ad0-59a0-4ac4-a89b-a18503d9166c",
+      "label": "Snake slither, 4 frames 20x20, facing right; grey matte pixels removed (from snake 6e819288)"
+    },
+    "art/farm/crow_perch.png": {
+      "asset_id": "b7f2e5aa-8d88-4a30-a907-60eefd3fab45",
+      "label": "Crow perched 16x16, facing right"
+    },
+    "art/farm/crow_fly.png": {
+      "asset_id": "6b06f2c4-9177-4e83-97bb-108c1be75d36",
+      "label": "Crow flying, 4 frames 36x36, pixel-engine-v1.5 (from flying crow 7856ec0e)"
     }
   },
   "animation_runs": {
     "farmer_topdown": "31532ffb-fab2-4152-9b50-6794ac95e0e9",
     "farmer_idles": "124ec018-82b2-4570-8777-2a2732db408c"
+  },
+  "ui_kit": {
+    "ui_kit_id": "b181d3c4-ae67-4f4e-baa5-d5e2c96228b2",
+    "concept_asset_id": "e3ad8529-2cb8-47eb-96a3-6143c6e37acf",
+    "sheet_asset_id": "920460b8-695f-4986-bf3b-a2754213416f",
+    "note": "art/ui/*.png are cut from the sheet at one third size; see scripts/ui_skin.gd for the 9-slice margins"
+  },
+  "icon_strips": {
+    "note": "art/ui/icons.png stacks these 4-icon strips top to bottom, stray fragments removed; order in scripts/ui_skin.gd ICONS",
+    "rows": [
+      "469fd2cb-a6f1-415a-9cfe-246d948a7348",
+      "dfc03a94-f1cb-45ce-a60d-03c811f4b403",
+      "bb62bc45-814d-4fe0-b135-fda1b5a1ac61",
+      "d87c0781-e6f4-4225-b352-ce0667273e25",
+      "0cc92b7a-5b2a-4ee0-b15d-4209304ae95d",
+      "d52e8bfe-b91b-4830-af83-3ba0bd36789b",
+      "4cb03be3-f162-4d96-a825-d0ebdcbf32a9",
+      "99460531-f91a-4824-99ff-bdb79e536718",
+      "88713ce8-0a7d-48be-9ab6-e9c676952b91",
+      "9c30b242-2b48-4b56-a3a2-ec603781b60c",
+      "e2b4ba65-efb9-4d63-9ceb-fb80689e4958",
+      "7fb55419-8995-4fd3-b8d0-b68b201a28a4",
+      "2a547703-e62d-490d-8612-93045780ec6a"
+    ],
+    "replaced": {
+      "hoe": "b285c708-4b20-4900-8cd5-a438d1ed45d6 (28px, scaled to 16)",
+      "hammer": "6ecd6b80-551c-4e91-9326-20925c0f9540 (26px, scaled to 16)"
+    }
   }
 }

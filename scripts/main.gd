@@ -72,6 +72,7 @@ const BIG_TREE_MESSAGE := "Too old and too thick to fell. Something moves in its
 const ROOST_HOUR := 20.0      # from this hour the crows come home to the great tree
 const ROOST_SIZE := 4         # perches in its crown
 const ROOST_ALT := 3.4        # how high the crown perches sit, in tiles
+const ROOST_SPOTS := [Vector2(-2.6, 2.7), Vector2(-0.7, 4.4), Vector2(0.9, 4.5), Vector2(2.6, 2.5)]  # perches on the tree's art
 const XP_FELL := 20
 # Rocks on the farm. Breaking one gives stone. A pick gives more, and from Mining 2 a small chance of copper ore.
 # Some sit inside the plots: a rock must be broken before that soil can be planted.
@@ -312,6 +313,7 @@ const SMOKEHOUSE_COST := {"wood": 5, "fiber": 3, "coins": 60, "level": 3}
 # The stall sells what you carry and buys seeds. It is open 06:00 to 18:00.
 const STALL_IX := FarmLayout.STALL_IX
 const STALL_IY := FarmLayout.STALL_IY
+const STALL_TILES := Vector2i(3, 2)   # the stall's footprint: as wide as its art, two rows deep
 const RESERVED := FarmLayout.RESERVED
 # Draws every farm tile as one flat colour block, with no ground detail, shadows, tree or building art.
 # Use it to read the layout itself. Set it to false for the full placeholder art.
@@ -666,9 +668,9 @@ const NIGHT_EVENTS := [
 	{"message": "The field is quiet tonight. Too quiet.", "shadow": "none", "sanity": -3},
 ]
 
-enum Tile { TREE, GRASS, SOIL, PATH, WATER, HOUSE, DOOR, FLOOR, WALL, EXIT, BED, STATION, DESK, FALLOW, STALL, CELLAR, COOLER, GATE, SMOKEHOUSE, FURNACE, PORTAL, CAMP, CAVE_MOUTH, CAVE_EXIT, ORE_COPPER, ORE_IRON, COOP, BARN, TABLE, FIREPLACE, WELL, PORCH, WOODSTORE, CHOPLOG, FENCE, ROCK, ROOF }
+enum Tile { TREE, GRASS, SOIL, PATH, WATER, HOUSE, DOOR, FLOOR, WALL, EXIT, BED, STATION, DESK, FALLOW, STALL, CELLAR, COOLER, GATE, SMOKEHOUSE, FURNACE, PORTAL, CAMP, CAVE_MOUTH, CAVE_EXIT, ORE_COPPER, ORE_IRON, COOP, BARN, TABLE, FIREPLACE, WELL, PORCH, WOODSTORE, CHOPLOG, FENCE, ROCK, ROOF, SCARECROW }
 
-const BLOCKING := [Tile.TREE, Tile.WATER, Tile.HOUSE, Tile.WALL, Tile.BED, Tile.STATION, Tile.DESK, Tile.STALL, Tile.CELLAR, Tile.COOLER, Tile.SMOKEHOUSE, Tile.FURNACE, Tile.CAMP, Tile.ORE_COPPER, Tile.ORE_IRON, Tile.COOP, Tile.BARN, Tile.TABLE, Tile.FIREPLACE, Tile.WELL, Tile.WOODSTORE, Tile.CHOPLOG, Tile.FENCE, Tile.ROCK]
+const BLOCKING := [Tile.TREE, Tile.WATER, Tile.HOUSE, Tile.WALL, Tile.BED, Tile.STATION, Tile.DESK, Tile.STALL, Tile.CELLAR, Tile.COOLER, Tile.SMOKEHOUSE, Tile.FURNACE, Tile.CAMP, Tile.ORE_COPPER, Tile.ORE_IRON, Tile.COOP, Tile.BARN, Tile.TABLE, Tile.FIREPLACE, Tile.WELL, Tile.WOODSTORE, Tile.CHOPLOG, Tile.FENCE, Tile.ROCK, Tile.SCARECROW]
 
 const TILE_COLORS := {
 	Tile.TREE: Color("2f4f2f"),
@@ -704,6 +706,7 @@ const TILE_COLORS := {
 	Tile.FENCE: Color("8a6a4a"),
 	Tile.ROCK: Color("7f7f80"),
 	Tile.ROOF: Color("905636"),
+	Tile.SCARECROW: Color("7a6a4a"),
 	Tile.TABLE: Color("7a5230"),
 	Tile.FIREPLACE: Color("5a5650"),
 	Tile.CAMP: Color("d07a30"),
@@ -1286,6 +1289,7 @@ func _draw() -> void:
 				_draw_flat_tile(Vector2i(x, y))
 		if FARM_SPRITES:
 			_draw_dual_ground(fx0, fy0, fx1, fy1)
+			_draw_clutter(fx0, fy0, fx1, fy1)
 			tree_view = Rect2i(fx0, fy0, fx1 - fx0 + 1, fy1 - fy0 + 1)
 			_draw_trees(self, false)
 			if tree_front_layer != null:
@@ -1383,9 +1387,18 @@ func _draw() -> void:
 			FarmArt.draw_crop(self, center, PX, str(crop["kind"]), stage, watered_now)
 
 	for pos in rocks:
-		FarmArt.draw_rock(self, _tile_center(pos.x, pos.y), PX * 0.3, FarmArt.hash_int(pos.x, pos.y, 4))
+		if FARM_SPRITES:
+			draw_texture_rect(FarmSprites.tex("boulder_%d" % FarmSprites.variant(pos.x, pos.y, 3)), _tile_rect(pos), false)
+		else:
+			FarmArt.draw_rock(self, _tile_center(pos.x, pos.y), PX * 0.3, FarmArt.hash_int(pos.x, pos.y, 4))
 	for pos in brush:
-		FarmArt.draw_brush(self, _tile_center(pos.x, pos.y), FarmArt.hash_int(pos.x, pos.y, 6))
+		if FARM_SPRITES:
+			# Thickets share the brush list; they are the piles on a thicket spot.
+			var thicket := THICKET_SPOTS.has(Vector2i(pos.x - BORDER_X, pos.y - BORDER_Y))
+			var art := "thicket_0" if thicket else "brush_%d" % FarmSprites.variant(pos.x, pos.y, 3)
+			draw_texture_rect(FarmSprites.tex(art), _tile_rect(pos), false)
+		else:
+			FarmArt.draw_brush(self, _tile_center(pos.x, pos.y), FarmArt.hash_int(pos.x, pos.y, 6))
 
 	_draw_house()
 
@@ -1657,7 +1670,7 @@ func _build_map() -> void:
 const TERRAIN_CODES := {
 	".": Tile.GRASS, "S": Tile.SOIL, "F": Tile.FALLOW, "P": Tile.PATH, "~": Tile.WATER,
 	"H": Tile.HOUSE, "D": Tile.DOOR, "A": Tile.STALL, "W": Tile.WELL, "R": Tile.PORCH,
-	"C": Tile.CAVE_MOUTH, "G": Tile.TREE, "B": Tile.TREE, "b": Tile.GRASS, "X": Tile.FENCE, "K": Tile.ROCK, "O": Tile.ROOF,
+	"C": Tile.CAVE_MOUTH, "G": Tile.TREE, "B": Tile.TREE, "b": Tile.GRASS, "X": Tile.FENCE, "K": Tile.ROCK, "O": Tile.ROOF, "Y": Tile.SCARECROW,
 }
 
 
@@ -2021,10 +2034,12 @@ func _build_hud() -> void:
 	minimap.custom_minimum_size = mini_size
 	minimap.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	minimap.set_anchors_preset(Control.PRESET_TOP_RIGHT)
-	minimap.offset_left = -(mini_size.x + 12.0)
-	minimap.offset_right = -12.0
-	minimap.offset_top = 12.0
-	minimap.offset_bottom = 12.0 + mini_size.y
+	# The frame's rail reaches past the map, so the map sits in from the corner by the rail's width too.
+	var inset := 12.0 + Minimap.FRAME_RAIL
+	minimap.offset_left = -(mini_size.x + inset)
+	minimap.offset_right = -inset
+	minimap.offset_top = inset
+	minimap.offset_bottom = inset + mini_size.y
 	layer.add_child(minimap)
 
 
@@ -2057,6 +2072,20 @@ func _make_need_bar(title: String) -> ProgressBar:
 	bar.show_percentage = false
 	bar.min_value = 0.0
 	bar.max_value = 100.0
+	var skinned_fill := UiSkin.bar_fill(title.to_lower())
+	if skinned_fill != null:
+		# The bar is the meter's channel; its frame is drawn around it, so a margin leaves the frame room.
+		bar.custom_minimum_size = UiSkin.CHANNEL_SIZE
+		bar.add_theme_stylebox_override("background", UiSkin.bar_background())
+		bar.add_theme_stylebox_override("fill", skinned_fill)
+		var room := MarginContainer.new()
+		room.add_theme_constant_override("margin_left", int(UiSkin.FRAME_OUTSET.x))
+		room.add_theme_constant_override("margin_right", int(UiSkin.FRAME_OUTSET.x))
+		room.add_theme_constant_override("margin_top", int(UiSkin.FRAME_OUTSET.y))
+		room.add_theme_constant_override("margin_bottom", int(UiSkin.FRAME_OUTSET.y))
+		room.add_child(bar)
+		col.add_child(room)
+		return bar
 	bar.custom_minimum_size = Vector2(64, 8)
 	bar.add_theme_stylebox_override("background", _bar_box(Color(0.06, 0.045, 0.035, 0.95)))
 	bar.add_theme_stylebox_override("fill", _bar_box(Color("c9a24a")))
@@ -2065,7 +2094,10 @@ func _make_need_bar(title: String) -> ProgressBar:
 
 
 # The bar's frame: dark wood with gold trim and a soft shadow.
-func _hud_box() -> StyleBoxFlat:
+func _hud_box() -> StyleBox:
+	var skinned := UiSkin.panel(10)
+	if skinned != null:
+		return skinned
 	var box := StyleBoxFlat.new()
 	box.bg_color = Color(0.09, 0.065, 0.05, 0.9)
 	box.border_color = Color("b8893f")
@@ -2182,15 +2214,21 @@ func _draw_sprite_ground(t: Vector2i, kind: int, cell: Rect2) -> bool:
 		Tile.ROCK:
 			name = "rock_%d" % v
 		Tile.CAVE_MOUTH:
-			name = "cave_mouth"
+			# Rock underneath; the entrance itself is drawn over it and its neighbours by _draw_trees.
+			name = "rock_%d" % v
 		Tile.HOUSE, Tile.DOOR, Tile.ROOF, Tile.PORCH, Tile.STALL, Tile.WELL:
 			# The house, stall and well are sprites drawn over their footprints, and the porch is path laid over
 			# grass by _draw_dual_ground, so all of these start as grass.
 			_draw_grass(t, cell)
 			return true
-		Tile.TREE:
-			# Every tree stands on grass; the trees and the great tree are drawn over it by _draw_trees.
+		Tile.TREE, Tile.SCARECROW:
+			# Every tree, the great tree and the scarecrow stand on grass; _draw_trees draws them over it.
 			_draw_grass(t, cell)
+			return true
+		Tile.FENCE:
+			# A split-rail section, posts at both ends, so a row of them joins into one fence.
+			_draw_grass(t, cell)
+			draw_texture_rect(FarmSprites.tex("fence"), cell, false)
 			return true
 		_:
 			return false
@@ -2204,6 +2242,8 @@ func _draw_sprite_ground(t: Vector2i, kind: int, cell: Rect2) -> bool:
 # Grass is the filled frame of its set, mirrored by position so the repeat is less obvious.
 const GROUND_FRAME := 16
 const GROUND_FILLED_FRAME := 6
+# The grass art is a light sage; this darkens it toward a damp, mossy green.
+const GRASS_TINT := Color(0.72, 0.8, 0.66)
 # Frame in the 4 by 4 atlas for each corner mask (top-left 1, top-right 2, bottom-left 4, bottom-right 8).
 const DUAL_FRAME_BY_MASK := [-1, 15, 8, 9, 0, 11, 14, 7, 13, 4, 1, 10, 3, 2, 5, 6]
 # Layers laid over the grass, bottom first, and the map tiles that count as each. The path goes last, so the
@@ -2229,7 +2269,7 @@ func _draw_grass(t: Vector2i, cell: Rect2) -> void:
 		src.position.x = tex.get_width() - src.end.x
 	if (bits & 2) == 2:
 		src.position.y = tex.get_height() - src.end.y
-	draw_texture_rect_region(tex, cell, src)
+	draw_texture_rect_region(tex, cell, src, GRASS_TINT)
 
 
 # Each layer is drawn on the dual grid: a tile sits on every corner where four map tiles meet, half a tile
@@ -2267,6 +2307,33 @@ func _draw_crop_sprite(cell: Rect2, kind: String, stage: int, watered: bool) -> 
 		draw_rect(cell, WATERED_SOIL)
 	var frame := clampi(stage, 0, MAX_STAGE)
 	draw_texture_rect_region(FarmSprites.tex("crop_%s" % kind), cell, Rect2(frame * CROP_FRAME, 0, CROP_FRAME, CROP_FRAME))
+
+
+# Ground clutter: pebbles, fallen leaves, mushrooms and dry grass tufts (art/farm/clutter.png, four 16-pixel
+# frames) on about one open grass tile in CLUTTER_ONE_IN. A tile only gets clutter when its eight neighbours
+# are grass too, so nothing sits on a path's or a plot's edge. It never blocks.
+const CLUTTER_ONE_IN := 11
+
+
+func _draw_clutter(fx0: int, fy0: int, fx1: int, fy1: int) -> void:
+	var tex := FarmSprites.tex("clutter")
+	for y in range(fy0, fy1 + 1):
+		for x in range(fx0, fx1 + 1):
+			if FarmArt.hash_int(x, y, 23) % CLUTTER_ONE_IN != 0 or not _open_grass_around(x, y):
+				continue
+			var t := Vector2i(x, y)
+			if brush.has(t) or rocks.has(t) or grove_felled.has(t) or crops.has(t):
+				continue
+			var frame := FarmArt.hash_int(x, y, 29) % 4
+			draw_texture_rect_region(tex, _tile_rect(t), Rect2(frame * GROUND_FRAME, 0, GROUND_FRAME, GROUND_FRAME))
+
+
+func _open_grass_around(x: int, y: int) -> bool:
+	for dy in range(-1, 2):
+		for dx in range(-1, 2):
+			if not _tile_is(x + dx, y + dy, [Tile.GRASS]):
+				return false
+	return true
 
 
 func _tile_is(x: int, y: int, kinds: Array) -> bool:
@@ -2347,18 +2414,18 @@ func _house_origin() -> Vector2i:
 	return best
 
 
-# The stall and the well are drawn over the player only while the player is north of their footprint.
+# The stall and the well are drawn over the player only while the player's feet are north of their footprint's
+# bottom edge, so standing just below one puts the farmer in front of it.
 func _update_prop_depth() -> void:
 	if stall_layer == null or well_layer == null or player == null:
 		return
-	var stall_bottom := _stall_cell().end.y
-	stall_layer.z_index = 1 if player.position.y < stall_bottom else 0
-	var well_bottom := _well_cell().end.y
-	well_layer.z_index = 1 if player.position.y < well_bottom else 0
+	var feet: float = player.ground_y()
+	stall_layer.z_index = 1 if feet < _stall_cell().end.y else 0
+	well_layer.z_index = 1 if feet < _well_cell().end.y else 0
 
 
 func _stall_cell() -> Rect2:
-	return Rect2(_tile_rect(_world_tile(STALL_IX, STALL_IY)).position, Vector2(PX * 2, PX * 2))
+	return Rect2(_tile_rect(_world_tile(STALL_IX, STALL_IY)).position, Vector2(PX * STALL_TILES.x, PX * STALL_TILES.y))
 
 
 func _well_cell() -> Rect2:
@@ -2367,7 +2434,8 @@ func _well_cell() -> Rect2:
 	return r
 
 
-# The stall covers 2 by 2 tiles and its art is drawn larger, centred on the footprint and standing on its bottom edge.
+# The stall covers 3 by 2 tiles and its art (48×48 at 3×) is drawn 3 tiles square, standing on the footprint's
+# bottom edge; the awning rises a tile above it.
 func _draw_stall_layer() -> void:
 	var cell := _stall_cell()
 	var stall_size := PX * 3.0
@@ -2441,6 +2509,14 @@ func _draw_trees(ci: CanvasItem, front: bool) -> void:
 				if trees_here:
 					var nudge := float(FarmArt.hash_int(x, y, 13) % 7 - 3) * SCALE
 					ci.draw_texture_rect(FarmSprites.tex(_tree_art(t)), Rect2(cell.get_center().x - PX + nudge, cell.end.y - PX * 3.0, PX * 2.0, PX * 3.0), false)
+			elif kind == Tile.CAVE_MOUTH:
+				# 48×32: an entrance in the rock face, three tiles wide and two tall, its opening on this tile.
+				if trees_here:
+					ci.draw_texture_rect(FarmSprites.tex("cave_mouth"), Rect2(cell.position.x - PX, cell.end.y - PX * 2.0, PX * 3.0, PX * 2.0), false)
+			elif kind == Tile.SCARECROW:
+				# 16×32: one tile wide, two tall, standing on its tile.
+				if trees_here:
+					ci.draw_texture_rect(FarmSprites.tex("scarecrow"), Rect2(cell.position.x, cell.end.y - PX * 2.0, PX, PX * 2.0), false)
 			elif kind == Tile.GRASS and grove_felled.has(t) and not front:
 				ci.draw_texture_rect(FarmSprites.tex("prop_stump"), cell, false)
 
@@ -2666,7 +2742,8 @@ func _build_tip_panel() -> void:
 	sb.set_border_width_all(2)
 	sb.set_corner_radius_all(6)
 	sb.set_content_margin_all(12)
-	tip_panel.add_theme_stylebox_override("panel", sb)
+	var skinned := UiSkin.panel(16)
+	tip_panel.add_theme_stylebox_override("panel", skinned if skinned != null else sb)
 	tip_panel.set_anchors_preset(Control.PRESET_CENTER_BOTTOM)
 	tip_panel.grow_horizontal = Control.GROW_DIRECTION_BOTH
 	tip_panel.grow_vertical = Control.GROW_DIRECTION_BEGIN
@@ -3640,8 +3717,14 @@ func _build_crows() -> void:
 	# The great tree's crown: a few perches spread across the top, where the crows roost at night.
 	roost_perches.clear()
 	var base := _big_tree_base()
-	for o in [Vector2(-0.8, 0.1), Vector2(-0.25, -0.05), Vector2(0.35, 0.12), Vector2(0.85, 0.0)]:
-		roost_perches.append({"ground": base + o * PX, "alt": PX * ROOST_ALT})
+	if FARM_SPRITES:
+		# On the great tree's art: the two bare branch tips at the sides, and two spots on top of the crown.
+		# Each is (tiles across from the trunk, tiles up), measured from prop_great_tree.png.
+		for o in ROOST_SPOTS:
+			roost_perches.append({"ground": base + Vector2(o.x, 0.0) * PX, "alt": PX * o.y})
+	else:
+		for o in [Vector2(-0.8, 0.1), Vector2(-0.25, -0.05), Vector2(0.35, 0.12), Vector2(0.85, 0.0)]:
+			roost_perches.append({"ground": base + o * PX, "alt": PX * ROOST_ALT})
 	# A faint red light at each perch, lit only while a crow roosts there, so the red eyes show in the dark.
 	for light in roost_lights:
 		(light as Node).queue_free()
@@ -3798,6 +3881,9 @@ func _draw_crow_layer() -> void:
 		var fade := clampf(1.0 - alt / 150.0, 0.1, 1.0)
 		var w := 5.0 + alt * 0.06
 		crow_layer.draw_colored_polygon(FarmArt.ellipse(c["ground"], w, w * 0.42), Color(0.02, 0.03, 0.02, 0.38 * fade))
+	if FARM_SPRITES:
+		_draw_crow_sprites()
+		return
 	var ink := Color("1c1a22")
 	var wing_near := Color("2e2b38")
 	var wing_far := Color("16141c")
@@ -3836,6 +3922,36 @@ func _draw_crow_layer() -> void:
 		# Near wing in front of the body.
 		crow_layer.draw_colored_polygon(_wing_shape(root + Vector2(facing * 2.0, 0.0), near_tip, root + Vector2(-facing * 2.0, 0.8)), wing_near)
 		crow_layer.draw_line(root + Vector2(facing * 1.0, 0.0), near_tip.lerp(root, 0.35), Color(0.45, 0.45, 0.55, 0.45), 0.8)
+
+
+# Crows in SpriteCook art, facing right and mirrored to face left. A perched or roosting crow is art/farm/
+# crow_perch.png (16×16) standing on its perch; a flying or hopping one is a frame of crow_fly.png (four 36×36
+# frames) centred on its position, the frame following its flap. Roosting crows' eyes glow red, as before.
+const CROW_PERCH_EYE := Vector2(11.5, 2.5)   # the perched crow's eye, in its art's pixels
+
+
+func _draw_crow_sprites() -> void:
+	for c in crows:
+		var facing := float(c["facing"])
+		var st := str(c["state"])
+		var p: Vector2 = (c["ground"] as Vector2) + Vector2(0, -float(c["alt"]))
+		if facing < 0.0:
+			crow_layer.draw_set_transform(Vector2(p.x * 2.0, 0.0), 0.0, Vector2(-1, 1))
+		if st == "perched" or st == "roost":
+			var size := Vector2(16, 16) * SCALE
+			var top_left := Vector2(p.x - size.x * 0.5, p.y + 6.0 - size.y)
+			crow_layer.draw_texture_rect(FarmSprites.tex("crow_perch"), Rect2(top_left, size), false)
+			if c.has("slot"):
+				var eye := top_left + (CROW_PERCH_EYE + Vector2(0.5, 0.5)) * SCALE
+				# Colours past 1.0 so the eyes stay bright under the night tint, which darkens everything else.
+				crow_layer.draw_circle(eye, 9.0, Color(3.0, 0.2, 0.15, 0.25))
+				crow_layer.draw_circle(eye, 5.0, Color(3.5, 0.3, 0.2, 0.5))
+				crow_layer.draw_rect(Rect2(eye - Vector2(SCALE, SCALE) * 0.5, Vector2(SCALE, SCALE)), Color(5.0, 1.0, 0.7))
+		else:
+			var frame := int(fposmod(float(c["flap"]), TAU) / TAU * 4.0) % 4
+			var fsize := Vector2(36, 36) * SCALE
+			crow_layer.draw_texture_rect_region(FarmSprites.tex("crow_fly"), Rect2(p - fsize * 0.5, fsize), Rect2(frame * 36, 0, 36, 36))
+		crow_layer.draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
 
 
 func _draw_fish_spots() -> void:
@@ -4258,10 +4374,12 @@ func _place_minimap(mini_size: Vector2) -> void:
 	if minimap.custom_minimum_size == mini_size:
 		return
 	minimap.custom_minimum_size = mini_size
-	minimap.offset_left = -(mini_size.x + 12.0)
-	minimap.offset_right = -12.0
-	minimap.offset_top = 12.0
-	minimap.offset_bottom = 12.0 + mini_size.y
+	# The frame's rail reaches past the map, so the map sits in from the corner by the rail's width too.
+	var inset := 12.0 + Minimap.FRAME_RAIL
+	minimap.offset_left = -(mini_size.x + inset)
+	minimap.offset_right = -inset
+	minimap.offset_top = inset
+	minimap.offset_bottom = inset + mini_size.y
 
 
 # --- The mining cave ---------------------------------------------------------
@@ -4376,10 +4494,73 @@ func _draw_cave() -> void:
 	var y0 := clampi(floori(top_left.y / PX) - 1, 0, CAVE_H - 1)
 	var x1 := clampi(ceili((top_left.x + view.x) / PX) + 1, 0, CAVE_W - 1)
 	var y1 := clampi(ceili((top_left.y + view.y) / PX) + 1, 0, CAVE_H - 1)
+	if FARM_SPRITES:
+		_draw_cave_sprites(x0, y0, x1, y1)
+	else:
+		for y in range(y0, y1 + 1):
+			for x in range(x0, x1 + 1):
+				draw_rect(_tile_rect(Vector2i(x, y)), TILE_COLORS[cave[y][x]])
+	_draw_combat()
+
+
+# The cave in SpriteCook art: stone floor everywhere (the filled frame of art/farm/cave_floor.png, mirrored by
+# position), the rock walls laid over it on the dual grid from art/farm/cave_wall.png, as the farm's ground is,
+# then the ore veins (art/farm/cave_ore.png: copper, then iron) and the exit's steps up into daylight.
+const CAVE_WALLS := [Tile.WALL, Tile.ORE_COPPER, Tile.ORE_IRON]
+# The wall art is close in tone to the floor; darkening it makes the tunnels read at a glance.
+const CAVE_WALL_TINT := Color(0.55, 0.55, 0.6)
+
+
+func _draw_cave_sprites(x0: int, y0: int, x1: int, y1: int) -> void:
+	var floor_tex := FarmSprites.tex("cave_floor")
+	var src := _ground_frame_rect(GROUND_FILLED_FRAME)
 	for y in range(y0, y1 + 1):
 		for x in range(x0, x1 + 1):
-			draw_rect(_tile_rect(Vector2i(x, y)), TILE_COLORS[cave[y][x]])
-	_draw_combat()
+			var bits := FarmSprites.variant(x, y, 4)
+			var tex := FarmSprites.tex_flipped("cave_floor", (bits & 1) == 1, (bits & 2) == 2) if bits != 0 else floor_tex
+			var s := src
+			if (bits & 1) == 1:
+				s.position.x = tex.get_width() - s.end.x
+			if (bits & 2) == 2:
+				s.position.y = tex.get_height() - s.end.y
+			draw_texture_rect_region(tex, _tile_rect(Vector2i(x, y)), s)
+	var wall := FarmSprites.tex("cave_wall")
+	for y in range(y0, y1 + 2):
+		for x in range(x0, x1 + 2):
+			var mask := 0
+			if _cave_is(x - 1, y - 1, CAVE_WALLS):
+				mask |= 1
+			if _cave_is(x, y - 1, CAVE_WALLS):
+				mask |= 2
+			if _cave_is(x - 1, y, CAVE_WALLS):
+				mask |= 4
+			if _cave_is(x, y, CAVE_WALLS):
+				mask |= 8
+			var frame: int = DUAL_FRAME_BY_MASK[mask]
+			if frame >= 0:
+				draw_texture_rect_region(wall, Rect2((Vector2(x, y) - Vector2(0.5, 0.5)) * PX, Vector2(PX, PX)), _ground_frame_rect(frame), CAVE_WALL_TINT)
+	var ore := FarmSprites.tex("cave_ore")
+	for y in range(y0, y1 + 1):
+		for x in range(x0, x1 + 1):
+			var kind: int = cave[y][x]
+			if kind == Tile.ORE_COPPER or kind == Tile.ORE_IRON:
+				var col := 0 if kind == Tile.ORE_COPPER else 1
+				draw_texture_rect_region(ore, _tile_rect(Vector2i(x, y)), Rect2(col * GROUND_FRAME, 0, GROUND_FRAME, GROUND_FRAME))
+			elif kind == Tile.CAVE_EXIT:
+				draw_texture_rect(FarmSprites.tex("cave_exit"), _tile_rect(Vector2i(x, y)), false)
+
+
+func _cave_is(x: int, y: int, kinds: Array) -> bool:
+	# Outside the cave counts as wall, so the rock closes off the edges.
+	if x < 0 or y < 0 or x >= CAVE_W or y >= CAVE_H:
+		return true
+	return kinds.has(cave[y][x])
+
+
+# Creatures with SpriteCook sheets (art/farm/foe_<kind>.png, facing right). Hollows and stalkers keep their
+# drawn shapes.
+const FOE_ANIMATED := ["bat", "lizard", "snake"]
+const FOE_FPS := 8.0
 
 
 # Foes, arrows in flight, and the swing arc. Shared by the world and the cave.
@@ -4388,11 +4569,26 @@ func _draw_combat() -> void:
 		var pos: Vector2 = foe["pos"]
 		var st: Dictionary = FOES[foe["kind"]]
 		var body := Color(str(st["color"]))
-		if float(foe["flash"]) > 0.0:
+		var flashing := float(foe["flash"]) > 0.0
+		if flashing:
 			body = Color("e8e0d0")
-		draw_circle(pos, PX * 0.32, body)
-		draw_circle(pos + Vector2(-5, -4), 2.5, Color(0.9, 0.1, 0.1))
-		draw_circle(pos + Vector2(5, -4), 2.5, Color(0.9, 0.1, 0.1))
+		var kind := str(foe["kind"])
+		if FARM_SPRITES and FOE_ANIMATED.has(kind):
+			# A creature's sheet (four 20×20 frames at 3×) standing on its position. It steps through its frames
+			# while it moves (a bat flaps all the time), faces the way it last moved, and turns pale when hit.
+			var size := Vector2(20, 20) * SCALE
+			var f := 0
+			if kind == "bat" or bool(foe.get("moving", false)):
+				f = (int(Time.get_ticks_msec() * 0.001 * FOE_FPS) + int(pos.x) % 4) % 4
+			var left: bool = kind != "bat" and float(foe.get("face", 1.0)) < 0.0
+			if left:
+				draw_set_transform(Vector2(pos.x * 2.0, 0.0), 0.0, Vector2(-1, 1))
+			draw_texture_rect_region(FarmSprites.tex("foe_%s" % kind), Rect2(pos - Vector2(size.x * 0.5, size.y - PX * 0.3), size), Rect2(f * 20, 0, 20, 20), Color(2.2, 2.1, 2.0) if flashing else Color.WHITE)
+			draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
+		else:
+			draw_circle(pos, PX * 0.32, body)
+			draw_circle(pos + Vector2(-5, -4), 2.5, Color(0.9, 0.1, 0.1))
+			draw_circle(pos + Vector2(5, -4), 2.5, Color(0.9, 0.1, 0.1))
 		var frac := float(foe["hp"]) / float(st["hp"])
 		draw_rect(Rect2(pos + Vector2(-PX * 0.3, -PX * 0.5), Vector2(PX * 0.6 * frac, 3)), Color("c24a4a"))
 	for shot in shots:
@@ -6091,6 +6287,9 @@ func _draw_hen_layer() -> void:
 	var center := Vector2(coop_tile.x + COOP_SIZE * 0.5, coop_tile.y + COOP_SIZE * 0.5) * PX
 	for i in hen_pos.size():
 		var c: Vector2 = center + hen_pos[i] * PX
+		if FARM_SPRITES:
+			_draw_animal(hen_layer, "hen_walk", 20, c, hen_pos[i], hen_goal[i], i)
+			continue
 		hen_layer.draw_circle(c, PX * 0.16, Color("f4efe0"))
 		hen_layer.draw_circle(c + Vector2(PX * 0.14, 0.0), PX * 0.05, Color("d9a040"))
 
@@ -6126,6 +6325,9 @@ func _draw_goat_layer() -> void:
 	var center := Vector2(barn_tile.x + BARN_SIZE.x * 0.5, barn_tile.y + BARN_SIZE.y + 0.9) * PX
 	for i in goat_pos.size():
 		var c: Vector2 = center + goat_pos[i] * PX
+		if FARM_SPRITES:
+			_draw_animal(goat_layer, "goat_walk", 36, c, goat_pos[i], goat_goal[i], i)
+			continue
 		var body := Color("efe6d2")
 		goat_layer.draw_colored_polygon(_goat_ellipse(c + Vector2(0, -PX * 0.05), PX * 0.3, PX * 0.19), body)
 		goat_layer.draw_circle(c + Vector2(PX * 0.28, -PX * 0.22), PX * 0.13, body)
@@ -6133,6 +6335,26 @@ func _draw_goat_layer() -> void:
 		goat_layer.draw_line(c + Vector2(PX * 0.22, -PX * 0.32), c + Vector2(PX * 0.12, -PX * 0.42), Color("b8a888"), 2.0)
 		for leg in [-0.18, 0.12]:
 			goat_layer.draw_rect(Rect2(c.x + leg * PX - 1.5, c.y + PX * 0.1, 3, PX * 0.22), Color("b8a888"))
+
+
+# A hen or goat from its walk sheet (four square frames of `frame` pixels, facing right, drawn at 3×), standing
+# on its position. It faces the way it is walking, steps through the cycle while it moves, and stands on frame 0
+# while it waits. Each animal starts its cycle at a different point, so a flock doesn't step in time.
+const ANIMAL_FPS := 7.0
+
+
+func _draw_animal(layer: CanvasItem, art: String, frame: int, at: Vector2, pos: Vector2, goal: Vector2, index: int) -> void:
+	var tex := FarmSprites.tex(art)
+	var size := Vector2(frame, frame) * SCALE
+	var moving := pos.distance_to(goal) >= 0.02
+	var f := 0
+	if moving:
+		f = (int(Time.get_ticks_msec() * 0.001 * ANIMAL_FPS) + index * 3) % 4
+	var left := goal.x < pos.x if moving else (index % 2 == 1)
+	if left:
+		layer.draw_set_transform(Vector2(at.x * 2.0, 0.0), 0.0, Vector2(-1, 1))
+	layer.draw_texture_rect_region(tex, Rect2(at - Vector2(size.x * 0.5, size.y * 0.85), size), Rect2(f * frame, 0, frame, frame))
+	layer.draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
 
 
 func _goat_ellipse(center: Vector2, rx: float, ry: float) -> PackedVector2Array:

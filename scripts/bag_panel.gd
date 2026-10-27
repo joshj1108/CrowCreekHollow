@@ -44,7 +44,8 @@ func _ready() -> void:
 	# A zero-size anchor at the bottom right; the panel grows up and to the left to fit its contents.
 	panel = PanelContainer.new()
 	panel.visible = false
-	panel.add_theme_stylebox_override("panel", _box(COL_PANEL, COL_GOLD.darkened(0.45), 2, 10, 10))
+	var skinned := UiSkin.panel(14)
+	panel.add_theme_stylebox_override("panel", skinned if skinned != null else _box(COL_PANEL, COL_GOLD.darkened(0.45), 2, 10, 10))
 	panel.set_anchors_preset(Control.PRESET_BOTTOM_RIGHT)
 	panel.offset_right = -RIGHT_MARGIN
 	panel.offset_left = -RIGHT_MARGIN
@@ -80,11 +81,18 @@ func _ready() -> void:
 		b.add_theme_font_size_override("font_size", 12)
 		b.add_theme_color_override("font_color", COL_TEXT)
 		b.add_theme_color_override("font_disabled_color", COL_DIM)
-		b.add_theme_stylebox_override("normal", _box(COL_SLOT, COL_BORDER, 2, 6, 4))
-		b.add_theme_stylebox_override("hover", _box(COL_SLOT_HOVER, COL_GOLD.darkened(0.2), 2, 6, 4))
-		b.add_theme_stylebox_override("focus", _box(COL_SLOT_HOVER, COL_GOLD, 2, 6, 4))
-		b.add_theme_stylebox_override("pressed", _box(COL_SLOT_HOVER, COL_GOLD, 2, 6, 4))
-		b.add_theme_stylebox_override("disabled", _box(COL_SLOT_EMPTY, Color("2a2016"), 1, 6, 4))
+		if UiSkin.slot(false) != null:
+			b.add_theme_stylebox_override("normal", UiSkin.slot(false, 4))
+			b.add_theme_stylebox_override("hover", UiSkin.slot(true, 4))
+			b.add_theme_stylebox_override("focus", UiSkin.slot(true, 4))
+			b.add_theme_stylebox_override("pressed", UiSkin.slot(true, 4))
+			b.add_theme_stylebox_override("disabled", UiSkin.slot(false, 4))
+		else:
+			b.add_theme_stylebox_override("normal", _box(COL_SLOT, COL_BORDER, 2, 6, 4))
+			b.add_theme_stylebox_override("hover", _box(COL_SLOT_HOVER, COL_GOLD.darkened(0.2), 2, 6, 4))
+			b.add_theme_stylebox_override("focus", _box(COL_SLOT_HOVER, COL_GOLD, 2, 6, 4))
+			b.add_theme_stylebox_override("pressed", _box(COL_SLOT_HOVER, COL_GOLD, 2, 6, 4))
+			b.add_theme_stylebox_override("disabled", _box(COL_SLOT_EMPTY, Color("2a2016"), 1, 6, 4))
 		b.pressed.connect(func() -> void: slot_chosen.emit(i))
 		_add_slot_art(b)
 		grid.add_child(b)
@@ -97,9 +105,10 @@ func _ready() -> void:
 	inventory_button.custom_minimum_size = Vector2(118, 28)
 	inventory_button.add_theme_font_size_override("font_size", 13)
 	inventory_button.add_theme_color_override("font_color", COL_TEXT)
-	inventory_button.add_theme_stylebox_override("normal", _box(COL_SLOT, COL_BORDER, 2, 6, 4))
-	inventory_button.add_theme_stylebox_override("hover", _box(COL_SLOT_HOVER, COL_GOLD.darkened(0.2), 2, 6, 4))
-	inventory_button.add_theme_stylebox_override("focus", _box(COL_SLOT_HOVER, COL_GOLD, 2, 6, 4))
+	if not UiSkin.style_button(inventory_button):
+		inventory_button.add_theme_stylebox_override("normal", _box(COL_SLOT, COL_BORDER, 2, 6, 4))
+		inventory_button.add_theme_stylebox_override("hover", _box(COL_SLOT_HOVER, COL_GOLD.darkened(0.2), 2, 6, 4))
+		inventory_button.add_theme_stylebox_override("focus", _box(COL_SLOT_HOVER, COL_GOLD, 2, 6, 4))
 	inventory_button.pressed.connect(func() -> void: inventory_requested.emit())
 	inventory_row.add_child(inventory_button)
 
@@ -117,9 +126,10 @@ func _ready() -> void:
 	toggle_button.custom_minimum_size = Vector2(150, 40)
 	toggle_button.add_theme_font_size_override("font_size", 16)
 	toggle_button.add_theme_color_override("font_color", COL_TEXT)
-	toggle_button.add_theme_stylebox_override("normal", _box(COL_SLOT, COL_BORDER, 2, 6, 4))
-	toggle_button.add_theme_stylebox_override("hover", _box(COL_SLOT_HOVER, COL_GOLD.darkened(0.2), 2, 6, 4))
-	toggle_button.add_theme_stylebox_override("focus", _box(COL_SLOT_HOVER, COL_GOLD, 2, 6, 4))
+	if not UiSkin.style_button(toggle_button):
+		toggle_button.add_theme_stylebox_override("normal", _box(COL_SLOT, COL_BORDER, 2, 6, 4))
+		toggle_button.add_theme_stylebox_override("hover", _box(COL_SLOT_HOVER, COL_GOLD.darkened(0.2), 2, 6, 4))
+		toggle_button.add_theme_stylebox_override("focus", _box(COL_SLOT_HOVER, COL_GOLD, 2, 6, 4))
 	# Sits just above the Menu button, which lives in the same corner.
 	toggle_button.set_anchors_preset(Control.PRESET_BOTTOM_RIGHT)
 	toggle_button.offset_left = -166.0
@@ -167,7 +177,8 @@ func set_items(items: Array) -> void:
 			b.disabled = false
 			b.modulate = Color(1, 1, 1) if bool(it.get("usable", false)) else Color(0.78, 0.76, 0.72)
 			var tint := str(it.get("tint", DEFAULT_TINT))
-			if str(b.get_meta("tint", "")) != tint:
+			# Flat slots take the item's tint on their edge; the skinned slots keep their frame.
+			if UiSkin.slot(false) == null and str(b.get_meta("tint", "")) != tint:
 				b.set_meta("tint", tint)
 				var edge := Color(tint).lightened(0.1)
 				b.add_theme_stylebox_override("normal", _box(COL_SLOT, edge, 2, 6, 4))

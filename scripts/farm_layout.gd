@@ -8,7 +8,7 @@ extends RefCounted
 #   . grass     S soil (plot one)     F fallow (plots two and three, cleared later)
 #   P path      ~ water               R porch boards
 #   H house     O roof (house top)    D door    A market stall     W well
-#   C cave mouth                      K rock (blocks)    X fence (blocks)
+#   C cave mouth                      K rock (blocks)    X fence (blocks)    Y scarecrow (blocks)
 #   G grove tree (felled for wood)    B great tree base (3 by 3, not felled)
 #   b great tree's walkable top row (grass)
 
@@ -24,17 +24,17 @@ const TERRAIN := [
 	"KKCKKK.............OOOOOOOOOOO..............~~~~~~~~~~~~..~~~~~.",
 	"KKPPK..............OOOOOOOOOOO..............~~~~~~~~~~~~..~~~~~.",
 	"..PPP..............HHHHHHHHHHH................PPP~~~~~~~~~~~~...",
-	"..P................HHHHHDHHHHH..G..AA.........PPP~~~~~~~~~~~~...",
-	"..P.....................RP.........AA.........PPP~~~~~~~~~~~~...",
+	"..P................HHHHHDHHHHH..G.AAA.........PPP~~~~~~~~~~~~...",
+	"..P.....................RP........AAA.........PPP~~~~~~~~~~~~...",
 	"..PPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPP~~~~~~~~~~~....",
 	"...................................................~~~~~~~......",
 	"..........G........................................~~~~~~~......",
 	".................................................G...~~~~.......",
 	"................................................................",
-	".............................................G.............G....",
+	"..XXXXXXXXXXXXXXXXX..........................G.............G....",
 	"...SSSSSSSSSSSSSSS..............................................",
 	"...SSSSSSSSSSSSSSS..............................................",
-	"...SSSSSSSSSSSSSSS.......G......................................",
+	"...SSSSSSSSSSSSSSS.Y.....G......................................",
 	"...SSSSSSSSSSSSSSS.................................G............",
 	"...SSSSSSSSSSSSSSS...........FFFFFFFFFFFF.......................",
 	"...SSSSSSSSSSSSSSS....WW.....FFFFFFFFFFFF.....G.................",
@@ -50,7 +50,7 @@ const TERRAIN := [
 	"...SSSSSSSSSSSSSSS..............................................",
 	"...SSSSSSSSSSSSSSS..............................................",
 	"...SSSSSSSSSSSSSSS..............................................",
-	"......................................G......................G..",
+	"..XXXXXXXXXXXXXXXXX...................G......................G..",
 	".................G..............................................",
 	"................................................................",
 ]
@@ -64,7 +64,7 @@ const HOUSE_W := 11
 const HOUSE_H := 7
 const PORCH_RECT := Rect2i(24, 12, 1, 1)
 const WELL_IX := Vector2i(22, 24)
-const STALL_IX := 35
+const STALL_IX := 34
 const STALL_IY := 11
 const CELLAR_IX := Vector2i(17, 7)
 const SMOKEHOUSE_IX := Vector2i(43, 33)
@@ -84,4 +84,4 @@ const ROCK_SPOTS := [Vector2i(56, 28), Vector2i(31, 7), Vector2i(34, 18), Vector
 # Farm tiles that the coop and barn must not be placed on, so they never overlap a building the player unlocks later.
 const RESERVED := [Vector2i(17, 7), Vector2i(40, 32), Vector2i(40, 33), Vector2i(40, 34), Vector2i(40, 35), Vector2i(41, 32), Vector2i(41, 33), Vector2i(41, 34), Vector2i(41, 35), Vector2i(42, 32), Vector2i(42, 33), Vector2i(42, 34), Vector2i(42, 35), Vector2i(43, 32), Vector2i(43, 33), Vector2i(43, 34), Vector2i(43, 35), Vector2i(44, 32), Vector2i(44, 33), Vector2i(44, 34), Vector2i(44, 35)]
 # Changes whenever the layout changes. Saves record it, so a save from another layout is migrated.
-const VERSION := "286b8939"
+const VERSION := "7f601855"
