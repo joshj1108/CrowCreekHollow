@@ -1204,6 +1204,10 @@ func _process(delta: float) -> void:
 			queue_redraw()
 	if weather != null:
 		weather.visible = not inside and not in_cave
+	# The farm's standing art lives on its own layers, which the cave's _draw doesn't cover, so hide them there.
+	for layer in [house_roof_layer, stall_layer, well_layer, big_tree_layer, tree_front_layer]:
+		if layer != null:
+			layer.visible = not in_cave
 	# Any open menu pauses the day: the clock stops, foes stand still, and only the menu responds.
 	player.paused = open_tab != "" or _bag_open() or _wheel_open()
 	# The bag's corner button only shows when no section or wheel covers the farm.
