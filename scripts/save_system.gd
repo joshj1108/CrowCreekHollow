@@ -117,6 +117,7 @@ func _save_game() -> void:
 		"sudoku_puzzles": m.sudoku_puzzles,
 		"desk_orders": m.desk_orders,
 		"tips_seen": m.tips_seen.keys(),
+		"guide_v": 1,
 	}
 	var file := FileAccess.open(m._save_path(), FileAccess.WRITE)
 	if file != null:
@@ -269,6 +270,10 @@ func _load_game() -> bool:
 		# Saves from before tips existed have seen the tutorial already, so it doesn't flood them.
 		for tip in m.TIPS:
 			m.tips_seen[str(tip["id"])] = true
+	# Saves from before the guided first day are past it already.
+	if not data.has("guide_v"):
+		for step in m.GUIDE:
+			m.tips_seen[str(step["id"])] = true
 	if data.has("cave_mined"):
 		m.cave_mined.clear()
 		for c in data["cave_mined"]:

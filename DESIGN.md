@@ -19,7 +19,7 @@ A top-down farming game with heavy psychological horror, built in Godot 4.7.
 - Walk into the farmhouse door to go inside. Walk onto the exit mat to leave.
 - The section wheel: Shift opens it (see Section wheel below). Settings is Esc only. The Inventory is opened from the bag (Tab).
 - The bag (grid, bottom-right corner): Tab opens and closes it. Click a slot to use it, or move with the arrow keys and press Enter.
-- Esc closes whatever is open, the bag, the wheel, or a section, one at a time. With nothing open, Esc opens Settings. Esc or Start closes Settings. B closes the same things as Esc, and dismisses a tip when nothing is open.
+- Esc closes whatever is open, the bag, the wheel, or a section, one at a time. With nothing open, Esc opens Settings. Esc or Start closes Settings. B closes the same things as Esc, and dismisses a tip when nothing is open. On the keyboard, Backspace dismisses a tip (and does nothing else), so Esc stays free for Settings.
 - Stuck while placing or boxed in? Esc opens Settings, which cancels any placement. The **Unstick** button in the Game section moves you to the nearest open ground (grass, path, soil, fallow) from the farmhouse door, and works on the farm only.
 - Farming and gathering pause while a panel is open
 - **Dev (debug builds only):** F4, or **Unlock** in the Game section of Settings, sets every skill to level 10 and gives 99,999 coins, 999 of each material and 99 of each seed. It also gives every tool, lantern and bag tier, restores the house, builds the pump, hose and storage buildings, and fills the needs. The coop and barn still need placing from the Buildings panel. Exported release builds ignore F4 and hide the button. It isn't on F9 because the Godot editor uses F9 to suspend a game running in its Game tab.
@@ -144,21 +144,17 @@ The story is taught through survival. Chapters run in order. The first unfinishe
 
 | # | Chapter | Goal | Reward |
 |---|---|---|---|
-| 1 | Unfamiliar Ground | Plant 3 seeds | 5 turnip seeds |
-| 2 | Food Takes Time | Harvest 1 crop | 50 Farming XP |
-| 3 | Wood Before Walls | Gather from 3 brush piles | 2 wood, 2 fiber |
-| 4 | Hold the Door | Repair the house to Boarded | 2 wood, 2 fiber |
-| 5 | Work the Pond | Catch 3 fish | 40 Fishing XP |
-| 6 | A Fire and a Pan | Cook a meal | 30 Cooking XP |
-| 7 | Light the Way | Build a Tin Lantern | 3 turnip seeds |
-| 8 | Sleep Under Your Own Roof | Sleep in the bed before 03:00 | 40 Carpentry XP |
-| 9 | The Overgrown Plot | Reach Farming 2 (opens plot two) | 3 pumpkin seeds |
-| 10 | A Clean Start | Repair to Patched and tidy once | 40 Cleaning XP |
-| 11 | Feed Yourself Through the Cold | Harvest 10 crops | 60 Farming XP |
-| 12 | Coin for Seed | Sell 5 items at the farm stand | 30 coins |
-| 13 | Something Sweeter | Harvest a pumpkin (Farming 3) | 2 pumpkin seeds |
-| 14 | Clear the Stain | Cleanse the house once | 40 Cleaning XP |
-| 15 | A Home Worth Keeping | Restore the farmhouse fully | 60 Cleaning XP |
+| 1 | Food Takes Time | Harvest 1 crop | 50 Farming XP |
+| 2 | Light the Way | Build a Tin Lantern | 3 turnip seeds |
+| 3 | Sleep Under Your Own Roof | Sleep in the bed before 03:00 | 40 Carpentry XP |
+| 4 | The Overgrown Plot | Reach Farming 2 (opens plot two) | 3 pumpkin seeds |
+| 5 | Feed Yourself Through the Cold | Harvest 10 crops | 60 Farming XP |
+| 6 | Coin for Seed | Sell 5 items at the farm stand | 30 coins |
+| 7 | Something Sweeter | Harvest a pumpkin (Farming 3) | 2 pumpkin seeds |
+| 8 | Clear the Stain | Cleanse the house once | 40 Cleaning XP |
+| 9 | A Home Worth Keeping | Restore the farmhouse fully | 60 Cleaning XP |
+
+The first day's basics (planting, gathering, crafting, chopping, drinking) are taught by the guided first day under Tutorial tips, not by chapters.
 
 Saves from before this change reset chapter progress. Stat-based achievements re-check from saved stats, so some rewards may be paid again.
 
@@ -334,10 +330,12 @@ The house is drawn in four stages that match its repair level. **Decrepit** has 
 
 ## Tutorial tips
 
-- A new game starts with tips for moving, the menus, and growing food. They show one at a time in a card at the bottom of the screen, each for about 16 seconds. Press B to dismiss one. A tip waits while a panel is open.
-- Later tips appear as the player reaches each part of the farm: sleeping after 17:00, chores, repairs, buildings, and quests from day 2, hens once a coop stands, the cellar, smelting and preserving once the furnace or smokehouse is built, and the mine from day 3.
-- Each tip shows once. The Settings menu lists the tips already seen under **Tips**, so they can be read again.
-- Saves keep the seen tips. Saves from before tips existed count the whole tutorial as seen, so it doesn't flood them.
+- **The guided first day.** A new game opens with eight steps on the tip card, one at a time: walk 10 tiles, plant 3 seeds with the trowel, open the bag, gather from 3 brush piles, open the section wheel, craft a crude hatchet, fell a tree, and drink from the pond. Each step stays up until it is done, shows "(n of 8)" in its title, and is followed by a "Done" message and a chime. A step already done ahead of its turn is passed over. Dismissing a step skips it. After the last step the card shows the current story chapter.
+- **Later tips** appear as the player reaches each part of the farm: watering once 3 seeds are planted, food and water at 12:00, sleeping at 17:00, repairs on day 2, quests from 10:00 on day 2, chores from 14:00 on day 2, buildings on day 3, the mine on day 4, hens once a coop stands, goats once the barn stands, the cellar, and smelting and preserving once the furnace or smokehouse is built. Each shows for about 16 seconds. A waiting tip steps in front of a guide step, which comes back afterwards.
+- The card sits at the bottom of the screen and steps aside while the bag, the wheel, a section or a placement is up. A tip's time doesn't run out behind a menu. B (or Backspace on the keyboard) dismisses it.
+- Tip text names the controls for the device in use: tools are left click or RT, hand actions (gather, open, drink, place) are Space or A.
+- Each tip shows once. The Settings menu lists the tips and guide steps already seen under **Tips**, so they can be read again.
+- Saves keep the seen tips. Saves from before tips existed count the whole tutorial as seen, and saves from before the guided first day count it as done, so neither floods them.
 
 ## Saving
 

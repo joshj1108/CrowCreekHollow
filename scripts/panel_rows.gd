@@ -60,9 +60,9 @@ func _game_rows() -> Array:
 func _tip_rows() -> Array:
 	var rows: Array = [{"section": "Tips"}]
 	var any := false
-	for tip in m.TIPS:
+	for tip in m.GUIDE + m.TIPS:
 		if m.tips_seen.has(tip["id"]):
-			rows.append({"name": tip["title"], "value": tip["text"]})
+			rows.append({"name": tip["title"], "value": m._fill_controls(str(tip["text"]))})
 			any = true
 	if not any:
 		rows.append({"note": "Tips appear as you reach each part of the farm. The first ones show as soon as you start."})

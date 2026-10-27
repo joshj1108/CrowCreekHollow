@@ -228,19 +228,32 @@ const CROP_VALUE := {"turnip": 8, "corn": 14, "pumpkin": 30}
 const STAGE_NAMES := ["Decrepit", "Boarded", "Patched", "Restored"]
 # Tips: short notes that appear one at a time as the player reaches each part of the farm.
 # Each shows once, and the Settings menu keeps the ones already seen. When the condition is met, see _tip_ready.
+# Braces name controls and are filled in for a keyboard or a gamepad, see _fill_controls.
 const TIPS := [
-	{"id": "well", "title": "The well", "text": "The pump by the plots is seized. Repair it from the Well panel, then attach the hose. The hose reaches every plot, so face a crop and press Space to water it. Rain waters everything."},
-	{"id": "sleep", "title": "Sleeping", "text": "Walk to the bed in the bedroom and press Space from 18:00 to save and end the day. Stay up past 03:00 and you collapse, which lowers your sanity limit."},
-	{"id": "chores", "title": "Keeping house", "text": "The house wears down a little each night. Tidy it and mend a board each day from the House section on the section wheel (Shift). Chores you skip add wear."},
-	{"id": "repair", "title": "Repairing the farmhouse", "text": "Repair the house from the House section on the section wheel (Shift). Each stage restores it inside and out, and unlocks rooms and features."},
-	{"id": "buildings", "title": "Buildings", "text": "Build the workshop, coop, and barn from the Buildings section on the section wheel (Shift). Pick a spot on open grass, press Space to place it, and B to cancel."},
-	{"id": "quests", "title": "Quests", "text": "The Quests section, on the section wheel (Shift), lists what the farm asks of you. Press Details on a quest to read its story."},
-	{"id": "hens", "title": "Hens", "text": "Order hens from the catalog at the desk; they come with the morning post. Stand beside the coop, facing it, and press Space to feed them. A grown hen that is fed lays an egg each morning. Hens are grown after a week."},
-	{"id": "goats", "title": "Goats", "text": "Build the barn from the Buildings menu, order goats from the catalog at the desk, and stand beside the barn, facing it, and press Space to feed them. A grown goat that is fed gives milk each morning. Goats are grown after ten days."},
-	{"id": "cellar", "title": "Storing crops", "text": "Stand beside the root cellar and press Space to store or take crops. Nothing spoils in the cellar."},
-	{"id": "smelt", "title": "Smelting and preserving", "text": "Stand beside the furnace and press Space to smelt ore into bars. The smokehouse preserves food, and the cooler keeps fish fresh."},
-	{"id": "needs", "title": "Food, water, and warmth", "text": "Food and water drain through the day, and warmth drops outside on cold days. Eat from the bag (Tab), drink from the pond, and warm up in the house. Sleep to be fully warm again, but only with a fire lit: feed the hearth from the firewood store at the workshop."},
+	{"id": "well", "title": "Watering", "text": "A crop only grows on a night after it was watered, and rain waters everything. The pump by the plots is seized: face the well and press {hand} to open it. Repair the pump once you reach Carpentry 2, then attach the hose. {tool:hose} to select the hose, face a crop, and press {tool} to water it."},
+	{"id": "sleep", "title": "Sleeping", "text": "From 18:00, walk to the bed in the bedroom and press {hand} to save and end the day. Stay up past 03:00 and you collapse, which lowers your sanity limit."},
+	{"id": "repair", "title": "Repairing the farmhouse", "text": "Repair the house from the House section on the section wheel ({wheel}). Each stage restores it inside and out, and unlocks rooms and features."},
+	{"id": "quests", "title": "Quests", "text": "The Quests section, on the section wheel ({wheel}), lists what the farm asks of you. Press Details on a quest to read its story."},
+	{"id": "chores", "title": "Keeping house", "text": "The house wears down a little each night. Tidy it and mend a board each day from the House section on the section wheel ({wheel}). Chores you skip add wear."},
+	{"id": "buildings", "title": "Buildings", "text": "Build the workshop, coop, and barn from the Buildings section on the section wheel ({wheel}). Pick a spot on open grass, press {hand} to place it, and {back} to cancel."},
+	{"id": "hens", "title": "Hens", "text": "Order hens from the catalog at the desk; they come with the morning post. Stand beside the coop, facing it, and press {hand} to feed them. A grown hen that is fed lays an egg each morning. Hens are grown after a week."},
+	{"id": "goats", "title": "Goats", "text": "Order goats from the catalog at the desk, then stand beside the barn, facing it, and press {hand} to feed them. A grown goat that is fed gives milk each morning. Goats are grown after ten days."},
+	{"id": "cellar", "title": "Storing crops", "text": "Stand beside the root cellar and press {hand} to store or take crops. Nothing spoils in the cellar."},
+	{"id": "smelt", "title": "Smelting and preserving", "text": "Stand beside the furnace and press {hand} to smelt ore into bars. The smokehouse preserves food, and the cooler keeps fish fresh."},
+	{"id": "needs", "title": "Food, water, and warmth", "text": "Food and water drain through the day, and warmth drops outside on cold days. Eat from the bag ({bag}), drink from the pond, and warm up in the house. Sleep to be fully warm again, but only with a fire lit: feed the hearth from the firewood store at the workshop."},
 	{"id": "cave", "title": "The mine", "text": "The cave is at the west edge of the farm. Each day it lays out differently, with ore to mine and creatures to watch for."},
+]
+# The guided first day: steps shown in order on the tip card. Each one stays up until it is done
+# (or skipped), then the next follows. "stat" and "goal" say when a step is done, see _guide_done.
+const GUIDE := [
+	{"id": "g_walk", "title": "Find your feet", "text": "Use {move} to walk around the yard.", "stat": "walked", "goal": 10},
+	{"id": "g_plant", "title": "Plant seeds", "text": "{tool:trowel} to select the trowel. Face a soil tile in the plot and press {tool} to plant a seed. Plant three.", "stat": "planted", "goal": 3},
+	{"id": "g_bag", "title": "Your bag", "text": "Press {bag} to open your bag and see what you carry. Press it again to close it.", "stat": "bag_opened", "goal": 1},
+	{"id": "g_brush", "title": "Sticks and fiber", "text": "The brush piles around the yard hide sticks and fiber. Face one and press {hand} to gather it. Gather three.", "stat": "gathered", "goal": 3},
+	{"id": "g_wheel", "title": "The section wheel", "text": "Press {wheel} to open the section wheel. It holds Skills, Gear, Craft, Quests, House, Buildings, and Achievements.", "stat": "wheel_opened", "goal": 1},
+	{"id": "g_hatchet", "title": "Your first tool", "text": "Open Craft from the section wheel ({wheel}) and make a crude hatchet from 2 sticks and 2 fiber.", "stat": "hatchet", "goal": 1},
+	{"id": "g_chop", "title": "Timber", "text": "{tool:axe} to select the axe. Face a tree and press {tool}, and keep chopping until it falls.", "stat": "felled", "goal": 1},
+	{"id": "g_drink", "title": "Drink", "text": "Walk to the pond, face the water, and press {hand} to drink.", "stat": "drank", "goal": 1},
 ]
 # Cost to reach the next house stage, and the Carpentry level it needs.
 const REPAIR_COSTS := [
@@ -683,6 +696,7 @@ var tip_check_timer := 0.0
 var tip_panel: PanelContainer
 var tip_title_label: Label
 var tip_body_label: Label
+var tip_hint_label: Label
 
 # Night events: picked by day so the nights vary. "shadow" says where it appears.
 const NIGHT_EVENTS := [
@@ -1642,6 +1656,7 @@ func _setup_input() -> void:
 	_ensure_action("wheel", [KEY_SHIFT], [JOY_BUTTON_LEFT_STICK])
 	_ensure_action("settings", [KEY_ESCAPE], [JOY_BUTTON_START])
 	_ensure_action("close_panel", [], [JOY_BUTTON_B])
+	_ensure_action("dismiss_tip", [KEY_BACKSPACE])
 
 
 # Adds keys, gamepad buttons, and stick directions to an action. Each axis entry
@@ -2734,32 +2749,66 @@ func _update_minimap() -> void:
 
 # --- Tutorial tips ----------------------------------------------------------
 
-# Each tip has a trigger. Tips are checked once a second and queue up, then show one at a time
-# while nothing else is open. A tip shows once, and its text stays in the Settings menu.
+# A new game opens with the guided first day (GUIDE): one step at a time, each waiting for its action.
+# Tips (TIPS) have a trigger. They are checked once a second and queue up, then show one at a time,
+# between guide steps. A tip shows once, and its text stays in the Settings menu.
 func _tip_ready(id: String) -> bool:
 	match id:
+		"well":
+			return int(stats.get("planted", 0)) >= 3 or day >= 2
 		"sleep":
 			return current_hour >= 17.0
-		"chores", "repair", "buildings", "quests":
+		"needs":
+			return current_hour >= 12.0
+		"repair":
 			return day >= 2
+		"quests":
+			return day >= 2 and current_hour >= 10.0
+		"chores":
+			return day >= 2 and current_hour >= 14.0
+		"buildings":
+			return day >= 3
+		"cave":
+			return day >= 4
 		"hens":
 			return coop_built
-		"cave":
-			return day >= 3
+		"goats":
+			return barn_built
 		"smelt":
 			return furnace_built or smokehouse_built
 		"cellar":
 			return cellar_built
-		"needs":
-			return current_hour >= 12.0
-		"well":
-			return day >= 2
-		"goats":
-			return barn_built
 	return false
 
 
+# The first guide step not yet done or skipped, or {} once the guide is over.
+# A step already done ahead of its turn is passed over quietly.
+func _guide_step() -> Dictionary:
+	for step in GUIDE:
+		if tips_seen.has(step["id"]):
+			continue
+		if _guide_done(step):
+			tips_seen[step["id"]] = true
+			continue
+		return step
+	return {}
+
+
+func _guide_done(step: Dictionary) -> bool:
+	var stat := str(step["stat"])
+	var value := int(tool_tier["hatchet"]) if stat == "hatchet" else int(stats.get(stat, 0))
+	return value >= int(step["goal"])
+
+
+func _is_guide(id: String) -> bool:
+	return id.begins_with("g_")
+
+
 func _update_tips(delta: float) -> void:
+	# The card steps aside while a menu is up, and a tip's time doesn't run out behind it.
+	var menu_up := open_tab != "" or placing != "" or _bag_open() or _wheel_open()
+	if tip_showing != "":
+		tip_panel.visible = not menu_up
 	tip_check_timer -= delta
 	if tip_check_timer <= 0.0:
 		tip_check_timer = 1.0
@@ -2767,14 +2816,34 @@ func _update_tips(delta: float) -> void:
 			var id: String = tip["id"]
 			if not tips_seen.has(id) and not tip_queue.has(id) and id != tip_showing and _tip_ready(id):
 				tip_queue.append(id)
-	if tip_showing != "":
-		tip_timer -= delta
-		if tip_timer <= 0.0:
+		if _is_guide(tip_showing) and _guide_done(_tip_data(tip_showing)):
+			_show_message("Done: %s." % str(_tip_data(tip_showing)["title"]))
+			play_sfx("chime")
 			_hide_tip()
+			# The guide is over: point at the story, which carries on from here.
+			if _guide_step().is_empty():
+				tip_cooldown = 0.0
+				_show_quest_prompt()
+	# A waiting tip steps in front of a guide step, which comes back afterwards.
+	if _is_guide(tip_showing) and tip_queue.size() > 0 and not menu_up:
+		_show_tip(str(tip_queue.pop_front()))
+		return
+	if tip_showing != "":
+		if not _is_guide(tip_showing) and not menu_up:
+			tip_timer -= delta
+			if tip_timer <= 0.0:
+				_hide_tip()
 		return
 	tip_cooldown = maxf(tip_cooldown - delta, 0.0)
-	if tip_queue.size() > 0 and tip_cooldown <= 0.0 and open_tab == "" and placing == "":
+	if tip_cooldown > 0.0 or menu_up:
+		return
+	# Waiting tips go first, so the guide never holds back a warning such as the one for bedtime.
+	if tip_queue.size() > 0:
 		_show_tip(str(tip_queue.pop_front()))
+		return
+	var step := _guide_step()
+	if not step.is_empty():
+		_show_tip(str(step["id"]))
 
 
 # Shows the current chapter as a prompt: its title, and what to do with the controls for this device.
@@ -2790,17 +2859,28 @@ func _show_quest_prompt() -> void:
 	tip_timer = 30.0
 	tip_title_label.text = str(current["title"])
 	tip_body_label.text = _prompt_text(current)
+	tip_hint_label.text = _fill_controls("{dismiss} to dismiss. The Quests section keeps your current goal.")
 	tip_panel.visible = true
 
 
 # A chapter's prompt, with the control names filled in for a keyboard or a gamepad.
 func _prompt_text(q: Dictionary) -> String:
-	var text := str(q.get("prompt", q["text"]))
+	return _fill_controls(str(q.get("prompt", q["text"])))
+
+
+# Fills in the control names in a tip or prompt for the device in use.
+# {tool} uses the tool in hand and {hand} is the hand action (gather, open, drink, place).
+func _fill_controls(text: String) -> String:
 	var pad := not Input.get_connected_joypads().is_empty()
 	text = text.replace("{move}", "the left stick" if pad else "WASD or the arrow keys")
 	text = text.replace("{use}", "RT or A" if pad else "left click or Space")
+	text = text.replace("{tool}", "RT" if pad else "left click")
+	text = text.replace("{hand}", "A" if pad else "Space")
+	text = text.replace("{back}", "B" if pad else "Esc")
+	text = text.replace("{dismiss}", "B" if pad else "Backspace")
+	text = text.replace("{bag}", "Y" if pad else "Tab")
+	text = text.replace("{wheel}", "a left stick click" if pad else "Shift")
 	text = text.replace("{switch}", "LB and RB" if pad else "the number keys 1 to 0 or the mouse wheel")
-	text = text.replace("{menus}", "Y for Skills, Back for Inventory, Start for Settings" if pad else "K Skills, I Inventory, C Craft, Q Quests")
 	text = text.replace("{craft}", "the Craft section on the section wheel" if pad else "the Craft section on the section wheel (Shift)")
 	text = text.replace("{inv}", "Back" if pad else "I")
 	text = text.replace("{house}", "the Menu button" if pad else "H")
@@ -2816,21 +2896,30 @@ func _prompt_text(q: Dictionary) -> String:
 func _show_tip(id: String) -> void:
 	var tip := _tip_data(id)
 	tip_showing = id
-	tips_seen[id] = true
 	tip_timer = 16.0
 	tip_title_label.text = str(tip["title"])
-	tip_body_label.text = str(tip["text"])
+	tip_body_label.text = _fill_controls(str(tip["text"]))
+	if _is_guide(id):
+		var n := GUIDE.find(tip) + 1
+		tip_title_label.text = "%s  (%d of %d)" % [str(tip["title"]), n, GUIDE.size()]
+		tip_hint_label.text = _fill_controls("{dismiss} to skip this step. Tips are kept in Settings.")
+	else:
+		tips_seen[id] = true
+		tip_hint_label.text = _fill_controls("{dismiss} to dismiss. Tips are kept in Settings.")
 	tip_panel.visible = true
 
 
+# A guide step counts as seen once it is done or skipped, so the next one can follow.
 func _hide_tip() -> void:
+	if _is_guide(tip_showing):
+		tips_seen[tip_showing] = true
 	tip_showing = ""
 	tip_panel.visible = false
 	tip_cooldown = 1.5
 
 
 func _tip_data(id: String) -> Dictionary:
-	for tip in TIPS:
+	for tip in TIPS + GUIDE:
 		if str(tip["id"]) == id:
 			return tip
 	return {"title": "", "text": ""}
@@ -2847,6 +2936,11 @@ func _build_tip_panel() -> void:
 	sb.set_corner_radius_all(6)
 	sb.set_content_margin_all(12)
 	var skinned := UiSkin.panel(16)
+	# The wood frame is thick, so the text keeps clear of its sides and bottom.
+	if skinned != null:
+		skinned.content_margin_left = 18
+		skinned.content_margin_right = 18
+		skinned.content_margin_bottom = 16
 	tip_panel.add_theme_stylebox_override("panel", skinned if skinned != null else sb)
 	tip_panel.set_anchors_preset(Control.PRESET_CENTER_BOTTOM)
 	tip_panel.grow_horizontal = Control.GROW_DIRECTION_BOTH
@@ -2871,11 +2965,10 @@ func _build_tip_panel() -> void:
 	tip_body_label.add_theme_font_size_override("font_size", 15)
 	tip_body_label.add_theme_color_override("font_color", Color("e8dcc0"))
 	box.add_child(tip_body_label)
-	var hint := Label.new()
-	hint.text = "B to dismiss. Tips are kept in Settings."
-	hint.add_theme_font_size_override("font_size", 12)
-	hint.add_theme_color_override("font_color", Color("9a8a6a"))
-	box.add_child(hint)
+	tip_hint_label = Label.new()
+	tip_hint_label.add_theme_font_size_override("font_size", 12)
+	tip_hint_label.add_theme_color_override("font_color", Color("9a8a6a"))
+	box.add_child(tip_hint_label)
 	host.add_child(tip_panel)
 
 
@@ -2892,11 +2985,15 @@ func _handle_keys() -> void:
 	if Input.is_action_just_pressed("settings"):
 		_press_back(true)
 	# B dismisses a tip when nothing else is open, and otherwise closes what is open.
+	# Backspace dismisses a tip on the keyboard and does nothing else, so Esc stays free for Settings.
+	var nothing_open := open_tab == "" and placing == "" and not _bag_open() and not _wheel_open()
 	if Input.is_action_just_pressed("close_panel"):
-		if tip_showing != "" and open_tab == "" and placing == "" and not _bag_open() and not _wheel_open():
+		if tip_showing != "" and nothing_open:
 			_hide_tip()
 		else:
 			_press_back(false)
+	if Input.is_action_just_pressed("dismiss_tip") and tip_showing != "" and nothing_open:
+		_hide_tip()
 
 
 # B and Esc close the thing on top. A wheel section goes back to the wheel, and a second press closes
@@ -2987,6 +3084,7 @@ func _toggle_wheel() -> void:
 	if open_tab != "" or _bag_open() or placing != "" or not world_started:
 		return
 	wheel.show_wheel()
+	progression._bump("wheel_opened")
 	play_sfx("panel")
 
 
@@ -3012,6 +3110,7 @@ func _toggle_bag() -> void:
 		return
 	bag.set_items(_bag_items())
 	bag.show_bag()
+	progression._bump("bag_opened")
 	play_sfx("panel")
 
 
