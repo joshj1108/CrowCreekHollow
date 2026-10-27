@@ -1366,8 +1366,8 @@ func _draw() -> void:
 			var kind: int = interior[y][x]
 			var cell := _tile_rect(INT_ORIGIN + Vector2i(x, y))
 			_draw_interior_tile(cell, Vector2i(x, y), kind)
-			# Furniture is labeled in the house so it's easy to tell apart.
-			if kind == Tile.BED or kind == Tile.STATION or kind == Tile.DESK:
+			# Furniture is labeled in the house so it's easy to tell apart, unless its sprite says what it is.
+			if not FARM_SPRITES and (kind == Tile.BED or kind == Tile.STATION or kind == Tile.DESK):
 				var furniture := "Bed" if kind == Tile.BED else ("Cleaning" if kind == Tile.STATION else "Desk")
 				draw_string(ThemeDB.fallback_font, cell.position + Vector2(2, PX * 0.6), furniture, HORIZONTAL_ALIGNMENT_LEFT, -1, 11, Color(0.95, 0.9, 0.78))
 			# Storage is labeled so it's easy to find.
@@ -6126,6 +6126,9 @@ func _tile_center(wx: int, wy: int) -> Vector2:
 
 # Each house tile is drawn for the house's current repair stage, so the rooms improve as you fix the house.
 func _draw_interior_tile(cell: Rect2, pos: Vector2i, kind: int) -> void:
+	if FARM_SPRITES:
+		_draw_interior_sprite(cell, pos, kind)
+		return
 	match kind:
 		Tile.WALL:
 			_draw_interior_wall(cell)
@@ -6147,6 +6150,93 @@ func _draw_interior_tile(cell: Rect2, pos: Vector2i, kind: int) -> void:
 			_draw_doormat(cell)
 		_:
 			draw_rect(cell, TILE_COLORS[kind])
+
+
+# The house in SpriteCook art (art/farm/int_*.png). Floors are 32-pixel plank textures, two tiles
+# square: worn boards for the first two stages, good boards after. A wall with floor to its south shows
+# its face, plaster over wainscot, cracked for the first two stages and clean after; other walls show
+# their dark tops. Furniture stands on the floor, its bottom edge on its tile, so tall pieces such as
+# the bed's headboard and the chimney rise over the wall behind them. The rug and the dining set
+# span several tiles and each tile draws its own part, since the tiles are drawn in rows.
+const INT_SHADE := [0.78, 1.0, 0.86, 1.0]          # floors and walls a little darker at the start of each art pair
+const INT_FURNITURE := {"desk": Rect2(0, 0, 20, 24), "wash": Rect2(21, 0, 13, 24), "wash_fine": Rect2(35, 0, 14, 24), "cooler": Rect2(50, 0, 14, 24)}
+
+
+func _draw_interior_sprite(cell: Rect2, pos: Vector2i, kind: int) -> void:
+	if kind == Tile.WALL:
+		_draw_wall_sprite(cell, pos)
+		return
+	var shade: float = INT_SHADE[house_stage]
+	var floor_tex := FarmSprites.tex("int_floor_new" if house_stage >= 2 else "int_floor_old")
+	var src := Rect2(posmod(pos.x, 2) * 16, posmod(pos.y, 2) * 16, 16, 16)
+	draw_texture_rect_region(floor_tex, cell, src, Color(shade, shade, shade))
+	if house_stage >= 1 and RUG_RECT.has_point(pos):
+		var r := pos - RUG_RECT.position
+		draw_texture_rect_region(FarmSprites.tex("int_rug"), cell, Rect2(r.x * 16, r.y * 16, 16, 16),
+			Color(1, 1, 1) if house_stage >= 3 else Color(0.85, 0.8, 0.8))
+	# The dining set covers the table's two tiles and the chair above and below each.
+	var dining := Rect2i(TABLE_TILES[0].x, TABLE_TILES[0].y - 1, 2, 3)
+	if dining.has_point(pos):
+		var t := pos - dining.position
+		draw_texture_rect_region(FarmSprites.tex("int_dining"), cell, Rect2(t.x * 16, t.y * 16, 16, 16))
+	match kind:
+		Tile.BED:
+			_draw_standing(cell, "int_beds", Rect2(house_stage * 16, 0, 16, 32))
+		Tile.DESK:
+			_draw_standing(cell, "int_furniture", INT_FURNITURE["desk"])
+		Tile.STATION:
+			_draw_standing(cell, "int_furniture", INT_FURNITURE["wash_fine" if house_stage >= 3 else "wash"])
+		Tile.COOLER:
+			_draw_standing(cell, "int_furniture", INT_FURNITURE["cooler"])
+		Tile.FIREPLACE:
+			# Cells: cracked and cold, cold, lit, mantel cold, mantel lit.
+			var lit := house_stage >= 2 and firewood._fire_lit()
+			var frame: int = [0, 1, 1, 3][house_stage]
+			if lit:
+				frame = 4 if house_stage >= 3 else 2
+			_draw_standing(cell, "int_hearth", Rect2(frame * 16, 0, 16, 32))
+			if lit:
+				draw_circle(cell.get_center(), PX * 1.2, Color(1.0, 0.6, 0.25, 0.08))
+		Tile.EXIT:
+			draw_texture_rect(FarmSprites.tex("int_mat"), cell, false)
+
+
+# A sprite standing on its tile: centred across it, bottom edge on the tile's bottom, three screen
+# pixels to each of its pixels, rising over the tiles above.
+func _draw_standing(cell: Rect2, art: String, src: Rect2) -> void:
+	var size := src.size * SCALE
+	var at := Vector2(cell.get_center().x - size.x * 0.5, cell.end.y - size.y)
+	draw_texture_rect_region(FarmSprites.tex(art), Rect2(at.snapped(Vector2(SCALE, SCALE)), size), src)
+
+
+func _draw_wall_sprite(cell: Rect2, pos: Vector2i) -> void:
+	var below := pos + Vector2i(0, 1)
+	var faces: bool = below.y < INT_H and interior[below.y][below.x] != Tile.WALL
+	var shade: float = INT_SHADE[house_stage]
+	if not faces:
+		var top: Color = Color("2a211a").lerp(Color("4a3a2c"), house_stage / 3.0)
+		draw_rect(cell, top)
+		# A lit rim where the wall top meets a room beside it or above it.
+		for side in [Vector2i(-1, 0), Vector2i(1, 0), Vector2i(0, -1)]:
+			var n: Vector2i = pos + side
+			if n.x < 0 or n.x >= INT_W or n.y < 0 or interior[n.y][n.x] == Tile.WALL:
+				continue
+			var rim := Rect2(cell.position, Vector2(SCALE, cell.size.y)) if side.x < 0 else (
+				Rect2(Vector2(cell.end.x - SCALE, cell.position.y), Vector2(SCALE, cell.size.y)) if side.x > 0 else
+				Rect2(cell.position, Vector2(cell.size.x, SCALE)))
+			draw_rect(rim, top.lightened(0.25))
+		return
+	# The wall art is two 31-pixel textures, old on the left and clean on the right; each tile shows the
+	# next 16 pixels of it, wrapping, so a row of wall reads as one long wall.
+	var base := 33 if house_stage >= 2 else 0
+	var off := posmod(pos.x * 16, 31)
+	var first := mini(16, 31 - off)
+	var tint := Color(shade, shade, shade)
+	var tex := FarmSprites.tex("int_wall")
+	draw_texture_rect_region(tex, Rect2(cell.position, Vector2(first * SCALE, cell.size.y)), Rect2(base + off, 0, first, 16), tint)
+	if first < 16:
+		draw_texture_rect_region(tex, Rect2(cell.position + Vector2(first * SCALE, 0), Vector2((16 - first) * SCALE, cell.size.y)),
+			Rect2(base, 0, 16 - first, 16), tint)
 
 
 # Plaster walls with a faint course line and a baseboard along the bottom.

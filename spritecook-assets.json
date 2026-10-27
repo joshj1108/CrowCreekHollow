@@ -393,5 +393,17 @@
     "weather_leaves": "37308920-6252-4430-805a-113ecd74bd61",
     "weather_petals": "6759e135-0251-4374-823b-ed4eb745c881",
     "weather_fog": "2100bee5-0241-468c-aa3f-238175db6eac"
+  },
+  "interior": {
+    "note": "art/farm/int_*.png; drawn by _draw_interior_sprite in scripts/main.gd. Floors and wall had their outline edges painted over so they tile.",
+    "int_floor_old": "a5bbbe51-50d9-4d83-979a-527935143ced",
+    "int_floor_new": "8c48a443-4027-472b-8f37-8d659be583ca",
+    "int_wall": "c9cda7d5-0e70-4890-b074-2c15e62de870 (old 0-30, clean 33-63)",
+    "int_beds": "71fab653-45c6-4cb0-bdc7-dce16bf5631d",
+    "int_hearth": "d3d594fd-66b9-4d60-87bb-ab627cae0960",
+    "int_furniture": "f52896b6-384c-42cb-82fe-6ace4d1b97d1 (desk, washstand, washstand restored, cooler); desk swapped for 36551e5b-8dea-4152-a8f8-0482030701c7, straight on",
+    "int_dining": "b85095b7-b798-43e5-85c0-c01ab26cd3a4",
+    "int_rug": "6bfc9a15-fa85-409f-a8a4-a764b92d3a13",
+    "int_mat": "1bb664f0-446f-4e1d-84e9-be9f3e709e7c"
   }
 }
