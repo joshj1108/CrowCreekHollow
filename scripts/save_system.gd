@@ -78,7 +78,6 @@ func _save_game() -> void:
 		"entertained_day": m.entertained_day,
 		"player_pos": _save_pos(),
 		"inside": m.inside,
-		"appearance": m.appearance,
 		"open_tab": m.open_tab,
 		"crops": m.farm._crops_to_array(),
 		"brush": m._brush_to_array(),
@@ -186,7 +185,6 @@ func _load_game() -> bool:
 	m.entertained_day = int(data.get("entertained_day", 0))
 	m.sanity = float(data.get("sanity", m.SANITY_MAX))
 	m.saved_inside = bool(data.get("inside", false))
-	m.appearance = Appearance.clean(data.get("appearance", {}))
 	m.saved_panel = str(data.get("open_tab", ""))
 	var pos: Variant = data.get("player_pos", null)
 	if typeof(pos) == TYPE_ARRAY and pos.size() == 2:

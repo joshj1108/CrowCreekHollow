@@ -892,7 +892,6 @@ var swing_cool := 0.0
 var swing_time := 0.0
 var swing_dir := Vector2.DOWN
 var invuln := 0.0
-var appearance: Dictionary = Appearance.default_choices()   # the farmer's look, set in the creator
 var equipment := {"hand_r": "hoe", "offhand": "", "head": "", "neck": "", "chest": "", "wrist": "", "legs": "", "feet": ""}
 
 # Set by loading, applied once the world exists.
@@ -1093,7 +1092,6 @@ func _on_title_start(mode: String, slot: int) -> void:
 	var loaded := mode != "new" and saver._load_game()
 	if not loaded:
 		_respawn_brush()
-		appearance = Appearance.clean(TitleMenu.pending_appearance)
 	_build_interior()
 	_build_world()
 	_build_hud()
@@ -1862,7 +1860,6 @@ func _build_world() -> void:
 	player.is_blocked = _is_blocked_world
 	player.stepped.connect(func() -> void: play_sfx("step", 0.03))
 	add_child(player)
-	player.apply_appearance(appearance)
 	_build_lantern_light()
 
 	camera = Camera2D.new()

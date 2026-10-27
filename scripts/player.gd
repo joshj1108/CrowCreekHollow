@@ -50,7 +50,7 @@ const BELT := Color("4a2e1a")
 const BUCKLE := Color("e0c060")
 const CHEEK := Color(0.9, 0.45, 0.4, 0.45)
 
-# The farmer's colours and styles. apply_appearance sets these from the choices; the defaults are the original look.
+# The code-drawn farmer's colours and styles.
 var skin := Color("f2c9a0")
 var skin_shade := Color("d9a27c")
 var hair := Color("5a3a22")
@@ -551,26 +551,6 @@ func _draw_hat(c: Vector2, side_view: bool, side: float) -> void:
 			draw_colored_polygon(_ellipse(h + Vector2(0, -5.0), 9.2, 5.5), hat)
 			var knot := Vector2(-side * 8.0, 0.0) if side_view else Vector2(7.0, 0.0)
 			draw_colored_polygon(PackedVector2Array([h + knot + Vector2(0, -3), h + knot + Vector2(3, 1), h + knot + Vector2(0, 4)]), hat_shade)
-
-
-# Sets the figure's colours and styles from the chosen appearance, and redraws it.
-func apply_appearance(choices: Dictionary) -> void:
-	var a := Appearance.clean(choices)
-	skin = Appearance.colour("skin", int(a["skin"]))
-	skin_shade = skin.darkened(0.12)
-	hair = Appearance.colour("hair_colour", int(a["hair_colour"]))
-	hat = Appearance.colour("hat_colour", int(a["hat_colour"]))
-	hat_shade = hat.darkened(0.25)
-	shirt = Appearance.colour("shirt", int(a["shirt"]))
-	shirt_shade = shirt.darkened(0.25)
-	pants = Appearance.colour("pants", int(a["pants"]))
-	pants_shade = pants.darkened(0.25)
-	boots = Appearance.colour("boots", int(a["boots"]))
-	eyes = Appearance.colour("eyes", int(a["eyes"]))
-	hat_style = int(a["hat_style"])
-	hair_style = int(a["hair_style"])
-	facial = int(a["facial_hair"])
-	queue_redraw()
 
 
 # --- Poses -----------------------------------------------------------------
