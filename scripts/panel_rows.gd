@@ -79,6 +79,7 @@ func _diary_rows() -> Array:
 		else:
 			rows.append({"note": "%s%s
 %s" % [str(chapter["title"]), _new_mark("story"), m._prompt_text(chapter)]})
+	rows += m.mystery._rows(_new_mark)
 	var notes: Array = []
 	for id in m.tips_seen.keys():
 		var tip := m._tip_data(str(id))
@@ -439,7 +440,7 @@ func _buildings_rows() -> Array:
 		rows.append({"note": "The barn is for livestock. Livestock are still to come, so for now it simply stands."})
 	else:
 		rows.append(m._placed_row("Barn", "barn", m.barn_tile, "move_barn"))
-	return rows
+	return m.projects._rows() + rows
 
 
 func _settings_rows() -> Array:
@@ -483,9 +484,9 @@ func _desk_rows() -> Array:
 	rows.append({"note": m.desk._property_text()})
 	rows.append({"name": "Property tax", "value": m.desk._tax_text(), "button": "Pay", "action": "pay_tax", "enabled": m.tax_owed > 0 and m.money >= m.tax_owed})
 	rows.append({"section": "Pastimes"})
-	rows.append({"name": "Entertained today", "value": "yes" if m.entertained_day == m.day else "no, play something or your sanity limit slips tonight"})
+	rows.append({"name": "Played today", "value": "yes" if m.entertained_day == m.day else "no: today's first game gives +%d sanity and %d limit back" % [int(m.rewards.PASTIME_SANITY), int(m.rewards.PASTIME_RELIEF)]})
 	if m.boredom_loss > 0.0:
-		rows.append({"name": "Sanity limit lost to boredom", "value": str(int(m.boredom_loss))})
+		rows.append({"name": "Sanity limit lost to boredom", "value": "%d, won back by playing" % int(m.boredom_loss)})
 	rows.append({"name": "Solitaire (%s)" % m.desk._hours_text(m.SOLITAIRE_HOURS), "value": "pack of cards: %d games left" % m.card_games, "button": "Play", "action": "pastime:solitaire", "enabled": m.desk._can_pastime("solitaire")})
 	rows.append({"name": "Sudoku (%s)" % m.desk._hours_text(m.SUDOKU_HOURS), "value": "sudoku book: %d puzzles left" % m.sudoku_puzzles, "button": "Play", "action": "pastime:sudoku", "enabled": m.desk._can_pastime("sudoku")})
 	rows.append({"section": "Catalog"})
@@ -591,7 +592,7 @@ func _achievement_rows() -> Array:
 		},
 	]
 	if done_count == total:
-		rows.append({"note": "Every achievement earned. Hallowvale has nothing left to teach you."})
+		rows.append({"note": "Every achievement earned. Crow Creek Hollow has nothing left to teach you."})
 	for tier in m.ACHIEVEMENT_TIERS.size():
 		var in_tier: Array = []
 		for a in m.ACHIEVEMENTS:

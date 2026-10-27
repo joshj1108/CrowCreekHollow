@@ -65,7 +65,7 @@ func _tidy_house() -> void:
 	m.progression._grant_xp("Cleaning", m.XP_TIDY)
 	var bonus := m.TIDY_CLEANING_BONUS if m.progression._level("Cleaning") >= 2 else 0
 	_change_sanity(m.TIDY_SANITY + bonus)
-	m._show_message("You tidy the house. The air feels a little lighter. +%d Cleaning XP" % m.XP_TIDY)
+	m._show_message("You tidy the house. The air feels a little lighter. +%d Cleaning XP. %s" % [m.XP_TIDY, m.rewards._tidy_find()])
 
 
 # Cleansing offers crops to the house to lift the permanent sanity penalty.
@@ -108,7 +108,7 @@ func _update_sanity(darkness: float, delta: float) -> void:
 	var rate := 0.02                 # slow recovery outdoors in daylight
 	if m.inside:
 		rate = 0.1 + (0.05 if m.house_stage >= 1 else 0.0)   # the house is shelter
-	elif darkness > 0.5:
+	elif darkness > 0.5 and not m.projects._lit(m._player_tile()):   # a lamp post's light holds the dark off
 		rate = -0.05 * (0.5 if _event_active("ward") else 1.0)   # the dark wears on you; lanterns ward it on All Hallows
 	_change_sanity(rate * delta)
 
@@ -117,20 +117,3 @@ func _low_sanity_boost() -> float:
 	# Low sanity makes everything darker, a visible warning.
 	return maxf(0.0, (m.LOW_SANITY - m.sanity) / m.LOW_SANITY) * 0.25
 
-
-func _trigger_night_event() -> void:
-	m.event_fired_day = m.day
-	m.stats["events"] += 1
-	var ev: Dictionary = m.NIGHT_EVENTS[(m.day * 3) % m.NIGHT_EVENTS.size()]
-	match ev["shadow"]:
-		"field":
-			m.tonight_shadow = m.shadow_tile
-		"house":
-			m.tonight_shadow = m._world_tile(m.HOUSE_IX + m.HOUSE_W, m.HOUSE_IY + 1)
-		_:
-			m.tonight_shadow = Vector2i(-1, -1)
-	var hit: float = float(ev["sanity"]) * (2.0 if _event_active("dread") else 1.0) * (0.5 if _event_active("ward") else 1.0)
-	_change_sanity(hit)
-	m.ambience.night_event(str(ev.get("sound", "")))
-	m._show_message(ev["message"])
-	m.queue_redraw()

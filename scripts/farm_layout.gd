@@ -25,7 +25,7 @@ const TERRAIN := [
 	"KKPPK..............OOOOOOOOOOO..............~~~~~~~~~~~~..~~~~~.",
 	"..PPP..............HHHHHHHHHHH................PPP~~~~~~~~~~~~...",
 	"..P................HHHHHDHHHHH..G.AAA.........PPP~~~~~~~~~~~~...",
-	"..P.....................RP........AAA.........PPP~~~~~~~~~~~~...",
+	"..P....................PRP........AAA.........PPP~~~~~~~~~~~~...",
 	"..PPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPP~~~~~~~~~~~....",
 	"...................................................~~~~~~~......",
 	"..........G........................................~~~~~~~......",
@@ -84,4 +84,4 @@ const ROCK_SPOTS := [Vector2i(56, 28), Vector2i(31, 7), Vector2i(34, 18), Vector
 # Farm tiles that the coop and barn must not be placed on, so they never overlap a building the player unlocks later.
 const RESERVED := [Vector2i(17, 7), Vector2i(39, 31), Vector2i(39, 32), Vector2i(39, 33), Vector2i(39, 34), Vector2i(39, 35), Vector2i(39, 36), Vector2i(40, 31), Vector2i(40, 32), Vector2i(40, 33), Vector2i(40, 34), Vector2i(40, 35), Vector2i(40, 36), Vector2i(41, 31), Vector2i(41, 32), Vector2i(41, 33), Vector2i(41, 34), Vector2i(41, 35), Vector2i(41, 36), Vector2i(42, 31), Vector2i(42, 32), Vector2i(42, 33), Vector2i(42, 34), Vector2i(42, 35), Vector2i(42, 36), Vector2i(43, 31), Vector2i(43, 32), Vector2i(43, 33), Vector2i(43, 34), Vector2i(43, 35), Vector2i(43, 36), Vector2i(44, 31), Vector2i(44, 32), Vector2i(44, 33), Vector2i(44, 34), Vector2i(44, 35), Vector2i(44, 36), Vector2i(45, 31), Vector2i(45, 32), Vector2i(45, 33), Vector2i(45, 34), Vector2i(45, 35), Vector2i(45, 36)]
 # Changes whenever the layout changes. Saves record it, so a save from another layout is migrated.
-const VERSION := "d52444ed"
+const VERSION := "61ea46f7"

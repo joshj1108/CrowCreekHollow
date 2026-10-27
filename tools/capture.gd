@@ -15,12 +15,27 @@ extends SceneTree
 #   season=NAME     Spring, Summer, Autumn or Winter
 #   hour=H          time of day, e.g. 21.5
 #   frames=N        frames to run before the shot (default 90)
+#   size=WxH        window size (default 1280x720), to check how the game fits other screens
+#   crop=X,Y,W,H    keep only this part of the full-size screen (before scale), to look closely at the HUD
 #   scale=F         shrink the saved image (default 0.5, so it's cheap to look at; 1 for full size)
 #   crops=A,B       plant every stage of each crop kind in a row on the first plot, e.g. crops=turnip,corn
 #   lantern=N       lantern tier 0-3 (0 = none)
 #   built           build the cellar, smokehouse, furnace and woodshed
 #   diary           find the diary in the desk and open it
-#   wheel           open the section wheel
+#   wheel           open the section wheel (wheel=N highlights section N, counting from 0)
+#   bag             open the bag
+#   title           stay on the title menu instead of starting a game
+#   tab=NAME        open a section, e.g. tab=Craft
+#   fight           put a creature in front of the player and swing at it, so it is hurt
+#   fish            stand below a fishing spot and cast at it
+#   visitor=ID      bring tonight's night visitor now: field, knock, quiet, crows, pond, watcher, footsteps
+#                   or hollow (use with hour=22 or later)
+#   happening=ID    jump to a day with this daily happening: pedlar, glint, branch, crow_gifts, mushrooms,
+#                   frenzy or neighbour (it is placed, and its morning note shown)
+#   decor=A,B       place decor in a row two tiles below the player: lamp, flowers, path or bell
+#   feel=SOUND      play an action's sound with its burst (harvest, chop, tree_fall, hoe, ...) and pop up a gain
+#   pages=N         Agnes Rook's first N torn pages are found (show them with diary)
+#   steps=N         how far the field shadow has crept toward the house, 0 to 8
 #   sound           print how loud each ambience loop is playing when the shot is taken
 
 func _initialize() -> void:
@@ -32,9 +47,19 @@ func _initialize() -> void:
 		push_error("capture.gd: out=PATH is required")
 		quit(1)
 		return
+	# The game opens maximized; shots are taken in a 1280 by 720 window so they compare, unless size= says.
+	DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_WINDOWED)
+	var win: PackedStringArray = opt.get("size", "1280x720").split("x")
+	DisplayServer.window_set_size(Vector2i(int(win[0]), int(win[1])))
 	var main = load("res://scenes/main.tscn").instantiate()
 	root.add_child(main)
 	await process_frame
+	if opt.has("title"):
+		# The title menu as the game opens, before a game is started.
+		for i in int(opt["frames"]):
+			await process_frame
+		_save(opt)
+		return
 	main._on_title_start("new", 8)
 	if opt.has("season"):
 		for d in range(1, 400):
@@ -65,6 +90,18 @@ func _initialize() -> void:
 	if opt.has("weather"):
 		main.weather_kind = opt["weather"]
 		main._apply_weather()
+	if opt.has("happening"):
+		for d in range(2, 400):
+			if main.happenings._pick(d).get("id", "") == opt["happening"]:
+				main.day = d
+				break
+		main._show_message(main.happenings._start_day(true).strip_edges())
+		var ht: Vector2i = main.happenings.tile
+		if ht.x >= 0 and not opt.has("tile"):
+			main.player.position = main._tile_center(ht.x, ht.y + 2)
+	if opt.has("steps"):
+		main.nights.shadow_steps = int(opt["steps"])
+		main._update_shadow_tile()
 	if opt.has("hour"):
 		main.clock = (float(opt["hour"]) - main.START_HOUR) / (main.DAY_END_HOUR - main.START_HOUR) * main.DAY_LENGTH
 	if opt.has("inside"):
@@ -80,19 +117,78 @@ func _initialize() -> void:
 	elif opt.has("tile"):
 		var t: PackedStringArray = opt["tile"].split(",")
 		main.player.position = main._tile_center(int(t[0]) + main.BORDER_X, int(t[1]) + main.BORDER_Y)
+	if opt.has("decor"):
+		var at: Vector2i = main._player_tile() + Vector2i(-2, 2)
+		for kind in opt["decor"].split(","):
+			while not main._spot_ok(at, Vector2i.ONE) and at.x < main.MAP_W - 2:
+				at.x += 1
+			main.projects.decor[at] = kind
+			at.x += 2
+		main.projects._stamp()
 	for i in int(opt["frames"]):
+		await process_frame
+	if opt.has("fish") and not main.fish_spots.is_empty():
+		var spot: Vector2i = main.fish_spots.keys()[0]
+		main.player.position = main._tile_center(spot.x, spot.y + 1)
+		main.player.facing = Vector2.UP
+		main.fishing._start_fishing(spot)
+		await process_frame
+	if opt.has("feel"):
+		main.money += 12
+		main.inventory["crops"] += 1
+		main.progression._grant_xp("Farming", 10)
+		main.play_sfx(opt["feel"])
+		for i in 8:
+			await process_frame
+	if opt.has("visitor"):
+		main.event_fired_day = main.day
+		main.nights._begin(opt["visitor"])
+		await process_frame
+	if opt.has("fight"):
+		var at: Vector2 = main.player.position + main.player.facing * main.PX
+		var foe: Dictionary = main.combat_sys._new_foe("bat" if main.in_cave else "hollow", Vector2i.ZERO)
+		foe["pos"] = at
+		foe["home"] = at
+		main.foes.append(foe)
+		main.active_slot = 0
+		main.equipment["hand_r"] = "sharpened_stick"
+		main.swing_cool = 0.0
+		main._tool_press = true
+		main._swing()
+		main._tool_press = false
 		await process_frame
 	if opt.has("sound"):
 		print("ambience ", main.ambience.levels)
+	if opt.has("pages"):
+		for i in int(opt["pages"]):
+			main.mystery.found[main.mystery.PAGES[i]["id"]] = true
 	if opt.has("diary"):
 		main._find_diary()
 		await process_frame
 		await process_frame
 	if opt.has("wheel"):
 		main._toggle_wheel()
+		if opt["wheel"] != "1":
+			main.wheel.highlight = int(opt["wheel"])
+			main.wheel.ring.queue_redraw()
 		await process_frame
 		await process_frame
+	if opt.has("bag"):
+		main._toggle_bag()
+		await process_frame
+		await process_frame
+	if opt.has("tab"):
+		main._toggle_tab(opt["tab"])
+		await process_frame
+		await process_frame
+	_save(opt)
+
+
+func _save(opt: Dictionary) -> void:
 	var img := root.get_texture().get_image()
+	if opt.has("crop"):
+		var r: PackedStringArray = opt["crop"].split(",")
+		img = img.get_region(Rect2i(int(r[0]), int(r[1]), int(r[2]), int(r[3])))
 	var sc := float(opt["scale"])
 	if sc != 1.0:
 		img.resize(int(img.get_width() * sc), int(img.get_height() * sc), Image.INTERPOLATE_NEAREST)

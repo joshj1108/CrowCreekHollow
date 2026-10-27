@@ -83,7 +83,7 @@ func _update_fishing(delta: float) -> void:
 
 func _fish_roll() -> void:
 	m.stats["fished"] += 1
-	var chance := clampf(m.FISH_BASE_CHANCE + m.FISH_CHANCE_PER_LEVEL * float(m.progression._level("Fishing") - 1) + m._rod_bonus(), 0.0, m.FISH_CHANCE_CAP)
+	var chance := clampf(m.FISH_BASE_CHANCE + m.FISH_CHANCE_PER_LEVEL * float(m.progression._level("Fishing") - 1) + m._rod_bonus() + m.happenings._fish_bonus(), 0.0, m.FISH_CHANCE_CAP)
 	if randf() < chance:
 		m.stats["caught"] += 1
 		m.inventory["fish"] += 1

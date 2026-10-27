@@ -72,6 +72,12 @@ func _save_game() -> void:
 		"mends_today": m.mends_today,
 		"cleanse_day": m.cleanse_day,
 		"event_fired_day": m.event_fired_day,
+		"shadow_steps": m.nights.shadow_steps,
+		"happening_done_day": m.happenings.done_day,
+		"decor": m.projects.decor.keys().map(func(t: Vector2i) -> Array: return [t.x, t.y, m.projects.decor[t]]),
+		"steps_done": m.projects.steps_done.keys(),
+		"rook_pages": m.mystery.found.keys(),
+		"last_visitor": m.nights.last_visitor,
 		"sanity": m.sanity,
 		"sanity_penalty": m.sanity_penalty,
 		"boredom_loss": m.boredom_loss,
@@ -187,6 +193,18 @@ func _load_game() -> bool:
 			if saved_eq.has(slot):
 				m.equipment[slot] = str(saved_eq[slot])
 	m.event_fired_day = int(data.get("event_fired_day", 0))
+	m.nights.shadow_steps = int(data.get("shadow_steps", 0))
+	m.happenings.done_day = int(data.get("happening_done_day", 0))
+	m.projects.decor.clear()
+	for d in data.get("decor", []):
+		m.projects.decor[Vector2i(int(d[0]), int(d[1]))] = str(d[2])
+	m.mystery.found.clear()
+	for id in data.get("rook_pages", []):
+		m.mystery.found[str(id)] = true
+	m.projects.steps_done.clear()
+	for id in data.get("steps_done", []):
+		m.projects.steps_done[str(id)] = true
+	m.nights.last_visitor = str(data.get("last_visitor", ""))
 	m.sanity_penalty = int(data.get("sanity_penalty", 0))
 	m.boredom_loss = float(data.get("boredom_loss", 0.0))
 	m.entertained_day = int(data.get("entertained_day", 0))

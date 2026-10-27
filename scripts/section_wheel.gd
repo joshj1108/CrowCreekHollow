@@ -13,7 +13,7 @@ const SECTIONS := [
 	{"name": "Gear", "subtitle": "What you wear and hold", "icon": "shield", "color": "7f9fbf"},
 	{"name": "Craft", "subtitle": "Make, cook, and build", "icon": "hammer", "color": "c0703a"},
 	{"name": "Quests", "subtitle": "What the farm asks of you", "icon": "scroll", "color": "e8d7a0"},
-	{"name": "Diary", "subtitle": "What you have learned, and what to do next", "icon": "book", "color": "8a5a34"},
+	{"name": "Diary", "subtitle": "What you have learned so far", "icon": "book", "color": "8a5a34"},
 	{"name": "House", "subtitle": "Keep it standing", "icon": "house", "color": "d08a5a"},
 	{"name": "Buildings", "subtitle": "The workshop, the coop, and the barn", "icon": "barn", "color": "b8443a"},
 	{"name": "Achievements", "subtitle": "Things you have done", "icon": "trophy", "color": "e0b43c"},
@@ -34,9 +34,11 @@ const COL_DIM := Color(0.0, 0.0, 0.0, 0.6)
 const COL_SEGMENT := Color("231a12")
 const COL_SEGMENT_HOT := Color("65472a")
 const COL_BORDER := Color("8a6a3a")
-const COL_ACCENT := Color("d9a94e")
-const COL_TEXT := Color("f1e4c8")
-const COL_MUTED := Color("b3a27c")
+const COL_ACCENT := Color("d8b050")
+const COL_TEXT := Color("e8dcc0")
+const COL_MUTED := Color("9a8a6a")
+const PLAQUE_W := 168.0       # the widest the middle plaque gets, so it stays inside the ring
+const PLAQUE_PAD := Vector2(18, 14)
 const COL_IRON := Color("5f5b55")
 const WOOD_SHADE := Color(0.72, 0.68, 0.64)   # the wood's tint on a segment that isn't highlighted
 const WOOD_HOT := Color(1.35, 1.2, 1.0)        # and on the highlighted one
@@ -155,17 +157,24 @@ func _draw_ring() -> void:
 		var at := c + _dir(mid) * ((INNER_R + OUTER_R) * 0.5)
 		if not _icon_sprite(str(SECTIONS[i]["icon"]), at, hot):
 			_icon(str(SECTIONS[i]["icon"]), at, 17.0, Color(str(SECTIONS[i]["color"])), hot)
-	# The middle names the highlighted section, on a wooden plaque when the UI art is there.
+	# The middle names the highlighted section, on a wooden plaque when the UI art is there. The name
+	# shrinks to fit the plaque and the subtitle wraps, and both sit centred in it.
+	var text_w := PLAQUE_W - PLAQUE_PAD.x * 2.0
 	var name_text := str(SECTIONS[highlight]["name"])
-	var name_width := font.get_string_size(name_text, HORIZONTAL_ALIGNMENT_LEFT, -1, 24).x
+	var name_size := 24
+	while name_size > 16 and font.get_string_size(name_text, HORIZONTAL_ALIGNMENT_LEFT, -1, name_size).x > text_w:
+		name_size -= 1
+	var name_dim := font.get_string_size(name_text, HORIZONTAL_ALIGNMENT_LEFT, -1, name_size)
 	var sub := str(SECTIONS[highlight]["subtitle"])
-	var sub_width := font.get_string_size(sub, HORIZONTAL_ALIGNMENT_LEFT, -1, 13).x
+	var sub_dim := font.get_multiline_string_size(sub, HORIZONTAL_ALIGNMENT_CENTER, text_w, 13)
+	var block := Vector2(maxf(name_dim.x, sub_dim.x), name_dim.y + 2.0 + sub_dim.y)
+	var top := c.y - block.y * 0.5
 	var plaque := UiSkin.slot(false)
 	if plaque != null:
-		var w := minf(maxf(name_width, sub_width) + 44.0, INNER_R * 2.0 - 8.0)
-		ring.draw_style_box(plaque, Rect2(c - Vector2(w * 0.5, 40.0), Vector2(w, 74.0)))
-	ring.draw_string(font, c + Vector2(-name_width * 0.5, -4.0), name_text, HORIZONTAL_ALIGNMENT_LEFT, -1, 24, COL_ACCENT)
-	ring.draw_string(font, c + Vector2(-sub_width * 0.5, 16.0), sub, HORIZONTAL_ALIGNMENT_LEFT, -1, 13, COL_MUTED)
+		var box := Vector2(block.x, block.y) + PLAQUE_PAD * 2.0
+		ring.draw_style_box(plaque, Rect2(c - box * 0.5, box).abs())
+	ring.draw_string(font, Vector2(c.x - text_w * 0.5, top + font.get_ascent(name_size)), name_text, HORIZONTAL_ALIGNMENT_CENTER, text_w, name_size, COL_ACCENT)
+	ring.draw_multiline_string(font, Vector2(c.x - text_w * 0.5, top + name_dim.y + 2.0 + font.get_ascent(13)), sub, HORIZONTAL_ALIGNMENT_CENTER, text_w, 13, -1, COL_MUTED)
 	var hint := "Mouse or left stick to choose   ·   A or click to open   ·   B or Esc to close"
 	var hint_width := font.get_string_size(hint, HORIZONTAL_ALIGNMENT_LEFT, -1, 14).x
 	ring.draw_string(font, Vector2(c.x - hint_width * 0.5, c.y + OUTER_R + 30.0), hint, HORIZONTAL_ALIGNMENT_LEFT, -1, 14, COL_MUTED)

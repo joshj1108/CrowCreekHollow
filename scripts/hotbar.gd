@@ -18,10 +18,10 @@ func _init() -> void:
 	_name_label = Label.new()
 	_name_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_name_label.add_theme_font_size_override("font_size", 15)
+	_name_label.add_theme_color_override("font_color", Color("f2d27a"))
 	_name_label.add_theme_color_override("font_outline_color", Color(0.05, 0.04, 0.03, 0.92))
 	_name_label.add_theme_constant_override("outline_size", 5)
 	_name_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	add_child(_name_label)
 	var row := HBoxContainer.new()
 	row.alignment = BoxContainer.ALIGNMENT_CENTER
 	row.add_theme_constant_override("separation", 5)
@@ -31,24 +31,29 @@ func _init() -> void:
 		var panel := PanelContainer.new()
 		panel.custom_minimum_size = Vector2(SLOT, SLOT)
 		panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		var inner := VBoxContainer.new()
-		inner.add_theme_constant_override("separation", 0)
-		inner.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		panel.add_child(inner)
+		# The icon fills the slot and sits in its centre. The slot number is a small mark in the top-left
+		# corner, laid over the icon so it doesn't push the icon down.
+		var holder := Control.new()
+		holder.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		panel.add_child(holder)
+		var icon := ActionBar.RecipeIcon.new()
+		icon.set_anchors_preset(Control.PRESET_FULL_RECT)
+		icon.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		holder.add_child(icon)
 		var num := Label.new()
 		num.text = str(i + 1) if i < 9 else "0"
-		num.add_theme_font_size_override("font_size", 12)
+		num.add_theme_font_size_override("font_size", 11)
+		num.add_theme_color_override("font_color", Color("9a8a6a"))
 		num.add_theme_color_override("font_outline_color", Color(0.05, 0.04, 0.03, 0.92))
 		num.add_theme_constant_override("outline_size", 4)
+		num.add_theme_constant_override("line_spacing", 0)
 		num.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		inner.add_child(num)
-		var icon := ActionBar.RecipeIcon.new()
-		icon.custom_minimum_size = Vector2(SLOT - 18, SLOT - 22)
-		icon.size_flags_vertical = Control.SIZE_EXPAND_FILL
-		icon.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		inner.add_child(icon)
+		num.position = Vector2(1, -2)
+		holder.add_child(num)
 		row.add_child(panel)
 		_cells.append({"panel": panel, "icon": icon, "num": num})
+	# The active tool's name, under the slots.
+	add_child(_name_label)
 
 
 # entries holds one dictionary per slot with id, name, icon, tint and enabled.

@@ -17,18 +17,6 @@ func _read_desk() -> void:
 	m._toggle_tab("Desk")
 
 
-func _boredom_check() -> String:
-	# BOREDOM_ENABLED false pauses the drain.
-	if not m.BOREDOM_ENABLED or m.entertained_day == m.day:
-		return ""
-	var before := m.sanity_sys._sanity_max()
-	m.boredom_loss = minf(m.boredom_loss + m.BOREDOM_DRAIN, m.BOREDOM_MAX_LOSS)
-	m.sanity = minf(m.sanity, m.sanity_sys._sanity_max())
-	if m.sanity_sys._sanity_max() < before:
-		return " Nothing to occupy you today, so your sanity limit slips to %d." % int(m.sanity_sys._sanity_max())
-	return ""
-
-
 func _desk_action(action_id: String) -> void:
 	if action_id == "pay_tax":
 		_pay_tax()
@@ -45,8 +33,8 @@ func _desk_action(action_id: String) -> void:
 
 
 # --- Pastimes ---
-# Solitaire and sudoku are not played out: a game just passes the time and entertains you
-# for the day. Each game uses up one game from the pack of cards or one puzzle from the book.
+# Solitaire and sudoku are not played out: a game just passes the time, and the day's first does you good
+# (HomesteadRewards). Each game uses up one game from the pack of cards or one puzzle from the book.
 
 func _hours_text(hours: float) -> String:
 	var mins := roundi(hours * 60.0)
@@ -79,14 +67,16 @@ func _play_pastime(kind: String) -> void:
 	m.clock += hours * m.DAY_LENGTH / (m.DAY_END_HOUR - m.START_HOUR)
 	m.current_hour += hours
 	m._update_needs(hours)
+	# One game a day does you good: sanity, and some of the lost limit back. A second does nothing more.
+	var gain := m.rewards._pastime_done() if m.entertained_day != m.day else ""
 	m.entertained_day = m.day
 	m._close_panel()
 	if kind == "sudoku":
 		m.sudoku_puzzles -= 1
-		m._show_message("You work through a sudoku over %s. %s" % [_hours_text(hours), "That was the last puzzle in the book." if m.sudoku_puzzles == 0 else "You are entertained for the day."])
+		m._show_message("You work through a sudoku over %s.%s%s" % [_hours_text(hours), gain, " That was the last puzzle in the book." if m.sudoku_puzzles == 0 else ""])
 	else:
 		m.card_games -= 1
-		m._show_message("You play solitaire for %s. %s" % [_hours_text(hours), "The cards are worn out now." if m.card_games == 0 else "You are entertained for the day."])
+		m._show_message("You play solitaire for %s.%s%s" % [_hours_text(hours), gain, " The cards are worn out now." if m.card_games == 0 else ""])
 
 
 # --- The catalog ---
@@ -229,15 +219,13 @@ func _property_value() -> int:
 	var house_mult := pow(m.PROPERTY_HOUSE_GROWTH, m.house_stage)
 	var building_mult := 1.0 + m.PROPERTY_PER_BUILDING * _building_count()
 	var plot_mult := 1.0 + m.PROPERTY_PER_PLOT * (int(m.plot_two_open) + int(m.plot_three_open))
-	var clean_mult := 1.0 + m.PROPERTY_PER_CLEAN_NIGHT * mini(m.clean_nights, m.PROPERTY_CLEAN_NIGHTS_MAX)
-	return roundi(m.PROPERTY_TAX * house_mult * building_mult * plot_mult * clean_mult)
+	return roundi(m.PROPERTY_TAX * house_mult * building_mult * plot_mult)
 
 
 func _property_text() -> String:
-	return "%d coins a quarter. Starts at %d; x%.1f per house upgrade, +%d%% per building (%d), +%d%% per farm plot past the first (%d), +%d%% for %d clean nights in a row (up to %d)." % [
+	return "%d coins a quarter. Starts at %d; x%.1f per house upgrade, +%d%% per building (%d), +%d%% per farm plot past the first (%d)." % [
 		_property_value(), m.PROPERTY_TAX, m.PROPERTY_HOUSE_GROWTH, int(m.PROPERTY_PER_BUILDING * 100), _building_count(),
-		int(m.PROPERTY_PER_PLOT * 100), int(m.plot_two_open) + int(m.plot_three_open),
-		int(m.PROPERTY_PER_CLEAN_NIGHT * 100), m.clean_nights, m.PROPERTY_CLEAN_NIGHTS_MAX]
+		int(m.PROPERTY_PER_PLOT * 100), int(m.plot_two_open) + int(m.plot_three_open)]
 
 
 func _tax_evicts() -> bool:

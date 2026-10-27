@@ -1,8 +1,8 @@
 class_name BagPanel
 extends CanvasLayer
 
-## The bag: a compact, centred grid of pack stacks in the bottom-right corner. Each slot takes its
-## item's colour on its border. Tab or Y opens and closes the bag. The D-pad moves between the slots,
+## The bag: a compact grid of square pack slots in the bottom-right corner, each with the item's picture
+## and count. The name of the slot in focus or under the mouse shows in one line under the grid. Tab or Y opens and closes the bag. The D-pad moves between the slots,
 ## A or a click uses the slot in focus, and B closes it. The Inventory button opens the full Inventory
 ## section. The Bag button at the corner works with a mouse.
 
@@ -12,8 +12,8 @@ signal inventory_requested
 
 const COLS := 4
 const ROWS := 5
-const CELL := Vector2(78, 46)
-const GAP := 5
+const CELL := Vector2(52, 52)
+const GAP := 4
 const RIGHT_MARGIN := 16.0
 const PANEL_BOTTOM := 106.0    # the bag's bottom edge, clear of the corner buttons
 const TOGGLE_BOTTOM := 56.0    # the Bag button's bottom edge, just above the Menu button
@@ -24,7 +24,7 @@ const COL_SLOT_HOVER := Color("3a2a18")
 const COL_SLOT_EMPTY := Color("120d09")
 const COL_BORDER := Color("4a3820")
 const COL_TEXT := Color("e8dcc0")
-const COL_DIM := Color("8f7f60")
+const COL_DIM := Color("9a8a6a")
 const COL_GOLD := Color("d8b050")
 
 var open := false
@@ -32,6 +32,7 @@ var root: Control
 var panel: PanelContainer
 var slots: Array = []        # one Button per cell
 var toggle_button: Button
+var focus_name: Label        # the highlighted slot's item, under the grid
 
 
 func _ready() -> void:
@@ -44,7 +45,7 @@ func _ready() -> void:
 	# A zero-size anchor at the bottom right; the panel grows up and to the left to fit its contents.
 	panel = PanelContainer.new()
 	panel.visible = false
-	var skinned := UiSkin.panel(14)
+	var skinned := UiSkin.panel(12)
 	panel.add_theme_stylebox_override("panel", skinned if skinned != null else _box(COL_PANEL, COL_GOLD.darkened(0.45), 2, 10, 10))
 	panel.set_anchors_preset(Control.PRESET_BOTTOM_RIGHT)
 	panel.offset_right = -RIGHT_MARGIN
@@ -56,7 +57,7 @@ func _ready() -> void:
 	root.add_child(panel)
 
 	var column := VBoxContainer.new()
-	column.add_theme_constant_override("separation", 7)
+	column.add_theme_constant_override("separation", 5)
 	column.alignment = BoxContainer.ALIGNMENT_CENTER
 	panel.add_child(column)
 
@@ -98,11 +99,19 @@ func _ready() -> void:
 		grid.add_child(b)
 		slots.append(b)
 
+	focus_name = Label.new()
+	focus_name.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	focus_name.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+	focus_name.custom_minimum_size = Vector2(COLS * CELL.x + (COLS - 1) * GAP, 0)
+	focus_name.add_theme_font_size_override("font_size", 13)
+	focus_name.add_theme_color_override("font_color", COL_GOLD)
+	column.add_child(focus_name)
+
 	var inventory_row := CenterContainer.new()
 	column.add_child(inventory_row)
 	var inventory_button := Button.new()
 	inventory_button.text = "Inventory"
-	inventory_button.custom_minimum_size = Vector2(118, 28)
+	inventory_button.custom_minimum_size = Vector2(110, 26)
 	inventory_button.add_theme_font_size_override("font_size", 13)
 	inventory_button.add_theme_color_override("font_color", COL_TEXT)
 	if not UiSkin.style_button(inventory_button):
@@ -117,7 +126,7 @@ func _ready() -> void:
 	hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	hint.autowrap_mode = TextServer.AUTOWRAP_WORD
 	hint.custom_minimum_size = Vector2(COLS * CELL.x + (COLS - 1) * GAP, 0)
-	hint.add_theme_font_size_override("font_size", 11)
+	hint.add_theme_font_size_override("font_size", 10)
 	hint.add_theme_color_override("font_color", COL_DIM)
 	column.add_child(hint)
 
@@ -162,12 +171,10 @@ func set_items(items: Array) -> void:
 		var b := slots[i] as Button
 		var icon := b.get_meta("icon") as ActionBar.RecipeIcon
 		var count_label := b.get_meta("count") as Label
-		var strip := b.get_meta("strip") as PanelContainer
-		var name_label := b.get_meta("name") as Label
 		if i < items.size():
 			var it: Dictionary = items[i]
 			var parts := str(it["label"]).rsplit(" x", true, 1)
-			name_label.text = parts[0]
+			b.set_meta("item_name", parts[0])
 			count_label.text = "x" + parts[parts.size() - 1] if parts.size() == 2 else ""
 			icon.visible = true
 			icon.kind = str(it.get("icon", ""))
@@ -186,62 +193,54 @@ func set_items(items: Array) -> void:
 		else:
 			icon.visible = false
 			count_label.text = ""
-			strip.visible = false
-			name_label.text = ""
+			b.set_meta("item_name", "")
 			b.tooltip_text = ""
 			b.disabled = true
 			b.modulate = Color(1, 1, 1)
 			b.set_meta("tint", "")
+	# The slot in focus may now hold something else.
+	if is_inside_tree():
+		_name_slot(get_viewport().gui_get_focus_owner())
 
 
-# A slot's picture, its count, and a name strip that shows only while the slot is highlighted.
+# A slot's picture, centred, and its count in the bottom-right corner. Focus or the mouse on the slot
+# names its item under the grid.
 func _add_slot_art(b: Button) -> void:
 	var icon := ActionBar.RecipeIcon.new()
 	icon.set_anchors_preset(Control.PRESET_FULL_RECT)
-	icon.offset_left = 4.0
-	icon.offset_top = 3.0
-	icon.offset_right = -4.0
-	icon.offset_bottom = -3.0
+	icon.offset_left = 5.0
+	icon.offset_top = 5.0
+	icon.offset_right = -5.0
+	icon.offset_bottom = -5.0
 	b.add_child(icon)
 
 	var count_label := Label.new()
 	count_label.set_anchors_preset(Control.PRESET_BOTTOM_RIGHT)
-	count_label.offset_left = -40.0
-	count_label.offset_top = -17.0
-	count_label.offset_right = -5.0
+	count_label.offset_left = -30.0
+	count_label.offset_top = -16.0
+	count_label.offset_right = -4.0
 	count_label.offset_bottom = -2.0
 	count_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	count_label.add_theme_font_size_override("font_size", 11)
 	count_label.add_theme_color_override("font_color", COL_GOLD)
+	count_label.add_theme_color_override("font_outline_color", Color(0.05, 0.04, 0.03, 0.92))
+	count_label.add_theme_constant_override("outline_size", 4)
 	count_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	b.add_child(count_label)
 
-	var strip := PanelContainer.new()
-	strip.set_anchors_preset(Control.PRESET_BOTTOM_WIDE)
-	strip.offset_left = 2.0
-	strip.offset_right = -2.0
-	strip.offset_top = -19.0
-	strip.offset_bottom = -2.0
-	strip.add_theme_stylebox_override("panel", _box(Color(0.06, 0.04, 0.03, 0.9), Color(0, 0, 0, 0), 0, 4, 1))
-	strip.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	strip.visible = false
-	var name_label := Label.new()
-	name_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	name_label.clip_text = true
-	name_label.add_theme_font_size_override("font_size", 11)
-	name_label.add_theme_color_override("font_color", COL_TEXT)
-	name_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	strip.add_child(name_label)
-	b.add_child(strip)
-
 	b.set_meta("icon", icon)
 	b.set_meta("count", count_label)
-	b.set_meta("strip", strip)
-	b.set_meta("name", name_label)
-	b.focus_entered.connect(func() -> void: strip.visible = true)
-	b.focus_exited.connect(func() -> void: strip.visible = false)
-	b.mouse_entered.connect(func() -> void: strip.visible = true)
-	b.mouse_exited.connect(func() -> void: strip.visible = false)
+	b.set_meta("item_name", "")
+	b.focus_entered.connect(_name_slot.bind(b))
+	b.mouse_entered.connect(_name_slot.bind(b))
+	b.mouse_exited.connect(func() -> void: _name_slot(get_viewport().gui_get_focus_owner()))
+
+
+# Names the item in a slot under the grid, or clears the line for an empty slot or no slot.
+func _name_slot(b: Control) -> void:
+	focus_name.text = str(b.get_meta("item_name", "")) if b != null and slots.has(b) else ""
+
+
 func _box(color: Color, border: Color, border_width: int, radius: int, margin: int) -> StyleBoxFlat:
 	var sb := StyleBoxFlat.new()
 	sb.bg_color = color

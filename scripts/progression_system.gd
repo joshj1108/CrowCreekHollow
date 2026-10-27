@@ -59,7 +59,7 @@ func _grant_reward(reward: Dictionary) -> void:
 		m.inventory["seeds"] += reward["seeds"]
 	if reward.has("pumpkin_seeds"):
 		m.inventory["pumpkin_seeds"] += reward["pumpkin_seeds"]
-	for mat in ["wood", "fiber", "resin"]:
+	for mat in ["wood", "fiber", "resin", "feathers"]:
 		if reward.has(mat):
 			m.materials[mat] += reward[mat]
 	if reward.has("coins"):
@@ -74,7 +74,7 @@ func _reward_text(reward: Dictionary) -> String:
 		parts.append("%d turnip seeds" % reward["seeds"])
 	if reward.has("pumpkin_seeds"):
 		parts.append("%d pumpkin seeds" % reward["pumpkin_seeds"])
-	for mat in ["wood", "fiber", "resin"]:
+	for mat in ["wood", "fiber", "resin", "feathers"]:
 		if reward.has(mat):
 			parts.append("%d %s" % [reward[mat], mat])
 	if reward.has("coins"):
@@ -106,4 +106,6 @@ func _level_progress(skill: String) -> float:
 
 
 func _grant_xp(skill: String, amount: int) -> void:
+	amount = m.rewards._xp(amount)   # more while hale
 	m.skill_xp[skill] += amount
+	m.feel._xp(skill, amount)

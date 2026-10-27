@@ -86,7 +86,6 @@ func _spawn_foes() -> void:
 
 func _update_foes(delta: float) -> void:
 	m.swing_cool = maxf(0.0, m.swing_cool - delta)
-	m.swing_time = maxf(0.0, m.swing_time - delta)
 	m.invuln = maxf(0.0, m.invuln - delta)
 	if not (m._in_village() or m.in_cave):
 		m.player.modulate = Color.WHITE

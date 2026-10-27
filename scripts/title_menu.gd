@@ -32,6 +32,18 @@ static func slot_path(slot: int) -> String:
 	return "user://hallowvale_save_%d.json" % slot
 
 
+# The game was called Hallowvale, and Godot keeps each game's files in a folder named after it. On the first
+# run under the new name, saves and settings are copied over from the old folder, so nothing is lost.
+static func migrate_old_folder() -> void:
+	var old := OS.get_data_dir().path_join("Godot/app_userdata/Hallowvale")
+	var dir := DirAccess.open(old)
+	if dir == null or OS.get_user_data_dir() == old:
+		return
+	for file in dir.get_files():
+		if file.begins_with("hallowvale_") and file.ends_with(".json") and not FileAccess.file_exists("user://" + file):
+			DirAccess.copy_absolute(old.path_join(file), "user://" + file)
+
+
 # Saves from before there were slots become slot 1, so an old save still loads.
 static func migrate_legacy_save() -> void:
 	if FileAccess.file_exists(LEGACY_SAVE) and not FileAccess.file_exists(slot_path(1)):
@@ -90,7 +102,7 @@ func _ready() -> void:
 		notice = ""
 
 	var title := Label.new()
-	title.text = "HALLOWVALE"
+	title.text = "CROW CREEK HOLLOW"
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	title.add_theme_font_size_override("font_size", 56)
 	title.add_theme_color_override("font_color", COL_GOLD)
@@ -268,6 +280,7 @@ func _add_heading(text: String) -> void:
 	label.text = text
 	label.add_theme_color_override("font_color", COL_GOLD)
 	label.add_theme_font_size_override("font_size", 18)
+	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	content.add_child(label)
 
 
@@ -276,6 +289,7 @@ func _add_hint(text: String) -> void:
 	label.text = text
 	label.autowrap_mode = TextServer.AUTOWRAP_WORD
 	label.custom_minimum_size = Vector2(420, 0)
+	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	label.add_theme_color_override("font_color", COL_DIM)
 	label.add_theme_font_size_override("font_size", 14)
 	content.add_child(label)

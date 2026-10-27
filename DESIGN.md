@@ -1,4 +1,4 @@
-# Hallowvale — Design
+# Crow Creek Hollow — Design
 
 A top-down farming game with heavy psychological horror, built in Godot 4.7.
 
@@ -37,6 +37,9 @@ A top-down farming game with heavy psychological horror, built in Godot 4.7.
 ## Action bar
 
 - Messages sit at the bottom-left of the screen, clear of the farm's labels. HUD and message text have a dark outline so they read over any ground.
+- **The window** opens maximized and can be resized. The game is laid out for 1280 by 720 and scales to fill the window; a window of another shape shows more of the world instead of black bars, and the HUD keeps to its corners.
+- **Text colours** follow the UI kit everywhere (HUD, hotbar, panels, the bag, the section wheel and the title menu): titles and highlights in gold (`d8b050`, or `f2d27a` for the brightest), body text in cream (`e8dcc0`), and notes, hints and labels in a muted tan (`9a8a6a`). Labels in a row are centred on the icon beside them. Text that might be too long for its box steps down a font size or two, then ends in an ellipsis, and never runs over a frame.
+- **The hotbar** shows ten framed slots with each tool's icon centred in its slot and the slot number small in the top-left corner. The active tool's name sits **under** the slots, in gold.
 - Trees are SpriteCook sprites (`art/farm/tree_*.png`), 32×48: two tiles wide and three tall, standing on the bottom centre of their tile. Kinds are autumn oaks, Douglas firs, willows and dead trees, picked by a hash of the tile. The forest border is mostly firs with oaks mixed in; the grove inside the farm is mostly oaks. Out of every twelve trees, one is dead. Willows grow where the layout lists them, by the pond. Each tree is nudged a few pixels by its position, and border trees overlap, so the outer forest reads as dense woodland. Trees block movement. Trees on or north of the player's row are drawn with the ground, behind the player; those south of it are drawn over the player (`tree_front_layer`). A felled grove tree leaves a stump.
 - **The great tree** is a 3 by 3 block of trees in the middle of the yard. It can't be felled, and the game says so when you face it. The crows roost in its crown from 20:00 and leave at dawn. Their eyes glow red, bright enough to show through the night tint, and each roost perch has a faint red light while a crow sits there. Crows are SpriteCook art: a perched sprite, and a four-frame flight cycle that follows each crow's flap. The roost perches sit on the great tree's art (`ROOST_SPOTS`): the two bare branch tips and two spots on top of the crown.
 - Rocks on the farm, and quarry rocks in the village, block movement like trees. You can still break a rock from the tile next to it.
@@ -62,7 +65,7 @@ The farmer is a SpriteCook sprite (`art/player/`): a 16×32 figure in a straw ha
 
 ### UI skin
 
-Menus, the bag, the hotbar, the HUD boxes and the title screen use one SpriteCook UI kit: dark wood frames with iron corner brackets, wooden buttons (normal, hover, pressed, disabled; focus looks like hover), and framed slots with a gold edge when selected. The pieces in `art/ui/` are cut from the kit's component sheet at a third of its size and drawn as 9-slices whose edges stretch (`scripts/ui_skin.gd`). Cards inside a section use the slot frame. The food, water and warmth meters are the kit's bar: each bar is the channel, with tan, blue or orange fill, and the iron-capped frame is drawn around it so the fill's length matches the value. The minimap sits inside the panel's rail, drawn over its edges. The section wheel's curved segments can't be 9-sliced, so they are filled with the panel's wood grain (shaded, or lit when highlighted) with iron edges, gold on the highlight, and the section's name sits on a slot-framed plaque. Each segment's icon is SpriteCook art drawn at 3×: Gear and Craft use the shield and hammer item icons, and Skills, Quests, House, Buildings and Achievements use `art/ui/wheel_icons.png` (a journal, a sealed scroll, a farmhouse, a barn with a silo, and a trophy). The Diary has no art yet and draws a leather book with a red ribbon in code. If the art is missing, every control falls back to its flat style.
+Menus, the bag, the hotbar, the HUD boxes and the title screen use one SpriteCook UI kit: dark wood frames with iron corner brackets, wooden buttons (normal, hover, pressed, disabled; focus looks like hover), and framed slots with a gold edge when selected. The pieces in `art/ui/` are cut from the kit's component sheet at a third of its size and drawn as 9-slices whose edges stretch (`scripts/ui_skin.gd`). Cards inside a section use the slot frame. The food, water and warmth meters are the kit's bar: each bar is the channel, with tan, blue or orange fill, and the iron-capped frame is drawn around it so the fill's length matches the value. The minimap sits inside the panel's rail, drawn over its edges. The section wheel's curved segments can't be 9-sliced, so they are filled with the panel's wood grain (shaded, or lit when highlighted) with iron edges, gold on the highlight, and the section's name sits on a slot-framed plaque. The plaque is sized to its text and stays inside the ring: a long name steps down a size and the subtitle wraps. Each segment's icon is SpriteCook art drawn at 3×: Gear and Craft use the shield and hammer item icons, and Skills, Quests, House, Buildings and Achievements use `art/ui/wheel_icons.png` (a journal, a sealed scroll, a farmhouse, a barn with a silo, and a trophy). The Diary has no art yet and draws a leather book with a red ribbon in code. If the art is missing, every control falls back to its flat style.
 
 ### Art style (locked)
 
@@ -185,7 +188,7 @@ Saves from before this change reset chapter progress. Stat-based achievements re
 ## Pack, bags, and storage
 
 - The **pack** holds crops, fish, eggs, milk, and every cooked food, each under its own name and picture. Seeds have their own pouch and don't count. Materials are uncapped for now.
-- The pack starts at **20 slots**. Like items stack up to **28** to a slot, so a kind takes as many slots as its stacks need. Grid menus (Skills, Inventory, Craft, Gear) sit centred in the menu box. The Inventory panel (I) shows what you carry as a grid of picture tiles, one per kind with its count, like the Craft panel: the pack's crops, fish, meals, and preserved goods, then the seed pouch and the materials you hold. Every item has a drawn picture. The name shows only on the highlighted tile, and the bag works the same way: each slot shows a picture and count, with the name on the slot in focus. Picking a tile fills the detail card beside the grid, which holds the **Eat** button for crops and meals. The pack's slots used and the next bag are listed under the grid. The Body meters and the planting options sit below it.
+- The pack starts at **20 slots**. Like items stack up to **28** to a slot, so a kind takes as many slots as its stacks need. Grid menus (Skills, Inventory, Craft, Gear) sit centred in the menu box. The Inventory panel (I) shows what you carry as a grid of picture tiles, one per kind with its count, like the Craft panel: the pack's crops, fish, meals, and preserved goods, then the seed pouch and the materials you hold. Every item has a drawn picture. The name shows only on the highlighted tile. The bag is kept small: twenty square 52-pixel slots, four across, each with a centred picture and its count in the corner, and the name of the slot in focus (or under the mouse) in one gold line under the grid. Picking a tile fills the detail card beside the grid, which holds the **Eat** button for crops and meals. The pack's slots used and the next bag are listed under the grid. The Body meters and the planting options sit below it.
 - The seed pouch is a small grid with a count on each seed type.
 - The Gear panel is a paper-doll grid of nine slots. The slots and crafting are described under Gear and crafting below.
 - **Bags** (bought with coins, fiber, wood, and Carpentry level):
@@ -279,7 +282,7 @@ The house is drawn in four stages that match its repair level. **Decrepit** has 
   - **Bedroom:** open from the start. The bed saves and ends the day.
   - **Parlor (Patched):** a cleaning station. Tidy once a day for Cleaning XP.
   - **Study (Restored):** an empty room. The desk stays in the bedroom.
-  - **Pastimes:** the Desk panel has **Solitaire** (1 hour) and **Sudoku** (1 hour 30). They are not played out: Play passes that much time (needs drop and the fire burns as usual), closes the panel and entertains you for the day. Solitaire uses a game from the **pack of cards** (a worn pack with 5 games is in the drawer at the start; a new pack lasts 15). Sudoku uses a puzzle from the **sudoku book** (10 puzzles; none at the start). A pastime has to be over by 02:00.
+  - **Pastimes:** the Desk panel has **Solitaire** (1 hour) and **Sudoku** (1 hour 30). They are not played out: Play passes that much time (needs drop and the fire burns as usual), closes the panel, and the day's first game gives sanity and some lost limit back (see Sanity and horror). Solitaire uses a game from the **pack of cards** (a worn pack with 5 games is in the drawer at the start; a new pack lasts 15). Sudoku uses a puzzle from the **sudoku book** (10 puzzles; none at the start). A pastime has to be over by 02:00.
   - **Catalog:** the Desk panel's catalog is where everything for the farm is bought. An order is paid at once and comes with the next morning's post, with a Delivery letter; animals go straight into their pens. It sells: a pack of cards (10 coins), a sudoku book (12), 5 turnip seeds (15), 4 corn seeds (24, Farming 2), 3 pumpkin seeds (30, Farming 3), a hen (12, needs the coop and room, counting hens on order), a goat (45, needs the barn and room). Nothing you can gather (wood, fiber, resin, stone, hardwood) is sold here. Pending orders are saved.
 - A restored house softens the night overall.
 - **Cleanse** (House panel): needs Cleaning 3 and 2 harvested crops. Once a day. Lifts the sanity limit by 5 and cures part of the collapse penalty.
@@ -293,7 +296,7 @@ The house is drawn in four stages that match its repair level. **Decrepit** has 
   - **Carpentry:** each house repair gives 30 XP. Mending a board (1 wood, 1 fiber, from the House panel) gives 15 XP, capped at 2 mends per day so the house can't be finished in one day. Training to level 2 takes about 3 days, and level 3 takes about a week.
   - **Cleaning:** each daily tidy gives 20 XP. At Cleaning 2, a tidy also gives +5 sanity. Cleaning 3 unlocks the cleanse.
   - **Cooking:** cooking a fish gives 15 XP and cooking crops gives 10 XP. See Cooking above.
-  - **Fishing:** face a sparkling spot on the pond edge and press Space to start fishing it, like RuneScape. While you keep still and face the spot, you roll for a catch every 3 seconds. The chance starts at 50% and rises 3% per level, up to 90%. Each catch gives 15 XP. Each spot stays active for 15 to 30 seconds, then goes quiet and a new spot appears elsewhere on the pond edge. There are 3 spots, with one more at Fishing 3 and another at Fishing 5. Moving, going inside, opening a panel, or pressing Space again reels the line in.
+  - **Fishing:** face a sparkling spot on the pond edge and press Space to start fishing it, like RuneScape. While you keep still and face the spot, you roll for a catch every 3 seconds. The chance starts at 50% and rises 3% per level, up to 90%. Each catch gives 15 XP. Each spot stays active for 15 to 30 seconds, then goes quiet and a new spot appears elsewhere on the pond edge. There are 3 spots, with one more at Fishing 3 and another at Fishing 5. Moving, going inside, opening a panel, or pressing Space again reels the line in. The spot you fish looks like any other spot: no ring is drawn around it, and the cast line and bobber show which one you're on.
 - Levels will unlock new areas, tools, and fortifications.
 
 ## Survival (bushcrafting and lanterns)
@@ -327,6 +330,7 @@ The house is drawn in four stages that match its repair level. **Decrepit** has 
 - **Food** drains about 2.4 an hour, so it runs out in about two days. Every food restores food, sanity and HP from its difficulty (1 to 4) and the level needed to obtain it: food = 10 + 12 × difficulty + 3 × level, sanity = 2 + 2 × difficulty + level, HP = difficulty. A raw turnip restores 22 food and a hearty stew 73. Eat food from the bag or the Inventory panel.
 - **Water** drains about 3 an hour, and 1.6 times faster on hot days (75°F and up). Face the **pond** and press Space to drink, for +40 water.
 - **Warmth** depends on the temperature. Outside it drains when it's below 50°F, faster the colder it gets. In mild weather it slowly refills. Inside the house it refills, faster once the house is patched. Sleeping in bed fills it to 100.
+- **Hale:** while food, water and warmth are all at 70 or more, every skill gains 20% more XP. A gold **Hale** tag shows beside the meters while it lasts.
 - If any need is empty, you lose 1 HP every 2 hours until it's filled. Dropping to 0 HP collapses you at the homestead, as in the wilds.
 - **Temperature** is shown in °F. It's the season's average (winter 40, spring 51, summer 67, autumn 54), plus a daily swing of about 7 degrees, coldest near dawn and warmest in the evening, plus the day's weather (sun +6, overcast 0, fog −2, drizzle −3, rain −4, downpour −6, snow −10).
 
@@ -335,14 +339,61 @@ The house is drawn in four stages that match its repair level. **Decrepit** has 
 - Sanity runs from 0 to a maximum that drops with each collapse. It shows in the HUD as `Sanity current/max`.
 - Outdoors in the dark, sanity drains slowly. Indoors it recovers, faster once the house is boarded. Tidying gives +10 (+5 more at Cleaning 2), and sleeping gives +25.
 - Below 30 sanity, the whole screen gets darker.
-- Night events vary by day and change sanity:
-  - Something at the edge of the field (−5)
-  - Knocks on the house wall (−10)
-  - A figure watching by the house (−15)
-  - A quiet night (−3)
-- The field shadow creeps closer each night.
+- At 22:00 something comes to the farm. See **Nights** below.
 - **Collapse penalty:** missing the bed by 03:00 lowers the sanity limit by 5 permanently. A **cleanse** (see Farmhouse) lifts it by 5 per use, once a day.
-- **Boredom:** one pastime at the **desk** (Solitaire or Sudoku) entertains you for that day. A day without a finished game lowers the sanity limit by 1, at the end of the day, down to 40 points lost (a limit of 60). The limit recovers only through cleansing and the collapse relief, not through boredom.
+- **Pastimes:** the day's first finished game at the **desk** (Solitaire or Sudoku) gives +10 sanity and wins back 2 points of lost sanity limit (boredom loss from older saves first, then the collapse penalty). A day without one costs nothing.
+
+## Nights
+
+Nights are a choice, not just a sanity cost (`scripts/night_system.gd`). At 22:00 one visitor comes. **Facing it** costs a little sanity now, leaves **crow feathers**, and pushes the field shadow back. **Ignoring it**, by waiting until 01:00 or going to bed, costs more sanity and lets the shadow creep closer.
+
+- **How to face each one:** walk up to a figure and press Space (a swing works too). Open the front door for the knocking. Stand under the great tree and press Space for the crows. Press Space at the pond lights. Get inside within an hour for the footsteps. Until you have faced three visitors, each arrival message says how to answer it.
+- **Visitors** (sanity lost facing / ignoring):
+  - Always: the figure at the field's edge (4 / 6, 1 feather), knocks on the front door (5 / 8, 1 feather), and a quiet night (3, nothing to answer).
+  - After 7 nights: the crows wake in the great tree (6 and 3 feathers / 2, and up to three crops pecked back a stage), pale lights in the pond (8 and two fish / 3), and a tall watcher beside the house (12 and 2 feathers, pushes the shadow back 2 / 15).
+  - After 14 nights: footsteps follow you when you're outdoors (4 if you reach the house within the hour / 15).
+  - Newer visitors are likelier, the same one never comes two nights running, and the pick is fixed by the day.
+- **The field shadow** starts at the far east of the field and moves 4 tiles toward the house for each ignored visitor (knocks, field figure, watcher, footsteps), and back for each faced one. After 8 steps it reaches the house, and that night **the Hollow** comes to the front door: a towering cloud of crow-black with red eyes. Facing it costs 20 sanity, gives 5 feathers, and sends the shadow back to the far edge. Ignoring it costs 30 and lowers the sanity limit by 5 (lifted by cleansing), and the shadow only falls back halfway.
+- **Seen in the dark:** visitors are drawn above the buildings, with a faint red glow at eye height (pale blue for the pond), so their outline and eyes show at night.
+- **Crow charm** (Craft, Other tab; Bushcrafting 2): 3 crow feathers and 1 fiber. One charm carried at 22:00 is used up and halves everything that night takes from your sanity. Facing 10 visitors earns the **Into the Dark** achievement (3 feathers and 3 fiber).
+- Dread and All Hallows still double or halve the losses, as before. The crow bell (see Homestead projects) takes another quarter off and keeps the Hollow away.
+
+## Daily happenings
+
+One surprise a day (`scripts/daily_happenings.gd`). From day 2, each morning picks a happening by the day, never the same one two days running, and the morning message announces it. Most leave something in the yard: walk up to it and press Space. Leaving the house by day reminds you while one waits. A happening left alone is gone the next morning.
+
+- **Pedlar** (by the farm stand, until 18:00): sells one odd thing for the day: a crow charm (25 coins), three pumpkin seeds (18), a sudoku book (6), three crow feathers (12), or five turnip seeds (8).
+- **A glint in the grass** (a random open grass tile): a purse of 10 to 25 coins, three crow feathers tied with red thread, a sealed seed tin (4 turnip and 2 corn seeds), or a warm tin soldier (−5 sanity, +15 coins).
+- **A fallen branch** across a path: clearing it gives 3 wood, 1 hardwood and Forestry XP.
+- **The crows' gifts** under the great tree: 5 to 15 coins and a crow feather.
+- **A mushroom ring** at the edge of the wood: two times in three, +20 food and +5 sanity; otherwise −10 sanity and a crow feather.
+- **Fish frenzy:** the day's catch chance is 25% higher (still capped at 90%).
+- **A neighbour** stops by in the morning with a gift (eggs, turnip hash, kindling or a few coins) and a line about the farm.
+- Rarer: the mushroom ring has half the weight of the others. The pedlar and the glint are the most common.
+- The pedlar, branch, glints and mushrooms are drawn in code for now, at the farmer's scale with dark outlines; they are candidates for SpriteCook sprites.
+
+## Homestead projects and decor
+
+Long-term goals you can see on the farm (`scripts/farm_projects.gd`).
+
+- **Homestead progress:** a ladder of 14 steps, shown at the top of the Buildings section with the count done and the **next step** and how to do it: board up the house, build the coop, patch the house, the smokehouse, open the second plot, the furnace, the firewood store, light the yard (a lamp post), the barn, restore the house, four flower beds, open the third plot, the Hollow Lantern, and the crow bell. Steps can be done in any order; the next step is the first one not done. Each step done pays 20 coins and names the next. Steps already done in an older save are recorded without paying.
+- **Decor**, placed like the coop (Buildings section, Decor; face open grass, Space places, B cancels):
+  - **Lamp post** (3 wood, 1 iron bar, Smithing 2; up to 8): lights a ring 3 tiles across after dusk. Standing in its light, the dark doesn't drain sanity.
+  - **Flower bed** (1 wood, 2 turnip seeds, Farming 2; up to 6): each gives +1 sanity every morning, except in winter, when they're bare.
+  - **Gravel path** (1 stone a tile): turns grass into path. Placing carries on tile after tile until the stone runs out or B is pressed.
+  - **Crow bell** (6 hardwood, 4 iron bars, 20 crow feathers, 150 coins, Carpentry 4; one): a tall post with an iron bell. While it stands, the field shadow stops a step short of the house, so the Hollow no longer comes, and every night loss is a quarter less.
+- Lamps, flower beds and the bell block movement; paths don't. Face one and press Space to see what it does; press again within a few seconds to take it down and get its materials back.
+- Decor is drawn in code for now, at the farmer's scale with dark outlines.
+
+## The farm's past
+
+The mystery comes out in torn pages from **Agnes Rook's** journal (`scripts/mystery.gd`). Agnes and her husband Elias farmed here before you. The crows fed a hollow under the great tree; Elias walked into it; Agnes kept it under by ringing an iron bell every night, until the town made her take the bell down, and then she went after him. Her last page asks whoever comes next to hang the bell again, which is the crow bell project.
+
+- **Ten pages**, each found through something the player already does, with a line saying where: (1) day 3, through the mail slot; (2) after the first knocking, answered or not; (3) facing the figure in the field; (4) holding 3 crow feathers or a crow charm; (5) the first sale at the farm stand; (6) patching the house; (7) the crows, at night or their gifts by day; (8) the first visit to the cave; (9) the first time the Hollow comes; (10) restoring the house.
+- Pages are found one at a time (checked every half second), each with a chime and a message, and go in the diary under **Agnes Rook's pages (n of 10)**, in page order, with "Missing" for the gaps. New ones are marked like any diary page.
+- **Epilogue:** hanging the crow bell adds a last page in your own hand: the bell rings, something under the great tree answers, and the field is only a field.
+- Neighbours drop hints too: Old Maren remembers Agnes keeping hens, and the postman says the crows haven't liked the farm since the Rooks.
+- Older saves file the pages they've already earned quietly when loaded; the ones tied to a night or the crows come the next time it happens.
 
 ## The diary
 
@@ -384,7 +435,8 @@ There is no tip card: everything the game teaches is written in the **diary**, s
 
 Combat happens while you move, in the style of Stardew Valley.
 
-- **Swing:** press Space to swing your right-hand weapon in the direction you face. A swing reaches 1.5 tiles in a forward arc and has a 0.5 second cooldown. Villagers still take priority: if one is in front, Space talks to them.
+- **Swing:** press Space to swing your right-hand weapon in the direction you face. A swing reaches 1.5 tiles in a forward arc and has a 0.5 second cooldown. Only the player's swing animation shows it; no arc is drawn on the ground. Villagers still take priority: if one is in front, Space talks to them.
+- Foes and cave creatures have no health bars. A hit makes them flash pale, and that is the only sign of damage.
 - **Foes roam** their area and wander when you're far away. They **chase** you when you're within their aggro range. Each foe has a contact attack on a cooldown.
   - **Hollow** (Lowmere wood): 6 HP, slow, 2 damage, aggro 3 tiles.
   - **Stalker** (the Ashford road): 10 HP, fast, 3 damage, aggro 4.5 tiles, drops resin.
@@ -554,7 +606,10 @@ A cave on the homestead, entered from the farm's west edge. It is the only place
 
 Keeping the homestead running is the daily work. Each part is at base level for now, to be deepened one project at a time.
 
-- **Chores:** each day has a short list, shown at the top of the House panel. Tidy the house and mend a board every day. Once you have hens, feeding them is listed too, but it is done at the coop. Each chore left undone adds 1 wear overnight. A night with every chore done brings back 5 sanity.
+- **Chores:** each day has a short list, shown at the top of the House panel. Tidy the house and mend a board every day. Once you have hens, feeding them is listed too, but it is done at the coop. Each chore left undone adds 1 wear overnight.
+- **Chores pay** (`scripts/homestead_rewards.gd`):
+  - **Finds:** the day's tidy turns up something small: a few coins under the rug, two firewood, two turnip seeds, a crow feather, or a pressed flower (+5 sanity). The day's first mended board does too: hidden coins, two sticks, a resin bead, or a crow feather. The find is picked by the day.
+  - **Kept well:** a night with every chore done brings back 5 sanity and pays odd-job coins in the morning, 2 for each night of the streak, up to 20. Every 7th night in a row, someone leaves a **crow charm** on the step. Missing a chore resets the streak.
 - **Wear:** the house wears by 1 each night, plus 1 for each chore left undone, up to 10. Mending a board takes 2 off, a tidy takes 1, and a repair takes 3. At wear 6 or more, rain ruins a random crop overnight. The Upkeep section of the House panel shows it.
 - **Buildings menu (U):** the workshop, the coop, and the barn are built and moved from here, not from the House panel. Each one is placed the same way: building it starts placement, a green or red preview follows the tile you face, and Space places it on open grass. A spot can't cover plots, crops, rocks, brush, fishing spots, or you. B cancels. The Move button relocates a standing building for free. A building that was paid for but never placed (older saves) shows Place instead.
 - **Coop:** 6 wood, 4 fiber, and Carpentry 2. A 2 by 2 building. Stand beside the coop, facing it, and press Space to open its panel, where you feed the hens (they are ordered from the catalog). The hens wander inside it, walking to a spot, pausing, and walking on.
@@ -562,8 +617,16 @@ Keeping the homestead running is the daily work. Each part is at base level for 
 - **Hens:** 12 coins each from the catalog, up to four in the coop. Feed them once a day from your crops (1 crop per hen). Hens are grown after a week (7 nights), and only a grown hen that is fed lays an egg overnight, which goes into your pack as an egg, as far as there is room. A grown hen sells for **20 coins** from the coop panel. Two unfed days in a row and a hen wanders off.
 - **Predators:** at wear 4 or more, a fox can get into the coop on a given night and take a hen.
 - **Post and the desk:** post comes through the mail slot in the front door and lands on the **desk** in the bedroom, which is there from the start. Each morning's new letters are announced in the morning message. Unread post turns on a **red light** at the desk, blinking, while you are in the house. Using the desk opens the Desk panel (post, property tax, pastimes, catalog), which marks the post read and lists it. Read letters go in the drawer with the Clear button.
-- **Property tax:** a bill arrives on the 1st of January, April, July, and October (not on the first day of the game). Its amount is the **property value** at that moment. The value starts at **40 coins**, then: it **multiplies by 1.8 with each house upgrade** (exponential), gains **5% per building** (coop, barn, cellar, cooler, smokehouse, furnace, woodshed), gains **25% per farm plot past the first** (plot two at Farming 2, plot three at Farming 4), and gains **1% per clean night** in a row, up to 20 nights, where a clean night is one with every chore done. The Desk panel shows the value and its breakdown. It is due 14 days after it arrives. Pay it from the Desk panel. Unpaid, a reminder comes the day after it is due, a final notice 7 days late, and at 14 days late the **land is lost**: the save is removed and the start screen says why.
+- **Property tax:** a bill arrives on the 1st of January, April, July, and October (not on the first day of the game). Its amount is the **property value** at that moment. The value starts at **40 coins**, then: it **multiplies by 1.8 with each house upgrade** (exponential), gains **5% per building** (coop, barn, cellar, cooler, smokehouse, furnace, woodshed), and gains **25% per farm plot past the first** (plot two at Farming 2, plot three at Farming 4). Keeping the farm well doesn't raise the bill. The Desk panel shows the value and its breakdown. It is due 14 days after it arrives. Pay it from the Desk panel. Unpaid, a reminder comes the day after it is due, a final notice 7 days late, and at 14 days late the **land is lost**: the save is removed and the start screen says why.
 - **Third plot:** opens at Farming 4 once the house is Patched. It sits between the two paths, south of the first plot.
+
+## Game feel
+
+Everyday actions get a little weight (`scripts/game_feel.gd`).
+
+- **Bursts:** each action's sound also throws a puff of particles at the tile being worked: dirt from the hoe and planting, droplets from watering and a catch, sparkles and leaves from a harvest, chips and leaves from the axe, stone from the pick, leaves from gathering, chips from splitting and repairs, and sparks from a hit. Leaves take the season's colours and see-saw as they fall. Particles are one or two art pixels, so they match the 3× pixel art.
+- **Shake:** each tool strike already jolts the camera a little. Felling a tree and breaking a rock jolt it harder.
+- **Pop-ups:** what you gain floats up over the farmer and fades: XP in gold (`+10 Farming XP`, after the Hale bonus), coins in bright gold, and items in cream (`+1 Turnip`). Gains are found by watching the totals each frame, so every source shows without being wired in. Several at once stack upward. They stay quiet while a menu or the bag is open, and they sit on their own canvas so the night doesn't dim them.
 
 ## Graphics and atmosphere
 
@@ -587,6 +650,12 @@ Particles do not run indoors, in the cave, or in the village. Nothing in the gra
 - `farm_system.gd` (`farm`): seeds, planting, watering, harvest and crop unlocks.
 - `firewood_system.gd` (`firewood`): chopping, the fire, and warmth.
 - `sanity_system.gd` (`sanity_sys`): the day's events, tidying, cleansing and the night relief.
+- `night_system.gd` (`nights`): the night visitors, the field shadow, crow feathers and the crow charm.
+- `homestead_rewards.gd` (`rewards`): what chores and needs give back: Hale, chore finds, the kept-well streak and pastimes.
+- `daily_happenings.gd` (`happenings`): the day's surprise: what it is, where it is, and what taking it gives.
+- `farm_projects.gd` (`projects`): the homestead progress ladder and placeable decor (lamps, flower beds, paths, the crow bell).
+- `game_feel.gd` (`feel`): action bursts, the bigger shakes, and the pop-ups for XP, coins and items.
+- `mystery.gd` (`mystery`): Agnes Rook's torn pages, when each turns up, and the diary's section for them.
 - `stall_system.gd` (`stall`): the farm stand, cooking, food, the pack and the bank.
 - `progression_system.gd` (`progression`): skill XP, levels, story, achievements and rewards.
 - `save_system.gd` (`saver`): saving, loading and the saved position.
@@ -603,7 +672,7 @@ Each class holds `var m: MainGame` and reads main's state through it. A member i
 The farm is a hand-read grid. `tools/farm_grid.txt` holds one character per inner tile (64×40). It was first read tile by tile from the layout diagram at 40×24, then spread out to 64×40 by the one-off `tools/grow_farm.py` when the farmer became a full-tile sprite. `tools/hand_layout.py` reads that grid, derives the anchors (plots, house, porch, well, stall, great tree, grove spots) and writes `scripts/farm_layout.gd`. Regenerate with `python3 tools/hand_layout.py`; edit the grid, not the generated file.
 
 - Terrain codes are listed in the header of `scripts/farm_layout.gd`. The roof (`O`) is a separate tile from the house body (`H`), so the two can differ in colour. The roof is walkable: the player walks over it, the walls and door block. The roof art is drawn in its own layer, over the player while they are north of the walls and under them on the walls, the same rule as the great tree's canopy. The stall is 3×2, as wide as its art. The well is 2×2; `WELL_IX` is its top-left tile.
-- The farmhouse footprint is 11 tiles wide: five rows of roof, then two of wall with the door in the middle of the bottom row, and the porch below the door. Its sprite is 12 tiles wide and 10 tall, shifted half a tile so the steps sit on the door tile. The door is a little taller than the farmer, so the house reads at the farmer's scale. Each repair stage is a SpriteCook edit of the ruined house (`gemini-3-pro-image`, since the exact-size model stops at 128 pixels), placed on the same 192×160 canvas with the door and steps lined up. The Boarded stage came out about 11 pixels narrower; it is centred on the door.
+- The farmhouse footprint is 11 tiles wide: five rows of roof, then two of wall with the door in the middle of the bottom row, and the porch below the door, with a path tile on each side of it so the door sits centred on the path. Its sprite is 12 tiles wide and 10 tall, shifted half a tile so the steps sit on the door tile. The door is a little taller than the farmer, so the house reads at the farmer's scale. Each repair stage is a SpriteCook edit of the ruined house (`gemini-3-pro-image`, since the exact-size model stops at 128 pixels), placed on the same 192×160 canvas with the door and steps lined up. The Boarded stage came out about 11 pixels narrower; it is centred on the door.
 - The plots are 15×7 (plot one), 15×6 (plot two) and 12×6 (plot three).
 - Split-rail fences (`X`, blocking) run along the top of plot one and the bottom of plot two, one tile out from the soil; the plots stay open on their sides. A scarecrow (`Y`, blocking, drawn two tiles tall with the trees) stands just east of plot one.
 - Ground clutter (pebbles, fallen leaves, mushrooms, dry grass tufts; `art/farm/clutter.png`) is scattered on about one open grass tile in eleven, chosen by a hash of the tile, and only where all eight neighbours are grass. It is drawn under everything and never blocks.
@@ -629,7 +698,7 @@ A save records the layout's version. When the version changes, the save is migra
 
 ## Deferred
 
-- The story beyond the survival chapters: mystery and horror escalation.
+- More of the story beyond Agnes Rook's pages (see The farm's past): what the Hollow is, and whether Elias and Agnes can be found.
 - **A cave system for combat.** A place to fight, and Combat's main source of XP. It would also restore the Combat training that the hollows and stalkers used to give.
 - **Wolves that threaten livestock.** Needs livestock first. Wolves would come after the cave system, so there's a reason to guard the animals.
 

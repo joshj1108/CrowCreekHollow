@@ -47,9 +47,9 @@ const COL_BUTTON_HOVER := Color("43321f")
 const COL_BUTTON_ACTIVE := Color("65472a")
 const COL_BUTTON_DISABLED := Color("241b14")
 const COL_TRACK := Color("120d09")
-const COL_TEXT := Color("f1e4c8")
-const COL_MUTED := Color("b3a27c")
-const COL_ACCENT := Color("d9a94e")
+const COL_TEXT := Color("e8dcc0")
+const COL_MUTED := Color("9a8a6a")
+const COL_ACCENT := Color("d8b050")
 const COL_SHORT := Color("d0705a")   # a cost or level the player does not meet yet
 
 var panel: Control         # the full-screen menu; visible only while a panel is open
@@ -553,8 +553,13 @@ func _build_recipe_tile(recipe: Dictionary, small: bool = false) -> Control:
 		tile.add_theme_stylebox_override("focus", _box(base, COL_ACCENT, 2, 8, 4))
 	tile.pressed.connect(_on_action_pressed.bind(str(recipe.get("action", ""))))
 
+	# The picture and name sit inside the tile's frame, clear of its iron edge.
 	var box := VBoxContainer.new()
 	box.set_anchors_preset(Control.PRESET_FULL_RECT)
+	box.offset_left = 10.0
+	box.offset_top = 8.0
+	box.offset_right = -10.0
+	box.offset_bottom = -10.0
 	box.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	box.alignment = BoxContainer.ALIGNMENT_CENTER
 	box.add_theme_constant_override("separation", 4)
@@ -563,7 +568,7 @@ func _build_recipe_tile(recipe: Dictionary, small: bool = false) -> Control:
 	var icon := RecipeIcon.new()
 	icon.kind = str(recipe.get("icon", ""))
 	icon.tint = Color(str(recipe.get("tint", "6b4a3a")))
-	icon.custom_minimum_size = Vector2(38, 38) if small else Vector2(56, 56)
+	icon.custom_minimum_size = Vector2(38, 38) if small else Vector2(48, 48)
 	icon.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 	icon.modulate = Color(1, 1, 1, 1) if lit else Color(1, 1, 1, 0.45)
 	box.add_child(icon)
@@ -571,8 +576,22 @@ func _build_recipe_tile(recipe: Dictionary, small: bool = false) -> Control:
 	var name_label := Label.new()
 	name_label.text = str(recipe.get("name", ""))
 	name_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	name_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	name_label.add_theme_font_size_override("font_size", 9 if small else 11)
+	# Each line fits inside the frame: the text steps down a size or two for a long name, and past that
+	# ends in an ellipsis.
+	var room := tile.custom_minimum_size.x - 22.0
+	var font := name_label.get_theme_font("font")
+	var font_size := 10 if small else 12
+	var widest := ""
+	for line in name_label.text.split("
+"):
+		if line.length() > widest.length():
+			widest = line
+	while font_size > 9 and font.get_string_size(widest, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size).x > room:
+		font_size -= 1
+	name_label.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+	name_label.custom_minimum_size.x = room
+	name_label.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+	name_label.add_theme_font_size_override("font_size", font_size)
 	name_label.add_theme_color_override("font_color", COL_TEXT if lit else COL_MUTED)
 	name_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	box.add_child(name_label)
@@ -830,6 +849,10 @@ class RecipeIcon extends Control:
 				draw_circle(_pt(0.5, 0.62), 0.16 * _sz, tint)
 				draw_arc(_pt(0.5, 0.62), 0.16 * _sz, 0.0, TAU, 24, light, 0.03 * _sz)
 				draw_circle(_pt(0.5, 0.62), 0.06 * _sz, light)
+			"feather":
+				# A black crow feather on a slant, with a pale quill down its middle.
+				_shape(_poly([[0.22, 0.86], [0.3, 0.55], [0.5, 0.28], [0.78, 0.1], [0.7, 0.38], [0.5, 0.62], [0.3, 0.8]]), tint)
+				draw_line(_pt(0.16, 0.92), _pt(0.74, 0.16), Color("8a8494"), 0.03 * _sz)
 			"bracer":
 				_box(Rect2(_pt(0.08, 0.36), Vector2(0.84, 0.28) * _sz), tint)
 				_box(Rect2(_pt(0.08, 0.36), Vector2(0.84, 0.04) * _sz), light)

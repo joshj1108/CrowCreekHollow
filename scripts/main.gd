@@ -370,8 +370,6 @@ const PROPERTY_TAX := 40            # coins per quarter at the start: the base o
 const PROPERTY_HOUSE_GROWTH := 1.8  # each house upgrade multiplies the value (exponential)
 const PROPERTY_PER_BUILDING := 0.05 # +5% for each building on the farm
 const PROPERTY_PER_PLOT := 0.25     # +25% for each farm plot unlocked past the first
-const PROPERTY_PER_CLEAN_NIGHT := 0.01  # +1% for each clean night in a row (every chore done)
-const PROPERTY_CLEAN_NIGHTS_MAX := 20   # the clean bonus stops growing after this many nights
 const TAX_MONTHS := [0, 3, 6, 9]    # January, April, July, October: the bill comes on the 1st
 const TAX_GRACE_DAYS := 14          # days to pay a bill after it arrives
 const TAX_FINAL_DAYS := 7           # days overdue before the final notice
@@ -392,7 +390,7 @@ const HOLLOW_SPAWNS := [Vector2i(28, 9), Vector2i(31, 13), Vector2i(33, 8)]
 const XP_HIT := 4
 const BASE_HP := 10
 const HOMESTEAD_ARRIVE := Vector2i(BORDER_X + INNER_W - 3, BORDER_Y + INNER_H / 2)
-const SWING_TIME := 0.3       # seconds the swing is shown
+const SWING_TIME := 0.3       # seconds the swing animation plays
 const SWING_COOLDOWN := 0.5
 const SWING_REACH := 1.5      # tiles
 const SWING_ARC := 0.3        # how far off straight ahead a foe can be and still be hit
@@ -598,6 +596,7 @@ const ACHIEVEMENTS := [
 	{"id": "hollow_light", "title": "Hollow Light", "text": "Build a Hollow Lantern.", "tier": 2, "stat": "lantern_tier", "goal": 3, "reward": {"wood": 3, "fiber": 3}},
 	{"id": "survivor", "title": "Survivor", "text": "Sleep in your bed 10 times.", "tier": 2, "stat": "slept", "goal": 10, "reward": {"wood": 3, "fiber": 3}},
 	{"id": "watcher", "title": "Field Watcher", "text": "Live through 5 nights of events.", "tier": 2, "stat": "events", "goal": 5, "reward": {"wood": 3, "fiber": 3}},
+	{"id": "faced", "title": "Into the Dark", "text": "Face 10 things that come in the night.", "tier": 2, "stat": "faced", "goal": 10, "reward": {"feathers": 3, "fiber": 3}},
 	{"id": "waterer", "title": "Tender of the Plots", "text": "Water 50 crops with the hose.", "tier": 2, "stat": "watered", "goal": 50, "reward": {"wood": 3, "fiber": 3}},
 	{"id": "season_3", "title": "Turning Seasons", "text": "Live through 3 seasonal events.", "tier": 1, "stat": "events_seen", "goal": 3, "reward": {"wood": 2, "fiber": 2}},
 
@@ -664,9 +663,6 @@ const NO_SPOT := Vector2i(-1, -1)
 const STARTING_SEEDS := 5
 const MESSAGE_SECONDS := 3.0
 const SANITY_MAX := 100.0
-const BOREDOM_ENABLED := true       # false pauses the boredom drain
-const BOREDOM_DRAIN := 1.0          # sanity limit lost on a day with no finished desk game
-const BOREDOM_MAX_LOSS := 40.0      # the most boredom can take from the limit
 const SOLITAIRE_HOURS := 1.0         # a game of solitaire at the desk
 const SUDOKU_HOURS := 1.5            # a sudoku from the book
 const PASTIME_LAST_HOUR := 26.0      # 02:00: a pastime has to be over by then
@@ -704,13 +700,6 @@ var tip_check_timer := 0.0
 var diary_icon: HudIcon            # the diary by the vitals, with a dot while a page is new
 var diary_label: Label
 
-# Night events: picked by day so the nights vary. "shadow" says where it appears.
-const NIGHT_EVENTS := [
-	{"message": "Something stands at the edge of the field.", "shadow": "field", "sanity": -5, "sound": "sting"},
-	{"message": "Three slow knocks sound against the house wall.", "shadow": "house", "sanity": -10, "sound": "knock"},
-	{"message": "A figure watches from the dark beside the house.", "shadow": "house", "sanity": -15, "sound": "sting"},
-	{"message": "The field is quiet tonight. Too quiet.", "shadow": "none", "sanity": -3, "sound": "hush"},
-]
 
 enum Tile { TREE, GRASS, SOIL, PATH, WATER, HOUSE, DOOR, FLOOR, WALL, EXIT, BED, STATION, DESK, FALLOW, STALL, CELLAR, COOLER, GATE, SMOKEHOUSE, FURNACE, PORTAL, CAMP, CAVE_MOUTH, CAVE_EXIT, ORE_COPPER, ORE_IRON, COOP, BARN, TABLE, FIREPLACE, WELL, PORCH, WOODSTORE, CHOPLOG, FENCE, ROCK, ROOF, SCARECROW }
 
@@ -771,7 +760,7 @@ var world_map_tex: Texture2D = null # the whole land as a small picture for the 
 var towns: Array = []               # generated towns: origin, size, kind, title, npcs
 var current_town := -1              # index into towns while the player is in one
 var active_shop := ""               # the shop open in the Shop panel
-var bank_materials := {"wood": 0, "sticks": 0, "fiber": 0, "resin": 0, "hardwood": 0, "stone": 0, "copper_ore": 0, "iron_ore": 0, "copper_bar": 0, "iron_bar": 0, "arrows": 0, "bolts": 0}
+var bank_materials := {"wood": 0, "sticks": 0, "fiber": 0, "resin": 0, "hardwood": 0, "stone": 0, "copper_ore": 0, "iron_ore": 0, "copper_bar": 0, "iron_bar": 0, "arrows": 0, "bolts": 0, "feathers": 0}
 var bank_coins := 0
 var in_cave := false                # standing in the mining cave
 var cave: Array = []                # cave tiles, [y][x], in cave tile coordinates
@@ -811,8 +800,8 @@ var hose_attached := false
 var well_water := 0.0      # hours spent with an empty need, toward the next HP lost
 var weather_kind := ""       # today's weather, rolled each morning: see WEATHER_WEIGHTS
 var skill_xp := {"Farming": 0, "Bushcrafting": 0, "Carpentry": 0, "Cleaning": 0, "Fishing": 0, "Cooking": 0, "Combat": 0, "Forestry": 0, "Mining": 0, "Smithing": 0}
-var inventory := {"seeds": STARTING_SEEDS, "corn_seeds": 0, "pumpkin_seeds": 0, "crops": 0, "corn": 0, "pumpkins": 0, "fish": 0, "eggs": 0, "milk": 0, "fish_meal": 0, "turnip_hash": 0, "smoked_fish": 0, "dried_turnip": 0, "pumpkin_soup": 0, "canned_turnip": 0, "fish_stew": 0, "fermented_turnip": 0, "hearty_stew": 0, "bandage": 0, "firewood": 4}
-var materials := {"wood": 0, "sticks": 0, "fiber": 0, "resin": 0, "hardwood": 0, "stone": 0, "copper_ore": 0, "iron_ore": 0, "copper_bar": 0, "iron_bar": 0, "arrows": 0, "bolts": 0}
+var inventory := {"seeds": STARTING_SEEDS, "corn_seeds": 0, "pumpkin_seeds": 0, "crops": 0, "corn": 0, "pumpkins": 0, "fish": 0, "eggs": 0, "milk": 0, "fish_meal": 0, "turnip_hash": 0, "smoked_fish": 0, "dried_turnip": 0, "pumpkin_soup": 0, "canned_turnip": 0, "fish_stew": 0, "fermented_turnip": 0, "hearty_stew": 0, "bandage": 0, "firewood": 4, "crow_charm": 0}
+var materials := {"wood": 0, "sticks": 0, "fiber": 0, "resin": 0, "hardwood": 0, "stone": 0, "copper_ore": 0, "iron_ore": 0, "copper_bar": 0, "iron_bar": 0, "arrows": 0, "bolts": 0, "feathers": 0}
 # The hotbar, in slot order. Slots after these are empty.
 const HOTBAR_TOOLS := [
 	{"id": "sword", "name": "Weapon", "icon": "sword", "tint": "6b4a3a"},
@@ -835,7 +824,7 @@ var stats := {"jobs": 0, "planted": 0, "harvested": 0, "gathered": 0, "slept": 0
 	"fished": 0, "caught": 0, "mended": 0, "cleansed": 0, "cooked": 0, "eaten": 0,
 	"pumpkins": 0, "collapses": 0, "events": 0, "sold": 0, "spoiled": 0,
 	"talks": 0, "defeated": 0, "delivered": 0, "stalkers": 0, "visited": 0, "crops_given": 0, "preserved": 0, "felled": 0, "mined": 0,
-	"drank": 0, "watered": 0, "pump": 0, "hose": 0, "rain_days": 0, "events_seen": 0, "goats_bought": 0}
+	"drank": 0, "watered": 0, "pump": 0, "hose": 0, "rain_days": 0, "events_seen": 0, "goats_bought": 0, "faced": 0}
 var achievements_done := {}     # achievement id -> true
 var quests_done := {}               # quest id -> true
 var selected_seed := "turnip"
@@ -884,7 +873,7 @@ var clean_nights := 0               # nights in a row with every chore done
 var cleanse_day := 0
 var sanity := SANITY_MAX
 var sanity_penalty := 0             # permanent cap reduction from collapsing
-var boredom_loss := 0.0             # sanity limit lost to days without a finished desk game
+var boredom_loss := 0.0             # sanity limit lost to boredom in older saves; desk games win it back
 var entertained_day := 0            # the last day a desk game was finished
 var card_games := START_CARD_GAMES  # solitaire games left in the pack of cards
 var sudoku_puzzles := 0             # puzzles left in the sudoku book
@@ -922,7 +911,6 @@ var hp := BASE_HP
 var guardian_done := {}        # guardian quest id -> true
 var foes: Array = []           # enemies in the current village, rebuilt on each visit
 var swing_cool := 0.0
-var swing_time := 0.0
 var swing_dir := Vector2.DOWN
 var invuln := 0.0
 var equipment := {"hand_r": "hoe", "offhand": "", "head": "", "neck": "", "chest": "", "wrist": "", "legs": "", "feet": ""}
@@ -946,6 +934,7 @@ var hud_weather_icon: HudIcon
 var hud_hp_label: Label
 var hud_sanity_label: Label
 var hud_coins_label: Label
+var hale_label: Label              # shown beside the needs while all three are high
 var needs_box: HBoxContainer
 var food_bar: ProgressBar
 var water_bar: ProgressBar
@@ -979,6 +968,12 @@ var saver: SaveSystem
 var progression: ProgressionSystem
 var stall: StallSystem
 var sanity_sys: SanitySystem
+var nights: NightSystem
+var happenings: DailyHappenings
+var projects: FarmProjects
+var feel: GameFeel
+var mystery: Mystery
+var rewards: HomesteadRewards
 var ambience: AmbienceSystem
 var firewood: FirewoodSystem
 var farm: FarmSystem
@@ -1002,12 +997,19 @@ var dev_was_down := false       # F4 held last frame, so one press unlocks once
 
 
 func _ready() -> void:
+	TitleMenu.migrate_old_folder()
 	panels = PanelRows.new(self)
 	desk = DeskSystem.new(self)
 	animals = AnimalSystem.new(self)
 	farm = FarmSystem.new(self)
 	firewood = FirewoodSystem.new(self)
 	sanity_sys = SanitySystem.new(self)
+	nights = NightSystem.new(self)
+	rewards = HomesteadRewards.new(self)
+	happenings = DailyHappenings.new(self)
+	projects = FarmProjects.new(self)
+	feel = GameFeel.new(self)
+	mystery = Mystery.new(self)
 	stall = StallSystem.new(self)
 	progression = ProgressionSystem.new(self)
 	saver = SaveSystem.new(self)
@@ -1108,6 +1110,8 @@ const SFX_DEFAULT_VOLUME := -4.0
 
 
 func play_sfx(name: String, jitter: float = 0.0) -> void:
+	if feel != null:
+		feel._on_sound(name)   # the action's burst of particles, and a shake for the big ones, sound or not
 	if not sfx_on or not sfx_streams.has(name) or sfx_players.is_empty():
 		return
 	var p: AudioStreamPlayer = sfx_players[sfx_next]
@@ -1165,7 +1169,15 @@ func _on_title_start(mode: String, slot: int) -> void:
 	_build_action_bar()
 	_build_ambience()
 	_build_crows()
+	nights._build()
+	happenings._build()
+	projects._build()
+	feel._build()
+	projects._stamp()
+	projects._check(false)
+	mystery._check(true)
 	_update_shadow_tile()
+	happenings._start_day(false)
 	if loaded:
 		_restore_saved_state()
 		_show_message("Welcome back. Day %d." % day)
@@ -1180,6 +1192,8 @@ func _process(delta: float) -> void:
 	_update_big_tree_depth()
 	_update_house_roof_depth()
 	_update_prop_depth()
+	if feel != null and world_started:
+		feel._update(delta)
 	# F3 toggles the performance readout, even while a menu is open.
 	var f3_down := Input.is_physical_key_pressed(KEY_F3)
 	if f3_down and not perf_was_down:
@@ -1266,7 +1280,12 @@ func _process(delta: float) -> void:
 		return
 
 	if current_hour >= EVENT_HOUR and event_fired_day != day:
-		sanity_sys._trigger_night_event()
+		nights._begin()
+	nights._update()
+	happenings._update()
+	if Engine.get_process_frames() % 30 == 0:
+		projects._check(true)
+		mystery._check()
 
 	var darkness := smoothstep(DUSK_HOUR, DUSK_HOUR + 2.0, current_hour)
 	darkness *= 1.0 - sanity_sys._night_relief()
@@ -1275,6 +1294,7 @@ func _process(delta: float) -> void:
 	if in_cave:
 		canvas_modulate.color = CAVE_TINT
 	_update_lantern(1.0 if in_cave else darkness)
+	projects._update(darkness)
 	_update_cave_mouth_light(smoothstep(DUSK_HOUR, DUSK_HOUR + 2.0, current_hour))
 	sanity_sys._update_sanity(darkness, delta)
 
@@ -1302,6 +1322,7 @@ func _process(delta: float) -> void:
 	for bar in [food_bar, water_bar, warmth_bar]:
 		bar.modulate = Color(1.0, 0.55, 0.5) if low and bar.value < 25.0 else Color.WHITE
 	needs_temp.text = "%d°F" % roundi(_temperature())
+	hale_label.visible = rewards._is_hale()
 	var date := _calendar_date(day)
 	var event_name := ""
 	for ev in sanity_sys._active_events():
@@ -1479,11 +1500,6 @@ func _draw() -> void:
 
 	_draw_house()
 
-	if tonight_shadow.x >= 0:
-		var s := _tile_center(tonight_shadow.x, tonight_shadow.y)
-		draw_circle(s, PX * 0.6, Color(0.02, 0.01, 0.05, 0.9))
-		draw_circle(s + Vector2(-8, -6), 3, Color(0.9, 0.1, 0.1))
-		draw_circle(s + Vector2(8, -6), 3, Color(0.9, 0.1, 0.1))
 
 
 # Ground is the tiles drawn flat with detail on top: grass, soil, path, fallow ground, and water.
@@ -2086,7 +2102,7 @@ func _build_hud() -> void:
 	hud_coins_label = _vital_chip(vitals, "coin")
 	diary_label = _vital_chip(vitals, "book")
 	diary_icon = diary_label.get_parent().get_child(0) as HudIcon
-	diary_label.add_theme_color_override("font_color", Color("e0b35a"))
+	diary_label.add_theme_color_override("font_color", Color("d8b050"))
 
 	needs_box = HBoxContainer.new()
 	needs_box.add_theme_constant_override("separation", 10)
@@ -2094,6 +2110,12 @@ func _build_hud() -> void:
 	food_bar = _make_need_bar("Food")
 	water_bar = _make_need_bar("Water")
 	warmth_bar = _make_need_bar("Warmth")
+	hale_label = _make_label(needs_box, Vector2.ZERO, 11)
+	hale_label.text = "Hale
++20% XP"
+	hale_label.add_theme_color_override("font_color", Color("d8b050"))
+	hale_label.tooltip_text = "Food, water and warmth are all at %d or more, so skills train faster." % int(HomesteadRewards.HALE_NEED)
+	hale_label.visible = false
 
 	hud_clock_panel = PanelContainer.new()
 	hud_clock_panel.set_anchors_preset(Control.PRESET_CENTER_TOP)
@@ -2123,7 +2145,7 @@ func _build_hud() -> void:
 	clock_row.add_child(hud_weather_icon)
 	hud_weather_label = _make_label(clock_row, Vector2.ZERO, 13)
 	needs_temp = _make_label(clock_row, Vector2.ZERO, 13)
-	needs_temp.add_theme_color_override("font_color", Color("9fd3e6"))
+	needs_temp.add_theme_color_override("font_color", Color("9a8a6a"))
 
 	message_label = _make_label(hud_root, Vector2(16, 100), 20)
 	message_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
@@ -2169,6 +2191,10 @@ func _make_label(parent: Node, pos: Vector2, font_size: int) -> Label:
 	var label := Label.new()
 	label.position = pos
 	label.add_theme_font_size_override("font_size", font_size)
+	# Body text in the UI kit's cream; titles and quiet notes set their own gold or muted colour.
+	label.add_theme_color_override("font_color", Color("e8dcc0"))
+	# Centred in its row, so text of different sizes beside an icon lines up on the icon's middle.
+	label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	# A dark outline keeps the text readable over grass, the house, and the dark.
 	label.add_theme_color_override("font_outline_color", Color(0.05, 0.04, 0.03, 0.92))
 	label.add_theme_constant_override("outline_size", 6)
@@ -2183,6 +2209,7 @@ func _make_need_bar(title: String) -> ProgressBar:
 	needs_box.add_child(col)
 	var name_label := _make_label(col, Vector2.ZERO, 11)
 	name_label.text = title
+	name_label.add_theme_color_override("font_color", Color("9a8a6a"))
 	var bar := ProgressBar.new()
 	bar.show_percentage = false
 	bar.min_value = 0.0
@@ -3151,6 +3178,9 @@ func _on_bag_slot(index: int) -> void:
 
 
 func _on_panel_action(action_id: String) -> void:
+	if action_id.begins_with("decor:"):
+		projects._start_place(action_id.trim_prefix("decor:"))
+		return
 	if action_id.begins_with("pastime:") or action_id.begins_with("order:") or action_id == "pay_tax" or action_id == "mail_clear" or action_id == "diary":
 		desk._desk_action(action_id)
 		return
@@ -3265,6 +3295,9 @@ func _on_panel_action(action_id: String) -> void:
 		return
 	if action_id == "make_bandage":
 		crafting._make_bandage()
+		return
+	if action_id == "make_charm":
+		nights._make_charm()
 		return
 	if action_id.begins_with("eat_food:"):
 		stall._eat_food(action_id.trim_prefix("eat_food:"))
@@ -3415,6 +3448,7 @@ const MATERIAL_INFO := {
 	"iron_bar": {"name": "Iron bar", "icon": "bar", "tint": "8d98a6", "desc": "Smelted iron, ready for smithing."},
 	"arrows": {"name": "Arrows", "icon": "arrow", "tint": "6b4a3a", "desc": "Ammunition for the bow. Each shot uses one."},
 	"bolts": {"name": "Bolts", "icon": "arrow", "tint": "6b6b6b", "desc": "Ammunition for ranged weapons. Each shot uses one."},
+	"feathers": {"name": "Crow feathers", "icon": "feather", "tint": "2a2632", "desc": "Left behind by the things that come at night, when you face them. Bound into crow charms."},
 }
 var inventory_selected := ""   # the pack item whose details show; remembered while the panel is open
 
@@ -3471,6 +3505,10 @@ func _raw_inventory_tiles() -> Array:
 	if n > 0:
 		tiles.append(_stack_tile("pack:bandage", str(BANDAGE["name"]), "bandage", "e8e0d0", n, "in the pack",
 			"Heals %d HP. Use it from here." % int(BANDAGE["heal"]), "use_bandage", "Use"))
+	n = int(inventory["crow_charm"])
+	if n > 0:
+		tiles.append(_stack_tile("pack:crow_charm", str(NightSystem.CHARM["name"]), "pendant", NightSystem.FEATHER_TINT, n, "in the pack",
+			"Carried at 22:00, one is used up and halves what the night takes from your sanity.", "", ""))
 	n = int(inventory["firewood"])
 	if n > 0:
 		tiles.append(_stack_tile("pack:firewood", "Firewood", "firewood", "9a6a3a", n, "in the pack",
@@ -3766,6 +3804,13 @@ func _interact() -> void:
 	var tile := _tile_in_front()
 	# Interior tiles sit outside the farm's bounds, so accept either area.
 	if not _in_bounds(tile) and not _in_interior(tile):
+		return
+	# A night visitor in front of you is faced before anything else there is used.
+	if not inside and nights._try_face(tile):
+		return
+	if not inside and happenings._try_take(tile):
+		return
+	if not inside and not in_cave and projects._try_use(tile):
 		return
 
 	if inside:
@@ -4175,8 +4220,6 @@ func _draw_fish_spots() -> void:
 		var star := Color(1.0, 1.0, 0.75, 0.95 * fade)
 		fish_layer.draw_line(c + Vector2(-r, 0), c + Vector2(r, 0), star, 2.0)
 		fish_layer.draw_line(c + Vector2(0, -r), c + Vector2(0, r), star, 2.0)
-		if tile == fishing_tile:
-			fish_layer.draw_arc(c, PX * 0.45, 0.0, TAU, 24, Color(0.7, 0.9, 1.0, 0.8), 2.0)
 		i += 1
 
 
@@ -4662,7 +4705,6 @@ func _enter_cave() -> void:
 	in_cave = true
 	inside = false
 	fishing._stop_fishing("")
-	swing_time = 0.0
 	# The cave is laid out fresh each day, so yesterday's mined ore is gone.
 	if cave_mined_day != day:
 		cave_mined.clear()
@@ -4684,7 +4726,6 @@ func _leave_cave() -> void:
 	play_sfx("step", 0.03)
 	in_cave = false
 	foes = []
-	swing_time = 0.0
 	# Back out on the path just south of the cave mouth.
 	var out := _cave_mouth_tile() + Vector2i(0, 1)
 	player.position = _tile_center(out.x, out.y)
@@ -4801,7 +4842,7 @@ const FOE_ANIMATED := ["bat", "lizard", "snake"]
 const FOE_FPS := 8.0
 
 
-# Foes, arrows in flight, and the swing arc. Shared by the world and the cave.
+# Foes and arrows in flight. Shared by the world and the cave.
 func _draw_combat() -> void:
 	for foe in foes:
 		var pos: Vector2 = foe["pos"]
@@ -4827,14 +4868,10 @@ func _draw_combat() -> void:
 			draw_circle(pos, PX * 0.32, body)
 			draw_circle(pos + Vector2(-5, -4), 2.5, Color(0.9, 0.1, 0.1))
 			draw_circle(pos + Vector2(5, -4), 2.5, Color(0.9, 0.1, 0.1))
-		var frac := float(foe["hp"]) / float(st["hp"])
-		draw_rect(Rect2(pos + Vector2(-PX * 0.3, -PX * 0.5), Vector2(PX * 0.6 * frac, 3)), Color("c24a4a"))
 	for shot in shots:
 		var shot_pos: Vector2 = shot["pos"]
 		var shot_vel: Vector2 = shot["vel"]
 		draw_line(shot_pos - shot_vel.normalized() * PX * 0.5, shot_pos, Color("e8e0c0"), 2.0)
-	if swing_time > 0.0:
-		draw_arc(player.position, SWING_REACH * PX, swing_dir.angle() - 0.9, swing_dir.angle() + 0.9, 12, Color(1, 1, 0.8, 0.8), 3.0)
 
 
 # --- Generated towns -----------------------------------------------------------
@@ -5253,7 +5290,6 @@ func _enter_zone(z: int, arrive: Vector2i, reason: String) -> void:
 	zone = z
 	in_cave = false
 	fishing._stop_fishing("")
-	swing_time = 0.0
 	player.position = _tile_center(arrive.x, arrive.y)
 	_on_region_change()
 	_set_bounds()
@@ -5387,7 +5423,9 @@ func _draw_world() -> void:
 		draw_circle(c, PX * 0.3, Color(str(npc["color"])))
 		# Name above each villager, using the first name only to keep it short.
 		var first_name := str(npc["name"]).split(" ")[0]
-		draw_string(ThemeDB.fallback_font, c + Vector2(-PX * 1.5, -PX * 0.6), first_name, HORIZONTAL_ALIGNMENT_CENTER, PX * 3, 12, Color(1, 0.97, 0.88))
+		# Cream on a dark outline, like the HUD's text.
+		draw_string_outline(ThemeDB.fallback_font, c + Vector2(-PX * 1.5, -PX * 0.6), first_name, HORIZONTAL_ALIGNMENT_CENTER, PX * 3, 12, 4, Color(0.05, 0.04, 0.03, 0.92))
+		draw_string(ThemeDB.fallback_font, c + Vector2(-PX * 1.5, -PX * 0.6), first_name, HORIZONTAL_ALIGNMENT_CENTER, PX * 3, 12, Color("e8dcc0"))
 	for pos in quarry:
 		var qc := _tile_center(pos.x, pos.y)
 		draw_circle(qc, PX * 0.3, Color("6a6a4a"))
@@ -5413,7 +5451,6 @@ func _swing() -> void:
 	if swing_cool > 0.0:
 		return
 	swing_cool = SWING_COOLDOWN
-	swing_time = SWING_TIME
 	player.play_act("swing", SWING_TIME)
 	play_sfx("swing", 0.08)
 	swing_dir = player.facing
@@ -5509,10 +5546,14 @@ func _mend_house() -> void:
 	stats["mended"] += 1
 	wear = maxi(0, wear - WEAR_MEND)
 	progression._grant_xp("Carpentry", XP_MEND)
-	_show_message("You mend a board. +%d Carpentry XP" % XP_MEND)
+	# The day's first board turns something up.
+	var find := (" " + rewards._mend_find()) if mends_today == 1 else ""
+	_show_message("You mend a board. +%d Carpentry XP.%s" % [XP_MEND, find])
 
 
 func _footprint(kind: String) -> Vector2i:
+	if kind.begins_with("decor:"):
+		return Vector2i.ONE
 	if kind == "barn":
 		return BARN_SIZE
 	return COOP_SIZE
@@ -5607,6 +5648,9 @@ func _cancel_placement() -> void:
 func _confirm_placement() -> void:
 	var kind := placing
 	var top := _tile_in_front()
+	if kind.begins_with("decor:"):
+		projects._confirm(kind.trim_prefix("decor:"), top)
+		return
 	var size := _footprint(kind)
 	if not _spot_ok(top, size):
 		_show_message("There isn't room for the %s there. It needs open grass, clear of crops, rocks, and brush." % kind)
@@ -5700,7 +5744,7 @@ func _spot_ok(top: Vector2i, size: Vector2i) -> bool:
 				return false
 			if RESERVED.has(t - Vector2i(BORDER_X, BORDER_Y)):
 				return false
-			if crops.has(t) or rocks.has(t) or brush.has(t) or fish_spots.has(t) or t == here:
+			if crops.has(t) or rocks.has(t) or brush.has(t) or fish_spots.has(t) or projects.decor.has(t) or t == here:
 				return false
 	return true
 
@@ -5870,6 +5914,7 @@ func _settle_day() -> String:
 	else:
 		sanity_sys._change_sanity(WELL_KEPT_SANITY)
 		notes += " The house is kept well, and you sleep easier. +%d sanity." % WELL_KEPT_SANITY
+		notes += rewards._kept_well()
 	animals._age_animals()
 	if hens > 0:
 		if hens_fed_day == day:
@@ -6152,6 +6197,8 @@ func _end_day(base: String, leave_house: bool = true) -> void:
 	if _in_village() and not _at_campsite():
 		_go_home("")
 	hp = max_hp()
+	# Tonight's visitor, if still waiting, is settled before the door opens in the morning.
+	var night_note := nights._end_night()
 	if inside and leave_house:
 		_leave_house()
 	# Fish left in the pack spoil overnight. The cooler keeps them.
@@ -6159,8 +6206,7 @@ func _end_day(base: String, leave_house: bool = true) -> void:
 	inventory["fish"] = 0
 	stats["spoiled"] += spoiled
 	var spoil_note := (" %d fish spoiled in your pack overnight." % spoiled) if spoiled > 0 else ""
-	var upkeep_note := _settle_day()
-	upkeep_note += desk._boredom_check()
+	var upkeep_note := night_note + _settle_day() + projects._morning()
 	# Rain waters every crop. Otherwise a crop must have been watered today to grow.
 	if weather_kind in WATER_RAIN_KINDS:
 		stats["rain_days"] += 1
@@ -6187,9 +6233,10 @@ func _end_day(base: String, leave_house: bool = true) -> void:
 	tonight_shadow = Vector2i(-1, -1)
 	_regrow_wild()
 	_update_shadow_tile()
+	var happening_note := happenings._start_day(true)
 	var mail_note := desk._mail_day()
 	_show_message("%s Your crops grew overnight.%s%s The morning is %s.%s" % [
-		base, spoil_note, upkeep_note, str(WEATHER_NAMES.get(weather_kind, "overcast")).to_lower(), event_note + mail_note])
+		base, spoil_note, upkeep_note, str(WEATHER_NAMES.get(weather_kind, "overcast")).to_lower(), event_note + happening_note + mail_note])
 	if desk._tax_evicts():
 		desk._evict()
 		return
@@ -6198,10 +6245,9 @@ func _end_day(base: String, leave_house: bool = true) -> void:
 
 
 func _update_shadow_tile() -> void:
-	# The field shadow creeps closer to the farm each night.
-	var x := BORDER_X + INNER_W - 2 - (day - 1) * 2
-	x = max(x, BORDER_X + 14)
-	shadow_tile = Vector2i(x, BORDER_Y + INNER_H / 2 - 4)
+	# The field shadow creeps toward the house on nights a visitor is left alone, and is pushed back by
+	# facing one (see NightSystem).
+	shadow_tile = Vector2i(nights._shadow_x(), BORDER_Y + INNER_H / 2 - 4)
 
 
 # --- Walking into and out of the house --------------------------------------
@@ -6237,6 +6283,7 @@ func _enter_house() -> void:
 	player.position = _tile_center(INT_ORIGIN.x + INT_ENTRY.x, INT_ORIGIN.y + INT_ENTRY.y)
 	_set_bounds()
 	_show_message("You step inside. The air is cold and smells of old wood.")
+	nights._on_enter_house()
 
 
 func _leave_house() -> void:
@@ -6244,6 +6291,8 @@ func _leave_house() -> void:
 	inside = false
 	player.position = _tile_center(BORDER_X + HOUSE_DOOR_IX, BORDER_Y + HOUSE_DOOR_IY + 1)
 	_set_bounds()
+	nights._on_leave_house()
+	happenings._on_leave_house()
 
 
 func _set_bounds() -> void:
@@ -6349,7 +6398,7 @@ func _is_blocked_world(p: Vector2) -> bool:
 	# farm rocks' coordinates mean nothing, so they only count out on the farm.
 	if _in_village():
 		return _npc_index(t) != -1 or quarry.has(t)
-	return not inside and (brush.has(t) or (not in_cave and rocks.has(t)))
+	return not inside and (brush.has(t) or (not in_cave and (rocks.has(t) or projects._blocks(t))))
 
 
 func _world_tile(ix: int, iy: int) -> Vector2i:
