@@ -287,7 +287,7 @@ const FURNACE_IX := FarmLayout.FURNACE_IX
 # The workshop is a walled building against the house's east wall, with a door on its south side.
 const WORKSHOP_RECT := FarmLayout.WORKSHOP_RECT
 const WORKSHOP_DOOR := FarmLayout.WORKSHOP_DOOR
-const COOP_SIZE := 2                         # the coop is a 2 by 2 building on open grass
+const COOP_SIZE := Vector2i(3, 2)            # the coop is 3 wide and 2 deep, on open grass; its hen door is one tile
 const COOLER_INTERIOR := Vector2i(11, 6)   # in the hall, inside the house
 const FURNACE_COST := {"wood": 6, "stone": 4, "coins": 80, "level": 4}
 const WOODSHED_COST := {"wood": 4, "fiber": 2, "coins": 40, "level": 2}
@@ -596,7 +596,7 @@ const WEAR_FOX := 4           # at this wear, a fox can get into the coop
 # Livestock: hens in a coop behind the house. A fed hen lays an egg each morning.
 const COOP_COST := {"wood": 6, "fiber": 4, "level": 2}
 const COOP_HENS_MAX := 4
-const BARN_SIZE := Vector2i(3, 2)          # the barn is 3 wide and 2 deep, on open grass
+const BARN_SIZE := Vector2i(5, 3)          # the barn is 5 wide and 3 deep, on open grass; its doors take a goat
 const BARN_COST := {"wood": 10, "fiber": 6, "level": 4}   # the barn is for livestock, kept apart from the coop
 const HEN_PRICE := 12
 const HEN_FEED_CROPS := 1
@@ -1325,7 +1325,7 @@ func _draw() -> void:
 			elif tile == Tile.WALL:
 				FarmArt.draw_wall_tile(self, cell, y == WORKSHOP_RECT.position.y + BORDER_Y)
 			elif tile == Tile.COOP:
-				FarmArt.draw_gable_tile(self, cell, Vector2i(x, y) - coop_tile, Vector2i(COOP_SIZE, COOP_SIZE), COOP_ROOF, COOP_WALL, "coop")
+				FarmArt.draw_gable_tile(self, cell, Vector2i(x, y) - coop_tile, COOP_SIZE, COOP_ROOF, COOP_WALL, "coop")
 			elif tile == Tile.BARN:
 				FarmArt.draw_gable_tile(self, cell, Vector2i(x, y) - barn_tile, _footprint("barn"), BARN_ROOF, BARN_WALL, "barn")
 			elif tile == Tile.WELL:
@@ -2221,7 +2221,7 @@ func _draw_sprite_ground(t: Vector2i, kind: int, cell: Rect2) -> bool:
 			# grass by _draw_dual_ground, so all of these start as grass.
 			_draw_grass(t, cell)
 			return true
-		Tile.TREE, Tile.SCARECROW:
+		Tile.TREE, Tile.SCARECROW, Tile.COOP, Tile.BARN:
 			# Every tree, the great tree and the scarecrow stand on grass; _draw_trees draws them over it.
 			_draw_grass(t, cell)
 			return true
@@ -2513,6 +2513,18 @@ func _draw_trees(ci: CanvasItem, front: bool) -> void:
 				# 48×32: an entrance in the rock face, three tiles wide and two tall, its opening on this tile.
 				if trees_here:
 					ci.draw_texture_rect(FarmSprites.tex("cave_mouth"), Rect2(cell.position.x - PX, cell.end.y - PX * 2.0, PX * 3.0, PX * 2.0), false)
+			elif (kind == Tile.COOP or kind == Tile.BARN) and trees_here:
+				# The coop (48×64) and barn (80×80) are drawn once, from their footprint's bottom-left tile, as wide
+				# as the footprint and standing on its bottom edge; the roof rises above it. Drawing from the bottom
+				# row puts the building behind the farmer when they stand below it and in front when above.
+				var b_kind := "coop" if kind == Tile.COOP else "barn"
+				var origin := _placed_tile(b_kind)
+				var fp := _footprint(b_kind)
+				if t == origin + Vector2i(0, fp.y - 1):
+					var tex := FarmSprites.tex(b_kind)
+					var w := float(fp.x) * PX
+					var h := w * float(tex.get_height()) / float(tex.get_width())
+					ci.draw_texture_rect(tex, Rect2(cell.position.x, cell.end.y - h, w, h), false)
 			elif kind == Tile.SCARECROW:
 				# 16×32: one tile wide, two tall, standing on its tile.
 				if trees_here:
@@ -5271,7 +5283,7 @@ func _mend_house() -> void:
 func _footprint(kind: String) -> Vector2i:
 	if kind == "barn":
 		return BARN_SIZE
-	return Vector2i(COOP_SIZE, COOP_SIZE)
+	return COOP_SIZE
 
 
 func _is_built(kind: String) -> bool:
@@ -6284,7 +6296,8 @@ func _draw_floor_tile(cell: Rect2, tile: Vector2i) -> void:
 
 # The hens are drawn on their own layer, from where each one currently stands in the coop.
 func _draw_hen_layer() -> void:
-	var center := Vector2(coop_tile.x + COOP_SIZE * 0.5, coop_tile.y + COOP_SIZE * 0.5) * PX
+	# The hens peck about in the yard in front of the coop, as the goats do in front of the barn.
+	var center := Vector2(coop_tile.x + COOP_SIZE.x * 0.5, coop_tile.y + COOP_SIZE.y + 0.8) * PX
 	for i in hen_pos.size():
 		var c: Vector2 = center + hen_pos[i] * PX
 		if FARM_SPRITES:
@@ -6302,7 +6315,7 @@ func _update_hens(delta: float) -> void:
 	if not hen_layer.visible:
 		return
 	while hen_pos.size() < hens:
-		var start := Vector2(randf_range(-0.6, 0.6), randf_range(-0.6, 0.6))
+		var start := Vector2(randf_range(-1.2, 1.2), randf_range(-0.2, 0.6))
 		hen_pos.append(start)
 		hen_goal.append(start)
 		hen_wait.append(randf_range(0.0, 2.0))
@@ -6314,7 +6327,7 @@ func _update_hens(delta: float) -> void:
 		hen_wait[i] = float(hen_wait[i]) - delta
 		var pos: Vector2 = hen_pos[i]
 		if float(hen_wait[i]) <= 0.0 and pos.distance_to(hen_goal[i]) < 0.02:
-			hen_goal[i] = Vector2(randf_range(-0.6, 0.6), randf_range(-0.6, 0.6))
+			hen_goal[i] = Vector2(randf_range(-1.2, 1.2), randf_range(-0.2, 0.6))
 			hen_wait[i] = randf_range(1.0, 3.5)
 		hen_pos[i] = pos.move_toward(hen_goal[i], 0.45 * delta)
 	hen_layer.queue_redraw()
@@ -6376,7 +6389,7 @@ func _update_goats(delta: float) -> void:
 		play_sfx("bleat", 0.1)
 		bleat_timer = randf_range(18.0, 45.0)
 	while goat_pos.size() < goats:
-		var start := Vector2(randf_range(-1.1, 1.1), randf_range(-0.2, 0.6))
+		var start := Vector2(randf_range(-2.0, 2.0), randf_range(-0.2, 0.6))
 		goat_pos.append(start)
 		goat_goal.append(start)
 		goat_wait.append(randf_range(0.0, 2.0))
@@ -6388,7 +6401,7 @@ func _update_goats(delta: float) -> void:
 		goat_wait[i] = float(goat_wait[i]) - delta
 		var pos: Vector2 = goat_pos[i]
 		if float(goat_wait[i]) <= 0.0 and pos.distance_to(goat_goal[i]) < 0.02:
-			goat_goal[i] = Vector2(randf_range(-1.1, 1.1), randf_range(-0.2, 0.6))
+			goat_goal[i] = Vector2(randf_range(-2.0, 2.0), randf_range(-0.2, 0.6))
 			goat_wait[i] = randf_range(1.5, 4.0)
 		goat_pos[i] = pos.move_toward(goat_goal[i], 0.3 * delta)
 	_separate_goats()

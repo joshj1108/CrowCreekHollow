@@ -344,6 +344,14 @@
     "art/farm/crow_fly.png": {
       "asset_id": "6b06f2c4-9177-4e83-97bb-108c1be75d36",
       "label": "Crow flying, 4 frames 36x36, pixel-engine-v1.5 (from flying crow 7856ec0e)"
+    },
+    "art/farm/coop.png": {
+      "asset_id": "25964300-c9fa-4747-94c3-537423c67751",
+      "label": "Chicken coop 48x64 on a 3x2 footprint"
+    },
+    "art/farm/barn.png": {
+      "asset_id": "3c27d6e8-d82d-43cf-8f3d-0890dcda8904",
+      "label": "Barn 80x80 on a 5x3 footprint"
     }
   },
   "animation_runs": {
