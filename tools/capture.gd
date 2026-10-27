@@ -19,7 +19,7 @@ extends SceneTree
 #   crops=A,B       plant every stage of each crop kind in a row on the first plot, e.g. crops=turnip,corn
 #   lantern=N       lantern tier 0-3 (0 = none)
 #   built           build the cellar, smokehouse, furnace and woodshed
-#   notip           hide the tip card, even one shown after the scene is set up
+#   diary           find the diary in the desk and open it
 #   wheel           open the section wheel
 #   sound           print how loud each ambience loop is playing when the shot is taken
 
@@ -36,8 +36,6 @@ func _initialize() -> void:
 	root.add_child(main)
 	await process_frame
 	main._on_title_start("new", 8)
-	if main.tip_panel:
-		main.tip_panel.visible = false
 	if opt.has("season"):
 		for d in range(1, 400):
 			if main._season_of(main._calendar_date(d)["month"]) == opt["season"]:
@@ -86,8 +84,9 @@ func _initialize() -> void:
 		await process_frame
 	if opt.has("sound"):
 		print("ambience ", main.ambience.levels)
-	if opt.has("notip") and main.tip_panel:
-		main.tip_panel.visible = false
+	if opt.has("diary"):
+		main._find_diary()
+		await process_frame
 		await process_frame
 	if opt.has("wheel"):
 		main._toggle_wheel()

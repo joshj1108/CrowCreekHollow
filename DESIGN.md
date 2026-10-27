@@ -11,15 +11,15 @@ A top-down farming game with heavy psychological horror, built in Godot 4.7.
 
 ## Controls (Stardew-style)
 
-- **Section wheel.** Shift, or a click on the left stick, opens a ring of the menus that aren't in the bag: Skills, Gear, Craft, Quests, House, Buildings, and Achievements. The mouse hovers and clicks a section. On a controller the left stick highlights one and A opens it. B or Esc closes the wheel, and from a section returns to the wheel. Choosing a section closes the wheel and shows that section alone. Sections can't be opened while the wheel is up, the bag is up, or another section is open.
+- **Section wheel.** Shift, or a click on the left stick, opens a ring of the menus that aren't in the bag: Skills, Gear, Craft, Quests, Diary, House, Buildings, and Achievements. The mouse hovers and clicks a section. On a controller the left stick highlights one and A opens it. B or Esc closes the wheel, and from a section returns to the wheel. Choosing a section closes the wheel and shows that section alone. Sections can't be opened while the wheel is up, the bag is up, or another section is open.
 
 - Move: WASD or arrow keys
 - Hand actions (talk, sleep, tidy, cleanse, cook, gather brush, drink from the pond, open panels, confirm placement, rest at camp): Space or A, facing the tile.
 - Tool and weapon actions (hoe, hose, trowel, axe, pick, rod, sword, bow): RT or a left click, facing the tile. A tool press on a tool target with the wrong tool in hand says which tool to select. With the trowel in hand, the D-pad up and down, or Z and X on the keyboard, cycle the seed you plant (the left stick does not) (turnip, then pumpkin once Farming reaches its level, skipping any you have none of), and do not walk you. A hand press on one says to use RT or click.
 - Walk into the farmhouse door to go inside. Walk onto the exit mat to leave.
-- The section wheel: Shift opens it (see Section wheel below). Settings is Esc only. The Inventory is opened from the bag (Tab).
+- The section wheel: Shift opens it (see Section wheel below). J opens and closes the diary (see The diary). Settings is Esc only. The Inventory is opened from the bag (Tab).
 - The bag (grid, bottom-right corner): Tab opens and closes it. Click a slot to use it, or move with the arrow keys and press Enter.
-- Esc closes whatever is open, the bag, the wheel, or a section, one at a time. With nothing open, Esc opens Settings. Esc or Start closes Settings. B closes the same things as Esc, and dismisses a tip when nothing is open. On the keyboard, Backspace dismisses a tip (and does nothing else), so Esc stays free for Settings.
+- Esc closes whatever is open, the bag, the wheel, or a section, one at a time. With nothing open, Esc opens Settings. Esc or Start closes Settings. B closes the same things as Esc.
 - Stuck while placing or boxed in? Esc opens Settings, which cancels any placement. The **Unstick** button in the Game section moves you to the nearest open ground (grass, path, soil, fallow) from the farmhouse door, and works on the farm only.
 - Farming and gathering pause while a panel is open
 - **Dev (debug builds only):** F4, or **Unlock** in the Game section of Settings, sets every skill to level 10 and gives 99,999 coins, 999 of each material and 99 of each seed. It also gives every tool, lantern and bag tier, restores the house, builds the pump, hose and storage buildings, and fills the needs. The coop and barn still need placing from the Buildings panel. Exported release builds ignore F4 and hide the button. It isn't on F9 because the Godot editor uses F9 to suspend a game running in its Game tab.
@@ -62,7 +62,7 @@ The farmer is a SpriteCook sprite (`art/player/`): a 16×32 figure in a straw ha
 
 ### UI skin
 
-Menus, the bag, the hotbar, the HUD boxes, the tip card and the title screen use one SpriteCook UI kit: dark wood frames with iron corner brackets, wooden buttons (normal, hover, pressed, disabled; focus looks like hover), and framed slots with a gold edge when selected. The pieces in `art/ui/` are cut from the kit's component sheet at a third of its size and drawn as 9-slices whose edges stretch (`scripts/ui_skin.gd`). Cards inside a section use the slot frame. The food, water and warmth meters are the kit's bar: each bar is the channel, with tan, blue or orange fill, and the iron-capped frame is drawn around it so the fill's length matches the value. The minimap sits inside the panel's rail, drawn over its edges. The section wheel's curved segments can't be 9-sliced, so they are filled with the panel's wood grain (shaded, or lit when highlighted) with iron edges, gold on the highlight, and the section's name sits on a slot-framed plaque. Each segment's icon is SpriteCook art drawn at 3×: Gear and Craft use the shield and hammer item icons, and Skills, Quests, House, Buildings and Achievements use `art/ui/wheel_icons.png` (a journal, a sealed scroll, a farmhouse, a barn with a silo, and a trophy). If the art is missing, every control falls back to its flat style.
+Menus, the bag, the hotbar, the HUD boxes and the title screen use one SpriteCook UI kit: dark wood frames with iron corner brackets, wooden buttons (normal, hover, pressed, disabled; focus looks like hover), and framed slots with a gold edge when selected. The pieces in `art/ui/` are cut from the kit's component sheet at a third of its size and drawn as 9-slices whose edges stretch (`scripts/ui_skin.gd`). Cards inside a section use the slot frame. The food, water and warmth meters are the kit's bar: each bar is the channel, with tan, blue or orange fill, and the iron-capped frame is drawn around it so the fill's length matches the value. The minimap sits inside the panel's rail, drawn over its edges. The section wheel's curved segments can't be 9-sliced, so they are filled with the panel's wood grain (shaded, or lit when highlighted) with iron edges, gold on the highlight, and the section's name sits on a slot-framed plaque. Each segment's icon is SpriteCook art drawn at 3×: Gear and Craft use the shield and hammer item icons, and Skills, Quests, House, Buildings and Achievements use `art/ui/wheel_icons.png` (a journal, a sealed scroll, a farmhouse, a barn with a silo, and a trophy). The Diary has no art yet and draws a leather book with a red ribbon in code. If the art is missing, every control falls back to its flat style.
 
 ### Art style (locked)
 
@@ -170,7 +170,7 @@ The story is taught through survival. Chapters run in order. The first unfinishe
 | 8 | Clear the Stain | Cleanse the house once | 40 Cleaning XP |
 | 9 | A Home Worth Keeping | Restore the farmhouse fully | 60 Cleaning XP |
 
-The first day's basics (planting, gathering, crafting, chopping, drinking) are taught by the guided first day under Tutorial tips, not by chapters.
+The first day's basics (planting, gathering, crafting, chopping, drinking) are taught by the guided first day in the diary (see The diary), not by chapters.
 
 Saves from before this change reset chapter progress. Stat-based achievements re-check from saved stats, so some rewards may be paid again.
 
@@ -344,14 +344,18 @@ The house is drawn in four stages that match its repair level. **Decrepit** has 
 - **Collapse penalty:** missing the bed by 03:00 lowers the sanity limit by 5 permanently. A **cleanse** (see Farmhouse) lifts it by 5 per use, once a day.
 - **Boredom:** one pastime at the **desk** (Solitaire or Sudoku) entertains you for that day. A day without a finished game lowers the sanity limit by 1, at the end of the day, down to 40 points lost (a limit of 60). The limit recovers only through cleansing and the collapse relief, not through boredom.
 
-## Tutorial tips
+## The diary
 
-- **The guided first day.** A new game opens with eight steps on the tip card, one at a time: walk 10 tiles, plant 3 seeds with the trowel, open the bag, gather from 3 brush piles, open the section wheel, craft a crude hatchet, fell a tree, and drink from the pond. Each step stays up until it is done, shows "(n of 8)" in its title, and is followed by a "Done" message and a chime. A step already done ahead of its turn is passed over. Dismissing a step skips it. After the last step the card shows the current story chapter.
-- **Later tips** appear as the player reaches each part of the farm: watering once 3 seeds are planted, food and water at 12:00, sleeping at 17:00, repairs on day 2, quests from 10:00 on day 2, chores from 14:00 on day 2, buildings on day 3, the mine on day 4, hens once a coop stands, goats once the barn stands, the cellar, and smelting and preserving once the furnace or smokehouse is built. Each shows for about 16 seconds. A waiting tip steps in front of a guide step, which comes back afterwards.
-- The card sits at the bottom of the screen and steps aside while the bag, the wheel, a section or a placement is up. A tip's time doesn't run out behind a menu. B (or Backspace on the keyboard) dismisses it.
-- Tip text names the controls for the device in use: tools are left click or RT, hand actions (gather, open, drink, place) are Space or A.
-- Each tip shows once. The Settings menu lists the tips and guide steps already seen under **Tips**, so they can be read again.
-- Saves keep the seen tips. Saves from before tips existed count the whole tutorial as seen, and saves from before the guided first day count it as done, so neither floods them.
+There is no tip card: everything the game teaches is written in the **diary**, so nothing covers the play area.
+
+- **Finding it.** A new game starts with the diary in the desk drawer in the bedroom. Until it is found, the desk's red light blinks while you are in the house, and a message every 90 seconds says where it is. Using the desk the first time finds it ("You find a diary in the desk drawer") and opens it. From then on it goes with you.
+- **Opening it.** J on the keyboard, the **Diary** section on the section wheel (the only way on a gamepad), or **Read** at the top of the Desk panel. It is a wheel section, so B or Esc goes back to the wheel.
+- **The first day.** Eight steps: walk 10 tiles, plant 3 seeds with the trowel, open the bag, gather from 3 brush piles, open the section wheel, craft a crude hatchet, fell a tree, and drink from the pond. The diary lists the steps done ("1 of 8. Find your feet: done") and writes out the next one in full; later steps stay hidden. A step done ahead of its turn is passed over. Steps can't be skipped. Finishing a step in play says "Done: <step>. Your diary has the next step." with a chime. Steps done before the diary is found count quietly.
+- **After the first day** the diary shows the current story chapter and its prompt under "What the farm asks". Each new chapter adds a page, with a "Next: <chapter>" message.
+- **Notes** are written as the player reaches each part of the farm, newest first: watering once 3 seeds are planted, food and water at 12:00, sleeping at 17:00, repairs on day 2, quests from 10:00 on day 2, chores from 14:00 on day 2, buildings on day 3, the mine on day 4, hens once a coop stands, goats once the barn stands, the cellar, and smelting and preserving once the furnace or smokehouse is built. A note met before the diary is found is waiting in it; one met after says "A new page in your diary: <title>."
+- **The cue.** Once found, a small diary icon sits in the vitals row (after the coins). While a page is unread it shows "New" and a blinking red dot. New pages are marked "(new)" in the diary and count as read when it closes.
+- Text names the controls for the device in use: tools are left click or RT, hand actions (gather, open, drink, place) are Space or A.
+- Saves keep the pages written, whether the diary is found, and which pages are new. Saves from before the diary count it as found. Saves from before tips existed count every note as written, and saves from before the guided first day count it as done, so neither floods them.
 
 ## Saving
 
@@ -359,7 +363,7 @@ The house is drawn in four stages that match its repair level. **Decrepit** has 
 - There are **three save slots**. New Game asks for a slot, and a used slot takes two presses to overwrite. Then it asks for a save name, filled in as "Farm N" so a gamepad player can just press Begin. Load Game lists each slot with its save name, day, coins, and house stage. Older single-slot saves become slot 1. Pressing Overwrite keeps focus on the armed slot, so a gamepad's second press overwrites it. Crops from saves made before watering existed count as watered on the day they load, so they grow that night.
 - The game saves **only** when you sleep in bed or collapse at 03:00, to the slot you're playing.
 - The in-game Settings menu ends with a **Game** section that never folds. It holds **Music** (on or off), **Unstick me**, and **Quit to the main menu**. Quitting returns to the start screen without saving, and progress since the last sleep is lost. The slot you were playing stays selected. Sleeping is the only way to save.
-- Saved: day, skill XP, inventory (including every food), coins, goats and their feeding, bag upgrades, root cellar, cooler, and smokehouse (built, and what they hold), materials, stats, story chapters done, achievements done, selected seed, lantern tier, house stage, house wear, coop and hens, barn (built, and where it stands), tidy/mend/cleanse days, sanity, sanity penalty, boredom loss and the day you were last entertained, animal ages (hens and goats), crop days, clean nights, property tax owed, its due day and reminder stage, the post on the desk, the cards and sudoku puzzles left, catalog orders, crops (with kind), brush piles, **player position**, whether you were **inside the house**, and the **open panel**.
+- Saved: day, skill XP, inventory (including every food), coins, goats and their feeding, bag upgrades, root cellar, cooler, and smokehouse (built, and what they hold), materials, stats, story chapters done, achievements done, selected seed, lantern tier, house stage, house wear, coop and hens, barn (built, and where it stands), tidy/mend/cleanse days, sanity, sanity penalty, boredom loss and the day you were last entertained, animal ages (hens and goats), crop days, clean nights, property tax owed, its due day and reminder stage, the post on the desk, the diary (found, pages written, pages new), the cards and sudoku puzzles left, catalog orders, crops (with kind), brush piles, **player position**, whether you were **inside the house**, and the **open panel**.
 - Quitting mid-day loses that day's progress since the last save. Position and panel are saved at the same moment, so they reflect the last sleep or collapse.
 
 ## The world: the portal, the road, and the wilds
@@ -578,7 +582,7 @@ Particles do not run indoors, in the cave, or in the village. Nothing in the gra
 `scripts/main.gd` (`class_name MainGame`) is the scene root. It owns the shared state, the drawing, the input and panel glue, the HUD, the world and map build, the lights, the crows, and the title and settings flow. The rules for each domain live in their own `RefCounted` script, which is built once in `_ready` and kept as a member on main:
 
 - `panel_rows.gd` (`panels`): the row lists for every panel.
-- `desk_system.gd` (`desk`): pastimes, the catalog and its deliveries, mail, the property tax and eviction.
+- `desk_system.gd` (`desk`): finding the diary, pastimes, the catalog and its deliveries, mail, the property tax and eviction. The diary itself (pages, the HUD icon) is in `main.gd` under "The diary", its rows in `panel_rows.gd`.
 - `animal_system.gd` (`animals`): hens and goats, feeding, ageing and sales.
 - `farm_system.gd` (`farm`): seeds, planting, watering, harvest and crop unlocks.
 - `firewood_system.gd` (`firewood`): chopping, the fire, and warmth.

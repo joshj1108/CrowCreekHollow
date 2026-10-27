@@ -117,6 +117,8 @@ func _save_game() -> void:
 		"sudoku_puzzles": m.sudoku_puzzles,
 		"desk_orders": m.desk_orders,
 		"tips_seen": m.tips_seen.keys(),
+		"diary_found": m.diary_found,
+		"diary_new": m.diary_new,
 		"guide_v": 1,
 	}
 	var file := FileAccess.open(m._save_path(), FileAccess.WRITE)
@@ -270,6 +272,11 @@ func _load_game() -> bool:
 		# Saves from before tips existed have seen the tutorial already, so it doesn't flood them.
 		for tip in m.TIPS:
 			m.tips_seen[str(tip["id"])] = true
+	# Saves from before the diary had their tips on the card already, so the diary is theirs.
+	m.diary_found = bool(data.get("diary_found", true))
+	m.diary_new = []
+	for id in data.get("diary_new", []):
+		m.diary_new.append(str(id))
 	# Saves from before the guided first day are past it already.
 	if not data.has("guide_v"):
 		for step in m.GUIDE:

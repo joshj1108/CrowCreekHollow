@@ -226,8 +226,8 @@ const CROP_GROW_DAYS := {"turnip": 7, "corn": 8, "pumpkin": 10}   # watered days
 # What a sold crop fetches at the farm stand, and what food from it is worth.
 const CROP_VALUE := {"turnip": 8, "corn": 14, "pumpkin": 30}
 const STAGE_NAMES := ["Decrepit", "Boarded", "Patched", "Restored"]
-# Tips: short notes that appear one at a time as the player reaches each part of the farm.
-# Each shows once, and the Settings menu keeps the ones already seen. When the condition is met, see _tip_ready.
+# Tips: diary pages written as the player reaches each part of the farm, once each, when its condition
+# is met (see _tip_ready).
 # Braces name controls and are filled in for a keyboard or a gamepad, see _fill_controls.
 const TIPS := [
 	{"id": "well", "title": "Watering", "text": "A crop only grows on a night after it was watered, and rain waters everything. The pump by the plots is seized: face the well and press {hand} to open it. Repair the pump once you reach Carpentry 2, then attach the hose. {tool:hose} to select the hose, face a crop, and press {tool} to water it."},
@@ -243,14 +243,16 @@ const TIPS := [
 	{"id": "needs", "title": "Food, water, and warmth", "text": "Food and water drain through the day, and warmth drops outside on cold days. Eat from the bag ({bag}), drink from the pond, and warm up in the house. Sleep to be fully warm again, but only with a fire lit: feed the hearth from the firewood store at the workshop."},
 	{"id": "cave", "title": "The mine", "text": "The cave is at the west edge of the farm. Each day it lays out differently, with ore to mine and creatures to watch for."},
 ]
-# The guided first day: steps shown in order on the tip card. Each one stays up until it is done
+# How often, in seconds, the player is reminded that the diary waits in the desk until it is found.
+const DIARY_HINT_EVERY := 90.0
+# The guided first day: steps written in the diary in order. Each one stays up until it is done
 # (or skipped), then the next follows. "stat" and "goal" say when a step is done, see _guide_done.
 const GUIDE := [
 	{"id": "g_walk", "title": "Find your feet", "text": "Use {move} to walk around the yard.", "stat": "walked", "goal": 10},
 	{"id": "g_plant", "title": "Plant seeds", "text": "{tool:trowel} to select the trowel. Face a soil tile in the plot and press {tool} to plant a seed. Plant three.", "stat": "planted", "goal": 3},
 	{"id": "g_bag", "title": "Your bag", "text": "Press {bag} to open your bag and see what you carry. Press it again to close it.", "stat": "bag_opened", "goal": 1},
 	{"id": "g_brush", "title": "Sticks and fiber", "text": "The brush piles around the yard hide sticks and fiber. Face one and press {hand} to gather it. Gather three.", "stat": "gathered", "goal": 3},
-	{"id": "g_wheel", "title": "The section wheel", "text": "Press {wheel} to open the section wheel. It holds Skills, Gear, Craft, Quests, House, Buildings, and Achievements.", "stat": "wheel_opened", "goal": 1},
+	{"id": "g_wheel", "title": "The section wheel", "text": "Press {wheel} to open the section wheel. It holds Skills, Gear, Craft, Quests, the Diary, House, Buildings, and Achievements.", "stat": "wheel_opened", "goal": 1},
 	{"id": "g_hatchet", "title": "Your first tool", "text": "Open Craft from the section wheel ({wheel}) and make a crude hatchet from 2 sticks and 2 fiber.", "stat": "hatchet", "goal": 1},
 	{"id": "g_chop", "title": "Timber", "text": "{tool:axe} to select the axe. Face a tree and press {tool}, and keep chopping until it falls.", "stat": "felled", "goal": 1},
 	{"id": "g_drink", "title": "Drink", "text": "Walk to the pond, face the water, and press {hand} to drink.", "stat": "drank", "goal": 1},
@@ -692,16 +694,15 @@ var bleat_timer := 20.0             # seconds until a goat next bleats
 var cluck_timer := 10.0             # seconds until a hen next clucks
 var thunder_day := -1               # the day thunder last rolled, so it rolls once a morning
 var weather: CanvasLayer  # the dreary weather overlay
-var tips_seen: Dictionary = {}     # tip id -> true, once it has been shown
-var tip_queue: Array = []          # tip ids waiting their turn
-var tip_showing := ""              # the tip on screen now, or ""
-var tip_timer := 0.0
-var tip_cooldown := 0.0
+var tips_seen: Dictionary = {}     # tip id -> true, once it is written in the diary
+var diary_found := false           # the diary waits in the desk drawer until the player finds it
+var diary_new: Array = []          # diary pages not read yet: tip ids, guide step ids, or "story"
+var diary_step := ""               # the guide step the diary last wrote out, so its finish is noticed
+var diary_reading := false         # the diary is open; its new pages count as read once it closes
+var diary_hint_timer := 8.0        # seconds until the next reminder that the diary is in the desk
 var tip_check_timer := 0.0
-var tip_panel: PanelContainer
-var tip_title_label: Label
-var tip_body_label: Label
-var tip_hint_label: Label
+var diary_icon: HudIcon            # the diary by the vitals, with a dot while a page is new
+var diary_label: Label
 
 # Night events: picked by day so the nights vary. "shadow" says where it appears.
 const NIGHT_EVENTS := [
@@ -1156,7 +1157,6 @@ func _on_title_start(mode: String, slot: int) -> void:
 	_build_fade()
 	_build_bag()
 	_build_wheel()
-	_build_tip_panel()
 	weather = WeatherScript.new()
 	add_child(weather)
 	if weather_kind == "":
@@ -1228,6 +1228,7 @@ func _process(delta: float) -> void:
 	player.held = _active_tool()
 	player.held_item = str(equipment["hand_r"]) if _active_tool() == "sword" else ""
 	player.set_loop(_loop_action())
+	_update_diary_icon()
 	if player.paused:
 		_handle_keys()
 		_refresh_panel()
@@ -1696,7 +1697,7 @@ func _setup_input() -> void:
 	_ensure_action("wheel", [KEY_SHIFT], [JOY_BUTTON_LEFT_STICK])
 	_ensure_action("settings", [KEY_ESCAPE], [JOY_BUTTON_START])
 	_ensure_action("close_panel", [], [JOY_BUTTON_B])
-	_ensure_action("dismiss_tip", [KEY_BACKSPACE])
+	_ensure_action("diary", [KEY_J])
 
 
 # Adds keys, gamepad buttons, and stick directions to an action. Each axis entry
@@ -2083,6 +2084,9 @@ func _build_hud() -> void:
 	hud_hp_label = _vital_chip(vitals, "heart")
 	hud_sanity_label = _vital_chip(vitals, "moon")
 	hud_coins_label = _vital_chip(vitals, "coin")
+	diary_label = _vital_chip(vitals, "book")
+	diary_icon = diary_label.get_parent().get_child(0) as HudIcon
+	diary_label.add_theme_color_override("font_color", Color("e0b35a"))
 
 	needs_box = HBoxContainer.new()
 	needs_box.add_theme_constant_override("separation", 10)
@@ -2797,11 +2801,12 @@ func _update_minimap() -> void:
 	minimap.update_view(map, TILE_COLORS, brush.keys(), player_tile, tonight_shadow, [] if inside else marks)
 
 
-# --- Tutorial tips ----------------------------------------------------------
+# --- The diary ----------------------------------------------------------------
 
-# A new game opens with the guided first day (GUIDE): one step at a time, each waiting for its action.
-# Tips (TIPS) have a trigger. They are checked once a second and queue up, then show one at a time,
-# between guide steps. A tip shows once, and its text stays in the Settings menu.
+# A new game opens with the diary in the desk drawer. Once found it goes with the player and holds the
+# guided first day (GUIDE), the steps done and the next one written out, then the current chapter, and a
+# page for each tip (TIPS) once its trigger is met. Triggers are checked once a second. A new page lights
+# a dot on the diary by the vitals and says so in one message, so nothing covers the play area.
 func _tip_ready(id: String) -> bool:
 	match id:
 		"well":
@@ -2850,67 +2855,64 @@ func _guide_done(step: Dictionary) -> bool:
 	return value >= int(step["goal"])
 
 
-func _is_guide(id: String) -> bool:
-	return id.begins_with("g_")
-
-
 func _update_tips(delta: float) -> void:
-	# The card steps aside while a menu is up, and a tip's time doesn't run out behind it.
-	var menu_up := open_tab != "" or placing != "" or _bag_open() or _wheel_open()
-	if tip_showing != "":
-		tip_panel.visible = not menu_up
 	tip_check_timer -= delta
-	if tip_check_timer <= 0.0:
-		tip_check_timer = 1.0
-		for tip in TIPS:
-			var id: String = tip["id"]
-			if not tips_seen.has(id) and not tip_queue.has(id) and id != tip_showing and _tip_ready(id):
-				tip_queue.append(id)
-		if _is_guide(tip_showing) and _guide_done(_tip_data(tip_showing)):
-			_show_message("Done: %s." % str(_tip_data(tip_showing)["title"]))
-			play_sfx("chime")
-			_hide_tip()
-			# The guide is over: point at the story, which carries on from here.
-			if _guide_step().is_empty():
-				tip_cooldown = 0.0
-				_show_quest_prompt()
-	# A waiting tip steps in front of a guide step, which comes back afterwards.
-	if _is_guide(tip_showing) and tip_queue.size() > 0 and not menu_up:
-		_show_tip(str(tip_queue.pop_front()))
+	if tip_check_timer > 0.0:
 		return
-	if tip_showing != "":
-		if not _is_guide(tip_showing) and not menu_up:
-			tip_timer -= delta
-			if tip_timer <= 0.0:
-				_hide_tip()
-		return
-	tip_cooldown = maxf(tip_cooldown - delta, 0.0)
-	if tip_cooldown > 0.0 or menu_up:
-		return
-	# Waiting tips go first, so the guide never holds back a warning such as the one for bedtime.
-	if tip_queue.size() > 0:
-		_show_tip(str(tip_queue.pop_front()))
-		return
+	tip_check_timer = 1.0
+	# Until it is found, the player is reminded now and then where the diary is.
+	if not diary_found:
+		diary_hint_timer -= 1.0
+		if diary_hint_timer <= 0.0:
+			diary_hint_timer = DIARY_HINT_EVERY
+			_show_message("Your diary is in the desk drawer, in the farmhouse bedroom.")
+	# Tips met before the diary is found are written in quietly, ready for when it is.
+	for tip in TIPS:
+		var id: String = tip["id"]
+		if not tips_seen.has(id) and _tip_ready(id):
+			tips_seen[id] = true
+			if diary_found:
+				_diary_page(id)
+				_show_message("A new page in your diary: %s." % str(tip["title"]))
 	var step := _guide_step()
-	if not step.is_empty():
-		_show_tip(str(step["id"]))
+	var step_id := str(step.get("id", ""))
+	if step_id == diary_step:
+		return
+	var was := diary_step
+	diary_step = step_id
+	# The first look after a load or at the find is quiet; only a step finished in play is announced.
+	if was == "" or not diary_found:
+		return
+	play_sfx("chime")
+	if step.is_empty():
+		_diary_page("story")
+		_show_message("Done: %s. That's the first day. Your diary has what the farm asks next." % str(_tip_data(was)["title"]))
+	else:
+		_diary_page(step_id)
+		_show_message("Done: %s. Your diary has the next step." % str(_tip_data(was)["title"]))
 
 
-# Shows the current chapter as a prompt: its title, and what to do with the controls for this device.
-func _show_quest_prompt() -> void:
-	var current: Variant = null
+# Marks a diary page as new, so the dot lights until the diary is opened.
+func _diary_page(id: String) -> void:
+	if not diary_new.has(id):
+		diary_new.append(id)
+
+
+# The story chapter being worked on, or {} once every chapter is done.
+func _current_chapter() -> Dictionary:
 	for q in STORY:
 		if not quests_done.has(q["id"]):
-			current = q
-			break
-	if current == null:
+			return q
+	return {}
+
+
+# A new chapter goes in the diary once the first day is over.
+func _show_quest_prompt() -> void:
+	var current := _current_chapter()
+	if current.is_empty() or not _guide_step().is_empty():
 		return
-	tip_showing = "quest"
-	tip_timer = 30.0
-	tip_title_label.text = str(current["title"])
-	tip_body_label.text = _prompt_text(current)
-	tip_hint_label.text = _fill_controls("{dismiss} to dismiss. The Quests section keeps your current goal.")
-	tip_panel.visible = true
+	_diary_page("story")
+	_show_message("Next: %s. It's in your diary and the Quests section." % str(current["title"]))
 
 
 # A chapter's prompt, with the control names filled in for a keyboard or a gamepad.
@@ -2927,12 +2929,12 @@ func _fill_controls(text: String) -> String:
 	text = text.replace("{tool}", "RT" if pad else "left click")
 	text = text.replace("{hand}", "A" if pad else "Space")
 	text = text.replace("{back}", "B" if pad else "Esc")
-	text = text.replace("{dismiss}", "B" if pad else "Backspace")
 	text = text.replace("{bag}", "Y" if pad else "Tab")
 	text = text.replace("{wheel}", "a left stick click" if pad else "Shift")
 	text = text.replace("{switch}", "LB and RB" if pad else "the number keys 1 to 0 or the mouse wheel")
 	text = text.replace("{craft}", "the Craft section on the section wheel" if pad else "the Craft section on the section wheel (Shift)")
 	text = text.replace("{inv}", "Back" if pad else "I")
+	text = text.replace("{diary}", "the Diary section on the section wheel" if pad else "J, or from the Diary section on the section wheel")
 	text = text.replace("{house}", "the Menu button" if pad else "H")
 	for i in HOTBAR_TOOLS.size():
 		var tool_id := str(HOTBAR_TOOLS[i]["id"])
@@ -2943,31 +2945,6 @@ func _fill_controls(text: String) -> String:
 	return text
 
 
-func _show_tip(id: String) -> void:
-	var tip := _tip_data(id)
-	tip_showing = id
-	tip_timer = 16.0
-	tip_title_label.text = str(tip["title"])
-	tip_body_label.text = _fill_controls(str(tip["text"]))
-	if _is_guide(id):
-		var n := GUIDE.find(tip) + 1
-		tip_title_label.text = "%s  (%d of %d)" % [str(tip["title"]), n, GUIDE.size()]
-		tip_hint_label.text = _fill_controls("{dismiss} to skip this step. Tips are kept in Settings.")
-	else:
-		tips_seen[id] = true
-		tip_hint_label.text = _fill_controls("{dismiss} to dismiss. Tips are kept in Settings.")
-	tip_panel.visible = true
-
-
-# A guide step counts as seen once it is done or skipped, so the next one can follow.
-func _hide_tip() -> void:
-	if _is_guide(tip_showing):
-		tips_seen[tip_showing] = true
-	tip_showing = ""
-	tip_panel.visible = false
-	tip_cooldown = 1.5
-
-
 func _tip_data(id: String) -> Dictionary:
 	for tip in TIPS + GUIDE:
 		if str(tip["id"]) == id:
@@ -2975,51 +2952,37 @@ func _tip_data(id: String) -> Dictionary:
 	return {"title": "", "text": ""}
 
 
-# The card sits at the bottom of the screen, clear of the top-left messages and the minimap.
-func _build_tip_panel() -> void:
-	var host := message_label.get_parent() as Control
-	tip_panel = PanelContainer.new()
-	var sb := StyleBoxFlat.new()
-	sb.bg_color = Color(0.08, 0.06, 0.04, 0.92)
-	sb.border_color = Color("8a6a3a")
-	sb.set_border_width_all(2)
-	sb.set_corner_radius_all(6)
-	sb.set_content_margin_all(12)
-	var skinned := UiSkin.panel(16)
-	# The wood frame is thick, so the text keeps clear of its sides and bottom.
-	if skinned != null:
-		skinned.content_margin_left = 18
-		skinned.content_margin_right = 18
-		skinned.content_margin_bottom = 16
-	tip_panel.add_theme_stylebox_override("panel", skinned if skinned != null else sb)
-	tip_panel.set_anchors_preset(Control.PRESET_CENTER_BOTTOM)
-	tip_panel.grow_horizontal = Control.GROW_DIRECTION_BOTH
-	tip_panel.grow_vertical = Control.GROW_DIRECTION_BEGIN
-	tip_panel.offset_left = -290
-	tip_panel.offset_right = 290
-	tip_panel.offset_top = -90
-	tip_panel.offset_bottom = -90
-	tip_panel.custom_minimum_size = Vector2(580, 0)
-	tip_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	tip_panel.visible = false
-	var box := VBoxContainer.new()
-	box.add_theme_constant_override("separation", 6)
-	tip_panel.add_child(box)
-	tip_title_label = Label.new()
-	tip_title_label.add_theme_font_size_override("font_size", 18)
-	tip_title_label.add_theme_color_override("font_color", Color("d8b050"))
-	box.add_child(tip_title_label)
-	tip_body_label = Label.new()
-	tip_body_label.autowrap_mode = TextServer.AUTOWRAP_WORD
-	tip_body_label.custom_minimum_size = Vector2(556, 0)
-	tip_body_label.add_theme_font_size_override("font_size", 15)
-	tip_body_label.add_theme_color_override("font_color", Color("e8dcc0"))
-	box.add_child(tip_body_label)
-	tip_hint_label = Label.new()
-	tip_hint_label.add_theme_font_size_override("font_size", 12)
-	tip_hint_label.add_theme_color_override("font_color", Color("9a8a6a"))
-	box.add_child(tip_hint_label)
-	host.add_child(tip_panel)
+# Using the desk the first time finds the diary, which goes with the player from then on.
+func _find_diary() -> void:
+	diary_found = true
+	diary_step = str(_guide_step().get("id", ""))
+	play_sfx("panel")
+	_show_message(_fill_controls("You find a diary in the desk drawer. Open it again with {diary}."))
+	_toggle_tab("Diary")
+
+
+func _open_diary() -> void:
+	if _wheel_open():
+		_close_wheel()
+	_toggle_tab("Diary")
+
+
+# The diary by the vitals shows once it is found, and its dot blinks while a page is new.
+# Pages stay marked new while the diary is open, and count as read once it closes.
+func _update_diary_icon() -> void:
+	if diary_icon == null:
+		return
+	if diary_reading and open_tab != "Diary":
+		diary_reading = false
+		diary_new.clear()
+	var chip := diary_icon.get_parent() as Control
+	chip.visible = diary_found
+	var unread := not diary_new.is_empty() and not diary_reading
+	var lit := unread and fmod(Time.get_ticks_msec() / 1000.0, 1.0) < 0.6
+	if diary_icon.dot != lit:
+		diary_icon.dot = lit
+		diary_icon.queue_redraw()
+	diary_label.text = "New" if unread else ""
 
 
 # --- Input and panels --------------------------------------------------------
@@ -3034,16 +2997,12 @@ func _handle_keys() -> void:
 	# Esc or Start closes whatever is open. With nothing open, it opens Settings.
 	if Input.is_action_just_pressed("settings"):
 		_press_back(true)
-	# B dismisses a tip when nothing else is open, and otherwise closes what is open.
-	# Backspace dismisses a tip on the keyboard and does nothing else, so Esc stays free for Settings.
-	var nothing_open := open_tab == "" and placing == "" and not _bag_open() and not _wheel_open()
+	# B closes what is open.
 	if Input.is_action_just_pressed("close_panel"):
-		if tip_showing != "" and nothing_open:
-			_hide_tip()
-		else:
-			_press_back(false)
-	if Input.is_action_just_pressed("dismiss_tip") and tip_showing != "" and nothing_open:
-		_hide_tip()
+		_press_back(false)
+	# J opens and closes the diary on the keyboard; a gamepad opens it from the section wheel.
+	if Input.is_action_just_pressed("diary"):
+		_open_diary()
 
 
 # B and Esc close the thing on top. A wheel section goes back to the wheel, and a second press closes
@@ -3192,7 +3151,7 @@ func _on_bag_slot(index: int) -> void:
 
 
 func _on_panel_action(action_id: String) -> void:
-	if action_id.begins_with("pastime:") or action_id.begins_with("order:") or action_id == "pay_tax" or action_id == "mail_clear":
+	if action_id.begins_with("pastime:") or action_id.begins_with("order:") or action_id == "pay_tax" or action_id == "mail_clear" or action_id == "diary":
 		desk._desk_action(action_id)
 		return
 	if action_id.begins_with("cook:"):
@@ -3412,7 +3371,10 @@ func _refresh_panel() -> void:
 		"Well":
 			rows = panels._well_rows()
 		"Settings":
-			rows = panels._settings_rows() + panels._tip_rows() + panels._game_rows()
+			rows = panels._settings_rows() + panels._game_rows()
+		"Diary":
+			rows = panels._diary_rows()
+			diary_reading = diary_found
 	action_bar.show_panel(open_tab, rows)
 
 

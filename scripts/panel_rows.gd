@@ -56,17 +56,44 @@ func _game_rows() -> Array:
 	return rows
 
 
-# The seen tips, for the Settings menu.
-func _tip_rows() -> Array:
-	var rows: Array = [{"section": "Tips"}]
-	var any := false
-	for tip in m.GUIDE + m.TIPS:
-		if m.tips_seen.has(tip["id"]):
-			rows.append({"name": tip["title"], "value": m._fill_controls(str(tip["text"]))})
-			any = true
-	if not any:
-		rows.append({"note": "Tips appear as you reach each part of the farm. The first ones show as soon as you start."})
+# The diary: the first day's steps done and the next one, or the current chapter once the day is over,
+# then a page for each tip, the newest first. Pages not read yet are marked new.
+func _diary_rows() -> Array:
+	if not m.diary_found:
+		return [{"note": "Your diary is in the desk drawer, in the farmhouse bedroom."}]
+	var rows: Array = [{"section": "The first day"}]
+	var next := m._guide_step()
+	for i in m.GUIDE.size():
+		var step: Dictionary = m.GUIDE[i]
+		var title := "%d of %d. %s" % [i + 1, m.GUIDE.size(), str(step["title"])]
+		if not next.is_empty() and str(step["id"]) == str(next["id"]):
+			rows.append({"note": "%s%s
+%s" % [title, _new_mark(str(step["id"])), m._fill_controls(str(step["text"]))]})
+			break
+		rows.append({"name": title, "value": "done"})
+	if next.is_empty():
+		var chapter := m._current_chapter()
+		rows.append({"section": "What the farm asks"})
+		if chapter.is_empty():
+			rows.append({"note": "Every chapter is done. The farm is yours."})
+		else:
+			rows.append({"note": "%s%s
+%s" % [str(chapter["title"]), _new_mark("story"), m._prompt_text(chapter)]})
+	var notes: Array = []
+	for id in m.tips_seen.keys():
+		var tip := m._tip_data(str(id))
+		if tip.has("id") and not str(id).begins_with("g_"):
+			notes.push_front(tip)
+	if not notes.is_empty():
+		rows.append({"section": "Notes"})
+	for tip in notes:
+		rows.append({"note": "%s%s
+%s" % [str(tip["title"]), _new_mark(str(tip["id"])), m._fill_controls(str(tip["text"]))]})
 	return rows
+
+
+func _new_mark(id: String) -> String:
+	return "  (new)" if m.diary_new.has(id) else ""
 
 
 func _skill_rows() -> Array:
@@ -442,7 +469,9 @@ func _settings_rows() -> Array:
 
 
 func _desk_rows() -> Array:
-	var rows: Array = [{"section": "Post on the desk"}]
+	var rows: Array = [{"section": "Diary"}]
+	rows.append({"name": "Your diary", "value": "a new page to read" if not m.diary_new.is_empty() else "what you have learned, and what to do next", "button": "Read", "action": "diary", "enabled": true})
+	rows.append({"section": "Post on the desk"})
 	if m.desk_mail.is_empty():
 		rows.append({"note": "No post. The mail slot in the front door drops letters here."})
 	for letter in m.desk_mail:

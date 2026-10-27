@@ -13,6 +13,7 @@ const SECTIONS := [
 	{"name": "Gear", "subtitle": "What you wear and hold", "icon": "shield", "color": "7f9fbf"},
 	{"name": "Craft", "subtitle": "Make, cook, and build", "icon": "hammer", "color": "c0703a"},
 	{"name": "Quests", "subtitle": "What the farm asks of you", "icon": "scroll", "color": "e8d7a0"},
+	{"name": "Diary", "subtitle": "What you have learned, and what to do next", "icon": "book", "color": "8a5a34"},
 	{"name": "House", "subtitle": "Keep it standing", "icon": "house", "color": "d08a5a"},
 	{"name": "Buildings", "subtitle": "The workshop, the coop, and the barn", "icon": "barn", "color": "b8443a"},
 	{"name": "Achievements", "subtitle": "Things you have done", "icon": "trophy", "color": "e0b43c"},
@@ -216,6 +217,12 @@ func _icon(kind: String, at: Vector2, size: float, base: Color, hot: bool) -> vo
 		"hammer":
 			ring.draw_line(at + Vector2(0.2, -0.2) * size, at + Vector2(-0.6, 0.9) * size, Color("e0cfae"), maxf(3.0, size * 0.22))
 			_poly(at, size, [[0.0, -0.75], [0.8, -0.75], [0.8, -0.2], [0.0, -0.2]], col)
+		"book":
+			# A leather diary with page edges down its right side and a red ribbon.
+			_poly(at, size, [[-0.75, -0.95], [0.75, -0.95], [0.75, 0.95], [-0.75, 0.95]], col)
+			_poly(at, size, [[0.5, -0.85], [0.68, -0.85], [0.68, 0.85], [0.5, 0.85]], Color("e8dcc0"))
+			_poly(at, size, [[-0.75, -0.95], [-0.5, -0.95], [-0.5, 0.95], [-0.75, 0.95]], col.darkened(0.35))
+			_poly(at, size, [[0.05, -0.95], [0.22, -0.95], [0.22, 1.15], [0.05, 1.15]], Color("b8443a"))
 		"scroll":
 			_poly(at, size, [[-0.6, -0.8], [0.6, -0.8], [0.6, 0.8], [-0.6, 0.8]], col)
 			for y in [-0.4, 0.0, 0.4]:

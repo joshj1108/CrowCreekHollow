@@ -48,7 +48,7 @@ static func _box(name: String, margin_key: String, content: Vector2) -> StyleBox
 	return sb
 
 
-# A large framed panel: menus, the bag, the HUD boxes and the tip card.
+# A large framed panel: menus, the bag and the HUD boxes.
 static func panel(content := 18.0) -> StyleBoxTexture:
 	return _box("panel", "panel", Vector2(content, content))
 

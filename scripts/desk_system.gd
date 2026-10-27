@@ -9,6 +9,9 @@ func _init(main: MainGame) -> void:
 
 
 func _read_desk() -> void:
+	if not m.diary_found:
+		m._find_diary()
+		return
 	for letter in m.desk_mail:
 		letter["unread"] = false
 	m._toggle_tab("Desk")
@@ -29,6 +32,9 @@ func _boredom_check() -> String:
 func _desk_action(action_id: String) -> void:
 	if action_id == "pay_tax":
 		_pay_tax()
+	elif action_id == "diary":
+		m._open_diary()
+		return
 	elif action_id == "mail_clear":
 		_clear_read_mail()
 	elif action_id.begins_with("pastime:"):
@@ -286,11 +292,12 @@ func _evict() -> void:
 	m._quit_to_title()
 
 
-# Blinks red once a second while there is unread post and the player is in the house.
+# Blinks red once a second while the player is in the house and there is unread post, or the diary
+# is still in the drawer.
 func _update_desk_light() -> void:
 	if m.desk_light == null:
 		return
-	var blinking := m.inside and _unread_count() > 0
+	var blinking := m.inside and (_unread_count() > 0 or not m.diary_found)
 	m.desk_light.enabled = blinking
 	if blinking:
 		m.desk_light.energy = 1.4 if fmod(Time.get_ticks_msec() / 1000.0, 1.0) < 0.5 else 0.0
