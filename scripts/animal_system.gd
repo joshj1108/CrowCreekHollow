@@ -8,14 +8,6 @@ func _init(main: MainGame) -> void:
 	m = main
 
 
-func _can_buy_hen() -> bool:
-	return m.coop_built and m.hens < m.COOP_HENS_MAX and m.money >= m.HEN_PRICE
-
-
-func _can_buy_goat() -> bool:
-	return m.barn_built and m.goats < m.BARN_GOATS_MAX and m.money >= m.GOAT_PRICE
-
-
 func _can_feed_goats() -> bool:
 	return m.goats > 0 and m.goats_fed_day != m.day and m.farm._crop_total() >= m.goats * m.GOAT_FEED_CROPS
 

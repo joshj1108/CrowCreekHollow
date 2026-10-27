@@ -15,7 +15,7 @@ func _read_desk() -> void:
 
 
 func _boredom_check() -> String:
-	# Paused while the desk games are reworked. Flip BOREDOM_ENABLED to restore the drain.
+	# BOREDOM_ENABLED false pauses the drain.
 	if not m.BOREDOM_ENABLED or m.entertained_day == m.day:
 		return ""
 	var before := m.sanity_sys._sanity_max()
@@ -31,189 +31,143 @@ func _desk_action(action_id: String) -> void:
 		_pay_tax()
 	elif action_id == "mail_clear":
 		_clear_read_mail()
-	elif action_id.begins_with("game_new:"):
-		if action_id.ends_with("sudoku"):
-			_start_sudoku()
-		else:
-			_start_solitaire()
-	elif action_id == "game_quit":
-		m.desk_game = {}
-	elif m.desk_game.get("kind", "") == "sudoku":
-		if action_id.begins_with("sudoku_next:"):
-			_sudoku_next(int(action_id.trim_prefix("sudoku_next:")))
-		elif action_id == "sudoku_check":
-			_sudoku_check()
-	elif m.desk_game.get("kind", "") == "solitaire":
-		if action_id == "sol_draw":
-			_sol_draw()
-		elif action_id == "sol_play":
-			_sol_play()
+	elif action_id.begins_with("pastime:"):
+		_play_pastime(action_id.trim_prefix("pastime:"))
+	elif action_id.begins_with("order:"):
+		_order(action_id.trim_prefix("order:"))
 	m._refresh_panel()
 
 
-func _finish_game(result: String) -> void:
+# --- Pastimes ---
+# Solitaire and sudoku are not played out: a game just passes the time and entertains you
+# for the day. Each game uses up one game from the pack of cards or one puzzle from the book.
+
+func _hours_text(hours: float) -> String:
+	var mins := roundi(hours * 60.0)
+	if mins % 60 == 0:
+		return "%d hour%s" % [mins / 60, "" if mins == 60 else "s"]
+	return "%d h %d min" % [mins / 60, mins % 60]
+
+
+func _pastime_hours(kind: String) -> float:
+	return m.SUDOKU_HOURS if kind == "sudoku" else m.SOLITAIRE_HOURS
+
+
+func _pastime_left(kind: String) -> int:
+	return m.sudoku_puzzles if kind == "sudoku" else m.card_games
+
+
+func _can_pastime(kind: String) -> bool:
+	return _pastime_left(kind) > 0 and m.current_hour + _pastime_hours(kind) <= m.PASTIME_LAST_HOUR
+
+
+func _play_pastime(kind: String) -> void:
+	var hours := _pastime_hours(kind)
+	if _pastime_left(kind) <= 0:
+		m._show_message("The sudoku book is full. Order a new one from the catalog." if kind == "sudoku" else "The cards are too worn to play. Order a new pack from the catalog.")
+		return
+	if m.current_hour + hours > m.PASTIME_LAST_HOUR:
+		m._show_message("It is too late for that. Get some sleep.")
+		return
+	# Time passes as if you had stood here for it: needs drop and the fire burns down.
+	m.clock += hours * m.DAY_LENGTH / (m.DAY_END_HOUR - m.START_HOUR)
+	m.current_hour += hours
+	m._update_needs(hours)
 	m.entertained_day = m.day
-	m.desk_game = {}
-	m._show_message("%s You are entertained for the day." % result)
-
-
-func _zeros(n: int) -> Array:
-	var out: Array = []
-	for i in n:
-		out.append(0)
-	return out
-
-
-func _start_sudoku() -> void:
-	# Relabelling the digits of a valid grid still gives a valid grid, so each game differs.
-	var digits := [1, 2, 3, 4]
-	digits.shuffle()
-	var solution: Array = []
-	for r in 4:
-		for c in 4:
-			solution.append(digits[m.SUDOKU_BASE[r][c] - 1])
-	var puzzle: Array = solution.duplicate()
-	var order: Array = range(16)
-	order.shuffle()
-	# Clear cells one at a time, keeping any clear that would leave more than one answer.
-	for i in order:
-		var keep: int = puzzle[i]
-		puzzle[i] = 0
-		if _sudoku_solutions(puzzle, 2) != 1:
-			puzzle[i] = keep
-	m.desk_game = {"kind": "sudoku", "solution": solution, "puzzle": puzzle, "guess": _zeros(16)}
-
-
-func _sudoku_solutions(board: Array, limit: int) -> int:
-	var idx := board.find(0)
-	if idx == -1:
-		return 1
-	var found := 0
-	for v in range(1, 5):
-		if _sudoku_fits(board, idx / 4, idx % 4, v):
-			board[idx] = v
-			found += _sudoku_solutions(board, limit - found)
-			board[idx] = 0
-			if found >= limit:
-				break
-	return found
-
-
-func _sudoku_fits(board: Array, r: int, c: int, v: int) -> bool:
-	for k in 4:
-		if int(board[r * 4 + k]) == v or int(board[k * 4 + c]) == v:
-			return false
-	var br := r / 2 * 2
-	var bc := c / 2 * 2
-	for dr in 2:
-		for dc in 2:
-			if int(board[(br + dr) * 4 + bc + dc]) == v:
-				return false
-	return true
-
-
-func _sudoku_next(i: int) -> void:
-	var guess: Array = m.desk_game["guess"]
-	guess[i] = (int(guess[i]) + 1) % 5
-
-
-func _sudoku_check() -> void:
-	var puzzle: Array = m.desk_game["puzzle"]
-	var guess: Array = m.desk_game["guess"]
-	var solution: Array = m.desk_game["solution"]
-	var right := 0
-	var wrong := 0
-	for i in 16:
-		if int(puzzle[i]) != 0 or int(guess[i]) == 0:
-			continue
-		if int(guess[i]) == int(solution[i]):
-			puzzle[i] = solution[i]
-			right += 1
-		else:
-			wrong += 1
-		guess[i] = 0
-	if right == 0 and wrong == 0:
-		m._show_message("Choose some numbers first, then check them.")
-		return
-	if not puzzle.has(0):
-		_finish_game("The sudoku is solved.")
-		return
-	m._show_message("%d right and locked in, %d wrong and cleared." % [right, wrong])
-
-
-func _start_solitaire() -> void:
-	var stock: Array = []
-	for card in 52:
-		stock.append(card)
-	stock.shuffle()
-	# A card is 0 to 51: suit = card / 13, rank = card % 13 + 1.
-	m.desk_game = {"kind": "solitaire", "stock": stock, "waste": [], "found": [0, 0, 0, 0], "passes": 0}
-
-
-func _card_name(card: int) -> String:
-	return "%s of %s" % [m.DESK_RANKS[card % 13], m.DESK_SUITS[card / 13]]
-
-
-func _sol_can_play() -> bool:
-	var waste: Array = m.desk_game["waste"]
-	if waste.is_empty():
-		return false
-	var card := int(waste.back())
-	var found: Array = m.desk_game["found"]
-	return int(found[card / 13]) == card % 13
-
-
-func _sol_can_turn() -> bool:
-	var stock: Array = m.desk_game["stock"]
-	var waste: Array = m.desk_game["waste"]
-	if not stock.is_empty():
-		return true
-	return not waste.is_empty() and int(m.desk_game["passes"]) < m.SOL_PASSES
-
-
-func _sol_draw() -> void:
-	if not _sol_can_turn():
-		m._show_message("Nothing left to turn over.")
-		return
-	var stock: Array = m.desk_game["stock"]
-	var waste: Array = m.desk_game["waste"]
-	if not stock.is_empty():
-		waste.append(stock.pop_back())
+	m._close_panel()
+	if kind == "sudoku":
+		m.sudoku_puzzles -= 1
+		m._show_message("You work through a sudoku over %s. %s" % [_hours_text(hours), "That was the last puzzle in the book." if m.sudoku_puzzles == 0 else "You are entertained for the day."])
 	else:
-		# The waste goes back face down: one more pass through the deck.
-		var back: Array = waste.duplicate()
-		back.reverse()
-		m.desk_game["stock"] = back
-		m.desk_game["waste"] = []
-		m.desk_game["passes"] = int(m.desk_game["passes"]) + 1
-	_sol_check_end()
+		m.card_games -= 1
+		m._show_message("You play solitaire for %s. %s" % [_hours_text(hours), "The cards are worn out now." if m.card_games == 0 else "You are entertained for the day."])
 
 
-func _sol_play() -> void:
-	if not _sol_can_play():
-		m._show_message("That card cannot go up yet.")
+# --- The catalog ---
+# Everything bought for the farm is ordered here: paid at once, delivered with the next morning's post.
+
+func _catalog() -> Array:
+	var items: Array = [
+		{"id": "cards", "section": "Pastimes", "name": "Pack of cards", "price": m.CARDS_PRICE, "detail": "%d games of solitaire" % m.CARDS_GAMES, "ok": true, "why": ""},
+		{"id": "sudoku", "section": "Pastimes", "name": "Sudoku book", "price": m.SUDOKU_BOOK_PRICE, "detail": "%d puzzles" % m.SUDOKU_BOOK_PUZZLES, "ok": true, "why": ""},
+		{"id": "seeds_turnip", "section": "Seeds", "name": "5 turnip seeds", "price": m.SEED_TURNIP_PRICE * 5, "detail": "%d held" % int(m.inventory["seeds"]), "ok": true, "why": ""},
+		{"id": "seeds_corn", "section": "Seeds", "name": "4 corn seeds", "price": m.SEED_CORN_PRICE * 4, "detail": "%d held" % int(m.inventory["corn_seeds"]), "ok": m.farm._crop_unlocked("corn"), "why": "needs Farming %d" % m.CORN_LEVEL},
+		{"id": "seeds_pumpkin", "section": "Seeds", "name": "3 pumpkin seeds", "price": m.SEED_PUMPKIN_PRICE * 3, "detail": "%d held" % int(m.inventory["pumpkin_seeds"]), "ok": m.progression._level("Farming") >= m.PUMPKIN_LEVEL, "why": "needs Farming %d" % m.PUMPKIN_LEVEL},
+	]
+	var hens_coming := m.hens + _on_order("hen")
+	items.append({"id": "hen", "section": "Livestock", "name": "Hen", "price": m.HEN_PRICE, "detail": "%d of %d in the coop" % [hens_coming, m.COOP_HENS_MAX],
+		"ok": m.coop_built and hens_coming < m.COOP_HENS_MAX, "why": "build the coop first" if not m.coop_built else "the coop is full"})
+	var goats_coming := m.goats + _on_order("goat")
+	items.append({"id": "goat", "section": "Livestock", "name": "Goat", "price": m.GOAT_PRICE, "detail": "%d of %d in the barn" % [goats_coming, m.BARN_GOATS_MAX],
+		"ok": m.barn_built and goats_coming < m.BARN_GOATS_MAX, "why": "build the barn first" if not m.barn_built else "the barn is full"})
+	return items
+
+
+func _catalog_item(id: String) -> Dictionary:
+	for item in _catalog():
+		if str(item["id"]) == id:
+			return item
+	return {}
+
+
+func _on_order(id: String) -> int:
+	return m.desk_orders.count(id)
+
+
+# The orders as a list, with repeats counted: "5 turnip seeds, hen (x2)".
+func _orders_text() -> String:
+	var counts := {}
+	for id in m.desk_orders:
+		counts[id] = int(counts.get(id, 0)) + 1
+	var parts: Array = []
+	for id in counts:
+		var label := str(_catalog_item(str(id)).get("name", id)).to_lower()
+		parts.append(label if int(counts[id]) == 1 else "%s (x%d)" % [label, int(counts[id])])
+	return ", ".join(PackedStringArray(parts))
+
+
+func _order(id: String) -> void:
+	var item := _catalog_item(id)
+	if item.is_empty():
 		return
-	var waste: Array = m.desk_game["waste"]
-	var card := int(waste.pop_back())
-	var found: Array = m.desk_game["found"]
-	found[card / 13] = int(found[card / 13]) + 1
-	_sol_check_end()
+	if not bool(item["ok"]):
+		m._show_message("You can't order that: %s." % str(item["why"]))
+		return
+	var price := int(item["price"])
+	if m.money < price:
+		m._show_message("That costs %d coins. You have %d." % [price, m.money])
+		return
+	m.play_sfx("coin")
+	m.money -= price
+	m.desk_orders.append(id)
+	m._show_message("You order %s for %d coins. It comes with the morning post." % [str(item["name"]).to_lower(), price])
 
 
-func _sol_check_end() -> void:
-	var found: Array = m.desk_game["found"]
-	var total := 0
-	for n in found:
-		total += int(n)
-	if total == 52:
-		_finish_game("You built all four foundations. Solitaire won.")
-	elif _sol_stuck():
-		_finish_game("No card can move. Solitaire is over with %d of 52 played." % total)
-
-
-func _sol_stuck() -> bool:
-	var stock: Array = m.desk_game["stock"]
-	return stock.is_empty() and not _sol_can_turn() and not _sol_can_play()
+# Opens the morning's parcels. Returns what came, or an empty string.
+func _deliver_orders() -> String:
+	if m.desk_orders.is_empty():
+		return ""
+	var list := _orders_text()
+	for id in m.desk_orders:
+		match str(id):
+			"cards":
+				m.card_games = m.CARDS_GAMES
+			"sudoku":
+				m.sudoku_puzzles = m.SUDOKU_BOOK_PUZZLES
+			"seeds_turnip":
+				m.inventory["seeds"] += 5
+			"seeds_corn":
+				m.inventory["corn_seeds"] += 4
+			"seeds_pumpkin":
+				m.inventory["pumpkin_seeds"] += 3
+			"hen":
+				m.hens += 1
+			"goat":
+				m.goats += 1
+				m.stats["goats_bought"] += 1
+	m.desk_orders = []
+	_add_letter("Delivery", "Your catalog order came: %s. Any animals are already in their pens." % list)
+	return " Your catalog order came: %s." % list
 
 
 func _add_letter(title: String, text: String) -> void:
@@ -286,7 +240,7 @@ func _tax_evicts() -> bool:
 
 # Each morning: a new quarterly bill, then reminders for any unpaid tax. Returns a note for the morning message.
 func _mail_day() -> String:
-	var note := ""
+	var note := _deliver_orders()
 	var date := m._calendar_date(m.day)
 	if int(date["day"]) == 1 and m.TAX_MONTHS.has(int(date["month"])) and m.day > 1:
 		if m.tax_owed == 0:

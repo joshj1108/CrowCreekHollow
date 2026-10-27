@@ -113,6 +113,9 @@ func _save_game() -> void:
 		"tax_stage": m.tax_stage,
 		"clean_nights": m.clean_nights,
 		"desk_mail": m.desk_mail,
+		"card_games": m.card_games,
+		"sudoku_puzzles": m.sudoku_puzzles,
+		"desk_orders": m.desk_orders,
 		"tips_seen": m.tips_seen.keys(),
 	}
 	var file := FileAccess.open(m._save_path(), FileAccess.WRITE)
@@ -254,6 +257,9 @@ func _load_game() -> bool:
 	m.tax_stage = int(data.get("tax_stage", 0))
 	m.clean_nights = int(data.get("clean_nights", 0))
 	m.desk_mail = data.get("desk_mail", [])
+	m.card_games = int(data.get("card_games", m.START_CARD_GAMES))
+	m.sudoku_puzzles = int(data.get("sudoku_puzzles", 0))
+	m.desk_orders = data.get("desk_orders", [])
 	m.animals._sync_ages()
 	if data.has("tips_seen"):
 		m.tips_seen = {}

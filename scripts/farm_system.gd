@@ -226,40 +226,6 @@ func _crop_price(kind: String) -> int:
 	return int(m.CROP_VALUE[kind])
 
 
-func _buy_seeds(kind: String) -> void:
-	if kind == "corn":
-		if not _crop_unlocked("corn"):
-			m._show_message("Corn seeds need Farming level %d." % m.CORN_LEVEL)
-			return
-		var corn_total := m.SEED_CORN_PRICE * 4
-		if m.money < corn_total:
-			m._show_message("Four corn seeds cost %d coins." % corn_total)
-			return
-		m.money -= corn_total
-		m.inventory["corn_seeds"] += 4
-		m._show_message("You buy 4 corn seeds for %d coins." % corn_total)
-		return
-	if kind == "pumpkin":
-		if m.progression._level("Farming") < m.PUMPKIN_LEVEL:
-			m._show_message("Pumpkin seeds need Farming level %d." % m.PUMPKIN_LEVEL)
-			return
-		var pumpkin_total := m.SEED_PUMPKIN_PRICE * 3
-		if m.money < pumpkin_total:
-			m._show_message("Three pumpkin seeds cost %d coins." % pumpkin_total)
-			return
-		m.money -= pumpkin_total
-		m.inventory["pumpkin_seeds"] += 3
-		m._show_message("You buy 3 pumpkin seeds for %d coins." % pumpkin_total)
-		return
-	var turnip_total := m.SEED_TURNIP_PRICE * 5
-	if m.money < turnip_total:
-		m._show_message("Five turnip seeds cost %d coins." % turnip_total)
-		return
-	m.money -= turnip_total
-	m.inventory["seeds"] += 5
-	m._show_message("You buy 5 turnip seeds for %d coins." % turnip_total)
-
-
 func _store_crops() -> void:
 	var amount := mini(int(m.inventory["crops"]), m.CELLAR_CAP - m.cellar_stock)
 	if amount <= 0:

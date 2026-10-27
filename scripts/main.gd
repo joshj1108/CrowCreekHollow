@@ -235,8 +235,8 @@ const TIPS := [
 	{"id": "repair", "title": "Repairing the farmhouse", "text": "Repair the house from the House section on the section wheel (Shift). Each stage restores it inside and out, and unlocks rooms and features."},
 	{"id": "buildings", "title": "Buildings", "text": "Build the workshop, coop, and barn from the Buildings section on the section wheel (Shift). Pick a spot on open grass, press Space to place it, and B to cancel."},
 	{"id": "quests", "title": "Quests", "text": "The Quests section, on the section wheel (Shift), lists what the farm asks of you. Press Details on a quest to read its story."},
-	{"id": "hens", "title": "Hens", "text": "Stand beside the coop, facing it, and press Space to buy and feed hens. A grown hen that is fed lays an egg each morning. Hens are grown after a week."},
-	{"id": "goats", "title": "Goats", "text": "Build the barn from the Buildings menu, then stand beside it, facing it, and press Space to buy and feed goats. A grown goat that is fed gives milk each morning. Goats are grown after ten days."},
+	{"id": "hens", "title": "Hens", "text": "Order hens from the catalog at the desk; they come with the morning post. Stand beside the coop, facing it, and press Space to feed them. A grown hen that is fed lays an egg each morning. Hens are grown after a week."},
+	{"id": "goats", "title": "Goats", "text": "Build the barn from the Buildings menu, order goats from the catalog at the desk, and stand beside the barn, facing it, and press Space to feed them. A grown goat that is fed gives milk each morning. Goats are grown after ten days."},
 	{"id": "cellar", "title": "Storing crops", "text": "Stand beside the root cellar and press Space to store or take crops. Nothing spoils in the cellar."},
 	{"id": "smelt", "title": "Smelting and preserving", "text": "Stand beside the furnace and press Space to smelt ore into bars. The smokehouse preserves food, and the cooler keeps fish fresh."},
 	{"id": "needs", "title": "Food, water, and warmth", "text": "Food and water drain through the day, and warmth drops outside on cold days. Eat from the bag (Tab), drink from the pond, and warm up in the house. Sleep to be fully warm again, but only with a fire lit: feed the hearth from the firewood store at the workshop."},
@@ -645,13 +645,17 @@ const NO_SPOT := Vector2i(-1, -1)
 const STARTING_SEEDS := 5
 const MESSAGE_SECONDS := 3.0
 const SANITY_MAX := 100.0
-const BOREDOM_ENABLED := false      # paused: no boredom drain while the desk games are reworked
+const BOREDOM_ENABLED := true       # false pauses the boredom drain
 const BOREDOM_DRAIN := 1.0          # sanity limit lost on a day with no finished desk game
 const BOREDOM_MAX_LOSS := 40.0      # the most boredom can take from the limit
-const SOL_PASSES := 3               # times the solitaire waste can be turned back into the deck
-const DESK_SUITS := ["Hearts", "Diamonds", "Clubs", "Spades"]
-const DESK_RANKS := ["A", "2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K"]
-const SUDOKU_BASE := [[1, 2, 3, 4], [3, 4, 1, 2], [2, 1, 4, 3], [4, 3, 2, 1]]
+const SOLITAIRE_HOURS := 1.0         # a game of solitaire at the desk
+const SUDOKU_HOURS := 1.5            # a sudoku from the book
+const PASTIME_LAST_HOUR := 26.0      # 02:00: a pastime has to be over by then
+const START_CARD_GAMES := 5          # the worn pack already in the desk drawer
+const CARDS_PRICE := 10              # a new pack of cards from the catalog
+const CARDS_GAMES := 15              # games a pack lasts before it is too worn
+const SUDOKU_BOOK_PRICE := 12
+const SUDOKU_BOOK_PUZZLES := 10
 const LOW_SANITY := 30.0
 const SLEEP_SANITY := 25.0
 const TIDY_SANITY := 10.0
@@ -860,7 +864,9 @@ var sanity := SANITY_MAX
 var sanity_penalty := 0             # permanent cap reduction from collapsing
 var boredom_loss := 0.0             # sanity limit lost to days without a finished desk game
 var entertained_day := 0            # the last day a desk game was finished
-var desk_game: Dictionary = {}      # the desk game in progress (not saved)
+var card_games := START_CARD_GAMES  # solitaire games left in the pack of cards
+var sudoku_puzzles := 0             # puzzles left in the sudoku book
+var desk_orders: Array = []         # catalog orders, delivered with the next morning's post
 var inside := false                 # standing in the farmhouse interior
 var open_tab := ""                  # "" when the action bar panel is closed
 var bag: BagPanel                   # the grid bag in the bottom-right corner (Tab or Y)
@@ -3037,7 +3043,7 @@ func _on_bag_slot(index: int) -> void:
 
 
 func _on_panel_action(action_id: String) -> void:
-	if action_id.begins_with("game_") or action_id.begins_with("sudoku_") or action_id.begins_with("sol_") or action_id == "pay_tax" or action_id == "mail_clear":
+	if action_id.begins_with("pastime:") or action_id.begins_with("order:") or action_id == "pay_tax" or action_id == "mail_clear":
 		desk._desk_action(action_id)
 		return
 	if action_id.begins_with("cook:"):
@@ -3112,17 +3118,12 @@ func _on_panel_action(action_id: String) -> void:
 	if action_id == "build_barn" or action_id == "move_barn":
 		_build_barn()
 		return
-	if action_id == "buy_hen":
-		_buy_hen()
-		return
 	if action_id == "feed_hens":
 		animals._feed_hens()
 	if action_id == "sell_hen":
 		animals._sell_hen()
 	if action_id == "sell_goat":
 		animals._sell_goat()
-	if action_id == "buy_goat":
-		_buy_goat()
 	if action_id == "feed_goats":
 		animals._feed_goats()
 		return
@@ -3198,12 +3199,6 @@ func _on_panel_action(action_id: String) -> void:
 			stall._sell("eggs")
 		"sell_milk":
 			stall._sell("milk")
-		"buy_turnip":
-			farm._buy_seeds("turnip")
-		"buy_corn":
-			farm._buy_seeds("corn")
-		"buy_pumpkin":
-			farm._buy_seeds("pumpkin")
 		"upgrade_bag":
 			_upgrade_bag()
 		"build_cellar":
@@ -3765,17 +3760,6 @@ func _interact() -> void:
 		farm._plant(tile)
 
 	queue_redraw()
-
-
-# --- Desk games ---
-# Finishing a game at the desk entertains you for that day. A day without one costs a little
-# of the sanity limit, down to BOREDOM_MAX_LOSS. Leaving a game unfinished does not count.
-
-
-# --- Sudoku (4 by 4) ---
-
-
-# --- Solitaire (one card at a time, to the four foundations) ---
 
 
 # --- Fishing ----------------------------------------------------------------
@@ -5608,35 +5592,6 @@ func _draw_placement_ghost() -> void:
 	for dy in size.y:
 		for dx in size.x:
 			placement_ghost.draw_rect(_tile_rect(top + Vector2i(dx, dy)), fill)
-
-
-func _buy_hen() -> void:
-	play_sfx("coin")
-	if not animals._can_buy_hen():
-		_show_message("A hen costs %d coins, and the coop holds %d." % [HEN_PRICE, COOP_HENS_MAX])
-		return
-	money -= HEN_PRICE
-	hens += 1
-	queue_redraw()
-	_show_message("A hen settles into the coop.")
-
-
-func _buy_goat() -> void:
-	play_sfx("coin")
-	if not barn_built:
-		_show_message("Build the barn first.")
-		return
-	if goats >= BARN_GOATS_MAX:
-		_show_message("The barn holds %d goats." % BARN_GOATS_MAX)
-		return
-	if money < GOAT_PRICE:
-		_show_message("A goat costs %d coins." % GOAT_PRICE)
-		return
-	money -= GOAT_PRICE
-	goats += 1
-	stats["goats_bought"] += 1
-	queue_redraw()
-	_show_message("A goat trots into the barn yard.")
 
 
 # The day's chores. Each is done or not. Chores left undone wear the house overnight.

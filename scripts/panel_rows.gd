@@ -317,15 +317,12 @@ func _house_rows() -> Array:
 	return rows
 
 
-# The coop panel: the hens are bought and fed here, not from the House panel.
+# The coop panel: the hens are fed here. They are ordered from the catalog at the desk.
 func _coop_rows() -> Array:
 	var rows: Array = [{"section": "Hens"}]
 	rows.append({
 		"name": "Hens",
-		"value": "%d of %d, %d coins each" % [m.hens, m.COOP_HENS_MAX, m.HEN_PRICE],
-		"button": "Buy hen",
-		"action": "buy_hen",
-		"enabled": m.animals._can_buy_hen(),
+		"value": "%d of %d, order more from the catalog at the desk" % [m.hens, m.COOP_HENS_MAX],
 	})
 	rows.append({
 		"name": "Feed hens",
@@ -339,15 +336,12 @@ func _coop_rows() -> Array:
 	return rows
 
 
-# The barn panel. Livestock aren't in the game yet, so for now it only says so.
+# The barn panel: the goats are fed here. They are ordered from the catalog at the desk.
 func _barn_rows() -> Array:
 	var rows: Array = [{"section": "Goats"}]
 	rows.append({
 		"name": "Goats",
-		"value": "%d of %d, %d coins each" % [m.goats, m.BARN_GOATS_MAX, m.GOAT_PRICE],
-		"button": "Buy goat",
-		"action": "buy_goat",
-		"enabled": m.animals._can_buy_goat(),
+		"value": "%d of %d, order more from the catalog at the desk" % [m.goats, m.BARN_GOATS_MAX],
 	})
 	rows.append({
 		"name": "Feed goats",
@@ -448,70 +442,35 @@ func _settings_rows() -> Array:
 
 
 func _desk_rows() -> Array:
-	var rows: Array = [{"section": "Desk"}]
-	rows.append({"section": "Post on the desk"})
+	var rows: Array = [{"section": "Post on the desk"}]
 	if m.desk_mail.is_empty():
 		rows.append({"note": "No post. The mail slot in the front door drops letters here."})
 	for letter in m.desk_mail:
-		rows.append({"note": "%s%s\n%s" % [str(letter["title"]), "  (new)" if bool(letter["unread"]) else "", str(letter["text"])]})
+		rows.append({"note": "%s%s
+%s" % [str(letter["title"]), "  (new)" if bool(letter["unread"]) else "", str(letter["text"])]})
+	rows.append({"name": "Put letters away", "value": "read letters go in the drawer", "button": "Clear", "action": "mail_clear", "enabled": m.desk._has_read_mail()})
+	rows.append({"section": "Property tax"})
 	rows.append({"name": "Property value", "value": "%d a quarter" % m.desk._property_value()})
 	rows.append({"note": m.desk._property_text()})
 	rows.append({"name": "Property tax", "value": m.desk._tax_text(), "button": "Pay", "action": "pay_tax", "enabled": m.tax_owed > 0 and m.money >= m.tax_owed})
-	rows.append({"name": "Put letters away", "value": "read letters go in the drawer", "button": "Clear", "action": "mail_clear", "enabled": m.desk._has_read_mail()})
-	rows.append({"section": "Games"})
-	var entertained := m.entertained_day == m.day
-	rows.append({"name": "Entertained today", "value": "yes" if entertained else "no, finish a game or your limit slips"})
+	rows.append({"section": "Pastimes"})
+	rows.append({"name": "Entertained today", "value": "yes" if m.entertained_day == m.day else "no, play something or your sanity limit slips tonight"})
 	if m.boredom_loss > 0.0:
 		rows.append({"name": "Sanity limit lost to boredom", "value": str(int(m.boredom_loss))})
-	if m.desk_game.is_empty():
-		rows.append({"name": "Sudoku", "value": "fill the 4 by 4 grid so each row, column and 2 by 2 box has 1 to 4", "button": "Play", "action": "game_new:sudoku"})
-		rows.append({"name": "Solitaire", "value": "turn cards and build the four suit foundations", "button": "Play", "action": "game_new:solitaire"})
-	elif m.desk_game["kind"] == "sudoku":
-		rows.append_array(_sudoku_rows())
-	else:
-		rows.append_array(_solitaire_rows())
+	rows.append({"name": "Solitaire (%s)" % m.desk._hours_text(m.SOLITAIRE_HOURS), "value": "pack of cards: %d games left" % m.card_games, "button": "Play", "action": "pastime:solitaire", "enabled": m.desk._can_pastime("solitaire")})
+	rows.append({"name": "Sudoku (%s)" % m.desk._hours_text(m.SUDOKU_HOURS), "value": "sudoku book: %d puzzles left" % m.sudoku_puzzles, "button": "Play", "action": "pastime:sudoku", "enabled": m.desk._can_pastime("sudoku")})
+	rows.append({"section": "Catalog"})
+	rows.append({"note": "Orders are paid now and come with the next morning's post. Coins: %d." % m.money})
+	if not m.desk_orders.is_empty():
+		rows.append({"name": "On order", "value": m.desk._orders_text()})
+	var heading := ""
+	for item in m.desk._catalog():
+		if str(item["section"]) != heading:
+			heading = str(item["section"])
+			rows.append({"section": heading})
+		var detail := str(item["detail"]) if bool(item["ok"]) else str(item["why"])
+		rows.append({"name": "%s (%d coins)" % [str(item["name"]), int(item["price"])], "value": detail, "button": "Order", "action": "order:" + str(item["id"]), "enabled": bool(item["ok"]) and m.money >= int(item["price"])})
 	return rows
-
-
-func _sudoku_rows() -> Array:
-	var puzzle: Array = m.desk_game["puzzle"]
-	var guess: Array = m.desk_game["guess"]
-	var lines: Array = []
-	for r in 4:
-		var cells: Array = []
-		for c in 4:
-			var i := r * 4 + c
-			var v := int(puzzle[i]) if int(puzzle[i]) != 0 else int(guess[i])
-			cells.append(str(v) if v != 0 else ".")
-		lines.append(" ".join(PackedStringArray(cells)))
-	var rows: Array = [{"section": "Sudoku"}, {"note": "\n".join(PackedStringArray(lines))}]
-	for i in 16:
-		if int(puzzle[i]) != 0:
-			continue
-		var g := int(guess[i])
-		rows.append({"name": "Row %d, column %d" % [i / 4 + 1, i % 4 + 1], "value": str(g) if g != 0 else "empty", "button": "Next", "action": "sudoku_next:%d" % i})
-	rows.append({"name": "Check your numbers", "value": "right ones are locked in, wrong ones clear", "button": "Check", "action": "sudoku_check"})
-	rows.append({"name": "Put the game away", "value": "unfinished, so it does not count today", "button": "Put away", "action": "game_quit"})
-	return rows
-
-
-func _solitaire_rows() -> Array:
-	var stock: Array = m.desk_game["stock"]
-	var waste: Array = m.desk_game["waste"]
-	var found: Array = m.desk_game["found"]
-	var top := "empty" if waste.is_empty() else m.desk._card_name(int(waste.back()))
-	var piles: Array = []
-	for s in 4:
-		piles.append("%s %d" % [m.DESK_SUITS[s], int(found[s])])
-	return [
-		{"section": "Solitaire"},
-		{"name": "Waste top", "value": top},
-		{"name": "Stock", "value": "%d left, %d of %d deck passes used" % [stock.size(), int(m.desk_game["passes"]), m.SOL_PASSES]},
-		{"name": "Turn a card", "value": "from the stock", "button": "Turn", "action": "sol_draw", "enabled": m.desk._sol_can_turn()},
-		{"name": "Play the waste card", "value": "up to its foundation, if it is next", "button": "Play", "action": "sol_play", "enabled": m.desk._sol_can_play()},
-		{"note": "Foundations (cards played): " + ", ".join(PackedStringArray(piles))},
-		{"name": "Put the game away", "value": "unfinished, so it does not count today", "button": "Put away", "action": "game_quit"},
-	]
 
 
 func _cooked_sell_rows() -> Array:
@@ -620,9 +579,6 @@ func _achievement_rows() -> Array:
 
 
 func _trade_rows() -> Array:
-	var turnip_pack := m.SEED_TURNIP_PRICE * 5
-	var corn_pack := m.SEED_CORN_PRICE * 4
-	var pumpkin_pack := m.SEED_PUMPKIN_PRICE * 3
 	return [
 		{"section": "Purse"},
 		{"name": "Coins", "value": str(m.money)},
@@ -670,28 +626,6 @@ func _trade_rows() -> Array:
 			"enabled": int(m.inventory["milk"]) > 0,
 		},
 		] + _cooked_sell_rows() + [
-		{"section": "Buy seeds"},
-		{
-			"name": "Turnip seeds (%d each)" % m.SEED_TURNIP_PRICE,
-			"value": "5 for %d coins" % turnip_pack,
-			"button": "Buy 5",
-			"action": "buy_turnip",
-			"enabled": m.money >= turnip_pack,
-		},
-		{
-			"name": "Corn seeds (%d each)" % m.SEED_CORN_PRICE,
-			"value": "4 for %d coins, Farming %d" % [corn_pack, m.CORN_LEVEL],
-			"button": "Buy 4",
-			"action": "buy_corn",
-			"enabled": m.farm._crop_unlocked("corn") and m.money >= corn_pack,
-		},
-		{
-			"name": "Pumpkin seeds (%d each)" % m.SEED_PUMPKIN_PRICE,
-			"value": "3 for %d coins, Farming %d" % [pumpkin_pack, m.PUMPKIN_LEVEL],
-			"button": "Buy 3",
-			"action": "buy_pumpkin",
-			"enabled": m.progression._level("Farming") >= m.PUMPKIN_LEVEL and m.money >= pumpkin_pack,
-		},
 		{"note": "The farm stand is open from 06:00 to 18:00. It only buys what you carry, so take crops or fish out of storage first."},
 	]
 
