@@ -232,10 +232,12 @@ Achievements track stats and never reset. Each pays a small reward. Earning all 
 
 ## Farming and crops
 
-- Two crop kinds:
-  - **Turnip** (starter): yields 1 crop and 1 seed back. 25 XP.
-  - **Pumpkin** (Farming 3): yields 3 crops and 1 pumpkin seed back. 40 XP.
-- Planting uses the **selected seed**. Switch it in the Inventory panel (Farming 3 and up). If you pick pumpkin before Farming 3, turnip is planted.
+- Three crop kinds:
+  - **Turnip** (starter): yields 1 crop and 1 seed back. 25 XP. 7 days. Sells for 8.
+  - **Corn** (Farming 2): yields 2 ears and 1 corn seed back. 30 XP. 8 days. Sells for 14. Seeds are 6 coins each, sold 4 at a time. Corn is food and animal feed like the other crops, but has no recipes and doesn't keep in the cellar. Art: `art/farm/crop_corn.png` (SpriteCook, four 16 px stages); its ripe frame is the corn icon in `art/ui/icons.png`.
+  - **Pumpkin** (Farming 3): yields 3 crops and 1 pumpkin seed back. 40 XP. 10 days. Sells for 30.
+- Planting uses the **selected seed**. Switch it in the Inventory panel once a second kind is unlocked; it steps through the unlocked kinds. If the selected kind isn't unlocked yet, turnip is planted.
+- Feeding animals, offerings and Harrow's crops take turnips first, then corn, then pumpkins.
 - Planting gives 5 XP.
 - **Crops need water.** A crop grows overnight only if it was watered that day. A crop that wasn't watered stays at its stage, and the morning message says how many went thirsty. Watering is covered under Well and watering.
 - Plot two stays overgrown until Farming 2. Walking up to it says so.

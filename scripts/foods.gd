@@ -12,6 +12,8 @@ extends RefCounted
 const LIST := [
 	{"id": "turnip", "held": "crops", "name": "Turnip", "icon": "turnip", "tint": "8fd16b", "skill": "Farming", "level": 0, "difficulty": 1, "price": 0,
 		"desc": "Harvested from the field. Eat it raw, or cook it into a meal."},
+	{"id": "corn", "held": "corn", "name": "Corn", "icon": "corn", "tint": "e8c440", "skill": "Farming", "level": 2, "difficulty": 1, "price": 0,
+		"desc": "An ear of corn in its husk. Eat it raw, or feed it to the animals. Corn does not keep in the cellar."},
 	{"id": "pumpkin", "held": "pumpkins", "name": "Pumpkin", "icon": "pumpkin", "tint": "e0822a", "skill": "Farming", "level": 3, "difficulty": 2, "price": 0,
 		"desc": "A large pumpkin. Eat it raw, or cook it. Pumpkins do not keep in the cellar."},
 	{"id": "egg", "held": "eggs", "name": "Egg", "icon": "egg", "tint": "f2ead2", "skill": "Farming", "level": 0, "difficulty": 1, "price": 0,

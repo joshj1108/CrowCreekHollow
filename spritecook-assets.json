@@ -153,6 +153,10 @@
       "asset_id": "97df83d8-b335-4f34-abb5-b4ec40aaa705",
       "label": "Turnip stages 0-3, 64x16 strip"
     },
+    "art/farm/crop_corn.png": {
+      "asset_id": "842b6ed5-e093-4ffd-af6a-dc63f520e6e6",
+      "label": "Corn stages 0-3, 64x16 strip (ripe frame also copied into art/ui/icons.png as the corn icon)"
+    },
     "art/farm/crop_pumpkin.png": {
       "asset_id": "69336d6b-212b-4aee-935b-ba6252f97b87",
       "label": "Pumpkin stages 0-3, 64x16 strip"

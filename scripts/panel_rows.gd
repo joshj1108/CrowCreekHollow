@@ -142,10 +142,14 @@ func _inventory_rows() -> Array:
 	var growing := m.crops.size()
 	if growing > 0:
 		rows.append({"name": "Watered today", "value": "%d of %d growing crops" % [m.farm._watered_today(), growing], "progress": float(m.farm._watered_today()) / float(growing)})
-	if m.progression._level("Farming") >= m.PUMPKIN_LEVEL:
+	var kinds := m.farm._unlocked_kinds()
+	if kinds.size() > 1:
+		var labels: Array = []
+		for kind in kinds:
+			labels.append(m.farm._seed_label(kind))
 		rows.append({
 			"name": "Switch seed",
-			"value": "Turnip or Pumpkin",
+			"value": ", ".join(labels.slice(0, -1)) + " or " + str(labels[-1]),
 			"button": "Switch",
 			"action": "switch_seed",
 			"enabled": true,
@@ -617,6 +621,7 @@ func _achievement_rows() -> Array:
 
 func _trade_rows() -> Array:
 	var turnip_pack := m.SEED_TURNIP_PRICE * 5
+	var corn_pack := m.SEED_CORN_PRICE * 4
 	var pumpkin_pack := m.SEED_PUMPKIN_PRICE * 3
 	return [
 		{"section": "Purse"},
@@ -628,6 +633,13 @@ func _trade_rows() -> Array:
 			"button": "Sell all",
 			"action": "sell_crops",
 			"enabled": int(m.inventory["crops"]) > 0,
+		},
+		{
+			"name": "Corn (%d each)" % m.farm._crop_price("corn"),
+			"value": "%d held" % int(m.inventory["corn"]),
+			"button": "Sell all",
+			"action": "sell_corn",
+			"enabled": int(m.inventory["corn"]) > 0,
 		},
 		{
 			"name": "Pumpkins (%d each)" % m.farm._crop_price("pumpkin"),
@@ -665,6 +677,13 @@ func _trade_rows() -> Array:
 			"button": "Buy 5",
 			"action": "buy_turnip",
 			"enabled": m.money >= turnip_pack,
+		},
+		{
+			"name": "Corn seeds (%d each)" % m.SEED_CORN_PRICE,
+			"value": "4 for %d coins, Farming %d" % [corn_pack, m.CORN_LEVEL],
+			"button": "Buy 4",
+			"action": "buy_corn",
+			"enabled": m.farm._crop_unlocked("corn") and m.money >= corn_pack,
 		},
 		{
 			"name": "Pumpkin seeds (%d each)" % m.SEED_PUMPKIN_PRICE,

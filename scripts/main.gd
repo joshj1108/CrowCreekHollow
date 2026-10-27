@@ -222,9 +222,9 @@ const BED_INTERIOR := Vector2i(1, 5)  # the bed's bottom-left tile (see BED_RECT
 const EVENT_HOUR := 22.0
 
 const MAX_STAGE := 3        # 0 = seed, 3 = ready to harvest
-const CROP_GROW_DAYS := {"turnip": 7, "pumpkin": 10}   # watered days from seed to ready: a week, and ten days
+const CROP_GROW_DAYS := {"turnip": 7, "corn": 8, "pumpkin": 10}   # watered days from seed to ready
 # What a sold crop fetches at the farm stand, and what food from it is worth.
-const CROP_VALUE := {"turnip": 8, "pumpkin": 30}
+const CROP_VALUE := {"turnip": 8, "corn": 14, "pumpkin": 30}
 const STAGE_NAMES := ["Decrepit", "Boarded", "Patched", "Restored"]
 # Tips: short notes that appear one at a time as the player reaches each part of the farm.
 # Each shows once, and the Settings menu keeps the ones already seen. When the condition is met, see _tip_ready.
@@ -272,12 +272,15 @@ const LANTERN_FLICKER_TIER := 3
 const LANTERN_ENERGY := 0.5
 const WINDOW_ENERGY := 0.45
 
-# Crops. Turnips are the starter crop. Pumpkins need Farming 3 and yield more.
-const CROPS := {
-	"turnip": {"seed": "seeds", "yield": 1, "xp": 25, "colors": ["8fd16b", "4f9a3a", "2f7a2a", "e8b440"]},
-	"pumpkin": {"seed": "pumpkin_seeds", "yield": 3, "xp": 40, "colors": ["9fd27a", "d98a35", "c26a1f", "f2a13a"]},
-}
+# Crops. Turnips are the starter crop. Corn needs Farming 2 and pumpkins Farming 3; both yield more.
+# held is the pack key the harvest goes to. Listed in unlock order, which is the seed cycling order.
+const CORN_LEVEL := 2
 const PUMPKIN_LEVEL := 3
+const CROPS := {
+	"turnip": {"label": "Turnip", "seed": "seeds", "held": "crops", "level": 0, "yield": 1, "xp": 25, "colors": ["8fd16b", "4f9a3a", "2f7a2a", "e8b440"]},
+	"corn": {"label": "Corn", "seed": "corn_seeds", "held": "corn", "level": CORN_LEVEL, "yield": 2, "xp": 30, "colors": ["9fc86a", "5f8a3a", "3f6a2a", "e8c440"]},
+	"pumpkin": {"label": "Pumpkin", "seed": "pumpkin_seeds", "held": "pumpkins", "level": PUMPKIN_LEVEL, "yield": 3, "xp": 40, "colors": ["9fd27a", "d98a35", "c26a1f", "f2a13a"]},
+}
 # A crop sells for its seed's cost spread over its yield, plus this difficulty bonus.
 # Pumpkins need Farming 3 and more care, so each one sells for more than a turnip.
 
@@ -356,6 +359,7 @@ const TAX_FINAL_DAYS := 7           # days overdue before the final notice
 const TAX_EVICT_DAYS := 14          # days overdue before the land is lost
 const DESK_IX := Vector2i(4, 3)     # the desk's left tile (it is two wide), in the bedroom: post lands here
 const SEED_TURNIP_PRICE := 3    # per seed, sold in packs of 5
+const SEED_CORN_PRICE := 6      # per seed, sold in packs of 4
 const SEED_PUMPKIN_PRICE := 10  # per seed, sold in packs of 3
 
 # The road east of the farm leads to Lowmere. It is walked in daylight only.
@@ -781,7 +785,7 @@ var hose_attached := false
 var well_water := 0.0      # hours spent with an empty need, toward the next HP lost
 var weather_kind := ""       # today's weather, rolled each morning: see WEATHER_WEIGHTS
 var skill_xp := {"Farming": 0, "Bushcrafting": 0, "Carpentry": 0, "Cleaning": 0, "Fishing": 0, "Cooking": 0, "Combat": 0, "Forestry": 0, "Mining": 0, "Smithing": 0}
-var inventory := {"seeds": STARTING_SEEDS, "pumpkin_seeds": 0, "crops": 0, "pumpkins": 0, "fish": 0, "eggs": 0, "milk": 0, "fish_meal": 0, "turnip_hash": 0, "smoked_fish": 0, "dried_turnip": 0, "pumpkin_soup": 0, "canned_turnip": 0, "fish_stew": 0, "fermented_turnip": 0, "hearty_stew": 0, "bandage": 0, "firewood": 4}
+var inventory := {"seeds": STARTING_SEEDS, "corn_seeds": 0, "pumpkin_seeds": 0, "crops": 0, "corn": 0, "pumpkins": 0, "fish": 0, "eggs": 0, "milk": 0, "fish_meal": 0, "turnip_hash": 0, "smoked_fish": 0, "dried_turnip": 0, "pumpkin_soup": 0, "canned_turnip": 0, "fish_stew": 0, "fermented_turnip": 0, "hearty_stew": 0, "bandage": 0, "firewood": 4}
 var materials := {"wood": 0, "sticks": 0, "fiber": 0, "resin": 0, "hardwood": 0, "stone": 0, "copper_ore": 0, "iron_ore": 0, "copper_bar": 0, "iron_bar": 0, "arrows": 0, "bolts": 0}
 # The hotbar, in slot order. Slots after these are empty.
 const HOTBAR_TOOLS := [
@@ -3184,6 +3188,8 @@ func _on_panel_action(action_id: String) -> void:
 			farm._switch_seed()
 		"sell_crops":
 			stall._sell("crops")
+		"sell_corn":
+			stall._sell("corn")
 		"sell_pumpkins":
 			stall._sell("pumpkins")
 		"sell_fish":
@@ -3194,6 +3200,8 @@ func _on_panel_action(action_id: String) -> void:
 			stall._sell("milk")
 		"buy_turnip":
 			farm._buy_seeds("turnip")
+		"buy_corn":
+			farm._buy_seeds("corn")
 		"buy_pumpkin":
 			farm._buy_seeds("pumpkin")
 		"upgrade_bag":
@@ -3266,7 +3274,7 @@ func _refresh_panel() -> void:
 
 # Each skill's picture, color, and what trains it.
 const SKILL_INFO := {
-	"Farming": {"icon": "crop", "tint": "4f6b3a", "desc": "Grows crops. Planting, watering, and harvesting all train it. Level 3 unlocks pumpkin seeds."},
+	"Farming": {"icon": "crop", "tint": "4f6b3a", "desc": "Grows crops. Planting, watering, and harvesting all train it. Level 2 unlocks corn seeds and level 3 pumpkin seeds."},
 	"Bushcrafting": {"icon": "fiber", "tint": "6b4a3a", "desc": "Gathers wood, fiber, and resin, and unlocks the early gear and lanterns."},
 	"Carpentry": {"icon": "hammer", "tint": "8a6a3a", "desc": "Trains by mending boards and repairing the house."},
 	"Cleaning": {"icon": "broom", "tint": "4a6b7a", "desc": "Tidies the house."},
@@ -3364,6 +3372,14 @@ func _raw_inventory_tiles() -> Array:
 	var turnip_ok := true
 	tiles.append(_stack_tile("seed:turnip", "Turnip seeds", "seed", "a8d46f", int(inventory["seeds"]), "in the pouch",
 		"Planted in tilled soil. Kept in the seed pouch.", "", ""))
+	var corn_ok := progression._level("Farming") >= CORN_LEVEL
+	var corn := _stack_tile("seed:corn", "Corn seeds", "seed", "e8c440", int(inventory["corn_seeds"]), "in the pouch",
+		"A harvest of two ears per plant. Needs Farming %d to plant." % CORN_LEVEL, "", "")
+	corn["enabled"] = corn_ok
+	corn["level_ok"] = corn_ok
+	if not corn_ok:
+		corn["level_text"] = "Needs Farming %d" % CORN_LEVEL
+	tiles.append(corn)
 	var pumpkin_ok := progression._level("Farming") >= PUMPKIN_LEVEL
 	var pumpkin := _stack_tile("seed:pumpkin", "Pumpkin seeds", "pumpkin_seed", "d98a35", int(inventory["pumpkin_seeds"]), "in the pouch",
 		"Larger harvest of three crops per plant. Needs Farming %d to plant." % PUMPKIN_LEVEL, "", "")
@@ -5979,6 +5995,7 @@ func _dev_unlock_all() -> void:
 	for mat in materials.keys():
 		materials[mat] = maxi(int(materials[mat]), 999)
 	inventory["seeds"] = maxi(int(inventory["seeds"]), 99)
+	inventory["corn_seeds"] = maxi(int(inventory["corn_seeds"]), 99)
 	inventory["pumpkin_seeds"] = maxi(int(inventory["pumpkin_seeds"]), 99)
 	for kind in tool_tier.keys():
 		tool_tier[kind] = TOOL_TIERS[kind].size()

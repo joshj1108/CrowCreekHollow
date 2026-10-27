@@ -920,6 +920,10 @@ class RecipeIcon extends Control:
 				_shape(_ellipse(0.5, 0.58, 0.4, 0.3), tint)
 				draw_polyline(_ellipse(0.32, 0.58, 0.16, 0.3), dark, 0.02 * _sz)
 				draw_polyline(_ellipse(0.68, 0.58, 0.16, 0.3), dark, 0.02 * _sz)
+			"corn":
+				_shape(_ellipse(0.5, 0.52, 0.16, 0.36), tint)
+				_shape(_poly([[0.5, 0.92], [0.24, 0.3], [0.4, 0.5]]), Color("5f9a3a"))
+				_shape(_poly([[0.5, 0.92], [0.76, 0.3], [0.6, 0.5]]), Color("5f9a3a"))
 			"pumpkin_seed":
 				_shape(_ellipse(0.4, 0.55, 0.2, 0.3), Color("efe2a6"))
 				_shape(_ellipse(0.62, 0.48, 0.2, 0.3), Color("efe2a6"))

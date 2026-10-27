@@ -109,6 +109,7 @@ const ICONS := [
 	"fermented", "firewood", "jar", "log",
 	"fiber", "sticks", "resin", "stone",
 	"ore", "ore_copper", "bar", "bar_copper",
+	"corn",
 ]
 const COPPER_TINTS := ["b87333", "c97f45"]
 

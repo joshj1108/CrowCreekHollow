@@ -127,10 +127,8 @@ func _first_cooked() -> String:
 
 
 func _food_price(food_id: String) -> int:
-	if food_id == "turnip":
-		return m.farm._crop_price("turnip")
-	if food_id == "pumpkin":
-		return m.farm._crop_price("pumpkin")
+	if m.CROP_VALUE.has(food_id):
+		return m.farm._crop_price(food_id)
 	return int(Foods.find(food_id).get("price", 0))
 
 
@@ -197,7 +195,11 @@ func _sell(kind: String) -> void:
 	if count <= 0:
 		m._show_message("You have nothing to sell.")
 		return
-	var price := m.farm._crop_price("pumpkin") if kind == "pumpkins" else m.farm._crop_price("turnip")
+	var price := m.farm._crop_price("turnip")
+	if kind == "corn":
+		price = m.farm._crop_price("corn")
+	if kind == "pumpkins":
+		price = m.farm._crop_price("pumpkin")
 	if kind == "fish":
 		price = m.SELL_FISH
 	if kind == "eggs":

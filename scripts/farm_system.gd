@@ -9,15 +9,27 @@ func _init(main: MainGame) -> void:
 
 
 func _seed_label(kind: String) -> String:
-	return "Pumpkin" if kind == "pumpkin" else "Turnip"
+	return str(m.CROPS.get(kind, m.CROPS["turnip"])["label"])
 
 
-# Steps through the seeds you have in the pouch: turnip always, pumpkin once Farming reaches its level.
+# True once Farming is high enough to plant this kind.
+func _crop_unlocked(kind: String) -> bool:
+	return m.progression._level("Farming") >= int(m.CROPS[kind]["level"])
+
+
+# The crop kinds Farming has unlocked, in unlock order.
+func _unlocked_kinds() -> Array:
+	var kinds: Array = []
+	for kind in m.CROPS:
+		if _crop_unlocked(kind):
+			kinds.append(kind)
+	return kinds
+
+
+# Steps through the seeds you have in the pouch: turnip always, corn and pumpkin once Farming reaches their levels.
 func _cycle_seed(step: int) -> void:
 	var options: Array = []
-	for kind in ["turnip", "pumpkin"]:
-		if kind == "pumpkin" and m.progression._level("Farming") < m.PUMPKIN_LEVEL:
-			continue
+	for kind in _unlocked_kinds():
 		if int(m.inventory[m.CROPS[kind]["seed"]]) > 0:
 			options.append(kind)
 	if options.is_empty():
@@ -34,7 +46,8 @@ func _cycle_seed(step: int) -> void:
 
 
 func _switch_seed() -> void:
-	m.selected_seed = "turnip" if m.selected_seed == "pumpkin" else "pumpkin"
+	var kinds := _unlocked_kinds()
+	m.selected_seed = str(kinds[posmod(kinds.find(m.selected_seed) + 1, kinds.size())])
 	m._show_message("You'll plant %s seeds now." % _seed_label(m.selected_seed).to_lower())
 
 
@@ -64,7 +77,7 @@ func _check_unlocks() -> void:
 func _plant(tile: Vector2i) -> void:
 	m.play_sfx("plant", 0.06)
 	var kind := m.selected_seed
-	if kind == "pumpkin" and m.progression._level("Farming") < m.PUMPKIN_LEVEL:
+	if not _crop_unlocked(kind):
 		kind = "turnip"
 	var seed_key: String = m.CROPS[kind]["seed"]
 	if m.inventory[seed_key] <= 0:
@@ -84,24 +97,20 @@ func _harvest(tile: Vector2i) -> void:
 	var kind: String = m.crops[tile]["kind"]
 	var yield_count: int = m.CROPS[kind]["yield"]
 	# Harvests go to the pack only. Storing in the cellar is up to the player.
-	var held := int(m.inventory["pumpkins" if kind == "pumpkin" else "crops"])
-	if not m.stall._pack_room(held, yield_count):
+	var held_key: String = m.CROPS[kind]["held"]
+	if not m.stall._pack_room(int(m.inventory[held_key]), yield_count):
 		m._show_message("Your pack is full. Store crops in the root cellar, or sell them.")
 		return
-	if kind == "pumpkin":
-		m.inventory["pumpkins"] += yield_count
-	else:
-		m.inventory["crops"] += yield_count
+	m.inventory[held_key] += yield_count
 	m.crops.erase(tile)
 	m.stats["harvested"] += 1
 	if kind == "pumpkin":
 		m.stats["pumpkins"] += 1
-		m.inventory["pumpkin_seeds"] += 1
-	else:
-		m.inventory["seeds"] += 1
+	m.inventory[m.CROPS[kind]["seed"]] += 1
 	var xp: int = m.CROPS[kind]["xp"]
 	m.progression._grant_xp("Farming", xp)
-	m._show_message("Harvested %s for %d %s. +%d Farming XP" % [_seed_label(kind).to_lower(), yield_count, "pumpkins" if kind == "pumpkin" else "crops", xp])
+	var unit := {"turnip": "crops", "corn": "ears", "pumpkin": "pumpkins"}
+	m._show_message("Harvested %s for %d %s. +%d Farming XP" % [_seed_label(kind).to_lower(), yield_count, unit[kind], xp])
 
 
 func _start_harvest(kind: String, tile: Vector2i) -> void:
@@ -195,16 +204,21 @@ func _watered_today() -> int:
 	return n
 
 
-# Turnips and pumpkins both feed you and cook into meals. Food and cooking count them together.
+# Turnips, corn and pumpkins all feed you and the animals. Food and offerings count them together.
 func _crop_total() -> int:
-	return int(m.inventory["crops"]) + int(m.inventory["pumpkins"])
+	var total := 0
+	for kind in m.CROPS:
+		total += int(m.inventory[m.CROPS[kind]["held"]])
+	return total
 
 
-# Uses crops for food or cooking, taking turnips first and then pumpkins.
+# Uses crops for food or offerings, taking turnips first, then corn, then pumpkins.
 func _spend_crops(amount: int) -> void:
-	var from_crops := mini(amount, int(m.inventory["crops"]))
-	m.inventory["crops"] -= from_crops
-	m.inventory["pumpkins"] -= amount - from_crops
+	for kind in m.CROPS:
+		var key: String = m.CROPS[kind]["held"]
+		var take := mini(amount, int(m.inventory[key]))
+		m.inventory[key] -= take
+		amount -= take
 
 
 # How much one crop sells for: its seed's cost spread over its yield, plus its difficulty.
@@ -213,6 +227,18 @@ func _crop_price(kind: String) -> int:
 
 
 func _buy_seeds(kind: String) -> void:
+	if kind == "corn":
+		if not _crop_unlocked("corn"):
+			m._show_message("Corn seeds need Farming level %d." % m.CORN_LEVEL)
+			return
+		var corn_total := m.SEED_CORN_PRICE * 4
+		if m.money < corn_total:
+			m._show_message("Four corn seeds cost %d coins." % corn_total)
+			return
+		m.money -= corn_total
+		m.inventory["corn_seeds"] += 4
+		m._show_message("You buy 4 corn seeds for %d coins." % corn_total)
+		return
 	if kind == "pumpkin":
 		if m.progression._level("Farming") < m.PUMPKIN_LEVEL:
 			m._show_message("Pumpkin seeds need Farming level %d." % m.PUMPKIN_LEVEL)
@@ -257,6 +283,7 @@ func _take_crops() -> void:
 func _seed_cells() -> Array:
 	return [
 		{"color": "a8d46f", "label": "Turnip", "count": str(m.inventory["seeds"]), "tip": "Turnip seeds. Kept in the seed pouch."},
+		{"color": "e8c440", "label": "Corn", "count": str(m.inventory["corn_seeds"]), "tip": "Corn seeds. Farming %d to plant." % m.CORN_LEVEL},
 		{"color": "d98a35", "label": "Pumpkin", "count": str(m.inventory["pumpkin_seeds"]), "tip": "Pumpkin seeds. Farming %d to plant." % m.PUMPKIN_LEVEL},
 	]
 

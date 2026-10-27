@@ -15,6 +15,7 @@ extends SceneTree
 #   hour=H          time of day, e.g. 21.5
 #   frames=N        frames to run before the shot (default 90)
 #   scale=F         shrink the saved image (default 0.5, so it's cheap to look at; 1 for full size)
+#   crops=A,B       plant every stage of each crop kind in a row on the first plot, e.g. crops=turnip,corn
 #   built           build the cellar, smokehouse, furnace and woodshed
 #   notip           hide the tip card, even one shown after the scene is set up
 #   wheel           open the section wheel
@@ -48,6 +49,15 @@ func _initialize() -> void:
 		main.furnace_built = true
 		main.woodshed_built = true
 		main._apply_storage_tiles()
+	if opt.has("crops"):
+		# One row per kind on the first plot, stages 0 to 3 left to right, and stand just below them.
+		var kinds: PackedStringArray = opt["crops"].split(",")
+		var origin := Vector2i(main.PLOT_ONE.position.x + main.BORDER_X, main.PLOT_ONE.position.y + main.BORDER_Y)
+		for r in kinds.size():
+			for s in 4:
+				main.crops[origin + Vector2i(s, r)] = {"stage": s, "kind": kinds[r], "days": 0}
+		if not opt.has("tile"):
+			main.player.position = main._tile_center(origin.x + 2, origin.y + kinds.size() + 1)
 	if opt.has("weather"):
 		main.weather_kind = opt["weather"]
 		main._apply_weather()
