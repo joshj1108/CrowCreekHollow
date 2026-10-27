@@ -37,14 +37,29 @@ const PLOT_TWO := FarmLayout.PLOT_TWO
 const PLOT_THREE := FarmLayout.PLOT_THREE
 const PLOT_THREE_LEVEL := 4
 
-# The walk-in interior sits below the farm, out of view of it.
-const INT_W := 14
-const INT_H := 9
+# The walk-in interior sits below the farm, out of view of it. It is sized for the farmer, who is two tiles
+# tall: three rooms along the north over a long hall, and every wall that faces a room is three tiles tall.
+# Rows 0-2 are the north wall, 3-8 the rooms, 9-12 the wall between the rooms and the hall (a top row and
+# three rows of face) with a doorway into each room, 13-18 the hall, and 19 the south wall with the exit mat.
+const INT_W := 22
+const INT_H := 20
 const INT_ORIGIN := Vector2i(0, MAP_H + 4)
-const FIREPLACE_IX := Vector2i(12, 5)            # the hearth, in the hall's north-east corner
-const TABLE_TILES := [Vector2i(2, 6), Vector2i(3, 6)]
-const CHAIR_TILES := [Vector2i(2, 5), Vector2i(3, 5), Vector2i(2, 7), Vector2i(3, 7)]
-const RUG_RECT := Rect2i(5, 5, 6, 3)            # the hall rug, laid from the Boarded stage
+const INT_BEDROOM := Rect2i(1, 3, 6, 6)
+const INT_STUDY := Rect2i(8, 3, 6, 6)
+const INT_PARLOR := Rect2i(15, 3, 6, 6)
+const INT_HALL := Rect2i(1, 13, 20, 6)
+const INT_FACE_ROWS := 3                         # a wall facing a room shows this many tiles of face
+const DOORWAY_BEDROOM := Rect2i(5, 9, 2, 4)      # through the wall between each room and the hall
+const DOORWAY_STUDY := Rect2i(10, 9, 2, 4)
+const DOORWAY_PARLOR := Rect2i(18, 9, 2, 4)
+const INT_EXIT := Vector2i(10, 19)               # the mat in the south wall, back out to the farm
+const INT_ENTRY := Vector2i(10, 18)              # where you stand on coming in
+const FIREPLACE_IX := Vector2i(16, 13)           # the hearth's left tile; it is two wide, against the hall's north wall
+const BED_RECT := Rect2i(1, 3, 2, 3)             # the bed against the bedroom's north wall, headboard at the top
+const DINING_RECT := Rect2i(3, 14, 3, 4)         # the table on the middle two rows, a chair above and below each end
+const TABLE_TILES := [Vector2i(3, 15), Vector2i(4, 15), Vector2i(5, 15), Vector2i(3, 16), Vector2i(4, 16), Vector2i(5, 16)]
+const CHAIR_TILES := [Vector2i(3, 14), Vector2i(5, 14), Vector2i(3, 17), Vector2i(5, 17)]
+const RUG_RECT := Rect2i(14, 15, 6, 3)           # the hall rug in front of the hearth, laid from the Boarded stage
 const INT_WALLS := [Color("221c18"), Color("4e4236"), Color("7a6a54"), Color("9a8a6a")]
 const INT_FLOORS := [Color("3e2e22"), Color("5a4430"), Color("6e5438"), Color("7f6244")]
 const QUILTS := [Color("6a5a4a"), Color("3e5a80"), Color("3f6b4a"), Color("8a2e3a")]
@@ -203,7 +218,7 @@ const START_HOUR := 6.0
 const DAY_END_HOUR := 27.0  # 03:00. Missing bed by then means collapsing.
 const DUSK_HOUR := 19.0
 const SLEEP_HOUR := 18.0    # the bed can be used from 18:00 onward
-const BED_INTERIOR := Vector2i(2, 1)  # the bed's tile in the bedroom; you wake on the tile below it
+const BED_INTERIOR := Vector2i(1, 5)  # the bed's bottom-left tile (see BED_RECT); you wake on the tile below it
 const EVENT_HOUR := 22.0
 
 const MAX_STAGE := 3        # 0 = seed, 3 = ready to harvest
@@ -288,7 +303,7 @@ const FURNACE_IX := FarmLayout.FURNACE_IX
 const WORKSHOP_RECT := FarmLayout.WORKSHOP_RECT
 const WORKSHOP_DOOR := FarmLayout.WORKSHOP_DOOR
 const COOP_SIZE := Vector2i(3, 2)            # the coop is 3 wide and 2 deep, on open grass; its hen door is one tile
-const COOLER_INTERIOR := Vector2i(11, 6)   # in the hall, inside the house
+const COOLER_INTERIOR := Vector2i(13, 13)   # in the hall, against its north wall
 const FURNACE_COST := {"wood": 6, "stone": 4, "coins": 80, "level": 4}
 const WOODSHED_COST := {"wood": 4, "fiber": 2, "coins": 40, "level": 2}
 const WOODSTORE_IX := FarmLayout.WOODSTORE_IX
@@ -339,7 +354,7 @@ const TAX_MONTHS := [0, 3, 6, 9]    # January, April, July, October: the bill co
 const TAX_GRACE_DAYS := 14          # days to pay a bill after it arrives
 const TAX_FINAL_DAYS := 7           # days overdue before the final notice
 const TAX_EVICT_DAYS := 14          # days overdue before the land is lost
-const DESK_IX := Vector2i(4, 1)     # the desk, in the bedroom: post lands here
+const DESK_IX := Vector2i(4, 3)     # the desk's left tile (it is two wide), in the bedroom: post lands here
 const SEED_TURNIP_PRICE := 3    # per seed, sold in packs of 5
 const SEED_PUMPKIN_PRICE := 10  # per seed, sold in packs of 3
 
@@ -1361,20 +1376,9 @@ func _draw() -> void:
 	# The great tree goes last, so its crown is never painted over by the ground around it.
 	if not FLAT_FARM_ART:
 		_draw_big_tree()
-	for y in INT_H:
-		for x in INT_W:
-			var kind: int = interior[y][x]
-			var cell := _tile_rect(INT_ORIGIN + Vector2i(x, y))
-			_draw_interior_tile(cell, Vector2i(x, y), kind)
-			# Furniture is labeled in the house so it's easy to tell apart, unless its sprite says what it is.
-			if not FARM_SPRITES and (kind == Tile.BED or kind == Tile.STATION or kind == Tile.DESK):
-				var furniture := "Bed" if kind == Tile.BED else ("Cleaning" if kind == Tile.STATION else "Desk")
-				draw_string(ThemeDB.fallback_font, cell.position + Vector2(2, PX * 0.6), furniture, HORIZONTAL_ALIGNMENT_LEFT, -1, 11, Color(0.95, 0.9, 0.78))
-			# Storage is labeled so it's easy to find.
-			if kind == Tile.COOLER or kind == Tile.CELLAR:
-				draw_rect(cell, Color(1, 1, 1, 0.8), false, 2.0)
-				var label := "Cooler" if kind == Tile.COOLER else "Cellar"
-				draw_string(ThemeDB.fallback_font, cell.position + Vector2(2, PX * 0.6), label, HORIZONTAL_ALIGNMENT_LEFT, -1, 11, Color(0.05, 0.03, 0.02))
+	_draw_interior(self, false)
+	if inside and tree_front_layer != null:
+		tree_front_layer.queue_redraw()
 
 	for pos in crops:
 		var crop: Dictionary = crops[pos]
@@ -1743,28 +1747,31 @@ func _build_interior() -> void:
 			row.append(Tile.WALL)
 		interior.append(row)
 
-	_fill_interior(1, 5, 12, 7, Tile.FLOOR)   # the hall, always open
-	_set_interior(FIREPLACE_IX.x, FIREPLACE_IX.y, Tile.FIREPLACE)
-	for t in TABLE_TILES:
-		_set_interior(t.x, t.y, Tile.TABLE)
-	_set_interior(6, 8, Tile.EXIT)            # back out to the farm
+	_fill_rect(INT_HALL, Tile.FLOOR)   # the hall, always open
+	_fill_rect(Rect2i(FIREPLACE_IX, Vector2i(2, 1)), Tile.FIREPLACE)
+	_fill_rect(DINING_RECT, Tile.TABLE)   # the chairs block too, so you walk around the set
+	_set_interior(INT_EXIT.x, INT_EXIT.y, Tile.EXIT)
 	if cooler_built:
 		_set_interior(COOLER_INTERIOR.x, COOLER_INTERIOR.y, Tile.COOLER)
 
-	# The bedroom and its bed are open from the start.
-	_fill_interior(1, 1, 4, 4, Tile.FLOOR)
-	_set_interior(BED_INTERIOR.x, BED_INTERIOR.y, Tile.BED)
+	# The bedroom and its bed are open from the start. A room that isn't open yet stays solid wall, with
+	# no doorway into it.
+	_fill_rect(INT_BEDROOM, Tile.FLOOR)
+	_fill_rect(DOORWAY_BEDROOM, Tile.FLOOR)
+	_fill_rect(BED_RECT, Tile.BED)
+	_fill_rect(Rect2i(DESK_IX, Vector2i(2, 1)), Tile.DESK)   # the desk is in the bedroom from the start, for the post
 	if house_stage >= 2:
-		_fill_interior(9, 1, 12, 4, Tile.FLOOR)
-		_set_interior(11, 1, Tile.STATION)
-	_set_interior(DESK_IX.x, DESK_IX.y, Tile.DESK)   # the desk is in the bedroom from the start, for the post
+		_fill_rect(INT_PARLOR, Tile.FLOOR)
+		_fill_rect(DOORWAY_PARLOR, Tile.FLOOR)
+		_set_interior(INT_PARLOR.position.x + 3, INT_PARLOR.position.y, Tile.STATION)
 	if house_stage >= 3:
-		_fill_interior(5, 1, 8, 4, Tile.FLOOR)
+		_fill_rect(INT_STUDY, Tile.FLOOR)
+		_fill_rect(DOORWAY_STUDY, Tile.FLOOR)
 
 
-func _fill_interior(x0: int, y0: int, x1: int, y1: int, kind: int) -> void:
-	for y in range(y0, y1 + 1):
-		for x in range(x0, x1 + 1):
+func _fill_rect(r: Rect2i, kind: int) -> void:
+	for y in range(r.position.y, r.end.y):
+		for x in range(r.position.x, r.end.x):
 			interior[y][x] = kind
 
 
@@ -1842,7 +1849,9 @@ func _build_world() -> void:
 	add_child(big_tree_layer)
 	tree_front_layer = Node2D.new()
 	tree_front_layer.z_index = 1
-	tree_front_layer.draw.connect(func() -> void: _draw_trees(tree_front_layer, true))
+	tree_front_layer.draw.connect(func() -> void:
+		_draw_trees(tree_front_layer, true)
+		_draw_interior(tree_front_layer, true))
 	add_child(tree_front_layer)
 
 	player = Node2D.new()
@@ -2181,7 +2190,8 @@ func _restore_saved_state() -> void:
 		player.position = saved_pos
 	# The house interior lies outside the farm bounds, so a saved spot inside is checked against the interior.
 	if saved_inside:
-		if not _in_interior(_player_tile()):
+		# A spot saved before the house was resized may now be inside a wall or the furniture.
+		if not _in_interior(_player_tile()) or BLOCKING.has(_kind_at(_player_tile())):
 			player.position = _wake_spot()
 	elif not WORLD_ENABLED and not _in_bounds(_player_tile()):
 		# A save made in the wider land returns to the homestead when the world is off.
@@ -5665,7 +5675,7 @@ func _build_desk_light() -> void:
 	desk_light.texture = _glow_texture()
 	desk_light.color = Color("ff2a2a")
 	desk_light.texture_scale = 0.45
-	desk_light.position = _tile_center(INT_ORIGIN.x + DESK_IX.x, INT_ORIGIN.y + DESK_IX.y)
+	desk_light.position = _tile_center(INT_ORIGIN.x + DESK_IX.x, INT_ORIGIN.y + DESK_IX.y) + Vector2(PX * 0.5, 0)   # between its two tiles
 	desk_light.enabled = false
 	add_child(desk_light)
 
@@ -5998,7 +6008,7 @@ func _check_doors() -> void:
 func _enter_house() -> void:
 	play_sfx("door", 0.05)
 	inside = true
-	player.position = _tile_center(INT_ORIGIN.x + 6, INT_ORIGIN.y + 6)
+	player.position = _tile_center(INT_ORIGIN.x + INT_ENTRY.x, INT_ORIGIN.y + INT_ENTRY.y)
 	_set_bounds()
 	_show_message("You step inside. The air is cold and smells of old wood.")
 
@@ -6028,7 +6038,7 @@ func _set_bounds() -> void:
 		camera.limit_bottom = WORLD_H * PX
 		return
 	if inside:
-		player.min_pos = _tile_center(INT_ORIGIN.x + 1, INT_ORIGIN.y + 1)
+		player.min_pos = _tile_center(INT_ORIGIN.x + 1, INT_ORIGIN.y + INT_BEDROOM.position.y)
 		# The bottom row holds the exit mat, so the player's clamp must reach it.
 		player.max_pos = _tile_center(INT_ORIGIN.x + INT_W - 2, INT_ORIGIN.y + INT_H - 1)
 		camera.limit_left = INT_ORIGIN.x * PX
@@ -6124,10 +6134,49 @@ func _tile_center(wx: int, wy: int) -> Vector2:
 	return Vector2(wx * PX + PX * 0.5, wy * PX + PX * 0.5)
 
 
+# The house. In SpriteCook art the floors go down first; then each row's walls and furniture, standing on
+# their tiles. Rows on or north of the player's row are drawn behind the player and the rest go on
+# tree_front_layer, over them, so the farmer walks behind the bed, the table and the wall into the hall.
+# Outside the house everything is drawn behind (it is out of view then anyway).
+func _draw_interior(ci: CanvasItem, front: bool) -> void:
+	if not FARM_SPRITES:
+		if not front:
+			for y in INT_H:
+				for x in INT_W:
+					var kind: int = interior[y][x]
+					var cell := _tile_rect(INT_ORIGIN + Vector2i(x, y))
+					_draw_interior_tile(cell, Vector2i(x, y), kind)
+					# Furniture is labeled so it's easy to tell apart, and storage so it's easy to find.
+					if kind == Tile.BED or kind == Tile.STATION or kind == Tile.DESK:
+						var furniture := "Bed" if kind == Tile.BED else ("Cleaning" if kind == Tile.STATION else "Desk")
+						draw_string(ThemeDB.fallback_font, cell.position + Vector2(2, PX * 0.6), furniture, HORIZONTAL_ALIGNMENT_LEFT, -1, 11, Color(0.95, 0.9, 0.78))
+					if kind == Tile.COOLER:
+						draw_rect(cell, Color(1, 1, 1, 0.8), false, 2.0)
+						draw_string(ThemeDB.fallback_font, cell.position + Vector2(2, PX * 0.6), "Cooler", HORIZONTAL_ALIGNMENT_LEFT, -1, 11, Color(0.05, 0.03, 0.02))
+		return
+	var player_row := floori(player.position.y / PX) - INT_ORIGIN.y if inside else INT_H
+	if not front:
+		for y in INT_H:
+			for x in INT_W:
+				_draw_interior_floor_sprite(_tile_rect(INT_ORIGIN + Vector2i(x, y)), Vector2i(x, y), interior[y][x])
+	for y in INT_H:
+		if (y > player_row) != front:
+			continue
+		for x in INT_W:
+			var pos := Vector2i(x, y)
+			var cell := _tile_rect(INT_ORIGIN + pos)
+			_draw_interior_piece(ci, cell, pos, interior[y][x])
+			# Storage is labeled so it's easy to find.
+			if interior[y][x] == Tile.COOLER:
+				ci.draw_rect(cell, Color(1, 1, 1, 0.8), false, 2.0)
+				ci.draw_string(ThemeDB.fallback_font, cell.position + Vector2(2, PX * 0.6), "Cooler", HORIZONTAL_ALIGNMENT_LEFT, -1, 11, Color(0.05, 0.03, 0.02))
+
+
 # Each house tile is drawn for the house's current repair stage, so the rooms improve as you fix the house.
+# This is the flat view, used when the SpriteCook art is off.
 func _draw_interior_tile(cell: Rect2, pos: Vector2i, kind: int) -> void:
-	if FARM_SPRITES:
-		_draw_interior_sprite(cell, pos, kind)
+	if kind == Tile.TABLE and CHAIR_TILES.has(pos):
+		_draw_interior_floor(cell, pos)
 		return
 	match kind:
 		Tile.WALL:
@@ -6152,19 +6201,22 @@ func _draw_interior_tile(cell: Rect2, pos: Vector2i, kind: int) -> void:
 			draw_rect(cell, TILE_COLORS[kind])
 
 
-# The house in SpriteCook art (art/farm/int_*.png). Floors are 32-pixel plank textures, two tiles
-# square: worn boards for the first two stages, good boards after. A wall with floor to its south shows
-# its face, plaster over wainscot, cracked for the first two stages and clean after; other walls show
-# their dark tops. Furniture stands on the floor, its bottom edge on its tile, so tall pieces such as
-# the bed's headboard and the chimney rise over the wall behind them. The rug and the dining set
-# span several tiles and each tile draws its own part, since the tiles are drawn in rows.
+# The house in SpriteCook art (art/farm/int_*.png), sized against the farmer (16×32). Floors are 32-pixel
+# plank textures, two tiles square: worn boards for the first two stages, good boards after. A wall facing
+# a room shows three tiles of face, plaster over wainscot under a crown trim, cracked for the first two
+# stages and clean after; other walls show their dark tops. Furniture stands on the floor, its bottom edge
+# on its footprint's bottom row, so tall pieces such as the headboard and the chimney rise over the wall
+# behind them. Each piece is drawn once, from its footprint's bottom-left tile.
 const INT_SHADE := [0.78, 1.0, 0.86, 1.0]          # floors and walls a little darker at the start of each art pair
-const INT_FURNITURE := {"desk": Rect2(0, 0, 20, 24), "wash": Rect2(21, 0, 13, 24), "wash_fine": Rect2(35, 0, 14, 24), "cooler": Rect2(50, 0, 14, 24)}
+# Cells in int_furniture.png. The bed (32×47 a stage), hearth (32×57 a frame), table (48×32) and chairs
+# (16×24, facing you then from behind) have their own sheets.
+const INT_FURNITURE := {"desk": Rect2(0, 0, 27, 29), "wash": Rect2(30, 0, 18, 29), "wash_fine": Rect2(52, 0, 18, 29), "cooler": Rect2(73, 0, 22, 29)}
+# int_wall.png holds two 61-pixel-wide walls, 48 tall: old from x=1 and clean from x=66.
+const INT_WALL_ART := {"old": 1, "clean": 66, "width": 61}
 
 
-func _draw_interior_sprite(cell: Rect2, pos: Vector2i, kind: int) -> void:
+func _draw_interior_floor_sprite(cell: Rect2, pos: Vector2i, kind: int) -> void:
 	if kind == Tile.WALL:
-		_draw_wall_sprite(cell, pos)
 		return
 	var shade: float = INT_SHADE[house_stage]
 	var floor_tex := FarmSprites.tex("int_floor_new" if house_stage >= 2 else "int_floor_old")
@@ -6174,48 +6226,73 @@ func _draw_interior_sprite(cell: Rect2, pos: Vector2i, kind: int) -> void:
 		var r := pos - RUG_RECT.position
 		draw_texture_rect_region(FarmSprites.tex("int_rug"), cell, Rect2(r.x * 16, r.y * 16, 16, 16),
 			Color(1, 1, 1) if house_stage >= 3 else Color(0.85, 0.8, 0.8))
-	# The dining set covers the table's two tiles and the chair above and below each.
-	var dining := Rect2i(TABLE_TILES[0].x, TABLE_TILES[0].y - 1, 2, 3)
-	if dining.has_point(pos):
-		var t := pos - dining.position
-		draw_texture_rect_region(FarmSprites.tex("int_dining"), cell, Rect2(t.x * 16, t.y * 16, 16, 16))
+	if kind == Tile.EXIT:
+		draw_texture_rect(FarmSprites.tex("int_mat"), cell, false)
+
+
+func _draw_interior_piece(ci: CanvasItem, cell: Rect2, pos: Vector2i, kind: int) -> void:
 	match kind:
+		Tile.WALL:
+			_draw_wall_sprite(ci, cell, pos)
 		Tile.BED:
-			_draw_standing(cell, "int_beds", Rect2(house_stage * 16, 0, 16, 32))
+			if pos == BED_INTERIOR:
+				_draw_standing(ci, cell, "int_beds", Rect2(house_stage * 32, 0, 32, 47), BED_RECT.size.x)
 		Tile.DESK:
-			_draw_standing(cell, "int_furniture", INT_FURNITURE["desk"])
+			if pos == DESK_IX:
+				_draw_standing(ci, cell, "int_furniture", INT_FURNITURE["desk"], 2)
 		Tile.STATION:
-			_draw_standing(cell, "int_furniture", INT_FURNITURE["wash_fine" if house_stage >= 3 else "wash"])
+			_draw_standing(ci, cell, "int_furniture", INT_FURNITURE["wash_fine" if house_stage >= 3 else "wash"])
 		Tile.COOLER:
-			_draw_standing(cell, "int_furniture", INT_FURNITURE["cooler"])
+			_draw_standing(ci, cell, "int_furniture", INT_FURNITURE["cooler"])
 		Tile.FIREPLACE:
-			# Cells: cracked and cold, cold, lit, mantel cold, mantel lit.
-			var lit := house_stage >= 2 and firewood._fire_lit()
-			var frame: int = [0, 1, 1, 3][house_stage]
-			if lit:
-				frame = 4 if house_stage >= 3 else 2
-			_draw_standing(cell, "int_hearth", Rect2(frame * 16, 0, 16, 32))
-			if lit:
-				draw_circle(cell.get_center(), PX * 1.2, Color(1.0, 0.6, 0.25, 0.08))
-		Tile.EXIT:
-			draw_texture_rect(FarmSprites.tex("int_mat"), cell, false)
+			if pos == FIREPLACE_IX:
+				# Frames: cracked and cold, cold, lit, mantel cold, mantel lit.
+				var lit := house_stage >= 2 and firewood._fire_lit()
+				var frame: int = [0, 1, 1, 3][house_stage]
+				if lit:
+					frame = 4 if house_stage >= 3 else 2
+				_draw_standing(ci, cell, "int_hearth", Rect2(frame * 32, 0, 32, 57), 2)
+				if lit:
+					ci.draw_circle(Vector2(cell.end.x, cell.get_center().y), PX * 2.0, Color(1.0, 0.6, 0.25, 0.08))
+		Tile.TABLE:
+			# Chairs facing you on the row above the table, the table on its two rows, and chairs seen from
+			# behind on the row below, so their backs hide the table's front edge.
+			var r := pos - DINING_RECT.position
+			var end_seat := r.x == 0 or r.x == DINING_RECT.size.x - 1
+			if r.y == 0 and end_seat:
+				_draw_standing(ci, cell, "int_chairs", Rect2(0, 0, 16, 24))
+			elif r.y == 2 and r.x == 0:
+				_draw_standing(ci, cell, "int_table", Rect2(0, 0, 48, 32), DINING_RECT.size.x)
+			elif r.y == 3 and end_seat:
+				_draw_standing(ci, cell, "int_chairs", Rect2(16, 0, 16, 24))
 
 
-# A sprite standing on its tile: centred across it, bottom edge on the tile's bottom, three screen
-# pixels to each of its pixels, rising over the tiles above.
-func _draw_standing(cell: Rect2, art: String, src: Rect2) -> void:
+# A sprite standing on its footprint: centred across its width in tiles from this cell, bottom edge on
+# the cell's bottom, three screen pixels to each of its pixels, rising over the tiles above.
+func _draw_standing(ci: CanvasItem, cell: Rect2, art: String, src: Rect2, tiles := 1) -> void:
 	var size := src.size * SCALE
-	var at := Vector2(cell.get_center().x - size.x * 0.5, cell.end.y - size.y)
-	draw_texture_rect_region(FarmSprites.tex(art), Rect2(at.snapped(Vector2(SCALE, SCALE)), size), src)
+	var at := Vector2(cell.position.x + (PX * tiles - size.x) * 0.5, cell.end.y - size.y)
+	ci.draw_texture_rect_region(FarmSprites.tex(art), Rect2(at.snapped(Vector2(SCALE, SCALE)), size), src)
 
 
-func _draw_wall_sprite(cell: Rect2, pos: Vector2i) -> void:
-	var below := pos + Vector2i(0, 1)
-	var faces: bool = below.y < INT_H and interior[below.y][below.x] != Tile.WALL
+# Which third of the wall's face this wall tile shows (0 at the top, 2 just above the floor), or -1 when
+# no room lies within three tiles south of it and it shows the wall's dark top instead.
+func _wall_face_row(pos: Vector2i) -> int:
+	for d in range(1, INT_FACE_ROWS + 1):
+		var b := pos + Vector2i(0, d)
+		if b.y >= INT_H:
+			return -1
+		if interior[b.y][b.x] != Tile.WALL:
+			return INT_FACE_ROWS - d
+	return -1
+
+
+func _draw_wall_sprite(ci: CanvasItem, cell: Rect2, pos: Vector2i) -> void:
+	var face := _wall_face_row(pos)
 	var shade: float = INT_SHADE[house_stage]
-	if not faces:
+	if face < 0:
 		var top: Color = Color("2a211a").lerp(Color("4a3a2c"), house_stage / 3.0)
-		draw_rect(cell, top)
+		ci.draw_rect(cell, top)
 		# A lit rim where the wall top meets a room beside it or above it.
 		for side in [Vector2i(-1, 0), Vector2i(1, 0), Vector2i(0, -1)]:
 			var n: Vector2i = pos + side
@@ -6224,19 +6301,21 @@ func _draw_wall_sprite(cell: Rect2, pos: Vector2i) -> void:
 			var rim := Rect2(cell.position, Vector2(SCALE, cell.size.y)) if side.x < 0 else (
 				Rect2(Vector2(cell.end.x - SCALE, cell.position.y), Vector2(SCALE, cell.size.y)) if side.x > 0 else
 				Rect2(cell.position, Vector2(cell.size.x, SCALE)))
-			draw_rect(rim, top.lightened(0.25))
+			ci.draw_rect(rim, top.lightened(0.25))
 		return
-	# The wall art is two 31-pixel textures, old on the left and clean on the right; each tile shows the
-	# next 16 pixels of it, wrapping, so a row of wall reads as one long wall.
-	var base := 33 if house_stage >= 2 else 0
-	var off := posmod(pos.x * 16, 31)
-	var first := mini(16, 31 - off)
+	# Each tile shows the next 16 pixels of the wall art, wrapping, so a row of wall reads as one long wall,
+	# and its third of the art's height.
+	var base: int = INT_WALL_ART["clean" if house_stage >= 2 else "old"]
+	var w: int = INT_WALL_ART["width"]
+	var off := posmod(pos.x * 16, w)
+	var first := mini(16, w - off)
+	var sy := face * 16
 	var tint := Color(shade, shade, shade)
 	var tex := FarmSprites.tex("int_wall")
-	draw_texture_rect_region(tex, Rect2(cell.position, Vector2(first * SCALE, cell.size.y)), Rect2(base + off, 0, first, 16), tint)
+	ci.draw_texture_rect_region(tex, Rect2(cell.position, Vector2(first * SCALE, cell.size.y)), Rect2(base + off, sy, first, 16), tint)
 	if first < 16:
-		draw_texture_rect_region(tex, Rect2(cell.position + Vector2(first * SCALE, 0), Vector2((16 - first) * SCALE, cell.size.y)),
-			Rect2(base, 0, 16 - first, 16), tint)
+		ci.draw_texture_rect_region(tex, Rect2(cell.position + Vector2(first * SCALE, 0), Vector2((16 - first) * SCALE, cell.size.y)),
+			Rect2(base, sy, 16 - first, 16), tint)
 
 
 # Plaster walls with a faint course line and a baseboard along the bottom.

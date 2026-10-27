@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://nhinbtl78ib3"
-path="res://.godot/imported/int_dining.png-7db356d540fa2fda96b3ef7af7827caa.ctex"
+uid="uid://pwrtfn2hhfhj"
+path="res://.godot/imported/int_table.png-0a2982da817d7558f0913562e979c1d6.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/farm/int_dining.png"
-dest_files=["res://.godot/imported/int_dining.png-7db356d540fa2fda96b3ef7af7827caa.ctex"]
+source_file="res://art/farm/int_table.png"
+dest_files=["res://.godot/imported/int_table.png-0a2982da817d7558f0913562e979c1d6.ctex"]
 
 [params]
 
