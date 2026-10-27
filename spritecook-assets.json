@@ -298,8 +298,8 @@
       "label": "Ground clutter strip 64x16: pebbles, leaves, mushrooms, grass tuft"
     },
     "art/farm/cave_mouth.png": {
-      "asset_id": "ffe18683-ee53-40ce-af22-5c77d3246ade",
-      "label": "Cave entrance 48x32, timber-framed opening in a mossy rock face"
+      "asset_id": "7138f901-3683-42da-b169-3f0358f6b5f6",
+      "label": "Cave entrance 64x48, timber-framed doorway in a mossy rock face, sized to the farmer"
     },
     "art/farm/cave_floor.png": {
       "asset_id": "976298a4-21e2-4cba-909e-bceec4eaa1ed",
@@ -314,8 +314,8 @@
       "label": "Ore strip 32x16: copper, iron"
     },
     "art/farm/cave_exit.png": {
-      "asset_id": "d64fcb12-9b2a-4d3c-8bd5-f4043f99041f",
-      "label": "Cave exit steps into daylight 16x16"
+      "asset_id": "df8808c6-ef72-44fc-90ed-a4d7361fa885",
+      "label": "Cave exit 32x32, stone steps up into daylight"
     },
     "art/farm/hen_walk.png": {
       "asset_id": "0a829419-8b03-4d83-874b-0376d20a9641",

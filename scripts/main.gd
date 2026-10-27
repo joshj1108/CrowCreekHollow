@@ -2541,9 +2541,10 @@ func _draw_trees(ci: CanvasItem, front: bool) -> void:
 					var nudge := float(FarmArt.hash_int(x, y, 13) % 7 - 3) * SCALE
 					ci.draw_texture_rect(FarmSprites.tex(_tree_art(t)), Rect2(cell.get_center().x - PX + nudge, cell.end.y - PX * 3.0, PX * 2.0, PX * 3.0), false)
 			elif kind == Tile.CAVE_MOUTH:
-				# 48×32: an entrance in the rock face, three tiles wide and two tall, its opening on this tile.
+				# 64×48: an entrance in the rock face, four tiles wide and three tall, its doorway centred on this
+				# tile. The doorway's sill is 4 px above the sprite's bottom, so it sits that far below the tile.
 				if trees_here:
-					ci.draw_texture_rect(FarmSprites.tex("cave_mouth"), Rect2(cell.position.x - PX, cell.end.y - PX * 2.0, PX * 3.0, PX * 2.0), false)
+					ci.draw_texture_rect(FarmSprites.tex("cave_mouth"), Rect2(cell.position.x - PX * 1.5, cell.end.y + 4.0 * SCALE - PX * 3.0, PX * 4.0, PX * 3.0), false)
 			elif (kind == Tile.COOP or kind == Tile.BARN) and trees_here:
 				# The coop (48×64) and barn (80×80) are drawn once, from their footprint's bottom-left tile, as wide
 				# as the footprint and standing on its bottom edge; the roof rises above it. Drawing from the bottom
@@ -4454,7 +4455,9 @@ func _generate_cave() -> void:
 			else:
 				dir = -dir
 	cave[CAVE_START.y][CAVE_START.x] = Tile.FLOOR
+	# The exit is two tiles tall, the mat and the tile north of it, under one 32×32 sprite.
 	cave[CAVE_EXIT_TILE.y][CAVE_EXIT_TILE.x] = Tile.CAVE_EXIT
+	cave[CAVE_EXIT_TILE.y - 1][CAVE_EXIT_TILE.x] = Tile.CAVE_EXIT
 	for y in range(1, CAVE_H - 1):
 		for x in range(1, CAVE_W - 1):
 			if cave[y][x] != Tile.WALL or not _touches_cave_floor(Vector2i(x, y)):
@@ -4589,8 +4592,10 @@ func _draw_cave_sprites(x0: int, y0: int, x1: int, y1: int) -> void:
 			if kind == Tile.ORE_COPPER or kind == Tile.ORE_IRON:
 				var col := 0 if kind == Tile.ORE_COPPER else 1
 				draw_texture_rect_region(ore, _tile_rect(Vector2i(x, y)), Rect2(col * GROUND_FRAME, 0, GROUND_FRAME, GROUND_FRAME))
-			elif kind == Tile.CAVE_EXIT:
-				draw_texture_rect(FarmSprites.tex("cave_exit"), _tile_rect(Vector2i(x, y)), false)
+			elif kind == Tile.CAVE_EXIT and Vector2i(x, y) == CAVE_EXIT_TILE:
+				# 32×32 steps up to daylight over both exit tiles, reaching a tile west into the outer wall.
+				var cell := _tile_rect(Vector2i(x, y))
+				draw_texture_rect(FarmSprites.tex("cave_exit"), Rect2(cell.position.x - PX, cell.end.y - PX * 2.0, PX * 2.0, PX * 2.0), false)
 
 
 func _cave_is(x: int, y: int, kinds: Array) -> bool:
