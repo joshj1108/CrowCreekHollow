@@ -176,7 +176,6 @@ func _roll_harvest(base: float, miss: String, finish: Callable) -> void:
 		_stop_harvest("")
 		finish.call()
 	else:
-		m.play_sfx("strike", 0.05)
 		m._show_message(miss)
 
 

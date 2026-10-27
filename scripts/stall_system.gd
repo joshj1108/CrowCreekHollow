@@ -96,6 +96,7 @@ func _make_food(food_id: String) -> void:
 	m.inventory[food_id] += 1
 	m.stats["cooked"] += 1
 	m.progression._grant_xp(skill, int(r["xp"]))
+	m.play_sfx("cook")
 	m._show_message("You make %s. +%d %s XP" % [str(f["name"]).to_lower(), int(r["xp"]), skill])
 
 
@@ -145,6 +146,7 @@ func _sell_food(food_id: String) -> void:
 	m.inventory[key] = 0
 	m.money += count * price
 	m.stats["sold"] += count
+	m.play_sfx("coin")
 	m._show_message("Sold %d for %d coins." % [count, count * price])
 
 
@@ -209,6 +211,7 @@ func _sell(kind: String) -> void:
 	m.inventory[kind] = 0
 	m.money += count * price
 	m.stats["sold"] += count
+	m.play_sfx("coin")
 	m._show_message("Sold %d for %d coins." % [count, count * price])
 
 
@@ -221,6 +224,7 @@ func _buy_material(key: String) -> void:
 		return
 	m.money -= price
 	m.materials[key] += m.GENERAL_BUY_QTY
+	m.play_sfx("coin")
 	m._show_message("You buy %d %s for %d coins." % [m.GENERAL_BUY_QTY, key, price])
 
 
@@ -234,6 +238,7 @@ func _sell_material(key: String) -> void:
 	var price := maxi(1, int(m.GENERAL_BUY[key]) / 2)
 	m.materials[key] = 0
 	m.money += count * price
+	m.play_sfx("coin")
 	m._show_message("Sold %d %s for %d coins." % [count, key, count * price])
 
 
@@ -243,10 +248,12 @@ func _bank_move(action_id: String) -> void:
 	if key == "coins":
 		if deposit:
 			m.bank_coins += m.money
+			m.play_sfx("coin")
 			m._show_message("You bank %d coins." % m.money)
 			m.money = 0
 		else:
 			m.money += m.bank_coins
+			m.play_sfx("coin")
 			m._show_message("You take %d coins from the bank." % m.bank_coins)
 			m.bank_coins = 0
 		return

@@ -19,6 +19,7 @@ func _fire(weapon: String) -> void:
 	m.materials[ammo] -= 1
 	m.swing_cool = float(item["cool"])
 	m.player.play_act("fire", 0.35)
+	m.play_sfx("shoot", 0.06)
 	var dir: Vector2 = m.player.facing.normalized()
 	m.shots.append({"pos": m.player.position, "vel": dir * m.SHOT_SPEED, "life": m.SHOT_LIFE, "dmg": int(item["dmg"])})
 	m.queue_redraw()
@@ -49,6 +50,7 @@ func _update_shots(delta: float) -> void:
 func _shot_hits(foe: Dictionary, amount: int) -> void:
 	foe["hp"] = int(foe["hp"]) - amount
 	foe["flash"] = 0.2
+	m.play_sfx("hit", 0.08)
 	m.progression._grant_xp("Combat", m.XP_HIT)
 	if int(foe["hp"]) <= 0:
 		_kill_foe(foe)
@@ -98,11 +100,17 @@ func _update_foes(delta: float) -> void:
 		var to_player: Vector2 = m.player.position - pos
 		var dist := to_player.length()
 		if dist < float(st["aggro"]) * m.PX:
+			# A foe calls out once when it notices you, and again if you lose it and it finds you again.
+			if not foe.get("noticed", false):
+				foe["noticed"] = true
+				m.play_sfx(str(m.FOE_SOUNDS.get(foe["kind"], "growl")), 0.12)
 			_move_foe(foe, to_player.normalized() * float(st["chase"]) * delta)
 			if dist < m.PX * 0.6 and float(foe["cool"]) <= 0.0:
 				foe["cool"] = float(st["cool"])
 				_foe_attack(foe)
 		else:
+			if dist > float(st["aggro"]) * m.PX * 1.6:
+				foe["noticed"] = false
 			foe["wander_t"] = float(foe["wander_t"]) - delta
 			if float(foe["wander_t"]) <= 0.0:
 				foe["wander_t"] = randf_range(1.0, 3.0)
@@ -144,12 +152,13 @@ func _foe_attack(foe: Dictionary) -> void:
 	# A held block turns aside a blow from the front.
 	if m.blocking and (foe["pos"] - m.player.position).normalized().dot(m.player.facing) > 0.3:
 		m.invuln = m.INVULN_TIME * 0.5
-		m.play_sfx("tick", 0.05)
+		m.play_sfx("block", 0.06)
 		return
 	var st: Dictionary = m.FOES[foe["kind"]]
 	var dmg := maxi(1, int(st["dmg"]) - m._defense())
 	m.hp -= dmg
 	m.invuln = m.INVULN_TIME
+	m.play_sfx("hurt", 0.06)
 	# Knock the player back a little, if there's room.
 	var away: Vector2 = (m.player.position - foe["pos"]).normalized()
 	var np: Vector2 = m.player.position + away * m.PX * 0.5
@@ -164,6 +173,7 @@ func _foe_attack(foe: Dictionary) -> void:
 func _kill_foe(foe: Dictionary) -> void:
 	var st: Dictionary = m.FOES[foe["kind"]]
 	m.foes.erase(foe)
+	m.play_sfx("foe_die", 0.1)
 	m.stats["defeated"] += 1
 	if foe["kind"] == "stalker":
 		m.stats["stalkers"] += 1

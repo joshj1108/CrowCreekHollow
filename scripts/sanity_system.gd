@@ -59,6 +59,7 @@ func _tidy_house() -> void:
 		m._show_message("The house is already tidy for today.")
 		return
 	m.tidied_day = m.day
+	m.play_sfx("sweep", 0.04)
 	m.stats["tidied"] += 1
 	m.wear = maxi(0, m.wear - m.WEAR_TIDY)
 	m.progression._grant_xp("Cleaning", m.XP_TIDY)
@@ -80,6 +81,7 @@ func _cleanse_house() -> void:
 		return
 	m.farm._spend_crops(m.CLEANSE_CROPS)
 	m.cleanse_day = m.day
+	m.play_sfx("cleanse")
 	m.sanity_penalty = maxi(0, m.sanity_penalty - m.CLEANSE_RELIEF)
 	m.sanity = minf(m.sanity, _sanity_max())
 	m.stats["cleansed"] += 1
@@ -129,5 +131,6 @@ func _trigger_night_event() -> void:
 			m.tonight_shadow = Vector2i(-1, -1)
 	var hit: float = float(ev["sanity"]) * (2.0 if _event_active("dread") else 1.0) * (0.5 if _event_active("ward") else 1.0)
 	_change_sanity(hit)
+	m.ambience.night_event(str(ev.get("sound", "")))
 	m._show_message(ev["message"])
 	m.queue_redraw()

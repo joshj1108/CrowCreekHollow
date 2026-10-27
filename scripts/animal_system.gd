@@ -21,6 +21,7 @@ func _feed_goats() -> void:
 		return
 	m.farm._spend_crops(m.goats * m.GOAT_FEED_CROPS)
 	m.goats_fed_day = m.day
+	m.play_sfx("feed", 0.06)
 	m._show_message("You feed the goats.")
 
 
@@ -37,6 +38,7 @@ func _feed_hens() -> void:
 		return
 	m.farm._spend_crops(m.hens * m.HEN_FEED_CROPS)
 	m.hens_fed_day = m.day
+	m.play_sfx("feed", 0.06)
 	m._show_message("You feed the hens.")
 
 
@@ -85,6 +87,7 @@ func _sell_hen() -> void:
 	m.money += m.HEN_SELL
 	m.stats["sold"] += 1
 	_sync_ages()
+	m.play_sfx("coin")
 	m._show_message("You sell a grown hen for %d coins, %d more than you paid." % [m.HEN_SELL, m.HEN_SELL - m.HEN_PRICE])
 
 
@@ -99,6 +102,7 @@ func _sell_goat() -> void:
 	m.money += m.GOAT_SELL
 	m.stats["sold"] += 1
 	_sync_ages()
+	m.play_sfx("coin")
 	m._show_message("You sell a grown goat for %d coins, %d more than you paid." % [m.GOAT_SELL, m.GOAT_SELL - m.GOAT_PRICE])
 
 

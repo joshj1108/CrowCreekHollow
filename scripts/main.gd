@@ -685,6 +685,7 @@ var sfx_streams: Dictionary = {}    # sound name -> AudioStreamOggVorbis
 var sfx_players: Array = []         # a small pool, so overlapping sounds can play together
 var sfx_next := 0
 var bleat_timer := 20.0             # seconds until a goat next bleats
+var cluck_timer := 10.0             # seconds until a hen next clucks
 var thunder_day := -1               # the day thunder last rolled, so it rolls once a morning
 var weather: CanvasLayer  # the dreary weather overlay
 var tips_seen: Dictionary = {}     # tip id -> true, once it has been shown
@@ -700,10 +701,10 @@ var tip_hint_label: Label
 
 # Night events: picked by day so the nights vary. "shadow" says where it appears.
 const NIGHT_EVENTS := [
-	{"message": "Something stands at the edge of the field.", "shadow": "field", "sanity": -5},
-	{"message": "Three slow knocks sound against the house wall.", "shadow": "house", "sanity": -10},
-	{"message": "A figure watches from the dark beside the house.", "shadow": "house", "sanity": -15},
-	{"message": "The field is quiet tonight. Too quiet.", "shadow": "none", "sanity": -3},
+	{"message": "Something stands at the edge of the field.", "shadow": "field", "sanity": -5, "sound": "sting"},
+	{"message": "Three slow knocks sound against the house wall.", "shadow": "house", "sanity": -10, "sound": "knock"},
+	{"message": "A figure watches from the dark beside the house.", "shadow": "house", "sanity": -15, "sound": "sting"},
+	{"message": "The field is quiet tonight. Too quiet.", "shadow": "none", "sanity": -3, "sound": "hush"},
 ]
 
 enum Tile { TREE, GRASS, SOIL, PATH, WATER, HOUSE, DOOR, FLOOR, WALL, EXIT, BED, STATION, DESK, FALLOW, STALL, CELLAR, COOLER, GATE, SMOKEHOUSE, FURNACE, PORTAL, CAMP, CAVE_MOUTH, CAVE_EXIT, ORE_COPPER, ORE_IRON, COOP, BARN, TABLE, FIREPLACE, WELL, PORCH, WOODSTORE, CHOPLOG, FENCE, ROCK, ROOF, SCARECROW }
@@ -971,6 +972,7 @@ var saver: SaveSystem
 var progression: ProgressionSystem
 var stall: StallSystem
 var sanity_sys: SanitySystem
+var ambience: AmbienceSystem
 var firewood: FirewoodSystem
 var farm: FarmSystem
 var animals: AnimalSystem
@@ -1009,6 +1011,8 @@ func _ready() -> void:
 	_load_settings()
 	_start_music()
 	_load_sfx()
+	ambience = AmbienceSystem.new(self)
+	ambience.setup()
 	_build_map()
 	_generate_world()
 	_find_pond_edges()
@@ -1064,8 +1068,16 @@ func _toggle_music() -> void:
 
 
 # Sound effects are short clips in audio/sfx. A small pool plays them, so several can overlap.
-const SFX_NAMES := ["step", "plant", "harvest", "water", "eat", "drink", "repair", "coin", "panel", "tick",
-	"chime", "bleat", "buzz", "thunder", "door", "strike", "gather"]
+const SFX_NAMES := ["chop", "pick", "hoe", "tree_fall", "rock_break", "step", "plant", "harvest", "water", "eat", "drink", "repair", "coin", "panel", "tick",
+	"chime", "bleat", "buzz", "thunder", "door", "strike", "gather",
+	"crow", "crow_far", "owl", "howl", "snap_far", "steps_behind", "whisper", "heartbeat", "sting", "knock", "hen",
+	"creak", "creak_high", "settle", "thunder_in",
+	"drip", "drip_low", "cave_rumble", "skitter", "cave_moan", "pebbles", "cave_in",
+	"swing", "hit", "hurt", "block", "shoot", "foe_die", "growl", "screech", "hiss",
+	"cast", "splash", "reel",
+	"fire_feed", "split", "smelt", "craft", "cloth", "cook", "feed", "sweep", "cleanse", "portal", "sleep", "collapse"]
+# The sound each kind of foe makes when it notices you.
+const FOE_SOUNDS := {"hollow": "growl", "stalker": "growl", "bat": "screech", "lizard": "hiss", "snake": "hiss"}
 
 
 func _load_sfx() -> void:
@@ -1073,7 +1085,7 @@ func _load_sfx() -> void:
 		var path := "res://audio/sfx/%s.ogg" % name
 		if ResourceLoader.exists(path):
 			sfx_streams[name] = load(path)
-	for i in 8:
+	for i in 12:
 		var p := AudioStreamPlayer.new()
 		add_child(p)
 		sfx_players.append(p)
@@ -1095,6 +1107,18 @@ func play_sfx(name: String, jitter: float = 0.0) -> void:
 	p.stream = sfx_streams[name]
 	p.volume_db = float(SFX_VOLUME.get(name, SFX_DEFAULT_VOLUME))
 	p.pitch_scale = float(SFX_PITCH.get(name, 1.0)) + randf_range(-jitter, jitter)
+	p.play()
+
+
+# Plays a sound at a set loudness, for the ambience and the night's events.
+func play_sfx_at(name: String, db: float, jitter: float = 0.0) -> void:
+	if not sfx_on or not sfx_streams.has(name) or sfx_players.is_empty():
+		return
+	var p: AudioStreamPlayer = sfx_players[sfx_next]
+	sfx_next = (sfx_next + 1) % sfx_players.size()
+	p.stream = sfx_streams[name]
+	p.volume_db = db
+	p.pitch_scale = 1.0 + randf_range(-jitter, jitter)
 	p.play()
 
 
@@ -1157,6 +1181,8 @@ func _process(delta: float) -> void:
 	perf_was_down = f3_down
 	if perf_shown:
 		_update_perf()
+	if ambience != null:
+		ambience.update(delta)
 	if not world_started:
 		return
 	# F4 maxes out the farmer for testing, in debug builds only (running from the editor or the command line).
@@ -4646,6 +4672,7 @@ func _touches_cave_floor(t: Vector2i) -> bool:
 
 
 func _enter_cave() -> void:
+	play_sfx("cave_in")
 	in_cave = true
 	inside = false
 	fishing._stop_fishing("")
@@ -4665,6 +4692,7 @@ func _enter_cave() -> void:
 
 
 func _leave_cave() -> void:
+	play_sfx("step", 0.03)
 	in_cave = false
 	foes = []
 	swing_time = 0.0
@@ -5232,6 +5260,7 @@ func _go_home(reason: String) -> void:
 
 
 func _enter_zone(z: int, arrive: Vector2i, reason: String) -> void:
+	play_sfx("portal")
 	zone = z
 	in_cave = false
 	fishing._stop_fishing("")
@@ -5276,6 +5305,7 @@ func _update_region() -> void:
 # Walking the road is daylight only. At dusk the gate pushes you back.
 func _refuse_gate(tile: Vector2i) -> void:
 	player.position += Vector2(PX if tile.x == 0 else -PX, 0)
+	play_sfx("buzz")
 	_show_message("The road is dark. Walk it in daylight.")
 
 
@@ -5328,6 +5358,7 @@ func _talk(npc: Dictionary) -> void:
 # Each tick, you swing and the hollow answers. Moving away breaks the fight.
 # Losing a fight sends you home, shaken. You're back at full health by morning.
 func _fallen() -> void:
+	play_sfx("sting")
 	sanity_sys._change_sanity(-10.0)
 	hp = max_hp()
 	_go_home("You collapse in the wood. You wake at the homestead, shaken. Sanity -10.")
@@ -5395,6 +5426,7 @@ func _swing() -> void:
 	swing_cool = SWING_COOLDOWN
 	swing_time = SWING_TIME
 	player.play_act("swing", SWING_TIME)
+	play_sfx("swing", 0.08)
 	swing_dir = player.facing
 	var dmg := combat_sys._weapon_damage()
 	var combat := progression._level("Combat")
@@ -5414,7 +5446,9 @@ func _swing() -> void:
 			combat_sys._kill_foe(foe)
 		else:
 			_show_message("You hit the %s for %d." % [str(foe["kind"]), amount])
-	if not hit_any:
+	if hit_any:
+		play_sfx("hit", 0.08)
+	else:
 		_show_message("You swing at empty air.")
 	queue_redraw()
 
@@ -5807,7 +5841,7 @@ func _apply_weather() -> void:
 	if weather_kind == "downpour" and thunder_day != day:
 		thunder_day = day
 		if randf() < 0.6:
-			play_sfx("thunder")
+			play_sfx("thunder_in" if inside else "thunder")
 
 
 func _light_tint() -> Color:
@@ -5933,6 +5967,7 @@ func _collapse() -> void:
 func _sleep_scene() -> void:
 	transitioning = true
 	player.paused = true
+	play_sfx("sleep")
 	card_label.add_theme_color_override("font_color", Color("e8dcc0"))
 	await _fade_to(Color(0.0, 0.0, 0.0, 1.0), 2.8, Tween.TRANS_SINE)
 	await get_tree().create_timer(0.6).timeout
@@ -5949,6 +5984,7 @@ func _collapse_scene() -> void:
 	transitioning = true
 	player.paused = true
 	card_label.add_theme_color_override("font_color", Color("c9463d"))
+	play_sfx("collapse")
 	_shake_camera(1.1, 9.0)
 	await _fade_to(Color(0.22, 0.0, 0.0, 1.0), 0.45, Tween.TRANS_QUAD)
 	await get_tree().create_timer(0.9).timeout
@@ -6008,9 +6044,14 @@ func _build_fade() -> void:
 	player.struck.connect(_on_player_struck)
 
 
-# A tool strike gives the camera a small jolt, so the impact reads.
+# A tool strike gives the camera a small jolt and its sound, so the impact reads. Planting has its own sound.
+const STRIKE_SOUNDS := {"chop": "chop", "mine": "pick", "hoe": "hoe"}
+
+
 func _on_player_struck(kind: String) -> void:
 	_shake_camera(0.12, 1.6 if kind == "mine" else 1.2)
+	if STRIKE_SOUNDS.has(kind):
+		play_sfx(STRIKE_SOUNDS[kind], 0.06)
 
 
 # --- Lanterns ---------------------------------------------------------------
@@ -6693,6 +6734,10 @@ func _update_hens(delta: float) -> void:
 	hen_layer.visible = on_farm and coop_built and coop_tile.x >= 0 and hens > 0
 	if not hen_layer.visible:
 		return
+	cluck_timer -= delta
+	if cluck_timer <= 0.0:
+		play_sfx("hen", 0.12)
+		cluck_timer = randf_range(14.0, 35.0)
 	while hen_pos.size() < hens:
 		var start := Vector2(randf_range(-1.2, 1.2), randf_range(-0.2, 0.6))
 		hen_pos.append(start)

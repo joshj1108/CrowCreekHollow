@@ -220,6 +220,7 @@ func _make_bandage() -> void:
 	m.materials["resin"] -= int(m.BANDAGE["resin"])
 	m.inventory["bandage"] += 1
 	m.progression._grant_xp("Bushcrafting", int(m.BANDAGE["xp"]))
+	m.play_sfx("cloth")
 	m._show_message("You roll a bandage. +%d Bushcrafting XP" % int(m.BANDAGE["xp"]))
 
 
@@ -258,6 +259,7 @@ func _craft_tool(kind: String) -> void:
 		m.materials[mat] -= int(tier["cost"][mat])
 	m.tool_tier[kind] += 1
 	m.progression._grant_xp(str(tier["skill"]), 10)
+	m.play_sfx("craft")
 	m._show_message("You make a %s. +10 %s XP" % [tier["name"], tier["skill"]])
 
 
@@ -270,6 +272,7 @@ func _craft_ammo(kind: String) -> void:
 		m.materials[mat] -= int(ammo["cost"][mat])
 	m.materials[kind] += int(ammo["yield"])
 	m.progression._grant_xp(str(ammo["skill"]), 6)
+	m.play_sfx("craft")
 	m._show_message("You make %d %s. +6 %s XP" % [int(ammo["yield"]), kind, ammo["skill"]])
 
 
@@ -296,4 +299,5 @@ func _craft_gear(id: String) -> void:
 		m.materials[mat] -= int(cost[mat])
 	m.equipment[item["slot"]] = id
 	m.progression._grant_xp(str(item.get("skill", "Bushcrafting")), 10)
+	m.play_sfx("craft")
 	m._show_message("You fashion a %s and equip it. +10 %s XP" % [item["name"], item.get("skill", "Bushcrafting")])

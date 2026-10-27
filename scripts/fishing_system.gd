@@ -51,12 +51,14 @@ func _start_fishing(tile: Vector2i) -> void:
 		return
 	m.fishing_tile = tile
 	m.fish_timer = m.FISH_TICK_SECONDS
+	m.play_sfx("cast", 0.05)
 	m._show_message("You cast your line. Stay put and keep fishing.")
 
 
 func _stop_fishing(reason: String) -> void:
 	m.fishing_tile = m.NO_SPOT
 	if reason != "":
+		m.play_sfx("reel", 0.05)
 		m._show_message(reason)
 
 
@@ -85,6 +87,7 @@ func _fish_roll() -> void:
 	if randf() < chance:
 		m.stats["caught"] += 1
 		m.inventory["fish"] += 1
+		m.play_sfx("splash", 0.08)
 		m.progression._grant_xp("Fishing", m.XP_FISH)
 		m._show_message("You hook a fish! +%d Fishing XP" % m.XP_FISH)
 	else:

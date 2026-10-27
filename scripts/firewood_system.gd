@@ -10,7 +10,6 @@ func _init(main: MainGame) -> void:
 
 func _chop(tile: Vector2i) -> void:
 	if int(m.tool_tier["hatchet"]) < 1:
-		m.play_sfx("strike", 0.08)
 		m._show_message("You need a hatchet. Craft a crude one from the Craft panel.")
 		return
 	# Chopping keeps rolling each tick until the tree falls. Moving away stops it.
@@ -20,6 +19,7 @@ func _chop(tile: Vector2i) -> void:
 
 func _finish_chop(tile: Vector2i) -> void:
 	m.grove_felled[tile] = true
+	m.play_sfx("tree_fall", 0.04)
 	m._apply_grove()
 	m.materials["wood"] += 3
 	var found := "3 wood"
@@ -45,6 +45,7 @@ func _feed_fire() -> void:
 		m._show_message("The fire is already roaring.")
 		return
 	m.inventory["firewood"] -= 1
+	m.play_sfx("fire_feed", 0.05)
 	m.fire_hours = minf(m.FIRE_MAX_HOURS, m.fire_hours + m.FIREWOOD_HOURS)
 	m._show_message("You feed the fire. It will burn for about %d more hours." % ceili(m.fire_hours))
 
@@ -60,6 +61,7 @@ func _chop_firewood() -> void:
 		m._show_message("The firewood store is full. Take some firewood out first.")
 		return
 	m.materials["wood"] -= 1
+	m.play_sfx("split", 0.06)
 	var made := mini(m.FIREWOOD_PER_WOOD, m.WOODSTORE_CAP - m.firewood_store)
 	m.firewood_store += made
 	m.progression._grant_xp("Forestry", m.XP_CHOP_LOG)

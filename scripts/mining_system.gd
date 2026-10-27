@@ -30,7 +30,7 @@ func _mine(tile: Vector2i) -> void:
 
 
 func _finish_mine(tile: Vector2i) -> void:
-	m.play_sfx("strike", 0.08)
+	m.play_sfx("rock_break", 0.06)
 	m.rocks.erase(tile)
 	var pick := int(m.tool_tier["pick"])
 	var amount := 2 if pick >= 1 else 1
@@ -63,6 +63,7 @@ func _smelt(kind: String) -> void:
 	m.materials[kind + "_ore"] -= 1
 	m.materials["wood"] -= 1
 	m.materials[kind + "_bar"] += 1
+	m.play_sfx("smelt", 0.04)
 	m.progression._grant_xp("Smithing", m.XP_SMELT)
 	m._show_message("You smelt a %s bar. +%d Smithing XP" % [kind, m.XP_SMELT])
 
@@ -84,6 +85,7 @@ func _quarry(tile: Vector2i) -> void:
 
 func _finish_quarry(tile: Vector2i) -> void:
 	var pick := int(m.tool_tier["pick"])
+	m.play_sfx("rock_break", 0.06)
 	m.quarry.erase(tile)
 	var kind := "copper_ore" if m.progression._level("Mining") >= 3 else "stone"
 	if m.progression._level("Mining") >= 5 and pick >= 2 and randf() < 0.5:
@@ -114,6 +116,7 @@ func _mine_cave(tile: Vector2i, kind: int) -> void:
 func _finish_cave_ore(tile: Vector2i) -> void:
 	var iron := m._kind_at(tile) == m.Tile.ORE_IRON
 	var ore := "iron" if iron else "copper"
+	m.play_sfx("rock_break", 0.06)
 	m.cave[tile.y][tile.x] = m.Tile.FLOOR
 	m.cave_mined[tile] = true
 	m.materials[ore + "_ore"] += 1

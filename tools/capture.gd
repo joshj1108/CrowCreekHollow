@@ -19,6 +19,7 @@ extends SceneTree
 #   built           build the cellar, smokehouse, furnace and woodshed
 #   notip           hide the tip card, even one shown after the scene is set up
 #   wheel           open the section wheel
+#   sound           print how loud each ambience loop is playing when the shot is taken
 
 func _initialize() -> void:
 	var opt := {"frames": "90", "scale": "0.5"}
@@ -75,6 +76,8 @@ func _initialize() -> void:
 		main.player.position = main._tile_center(int(t[0]) + main.BORDER_X, int(t[1]) + main.BORDER_Y)
 	for i in int(opt["frames"]):
 		await process_frame
+	if opt.has("sound"):
+		print("ambience ", main.ambience.levels)
 	if opt.has("notip") and main.tip_panel:
 		main.tip_panel.visible = false
 		await process_frame
