@@ -1305,6 +1305,7 @@ func _draw() -> void:
 		if FARM_SPRITES:
 			_draw_dual_ground(fx0, fy0, fx1, fy1)
 			_draw_clutter(fx0, fy0, fx1, fy1)
+			_draw_workshop()
 			tree_view = Rect2i(fx0, fy0, fx1 - fx0 + 1, fy1 - fy0 + 1)
 			_draw_trees(self, false)
 			if tree_front_layer != null:
@@ -1720,12 +1721,13 @@ func _apply_storage_tiles() -> void:
 	queue_redraw()
 
 
-# Walls around the workshop footprint, with a floor inside and a door on the south side.
+# Walls around the workshop footprint, with a floor inside and a door on the south side. The back wall is two
+# rows deep, so its face is about the farmer's height.
 func _stamp_workshop() -> void:
 	var r := WORKSHOP_RECT
 	for y in range(r.position.y, r.end.y):
 		for x in range(r.position.x, r.end.x):
-			var edge := x == r.position.x or x == r.end.x - 1 or y == r.position.y or y == r.end.y - 1
+			var edge := x == r.position.x or x == r.end.x - 1 or y <= r.position.y + 1 or y == r.end.y - 1
 			map[y + BORDER_Y][x + BORDER_X] = Tile.WALL if edge else Tile.FLOOR
 	# A plain opening. DOOR is reserved for the farmhouse, so stepping here doesn't take you indoors.
 	map[WORKSHOP_DOOR.y + BORDER_Y][WORKSHOP_DOOR.x + BORDER_X] = Tile.PATH
@@ -2256,6 +2258,15 @@ func _draw_sprite_ground(t: Vector2i, kind: int, cell: Rect2) -> bool:
 			# Every tree, the great tree and the scarecrow stand on grass; _draw_trees draws them over it.
 			_draw_grass(t, cell)
 			return true
+		Tile.CELLAR:
+			# The cellar's mound is drawn over the grass by _draw_trees.
+			_draw_grass(t, cell)
+			return true
+		Tile.WALL, Tile.FLOOR, Tile.SMOKEHOUSE, Tile.FURNACE, Tile.WOODSTORE, Tile.CHOPLOG:
+			# The workshop's walls and floor are one sprite laid over the grass by _draw_workshop, and its
+			# pieces stand on that floor, drawn by _draw_trees.
+			_draw_grass(t, cell)
+			return true
 		Tile.FENCE:
 			# A split-rail section, posts at both ends, so a row of them joins into one fence.
 			_draw_grass(t, cell)
@@ -2521,6 +2532,23 @@ func _tree_art(t: Vector2i) -> String:
 # Trees and stumps, drawn after the ground so their bases sit on their tiles. A tree's crown rises two tiles
 # above its tile, so rows below the view are drawn too. Trees on or north of the player's row are drawn
 # with the ground, behind the player; the rest go on tree_front_layer, over the player.
+# The workshop's walls and floor: one 112×96 sprite covering its 7 by 6 footprint, drawn under the player. The
+# back wall's face fills the top two rows, the low side and front walls the edge tiles, the doorway the middle
+# of the bottom row.
+func _draw_workshop() -> void:
+	var r := WORKSHOP_RECT
+	var top := Vector2i(r.position.x + BORDER_X, r.position.y + BORDER_Y)
+	if map[top.y][top.x] != Tile.WALL:
+		return
+	draw_texture_rect(FarmSprites.tex("workshop"), Rect2(_tile_rect(top).position, Vector2(r.size) * PX), false)
+
+
+const OUTBUILDING_ART := {
+	Tile.CELLAR: "cellar", Tile.SMOKEHOUSE: "smokehouse", Tile.FURNACE: "furnace",
+	Tile.WOODSTORE: "woodstore", Tile.CHOPLOG: "chopping_log",
+}
+
+
 func _draw_trees(ci: CanvasItem, front: bool) -> void:
 	if player == null or tree_view.size == Vector2i.ZERO:
 		return
@@ -2561,6 +2589,13 @@ func _draw_trees(ci: CanvasItem, front: bool) -> void:
 				# 16×32: one tile wide, two tall, standing on its tile.
 				if trees_here:
 					ci.draw_texture_rect(FarmSprites.tex("scarecrow"), Rect2(cell.position.x, cell.end.y - PX * 2.0, PX, PX * 2.0), false)
+			elif OUTBUILDING_ART.has(kind):
+				# The cellar, smokehouse, furnace and woodstore are 16×32, about the farmer's height, standing on
+				# their tile with the top rising over the tile above. The chopping log is 16×16.
+				if trees_here:
+					var art: Texture2D = FarmSprites.tex(OUTBUILDING_ART[kind])
+					var h := float(art.get_height()) * SCALE
+					ci.draw_texture_rect(art, Rect2(cell.position.x, cell.end.y - h, PX, h), false)
 			elif kind == Tile.GRASS and grove_felled.has(t) and not front:
 				ci.draw_texture_rect(FarmSprites.tex("prop_stump"), cell, false)
 

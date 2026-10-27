@@ -352,6 +352,126 @@
     "art/farm/barn.png": {
       "asset_id": "3c27d6e8-d82d-43cf-8f3d-0890dcda8904",
       "label": "Barn 80x80 on a 5x3 footprint"
+    },
+    "art/style_tests/outbuildings/cellar_0.png": {
+      "asset_id": "607e24c2-b659-449b-b42a-f55fee3db736",
+      "label": "Root cellar mound 16x32 option 0"
+    },
+    "art/style_tests/outbuildings/cellar_1.png": {
+      "asset_id": "33060329-7b7e-405f-9d8f-8320b798b746",
+      "label": "Root cellar mound 16x32 option 1 (chosen)"
+    },
+    "art/style_tests/outbuildings/cellar_2.png": {
+      "asset_id": "6e894472-5254-416b-9edc-05fa4cc30dd2",
+      "label": "Root cellar mound 16x32 option 2"
+    },
+    "art/style_tests/outbuildings/cellar_3.png": {
+      "asset_id": "0fc03556-c9f0-4daa-abef-63d4a56efeea",
+      "label": "Root cellar mound 16x32 option 3"
+    },
+    "art/farm/cellar.png": {
+      "asset_id": "33060329-7b7e-405f-9d8f-8320b798b746",
+      "label": "Root cellar mound 16x32"
+    },
+    "art/style_tests/outbuildings/smoke_0.png": {
+      "asset_id": "bab328fc-b1fe-4881-b800-373f1a54e5c5",
+      "label": "Smokehouse 16x32 option 0"
+    },
+    "art/style_tests/outbuildings/smoke_1.png": {
+      "asset_id": "3ef51ea2-432e-4e5d-ae23-60cdb589441c",
+      "label": "Smokehouse 16x32 option 1 (chosen)"
+    },
+    "art/style_tests/outbuildings/smoke_2.png": {
+      "asset_id": "19b5a1a1-19eb-4fb0-a24d-6707e0f7c6e1",
+      "label": "Smokehouse 16x32 option 2"
+    },
+    "art/style_tests/outbuildings/smoke_3.png": {
+      "asset_id": "1d70d4c3-37d4-4a40-8748-39a4603f3ff1",
+      "label": "Smokehouse 16x32 option 3"
+    },
+    "art/farm/smokehouse.png": {
+      "asset_id": "3ef51ea2-432e-4e5d-ae23-60cdb589441c",
+      "label": "Smokehouse 16x32"
+    },
+    "art/style_tests/outbuildings/furnace_0.png": {
+      "asset_id": "7e9a6e0a-10fa-4982-8f8b-dea2a2f8b40f",
+      "label": "Furnace 16x32 option 0 (chosen)"
+    },
+    "art/style_tests/outbuildings/furnace_1.png": {
+      "asset_id": "f454080c-db5b-48bf-b557-06a668fc756c",
+      "label": "Furnace 16x32 option 1"
+    },
+    "art/style_tests/outbuildings/furnace_2.png": {
+      "asset_id": "aa0b0fea-f4ba-4256-ab60-0bdf6513f0ab",
+      "label": "Furnace 16x32 option 2"
+    },
+    "art/style_tests/outbuildings/furnace_3.png": {
+      "asset_id": "20eda16e-4844-457f-a262-f9eeb8c01389",
+      "label": "Furnace 16x32 option 3"
+    },
+    "art/farm/furnace.png": {
+      "asset_id": "7e9a6e0a-10fa-4982-8f8b-dea2a2f8b40f",
+      "label": "Furnace 16x32"
+    },
+    "art/style_tests/outbuildings/wood_0.png": {
+      "asset_id": "3239d7a7-edc1-413d-ae25-b03a7bca15af",
+      "label": "Firewood store 16x32 option 0"
+    },
+    "art/style_tests/outbuildings/wood_1.png": {
+      "asset_id": "6cd05068-1ac2-4df4-9c8e-28f2c52c8b15",
+      "label": "Firewood store 16x32 option 1"
+    },
+    "art/style_tests/outbuildings/wood_2.png": {
+      "asset_id": "dc2f524c-dc88-4c89-80ba-60055725af2c",
+      "label": "Firewood store 16x32 option 2 (chosen)"
+    },
+    "art/style_tests/outbuildings/wood_3.png": {
+      "asset_id": "e2e4ecbf-4e5f-4330-9973-822cd6439bb5",
+      "label": "Firewood store 16x32 option 3"
+    },
+    "art/farm/woodstore.png": {
+      "asset_id": "dc2f524c-dc88-4c89-80ba-60055725af2c",
+      "label": "Firewood store 16x32"
+    },
+    "art/style_tests/outbuildings/log_0.png": {
+      "asset_id": "d3d14791-e037-48c6-9c8a-7f852952b89e",
+      "label": "Chopping log 16x16 option 0 (chosen)"
+    },
+    "art/style_tests/outbuildings/log_1.png": {
+      "asset_id": "413ee0c9-29e7-4261-9b79-67110412a5de",
+      "label": "Chopping log 16x16 option 1"
+    },
+    "art/style_tests/outbuildings/log_2.png": {
+      "asset_id": "e64dc2b4-a126-45a7-92e9-c02c3f31dec1",
+      "label": "Chopping log 16x16 option 2"
+    },
+    "art/style_tests/outbuildings/log_3.png": {
+      "asset_id": "fadb8a8b-9e46-44bd-aaae-5cda818419e8",
+      "label": "Chopping log 16x16 option 3"
+    },
+    "art/farm/chopping_log.png": {
+      "asset_id": "d3d14791-e037-48c6-9c8a-7f852952b89e",
+      "label": "Chopping log 16x16"
+    },
+    "art/style_tests/outbuildings/workshop_0.png": {
+      "asset_id": "8e0b6afc-d4c7-402a-85ed-cec51c72b76b",
+      "label": "Workshop walls and floor 112x96 option 0 (chosen)"
+    },
+    "art/style_tests/outbuildings/workshop_1.png": {
+      "asset_id": "ae715161-2f46-4654-b340-c75d35445c5f",
+      "label": "Workshop walls and floor 112x96 option 1"
+    },
+    "art/style_tests/outbuildings/workshop_2.png": {
+      "asset_id": "88a3d7c8-67e0-4281-a139-429afd3e2bd6",
+      "label": "Workshop walls and floor 112x96 option 2"
+    },
+    "art/style_tests/outbuildings/workshop_3.png": {
+      "asset_id": "c48c0883-5d5a-40d3-b861-196bbdef95ce",
+      "label": "Workshop walls and floor 112x96 option 3"
+    },
+    "art/farm/workshop.png": {
+      "asset_id": "8e0b6afc-d4c7-402a-85ed-cec51c72b76b",
+      "label": "Workshop walls and floor 112x96 on a 7x6 footprint"
     }
   },
   "animation_runs": {

@@ -14,7 +14,7 @@ import farm_layout as fl  # noqa: E402  (reuses the emitter)
 
 ROOT = os.path.dirname(HERE)
 INNER_W, INNER_H = 64, 40
-WORKSHOP = (40, 32, 5, 4)
+WORKSHOP = (39, 31, 7, 6)  # walls included; the back wall is two rows, the floor 5 by 3
 OLD_SPOTS = {
     "brush": [(48, 20), (19, 2), (29, 30), (61, 25), (42, 2), (35, 5), (43, 23)],
     "thicket": [(11, 7)],

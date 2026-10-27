@@ -67,12 +67,12 @@ const WELL_IX := Vector2i(22, 24)
 const STALL_IX := 34
 const STALL_IY := 11
 const CELLAR_IX := Vector2i(17, 7)
-const SMOKEHOUSE_IX := Vector2i(43, 33)
-const FURNACE_IX := Vector2i(41, 33)
-const WORKSHOP_RECT := Rect2i(40, 32, 5, 4)
-const WORKSHOP_DOOR := Vector2i(42, 35)
-const WOODSTORE_IX := Vector2i(41, 34)
-const CHOPLOG_IX := Vector2i(43, 34)
+const SMOKEHOUSE_IX := Vector2i(42, 33)
+const FURNACE_IX := Vector2i(40, 33)
+const WORKSHOP_RECT := Rect2i(39, 31, 7, 6)
+const WORKSHOP_DOOR := Vector2i(42, 36)
+const WOODSTORE_IX := Vector2i(44, 33)
+const CHOPLOG_IX := Vector2i(44, 35)
 const BIG_TREE_INNER := Vector2i(50, 28)
 const LAKE_FOCUS := Vector2(53.5, 8.5)
 const GROVE_SPOTS := [Vector2i(39, 1), Vector2i(30, 2), Vector2i(14, 7), Vector2i(38, 7), Vector2i(32, 11), Vector2i(10, 15), Vector2i(49, 16), Vector2i(45, 18), Vector2i(59, 18), Vector2i(25, 21), Vector2i(51, 22), Vector2i(46, 24), Vector2i(59, 28), Vector2i(22, 29), Vector2i(42, 29), Vector2i(34, 32), Vector2i(26, 33), Vector2i(38, 37), Vector2i(61, 37), Vector2i(17, 38)]
@@ -82,6 +82,6 @@ const BRUSH_SPOTS := [Vector2i(48, 20), Vector2i(19, 2), Vector2i(29, 30), Vecto
 const THICKET_SPOTS := [Vector2i(11, 7)]
 const ROCK_SPOTS := [Vector2i(56, 28), Vector2i(31, 7), Vector2i(34, 18), Vector2i(2, 2), Vector2i(61, 17), Vector2i(26, 2), Vector2i(24, 37), Vector2i(58, 20)]
 # Farm tiles that the coop and barn must not be placed on, so they never overlap a building the player unlocks later.
-const RESERVED := [Vector2i(17, 7), Vector2i(40, 32), Vector2i(40, 33), Vector2i(40, 34), Vector2i(40, 35), Vector2i(41, 32), Vector2i(41, 33), Vector2i(41, 34), Vector2i(41, 35), Vector2i(42, 32), Vector2i(42, 33), Vector2i(42, 34), Vector2i(42, 35), Vector2i(43, 32), Vector2i(43, 33), Vector2i(43, 34), Vector2i(43, 35), Vector2i(44, 32), Vector2i(44, 33), Vector2i(44, 34), Vector2i(44, 35)]
+const RESERVED := [Vector2i(17, 7), Vector2i(39, 31), Vector2i(39, 32), Vector2i(39, 33), Vector2i(39, 34), Vector2i(39, 35), Vector2i(39, 36), Vector2i(40, 31), Vector2i(40, 32), Vector2i(40, 33), Vector2i(40, 34), Vector2i(40, 35), Vector2i(40, 36), Vector2i(41, 31), Vector2i(41, 32), Vector2i(41, 33), Vector2i(41, 34), Vector2i(41, 35), Vector2i(41, 36), Vector2i(42, 31), Vector2i(42, 32), Vector2i(42, 33), Vector2i(42, 34), Vector2i(42, 35), Vector2i(42, 36), Vector2i(43, 31), Vector2i(43, 32), Vector2i(43, 33), Vector2i(43, 34), Vector2i(43, 35), Vector2i(43, 36), Vector2i(44, 31), Vector2i(44, 32), Vector2i(44, 33), Vector2i(44, 34), Vector2i(44, 35), Vector2i(44, 36), Vector2i(45, 31), Vector2i(45, 32), Vector2i(45, 33), Vector2i(45, 34), Vector2i(45, 35), Vector2i(45, 36)]
 # Changes whenever the layout changes. Saves record it, so a save from another layout is migrated.
-const VERSION := "7f601855"
+const VERSION := "d52444ed"
