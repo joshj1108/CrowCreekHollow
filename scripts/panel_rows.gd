@@ -13,7 +13,7 @@ func _init(main: Node) -> void:
 
 # The Game section of Settings: leaving the farm for the start screen.
 func _game_rows() -> Array:
-	return [
+	var rows: Array = [
 		{"section": "Game"},
 		{
 			"name": "Music",
@@ -44,6 +44,16 @@ func _game_rows() -> Array:
 			"enabled": true,
 		},
 	]
+	# Debug builds only, so a released game never shows it.
+	if OS.is_debug_build():
+		rows.append({
+			"name": "Dev: unlock everything",
+			"value": "Every skill to level 10, coins, materials, every tool tier, the house and buildings (also F4)",
+			"button": "Unlock",
+			"action": "dev_unlock",
+			"enabled": true,
+		})
+	return rows
 
 
 # The seen tips, for the Settings menu.

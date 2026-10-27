@@ -964,6 +964,7 @@ var blocking := false                # held block: LT or right click, with a wea
 var tree_sprites: Dictionary = {}   # "variant:seed" -> Texture2D, filled in once at start
 var tree_bake_started := false
 var perf_was_down := false
+var dev_was_down := false       # F4 held last frame, so one press unlocks once
 
 
 func _ready() -> void:
@@ -1134,6 +1135,12 @@ func _process(delta: float) -> void:
 		_update_perf()
 	if not world_started:
 		return
+	# F4 maxes out the farmer for testing, in debug builds only (running from the editor or the command line).
+	# Not F9 or F10: the editor takes those to suspend and step a game running in its Game tab.
+	var dev_down := OS.is_debug_build() and Input.is_physical_key_pressed(KEY_F4)
+	if dev_down and not dev_was_down:
+		_dev_unlock_all()
+	dev_was_down = dev_down
 	if transitioning:
 		return
 	if not tree_bake_started:
@@ -3076,6 +3083,9 @@ func _on_panel_action(action_id: String) -> void:
 		return
 	if action_id == "unstick":
 		_unstick()
+		return
+	if action_id == "dev_unlock":
+		_dev_unlock_all()
 		return
 	if action_id == "repair_well":
 		_repair_well()
@@ -5956,6 +5966,45 @@ func _advance_lantern() -> void:
 	lantern_tier += 1
 	_apply_lantern_radius()
 	_show_message("You build a %s. Its light reaches %.1f tiles." % [t["name"], t["radius"]])
+
+
+# Dev only (F4, or the button in Settings): every skill to DEV_LEVEL, plenty of coins, materials and seeds, every tool, lantern and
+# bag tier, the house restored, every storage building, the pump and hose, and full needs. The coop and
+# barn still need placing, so build them from the Buildings panel.
+const DEV_LEVEL := 10
+func _dev_unlock_all() -> void:
+	for skill in skill_xp.keys():
+		skill_xp[skill] = maxi(int(skill_xp[skill]), progression._xp_for_level(DEV_LEVEL))
+	money = maxi(money, 99999)
+	for mat in materials.keys():
+		materials[mat] = maxi(int(materials[mat]), 999)
+	inventory["seeds"] = maxi(int(inventory["seeds"]), 99)
+	inventory["pumpkin_seeds"] = maxi(int(inventory["pumpkin_seeds"]), 99)
+	for kind in tool_tier.keys():
+		tool_tier[kind] = TOOL_TIERS[kind].size()
+	lantern_tier = LANTERN_TIERS.size()
+	bag_tier = BAG_TIERS.size()
+	house_stage = STAGE_NAMES.size() - 1
+	wear = 0
+	cellar_built = true
+	cooler_built = true
+	smokehouse_built = true
+	furnace_built = true
+	woodshed_built = true
+	well_repaired = true
+	hose_attached = true
+	well_water = WELL_CAPACITY
+	sanity_penalty = 0
+	sanity = SANITY_MAX
+	food = 100.0
+	water = 100.0
+	warmth = 100.0
+	hp = max_hp()
+	farm._check_unlocks()
+	_build_interior()
+	_apply_lantern_radius()
+	_show_message("Dev: every skill at level %d, tools, lanterns, bag, house and buildings unlocked." % DEV_LEVEL)
+	queue_redraw()
 
 
 func _apply_lantern_radius() -> void:
