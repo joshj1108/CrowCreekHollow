@@ -17,6 +17,14 @@ const SECTIONS := [
 	{"name": "Buildings", "subtitle": "The workshop, the coop, and the barn", "icon": "barn", "color": "b8443a"},
 	{"name": "Achievements", "subtitle": "Things you have done", "icon": "trophy", "color": "e0b43c"},
 ]
+# Icon art: Gear and Craft use the item icons (UiSkin), the rest art/ui/wheel_icons.png, five SpriteCook
+# cells 16 wide and 20 tall: journal (Skills), scroll, house, barn, trophy. Drawn at 3x, like the world.
+const WHEEL_ICONS_PATH := "res://art/ui/wheel_icons.png"
+const WHEEL_CELL := Vector2(16, 20)
+const WHEEL_CELLS := {"bars": 0, "scroll": 1, "house": 2, "barn": 3, "trophy": 4}
+const ITEM_ICONS := {"shield": "shield", "hammer": "hammer"}
+const ICON_SCALE := 3.0
+const ICON_HOT := Color(1.25, 1.2, 1.1)   # the highlighted section's icon is a little brighter
 const INNER_R := 92.0
 const OUTER_R := 222.0
 const GAP := 0.035            # the space between two segments, in radians
@@ -35,6 +43,7 @@ const WOOD_HOT := Color(1.35, 1.2, 1.0)        # and on the highlighted one
 var open := false
 var highlight := 0
 var ring: Control
+var wheel_icons: Texture2D = load(WHEEL_ICONS_PATH) if ResourceLoader.exists(WHEEL_ICONS_PATH) else null
 
 
 func _ready() -> void:
@@ -143,7 +152,8 @@ func _draw_ring() -> void:
 		var border := COL_IRON if wood != null else COL_BORDER
 		ring.draw_polyline(edge, COL_ACCENT if hot else border, 3.0 if hot else 2.0)
 		var at := c + _dir(mid) * ((INNER_R + OUTER_R) * 0.5)
-		_icon(str(SECTIONS[i]["icon"]), at, 17.0, Color(str(SECTIONS[i]["color"])), hot)
+		if not _icon_sprite(str(SECTIONS[i]["icon"]), at, hot):
+			_icon(str(SECTIONS[i]["icon"]), at, 17.0, Color(str(SECTIONS[i]["color"])), hot)
 	# The middle names the highlighted section, on a wooden plaque when the UI art is there.
 	var name_text := str(SECTIONS[highlight]["name"])
 	var name_width := font.get_string_size(name_text, HORIZONTAL_ALIGNMENT_LEFT, -1, 24).x
@@ -163,6 +173,24 @@ func _draw_ring() -> void:
 # A direction on the screen for an angle, zero straight up and growing clockwise.
 func _dir(angle: float) -> Vector2:
 	return Vector2(sin(angle), -cos(angle))
+
+
+# Draws a section's icon from its SpriteCook art, centred on at and snapped to whole pixels.
+# Returns false when there is no art for it, so the shapes below are drawn instead.
+func _icon_sprite(kind: String, at: Vector2, hot: bool) -> bool:
+	var tex: Texture2D = null
+	var region := Rect2()
+	if WHEEL_CELLS.has(kind) and wheel_icons != null:
+		tex = wheel_icons
+		region = Rect2(Vector2(WHEEL_CELLS[kind] * WHEEL_CELL.x, 0.0), WHEEL_CELL)
+	elif ITEM_ICONS.has(kind):
+		region = UiSkin.icon_rect(ITEM_ICONS[kind], Color.WHITE)
+		tex = UiSkin.icons() if region.has_area() else null
+	if tex == null:
+		return false
+	var sz := region.size * ICON_SCALE
+	ring.draw_texture_rect_region(tex, Rect2((at - sz * 0.5).round(), sz), region, ICON_HOT if hot else Color.WHITE)
+	return true
 
 
 # Draws a section's icon in its own colour, centred on at and about 2 * size across. A highlighted
