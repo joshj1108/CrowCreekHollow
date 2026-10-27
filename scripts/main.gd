@@ -283,6 +283,10 @@ const LANTERN_TIERS := [
 const LANTERN_FLICKER_TIER := 3
 # How bright a lantern and a lit window glow. Kept low, so the dark still reads as dark.
 const LANTERN_ENERGY := 0.5
+# In the cave the lantern is the only light, against near-black, so it glows this many times stronger there.
+const CAVE_LANTERN_BOOST := 4.0
+# The daylight at the cave's exit, kept barely there so the cave still reads as dark.
+const CAVE_MOUTH_ENERGY := 0.6
 const WINDOW_ENERGY := 0.45
 
 # Crops. Turnips are the starter crop. Corn needs Farming 2 and pumpkins Farming 3; both yield more.
@@ -754,6 +758,8 @@ const TILE_COLORS := {
 
 
 const NIGHT_TINT := Color("3a3f6e")
+# The cave has no daylight at any hour: almost black, so only a lantern's ring shows the tunnels.
+const CAVE_TINT := Color("050508")
 
 enum Zone { HOMESTEAD, VILLAGE, ASHFORD, WILDS, TOWN }
 
@@ -980,6 +986,7 @@ var desk: DeskSystem
 var lantern_light: PointLight2D
 var window_lights: Array = []   # glows for the lit windows, one PointLight2D each
 var porch_light: PointLight2D     # the lamp by the door, once the house is restored
+var cave_mouth_light: PointLight2D  # faint daylight spilling down the cave's exit steps
 var water_fx: Node2D              # the pond's shine, redrawn about 20 times a second
 var water_fx_next_ms := 0            # when the shine is next due for a redraw
 var perf_label: Label = null         # F3 shows frame and draw stats
@@ -1264,7 +1271,10 @@ func _process(delta: float) -> void:
 	darkness *= 1.0 - sanity_sys._night_relief()
 	darkness = clampf(darkness + sanity_sys._low_sanity_boost(), 0.0, 1.0)
 	canvas_modulate.color = _light_tint().lerp(NIGHT_TINT, darkness)
-	_update_lantern(darkness)
+	if in_cave:
+		canvas_modulate.color = CAVE_TINT
+	_update_lantern(1.0 if in_cave else darkness)
+	_update_cave_mouth_light(smoothstep(DUSK_HOUR, DUSK_HOUR + 2.0, current_hour))
 	sanity_sys._update_sanity(darkness, delta)
 
 	_check_doors()
@@ -1979,6 +1989,14 @@ func _build_window_lights() -> void:
 	porch_light.position = Vector2(_world_tile(HOUSE_DOOR_IX, HOUSE_DOOR_IY)) * PX + Vector2(PX * 0.5, PX * 0.5)
 	porch_light.enabled = false
 	add_child(porch_light)
+	# Centred on the two exit tiles' south edge, so it spills up the steps into the cave.
+	cave_mouth_light = PointLight2D.new()
+	cave_mouth_light.texture = texture
+	cave_mouth_light.color = Color("c8d4e0")
+	cave_mouth_light.texture_scale = 1.4
+	cave_mouth_light.position = Vector2((CAVE_EXIT_TILE.x + 1) * PX, (CAVE_EXIT_TILE.y + 1) * PX)
+	cave_mouth_light.enabled = false
+	add_child(cave_mouth_light)
 
 
 # The pond's shine, drawn every frame while on the farm.
@@ -2731,6 +2749,8 @@ func _update_perf() -> void:
 		if light.enabled:
 			lights += 1
 	if porch_light != null and porch_light.enabled:
+		lights += 1
+	if cave_mouth_light != null and cave_mouth_light.enabled:
 		lights += 1
 	if lantern_light != null and lantern_light.enabled:
 		lights += 1
@@ -4692,7 +4712,10 @@ func _enter_cave() -> void:
 	_set_bounds()
 	combat_sys._spawn_foes()
 	queue_redraw()
-	_show_message("You step into the cave. It smells of damp stone, and something skitters in the dark.")
+	if lantern_tier > 0:
+		_show_message("You step into the cave. It smells of damp stone, and something skitters in the dark.")
+	else:
+		_show_message("You step into the cave and can't see your own hands. A lantern would help.")
 
 
 func _leave_cave() -> void:
@@ -6132,11 +6155,12 @@ func _apply_lantern_radius() -> void:
 
 func _update_lantern(darkness: float) -> void:
 	lantern_light.enabled = lantern_tier > 0 and darkness > 0.05
+	var energy := LANTERN_ENERGY * (CAVE_LANTERN_BOOST if in_cave else 1.0)
 	if lantern_tier >= LANTERN_FLICKER_TIER:
 		var t := Time.get_ticks_msec() / 1000.0
-		lantern_light.energy = LANTERN_ENERGY * (0.9 + 0.08 * sin(t * 9.0) + randf_range(-0.03, 0.03))
+		lantern_light.energy = energy * (0.9 + 0.08 * sin(t * 9.0) + randf_range(-0.03, 0.03))
 	else:
-		lantern_light.energy = LANTERN_ENERGY
+		lantern_light.energy = energy
 	# Lit windows glow once the house has glass, and the porch lamp once it is restored.
 	var outdoors := not inside and not in_cave and not _in_village() and world_started
 	var lit := outdoors and house_stage >= 2 and darkness > 0.1
@@ -6146,6 +6170,12 @@ func _update_lantern(darkness: float) -> void:
 		light.energy = glow
 	porch_light.enabled = outdoors and house_stage == 3 and darkness > 0.1
 	porch_light.energy = glow
+
+
+# Daylight through the cave's exit: very faint, fading out with the dusk and gone at night.
+func _update_cave_mouth_light(darkness: float) -> void:
+	cave_mouth_light.enabled = in_cave and darkness < 0.95
+	cave_mouth_light.energy = CAVE_MOUTH_ENERGY * (1.0 - darkness)
 
 
 # --- Quests ------------------------------------------------------------------

@@ -536,6 +536,8 @@ Levels are first-pass values and will be tuned in playtesting. Ammunition arrows
 A cave on the homestead, entered from the farm's west edge. It is the only place to get iron ore, and the only place to fight.
 
 - **Entrance:** step onto the cave mouth on the farm's west edge. The exit mat inside takes you back out to the farm.
+- **Dark:** the cave is always open, but it has no daylight at any hour. Without a lantern it is pitch black; a lantern lights its usual ring, glowing stronger than outdoors (`CAVE_TINT`, `CAVE_LANTERN_BOOST`). Sanity still follows the time of day, not the cave's dark.
+- **Daylight at the exit:** by day a very faint, cool glow spills up the exit steps (`cave_mouth_light`, `CAVE_MOUTH_ENERGY`). It fades out with the dusk and is gone at night.
 - **Layout:** the cave is laid out fresh each day, so the tunnels, ore, and creatures change overnight. The same day always gives the same cave.
 - **Ore:** copper and iron set into the rock walls. Copper needs a stone pick and Mining 2. Iron needs a copper pick and Mining 5, and only sits deeper in the cave. Each node gives one ore and 12 Mining XP. Broken nodes stay broken until the next day, and that holds through a save.
 - **Creatures:** ordinary animals, no supernatural ones. Three bats (fast, weak), two lizards (slow, tougher), and two snakes (quick, hard-hitting). They spawn away from the entrance, and each visit starts with them back in their places. Kills give Combat XP and a small chance of fiber or resin.

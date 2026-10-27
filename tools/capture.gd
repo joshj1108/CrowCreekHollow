@@ -9,6 +9,7 @@ extends SceneTree
 #   inside          stand in the farmhouse
 #   itile=X,Y       with inside, stand on this house tile (interior coordinates)
 #   cave            stand in the mining cave
+#   ctile=X,Y       with cave, stand on this cave tile (the exit is at 20,21)
 #   tile=X,Y        stand on this farm tile (layout coordinates, before the border)
 #   weather=KIND    sunny, cloudy, fog, drizzle, rain, downpour or snow
 #   season=NAME     Spring, Summer, Autumn or Winter
@@ -16,6 +17,7 @@ extends SceneTree
 #   frames=N        frames to run before the shot (default 90)
 #   scale=F         shrink the saved image (default 0.5, so it's cheap to look at; 1 for full size)
 #   crops=A,B       plant every stage of each crop kind in a row on the first plot, e.g. crops=turnip,corn
+#   lantern=N       lantern tier 0-3 (0 = none)
 #   built           build the cellar, smokehouse, furnace and woodshed
 #   notip           hide the tip card, even one shown after the scene is set up
 #   wheel           open the section wheel
@@ -50,6 +52,9 @@ func _initialize() -> void:
 		main.furnace_built = true
 		main.woodshed_built = true
 		main._apply_storage_tiles()
+	if opt.has("lantern"):
+		main.lantern_tier = int(opt["lantern"])
+		main._apply_lantern_radius()
 	if opt.has("crops"):
 		# One row per kind on the first plot, stages 0 to 3 left to right, and stand just below them.
 		var kinds: PackedStringArray = opt["crops"].split(",")
@@ -71,6 +76,9 @@ func _initialize() -> void:
 			main.player.position = main._tile_center(main.INT_ORIGIN.x + int(it[0]), main.INT_ORIGIN.y + int(it[1]))
 	elif opt.has("cave"):
 		main._enter_cave()
+		if opt.has("ctile"):
+			var ct: PackedStringArray = opt["ctile"].split(",")
+			main.player.position = main._tile_center(int(ct[0]), int(ct[1]))
 	elif opt.has("tile"):
 		var t: PackedStringArray = opt["tile"].split(",")
 		main.player.position = main._tile_center(int(t[0]) + main.BORDER_X, int(t[1]) + main.BORDER_Y)
