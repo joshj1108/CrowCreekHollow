@@ -3,12 +3,13 @@ extends RefCounted
 
 # Bumped when a save's keys change shape. Saves from before the number was written count as 1.
 # _migrate lifts an older save one version at a time, so every old save still loads.
-const SAVE_VERSION := 12
+const SAVE_VERSION := 13
 # Keys a save must hold with the right type, or it isn't read: the loader would trip over anything else.
 const DICT_KEYS := ["inventory", "materials", "skill_xp", "stats", "equipment", "quests_done", "achievements_done",
-	"tool_tier", "trek_walked"]
+	"tool_tier", "trek_walked", "night_seen"]
 const ARRAY_KEYS := ["crops", "brush", "felled", "rocks", "cave_mined", "decor", "steps_done", "rook_pages",
-	"desk_mail", "desk_orders", "tips_seen", "diary_new", "hen_ages", "goat_ages", "player_pos", "trek_works"]
+	"desk_mail", "desk_orders", "tips_seen", "diary_new", "hen_ages", "goat_ages", "player_pos", "trek_works",
+	"night_blight"]
 # What version 8 cut along with the wider land. A save from before it keeps none of these keys.
 const WORLD_KEYS := ["zone", "world_version", "campsite", "guardian_done", "quarry", "bank_materials", "bank_coins"]
 # The ranged weapons cut in version 8, with the materials they cost, given back to an older save that made one.
@@ -102,6 +103,10 @@ func _save_game() -> void:
 		"stand_glut": m.stall.glut,
 		"rook_pages": m.mystery.found.keys(),
 		"last_visitor": m.nights.last_visitor,
+		"night_seen": m.nights.seen,
+		"night_blight": m.nights.blight.keys().map(func(t: Vector2i) -> Array: return [t.x, t.y, m.nights.blight[t]]),
+		"bless_offer_day": m.sanity_sys.bless_offer_day,
+		"bless_day": m.sanity_sys.bless_day,
 		"sanity": m.sanity,
 		"sanity_penalty": m.sanity_penalty,
 		"boredom_loss": m.boredom_loss,
@@ -247,6 +252,16 @@ func _load_game() -> bool:
 	for id in data.get("steps_done", []):
 		m.projects.steps_done[str(id)] = true
 	m.nights.last_visitor = str(data.get("last_visitor", ""))
+	m.nights.seen.clear()
+	var night_seen: Variant = data.get("night_seen", {})
+	if typeof(night_seen) == TYPE_DICTIONARY:
+		for id in night_seen:
+			m.nights.seen[str(id)] = int(night_seen[id])
+	m.nights.blight.clear()
+	for b in data.get("night_blight", []):
+		m.nights.blight[Vector2i(int(b[0]), int(b[1]))] = int(b[2])
+	m.sanity_sys.bless_offer_day = int(data.get("bless_offer_day", -1))
+	m.sanity_sys.bless_day = int(data.get("bless_day", -100))
 	m.nights.first_beat = -1   # a first night playing out in the game left behind doesn't carry into this one
 	m.sanity_penalty = int(data.get("sanity_penalty", 0))
 	m.boredom_loss = float(data.get("boredom_loss", 0.0))
@@ -500,6 +515,17 @@ static func _migrate(data: Dictionary) -> Dictionary:
 		var quests: Variant = data.get("quests_done")
 		if past and typeof(quests) == TYPE_DICTIONARY:
 			quests["edge"] = true
+	if v < 13:
+		# Version 13 made the nights played (NightSystem): which visitors have been met (for the prompts), the
+		# shadow's blight on the ground, and the vicar's blessing. An older save has met each visitor as often as it
+		# has faced any, so a player past the first few nights isn't prompted again; the rest starts empty.
+		if not data.has("night_seen"):
+			var old_stats: Variant = data.get("stats", {})
+			var met := mini(int(old_stats.get("faced", 0)), 3) if typeof(old_stats) == TYPE_DICTIONARY else 0
+			var seen_ids := {}
+			for id in ["field", "first", "knock", "crows", "pond", "watcher", "footsteps", "hollow", "raid"]:
+				seen_ids[id] = met
+			data["night_seen"] = seen_ids
 	# A save from a newer build keeps its number; keys this build doesn't know are ignored.
 	data["save_version"] = maxi(v, SAVE_VERSION)
 	return data

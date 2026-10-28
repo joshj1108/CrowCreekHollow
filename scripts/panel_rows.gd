@@ -335,7 +335,7 @@ func _house_rows() -> Array:
 		})
 	rows.append({"name": "Wear", "status": "%d / %d" % [m.wear, m.WEAR_MAX], "status_kind": "short" if m.wear >= m.WEAR_RUNDOWN else "info",
 		"progress": float(m.wear) / float(m.WEAR_MAX),
-		"note": "The house wears a little each night. Mending, tidying, and repairs bring it down. At %d wear, rain ruins a crop overnight. At %d, a fox can get into the coop. A third plot opens at Farming %d once the house is Patched." % [m.WEAR_RUNDOWN, m.WEAR_FOX, m.PLOT_THREE_LEVEL]})
+		"note": "The house wears a little each night. Mending, tidying, and repairs bring it down. At %d wear, rain ruins a crop overnight. At %d, foxes and worse come to the coop and barn more often at night. A third plot opens at Farming %d once the house is Patched." % [m.WEAR_RUNDOWN, m.WEAR_FOX, m.PLOT_THREE_LEVEL]})
 	rows.append({"name": "Sanity limit", "status": "%d / %d" % [m.sanity_sys._sanity_max(), int(m.SANITY_MAX)],
 		"progress": float(m.sanity_sys._sanity_max()) / float(m.SANITY_MAX),
 		"note": "The bed is in the bedroom. Walk there and press Space from 18:00 to save and end the day. If you aren't in bed by 03:00 you collapse, and your sanity limit drops permanently."})
@@ -351,6 +351,18 @@ func _house_rows() -> Array:
 		"action": "cleanse",
 		"enabled": m.sanity_sys._can_cleanse(),
 	})
+	# The vicar's blessing, only on a day he waits at the gate (sanity under SanitySystem.BLESS_BELOW at waking).
+	if m.sanity_sys.bless_offer_day == m.day:
+		var ss := m.sanity_sys
+		rows.append({
+			"name": "The vicar's blessing",
+			"value": "%d crops for the poor box: +%d sanity, +%d limit, tonight halved" % [ss.BLESS_CROPS, int(ss.BLESS_SANITY), ss.BLESS_LIMIT],
+			"about": "The vicar waits at the gate today. He will walk the rooms and bless the house.",
+			"needs": _needs({"crops": ss.BLESS_CROPS}, "Cleaning") + [{"text": "Once", "ok": ss.bless_day != m.day}],
+			"button": "Bless",
+			"action": "bless",
+			"enabled": ss._can_bless(),
+		})
 
 	rows.append({"tab": "Chores", "icon": "chores"})
 	for chore in m._chore_list():

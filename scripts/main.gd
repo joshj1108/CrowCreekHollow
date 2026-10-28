@@ -558,7 +558,7 @@ const MEND_DUE_WEAR := 2       # mending is a chore only once the house has this
 const WEAR_MEND := 2
 const WEAR_TIDY := 1
 const WEAR_REPAIR := 3
-const WELL_KEPT_SANITY := 3    # sanity back for a night with every chore done
+const WELL_KEPT_SANITY := 2    # sanity back for a night with every chore done
 const WEAR_RUNDOWN := 6       # at this wear, rain ruins a crop overnight
 const WEAR_FOX := 4           # at this wear, a fox can get into the coop
 # Livestock: hens in a coop behind the house. A fed hen lays an egg each morning.
@@ -608,12 +608,12 @@ const CARDS_GAMES := 15              # games a pack lasts before it is too worn
 const SUDOKU_BOOK_PRICE := 12
 const SUDOKU_BOOK_PUZZLES := 10
 const LOW_SANITY := 30.0
-const SLEEP_SANITY := 12.0
-const TIDY_SANITY := 5.0
+const SLEEP_SANITY := 8.0
+const TIDY_SANITY := 3.0
 const INDOOR_SANITY_RATE := 0.46    # sanity a game hour indoors; the boarded house adds SHELTER_SANITY_RATE
 const SHELTER_SANITY_RATE := 0.23
 const DARK_SANITY_DRAIN := 0.91     # sanity a game hour outdoors in the dark, away from a lamp
-const NIGHT_LOSS_MULT := 1.5        # scales every night visitor's sanity loss
+const NIGHT_LOSS_MULT := 2.2        # scales every night visitor's sanity loss
 const COLLAPSE_SANITY_PENALTY := 5   # permanent cap reduction, curable with a cleanse
 var save_slot := 1                  # which save slot this game reads and writes
 var save_name := ""                 # the name given to the save when the game was started
@@ -914,6 +914,7 @@ var progression: ProgressionSystem
 var stall: StallSystem
 var sanity_sys: SanitySystem
 var nights: NightSystem
+var madness: MadnessSystem
 var happenings: DailyHappenings
 var trek: TrekSystem
 var projects: FarmProjects
@@ -954,6 +955,7 @@ func _ready() -> void:
 	firewood = FirewoodSystem.new(self)
 	sanity_sys = SanitySystem.new(self)
 	nights = NightSystem.new(self)
+	madness = MadnessSystem.new(self)
 	rewards = HomesteadRewards.new(self)
 	happenings = DailyHappenings.new(self)
 	trek = TrekSystem.new(self)
@@ -1097,6 +1099,7 @@ func _on_title_start(mode: String, slot: int) -> void:
 	_build_ambience()
 	_build_crows()
 	nights._build()
+	madness._build()
 	happenings._build()
 	forage._build()
 	trek._build()
@@ -1215,6 +1218,7 @@ func _process(delta: float) -> void:
 	if current_hour >= EVENT_HOUR and event_fired_day != day:
 		nights._begin()
 	nights._update()
+	madness._update(delta)
 	happenings._update()
 	forage._update()
 	trek._update(delta)
@@ -1243,7 +1247,8 @@ func _process(delta: float) -> void:
 	_update_crows(delta)
 	combat_sys._update_foes(delta)
 
-	var minutes := int(fmod(current_hour, 1.0) * 60.0)
+	var shown_hour := madness._clock_hour(current_hour)   # at the lowest sanity, the clock lies now and then
+	var minutes := int(fmod(shown_hour, 1.0) * 60.0)
 	var low := food < 25.0 or water < 25.0 or warmth < 25.0
 	food_bar.value = food
 	water_bar.value = water
@@ -1259,7 +1264,7 @@ func _process(delta: float) -> void:
 		break
 	hud_day_label.text = "Day %d" % day
 	hud_date_label.text = "%s %d · %s%s" % [MONTH_NAMES[date["month"]].substr(0, 3), date["day"], _season_of(date["month"]), event_name]
-	hud_time_label.text = "%02d:%02d" % [int(fmod(current_hour, 24.0)), minutes]
+	hud_time_label.text = "%02d:%02d" % [int(shown_hour), minutes]
 	hud_weather_label.text = WEATHER_NAMES.get(weather_kind, "Overcast")
 	hud_weather_icon.kind = "sun" if weather_kind == "sunny" else ("rain" if weather_kind in WATER_RAIN_KINDS else "cloud")
 	hud_weather_icon.queue_redraw()
@@ -3310,6 +3315,8 @@ func _on_panel_action(action_id: String) -> void:
 			_mend_house()
 		"cleanse":
 			sanity_sys._cleanse_house()
+		"bless":
+			sanity_sys._take_blessing()
 		"tidy":
 			sanity_sys._tidy_house()
 		"advance_lantern":
@@ -5385,7 +5392,9 @@ func _settle_day() -> String:
 		notes += rewards._kept_well()
 	animals._age_animals()
 	if hens > 0:
-		if hens_fed_day == day:
+		if hens_fed_day == day and nights.raid_loss == "eggs":
+			hen_unfed_days = 0   # the crows at the coop in the night: fed, but no eggs
+		elif hens_fed_day == day:
 			hen_unfed_days = 0
 			var room := maxi(0, stall._pack_capacity() - stall._pack_used())
 			var layers := animals._grown_count(hen_ages, HEN_MATURE_DAYS)
@@ -5402,7 +5411,9 @@ func _settle_day() -> String:
 				hen_unfed_days = 0
 				notes += " A hungry hen wandered off."
 	if goats > 0:
-		if goats_fed_day == day:
+		if goats_fed_day == day and nights.raid_loss == "milk":
+			goat_unfed_days = 0   # something at the barn in the night: fed, but no milk
+		elif goats_fed_day == day:
 			goat_unfed_days = 0
 			var room := maxi(0, stall._pack_capacity() - stall._pack_used())
 			var givers := animals._grown_count(goat_ages, GOAT_MATURE_DAYS)
@@ -5418,9 +5429,7 @@ func _settle_day() -> String:
 				goats -= 1
 				goat_unfed_days = 0
 				notes += " A hungry goat wandered off."
-	if wear >= WEAR_FOX and hens > 0 and randf() < 0.5:
-		hens -= 1
-		notes += " A fox got into the coop and took a hen."
+	nights.raid_loss = ""   # the night's raids (NightSystem) took their hen or goat already
 	animals._sync_ages()
 	if wear >= WEAR_RUNDOWN and not crops.is_empty():
 		var spot = crops.keys().pick_random()
@@ -5442,7 +5451,7 @@ func _try_sleep() -> void:
 		_show_message("You aren't tired yet. The bed will be there after 18:00.")
 		return
 	stats["slept"] += 1
-	sanity_sys._change_sanity(SLEEP_SANITY + estate._sleep_bonus())
+	sanity_sys._change_sanity(sanity_sys._sleep_gain())
 	if firewood._fire_lit():
 		warmth = 100.0
 	else:
@@ -5730,7 +5739,8 @@ func _end_day(base: String, leave_house: bool = true) -> void:
 	day += 1
 	upkeep_note += farm._wither() + farm._season_warning()
 	_roll_weather()
-	var event_note := projects._sprinkle() + sanity_sys._begin_day_events()
+	nights._morning()
+	var event_note := projects._sprinkle() + sanity_sys._begin_day_events() + sanity_sys._morning_bless()
 	clock = 0.0
 	tonight_shadow = Vector2i(-1, -1)
 	_regrow_wild()

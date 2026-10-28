@@ -354,6 +354,31 @@ func _run() -> void:
 	m.trek.edge_done = false
 	m.nights.sighting_seen = false
 
+	# Version 13: the nights' prompts met, the shadow's blight on the ground and the vicar's blessing round-trip;
+	# an older save has met each visitor as often as it faced any (up to 3), and no blight.
+	m.nights.seen = {"field": 2, "raid": 1}
+	m.nights.blight = {Vector2i(40, 20): 9, Vector2i(41, 20): 10}
+	m.sanity_sys.bless_offer_day = 11
+	m.sanity_sys.bless_day = 11
+	_save_on_day(11)
+	m.nights.seen = {}
+	m.nights.blight = {}
+	m.sanity_sys.bless_offer_day = -1
+	m.sanity_sys.bless_day = -100
+	_check("night prompts, blight and blessing round-trip", _load() == 11 and int(m.nights.seen.get("field", 0)) == 2
+		and int(m.nights.seen.get("raid", 0)) == 1 and int(m.nights.blight.get(Vector2i(41, 20), 0)) == 10
+		and m.sanity_sys.bless_offer_day == 11 and m.sanity_sys._blessed_tonight())
+	var v12 := _raw(path)
+	v12["save_version"] = 12
+	for key in ["night_seen", "night_blight", "bless_offer_day", "bless_day"]:
+		v12.erase(key)
+	(v12["stats"] as Dictionary)["faced"] = 7
+	_write_text(path, JSON.stringify(v12))
+	_check("version 12 save: visitors met, no blight, no blessing", _load() == 11 and int(m.nights.seen.get("watcher", 0)) == 3
+		and m.nights.blight.is_empty() and m.sanity_sys.bless_day == -100
+		and int(SaveSystem.read_save(path).get("save_version", 0)) == SaveSystem.SAVE_VERSION)
+	m.nights.seen = {}
+
 	# Saving in the cave puts you at the homestead on load.
 	var home := m._tile_center(m.HOMESTEAD_ARRIVE.x, m.HOMESTEAD_ARRIVE.y)
 	m.in_cave = true

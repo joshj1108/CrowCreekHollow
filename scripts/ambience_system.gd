@@ -35,6 +35,12 @@ const EVENTS := [
 	{"sounds": ["thunder_in"], "place": "in", "time": "any", "weather": ["downpour"], "every": Vector2(35, 90), "db": -4.0},
 	{"sounds": ["thunder_in"], "place": "in", "time": "any", "weather": ["rain"], "every": Vector2(120, 260), "db": -8.0},
 	{"sounds": ["whisper"], "place": "in", "time": "night", "fear": 0.7, "every": Vector2(45, 90), "db": -10.0, "side": true},
+	# The false sounds of low sanity (MadnessSystem): steps by day under 60, knocks at the door under 40, the door
+	# opening under 20, though nobody is there.
+	{"sounds": ["steps_behind"], "place": "out", "time": "day", "fear": 0.4, "every": Vector2(45, 110), "db": -9.0, "side": true},
+	{"sounds": ["knock"], "place": "in", "time": "any", "fear": 0.6, "every": Vector2(50, 120), "db": -8.0, "side": true},
+	{"sounds": ["hen", "bleat"], "place": "out", "time": "night", "fear": 0.6, "every": Vector2(60, 140), "db": -10.0, "side": true},
+	{"sounds": ["door"], "place": "in", "time": "any", "fear": 0.8, "every": Vector2(60, 150), "db": -9.0, "side": true},
 	{"sounds": ["drip", "drip_low"], "place": "cave", "time": "any", "every": Vector2(1.5, 5.0), "db": -10.0, "side": true},
 	{"sounds": ["skitter"], "place": "cave", "time": "any", "every": Vector2(10, 25), "db": -8.0, "side": true},
 	{"sounds": ["pebbles"], "place": "cave", "time": "any", "every": Vector2(15, 35), "db": -9.0, "side": true},

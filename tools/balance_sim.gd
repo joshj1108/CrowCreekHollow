@@ -6,8 +6,9 @@ extends SceneTree
 # Run headless, from the project folder:
 #   godot --path . --headless -s tools/balance_sim.gd -- mode=engaged days=60
 # Options, any order, after "--":
-#   mode=NAME   engaged  - faces every visitor outdoors at 22:00 (the default)
-#               ignore   - stays in, lets each visitor come and go, sleeps at 23:00
+#   mode=NAME   engaged  - faces every visitor outdoors at 22:00 (the default), winning most (WIN_CHANCE), and
+#                          runs to each raid on the coop or barn (RAID_WIN)
+#               ignore   - stays in, lets each visitor and raid come and go, sleeps at 23:00
 #               earlybed - stays in and sleeps at 21:00, before the visitor comes
 #   days=N      days to play (default 60; the first tax bill comes on day 93, January 1st; the earliest
 #               the crow bell can be hung is day 396, the second All Hallows)
@@ -32,6 +33,10 @@ extends SceneTree
 #   - Every forageable on the farm is picked each morning; the seasonal recipes that don't use turnips, eggs or
 #     flour are cooked at midday, and fish, forage and cooked food are sold.
 #   - Fishing only when there is nothing to eat (grilled at once, any fish that bites then); no fights. Firewood is split straight into the pack once the woodshed stands.
+#   - The night encounters are not walked: engaged wins each with WIN_CHANCE (more with a better lantern), taking a
+#     strike (NightSystem.STRIKE_SANITY) on STRIKE_CHANCE of wins and two on a loss; a lost one counts as ignored,
+#     with its creep and the shadow's blight. Raids are won with RAID_WIN when engaged, and lost otherwise (unless
+#     a lamp post lights the spot). The vicar's blessing is taken whenever he waits at the gate.
 #   - The day runs 06:00 inside, 07:00-19:00 outdoors, then evening per mode; a desk game is played at 20:00.
 #   - The hose heads, the cistern, the hoppers and the sprinklers (on SPRINKLER_SPOTS) are made as soon as they
 #     can be. The hoppers are topped up under two days' feed; the "chores" line counts the presses that remain.
@@ -69,6 +74,11 @@ const CLEARING_SECONDS := 25.0  # a clearing's walk, for the oil (a flask burns 
 const CLEARING_SANITY := 2.0    # the wood's sanity drain and the tall one, a clearing (half again on the dark trail)
 const EVENT_SANITY := 3.0       # crows, lights or dogs
 const OIL_PRICE := 8
+# How often an engaged player wins each night encounter with no lantern; each lantern tier adds WIN_PER_TIER.
+const WIN_CHANCE := {"field": 0.8, "knock": 0.9, "crows": 0.7, "pond": 0.75, "watcher": 0.65, "footsteps": 0.85, "hollow": 0.6}
+const WIN_PER_TIER := 0.06
+const STRIKE_CHANCE := 0.4
+const RAID_WIN := 0.75
 const ROPE_FIBER := 2
 var mode := "engaged"
 var treks_a_week := 0
@@ -79,7 +89,8 @@ var trek_log := {"edge": 0, "mill": 0, "orchard": 0, "chapel": 0, "post": 0, "gr
 var days := 60
 var every := 1
 var milestones := {}         # name -> first day
-var nights := {"faced": 0, "ignored": 0, "skipped": 0, "hollow": 0}
+var nights := {"faced": 0, "ignored": 0, "lost": 0, "skipped": 0, "hollow": 0, "raids_won": 0, "blessed": 0}
+var day_min := {}            # day -> lowest sanity that day, for the madness tiers
 var spent := {"seeds": 0, "animals": 0, "tax": 0, "pedlar": 0, "cards": 0, "estate": 0}
 var earned := {"crops": 0, "eggs_milk": 0, "fish": 0, "forage": 0, "cooked": 0}
 var grown := {}             # crop kind -> harvested
@@ -159,6 +170,9 @@ func _play_day() -> String:
 		chores["mends"] += 1
 	if m.sanity_sys._can_cleanse():
 		m.sanity_sys._cleanse_house()
+	if m.sanity_sys._can_bless():
+		m.sanity_sys._take_blessing()
+		nights["blessed"] += 1
 	if m.tax_owed > 0 and m.money >= m.tax_owed:
 		spent["tax"] += m.tax_owed
 		m.desk._pay_tax()
@@ -208,7 +222,7 @@ func _play_day() -> String:
 
 func _sleep() -> void:
 	m.stats["slept"] += 1
-	m.sanity_sys._change_sanity(m.SLEEP_SANITY + m.estate._sleep_bonus())
+	m.sanity_sys._change_sanity(m.sanity_sys._sleep_gain())
 	if m.firewood._fire_lit():
 		m.warmth = 100.0
 	# In earlybed the visitor comes to the sleeping house during _end_day, so the Hollow is counted here.
@@ -801,6 +815,7 @@ func _try_build(id: String, cost: Dictionary) -> String:
 				m.barn_built = true
 			else:
 				m.coop_built = true
+			m._relocate_building(id)
 			m.progression._grant_xp("Carpentry", m.XP_REPAIR)
 		"woodshed":
 			m._build_woodshed()
@@ -1033,9 +1048,24 @@ func _face_night() -> String:
 	var id := str(v["id"])
 	if id == "hollow":
 		nights["hollow"] += 1
-	m.nights._resolve(true)
-	nights["faced"] += 1
-	return id + "+"
+	var rng := RandomNumberGenerator.new()
+	rng.seed = hash([m.day, "sim night"])
+	var won := rng.randf() < float(WIN_CHANCE.get(id, 1.0)) + WIN_PER_TIER * m.lantern_tier
+	var strikes := (1 if rng.randf() < STRIKE_CHANCE else 0) if won else 2
+	for i in strikes:
+		m.sanity_sys._change_sanity(-m.nights.STRIKE_SANITY * m.nights._loss_mult())
+	if id == "crows":
+		for c in m.nights.crow_at:
+			c["state"] = "gone" if won else "wait"
+	m.nights._resolve(won)
+	nights["faced" if won else "lost"] += 1
+	# The raid, if one comes tonight: run to it.
+	if m.nights.raid != "":
+		var saved := rng.randf() < RAID_WIN or m.projects._lit(m.nights.raid_tile)
+		m.nights._end_raid(saved, false)
+		if saved:
+			nights["raids_won"] += 1
+	return id + ("+" if won else "x")
 
 
 func _ignore_night() -> String:
@@ -1056,6 +1086,7 @@ func _ignore_night() -> String:
 
 func _track_sanity() -> void:
 	min_sanity = minf(min_sanity, m.sanity)
+	day_min[m.day] = minf(float(day_min.get(m.day, 100.0)), m.sanity)
 	if m.sanity < m.LOW_SANITY:
 		low_days[m.day] = true
 
@@ -1134,6 +1165,13 @@ func _summary() -> void:
 		print(line)
 	print("--- totals: nights %s, min sanity %d, days under %d sanity %d, sanity limit %d, HP lost to needs %d, hours empty %s, hours fished %d" % [
 		nights, int(min_sanity), int(m.LOW_SANITY), low_days.size(), int(m.sanity_sys._sanity_max()), hp_lost, empty_hours, fished_hours])
+	var tiers := [0, 0, 0]
+	for d in day_min:
+		for i in 3:
+			if float(day_min[d]) < float(MadnessSystem.TIERS[i]):
+				tiers[i] += 1
+	print("--- madness: days under 60 / 40 / 20 sanity: %d / %d / %d; raids %d (won %d); blight on the ground now %d tiles; hens %d" % [
+		tiers[0], tiers[1], tiers[2], int(m.nights.seen.get("raid", 0)), int(nights["raids_won"]), m.nights.blight.size(), m.hens])
 	print("--- coins earned %s, spent %s; hens %d goats %d; property value %d; tax owed %d" % [earned, spent, m.hens, m.goats, m.desk._property_value(), m.tax_owed])
 	print("--- materials: %s" % JSON.stringify(m.materials))
 	print("--- harvested %s; withered %d" % [JSON.stringify(grown), int(m.stats["withered"])])

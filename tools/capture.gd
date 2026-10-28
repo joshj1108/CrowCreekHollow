@@ -34,6 +34,12 @@ extends SceneTree
 #                   or hollow (use with hour=22 or later)
 #                   first is the scripted first night (a new game gets it anyway at 22:00); sighting is the
 #                   first Hollow sighting (the night of the walk to the wood's edge)
+#   prog=F          with visitor, how far its answer has come (0 to 1): the ring round a held figure's head
+#   raid=KIND       bring tonight's raid now (fox, crows or barn; needs hens with built, or a coop: add hens=N)
+#   hens=N          put N hens in a coop placed beside the player
+#   sanity=N        set sanity (the madness tiers start under 60, 40 and 20); with madness, show each tier's sights now
+#   madness         with sanity, bring a figure at the screen's edge and (under 20) a crop that isn't there
+#   blight=N        the field shadow creeps N steps tonight, blighting the crops nearest it (use with crops=)
 #   beat=N          with visitor=first, play its beats up to N (0-3; the figure comes at 2); with visitor=sighting,
 #                   up to N (0-2: the crows go up at 0, the shape stands at the field's far edge at 1, and goes at 2)
 #   happening=ID    jump to a day with this daily happening: pedlar, glint, branch, crow_gifts, mushrooms,
@@ -165,6 +171,18 @@ func _initialize() -> void:
 	if opt.has("steps"):
 		main.nights.shadow_steps = int(opt["steps"])
 		main._update_shadow_tile()
+	if opt.has("blight"):
+		main.nights._blight(main.nights.shadow_steps, main.nights.shadow_steps + int(opt["blight"]))
+		main.nights.shadow_steps += int(opt["blight"])
+		main._update_shadow_tile()
+	if opt.has("hens"):
+		main.coop_built = true
+		main._relocate_building("coop")
+		main.hens = int(opt["hens"])
+		main.animals._sync_ages()
+		main._apply_storage_tiles()
+	if opt.has("sanity"):
+		main.sanity = float(opt["sanity"])
 	if opt.has("hour"):
 		main.clock = (float(opt["hour"]) - main.START_HOUR) / (main.DAY_END_HOUR - main.START_HOUR) * main.DAY_LENGTH
 	if opt.has("inside"):
@@ -251,6 +269,25 @@ func _initialize() -> void:
 				main.nights.sight_start -= float(main.nights.SIGHTING_BEATS[int(opt["beat"])])
 			else:
 				main.nights.first_start -= float(main.nights.FIRST_BEATS[int(opt["beat"])])
+		if opt.has("prog"):
+			main.nights.prog = float(opt["prog"])
+			# The slips into the dark up to this point have happened, so the figure stays where it stands.
+			var blinks := int(main.nights.BLINKS.get(opt["visitor"], 0))
+			main.nights.beats = mini(blinks, int(float(opt["prog"]) * (blinks + 1)))
+		await process_frame
+	if opt.has("raid"):
+		main.nights.raid = opt["raid"]
+		main.nights.raid_tile = main.nights._raid_place(opt["raid"])
+		main.nights.raid_at = main.current_hour
+		main.nights._update_raid()
+		await process_frame
+	if opt.has("madness"):
+		main.madness._spawn_figure()
+		main.madness.figure_left = 10.0
+		if main.madness._tier() >= 3:
+			main.madness.fake_crop = main.madness._fake_spot()
+			main.madness.lie_left = 10.0
+			main.madness.lie_hours = 2
 		await process_frame
 	if opt.has("fight"):
 		var at: Vector2 = main.player.position + main.player.facing * main.PX
