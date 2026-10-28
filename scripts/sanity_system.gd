@@ -105,11 +105,11 @@ func _change_sanity(amount: float) -> void:
 
 
 func _update_sanity(darkness: float, delta: float) -> void:
-	var rate := 0.02                 # slow recovery outdoors in daylight
+	var rate := 0.0                  # daylight outdoors neither drains nor restores
 	if m.inside:
-		rate = 0.1 + (0.05 if m.house_stage >= 1 else 0.0)   # the house is shelter
+		rate = m.INDOOR_SANITY_RATE + (m.SHELTER_SANITY_RATE if m.house_stage >= 1 else 0.0)   # the house is shelter
 	elif darkness > 0.5 and not m.projects._lit(m._player_tile()):   # a lamp post's light holds the dark off
-		rate = -0.05 * (0.5 if _event_active("ward") else 1.0)   # the dark wears on you; lanterns ward it on All Hallows
+		rate = -m.DARK_SANITY_DRAIN * (0.5 if _event_active("ward") else 1.0)   # the dark wears on you; lanterns ward it on All Hallows
 	_change_sanity(rate * delta)
 
 

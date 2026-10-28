@@ -33,9 +33,9 @@ const HOUSE_DOOR_IY := HOUSE_IY + HOUSE_H - 1
 # The first plot is open from the start. The second is overgrown until Farming 2.
 const PLOT_ONE := FarmLayout.PLOT_ONE
 const PLOT_TWO := FarmLayout.PLOT_TWO
-# The third plot opens at Farming 4 once the house is Patched. It sits between the paths.
+# The third plot opens at Farming 9 once the house is Patched. It sits between the paths.
 const PLOT_THREE := FarmLayout.PLOT_THREE
-const PLOT_THREE_LEVEL := 4
+const PLOT_THREE_LEVEL := 9
 
 # The walk-in interior sits below the farm, out of view of it. It is sized for the farmer, who is two tiles
 # tall: three rooms along the north over a long hall, and every wall that faces a room is three tiles tall.
@@ -68,7 +68,7 @@ const QUILTS := [Color("6a5a4a"), Color("3e5a80"), Color("3f6b4a"), Color("8a2e3
 # Each one gives sticks and fiber. Brush and trees come back on a weekly cycle; rocks take a month.
 const BRUSH_SPOTS := FarmLayout.BRUSH_SPOTS
 const BRUSH_REGROW_DAYS := 7
-const ROCK_REGROW_DAYS := 30
+const ROCK_REGROW_DAYS := 14
 # Extra piles that appear once Bushcrafting reaches level 3.
 const THICKET_SPOTS := FarmLayout.THICKET_SPOTS
 # The porch: four tiles of boards in front of the door, starting one row below the house.
@@ -92,7 +92,7 @@ const XP_FELL := 20
 # Rocks on the farm. Breaking one gives stone. A pick gives more, and from Mining 2 a small chance of copper ore.
 # Some sit inside the plots: a rock must be broken before that soil can be planted.
 const ROCK_SPOTS := FarmLayout.ROCK_SPOTS
-const XP_MINE := 12
+const XP_MINE := 8
 const ORE_CHANCE := 0.15
 const ORE_MINING_LEVEL := 2
 # A campsite is set up in the wider land from wood and fiber. It is safe from foes
@@ -123,6 +123,10 @@ const CAVE_EXIT_TILE := Vector2i(20, 21) # the west of the two exit tiles agains
 const CAVE_CREATURES := ["bat", "bat", "bat", "lizard", "lizard", "snake", "snake"]
 const CAVE_MIN_CREATURE_DEPTH := 8       # creatures start at least this far from the entrance
 const CAVE_IRON_DEPTH := 12              # iron ore only this far in
+const TREK_LANTERN_BOOST := 1.6          # the lantern in the Rookery Wood's gloom (see TrekSystem)
+const LAMP_OIL_PRICE := 8                # a flask of lamp oil from the catalog, for treks
+const CAVE_ORE_CHANCE := 0.05            # odds a rock wall touching the tunnels holds ore (about 7 a day)
+const CAVE_IRON_CHANCE := 0.015          # ... and that deep ore is iron (about 2 a day)
 const LOWMERE_ORIGIN := Vector2i(380, 440)
 const ASHFORD_ORIGIN := Vector2i(470, 440)
 # Tool tiers. A hatchet fells trees. Hardwood needs a copper hatchet or better.
@@ -224,7 +228,8 @@ const EVENT_HOUR := 22.0
 const MAX_STAGE := 3        # 0 = seed, 3 = ready to harvest
 const CROP_GROW_DAYS := {"turnip": 7, "corn": 8, "pumpkin": 10}   # watered days from seed to ready
 # What a sold crop fetches at the farm stand, and what food from it is worth.
-const CROP_VALUE := {"turnip": 8, "corn": 14, "pumpkin": 30}
+const CROP_VALUE := {"turnip": 8, "corn": 10, "pumpkin": 15}
+const SEED_BACK_CHANCE := 0.5   # odds a harvest gives its seed back, so seeds stay an ongoing cost
 const STAGE_NAMES := ["Decrepit", "Boarded", "Patched", "Restored"]
 # Tips: diary pages written as the player reaches each part of the farm, once each, when its condition
 # is met (see _tip_ready).
@@ -258,10 +263,12 @@ const GUIDE := [
 	{"id": "g_drink", "title": "Drink", "text": "Walk to the pond, face the water, and press {hand} to drink.", "stat": "drank", "goal": 1},
 ]
 # Cost to reach the next house stage, and the Carpentry level it needs.
+# The levels spread the homestead over the first year: boarded in the first days, patched in the second
+# week, restored in early summer (see the Homestead projects section of DESIGN.md).
 const REPAIR_COSTS := [
 	{"wood": 3, "fiber": 2, "level": 1},
-	{"wood": 5, "fiber": 4, "level": 2},
-	{"wood": 8, "fiber": 6, "level": 3},
+	{"wood": 5, "fiber": 4, "level": 3},
+	{"wood": 8, "fiber": 6, "level": 8, "season": "Summer"},   # the paint needs a dry season
 ]
 const HOUSE_FEATURES := [
 	{"stage": 1, "text": "Boarded: the walls hold, and sanity recovers faster indoors"},
@@ -298,7 +305,7 @@ const PUMPKIN_LEVEL := 3
 const CROPS := {
 	"turnip": {"label": "Turnip", "seed": "seeds", "held": "crops", "level": 0, "yield": 1, "xp": 25, "colors": ["8fd16b", "4f9a3a", "2f7a2a", "e8b440"]},
 	"corn": {"label": "Corn", "seed": "corn_seeds", "held": "corn", "level": CORN_LEVEL, "yield": 2, "xp": 30, "colors": ["9fc86a", "5f8a3a", "3f6a2a", "e8c440"]},
-	"pumpkin": {"label": "Pumpkin", "seed": "pumpkin_seeds", "held": "pumpkins", "level": PUMPKIN_LEVEL, "yield": 3, "xp": 40, "colors": ["9fd27a", "d98a35", "c26a1f", "f2a13a"]},
+	"pumpkin": {"label": "Pumpkin", "seed": "pumpkin_seeds", "held": "pumpkins", "level": PUMPKIN_LEVEL, "yield": 2, "xp": 40, "colors": ["9fd27a", "d98a35", "c26a1f", "f2a13a"]},
 }
 # A crop sells for its seed's cost spread over its yield, plus this difficulty bonus.
 # Pumpkins need Farming 3 and more care, so each one sells for more than a turnip.
@@ -326,7 +333,7 @@ const WORKSHOP_RECT := FarmLayout.WORKSHOP_RECT
 const WORKSHOP_DOOR := FarmLayout.WORKSHOP_DOOR
 const COOP_SIZE := Vector2i(3, 2)            # the coop is 3 wide and 2 deep, on open grass; its hen door is one tile
 const COOLER_INTERIOR := Vector2i(13, 13)   # in the hall, against its north wall
-const FURNACE_COST := {"wood": 6, "stone": 4, "coins": 80, "level": 4}
+const FURNACE_COST := {"wood": 6, "stone": 4, "coins": 80, "level": 5}
 const WOODSHED_COST := {"wood": 4, "fiber": 2, "coins": 40, "level": 2}
 const WOODSTORE_IX := FarmLayout.WOODSTORE_IX
 const CHOPLOG_IX := FarmLayout.CHOPLOG_IX
@@ -337,6 +344,7 @@ const FIRE_MAX_HOURS := 12.0        # the hearth holds at most four firewood's w
 const XP_CHOP_LOG := 6
 const SMELT_LEVEL := {"copper": 1, "iron": 4}
 const XP_SMELT := 10
+const SMELT_DAILY_LIMIT := 8      # bars the furnace makes a day before it must cool overnight
 # Ammunition is fletched at the Craft panel and used up by each shot.
 const AMMO := {
 	"arrows": {"name": "Arrows", "yield": 5, "cost": {"wood": 1, "fiber": 1}, "skill": "Bushcrafting", "level": 2},
@@ -344,7 +352,7 @@ const AMMO := {
 }
 const SHOT_SPEED := 320.0
 const SHOT_LIFE := 0.9
-const SMOKEHOUSE_COST := {"wood": 5, "fiber": 3, "coins": 60, "level": 3}
+const SMOKEHOUSE_COST := {"wood": 5, "fiber": 3, "coins": 60, "level": 4}
 # Preserving turns food into goods that keep in the pack. Each method needs a skill
 # level and makes one item per press at the smokehouse.
 # The stall sells what you carry and buys seeds. It is open 06:00 to 18:00.
@@ -360,8 +368,8 @@ const FARM_SPRITES := true
 const LAYOUT_VERSION := FarmLayout.VERSION
 const STALL_CLOSE_HOUR := 18.0
 const SELL_FISH := 6
-const SELL_EGG := 4                 # farm stand price for an egg
-const SELL_MILK := 6                # farm stand price for a jug of goat milk
+const SELL_EGG := 8                 # farm stand price for an egg: about the turnip a hen eats for it
+const SELL_MILK := 16               # farm stand price for a jug of goat milk: about the 2 turnips a goat eats for it
 const HEN_SELL := 20                # what a grown hen fetches at the coop
 const GOAT_SELL := 70               # what a grown goat fetches at the barn
 const HEN_MATURE_DAYS := 7          # nights before a hen is grown and starts laying: a week
@@ -402,6 +410,7 @@ const FOES := {
 	"bat": {"hp": 4, "speed": 40.0, "chase": 70.0, "dmg": 1, "aggro": 3.5, "cool": 0.9, "color": "3a3040", "xp": 12, "drop": "fiber"},
 	"lizard": {"hp": 8, "speed": 22.0, "chase": 44.0, "dmg": 2, "aggro": 3.0, "cool": 1.3, "color": "5f7a3a", "xp": 18, "drop": "resin"},
 	"snake": {"hp": 6, "speed": 30.0, "chase": 56.0, "dmg": 2, "aggro": 3.5, "cool": 1.1, "color": "6a5a2a", "xp": 16, "drop": "fiber"},
+	"dog": {"hp": 5, "speed": 30.0, "chase": 90.0, "dmg": 2, "aggro": 4.5, "cool": 1.1, "color": "4a3a2e", "xp": 16, "drop": "fiber"},   # feral dogs on treks (TrekSystem)
 }
 const STALKER_SPAWNS := [Vector2i(26, 8), Vector2i(29, 12), Vector2i(31, 7)]
 const ASHFORD_HOUSES := [Rect2i(5, 3, 6, 5), Rect2i(14, 13, 5, 4)]
@@ -617,7 +626,7 @@ const XP_PLANT := 5
 const XP_GATHER := 10
 const XP_REPAIR := 30
 const XP_TIDY := 20
-const TIDY_CLEANING_BONUS := 5     # extra sanity from a tidy at Cleaning 2
+const TIDY_CLEANING_BONUS := 3     # extra sanity from a tidy at Cleaning 2
 const XP_MEND := 15
 const MEND_WOOD := 1
 const MEND_FIBER := 1
@@ -627,14 +636,14 @@ const WEAR_PER_NIGHT := 1
 const WEAR_MEND := 2
 const WEAR_TIDY := 1
 const WEAR_REPAIR := 3
-const WELL_KEPT_SANITY := 5    # sanity back for a night with every chore done
+const WELL_KEPT_SANITY := 3    # sanity back for a night with every chore done
 const WEAR_RUNDOWN := 6       # at this wear, rain ruins a crop overnight
 const WEAR_FOX := 4           # at this wear, a fox can get into the coop
 # Livestock: hens in a coop behind the house. A fed hen lays an egg each morning.
 const COOP_COST := {"wood": 6, "fiber": 4, "level": 2}
 const COOP_HENS_MAX := 4
 const BARN_SIZE := Vector2i(5, 3)          # the barn is 5 wide and 3 deep, on open grass; its doors take a goat
-const BARN_COST := {"wood": 10, "fiber": 6, "level": 4}   # the barn is for livestock, kept apart from the coop
+const BARN_COST := {"wood": 10, "fiber": 6, "level": 7}   # the barn is for livestock, kept apart from the coop
 const HEN_PRICE := 12
 const HEN_FEED_CROPS := 1
 const HEN_LEAVE_DAYS := 2     # unfed this many days in a row, and a hen wanders off
@@ -672,17 +681,19 @@ const CARDS_GAMES := 15              # games a pack lasts before it is too worn
 const SUDOKU_BOOK_PRICE := 12
 const SUDOKU_BOOK_PUZZLES := 10
 const LOW_SANITY := 30.0
-const SLEEP_SANITY := 25.0
-const TIDY_SANITY := 10.0
+const SLEEP_SANITY := 12.0
+const TIDY_SANITY := 5.0
+const INDOOR_SANITY_RATE := 0.04    # sanity a second indoors; the boarded house adds SHELTER_SANITY_RATE
+const SHELTER_SANITY_RATE := 0.02
+const DARK_SANITY_DRAIN := 0.08     # sanity a second outdoors in the dark, away from a lamp
+const NIGHT_LOSS_MULT := 1.5        # scales every night visitor's sanity loss
 const COLLAPSE_SANITY_PENALTY := 5   # permanent cap reduction, curable with a cleanse
 var save_slot := 1                  # which save slot this game reads and writes
 var save_name := ""                 # the name given to the save when the game was started
 var world_started := false         # false while the start screen is up
 var title_menu: TitleMenu
-const SETTINGS_PATH := "user://hallowvale_settings.json"
-var music_on := true
-var music_player: AudioStreamPlayer
-var sfx_on := true                  # sound effects, remembered with the music setting
+var music_player: AudioStreamPlayer   # volumes and the rest of the settings are in GameSettings
+var pause_armed := ""               # the Pause menu's quit button pressed once, waiting for a second press
 var sfx_streams: Dictionary = {}    # sound name -> AudioStreamOggVorbis
 var sfx_players: Array = []         # a small pool, so overlapping sounds can play together
 var sfx_next := 0
@@ -800,8 +811,9 @@ var hose_attached := false
 var well_water := 0.0      # hours spent with an empty need, toward the next HP lost
 var weather_kind := ""       # today's weather, rolled each morning: see WEATHER_WEIGHTS
 var skill_xp := {"Farming": 0, "Bushcrafting": 0, "Carpentry": 0, "Cleaning": 0, "Fishing": 0, "Cooking": 0, "Combat": 0, "Forestry": 0, "Mining": 0, "Smithing": 0}
-var inventory := {"seeds": STARTING_SEEDS, "corn_seeds": 0, "pumpkin_seeds": 0, "crops": 0, "corn": 0, "pumpkins": 0, "fish": 0, "eggs": 0, "milk": 0, "fish_meal": 0, "turnip_hash": 0, "smoked_fish": 0, "dried_turnip": 0, "pumpkin_soup": 0, "canned_turnip": 0, "fish_stew": 0, "fermented_turnip": 0, "hearty_stew": 0, "bandage": 0, "firewood": 4, "crow_charm": 0}
-var materials := {"wood": 0, "sticks": 0, "fiber": 0, "resin": 0, "hardwood": 0, "stone": 0, "copper_ore": 0, "iron_ore": 0, "copper_bar": 0, "iron_bar": 0, "arrows": 0, "bolts": 0, "feathers": 0}
+var inventory := {"seeds": STARTING_SEEDS, "corn_seeds": 0, "pumpkin_seeds": 0, "crops": 0, "corn": 0, "pumpkins": 0, "fish": 0, "eggs": 0, "milk": 0, "fish_meal": 0, "turnip_hash": 0, "smoked_fish": 0, "dried_turnip": 0, "pumpkin_soup": 0, "canned_turnip": 0, "fish_stew": 0, "fermented_turnip": 0, "hearty_stew": 0, "bandage": 0, "firewood": 4, "crow_charm": 0, "trail_ration": 0}
+var materials := {"wood": 0, "sticks": 0, "fiber": 0, "resin": 0, "hardwood": 0, "stone": 0, "copper_ore": 0, "iron_ore": 0, "copper_bar": 0, "iron_bar": 0, "arrows": 0, "bolts": 0, "feathers": 0,
+	"storm_oak": 0, "flax": 0, "bell_metal": 0, "bell_frame": 0, "bell_rope": 0, "lamp_oil": 0, "rope": 0}
 # The hotbar, in slot order. Slots after these are empty.
 const HOTBAR_TOOLS := [
 	{"id": "sword", "name": "Weapon", "icon": "sword", "tint": "6b4a3a"},
@@ -833,6 +845,8 @@ var house_stage := 0
 var tidied_day := 0
 var mend_day := 0                   # the day the mend count applies to
 var mends_today := 0
+var smelt_day := 0                  # the day the smelt count applies to
+var smelts_today := 0
 var wear := 0                       # house upkeep, 0 to WEAR_MAX
 var coop_built := false
 var coop_tile := Vector2i(-1, -1)  # map tile of the coop's top-left corner, once built
@@ -882,7 +896,6 @@ var inside := false                 # standing in the farmhouse interior
 var open_tab := ""                  # "" when the action bar panel is closed
 var bag: BagPanel                   # the grid bag in the bottom-right corner (Tab or Y)
 var wheel: SectionWheel             # the section wheel (Shift or left stick click)
-var quest_open := {}              # quest id -> true when its details are open (not saved)
 var craft_tab := "gear"             # which Craft sub-tab shows (not saved)
 var event_fired_day := 0            # the day the night event last happened
 var tonight_shadow := Vector2i(-1, -1)
@@ -970,6 +983,7 @@ var stall: StallSystem
 var sanity_sys: SanitySystem
 var nights: NightSystem
 var happenings: DailyHappenings
+var trek: TrekSystem
 var projects: FarmProjects
 var feel: GameFeel
 var mystery: Mystery
@@ -1007,6 +1021,7 @@ func _ready() -> void:
 	nights = NightSystem.new(self)
 	rewards = HomesteadRewards.new(self)
 	happenings = DailyHappenings.new(self)
+	trek = TrekSystem.new(self)
 	projects = FarmProjects.new(self)
 	feel = GameFeel.new(self)
 	mystery = Mystery.new(self)
@@ -1018,7 +1033,9 @@ func _ready() -> void:
 	mining = MiningSystem.new(self)
 	combat_sys = CombatSystem.new(self)
 	_setup_input()
-	_load_settings()
+	GameSettings.load_settings()
+	GameSettings.apply(false)
+	_apply_display.call_deferred()
 	_start_music()
 	_load_sfx()
 	ambience = AmbienceSystem.new(self)
@@ -1029,7 +1046,7 @@ func _ready() -> void:
 	save_slot = TitleMenu.active_slot
 	# The start screen comes first. The world is built once the player picks Continue, New Game, or a slot.
 	title_menu = TitleMenu.new()
-	title_menu.settings_rows = panels._settings_rows()
+	title_menu.settings_rows = panels._controls_rows()
 	title_menu.start_requested.connect(_on_title_start)
 	title_menu.quit_requested.connect(func() -> void: get_tree().quit())
 	add_child(title_menu)
@@ -1039,19 +1056,11 @@ func _save_path() -> String:
 	return TitleMenu.slot_path(save_slot)
 
 
-# The lo-fi loop plays from the start screen on, and can be turned off in Settings. The choice is remembered.
-func _load_settings() -> void:
-	if FileAccess.file_exists(SETTINGS_PATH):
-		var parsed: Variant = JSON.parse_string(FileAccess.get_file_as_string(SETTINGS_PATH))
-		if typeof(parsed) == TYPE_DICTIONARY:
-			music_on = bool(parsed.get("music", true))
-			sfx_on = bool(parsed.get("sfx", true))
-
-
-func _save_settings() -> void:
-	var file := FileAccess.open(SETTINGS_PATH, FileAccess.WRITE)
-	if file != null:
-		file.store_string(JSON.stringify({"music": music_on, "sfx": sfx_on}))
+# The window follows the settings once the scene is running. A tool that loads the scene for a
+# screenshot has already sized the window, and the scene isn't the current one there, so it is left alone.
+func _apply_display() -> void:
+	if get_tree().current_scene == self:
+		GameSettings.apply(true)
 
 
 func _start_music() -> void:
@@ -1060,21 +1069,9 @@ func _start_music() -> void:
 	music_player = AudioStreamPlayer.new()
 	music_player.stream = stream
 	music_player.volume_db = -8.0
+	music_player.bus = "Music"   # the Music bus carries the volume setting, and is muted at 0
 	add_child(music_player)
-	_apply_music()
-
-
-func _apply_music() -> void:
-	if music_on and not music_player.playing:
-		music_player.play()
-	elif not music_on and music_player.playing:
-		music_player.stop()
-
-
-func _toggle_music() -> void:
-	music_on = not music_on
-	_save_settings()
-	_apply_music()
+	music_player.play()
 
 
 # Sound effects are short clips in audio/sfx. A small pool plays them, so several can overlap.
@@ -1087,7 +1084,7 @@ const SFX_NAMES := ["chop", "pick", "hoe", "tree_fall", "rock_break", "step", "p
 	"cast", "splash", "reel",
 	"fire_feed", "split", "smelt", "craft", "cloth", "cook", "feed", "sweep", "cleanse", "portal", "sleep", "collapse"]
 # The sound each kind of foe makes when it notices you.
-const FOE_SOUNDS := {"hollow": "growl", "stalker": "growl", "bat": "screech", "lizard": "hiss", "snake": "hiss"}
+const FOE_SOUNDS := {"hollow": "growl", "stalker": "growl", "bat": "screech", "lizard": "hiss", "snake": "hiss", "dog": "growl"}
 
 
 func _load_sfx() -> void:
@@ -1097,6 +1094,7 @@ func _load_sfx() -> void:
 			sfx_streams[name] = load(path)
 	for i in 12:
 		var p := AudioStreamPlayer.new()
+		p.bus = "SFX"
 		add_child(p)
 		sfx_players.append(p)
 
@@ -1112,7 +1110,7 @@ const SFX_DEFAULT_VOLUME := -4.0
 func play_sfx(name: String, jitter: float = 0.0) -> void:
 	if feel != null:
 		feel._on_sound(name)   # the action's burst of particles, and a shake for the big ones, sound or not
-	if not sfx_on or not sfx_streams.has(name) or sfx_players.is_empty():
+	if GameSettings.sfx_volume <= 0 or not sfx_streams.has(name) or sfx_players.is_empty():
 		return
 	var p: AudioStreamPlayer = sfx_players[sfx_next]
 	sfx_next = (sfx_next + 1) % sfx_players.size()
@@ -1124,7 +1122,7 @@ func play_sfx(name: String, jitter: float = 0.0) -> void:
 
 # Plays a sound at a set loudness, for the ambience and the night's events.
 func play_sfx_at(name: String, db: float, jitter: float = 0.0) -> void:
-	if not sfx_on or not sfx_streams.has(name) or sfx_players.is_empty():
+	if GameSettings.sfx_volume <= 0 or not sfx_streams.has(name) or sfx_players.is_empty():
 		return
 	var p: AudioStreamPlayer = sfx_players[sfx_next]
 	sfx_next = (sfx_next + 1) % sfx_players.size()
@@ -1132,13 +1130,6 @@ func play_sfx_at(name: String, db: float, jitter: float = 0.0) -> void:
 	p.volume_db = db
 	p.pitch_scale = 1.0 + randf_range(-jitter, jitter)
 	p.play()
-
-
-func _toggle_sfx() -> void:
-	sfx_on = not sfx_on
-	_save_settings()
-	if sfx_on:
-		play_sfx("tick")
 
 
 # Reloads the scene, which resets everything and shows the start screen. The chosen slot carries over.
@@ -1171,6 +1162,7 @@ func _on_title_start(mode: String, slot: int) -> void:
 	_build_crows()
 	nights._build()
 	happenings._build()
+	trek._build()
 	projects._build()
 	feel._build()
 	projects._stamp()
@@ -1208,9 +1200,13 @@ func _process(delta: float) -> void:
 		return
 	# F4 maxes out the farmer for testing, in debug builds only (running from the editor or the command line).
 	# Not F9 or F10: the editor takes those to suspend and step a game running in its Game tab.
+	# Shift+F4 jumps to the next morning a trek walker waits, packed for the trek (also debug builds only).
 	var dev_down := OS.is_debug_build() and Input.is_physical_key_pressed(KEY_F4)
 	if dev_down and not dev_was_down:
-		_dev_unlock_all()
+		if Input.is_physical_key_pressed(KEY_SHIFT):
+			_dev_trek_day()
+		else:
+			_dev_unlock_all()
 	dev_was_down = dev_down
 	if transitioning:
 		return
@@ -1268,12 +1264,12 @@ func _process(delta: float) -> void:
 		progression._bump("walked")
 	last_walk_tile = walk_tile
 	_update_tips(delta)
-	clock += delta
+	clock += delta * trek._time_scale()   # the clock runs slow in the Rookery Wood
 	_update_hens(delta)
 	_update_goats(delta)
 	desk._update_desk_light()
 	current_hour = START_HOUR + clock / DAY_LENGTH * (DAY_END_HOUR - START_HOUR)
-	_update_needs(delta * (DAY_END_HOUR - START_HOUR) / DAY_LENGTH)
+	_update_needs(delta * trek._time_scale() * (DAY_END_HOUR - START_HOUR) / DAY_LENGTH)
 
 	if current_hour >= DAY_END_HOUR:
 		_collapse()
@@ -1283,6 +1279,7 @@ func _process(delta: float) -> void:
 		nights._begin()
 	nights._update()
 	happenings._update()
+	trek._update(delta)
 	if Engine.get_process_frames() % 30 == 0:
 		projects._check(true)
 		mystery._check()
@@ -1292,7 +1289,7 @@ func _process(delta: float) -> void:
 	darkness = clampf(darkness + sanity_sys._low_sanity_boost(), 0.0, 1.0)
 	canvas_modulate.color = _light_tint().lerp(NIGHT_TINT, darkness)
 	if in_cave:
-		canvas_modulate.color = CAVE_TINT
+		canvas_modulate.color = trek._tint(darkness) if trek.active else CAVE_TINT
 	_update_lantern(1.0 if in_cave else darkness)
 	projects._update(darkness)
 	_update_cave_mouth_light(smoothstep(DUSK_HOUR, DUSK_HOUR + 2.0, current_hour))
@@ -1379,7 +1376,10 @@ func _draw() -> void:
 	if not world_started:
 		return
 	if in_cave:
-		_draw_cave()
+		if trek.active:
+			trek._draw_map()
+		else:
+			_draw_cave()
 		return
 	if _in_village():
 		_draw_world()
@@ -1880,7 +1880,7 @@ func _respawn_brush() -> void:
 	queue_redraw()
 
 
-# Brush and trees grow back once a week, and rocks once a month. The quarry refills each morning.
+# Brush and trees grow back once a week, and rocks every two weeks. The quarry refills each morning.
 func _regrow_wild() -> void:
 	mining._fill_quarry()
 	if day - brush_day >= BRUSH_REGROW_DAYS:
@@ -2116,6 +2116,11 @@ func _build_hud() -> void:
 	hale_label.add_theme_color_override("font_color", Color("d8b050"))
 	hale_label.tooltip_text = "Food, water and warmth are all at %d or more, so skills train faster." % int(HomesteadRewards.HALE_NEED)
 	hale_label.visible = false
+	# The walker's nerve, shown only on a trek.
+	trek.nerve_bar = _make_need_bar("Nerve")
+	trek.nerve_col = needs_box.get_child(needs_box.get_child_count() - 1)
+	(trek.nerve_col.get_child(0) as Label).text = "%s's nerve" % TrekSystem.ROUTES["mill"]["short"]
+	trek.nerve_col.visible = false
 
 	hud_clock_panel = PanelContainer.new()
 	hud_clock_panel.set_anchors_preset(Control.PRESET_CENTER_TOP)
@@ -3021,7 +3026,7 @@ func _handle_keys() -> void:
 	# Shift or a left stick click opens the section wheel, and closes it again.
 	if Input.is_action_just_pressed("wheel"):
 		_toggle_wheel()
-	# Esc or Start closes whatever is open. With nothing open, it opens Settings.
+	# Esc or Start closes whatever is open. With nothing open, it opens the Pause menu.
 	if Input.is_action_just_pressed("settings"):
 		_press_back(true)
 	# B closes what is open.
@@ -3045,10 +3050,46 @@ func _press_back(open_settings: bool) -> void:
 		_close_panel()
 		wheel.show_wheel()
 		play_sfx("panel")
+	elif open_tab == "Settings" or open_tab == "Controls":
+		_open_pause()
 	elif open_tab != "":
 		_close_panel()
 	elif open_settings:
-		_toggle_tab("Settings")
+		_open_pause()
+
+
+# The Pause menu. Like every panel it stops the day: the clock, needs, the night and foes all wait.
+func _open_pause() -> void:
+	pause_armed = ""
+	if open_tab == "":
+		_toggle_tab("Pause")
+	else:
+		open_tab = "Pause"
+		play_sfx("panel")
+		_refresh_panel()
+
+
+# The Pause menu's buttons. Both quits take a second press, as progress since the last sleep is lost.
+func _pause_action(action_id: String) -> bool:
+	match action_id:
+		"resume":
+			_close_panel()
+		"open_settings", "open_controls":
+			open_tab = "Settings" if action_id == "open_settings" else "Controls"
+			play_sfx("panel")
+			_refresh_panel()
+		"quit_title", "quit_game":
+			if pause_armed != action_id:
+				pause_armed = action_id
+				play_sfx("tick")
+				_refresh_panel()
+			elif action_id == "quit_title":
+				_quit_to_title()
+			else:
+				get_tree().quit()
+		_:
+			return false
+	return true
 
 
 func _is_wheel_section(section_name: String) -> bool:
@@ -3181,6 +3222,9 @@ func _on_panel_action(action_id: String) -> void:
 	if action_id.begins_with("decor:"):
 		projects._start_place(action_id.trim_prefix("decor:"))
 		return
+	if action_id.begins_with("bellpart:"):
+		projects._make_part(action_id.trim_prefix("bellpart:"))
+		return
 	if action_id.begins_with("pastime:") or action_id.begins_with("order:") or action_id == "pay_tax" or action_id == "mail_clear" or action_id == "diary":
 		desk._desk_action(action_id)
 		return
@@ -3244,14 +3288,10 @@ func _on_panel_action(action_id: String) -> void:
 	if action_id == "drink_well":
 		_drink_well()
 		return
-	if action_id == "toggle_music":
-		_toggle_music()
+	if GameSettings.change(action_id):
+		play_sfx("tick")
 		return
-	if action_id == "toggle_sfx":
-		_toggle_sfx()
-		return
-	if action_id == "quit_title":
-		_quit_to_title()
+	if _pause_action(action_id):
 		return
 	if action_id == "build_barn" or action_id == "move_barn":
 		_build_barn()
@@ -3271,12 +3311,15 @@ func _on_panel_action(action_id: String) -> void:
 	if action_id.begins_with("craft:"):
 		crafting._craft_gear(action_id.trim_prefix("craft:"))
 		return
-	if action_id.begins_with("quest_open:") or action_id.begins_with("quest_close:"):
-		quest_open[action_id.get_slice(":", 1)] = action_id.begins_with("quest_open:")
-		_refresh_panel()
-		return
 	if action_id.begins_with("craft_tab:"):
 		craft_tab = action_id.trim_prefix("craft_tab:")
+		play_sfx("tick")
+		_refresh_panel()
+		return
+	# The character tabs (Inventory, Gear, Skills) switch sections in place.
+	if action_id.begins_with("section:"):
+		open_tab = action_id.trim_prefix("section:")
+		play_sfx("tick")
 		_refresh_panel()
 		return
 	if action_id.begins_with("skill_pick:"):
@@ -3292,6 +3335,9 @@ func _on_panel_action(action_id: String) -> void:
 		return
 	if action_id == "use_bandage":
 		_use_bandage()
+		return
+	if action_id == "make_rope":
+		trek._make_rope()
 		return
 	if action_id == "make_bandage":
 		crafting._make_bandage()
@@ -3403,8 +3449,12 @@ func _refresh_panel() -> void:
 			rows = panels._barn_rows()
 		"Well":
 			rows = panels._well_rows()
+		"Pause":
+			rows = panels._pause_rows()
 		"Settings":
-			rows = panels._settings_rows() + panels._game_rows()
+			rows = panels._as_tabs(GameSettings.rows())
+		"Controls":
+			rows = panels._as_tabs(panels._controls_rows())
 		"Diary":
 			rows = panels._diary_rows()
 			diary_reading = diary_found
@@ -3449,6 +3499,13 @@ const MATERIAL_INFO := {
 	"arrows": {"name": "Arrows", "icon": "arrow", "tint": "6b4a3a", "desc": "Ammunition for the bow. Each shot uses one."},
 	"bolts": {"name": "Bolts", "icon": "arrow", "tint": "6b6b6b", "desc": "Ammunition for ranged weapons. Each shot uses one."},
 	"feathers": {"name": "Crow feathers", "icon": "feather", "tint": "2a2632", "desc": "Left behind by the things that come at night, when you face them. Bound into crow charms."},
+	"storm_oak": {"name": "Storm oak", "icon": "log", "tint": "3a2a22", "desc": "Heartwood from an oak split by a spring storm. The crow bell's frame is cut from it."},
+	"flax": {"name": "Wild flax", "icon": "fiber", "tint": "5a7ab0", "desc": "Long stems from the wild flax that flowers in summer. Twisted into the crow bell's rope."},
+	"bell_metal": {"name": "Bell metal", "icon": "bar", "tint": "6a6058", "desc": "The crow bell, cast in winter and cooled in the frost. Hung on All Hallows."},
+	"bell_frame": {"name": "Bell frame", "icon": "log", "tint": "5a3a26", "desc": "The crow bell's yoke, cut from storm oak. Hung on All Hallows."},
+	"lamp_oil": {"name": "Lamp oil", "icon": "resin", "tint": "d8b050", "desc": "A flask of lamp oil from the catalog. In the Rookery Wood your lantern burns one in about a minute, and goes out without it."},
+	"bell_rope": {"name": "Bell rope", "icon": "fiber", "tint": "c8b080", "desc": "The crow bell's rope, twisted from wild flax. Hung on All Hallows."},
+	"rope": {"name": "Rope", "icon": "fiber", "tint": "b89a68", "desc": "Twisted from fiber (Craft, Other). On a trek, tied across a flooded hollow, it takes the walker over dry."},
 }
 var inventory_selected := ""   # the pack item whose details show; remembered while the panel is open
 
@@ -3656,30 +3713,6 @@ func _use_bandage() -> void:
 	_show_message("You bind your wounds. HP %d/%d" % [hp, max_hp()])
 
 
-# A quest is a single line: its name, and Done or its progress. Details open with a button.
-# The current chapter starts open; the player's choice overrides that.
-func _quest_row(q: Dictionary, expanded: bool) -> Dictionary:
-	var id := str(q["id"])
-	var done: bool = quests_done.has(q["id"])
-	var is_open: bool = bool(quest_open.get(id, expanded))
-	var shown := mini(progression._stat_value(q["stat"]), q["goal"])
-	var row := {
-		"name": str(q["title"]),
-		"struck": done,
-		"value": "Done" if done else "%d/%d" % [shown, q["goal"]],
-		"button": "Hide" if is_open else "Details",
-		"action": ("quest_close:" if is_open else "quest_open:") + id,
-		"enabled": true,
-	}
-	if is_open:
-		var note := "%s  Reward: %s" % [q["text"], progression._reward_text(q["reward"])]
-		if expanded:
-			note = "%s\n%s" % [q["story"], note]
-		row["note"] = note
-		row["progress"] = float(shown) / float(q["goal"])
-	return row
-
-
 # A standing building can be moved; one that is paid for but not yet placed gets a Place button.
 func _placed_row(label: String, kind: String, tile: Vector2i, action: String) -> Dictionary:
 	var placed := tile.x >= 0
@@ -3793,7 +3826,10 @@ func _interact() -> void:
 		farm._stop_harvest("You stop working.")
 		return
 	if in_cave:
-		_interact_cave()
+		if trek.active:
+			trek._interact(_tile_in_front())
+		else:
+			_interact_cave()
 		return
 	if _in_village():
 		_interact_village()
@@ -3809,6 +3845,8 @@ func _interact() -> void:
 	if not inside and nights._try_face(tile):
 		return
 	if not inside and happenings._try_take(tile):
+		return
+	if not inside and trek._try_walker(tile):
 		return
 	if not inside and not in_cave and projects._try_use(tile):
 		return
@@ -4493,7 +4531,7 @@ func _has_materials(cost: Dictionary) -> bool:
 
 # --- Mining --------------------------------------------------------------------
 
-# A monthly refill leaves a spot empty while a crop is growing on it, so the crop is never buried.
+# A refill leaves a spot empty while a crop is growing on it, so the crop is never buried.
 func _fill_rocks(keep_clear: bool = false) -> void:
 	rocks.clear()
 	for spot in ROCK_SPOTS:
@@ -4670,9 +4708,9 @@ func _generate_cave() -> void:
 				continue
 			var depth := absi(x - CAVE_START.x) + absi(y - CAVE_START.y)
 			var roll := rng.randf()
-			if depth >= CAVE_IRON_DEPTH and roll < 0.04:
+			if depth >= CAVE_IRON_DEPTH and roll < CAVE_IRON_CHANCE:
 				cave[y][x] = Tile.ORE_IRON
-			elif roll < 0.09:
+			elif roll < CAVE_ORE_CHANCE:
 				cave[y][x] = Tile.ORE_COPPER
 	var spots: Array = []
 	for y in range(1, CAVE_H - 1):
@@ -5499,13 +5537,13 @@ func _can_repair() -> bool:
 	var cost: Dictionary = REPAIR_COSTS[house_stage]
 	return materials["wood"] >= cost["wood"] \
 		and materials["fiber"] >= cost["fiber"] \
-		and progression._level("Carpentry") >= cost["level"]
+		and progression._level("Carpentry") >= cost["level"] 		and str(cost.get("season", _season_of(_calendar_date(day)["month"]))) == _season_of(_calendar_date(day)["month"])
 
 
 func _repair_house() -> void:
 	play_sfx("repair")
 	if not _can_repair():
-		_show_message("Not enough wood and fiber, or Carpentry is too low for this repair.")
+		_show_message("Not enough wood and fiber, Carpentry is too low, or it isn't the season for this repair.")
 		return
 	var cost: Dictionary = REPAIR_COSTS[house_stage]
 	materials["wood"] -= cost["wood"]
@@ -6046,6 +6084,8 @@ func _show_card(text: String, fade_in: float, hold: float, fade_out: float) -> v
 
 
 func _shake_camera(seconds: float, strength: float) -> void:
+	if not GameSettings.screen_shake:
+		return
 	if shake_tw != null and shake_tw.is_valid():
 		shake_tw.kill()
 	var tw := create_tween()
@@ -6117,6 +6157,36 @@ func _advance_lantern() -> void:
 # bag tier, the house restored, every storage building, the pump and hose, and full needs. The coop and
 # barn still need placing, so build them from the Buildings panel.
 const DEV_LEVEL := 10
+# Dev only (Shift+F4): the next day a walker waits at the north edge, at 08:00, standing below them, with a
+# lantern, a hatchet, 2 lamp oil and 2 trail rations. Nothing else changes, so it's a fair test of the trek.
+func _dev_trek_day() -> void:
+	var d := maxi(day + 1, TrekSystem.FROM_DAY)
+	while not trek._walker_day(d):
+		d += 1
+	day = d
+	clock = (8.0 - START_HOUR) / (DAY_END_HOUR - START_HOUR) * DAY_LENGTH
+	current_hour = 8.0
+	_roll_weather()
+	_apply_weather()
+	happenings._start_day(false)
+	lantern_tier = maxi(lantern_tier, 1)
+	_apply_lantern_radius()
+	tool_tier["hatchet"] = maxi(int(tool_tier["hatchet"]), 1)
+	materials["lamp_oil"] = maxi(int(materials["lamp_oil"]), 2)
+	inventory["trail_ration"] = maxi(int(inventory["trail_ration"]), 2)
+	trek._abort()
+	if in_cave:
+		in_cave = false
+		foes = []
+	if inside:
+		_leave_house()
+	var w := trek._walker_tile()
+	player.position = _tile_center(w.x, w.y + 1)
+	_set_bounds()
+	queue_redraw()
+	_show_message("Dev: day %d.%s" % [day, trek._morning_note()])
+
+
 func _dev_unlock_all() -> void:
 	for skill in skill_xp.keys():
 		skill_xp[skill] = maxi(int(skill_xp[skill]), progression._xp_for_level(DEV_LEVEL))
@@ -6161,8 +6231,9 @@ func _apply_lantern_radius() -> void:
 
 
 func _update_lantern(darkness: float) -> void:
-	lantern_light.enabled = lantern_tier > 0 and darkness > 0.05
-	var energy := LANTERN_ENERGY * (CAVE_LANTERN_BOOST if in_cave else 1.0)
+	# In the Rookery Wood the lantern burns lamp oil, and goes out without it.
+	lantern_light.enabled = lantern_tier > 0 and darkness > 0.05 and not (trek.active and not trek.lit)
+	var energy := LANTERN_ENERGY * ((TREK_LANTERN_BOOST if trek.active else CAVE_LANTERN_BOOST) if in_cave else 1.0)
 	if lantern_tier >= LANTERN_FLICKER_TIER:
 		var t := Time.get_ticks_msec() / 1000.0
 		lantern_light.energy = energy * (0.9 + 0.08 * sin(t * 9.0) + randf_range(-0.03, 0.03))
@@ -6181,7 +6252,7 @@ func _update_lantern(darkness: float) -> void:
 
 # Daylight through the cave's exit: very faint, fading out with the dusk and gone at night.
 func _update_cave_mouth_light(darkness: float) -> void:
-	cave_mouth_light.enabled = in_cave and darkness < 0.95
+	cave_mouth_light.enabled = in_cave and not trek.active and darkness < 0.95
 	cave_mouth_light.energy = CAVE_MOUTH_ENERGY * (1.0 - darkness)
 
 
@@ -6196,6 +6267,7 @@ func _end_day(base: String, leave_house: bool = true) -> void:
 	# Resting at a campsite keeps you in the wider land. Everywhere else in the world sends you home.
 	if _in_village() and not _at_campsite():
 		_go_home("")
+	trek._abort()
 	hp = max_hp()
 	# Tonight's visitor, if still waiting, is settled before the door opens in the morning.
 	var night_note := nights._end_night()
@@ -6236,7 +6308,7 @@ func _end_day(base: String, leave_house: bool = true) -> void:
 	var happening_note := happenings._start_day(true)
 	var mail_note := desk._mail_day()
 	_show_message("%s Your crops grew overnight.%s%s The morning is %s.%s" % [
-		base, spoil_note, upkeep_note, str(WEATHER_NAMES.get(weather_kind, "overcast")).to_lower(), event_note + happening_note + mail_note])
+		base, spoil_note, upkeep_note, str(WEATHER_NAMES.get(weather_kind, "overcast")).to_lower(), event_note + happening_note + trek._morning_note() + mail_note])
 	if desk._tax_evicts():
 		desk._evict()
 		return
@@ -6256,7 +6328,9 @@ func _check_doors() -> void:
 	var tile := _player_tile()
 	var kind := _kind_at(tile)
 	if in_cave:
-		if kind == Tile.CAVE_EXIT:
+		if trek.active:
+			trek._on_step(kind)
+		elif kind == Tile.CAVE_EXIT:
 			_leave_cave()
 		return
 	if not _in_village() and not inside and kind == Tile.CAVE_MOUTH:
@@ -6352,7 +6426,7 @@ func _cost_text(cost: Dictionary) -> String:
 
 func _show_message(text: String) -> void:
 	message_label.text = text
-	message_timer = MESSAGE_SECONDS + text.length() / 30.0
+	message_timer = (MESSAGE_SECONDS + text.length() / 30.0) * GameSettings.message_scale()
 
 
 func _tile_in_front() -> Vector2i:
@@ -6398,7 +6472,7 @@ func _is_blocked_world(p: Vector2) -> bool:
 	# farm rocks' coordinates mean nothing, so they only count out on the farm.
 	if _in_village():
 		return _npc_index(t) != -1 or quarry.has(t)
-	return not inside and (brush.has(t) or (not in_cave and (rocks.has(t) or projects._blocks(t))))
+	return not inside and not in_cave and (brush.has(t) or rocks.has(t) or projects._blocks(t))
 
 
 func _world_tile(ix: int, iy: int) -> Vector2i:

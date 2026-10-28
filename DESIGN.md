@@ -17,21 +17,22 @@ A top-down farming game with heavy psychological horror, built in Godot 4.7.
 - Hand actions (talk, sleep, tidy, cleanse, cook, gather brush, drink from the pond, open panels, confirm placement, rest at camp): Space or A, facing the tile.
 - Tool and weapon actions (hoe, hose, trowel, axe, pick, rod, sword, bow): RT or a left click, facing the tile. A tool press on a tool target with the wrong tool in hand says which tool to select. With the trowel in hand, the D-pad up and down, or Z and X on the keyboard, cycle the seed you plant (the left stick does not) (turnip, then pumpkin once Farming reaches its level, skipping any you have none of), and do not walk you. A hand press on one says to use RT or click.
 - Walk into the farmhouse door to go inside. Walk onto the exit mat to leave.
-- The section wheel: Shift opens it (see Section wheel below). J opens and closes the diary (see The diary). Settings is Esc only. The Inventory is opened from the bag (Tab).
+- The section wheel: Shift opens it (see Section wheel below). J opens and closes the diary (see The diary). The Pause menu is Esc only. The Inventory is opened from the bag (Tab).
 - The bag (grid, bottom-right corner): Tab opens and closes it. Click a slot to use it, or move with the arrow keys and press Enter.
-- Esc closes whatever is open, the bag, the wheel, or a section, one at a time. With nothing open, Esc opens Settings. Esc or Start closes Settings. B closes the same things as Esc.
-- Stuck while placing or boxed in? Esc opens Settings, which cancels any placement. The **Unstick** button in the Game section moves you to the nearest open ground (grass, path, soil, fallow) from the farmhouse door, and works on the farm only.
+- Esc closes whatever is open, the bag, the wheel, or a section, one at a time. With nothing open, Esc opens the **Pause menu** (see Settings and pause). From Settings or Controls, Esc or B goes back to the Pause menu. B closes the same things as Esc.
+- Stuck while placing or boxed in? Esc cancels any placement and opens the Pause menu. Its **Unstick** button moves you to the nearest open ground (grass, path, soil, fallow) from the farmhouse door, and works on the farm only.
 - Farming and gathering pause while a panel is open
-- **Dev (debug builds only):** F4, or **Unlock** in the Game section of Settings, sets every skill to level 10 and gives 99,999 coins, 999 of each material and 99 of each seed. It also gives every tool, lantern and bag tier, restores the house, builds the pump, hose and storage buildings, and fills the needs. The coop and barn still need placing from the Buildings panel. Exported release builds ignore F4 and hide the button. It isn't on F9 because the Godot editor uses F9 to suspend a game running in its Game tab.
+- **Dev (debug builds only):** F4, or **Unlock** at the bottom of the Pause menu, sets every skill to level 10 and gives 99,999 coins, 999 of each material and 99 of each seed. It also gives every tool, lantern and bag tier, restores the house, builds the pump, hose and storage buildings, and fills the needs. The coop and barn still need placing from the Buildings panel. Exported release builds ignore F4 and hide the button. It isn't on F9 because the Godot editor uses F9 to suspend a game running in its Game tab. **Shift+F4** jumps to the next morning a trek walker waits (08:00, standing below them) and packs a lantern, a hatchet, 2 lamp oil and 2 trail rations, changing nothing else, for testing the treks.
 
 ## Gamepad (Xbox layout)
 
 - Move: left stick or D-pad (0.3 deadzone)
 - Use, plant, harvest, gather, sleep: A
 - Close the open panel: B
-- Bag Y, section wheel left stick click, Settings Start, Close B
+- Bag Y, section wheel left stick click, Pause menu Start, Close B
 - The bag: Y opens and closes it, the D-pad moves between its slots, A uses the slot in focus, B closes it.
 - While a panel is open, the D-pad or left stick moves focus between its buttons, and A presses the highlighted one. The first usable button is highlighted when a panel opens.
+- In a ledger panel, LB and RB switch tabs, the D-pad moves between entries, and A presses the focused entry's action.
 - Keyboard and gamepad share the same actions, so both work at once.
 
 ## Action bar
@@ -47,11 +48,21 @@ A top-down farming game with heavy psychological horror, built in Godot 4.7.
 - The farm's buildings hug the house: the cellar against the west wall. The workshop is a walled building south-east of the farm centre, 7 by 6, with a door on its south side. Its furnace and smokehouse stand inside. The cooler is inside the house. The workshop, coop, and barn are built and moved from the Buildings menu (U).
 
 - A small **Menu** button sits in the bottom-right corner for mouse players. It opens the section wheel, and hides while a section is open. A section is shown alone, full screen, with its options and a Close button. It never lists the other sections, so the only way to another section is to close it and open the wheel again.
-- Quests are collapsed to a line: the title, and Done or the progress count. A Details button opens the story, reward, and progress bar, and Hide closes it. The current chapter starts open.
-- Completed quests show their title struck through.
-- Settings sections fold. Each header shows its item count and opens with Enter or A, or a click, so only the headings show until you open one. Every section starts folded.
-- Each section lists its options as cards: name, value, and an optional button or progress bar. The Craft panel is the exception: it is a picture grid (see Gear and crafting). The other sections use the card layout.
-- **Any open menu pauses the day.** While any section is open (Skills, Inventory, Craft, Quests, shops, the bank, Settings, and the rest) the clock stops, foes stand still, and the player can't move. Closing the menu resumes the day where it left off.
+- Controls sections are ledger tabs in the game (the start screen lists them with headings).
+- Each section lists its options as cards: name, value, and an optional button or progress bar. The Craft panel is the exception: it is a picture grid (see Gear and crafting). Sections not yet moved to the ledger use the card layout.
+- **The ledger layout** (replacing the cards one panel at a time; every card panel but the diary is done). A section is split into tabs, switched with LB/RB or Q/E (Q and E are free while a panel is open, and LB/RB don't change the hotbar since the day is paused) or by clicking a tab. The tab strip hides when there's only one tab. Each tab lists one-line entries on the left: the name, and a status on the right in green (ready, or the button's word), rust (short, "Not yet"), grey (done, built) or gold (information). Every entry takes focus, so a gamepad can read the ones without a button too. The right side is the detail page for the focused entry: its name, status, what it does, a "Needs" list with each cost ticked (have) or crossed (short, with how many you have), a progress bar, the longer note, and the button with its prompt. A or Space on an entry presses its action; a click only picks it, and the detail button acts. A tab's general notes sit small under its entries. The footer shows button prompts (Select, Close, Tabs, Sections) in keyboard or Xbox names, following whichever was used last. The open tab is remembered per panel until the game closes and isn't saved.
+- **House tabs:** Home (the farmhouse, the next repair, including the summer-only restore, wear, the sanity limit and the bed, cleansing), Chores (the chores and the daily job), Storage (root cellar, cooler), Features (what each repair stage unlocks).
+- **Buildings tabs:** Homestead (steps done with a bar, and the next step), Workshop (smokehouse, furnace, firewood store; the store needs one of the others first), Animals (coop, barn: build, then place or move), Decor (lamp post, flower bed, gravel path, crow bell, each with its skill, season or All Hallows need), and Crow bell (its three parts, until the bell is hung). The mill path's Trail works will be one more tab.
+- **Desk tabs:** Post (the diary, each letter as an entry marked New or Read with its text on the detail page, and Put letters away), Tax (property value, and the tax owed with Pay), Pastimes (played today, any limit lost to boredom, solitaire and sudoku), Catalog (grouped by Pastimes, Supplies, Seeds and Livestock, each with its price and anything else it needs, and what's on order).
+- **Small panels:** Furnace (a "Bars left today" line with a bar, then each smelt with its ore, wood, Smithing level and the day's limit), Smokehouse, Coop (Hens), Barn (Goats), Root cellar, Cooler and Firewood store are one tab each, so they show no tab strip. The Well has Pump and Hose tabs, the general shop Buy and Sell, and the bank Coins and Goods. An entry whose button can't be pressed shows its short value in rust (such as "0 held"), or "Not yet".
+- **Pause** is one ledger tab with no status on its lines, so it reads as a plain menu, and its prompts leave out Sections. A quit waiting for its second press shows "Press again" in rust, and its detail page says progress since the last sleep is lost.
+- **Grid panels with tabs:** Inventory, Gear and Skills share a tab strip (in that order), so LB/RB or Q/E step between them in place. Craft's tab strip (its own sub-tabs) steps the same way. Their tab buttons are out of the focus path (the D-pad stays on the grid), carry the tab keys at their ends, and these panels show the prompt bar instead of the old hint line.
+- **Quests** has a Story tab (and Lowmere when the world is on): the current chapter first, then every chapter with Done or its count. The detail page tells the current chapter's story, the goal, a bar and the reward. The old Details and Hide buttons are gone.
+- **Achievements** has a tab per tier (Settler, Homesteader, Keeper, Hollow Hand), each achievement with Done or its count, and a note giving the tier's count and the overall total.
+- **Settings and Controls** keep their rows shared with the start screen, which still shows headings. In the game each heading becomes a tab (Sound, Display, Messages; Keyboard, Gamepad, Saving) and each line shows its value on the right. A volume line steps down and up with left and right (its detail page has - and + for the mouse). From these two, the prompt reads Back, since B returns to the Pause menu.
+- Needs lines are marked [x] (have) and [ ] (short), since the default font has no tick or cross.
+- **Ledger plan:** every panel is moved except the diary, which keeps its own page layout. What's left is the SpriteCook art. Skills, Inventory, Gear and Craft keep their picture grids and take the tab keys and prompt bar. Art to make in SpriteCook later: tab planks (normal, open), a 16 px strip of prompt glyphs (A, B, LB, RB, L3, Q, E, Space, Esc, Shift) and a strip of tab icons; until then they are drawn in code.
+- **Any open menu pauses the day.** While any section is open (Skills, Inventory, Craft, Quests, shops, the bank, the Pause menu, Settings, and the rest) the clock stops, foes stand still, and the player can't move. Closing the menu resumes the day where it left off.
 - Panels rebuild only when their content changes, so buttons don't disappear mid-click.
 - The open panel is saved and reopened on load.
 
@@ -81,7 +92,7 @@ All sprites are being remade in SpriteCook in one style. The older ChatGPT art i
 ## Map
 
 - A 64×40 walkable farm surrounded by a tree border, so the camera stays centered on the player all the way to the farm's edge.
-- Two plots: **Plot one** is tilled from the start. **Plot two** is overgrown and opens at Farming 2. A third fallow plot sits beside them and opens at Farming 4 once the house is Patched.
+- Two plots: **Plot one** is tilled from the start. **Plot two** is overgrown and opens at Farming 2. A third fallow plot sits beside them and opens at Farming 9 once the house is Patched.
 - The layout comes from a diagram (see Code layout). Fences and rocks block movement; the dock, the island and the path are walkable.
 - Trees, water, the house walls, and brush piles block movement. The player slides along walls.
 - A minimap in the top-right shows the farm, brush piles, the player, and the shadow on event nights. Its colours are graded toward the game's muted look (part way to grey, darker and a little cooler; `Minimap.grade`, also used for the world map), and each tile is shaded a little lighter or darker so fields and woods read as texture. The house, the well, the cave and the player are SpriteCook icons (`art/ui/minimap_icons.png`, four 16 px cells); without the art they fall back to blue squares and a dot.
@@ -119,7 +130,7 @@ All sprites are being remade in SpriteCook in one style. The older ChatGPT art i
 - The sounds are generated by `tools/make_sfx.py` (numpy synthesis, written to OGG with soundfile) and live in `audio/sfx/`. Each can be replaced by a file with the same name.
 - They are built to sound physical rather than beepy: filtered noise and crackle for dirt, leaves and food, struck wood and metal partials for hammers, tools, coins and latches, a plucked note in the harvest, a music-box run for achievements, a formant voice for the goats, and a short room or outdoor reverb on each. Each is levelled to the loudness the game's per-sound volumes were tuned for.
 - A small pool of players lets sounds overlap, and each footstep and sound gets a little random pitch.
-- **Sound effects** can be turned on or off under Game in Settings. The choice is saved with the music setting. It covers the ambience too.
+- **Sound effects** have their own volume in Settings (0 is off). It covers the ambience too.
 
 ### Ambience
 
@@ -154,7 +165,7 @@ Each year has a few dated events. When one starts, the morning message announces
 ## Music
 
 - **Music** is a lo-fi loop (`audio/dreary_loop.ogg`) that starts on the title screen and loops quietly.
-- It can be turned off in Settings under Game. The choice is saved to `user://hallowvale_settings.json`.
+- Its volume is set in Settings (0 is off). See Settings and pause.
 - The loop is generated by `tools/make_music.py` (numpy synthesis, seeded, 53 seconds). It is a placeholder that can be swapped for any OGG file at the same path.
 
 ## Story chapters
@@ -182,7 +193,7 @@ Saves from before this change reset chapter progress. Stat-based achievements re
 - Coins are the money. The HUD shows them, and they're saved.
 - The **farm stand** sits on the path east of the house. It is open **06:00 to 18:00**. Walk up to it and press Space to trade.
 - The farm stand **only buys what you carry**. Take crops or fish out of storage first.
-- Sell prices: turnips 8 each, pumpkins 30 each, fish 6 each, eggs 4 each, goat milk 6 each, and cooked food from 8 to 20 each, as listed on the Trade panel.
+- Sell prices: turnips 8 each, corn 10 each, pumpkins 15 each, fish 6 each, eggs 8 each, goat milk 16 each, and cooked food from 8 to 20 each, as listed on the Trade panel.
 - The stand only sells. Seeds and livestock are ordered from the **catalog** at the desk (see Farmhouse).
 
 ## Pack, bags, and storage
@@ -204,7 +215,7 @@ Saves from before this change reset chapter progress. Stat-based achievements re
 - **Fish spoil:** any fish still in the pack at the end of the day are lost. The end-of-day message says how many. Storing fish in the cooler is the only way to keep them overnight.
 - **Full pack:** storage is always manual. A full pack stops harvesting and fishing with a message. Store fish in the cooler, or sell or cook them, to keep going.
 
-**Smokehouse** (built from the Buildings menu, in the workshop): 60 coins, 5 wood, 3 fiber, Carpentry 3. Stand beside it, facing it, and press Space to preserve food. Preserved goods live in the pack and never spoil overnight.
+**Smokehouse** (built from the Buildings menu, in the workshop): 60 coins, 5 wood, 3 fiber, Carpentry 4. Stand beside it, facing it, and press Space to preserve food. Preserved goods live in the pack and never spoil overnight.
 
 | Method | Input | Needs | Makes | Sells | Skill |
 |---|---|---|---|---|---|
@@ -248,9 +259,9 @@ Achievements track stats and never reset. Each pays a small reward. Earning all 
 ## Farming and crops
 
 - Three crop kinds:
-  - **Turnip** (starter): yields 1 crop and 1 seed back. 25 XP. 7 days. Sells for 8.
-  - **Corn** (Farming 2): yields 2 ears and 1 corn seed back. 30 XP. 8 days. Sells for 14. Seeds are 6 coins each, sold 4 at a time. Corn is food and animal feed like the other crops, but has no recipes and doesn't keep in the cellar. Art: `art/farm/crop_corn.png` (SpriteCook, four 16 px stages); its ripe frame is the corn icon in `art/ui/icons.png`.
-  - **Pumpkin** (Farming 3): yields 3 crops and 1 pumpkin seed back. 40 XP. 10 days. Sells for 30.
+  - **Turnip** (starter): yields 1 crop, and half the time 1 seed back (`SEED_BACK_CHANCE`), so seeds are an ongoing cost. 25 XP. 7 days. Sells for 8.
+  - **Corn** (Farming 2): yields 2 ears, and half the time 1 corn seed back. 30 XP. 8 days. Sells for 10. Seeds are 6 coins each, sold 4 at a time. Corn is food and animal feed like the other crops, but has no recipes and doesn't keep in the cellar. Art: `art/farm/crop_corn.png` (SpriteCook, four 16 px stages); its ripe frame is the corn icon in `art/ui/icons.png`.
+  - **Pumpkin** (Farming 3): yields 2 pumpkins, and half the time 1 pumpkin seed back. 40 XP. 10 days. Sells for 15.
 - Planting uses the **selected seed**. Switch it in the Inventory panel once a second kind is unlocked; it steps through the unlocked kinds. If the selected kind isn't unlocked yet, turnip is planted.
 - Feeding animals, offerings and Harrow's crops take turnips first, then corn, then pumpkins.
 - Planting gives 5 XP.
@@ -274,8 +285,8 @@ The house is drawn in four stages that match its repair level. **Decrepit** has 
 | Repair to | Wood | Fiber | Carpentry |
 |---|---|---|---|
 | Boarded | 3 | 2 | 1 |
-| Patched | 5 | 4 | 2 |
-| Restored | 8 | 6 | 3 |
+| Patched | 5 | 4 | 3 |
+| Restored | 8 | 6 | 8, in summer only (the paint needs a dry season) |
 
 - The hall and bedroom are open from the start, so the bed is usable right away. Other rooms open as the house is repaired:
   - **Hall:** open from the start, with the exit mat.
@@ -283,18 +294,18 @@ The house is drawn in four stages that match its repair level. **Decrepit** has 
   - **Parlor (Patched):** a cleaning station. Tidy once a day for Cleaning XP.
   - **Study (Restored):** an empty room. The desk stays in the bedroom.
   - **Pastimes:** the Desk panel has **Solitaire** (1 hour) and **Sudoku** (1 hour 30). They are not played out: Play passes that much time (needs drop and the fire burns as usual), closes the panel, and the day's first game gives sanity and some lost limit back (see Sanity and horror). Solitaire uses a game from the **pack of cards** (a worn pack with 5 games is in the drawer at the start; a new pack lasts 15). Sudoku uses a puzzle from the **sudoku book** (10 puzzles; none at the start). A pastime has to be over by 02:00.
-  - **Catalog:** the Desk panel's catalog is where everything for the farm is bought. An order is paid at once and comes with the next morning's post, with a Delivery letter; animals go straight into their pens. It sells: a pack of cards (10 coins), a sudoku book (12), 5 turnip seeds (15), 4 corn seeds (24, Farming 2), 3 pumpkin seeds (30, Farming 3), a hen (12, needs the coop and room, counting hens on order), a goat (45, needs the barn and room). Nothing you can gather (wood, fiber, resin, stone, hardwood) is sold here. Pending orders are saved.
+  - **Catalog:** the Desk panel's catalog is where everything for the farm is bought. An order is paid at once and comes with the next morning's post, with a Delivery letter; animals go straight into their pens. It sells: a pack of cards (10 coins), a sudoku book (12), 5 turnip seeds (15), 4 corn seeds (24, Farming 2), 3 pumpkin seeds (30, Farming 3), a hen (12, needs the coop and room, counting hens on order), a goat (45, needs the barn and room), and lamp oil for treks (8 a flask). Nothing you can gather (wood, fiber, resin, stone, hardwood) is sold here. Pending orders are saved.
 - A restored house softens the night overall.
 - **Cleanse** (House panel): needs Cleaning 3 and 2 harvested crops. Once a day. Lifts the sanity limit by 5 and cures part of the collapse penalty.
 
 ## Skills (RuneScape-style)
 
 - The Skills panel (K) is a grid of ten picture tiles, each showing the skill's drawing and its level. Picking one fills the detail card with what trains the skill, its XP bar, and the XP left to the next level.
-- Ten skills, each with XP and levels. Each level costs more than the last: level 2 at 100 XP, level 3 at 300, level 4 at 600, level 5 at 1000, level 6 at 1500 (level L needs 50 × (L−1) × L XP in total):
+- Ten skills, each with XP and levels. Each level costs more than the last: level 2 at 100 XP, level 3 at 300, level 4 at 600, level 5 at 1000 (50 × (L−1) × L XP in total). Past level 5 each level costs 1.8 times the one before (`STEEP_GROWTH` in `progression_system.gd`): level 6 at 1720, 7 at 3016, 8 at 5349, 9 at 9548, and level 10, the highest (`LEVEL_CAP`), at 17106:
   - **Farming:** planting gives 5 XP. Turnips give 25 XP and pumpkins give 40 XP on harvest. Level 2 opens plot two. Level 3 unlocks pumpkins.
   - **Bushcrafting:** gathering a brush pile gives 10 XP. Level 3 adds three thicket piles.
   - **Carpentry:** each house repair gives 30 XP. Mending a board (1 wood, 1 fiber, from the House panel) gives 15 XP, capped at 2 mends per day so the house can't be finished in one day. Training to level 2 takes about 3 days, and level 3 takes about a week.
-  - **Cleaning:** each daily tidy gives 20 XP. At Cleaning 2, a tidy also gives +5 sanity. Cleaning 3 unlocks the cleanse.
+  - **Cleaning:** each daily tidy gives 20 XP. At Cleaning 2, a tidy also gives +3 sanity. Cleaning 3 unlocks the cleanse.
   - **Cooking:** cooking a fish gives 15 XP and cooking crops gives 10 XP. See Cooking above.
   - **Fishing:** face a sparkling spot on the pond edge and press Space to start fishing it, like RuneScape. While you keep still and face the spot, you roll for a catch every 3 seconds. The chance starts at 50% and rises 3% per level, up to 90%. Each catch gives 15 XP. Each spot stays active for 15 to 30 seconds, then goes quiet and a new spot appears elsewhere on the pond edge. There are 3 spots, with one more at Fishing 3 and another at Fishing 5. Moving, going inside, opening a panel, or pressing Space again reels the line in. The spot you fish looks like any other spot: no ring is drawn around it, and the cast line and bobber show which one you're on.
 - Levels will unlock new areas, tools, and fortifications.
@@ -327,7 +338,7 @@ The house is drawn in four stages that match its repair level. **Decrepit** has 
 ## Body needs
 
 - Three meters run from 0 to 100: **Food**, **Water**, and **Warmth**. They show on a line under the top bar, in red when one is under 25, and in full in the Body section of the Inventory menu (I), below the pack.
-- **Food** drains about 2.4 an hour, so it runs out in about two days. Every food restores food, sanity and HP from its difficulty (1 to 4) and the level needed to obtain it: food = 10 + 12 × difficulty + 3 × level, sanity = 2 + 2 × difficulty + level, HP = difficulty. A raw turnip restores 22 food and a hearty stew 73. Eat food from the bag or the Inventory panel.
+- **Food** drains about 2.4 an hour, so it runs out in about two days. Every food restores food, sanity and HP from its difficulty (1 to 4) and the level needed to obtain it: food = 10 + 12 × difficulty + 3 × level, sanity = 1 + difficulty + level ÷ 2, HP = difficulty. A raw turnip restores 22 food and a hearty stew 73. Eat food from the bag or the Inventory panel.
 - **Water** drains about 3 an hour, and 1.6 times faster on hot days (75°F and up). Face the **pond** and press Space to drink, for +40 water.
 - **Warmth** depends on the temperature. Outside it drains when it's below 50°F, faster the colder it gets. In mild weather it slowly refills. Inside the house it refills, faster once the house is patched. Sleeping in bed fills it to 100.
 - **Hale:** while food, water and warmth are all at 70 or more, every skill gains 20% more XP. A gold **Hale** tag shows beside the meters while it lasts.
@@ -337,20 +348,22 @@ The house is drawn in four stages that match its repair level. **Decrepit** has 
 ## Sanity and horror
 
 - Sanity runs from 0 to a maximum that drops with each collapse. It shows in the HUD as `Sanity current/max`.
-- Outdoors in the dark, sanity drains slowly. Indoors it recovers, faster once the house is boarded. Tidying gives +10 (+5 more at Cleaning 2), and sleeping gives +25.
+- Outdoors in the dark, away from a lamp, sanity drains 0.08 a second (`DARK_SANITY_DRAIN`). Indoors it recovers 0.04 a second, 0.06 once the house is boarded (`INDOOR_SANITY_RATE`, `SHELTER_SANITY_RATE`); daylight outdoors neither drains nor restores it. Tidying gives +5 (+3 more at Cleaning 2), a night with every chore done +3, and sleeping +12 (`SLEEP_SANITY`).
+- The day gives back about 35 sanity and a night takes 3 to 22, so bad nights add up and quiet days let you recover. In the balance sim the lowest point over a year is about 40 when ignoring the visitors or going to bed early, and about 64 when facing them: facing is meant to be the safer choice.
 - Below 30 sanity, the whole screen gets darker.
 - At 22:00 something comes to the farm. See **Nights** below.
 - **Collapse penalty:** missing the bed by 03:00 lowers the sanity limit by 5 permanently. A **cleanse** (see Farmhouse) lifts it by 5 per use, once a day.
-- **Pastimes:** the day's first finished game at the **desk** (Solitaire or Sudoku) gives +10 sanity and wins back 2 points of lost sanity limit (boredom loss from older saves first, then the collapse penalty). A day without one costs nothing.
+- **Pastimes:** the day's first finished game at the **desk** (Solitaire or Sudoku) gives +5 sanity and wins back 2 points of lost sanity limit (boredom loss from older saves first, then the collapse penalty). A day without one costs nothing.
 
 ## Nights
 
-Nights are a choice, not just a sanity cost (`scripts/night_system.gd`). At 22:00 one visitor comes. **Facing it** costs a little sanity now, leaves **crow feathers**, and pushes the field shadow back. **Ignoring it**, by waiting until 01:00 or going to bed, costs more sanity and lets the shadow creep closer.
+Nights are a choice, not just a sanity cost (`scripts/night_system.gd`). At 22:00 one visitor comes. **Facing it** costs a little sanity now, leaves **crow feathers**, and pushes the field shadow back. **Ignoring it**, by waiting until 01:00 or going to bed (even before 22:00: the visitor still comes to a sleeping house), costs more sanity and lets the shadow creep closer.
 
+- **The first night** (day 1) is always the same short scare instead of a random visitor, and teaches the dark, sanity and the bed. It runs on the game clock, so the pause menu or any open panel holds it, and it plays only once (a save made after 22:00 on day 1 doesn't replay it). Beats, in game hours after 22:00 (about 11 seconds each): at 0, the crows stop calling and the farm goes quiet; at 0.4, footsteps behind you outdoors or three knocks indoors (2 sanity); at 0.9, the figure appears at the field's edge with a sting (seen "through the window" from inside); at 1.5, a whisper and a note that the dark wears at your Sanity and that the house and bed put it right, plus a nudge to build a lantern if you have none. The figure can be faced like the field figure (2 sanity, 1 feather) or left (3 sanity, at bed or 01:00); it never moves the field shadow. Going to bed before 22:00 on day 1 skips the scare and costs the same 3. `tools/capture.gd` shows it with `visitor=first beat=N`.
 - **How to face each one:** walk up to a figure and press Space (a swing works too). Open the front door for the knocking. Stand under the great tree and press Space for the crows. Press Space at the pond lights. Get inside within an hour for the footsteps. Until you have faced three visitors, each arrival message says how to answer it.
-- **Visitors** (sanity lost facing / ignoring):
+- **Visitors** (sanity lost facing / ignoring, before `NIGHT_LOSS_MULT`, which scales every night loss by 1.5):
   - Always: the figure at the field's edge (4 / 6, 1 feather), knocks on the front door (5 / 8, 1 feather), and a quiet night (3, nothing to answer).
-  - After 7 nights: the crows wake in the great tree (6 and 3 feathers / 2, and up to three crops pecked back a stage), pale lights in the pond (8 and two fish / 3), and a tall watcher beside the house (12 and 2 feathers, pushes the shadow back 2 / 15).
+  - After 7 nights: the crows wake in the great tree (6 and 3 feathers / 2, and up to three crops pecked back a stage, losing that growth), pale lights in the pond (8 and two fish / 3), and a tall watcher beside the house (12 and 2 feathers, pushes the shadow back 2 / 15).
   - After 14 nights: footsteps follow you when you're outdoors (4 if you reach the house within the hour / 15).
   - Newer visitors are likelier, the same one never comes two nights running, and the pick is fixed by the day.
 - **The field shadow** starts at the far east of the field and moves 4 tiles toward the house for each ignored visitor (knocks, field figure, watcher, footsteps), and back for each faced one. After 8 steps it reaches the house, and that night **the Hollow** comes to the front door: a towering cloud of crow-black with red eyes. Facing it costs 20 sanity, gives 5 feathers, and sends the shadow back to the far edge. Ignoring it costs 30 and lowers the sanity limit by 5 (lifted by cleansing), and the shadow only falls back halfway.
@@ -369,19 +382,22 @@ One surprise a day (`scripts/daily_happenings.gd`). From day 2, each morning pic
 - **A mushroom ring** at the edge of the wood: two times in three, +20 food and +5 sanity; otherwise −10 sanity and a crow feather.
 - **Fish frenzy:** the day's catch chance is 25% higher (still capped at 90%).
 - **A neighbour** stops by in the morning with a gift (eggs, turnip hash, kindling or a few coins) and a line about the farm.
-- Rarer: the mushroom ring has half the weight of the others. The pedlar and the glint are the most common.
+- **Storm oak** (spring only): lightning split an oak at the edge of the wood. With a hatchet, it gives 1 storm oak (for the crow bell's frame), 2 wood and Forestry XP.
+- **Wild flax** (summer only): blue flax in flower at the edge of the wood. It gives 3 wild flax (for the crow bell's rope) and Bushcrafting XP.
+- Rarer: the mushroom ring has half the weight of the others. The pedlar and the glint are the most common, and in their seasons the storm oak and the flax are as common.
 - The pedlar, branch, glints and mushrooms are drawn in code for now, at the farmer's scale with dark outlines; they are candidates for SpriteCook sprites.
 
 ## Homestead projects and decor
 
 Long-term goals you can see on the farm (`scripts/farm_projects.gd`).
 
-- **Homestead progress:** a ladder of 14 steps, shown at the top of the Buildings section with the count done and the **next step** and how to do it: board up the house, build the coop, patch the house, the smokehouse, open the second plot, the furnace, the firewood store, light the yard (a lamp post), the barn, restore the house, four flower beds, open the third plot, the Hollow Lantern, and the crow bell. Steps can be done in any order; the next step is the first one not done. Each step done pays 20 coins and names the next. Steps already done in an older save are recorded without paying.
+- **Homestead progress:** a ladder of 14 steps, shown on the Homestead tab of the Buildings section with the count done and the **next step** and how to do it: board up the house, open the second plot, build the coop, patch the house, the smokehouse, the firewood store, the furnace, light the yard (a lamp post), open the third plot, the barn, the Hollow Lantern, four flower beds, restore the house, and the crow bell. The ladder is paced over the first year by the levels each step needs and by the seasons. In the balance sim an engaged player finishes them on days 1, 6, 7, 10, 17, 19, 31, 63, 66, 85, 108, 155, 246 and 396: the house and first buildings in the first autumn, the lamp and third plot as winter starts, the lantern and barn in midwinter, the flower beds in spring, the restored house in summer (it can only be done then), and the bell on the second All Hallows. Skills reach level 10 between day 106 (Farming) and the second autumn; Smithing climbs about a level a week once the furnace stands. Steps can be done in any order; the next step is the first one not done. Each step done pays 20 coins and names the next. Steps already done in an older save are recorded without paying.
 - **Decor**, placed like the coop (Buildings section, Decor; face open grass, Space places, B cancels):
-  - **Lamp post** (3 wood, 1 iron bar, Smithing 2; up to 8): lights a ring 3 tiles across after dusk. Standing in its light, the dark doesn't drain sanity.
-  - **Flower bed** (1 wood, 2 turnip seeds, Farming 2; up to 6): each gives +1 sanity every morning, except in winter, when they're bare.
+  - **Lamp post** (3 wood, 1 iron bar, Smithing 7; up to 8): lights a ring 3 tiles across after dusk. Standing in its light, the dark doesn't drain sanity.
+  - **Flower bed** (1 wood, 2 turnip seeds, Farming 2; up to 6; planted in spring or summer only): each gives +1 sanity every morning, except in winter, when they're bare.
   - **Gravel path** (1 stone a tile): turns grass into path. Placing carries on tile after tile until the stone runs out or B is pressed.
-  - **Crow bell** (6 hardwood, 4 iron bars, 20 crow feathers, 150 coins, Carpentry 4; one): a tall post with an iron bell. While it stands, the field shadow stops a step short of the house, so the Hollow no longer comes, and every night loss is a quarter less.
+  - **Crow bell** (the bell metal, frame and rope, 20 crow feathers, 150 coins, Carpentry 6; one): a tall post with an iron bell. It is a year's work, made one part a season and hung only on **All Hallows** (October 31). The Hollow comes to it that night, one last time. While it stands, the field shadow stops a step short of the house, so the Hollow no longer comes, and every night loss is a quarter less.
+  - **Its parts** (Buildings section, Crow bell tab, shown until the bell is hung; `BELL_PARTS` in `farm_projects.gd`): **bell metal** (4 iron bars, 2 copper bars, 10 crow feathers, Smithing 6, the furnace; only in winter, when it can cool in the frost), **bell frame** (1 storm oak, 6 hardwood, Carpentry 6) and **bell rope** (9 wild flax, 2 resin, Bushcrafting 5). Storm oak and wild flax come from daily happenings in spring and summer. A game starts on October 1st, so the bell can't be hung before the second All Hallows, day 396. The balance sim hangs it on day 396 whether you face the nights or not.
 - Lamps, flower beds and the bell block movement; paths don't. Face one and press Space to see what it does; press again within a few seconds to take it down and get its materials back.
 - Decor is drawn in code for now, at the farmer's scale with dark outlines.
 
@@ -394,6 +410,94 @@ The mystery comes out in torn pages from **Agnes Rook's** journal (`scripts/myst
 - **Epilogue:** hanging the crow bell adds a last page in your own hand: the bell rings, something under the great tree answers, and the field is only a field.
 - Neighbours drop hints too: Old Maren remembers Agnes keeping hens, and the postman says the crows haven't liked the farm since the Rooks.
 - Older saves file the pages they've already earned quietly when loaded; the ones tied to a night or the crows come the next time it happens.
+
+## Groves and treks (planned)
+
+**Built so far (steps 1 to 3, `scripts/trek_system.gd`):** the mill path first, then the other routes (step 3, below). From the first winter (day 62), on about one day in three (`COME_EVERY`), **Old Maren** waits at the gap in the trees on the farm's north edge, above the house, until 15:00; the morning message says so. Space beside her shows the route and your supplies, and Space again sets out. She needs your lantern and 1 lamp oil.
+- The clearings are laid into the cave's grid while trekking (`in_cave` is set), so walking, the camera and the minimap work as underground. Each is a long, switchbacking trail through dense wood given as points (`CLEARINGS`), with room carved around it, the way on at the top and the way back (giving up) at the bottom. The last ends at the mill, drawn in code with its wheel turning. The wood is dim by day (`GLOOM`), the lantern glows a little stronger there (`TREK_LANTERN_BOOST`), and **the clock runs at a quarter speed** (`TIME_SCALE`), so the walk of about two minutes takes about three hours.
+- **Lamp oil** (catalog, Supplies, 8 coins): a flask burns 75 seconds in the wood (`FLASK_SECONDS`), and you refill as it gutters. The mill takes about two. Without oil the lantern goes out, and the dark is where her nerve goes.
+- **Trail ration** (Cooking, at the fire: 1 egg, 1 turnip, 1 wood; Cooking 2).
+- **Maren** walks slower than you (`WALKER_SPEED`, 2.6 tiles a second against your 3.75), so you keep stopping for her. **Her nerve** shows beside the needs, starting at 70. Each second: −0.4 even in your lantern's light (the ring plus a tile), −2 out of it, −1.5 more while either of you is off the trail (cutting across the grass between bends, or the way round an event; she begs you back the first time in each clearing), −3 more when you're over 6 tiles ahead, −1 more while your sanity is under 40, −5 more while the crows mob her. Under 25 she **freezes** and won't take another step until a ration brings her back over 35. Space beside her gives a ration (+35) when her nerve is under 70 or she is frozen, or else a word (+10, once a clearing, with a line of her story). **At 0 she runs**: the trek is over, the oil and rations are spent, and you lose 10 sanity. The wood also takes 0.1 sanity a second, twice that unlit.
+- **The fork** (step 2): the first clearing ends at an old fingerpost with two ways on. The **marked trail** (`MARKED_ROUTE`) is two more clearings before the mill, with pale blazes on the trunks and gentler events; the **dark trail** (`DARK_ROUTE`) is one, darker (`GLOOM_DARK`), with the wood's sanity drain half again (`DARK_SANITY`), the tall one faster and sooner, harder events, and better pay (+30 Bushcrafting XP, +1 feather, richer hollow trees). Which arm is marked changes with the day. The sign reads (its carvings show, and Space says which way is which) with **Bushcrafting 3** (`SIGN_LEVEL`) or, later, the Waymarks trail work: the hook is `TrekSystem._can_read_sign()`. Event severity scales with `_harsh()`: 0.7 on the marked trail, 1.4 on the dark, 1 in the first clearing (crows: one wave fewer or more).
+- **Events**, one in each clearing before the mill, picked by the day with no repeats (`_plan(day)`, which the balance sim reads too): the first clearing and the marked trail draw from tree, crows, flood, cairn and hollow; the dark trail from crows, flood, lights, fog and hollow. Summer skips the flood and the fog (`SEASON_SKIPS`). Coming within 4 tiles of an event says what it is.
+  - A **fallen tree** across a narrow stretch: with a hatchet, Space cuts through for 2 wood and Forestry XP; or take the faint way round through the trees (laid only for this event), off the trail, where her nerve falls faster.
+  - **The crows** find her at their spot and then mob her in waves: Space beside her drives them off (−3 sanity, +1 feather), and they come back 8 seconds later until driven off three times.
+  - A **flooded hollow** across the trail: Space at the water with a **rope** ties it across (−1 rope, +10 Bushcrafting XP, both cross dry); without one, Space twice wades it with her on your back: −10 warmth (×`_harsh`, and ×3.5 in winter, so 24 to 49 then) and −10 nerve (×`_harsh`). The mill footbridge will make the hollows dry (planks over a dry bed): the hook is `TrekSystem._hollows_dry()`. **Rope** is Craft, Other: 2 fiber, Bushcrafting 3.
+  - **Lights off the path** (dark trail): pale lights wait in the trees beside the trail, wearing on her nerve while she is near them. Space near them follows: half the time they lead you to the way on; otherwise you are lost an hour (the clock moves on), −20 nerve, −5 sanity, 30 seconds of oil, and back at the start of the clearing.
+  - A **cairn of crow skulls** beside the trail: Space leaves 5 coins (or a ration if you have no coins): +6 sanity, +15 nerve. Walk on past and, once she is 6 tiles beyond it, she takes it badly (−10 nerve, ×`_harsh`).
+  - A **fog bank** (dark trail) blocks the trail: a Brass Lantern or better burns a way through; otherwise it thins 18 seconds (×`_harsh`, so 25) after you reach it, while the oil burns and her nerve wears.
+  - A **hollow tree** beside the trail: Space reaches in, once: a feather bundle (+3, +5 on the dark trail), old coins (6 to 12, doubled on the dark trail), or one time in five a nest of small bones (−4 sanity, −8 nerve).
+  - Blocking events (tree, flood, fog) close every open tile around the narrow stretch, so nothing slips past at the edges.
+- **The tall one** walks the trees from the second clearing on, 8 seconds in: a thin dark shape twice your height with red eyes, only its eyes showing out of your light. It comes straight through the trees for Maren (1.6 tiles a second in your light, 2.4 out of it). Space within 3 tiles drives it off for 9 seconds (−3 sanity). If it reaches her, her nerve drops 30.
+- **Dread:** the wood learns you. Each trek you finish (`treks_done`, saved) raises its dread by one, up to 6 (`MAX_DREAD`). Per point: her nerve wears 0.08 a second faster even in your light, the tall one walks 0.15 tiles a second faster, shows a second sooner and stays back half a second less after being driven off, and every two points the crows need driving off once more. From dread 2 the tall one walks the first clearing too. Setting out says the dread. The pay rises with it: 15 more Bushcrafting XP a point, and a feather more every two.
+- **Arriving:** 4 turnip seeds, a crow feather (more with dread), a fiber for each clearing walked and 60 Bushcrafting XP (more with dread). You are back at the north edge an hour later. Bed or a collapse while in the wood ends the trek.
+- **Tested with a bot walking at your speed** (careful play, lowest nerve by dread: 0 → 66, 2 → 53, 4 → 49, 6 → 41, when it also needs both rations and both flasks): played carefully (waiting for her, words, a ration under 50, turning on the crows and the tall one at once), it arrives in about 95 seconds with her nerve no lower than 66, one ration used and both flasks burned. With one flask the last clearing is dark and costs her about 37 more. Played carelessly (just walking), she breaks in the second clearing when the tall one reaches her twice. A person reacts slower than the bot, so expect closer calls.
+- **Step 3: the other routes and the seasons.** Every route (`TrekSystem.ROUTES`) has its walker, its clearings by each trail, its oil, its Bushcrafting level, its talk and its pay. On a walker day every walker whose route is open waits at their own spot along the gap (Maren in the middle, the Tull boy to her left, the vicar to her right, the woman further left), and the morning message names them all: **Space beside one picks that route** (a first Space says where they want walking, the clearings by each trail and your supplies; Space again sets out). A walker whose route needs more Bushcrafting says so.
+  - **The drowned orchard** (from spring, day 152, Bushcrafting 4, 2 lamp oil): **the Tull boy** (Davy), looking for his dog. 5 clearings by the marked trail, 4 by the dark. Pays 120 XP, a feather more, 2 hardwood (old applewood), and in summer 2 wild flax.
+  - **The chapel on the hill** (from summer, day 244, Bushcrafting 5, 2 lamp oil): **the vicar**, who cut the bell down and kept its clapper. 6 or 5 clearings. Pays 200 XP, two feathers more, 2 lamp oil from the vestry, and in spring a storm oak from the split tree in the churchyard.
+  - **The Hollow's grove** (from October 15th of the second year, day 381, once the crow bell is hung; once only, `grove_done`, saved): **a woman in a grey shawl**, who gives no name. 7 or 6 clearings. Pays 300 XP and five feathers more, and ends with her walking into the grove: she is Agnes Rook. (A first draft of the story's end: the clapper, pages and anything the ending unlocks are not built.)
+  - The new clearings: two more layouts (a marked switchback and a dark one) and the old ones mirrored (layout `FLIP + i`), so the long routes don't repeat a clearing as it was. The end clearing is the mill's, with the route's destination drawn over the top (the drowned orchard's water and bare apple trees, the chapel with its empty bell-cote, the ring of black trunks at the grove). A flood-fill check of every layout and blocking event passes (no leaks past a block, a way round a fallen tree, the exit open after).
+  - **Night treks** (chapel and grove): their walkers wait until 22:00. Between 15:00 and 18:00 they say it's too late for daylight; **from 18:00** you can set out by night with a flask more oil (`NIGHT_OIL`): **twice the pay** (XP, feathers, fiber and gifts, `NIGHT_PAY`), the wood's sanity drain doubled (`NIGHT_SANITY`), and the tall one 0.3 tiles a second faster. The chapel's window is lit at night.
+  - **Feral dogs** (`dogs`, an event on the orchard, chapel and grove routes, every trail): 2 dogs on the trail at the event, 3 on the dark trail, a dog more in winter. They are cave foes (`FOES["dog"]` in `main.gd`: 5 HP, 2 damage, quick to chase, 16 Combat XP), fought with the sword as in the cave. The walker's nerve falls 4 a second faster while a dog is within 4 tiles of them. Kill them all and the walker steadies; or hurry past, as they don't follow far. A collapse ends the trek.
+  - **Seasons** (`_plan(day, route)`): summer still skips the flood and the fog; each season counts two events twice in the draw (`SEASON_MORE`: spring floods and fallen trees, summer crows and hollow trees, autumn fog and lights, winter dogs and cairns). The wood is lighter in summer and darker in autumn and winter (`SEASON_GLOOM`), and in winter the cold takes 0.06 warmth a second (`WINTER_COLD`), on top of the deeper wading. When a long route runs out of fresh events, they can repeat.
+  - **Hooks for the later trail works** (step 4 fills `works` and saves it): `_walker_day()` (a lamp at the gate, `gate_lamp`: walkers two days in three instead of one), `_orchard_shorter()` (`boardwalk`: `_steps` drops the clearing before the orchard), `_rests_halfway()` (`waystation`: on routes of 5 clearings or more, the halfway clearing gives a half-hour rest, nerve and warmth full, no oil), `_night_sanity()` (`chapel_steps`: the chapel by night without the doubled drain). `_hollows_dry()` (`footbridge`) is now the mill path only.
+  - **Sim** (400 days, `treks=3`, by day only; the sim now walks every route from the real plan, steps and gifts): engaged / ignore / earlybed walked 40 / 43 / 40 mill, 25 / 21 / 20 orchard and 12 / 9 / 14 chapel treks, about half by the dark trail, with 21 to 24 dog fights and 32 to 38 floods; the ignore run hung the bell on day 396 and walked the grove on day 399. Oil cost 800 to 880 coins (the vicar's oil pays some back). The year ends with 4,124 / 1,574 / 1,288 coins and sanity no lower than 61 / 39 / 46. About 95 trek days were skipped, nearly all for want of spare crops for the rations.
+- Not yet: torn pages in the hollow trees (Agnes's ten pages are each tied to a farm moment in `mystery.gd`; trek pages need new pages written), the old bell's clapper, the postman, the trail works themselves (step 4), and SpriteCook art for the walkers, the dogs, the logs and the destinations (all drawn in code at the farmer's scale). Storm oak and wild flax are now also trek gifts, but the yard happenings still give them too.
+- Check it with `tools/capture.gd`: `walker` (with `wday=N` for a later day, `wbell` for the grove), `trek=N`, `troute=orchard|chapel|grove`, `tday=N`, `tnight`, `tevent=tree|crows|flood|lights|cairn|fog|hollow|dogs`, `tdark` (the dark trail), `tsign` (stand below the fingerpost), `tread` (the sign reads), `nooil`, `tall`. Shift+F4 in a debug build jumps to a walker morning.
+
+The rest of this section is the plan. The woods past the farm are walked as **treks**: you guide someone from the lane through the Rookery Wood, one clearing at a time, with what you packed. Loosely inspired by escort treks in other games, but built from this game's own parts: the lantern, sanity, the crows, the seasons and Agnes Rook's story. Treks are where coins go (supplies and trail works), where Bushcrafting is trained, and where the story deepens between the homestead steps.
+
+**Why people walk the wood:** since Agnes's bell came down, nobody from the lane crosses the Rookery Wood alone. They come to the farm, the last house before the trees, and ask you to walk them. A **walker** waits by the north gate on some mornings (a daily happening, from the first winter). Each walker has a reason, and their talk on the way tells the story: Old Maren visiting her sister at the mill, the postman with a letter for the chapel, the Tull boy looking for his dog, the vicar who took the first bell down. Late in the second autumn, a woman in a grey shawl asks to be walked to the Hollow's grove and gives no name.
+
+**The routes**, through the north gate past the great tree:
+
+| Route | Clearings | Opens | Supplies (typical) | Walker gives |
+|---|---|---|---|---|
+| The mill path | 3 | first winter | 1 lamp oil, 1 trail ration | seeds, eggs, honey, a few feathers |
+| The drowned orchard | 4 | spring (Bushcrafting 4) | 2 lamp oil, 2 rations, 1 rope | wild flax (summer), orchard saplings, pages |
+| The chapel on the hill | 5 | first summer (Bushcrafting 5) | 2 lamp oil, 3 rations, 1 rope, 1 bandage | storm oak (spring), the old bell's clapper, pages |
+| The Hollow's grove | 6 | second autumn, after the bell's three parts | 2 lamp oil (more at night), 4 rations, 2 rope, 2 bandages | the story's end |
+
+Storm oak and wild flax, the crow bell's frame and rope, move here from the yard happenings once treks are built, so the year-long bell sends you into the woods.
+
+**How a trek plays:**
+- **Setting out:** talk to the walker at the gate and pick the route. A trek takes 3 to 6 hours and must start by 15:00. Starting after 18:00 is allowed on the chapel and grove routes: night treks pay double and cost far more sanity.
+- **Clearings:** each is a small hand-made map (built like the cave), joined by a trail. Between clearings the path **forks**: a marked trail (one more clearing, gentler events) or a dark trail (shorter, harder events, better finds). The fork signs can be read with Bushcrafting.
+- **The walker's nerve:** a bar shown while trekking, from 0 to 100. It drops in the dark, at bad events, while your own sanity is under 40, and if you get far ahead. It comes back with a trail ration, inside your lantern's light, and with a word (press Space beside them). At 0 the walker bolts home, the trek ends, and the supplies are spent.
+- **Events**, one per clearing, picked by the day and season:
+  - A fallen tree across the trail: chop through (wood) or lead them round (nerve).
+  - A flooded hollow: a rope across, or wade (warmth, and in winter a lot of it).
+  - Crows mobbing the walker: face them (feathers, sanity) or hurry them through (nerve).
+  - Lights off the path: follow them (a shortcut, or lost an hour in the dark) or keep to the trail.
+  - A cairn of crow skulls: leave a ration or a coin (sanity back, the walker steadies) or walk past.
+  - A fog bank: only the Brass Lantern or better finds the way; otherwise wait it out.
+  - Feral dogs (a fight, using the cave's combat) or something tall between the trees (stand still until it passes).
+  - A hollow tree with something in it: a torn page, a feather bundle, or old coins.
+- **Arriving:** the walker thanks you and pays in kind, not coins. You walk back alone by the short trail, quickly.
+- **Sanity:** the deep wood drains sanity like the dark, faster on dark trails and at night. Treks are what makes sanity matter by day.
+
+**Supplies (the coin sink):** packed before setting out and used up on the way.
+- **Lamp oil** (catalog, 8 coins a flask): the lantern burns a flask every three clearings in the woods. Without oil it goes out, and the walker's nerve falls fast.
+- **Trail ration** (cooked at the fire: 1 egg, 1 turnip, 1 wood; Cooking 2; a milk version later): the walker eats one when their nerve is low. Hens and goats are what make treks possible.
+- **Rope** (Craft, Other: 2 fiber, Bushcrafting 3), **bandages** as now. Brush along the trail gives 1 fiber a clearing, so treks pay for their own rope and help the house and barn, which need fiber too.
+- A typical trek costs 8 to 32 coins in oil and the crops, eggs and milk in the rations, and pays in materials, seeds, feathers, pages and Bushcrafting XP (60 to 200 a trek), not coins.
+
+**Trail works (the big sink):** paid at the north gate's signboard, each once, from when its route opens. They make the treks safer and are the farm's long-term coin goals beside the ladder.
+
+| Work | From | Coins | Materials | Effect |
+|---|---|---|---|---|
+| Waymarks | first winter | 150 | 10 wood | The marked trail's fork signs read without Bushcrafting |
+| The mill footbridge | first winter | 300 | 12 wood, 6 rope | Flooded hollows on the mill path are dry |
+| A lamp at the gate | first winter | 400 | 2 iron bars | Walkers come twice as often |
+| The orchard boardwalk | spring | 700 | 20 wood, 8 rope | The orchard is one clearing shorter |
+| The waystation hut | summer | 1200 | 30 wood, 10 hardwood | Rest halfway: nerve and warmth refill, no oil burned |
+| The chapel steps | summer | 1800 | 30 stone, 4 iron bars | The chapel route opens at night without the double sanity |
+
+**Balance (sim, 400 days, 3 treks a week):** the sim walked 42 mill, 25 orchard and 19 chapel treks. Oil took about 1,200 coins and trail works 4,550. Coins peak at about 5,000 in early spring, then the summer works spend them; the year ends with 800 to 3,500, against 14,500 with no treks. Sanity's lowest is 64 to 70, from about 83. Treks give Bushcrafting XP and fiber, so the Hollow Lantern comes around day 90 and the restored house around day 190.
+
+**Story:** each route ends somewhere that matters to the Rooks. The mill is where the town met to vote the first bell down. The orchard was Elias's. The chapel kept the old bell's clapper, which the crow bell can't ring without (its rope or frame recipe may later need it). The Hollow's grove is where Elias walked in, and the nameless woman is Agnes. Her pages, now spread across treks as well as the farm, are read in the diary as before.
+
+**Building it, in order:** (1) one route, the mill path, with three clearings, the walker and nerve, lamp oil and rations, two events; (2) the remaining events and forks; (3) the other routes and seasons; (4) trail works. Each step is checked with `tools/balance_sim.gd`, which already models the supplies and trail works (`treks=N`).
 
 ## The diary
 
@@ -408,14 +512,36 @@ There is no tip card: everything the game teaches is written in the **diary**, s
 - Text names the controls for the device in use: tools are left click or RT, hand actions (gather, open, drink, place) are Space or A.
 - Saves keep the pages written, whether the diary is found, and which pages are new. Saves from before the diary count it as found. Saves from before tips existed count every note as written, and saves from before the guided first day count it as done, so neither floods them.
 
+## Settings and pause
+
+- **Pause menu.** Esc or Start with nothing open (Esc closes an open panel first). Like every panel it stops the day: the clock, needs, nights, happenings and foes all wait, and you can't move. It lists **Resume**, **Settings**, **Controls**, **Unstick me**, **Quit to the main menu** and **Quit the game** (plus the dev **Unlock** in debug builds). Both quits need a second press ("Yes, quit"), and say that progress since the last sleep is lost.
+- **Settings** (`GameSettings` in `scripts/game_settings.gd`): music volume and sound-effect volume (0 to 100% in steps of 10, with − and + buttons; 0 mutes), Screen (Fullscreen or Windowed), Window size (Fill the screen, 1280×720, 1600×900, 1920×1080; shrunk to fit the screen, centred), Screen shake (on or off), and How long messages stay (Short ×0.7, Normal, Long ×1.6). Each change applies and saves at once.
+- They are saved to `user://settings.cfg` (ConfigFile), apart from the save slots, and applied at launch. An old `hallowvale_settings.json` is read once: music or sound turned off becomes volume 0.
+- Volumes work through the **Music** and **SFX** audio buses, made at launch. The music player is on Music; the sound-effect pool and the ambience loops are on SFX.
+- The start screen shows the same Settings rows, and a Controls page. B or Esc goes back a page there.
+- Mouse, keyboard and gamepad all work: the D-pad or arrows move focus (left and right between − and +), A or Enter presses, B or Esc goes back. Pressing a setting keeps focus on that button, so + can be pressed again.
+- `tools/capture.gd` sizes its own window, so the window settings are only applied when the game scene is the current scene.
+
+## Test builds
+
+- `application/config/version` in `project.godot` (now `0.1.0`) is shown as `v0.1.0` in the start screen's bottom-right corner, so feedback names its build. Raise it for each build sent out, and match `application/file_version` in `export_presets.cfg`.
+- The "Windows Desktop" preset in `export_presets.cfg` builds one exe with the pack embedded, leaving out `art/style_tests/` and `tools/`: `godot --path . --headless --export-release "Windows Desktop" builds/CrowCreekHollow.exe`. `builds/` is git-ignored. The templates live with the Steam editor (`editor_data/export_templates/4.7.2.stable`).
+- Release builds hide the dev Unlock and ignore F4 and Shift+F4 (`OS.is_debug_build()`).
+- Godot logs to `user://logs/godot.log` on PC (default, keeps 5). `application/run/flush_stdout_on_print` is on so the log survives a crash. `TESTERS.md` tells testers what to try and what to send back.
+
 ## Saving
 
-- The game opens on a **start screen**: **Continue** (the most recently saved slot), **New Game**, **Load Game**, **Settings** (the controls list), and **Quit**. The world is built only after you choose.
+- The game opens on a **start screen**: **Continue** (the most recently saved slot), **New Game**, **Load Game**, **Settings** (the same settings as in the game, and a **Controls** page), and **Quit**. B or Esc goes back a page. The world is built only after you choose.
 - There are **three save slots**. New Game asks for a slot, and a used slot takes two presses to overwrite. Then it asks for a save name, filled in as "Farm N" so a gamepad player can just press Begin. Load Game lists each slot with its save name, day, coins, and house stage. Older single-slot saves become slot 1. Pressing Overwrite keeps focus on the armed slot, so a gamepad's second press overwrites it. Crops from saves made before watering existed count as watered on the day they load, so they grow that night.
 - The game saves **only** when you sleep in bed or collapse at 03:00, to the slot you're playing.
-- The in-game Settings menu ends with a **Game** section that never folds. It holds **Music** (on or off), **Unstick me**, and **Quit to the main menu**. Quitting returns to the start screen without saving, and progress since the last sleep is lost. The slot you were playing stays selected. Sleeping is the only way to save.
+- The **Pause menu** (Esc or Start) holds **Quit to the main menu** and **Quit the game**, each taking a second press. Quitting to the menu returns to the start screen without saving, and progress since the last sleep is lost. The slot you were playing stays selected. Sleeping is the only way to save.
 - Saved: day, skill XP, inventory (including every food), coins, goats and their feeding, bag upgrades, root cellar, cooler, and smokehouse (built, and what they hold), materials, stats, story chapters done, achievements done, selected seed, lantern tier, house stage, house wear, coop and hens, barn (built, and where it stands), tidy/mend/cleanse days, sanity, sanity penalty, boredom loss and the day you were last entertained, animal ages (hens and goats), crop days, clean nights, property tax owed, its due day and reminder stage, the post on the desk, the diary (found, pages written, pages new), the cards and sudoku puzzles left, catalog orders, crops (with kind), brush piles, **player position**, whether you were **inside the house**, and the **open panel**.
 - Quitting mid-day loses that day's progress since the last save. Position and panel are saved at the same moment, so they reflect the last sleep or collapse.
+- **Saves are safe against crashes.** Each save is written to `hallowvale_save_N.tmp.json`, read back and checked, and only then moved over the real file; the save it replaces becomes `hallowvale_save_N.bak.json`. Only a good save becomes the backup, so a damaged file never pushes the last good one out.
+- **Recovery.** Before the start screen lists the slots, each slot is checked: the file must be JSON, hold a day of 1 or more and an inventory, and have the right type for each list and table the loader reads. A damaged or missing save comes back from its backup (or from a complete `.tmp` save left by a crash mid-move, which is newer), and the start screen says once which slot was restored and to what day. A damaged save with no backup is kept as `.broken.json` and the slot shows empty, so Continue never starts a new game over it by mistake. Loading does the same check, in case the start screen didn't.
+- **Save versions.** Each save records `save_version` (now 2; saves without one count as 1). On load, `SaveSystem._migrate` lifts an old save one version at a time: version 2 added the crow bell (`bell_day`) and treks (`treks_done`), and older saves start with neither begun. Materials and items an old save never had (lamp oil, storm oak, flax, bell parts, trail rations) keep their new-game amounts. A save from a newer build still loads; keys this build doesn't know are ignored.
+- Saving in the mining cave records the homestead as your position. A trek still going at day end is called off before the save, so you wake at home. When the farm is taken for unpaid tax, the save, its backup and any `.tmp` are all deleted, so nothing brings the farm back.
+- `tools/save_test.gd` checks all of this headless in slot 9 (truncated, empty and garbage files, wrong types, a missing save with a backup, a crash mid-move, an old save, cave and trek saves, eviction).
 
 ## The world: the portal, the road, and the wilds
 
@@ -519,16 +645,16 @@ A campsite lets you stay out in the wider land overnight. It is built, not place
 - **Fishing rods** are in the Tools tab too. A **Willow rod** (Fishing 2: 2 wood, 2 fiber) adds 10% to each catch chance. A **Hardwood rod** (Fishing 5: 2 hardwood, 2 fiber, 1 resin) adds another 10%. The rod sits in the toolbelt on the Gear panel.
 ## Mining
 
-- **Rocks** sit on the farm at five spots. Each one comes back each morning, like brush piles.
+- **Rocks** sit on the farm at eight spots. They come back every 14 days (`ROCK_REGROW_DAYS`), except on a spot with a growing crop.
 - Breaking a rock **by hand** gives 1 stone. That gets you the first stone pick.
-- With a **pick**, a rock gives 2 stone and 12 Mining XP.
+- With a **pick**, a rock gives 2 stone and 8 Mining XP (`XP_MINE`).
 - From **Mining 2**, a pick also gives a 15% chance of **copper ore** per rock. Farm rocks never give iron.
 - Stone is worth little on its own. It goes into the stone hatchet and stone pick.
 
 ## Smithing and metal gear
 
-- **Furnace** (built from the Buildings menu, in the workshop): 80 coins, 6 wood, 4 stone, Carpentry 4. Stand beside it, facing it, and press Space to smelt.
-- **Smelting** turns one ore and one wood into a bar. Copper needs Smithing 1. Iron needs Smithing 4. Smelting gives 10 Smithing XP.
+- **Furnace** (built from the Buildings menu, in the workshop): 80 coins, 6 wood, 4 stone, Carpentry 5. Stand beside it, facing it, and press Space to smelt.
+- **Smelting** turns one ore and one wood into a bar. Copper needs Smithing 1. Iron needs Smithing 4. Smelting gives 10 Smithing XP. The furnace makes at most 8 bars a day (`SMELT_DAILY_LIMIT`) before it must cool overnight, so a stockpile of ore trains Smithing over weeks, not in one afternoon.
 - **Metal gear replaces bark slot by slot.** Each bark piece has a metal version in the same slot:
 
 | Slot | Bark | Copper (Smithing 2 to 3) | Iron (Smithing 5 to 6) |
@@ -595,7 +721,7 @@ A cave on the homestead, entered from the farm's west edge. It is the only place
 - **Dark:** the cave is always open, but it has no daylight at any hour. Without a lantern it is pitch black; a lantern lights its usual ring, glowing stronger than outdoors (`CAVE_TINT`, `CAVE_LANTERN_BOOST`). Sanity still follows the time of day, not the cave's dark.
 - **Daylight at the exit:** by day a very faint, cool glow spills up the exit steps (`cave_mouth_light`, `CAVE_MOUTH_ENERGY`). It fades out with the dusk and is gone at night.
 - **Layout:** the cave is laid out fresh each day, so the tunnels, ore, and creatures change overnight. The same day always gives the same cave.
-- **Ore:** copper and iron set into the rock walls. Copper needs a stone pick and Mining 2. Iron needs a copper pick and Mining 5, and only sits deeper in the cave. Each node gives one ore and 12 Mining XP. Broken nodes stay broken until the next day, and that holds through a save.
+- **Ore:** copper and iron set into the rock walls. Copper needs a stone pick and Mining 2. Iron needs a copper pick and Mining 5, and only sits deeper in the cave. About 5% of the rock walls along the tunnels hold ore (`CAVE_ORE_CHANCE`), and deep ore is iron about 1.5% of the time (`CAVE_IRON_CHANCE`): about 9 copper and 3 iron nodes a day. Each node gives one ore and 8 Mining XP. Broken nodes stay broken until the next day, and that holds through a save.
 - **Creatures:** ordinary animals, no supernatural ones. Three bats (fast, weak), two lizards (slow, tougher), and two snakes (quick, hard-hitting). They spawn away from the entrance, and each visit starts with them back in their places. Kills give Combat XP and a small chance of fiber or resin.
 - **Saving:** a save made in the cave returns you to the homestead when loaded.
 
@@ -613,12 +739,12 @@ Keeping the homestead running is the daily work. Each part is at base level for 
 - **Wear:** the house wears by 1 each night, plus 1 for each chore left undone, up to 10. Mending a board takes 2 off, a tidy takes 1, and a repair takes 3. At wear 6 or more, rain ruins a random crop overnight. The Upkeep section of the House panel shows it.
 - **Buildings menu (U):** the workshop, the coop, and the barn are built and moved from here, not from the House panel. Each one is placed the same way: building it starts placement, a green or red preview follows the tile you face, and Space places it on open grass. A spot can't cover plots, crops, rocks, brush, fishing spots, or you. B cancels. The Move button relocates a standing building for free. A building that was paid for but never placed (older saves) shows Place instead.
 - **Coop:** 6 wood, 4 fiber, and Carpentry 2. A 2 by 2 building. Stand beside the coop, facing it, and press Space to open its panel, where you feed the hens (they are ordered from the catalog). The hens wander inside it, walking to a spot, pausing, and walking on.
-- **Barn:** 10 wood, 6 fiber, and Carpentry 4. A 3 by 2 building of red boards. Stand beside it, facing it, and press Space to open its panel. It holds the goats, which are ordered from the catalog, and it is separate from the coop.
+- **Barn:** 10 wood, 6 fiber, and Carpentry 7. A 3 by 2 building of red boards. Stand beside it, facing it, and press Space to open its panel. It holds the goats, which are ordered from the catalog, and it is separate from the coop.
 - **Hens:** 12 coins each from the catalog, up to four in the coop. Feed them once a day from your crops (1 crop per hen). Hens are grown after a week (7 nights), and only a grown hen that is fed lays an egg overnight, which goes into your pack as an egg, as far as there is room. A grown hen sells for **20 coins** from the coop panel. Two unfed days in a row and a hen wanders off.
 - **Predators:** at wear 4 or more, a fox can get into the coop on a given night and take a hen.
 - **Post and the desk:** post comes through the mail slot in the front door and lands on the **desk** in the bedroom, which is there from the start. Each morning's new letters are announced in the morning message. Unread post turns on a **red light** at the desk, blinking, while you are in the house. Using the desk opens the Desk panel (post, property tax, pastimes, catalog), which marks the post read and lists it. Read letters go in the drawer with the Clear button.
-- **Property tax:** a bill arrives on the 1st of January, April, July, and October (not on the first day of the game). Its amount is the **property value** at that moment. The value starts at **40 coins**, then: it **multiplies by 1.8 with each house upgrade** (exponential), gains **5% per building** (coop, barn, cellar, cooler, smokehouse, furnace, woodshed), and gains **25% per farm plot past the first** (plot two at Farming 2, plot three at Farming 4). Keeping the farm well doesn't raise the bill. The Desk panel shows the value and its breakdown. It is due 14 days after it arrives. Pay it from the Desk panel. Unpaid, a reminder comes the day after it is due, a final notice 7 days late, and at 14 days late the **land is lost**: the save is removed and the start screen says why.
-- **Third plot:** opens at Farming 4 once the house is Patched. It sits between the two paths, south of the first plot.
+- **Property tax:** a bill arrives on the 1st of January, April, July, and October (not on the first day of the game). Its amount is the **property value** at that moment. The value starts at **40 coins**, then: it **multiplies by 1.8 with each house upgrade** (exponential), gains **5% per building** (coop, barn, cellar, cooler, smokehouse, furnace, woodshed), and gains **25% per farm plot past the first** (plot two at Farming 2, plot three at Farming 9). Keeping the farm well doesn't raise the bill. The Desk panel shows the value and its breakdown. It is due 14 days after it arrives. Pay it from the Desk panel. Unpaid, a reminder comes the day after it is due, a final notice 7 days late, and at 14 days late the **land is lost**: the save is removed and the start screen says why.
+- **Third plot:** opens at Farming 9 once the house is Patched. It sits between the two paths, south of the first plot.
 
 ## Game feel
 
@@ -654,6 +780,7 @@ Particles do not run indoors, in the cave, or in the village. Nothing in the gra
 - `homestead_rewards.gd` (`rewards`): what chores and needs give back: Hale, chore finds, the kept-well streak and pastimes.
 - `daily_happenings.gd` (`happenings`): the day's surprise: what it is, where it is, and what taking it gives.
 - `farm_projects.gd` (`projects`): the homestead progress ladder and placeable decor (lamps, flower beds, paths, the crow bell).
+- `trek_system.gd` (`trek`): treks into the Rookery Wood: the walker at the north edge, the clearings (laid into the cave's grid), the walker's nerve, lamp oil, and the trek events.
 - `game_feel.gd` (`feel`): action bursts, the bigger shakes, and the pop-ups for XP, coins and items.
 - `mystery.gd` (`mystery`): Agnes Rook's torn pages, when each turns up, and the diary's section for them.
 - `stall_system.gd` (`stall`): the farm stand, cooking, food, the pack and the bank.

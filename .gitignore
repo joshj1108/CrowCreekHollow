@@ -1,5 +1,5 @@
 # Godot 4 editor cache and generated files
 .godot/
 *.tmp
-export_presets.cfg
 __pycache__/
+builds/

@@ -8,16 +8,12 @@ extends CanvasLayer
 
 signal menu_pressed
 var menu_frame: PanelContainer
-# Sections in these menus fold away, so a long list shows only its headings until one is opened.
-const COLLAPSIBLE_TABS := ["Settings"]
 const HINT_DEFAULT := "B or Esc to close   ·   Shift or the left stick opens the section wheel"
 const HINT_SETTINGS := "B or Esc to close"
+const HINT_BACK := "B or Esc to go back to the Pause menu"
 var hint_label: Label
-const ALWAYS_OPEN_SECTIONS := ["Game"]   # sections that never fold, so their options are always visible
-var collapsed_sections := {}   # "tab|section" -> true while folded (folded is the default)
 var _last_tab := ""
 var _last_rows: Array = []
-var _focus_section := ""       # a header to focus after it folds or unfolds
 signal action_pressed(action_id: String)
 
 const SUBTITLES := {
@@ -27,12 +23,15 @@ const SUBTITLES := {
 	"Craft": "Make, cook, and build",
 	"Quests": "What the farm asks of you",
 	"House": "Keep it standing",
-	"Buildings": "The workshop, the coop, and the barn",
+	"Buildings": "Grow the homestead and make it yours",
+	"Desk": "Post, bills, and a little peace",
 	"Coop": "Hens and their feed",
 	"Barn": "Livestock",
 	"Well": "Water for the farm",
 	"Achievements": "Things you have done",
-	"Settings": "Time is paused while you are here",
+	"Pause": "Time is paused while you are here",
+	"Settings": "Saved at once, for every save slot",
+	"Controls": "Keyboard, mouse and gamepad",
 }
 
 const COL_DIM := Color(0.0, 0.0, 0.0, 0.62)
@@ -60,6 +59,27 @@ var scroll: ScrollContainer
 var rows_box: VBoxContainer
 var active_tab := ""
 var _last_key := ""
+
+# The ledger layout. A panel whose rows carry {"tab": name} markers is split into tabs (LB/RB or Q/E),
+# with a list of one-line entries on the left and the focused entry's details on the right.
+# An entry is a row dict: name, plus optional status, status_kind (ok, short, done, info), value,
+# about, needs ([{text, ok, have}]), note, progress, and button, action, enabled.
+const COL_OK := Color("8fb069")
+const LEDGER_DETAIL_WIDTH := 380
+var ledger: VBoxContainer
+var tab_strip: HBoxContainer
+var list_scroll: ScrollContainer
+var list_box: VBoxContainer
+var detail_box: VBoxContainer
+var prompt_bar: HBoxContainer
+var close_button: Button
+var ledger_tabs := {}             # panel -> the open tab's index, kept until the game closes
+var _ledger_entries: Array = []   # the open tab's entries, in list order
+var _ledger_pick := 0             # the focused entry
+var _ledger_tab_count := 0      # tabs in the open panel, ledger or a grid panel's tab strip
+var _grid_tabs := {}            # a grid panel's {"tabs", "active"} row, stepped by LB/RB or Q/E
+var _pad_glyphs := false          # true once a gamepad was used last, so prompts show its buttons
+var _pointer_last := false        # true when the last press came from the mouse
 
 
 func _ready() -> void:
@@ -150,10 +170,17 @@ func _build_menu() -> Control:
 	rows_box.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	rows_box.add_theme_constant_override("separation", 8)
 	scroll.add_child(rows_box)
+	main.add_child(_build_ledger_frame())
 
 	var footer := HBoxContainer.new()
 	footer.add_theme_constant_override("separation", 12)
 	main.add_child(footer)
+	prompt_bar = HBoxContainer.new()
+	prompt_bar.add_theme_constant_override("separation", 18)
+	prompt_bar.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	prompt_bar.alignment = BoxContainer.ALIGNMENT_BEGIN
+	prompt_bar.visible = false
+	footer.add_child(prompt_bar)
 	var hints := Label.new()
 	hints.text = HINT_DEFAULT
 	hints.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -168,6 +195,7 @@ func _build_menu() -> Control:
 	_style_button(close, false)
 	close.pressed.connect(_on_action_pressed.bind("close"))
 	footer.add_child(close)
+	close_button = close
 	return overlay
 
 
@@ -179,7 +207,7 @@ func _fit_frame() -> void:
 
 func show_panel(tab: String, rows: Array) -> void:
 	# Only rebuild when the content changes, so buttons aren't recreated mid-click.
-	var key := JSON.stringify([tab, rows, collapsed_sections])
+	var key := JSON.stringify([tab, rows])
 	if panel.visible and key == _last_key:
 		return
 	# Hold the rebuild while the mouse button is down, so a press can finish on the button it started on.
@@ -190,20 +218,42 @@ func show_panel(tab: String, rows: Array) -> void:
 	_last_rows = rows
 	panel.visible = true
 	menu_button.visible = false
+	# A rebuild of the same tab keeps focus on the button that was pressed, so a gamepad can press + again.
+	var keep_action := ""
+	var focused := get_viewport().gui_get_focus_owner()
+	if tab == active_tab and focused is Button and focused.has_meta("action"):
+		keep_action = str(focused.get_meta("action"))
 	if tab != active_tab:
 		scroll.scroll_vertical = 0
+		list_scroll.scroll_vertical = 0
+		_ledger_pick = 0
 	title_label.text = tab
 	if hint_label != null:
-		hint_label.text = HINT_SETTINGS if tab == "Settings" else HINT_DEFAULT
+		hint_label.text = HINT_BACK if tab in ["Settings", "Controls"] else (HINT_SETTINGS if tab == "Pause" else HINT_DEFAULT)
 	subtitle_label.text = str(SUBTITLES.get(tab, ""))
 	active_tab = tab
-	for child in rows_box.get_children():
-		rows_box.remove_child(child)
-		child.queue_free()
-	for row in _with_folds(tab, rows):
+	_clear(rows_box)
+	var is_ledger := _has_tabs(rows)
+	_grid_tabs = {}
+	for row in rows:
+		if not is_ledger and row is Dictionary and row.has("tabs"):
+			_grid_tabs = row
+	var prompted := is_ledger or not _grid_tabs.is_empty()
+	scroll.visible = not is_ledger
+	ledger.visible = is_ledger
+	prompt_bar.visible = prompted
+	hint_label.visible = not prompted
+	if not _grid_tabs.is_empty():
+		_ledger_tab_count = _grid_tabs["tabs"].size()
+		_refresh_prompts()
+	close_button.focus_mode = Control.FOCUS_NONE if is_ledger else Control.FOCUS_ALL
+	if is_ledger:
+		_build_ledger(tab, rows)
+		return
+	for row in rows:
 		rows_box.add_child(_build_row(row))
 	# Highlight the first usable button so a gamepad can reach it.
-	call_deferred("_focus_first_button")
+	call_deferred("_focus_first_button", keep_action)
 
 
 func hide_panel() -> void:
@@ -213,70 +263,26 @@ func hide_panel() -> void:
 	active_tab = ""
 
 
-# Turns each section of a collapsible menu into a header that shows its item count. The items
-# are only included while the section is open.
-func _with_folds(tab: String, rows: Array) -> Array:
-	if not COLLAPSIBLE_TABS.has(tab):
-		return rows
-	var out: Array = []
-	var i := 0
-	while i < rows.size():
-		var row: Dictionary = rows[i]
-		if not row.has("section"):
-			out.append(row)
-			i += 1
-			continue
-		var group: Array = []
-		var j := i + 1
-		while j < rows.size() and not rows[j].has("section"):
-			group.append(rows[j])
-			j += 1
-		var items := 0
-		for item in group:
-			if not item.has("note"):
-				items += 1
-		if ALWAYS_OPEN_SECTIONS.has(str(row["section"])):
-			out.append(row)
-			out.append_array(group)
-			i = j
-			continue
-		var key := "%s|%s" % [tab, str(row["section"])]
-		var folded := bool(collapsed_sections.get(key, true))
-		out.append({"section_toggle": str(row["section"]), "key": key, "count": items, "folded": folded})
-		if not folded:
-			out.append_array(group)
-		i = j
-	return out
-
-
-func _toggle_section(key: String) -> void:
-	collapsed_sections[key] = not bool(collapsed_sections.get(key, true))
-	_focus_section = key
-	_last_key = ""
-	show_panel(_last_tab, _last_rows)
-
-
-func _find_toggle(node: Node, key: String) -> Button:
-	for child in node.get_children():
-		var button := child as Button
-		if button != null and button.has_meta("toggle_key") and str(button.get_meta("toggle_key")) == key:
-			return button
-		var found := _find_toggle(child, key)
-		if found != null:
-			return found
-	return null
-
-
-func _focus_first_button() -> void:
-	if _focus_section != "":
-		var header := _find_toggle(rows_box, _focus_section)
-		_focus_section = ""
-		if header != null:
-			header.grab_focus()
+func _focus_first_button(keep_action: String = "") -> void:
+	if keep_action != "":
+		var kept := _find_action_button(rows_box, keep_action)
+		if kept != null:
+			kept.grab_focus()
 			return
 	var button := _first_enabled_button(rows_box)
 	if button != null:
 		button.grab_focus()
+
+
+func _find_action_button(node: Node, action_id: String) -> Button:
+	for child in node.get_children():
+		var button := child as Button
+		if button != null and not button.disabled and str(button.get_meta("action", "")) == action_id:
+			return button
+		var found := _find_action_button(child, action_id)
+		if found != null:
+			return found
+	return null
 
 
 func _first_enabled_button(node: Node) -> Button:
@@ -298,20 +304,6 @@ func _build_row(data: Dictionary) -> Control:
 		return _centred(_build_split(data["split"]))
 	if data.has("grid"):
 		return _centred(_build_grid(data))
-	if data.has("section_toggle"):
-		var toggle := Button.new()
-		var sign_text := "+" if bool(data["folded"]) else "-"
-		toggle.text = "%s  %s   (%d)" % [sign_text, str(data["section_toggle"]).to_upper(), int(data["count"])]
-		toggle.alignment = HORIZONTAL_ALIGNMENT_LEFT
-		toggle.focus_mode = Control.FOCUS_ALL
-		toggle.custom_minimum_size = Vector2(0, 34)
-		_style_button(toggle, false)
-		toggle.set_meta("toggle_key", str(data["key"]))
-		toggle.pressed.connect(_toggle_section.bind(str(data["key"])))
-		var toggle_space := MarginContainer.new()
-		toggle_space.add_theme_constant_override("margin_top", 10)
-		toggle_space.add_child(toggle)
-		return toggle_space
 	if data.has("section"):
 		var heading := Label.new()
 		heading.text = str(data["section"]).to_upper()
@@ -383,13 +375,24 @@ func _build_card(data: Dictionary) -> Control:
 	else:
 		line.add_child(value_label)
 
+	# An optional second, small button sits before the main one, such as − beside +.
+	if data.has("button2"):
+		var less := Button.new()
+		less.text = str(data["button2"])
+		less.custom_minimum_size = Vector2(48, 34)
+		less.focus_mode = Control.FOCUS_ALL
+		_style_button(less, false)
+		less.set_meta("action", str(data.get("action2", "")))
+		less.pressed.connect(_on_action_pressed.bind(str(data.get("action2", ""))))
+		line.add_child(less)
 	if data.has("button"):
 		var button := Button.new()
 		button.text = str(data["button"])
-		button.custom_minimum_size = Vector2(120, 34)
+		button.custom_minimum_size = Vector2(48 if data.has("button2") else 120, 34)
 		button.focus_mode = Control.FOCUS_ALL
 		button.disabled = not bool(data.get("enabled", true))
 		_style_button(button, false)
+		button.set_meta("action", str(data.get("action", "")))
 		button.pressed.connect(_on_action_pressed.bind(str(data.get("action", ""))))
 		line.add_child(button)
 
@@ -415,15 +418,21 @@ func _build_card(data: Dictionary) -> Control:
 # A row of sub-tab buttons. The active one is highlighted; each button sends its action.
 func _build_tabs(data: Dictionary) -> Control:
 	var holder := HBoxContainer.new()
-	holder.add_theme_constant_override("separation", 8)
+	holder.add_theme_constant_override("separation", 6)
+	holder.alignment = BoxContainer.ALIGNMENT_CENTER
+	holder.add_child(_glyph("LB" if _pad_glyphs else "Q"))
 	for tab in data["tabs"]:
 		var button := Button.new()
 		button.text = str(tab["name"])
 		button.custom_minimum_size = Vector2(120, 36)
-		button.focus_mode = Control.FOCUS_ALL
-		_style_button(button, str(tab["id"]) == str(data.get("active", "")))
+		button.focus_mode = Control.FOCUS_NONE
+		var open := str(tab["id"]) == str(data.get("active", ""))
+		_style_button(button, open)
+		if open:
+			button.add_theme_color_override("font_color", COL_ACCENT)
 		button.pressed.connect(_on_action_pressed.bind(str(tab.get("action", ""))))
 		holder.add_child(button)
+	holder.add_child(_glyph("RB" if _pad_glyphs else "E"))
 	return holder
 
 
@@ -687,6 +696,338 @@ func _build_detail(recipe: Dictionary) -> Control:
 	return card
 
 
+# --- The ledger layout --------------------------------------------------------
+
+func _clear(node: Node) -> void:
+	for child in node.get_children():
+		node.remove_child(child)
+		child.queue_free()
+
+
+func _has_tabs(rows: Array) -> bool:
+	for row in rows:
+		if row is Dictionary and row.has("tab"):
+			return true
+	return false
+
+
+# The tab strip above, then the entry list on the left and the detail page on the right.
+func _build_ledger_frame() -> Control:
+	ledger = VBoxContainer.new()
+	ledger.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	ledger.add_theme_constant_override("separation", 10)
+	ledger.visible = false
+	tab_strip = HBoxContainer.new()
+	tab_strip.add_theme_constant_override("separation", 6)
+	tab_strip.alignment = BoxContainer.ALIGNMENT_CENTER
+	ledger.add_child(tab_strip)
+	var body := HBoxContainer.new()
+	body.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	body.add_theme_constant_override("separation", 14)
+	ledger.add_child(body)
+	list_scroll = ScrollContainer.new()
+	list_scroll.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	list_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	list_scroll.follow_focus = true
+	body.add_child(list_scroll)
+	list_box = VBoxContainer.new()
+	list_box.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	list_box.add_theme_constant_override("separation", 6)
+	list_scroll.add_child(list_box)
+	var page := PanelContainer.new()
+	page.custom_minimum_size = Vector2(LEDGER_DETAIL_WIDTH, 0)
+	page.add_theme_stylebox_override("panel", _box(Color("1b140d"), COL_BORDER, 2, 6, 16))
+	body.add_child(page)
+	detail_box = VBoxContainer.new()
+	detail_box.add_theme_constant_override("separation", 8)
+	page.add_child(detail_box)
+	return ledger
+
+
+func _build_ledger(panel_name: String, rows: Array) -> void:
+	# Split the rows at each tab marker.
+	var tabs: Array = []
+	for row in rows:
+		if row.has("tab"):
+			tabs.append({"name": str(row["tab"]), "rows": []})
+		elif not tabs.is_empty():
+			tabs[-1]["rows"].append(row)
+	_ledger_tab_count = tabs.size()
+	var open := clampi(int(ledger_tabs.get(panel_name, 0)), 0, tabs.size() - 1)
+	ledger_tabs[panel_name] = open
+
+	_clear(tab_strip)
+	tab_strip.visible = tabs.size() > 1
+	tab_strip.add_child(_glyph("LB" if _pad_glyphs else "Q"))
+	for i in tabs.size():
+		var tab_button := Button.new()
+		tab_button.text = str(tabs[i]["name"])
+		tab_button.custom_minimum_size = Vector2(130, 36)
+		tab_button.focus_mode = Control.FOCUS_NONE
+		_style_button(tab_button, i == open)
+		if i == open:
+			tab_button.add_theme_color_override("font_color", COL_ACCENT)
+		tab_button.pressed.connect(_open_ledger_tab.bind(i))
+		tab_strip.add_child(tab_button)
+	tab_strip.add_child(_glyph("RB" if _pad_glyphs else "E"))
+
+	_clear(list_box)
+	_ledger_entries = []
+	var notes: Array = []
+	for row in tabs[open]["rows"]:
+		if row.has("section"):
+			var heading := Label.new()
+			heading.text = str(row["section"]).to_upper()
+			heading.add_theme_font_size_override("font_size", 13)
+			heading.add_theme_color_override("font_color", COL_ACCENT)
+			list_box.add_child(heading)
+		elif row.has("note") and not row.has("name"):
+			notes.append(str(row["note"]))
+		else:
+			list_box.add_child(_build_entry(row, _ledger_entries.size()))
+			_ledger_entries.append(row)
+	# The tab's notes sit under its entries, small, instead of between them.
+	for text in notes:
+		var spaced := MarginContainer.new()
+		spaced.add_theme_constant_override("margin_top", 6)
+		spaced.add_child(_detail_text(str(text), COL_MUTED, 13))
+		list_box.add_child(spaced)
+	_ledger_pick = clampi(_ledger_pick, 0, maxi(0, _ledger_entries.size() - 1))
+	_show_detail()
+	_refresh_prompts()
+	call_deferred("_focus_entry", _ledger_pick)
+
+
+# One line: the name, then a coloured status on the right. The whole line takes focus.
+func _build_entry(row: Dictionary, index: int) -> Control:
+	var status: Array = _entry_status(row)
+	var entry := Button.new()
+	entry.custom_minimum_size = Vector2(0, 42)
+	entry.focus_mode = Control.FOCUS_ALL
+	entry.add_theme_stylebox_override("normal", _box(COL_CARD, Color("3d3024"), 1, 4, 0))
+	entry.add_theme_stylebox_override("hover", _box(COL_NAV_HOVER, COL_BORDER, 1, 4, 0))
+	entry.add_theme_stylebox_override("pressed", _box(COL_NAV_ACTIVE, COL_ACCENT, 2, 4, 0))
+	var ring := _box(COL_NAV_ACTIVE, COL_ACCENT, 2, 4, 0)
+	ring.draw_center = false
+	entry.add_theme_stylebox_override("focus", ring)
+	if row.has("action"):
+		entry.set_meta("action", str(row["action"]))
+	var line := HBoxContainer.new()
+	line.set_anchors_preset(Control.PRESET_FULL_RECT)
+	line.offset_left = 14
+	line.offset_right = -14
+	line.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	line.add_theme_constant_override("separation", 10)
+	entry.add_child(line)
+	var name_label := Label.new()
+	name_label.text = str(row.get("name", ""))
+	name_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	name_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	name_label.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+	name_label.add_theme_font_size_override("font_size", 16)
+	name_label.add_theme_color_override("font_color", COL_MUTED if str(status[1]) == "done" else COL_TEXT)
+	line.add_child(name_label)
+	if str(status[0]) != "":
+		var chip := Label.new()
+		chip.text = str(status[0])
+		chip.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+		chip.add_theme_font_size_override("font_size", 13)
+		chip.add_theme_color_override("font_color", _kind_color(str(status[1])))
+		line.add_child(chip)
+	entry.focus_entered.connect(_pick_entry.bind(index))
+	entry.pressed.connect(_press_entry.bind(index))
+	if row.has("button2"):
+		entry.gui_input.connect(_step_entry.bind(index, entry))
+	return entry
+
+
+# Left and right on a line with − and + press them, like a slider.
+func _step_entry(event: InputEvent, index: int, entry: Button) -> void:
+	var row: Dictionary = _ledger_entries[index]
+	if event.is_action_pressed("ui_left"):
+		_on_action_pressed(str(row.get("action2", "")))
+		entry.accept_event()
+	elif event.is_action_pressed("ui_right"):
+		_on_action_pressed(str(row.get("action", "")))
+		entry.accept_event()
+
+
+# The status shown on an entry's line: its own, or what its button would do.
+func _entry_status(row: Dictionary) -> Array:
+	if row.has("status"):
+		var kind := str(row.get("status_kind", ""))
+		if kind == "" and row.has("button"):
+			kind = "ok" if bool(row.get("enabled", true)) else "short"
+		return [str(row["status"]), kind if kind != "" else "info"]
+	if row.has("button"):
+		if bool(row.get("enabled", true)):
+			return [str(row["button"]), "ok"]
+		# A short value, such as "0 held", says more than "Not yet".
+		var short_value := str(row.get("value", ""))
+		return [short_value if short_value != "" and short_value.length() <= 18 else "Not yet", "short"]
+	var value := str(row.get("value", ""))
+	return [value if value.length() <= 18 else "", "info"]
+
+
+func _kind_color(kind: String) -> Color:
+	match kind:
+		"ok":
+			return COL_OK
+		"short":
+			return COL_SHORT
+		"done":
+			return COL_MUTED
+	return COL_ACCENT
+
+
+func _pick_entry(index: int) -> void:
+	if index == _ledger_pick and detail_box.get_child_count() > 0:
+		return
+	_ledger_pick = index
+	_show_detail()
+
+
+func _focus_entry(index: int) -> void:
+	var entries: Array = []
+	for child in list_box.get_children():
+		if child is Button:
+			entries.append(child)
+	if index < entries.size():
+		entries[index].grab_focus()
+
+
+# A or Space on an entry presses its action. A click only picks it, so its details can be read first.
+func _press_entry(index: int) -> void:
+	if _pointer_last or index >= _ledger_entries.size():
+		return
+	var row: Dictionary = _ledger_entries[index]
+	if str(row.get("action", "")) != "" and bool(row.get("enabled", true)):
+		_on_action_pressed(str(row["action"]))
+
+
+# The focused entry in full: what it is, what it needs (have or short), and its button.
+func _show_detail() -> void:
+	_clear(detail_box)
+	if _ledger_entries.is_empty():
+		return
+	var row: Dictionary = _ledger_entries[clampi(_ledger_pick, 0, _ledger_entries.size() - 1)]
+	detail_box.add_child(_detail_text(str(row.get("name", "")), COL_ACCENT, 20))
+	var status: Array = _entry_status(row)
+	if str(row.get("status", "")) != "":
+		detail_box.add_child(_detail_text(str(status[0]), _kind_color(str(status[1])), 14))
+	if str(row.get("about", "")) != "":
+		detail_box.add_child(_detail_text(str(row["about"]), COL_TEXT, 15))
+	var needs: Array = row.get("needs", [])
+	if needs.is_empty():
+		if str(row.get("value", "")) != "" and str(row.get("value", "")) != str(row.get("status", "")):
+			detail_box.add_child(_detail_text(str(row["value"]), COL_TEXT, 15))
+	else:
+		detail_box.add_child(_detail_text("NEEDS", COL_MUTED, 12))
+		for need in needs:
+			var ok := bool(need.get("ok", false))
+			# Plain ASCII boxes: the default font has no tick or cross.
+			var text := "%s  %s" % ["[x]" if ok else "[  ]", str(need["text"])]
+			if need.has("have") and not ok:
+				text += "  (have %d)" % int(need["have"])
+			detail_box.add_child(_detail_text(text, COL_OK if ok else COL_SHORT, 15))
+	if row.has("progress"):
+		var bar := ProgressBar.new()
+		bar.show_percentage = false
+		bar.custom_minimum_size = Vector2(0, 10)
+		bar.value = clampf(float(row["progress"]), 0.0, 1.0) * 100.0
+		bar.add_theme_stylebox_override("background", _box(COL_TRACK, COL_TRACK, 0, 4, 0))
+		bar.add_theme_stylebox_override("fill", _box(COL_ACCENT, COL_ACCENT, 0, 4, 0))
+		detail_box.add_child(bar)
+	if str(row.get("note", "")) != "":
+		detail_box.add_child(_detail_text(str(row["note"]), COL_MUTED, 13))
+	var spacer := Control.new()
+	spacer.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	detail_box.add_child(spacer)
+	if row.has("button"):
+		var bottom := HBoxContainer.new()
+		bottom.alignment = BoxContainer.ALIGNMENT_END
+		bottom.add_theme_constant_override("separation", 8)
+		detail_box.add_child(bottom)
+		if row.has("button2"):
+			bottom.add_child(_glyph("< >"))
+			var less := Button.new()
+			less.text = str(row["button2"]).replace("−", "-")
+			less.custom_minimum_size = Vector2(48, 38)
+			less.focus_mode = Control.FOCUS_NONE
+			_style_button(less, false)
+			less.pressed.connect(_on_action_pressed.bind(str(row.get("action2", ""))))
+			bottom.add_child(less)
+		else:
+			bottom.add_child(_glyph("A" if _pad_glyphs else "Space"))
+		var button := Button.new()
+		button.text = str(row["button"])
+		button.custom_minimum_size = Vector2(48 if row.has("button2") else 140, 38)
+		button.focus_mode = Control.FOCUS_NONE
+		button.disabled = not bool(row.get("enabled", true))
+		_style_button(button, false)
+		button.pressed.connect(_on_action_pressed.bind(str(row.get("action", ""))))
+		bottom.add_child(button)
+
+
+func _detail_text(text: String, color: Color, font_size: int) -> Label:
+	var label := Label.new()
+	label.text = text
+	label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	label.add_theme_font_size_override("font_size", font_size)
+	label.add_theme_color_override("font_color", color)
+	return label
+
+
+func _open_ledger_tab(index: int) -> void:
+	if index == int(ledger_tabs.get(active_tab, 0)):
+		return
+	ledger_tabs[active_tab] = index
+	_ledger_pick = 0
+	list_scroll.scroll_vertical = 0
+	_rebuild()
+
+
+func _rebuild() -> void:
+	_last_key = ""
+	show_panel(_last_tab, _last_rows)
+
+
+# A small boxed key or button name, drawn in code until the glyph art is made.
+func _glyph(key_name: String) -> Control:
+	var glyph := Label.new()
+	glyph.text = key_name
+	glyph.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	glyph.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	glyph.custom_minimum_size = Vector2(26, 24)
+	glyph.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	glyph.add_theme_font_size_override("font_size", 12)
+	glyph.add_theme_color_override("font_color", COL_TEXT)
+	glyph.add_theme_stylebox_override("normal", _box(COL_BUTTON, COL_BORDER, 1, 4, 5))
+	return glyph
+
+
+# The footer's button prompts, in the glyphs of whichever device was used last.
+func _refresh_prompts() -> void:
+	_clear(prompt_bar)
+	var pad := _pad_glyphs
+	var back := "Back" if active_tab in ["Settings", "Controls"] else "Close"
+	var prompts: Array = [["A" if pad else "Space", "Select"], ["B" if pad else "Esc", back]]
+	if _ledger_tab_count > 1:
+		prompts.append(["LB RB" if pad else "Q E", "Tabs"])
+	if not active_tab in ["Pause", "Settings", "Controls"]:
+		prompts.append(["L3" if pad else "Shift", "Sections"])
+	for prompt in prompts:
+		var pair := HBoxContainer.new()
+		pair.add_theme_constant_override("separation", 6)
+		pair.add_child(_glyph(str(prompt[0])))
+		var label := Label.new()
+		label.text = str(prompt[1])
+		label.add_theme_font_size_override("font_size", 13)
+		label.add_theme_color_override("font_color", COL_MUTED)
+		pair.add_child(label)
+		prompt_bar.add_child(pair)
+
+
 func _style_button(button: Button, active: bool) -> void:
 	button.add_theme_color_override("font_color", COL_TEXT)
 	button.add_theme_color_override("font_disabled_color", COL_MUTED)
@@ -732,12 +1073,50 @@ func _process(delta: float) -> void:
 		return
 	var stick := Input.get_joy_axis(pads[0], JOY_AXIS_RIGHT_Y)
 	if absf(stick) > 0.25:
-		scroll.scroll_vertical += int(stick * 900.0 * delta)
+		var target := list_scroll if ledger.visible else scroll
+		target.scroll_vertical += int(stick * 900.0 * delta)
 
 
 func _input(event: InputEvent) -> void:
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT:
 		_pointer_held = event.pressed
+	if event is InputEventMouseButton:
+		_pointer_last = true
+	elif event is InputEventKey or event is InputEventJoypadButton:
+		_pointer_last = false
+	# The prompts follow whichever of keyboard or gamepad was used last.
+	var pad := event is InputEventJoypadButton or (event is InputEventJoypadMotion and absf(event.axis_value) > 0.5)
+	if (pad or event is InputEventKey) and pad != _pad_glyphs:
+		_pad_glyphs = pad
+		if panel.visible and prompt_bar.visible:
+			_rebuild()
+	if not panel.visible or not prompt_bar.visible or _ledger_tab_count < 2:
+		return
+	if not event.is_pressed() or event.is_echo():
+		return
+	var step := 0
+	if event is InputEventKey:
+		if event.physical_keycode == KEY_Q:
+			step = -1
+		elif event.physical_keycode == KEY_E:
+			step = 1
+	elif event is InputEventJoypadButton:
+		if event.button_index == JOY_BUTTON_LEFT_SHOULDER:
+			step = -1
+		elif event.button_index == JOY_BUTTON_RIGHT_SHOULDER:
+			step = 1
+	if step == 0:
+		return
+	get_viewport().set_input_as_handled()
+	if ledger.visible:
+		_open_ledger_tab(posmod(int(ledger_tabs.get(active_tab, 0)) + step, _ledger_tab_count))
+		return
+	var tabs: Array = _grid_tabs["tabs"]
+	var at := 0
+	for i in tabs.size():
+		if str(tabs[i]["id"]) == str(_grid_tabs.get("active", "")):
+			at = i
+	_on_action_pressed(str(tabs[posmod(at + step, tabs.size())].get("action", "")))
 
 
 func _on_menu_pressed() -> void:

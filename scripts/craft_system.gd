@@ -209,6 +209,7 @@ func _recipes_other() -> Array:
 			"action": "advance_lantern", "button": "Build" if m.lantern_tier == 0 else "Upgrade",
 		})
 	out.append(m._recipes_other_bandage())
+	out.append(m.trek._rope_recipe())
 	out.append(m.nights._charm_recipe())
 	return out
 

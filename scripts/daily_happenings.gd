@@ -32,6 +32,13 @@ const HAPPENINGS := [
 		"morning": "The pond is boiling with fish this morning. Catches come easier all day."},
 	{"id": "neighbour", "weight": 2,
 		"morning": ""},
+	# The crow bell's parts: storm oak for its frame in spring, wild flax for its rope in summer.
+	{"id": "storm_oak", "weight": 3, "season": "Spring",
+		"morning": "Lightning split an oak at the edge of the wood in the night. Its heartwood lies open.",
+		"remind": "The storm-split oak still lies at the edge of the wood."},
+	{"id": "flax", "weight": 3, "season": "Summer",
+		"morning": "Wild flax is in blue flower at the edge of the wood.",
+		"remind": "The wild flax is still in flower at the edge of the wood."},
 ]
 const PEDLAR_GOODS := [
 	{"name": "a crow charm", "price": 25, "item": "crow_charm", "amount": 1},
@@ -69,8 +76,13 @@ func _raw_pick(day: int) -> int:
 	_rng.seed = hash([day, "happening"])
 	var weights := PackedFloat32Array()
 	for h in HAPPENINGS:
-		weights.append(float(h["weight"]))
+		weights.append(float(h["weight"]) if _in_season(h, day) else 0.0)
 	return _rng.rand_weighted(weights)
+
+
+# A happening with a season only comes in that season.
+func _in_season(h: Dictionary, day: int) -> bool:
+	return not h.has("season") or m._season_of(m._calendar_date(day)["month"]) == str(h["season"])
 
 
 # The day's happening: its own roll, moved on by one when it would repeat yesterday's. Each day depends on
@@ -83,12 +95,14 @@ func _pick(day: int) -> Dictionary:
 		var i := _raw_pick(d)
 		if not _picks.is_empty() and i == _picks[-1]:
 			i = (i + 1) % HAPPENINGS.size()
+			while not _in_season(HAPPENINGS[i], d):
+				i = (i + 1) % HAPPENINGS.size()
 		_picks.append(i)
 	return HAPPENINGS[_picks[day - 2]]
 
 
 func _pending() -> bool:
-	return not today.is_empty() and done_day != m.day and today["id"] in ["pedlar", "glint", "branch", "crow_gifts", "mushrooms"] \
+	return not today.is_empty() and done_day != m.day and today["id"] in ["pedlar", "glint", "branch", "crow_gifts", "mushrooms", "storm_oak", "flax"] \
 		and not (today["id"] == "pedlar" and m.current_hour >= PEDLAR_LEAVES)
 
 
@@ -111,7 +125,7 @@ func _start_day(morning: bool) -> String:
 		"crow_gifts":
 			var base := m._big_tree_origin()
 			tile = base + Vector2i(1, 3)
-		"mushrooms":
+		"mushrooms", "storm_oak", "flax":
 			tile = _random_tile(func(t: Vector2i) -> bool: return _open_grass(t) and _beside_tree(t))
 	_redraw()
 	if not morning:
@@ -223,6 +237,20 @@ func _try_take(t: Vector2i) -> bool:
 			m.play_sfx("coin", 0.05)
 			m.mystery._on_crow_gifts()
 			text = "Under the tree: buttons, a bent spoon, a ring of keys to nothing, and %d coins. A feather, too. +1 crow feather." % coins
+		"storm_oak":
+			if int(m.tool_tier["hatchet"]) < 1:
+				m._show_message("The heartwood is too tough to pull free. It needs a hatchet.")
+				return true
+			m.materials["storm_oak"] += 1
+			m.materials["wood"] += 2
+			m.progression._grant_xp("Forestry", m.XP_FELL)
+			m.play_sfx("chop", 0.05)
+			text = "You cut the heartwood out of the split oak. It is still warm. +1 storm oak, +2 wood, +%d Forestry XP." % m.XP_FELL
+		"flax":
+			m.materials["flax"] += 3
+			m.progression._grant_xp("Bushcrafting", m.XP_GATHER)
+			m.play_sfx("gather", 0.05)
+			text = "You pull the longest stems and leave the rest to seed. +3 wild flax, +%d Bushcrafting XP." % m.XP_GATHER
 		"mushrooms":
 			m.play_sfx("eat", 0.05)
 			if _rng.randf() < 0.67:
@@ -305,6 +333,22 @@ func _draw() -> void:
 			for p in [Vector2(-0.4, -0.35), Vector2(0.7, -0.4), Vector2(0.55, 0.3)]:
 				layer.draw_circle(c + p * px, px * 0.11, ink)
 				layer.draw_circle(c + p * px, px * 0.08, Color("c07a3a"))
+		"storm_oak":
+			# A fallen trunk, split along its length, pale heartwood showing and a scorch at the break.
+			var bark := Color("4a3426")
+			_box(Rect2(c + Vector2(-px * 0.8, -px * 0.2), Vector2(px * 1.6, px * 0.4)), bark)
+			layer.draw_line(c + Vector2(-px * 0.7, 0), c + Vector2(px * 0.6, -px * 0.02), Color("d8c08a"), 4.0)
+			layer.draw_circle(c + Vector2(px * 0.72, 0), px * 0.16, Color("1d1611"))
+			layer.draw_circle(c + Vector2(px * 0.72, 0), px * 0.1, Color("2a2420"))
+		"flax":
+			# A clump of thin green stems with small blue flowers.
+			for k in 6:
+				var p := c + Vector2((float(k) - 2.5) * px * 0.14, px * 0.3)
+				var top := p + Vector2(sin(float(k)) * px * 0.08, -px * (0.5 + 0.08 * float(k % 3)))
+				layer.draw_line(p, top, Color("1d1611"), 3.0)
+				layer.draw_line(p, top, Color("6a9a4a"), 1.5)
+				layer.draw_circle(top, 3.5, Color("1d1611"))
+				layer.draw_circle(top, 2.5, Color("7a9ad8"))
 		"mushrooms":
 			for k in 7:
 				var a := TAU * float(k) / 7.0

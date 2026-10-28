@@ -66,6 +66,7 @@ func setup() -> void:
 		var stream := load(path) as AudioStreamOggVorbis
 		stream.loop = true
 		var p := AudioStreamPlayer.new()
+		p.bus = "SFX"
 		p.stream = stream
 		p.volume_db = -80.0
 		m.add_child(p)
@@ -92,13 +93,13 @@ func _fear() -> float:
 
 
 func _place() -> String:
-	if m.in_cave:
+	if m.in_cave and not m.trek.active:
 		return "cave"
 	return "in" if m.inside else "out"
 
 
 func update(delta: float) -> void:
-	var on := m.sfx_on and m.world_started
+	var on := GameSettings.sfx_volume > 0 and m.world_started
 	var targets := {}
 	if on:
 		targets = _loop_targets()

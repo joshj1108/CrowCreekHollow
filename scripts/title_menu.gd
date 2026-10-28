@@ -20,6 +20,7 @@ const COL_BUTTON_HOVER := Color("3a2a18")
 const COL_BUTTON_DISABLED := Color("16110c")
 
 var settings_rows: Array = []   # the controls list, from main.gd
+var page := "title"             # the page showing, so B or Esc can go back from it
 var root_panel: Control
 var content: VBoxContainer
 var overwrite_armed := -1       # slot waiting for a second press in New Game
@@ -51,11 +52,22 @@ static func migrate_legacy_save() -> void:
 
 
 static func slot_data(slot: int) -> Dictionary:
-	var path := slot_path(slot)
-	if not FileAccess.file_exists(path):
-		return {}
-	var parsed: Variant = JSON.parse_string(FileAccess.get_file_as_string(path))
-	return parsed if typeof(parsed) == TYPE_DICTIONARY else {}
+	return SaveSystem.read_save(slot_path(slot))
+
+
+# Puts each slot's save right before the slots are listed: a damaged or missing save comes back from its
+# backup, and the start screen says so once.
+static func recover_slots() -> void:
+	for slot in range(1, SLOT_COUNT + 1):
+		var result := SaveSystem.recover(slot_path(slot))
+		var line := ""
+		if result == "restored":
+			line = "Slot %d's save was damaged, so it was restored from the night before (day %d)." % [slot, int(slot_data(slot).get("day", 1))]
+		elif result == "lost":
+			line = "Slot %d's save was damaged and had no backup, so the slot is empty." % slot
+		if line != "":
+			notice = line if notice == "" else notice + "
+" + line
 
 
 # The slot saved most recently, or -1 if there are no saves.
@@ -87,10 +99,22 @@ func _ready() -> void:
 	column.set_anchors_preset(Control.PRESET_FULL_RECT)
 	root_panel.add_child(column)
 
+	# The build version sits in the corner, so a tester's feedback can name the build it came from.
+	var version := Label.new()
+	version.text = "v%s" % ProjectSettings.get_setting("application/config/version", "dev")
+	version.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_RIGHT, Control.PRESET_MODE_MINSIZE, 12)
+	version.grow_horizontal = Control.GROW_DIRECTION_BEGIN
+	version.grow_vertical = Control.GROW_DIRECTION_BEGIN
+	version.add_theme_font_size_override("font_size", 14)
+	version.add_theme_color_override("font_color", COL_DIM)
+	root_panel.add_child(version)
+
 	var box := VBoxContainer.new()
 	box.add_theme_constant_override("separation", 14)
 	box.custom_minimum_size = Vector2(420, 0)
 	column.add_child(box)
+	migrate_legacy_save()
+	recover_slots()
 	if notice != "":
 		var notice_label := Label.new()
 		notice_label.text = notice
@@ -129,12 +153,12 @@ func _ready() -> void:
 	content.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	scroll.add_child(content)
 
-	migrate_legacy_save()
 	show_title()
 
 
 func show_title() -> void:
 	_clear()
+	page = "title"
 	overwrite_armed = -1
 	var newest := newest_slot()
 	_add_button("Continue", newest >= 0, func() -> void: start_requested.emit("continue", newest))
@@ -148,6 +172,7 @@ func show_title() -> void:
 
 func _show_slots(mode: String) -> void:
 	_clear()
+	page = "slots"
 	var heading := "Choose a slot for the new game" if mode == "new" else "Load a game"
 	_add_heading(heading)
 	for slot in range(1, SLOT_COUNT + 1):
@@ -189,6 +214,7 @@ func _show_slots_refresh_armed(slot: int) -> void:
 # gamepad player can just press Begin.
 func _show_name(slot: int) -> void:
 	_clear()
+	page = "name"
 	_add_heading("Name this save")
 	var field := LineEdit.new()
 	field.text = "Farm %d" % slot
@@ -212,8 +238,61 @@ func _show_name(slot: int) -> void:
 	field.grab_focus.call_deferred()
 
 
-func _show_settings() -> void:
+# B or Esc goes back a page: from Controls to Settings, and from any other page to the title.
+func _unhandled_input(event: InputEvent) -> void:
+	if not visible or page == "title" or not event.is_action_pressed("ui_cancel"):
+		return
+	get_viewport().set_input_as_handled()
+	if page == "controls":
+		_show_settings()
+	elif page == "name":
+		_show_slots("new")
+	else:
+		show_title()
+
+
+# The same settings as the Pause menu, from GameSettings. keep_action keeps focus on the button just pressed.
+func _show_settings(keep_action: String = "") -> void:
 	_clear()
+	page = "settings"
+	for row in GameSettings.rows():
+		if row.has("section"):
+			_add_heading(str(row["section"]))
+			continue
+		var line := HBoxContainer.new()
+		line.add_theme_constant_override("separation", 8)
+		var name_label := Label.new()
+		name_label.text = str(row["name"])
+		name_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		name_label.add_theme_color_override("font_color", COL_TEXT)
+		line.add_child(name_label)
+		var value_label := Label.new()
+		value_label.text = str(row.get("value", ""))
+		value_label.add_theme_color_override("font_color", COL_DIM)
+		line.add_child(value_label)
+		for key in ["2", ""]:
+			if row.has("button" + key):
+				var action := str(row["action" + key])
+				var button := _make_button(str(row["button" + key]), true, _on_setting.bind(action), Vector2(44 if row.has("button2") else 96, 36), 16)
+				button.set_meta("action", action)
+				line.add_child(button)
+				if action == keep_action:
+					button.grab_focus.call_deferred()
+		content.add_child(line)
+	_add_button("Controls", true, _show_controls)
+	_add_button("Back", true, show_title)
+	if keep_action == "":
+		_focus_first()
+
+
+func _on_setting(action: String) -> void:
+	GameSettings.change(action)
+	_show_settings(action)
+
+
+func _show_controls() -> void:
+	_clear()
+	page = "controls"
 	for row in settings_rows:
 		if row.has("section"):
 			_add_heading(str(row["section"]))
@@ -233,7 +312,7 @@ func _show_settings() -> void:
 			value_label.custom_minimum_size = Vector2(220, 0)
 			line.add_child(value_label)
 			content.add_child(line)
-	_add_button("Back", true, show_title)
+	_add_button("Back", true, _show_settings)
 	_focus_first()
 
 
@@ -257,11 +336,15 @@ func _clear() -> void:
 
 
 func _add_button(text: String, enabled: bool, on_press: Callable) -> void:
+	content.add_child(_make_button(text, enabled, on_press, Vector2(420, 44), 20))
+
+
+func _make_button(text: String, enabled: bool, on_press: Callable, min_size: Vector2, font_size: int) -> Button:
 	var button := Button.new()
 	button.text = text
 	button.disabled = not enabled
-	button.custom_minimum_size = Vector2(420, 44)
-	button.add_theme_font_size_override("font_size", 20)
+	button.custom_minimum_size = min_size
+	button.add_theme_font_size_override("font_size", font_size)
 	button.add_theme_color_override("font_color", COL_TEXT)
 	button.add_theme_color_override("font_disabled_color", COL_DIM)
 	if not UiSkin.style_button(button):
@@ -272,7 +355,7 @@ func _add_button(text: String, enabled: bool, on_press: Callable) -> void:
 		button.add_theme_stylebox_override("disabled", _box(COL_BUTTON_DISABLED))
 	if enabled:
 		button.pressed.connect(on_press)
-	content.add_child(button)
+	return button
 
 
 func _add_heading(text: String) -> void:

@@ -11,26 +11,21 @@ func _init(main: Node) -> void:
 	m = main
 
 
-# The Game section of Settings: leaving the farm for the start screen.
-func _game_rows() -> Array:
+# The Pause menu: back to the farm, the settings, the controls, and the ways out.
+# Each quit asks for a second press, since progress since the last sleep is lost.
+func _pause_rows() -> Array:
+	var title_armed: bool = m.pause_armed == "quit_title"
+	var game_armed: bool = m.pause_armed == "quit_game"
+	# One ledger tab with no status on the lines, so it reads as a plain menu. A quit that is waiting
+	# for its second press says so in rust.
 	var rows: Array = [
-		{"section": "Game"},
-		{
-			"name": "Music",
-			"value": "On" if m.music_on else "Off",
-			"button": "Turn off" if m.music_on else "Turn on",
-			"action": "toggle_music",
-			"enabled": true,
-		},
-		{
-			"name": "Sound effects",
-			"value": "On" if m.sfx_on else "Off",
-			"button": "Turn off" if m.sfx_on else "Turn on",
-			"action": "toggle_sfx",
-			"enabled": true,
-		},
+		{"tab": "Pause"},
+		{"name": "Resume", "status": "", "value": "Back to the farm", "button": "Resume", "action": "resume", "enabled": true},
+		{"name": "Settings", "status": "", "value": "Volume, screen, shake, messages", "button": "Open", "action": "open_settings", "enabled": true},
+		{"name": "Controls", "status": "", "value": "Keyboard, mouse and gamepad", "button": "Open", "action": "open_controls", "enabled": true},
 		{
 			"name": "Unstick me",
+			"status": "",
 			"value": "Cancels any placement and moves you to the path outside the farmhouse door",
 			"button": "Unstick",
 			"action": "unstick",
@@ -38,9 +33,20 @@ func _game_rows() -> Array:
 		},
 		{
 			"name": "Quit to the main menu",
-			"value": "Returns to the start screen without saving. Progress since your last sleep is lost.",
-			"button": "Quit",
+			"status": "Press again" if title_armed else "",
+			"status_kind": "short",
+			"value": "Press again to quit. Progress since your last sleep is lost." if title_armed else "Returns to the start screen without saving. Progress since your last sleep is lost.",
+			"button": "Yes, quit" if title_armed else "Quit",
 			"action": "quit_title",
+			"enabled": true,
+		},
+		{
+			"name": "Quit the game",
+			"status": "Press again" if game_armed else "",
+			"status_kind": "short",
+			"value": "Press again to close the game. Progress since your last sleep is lost." if game_armed else "Closes the game without saving. Progress since your last sleep is lost.",
+			"button": "Yes, quit" if game_armed else "Quit",
+			"action": "quit_game",
 			"enabled": true,
 		},
 	]
@@ -48,6 +54,7 @@ func _game_rows() -> Array:
 	if OS.is_debug_build():
 		rows.append({
 			"name": "Dev: unlock everything",
+			"status": "",
 			"value": "Every skill to level 10, coins, materials, every tool tier, the house and buildings (also F4)",
 			"button": "Unlock",
 			"action": "dev_unlock",
@@ -97,6 +104,14 @@ func _new_mark(id: String) -> String:
 	return "  (new)" if m.diary_new.has(id) else ""
 
 
+# The tab strip over Inventory, Gear and Skills, so LB/RB or Q/E step between them.
+func _character_tabs(active: String) -> Dictionary:
+	var tabs: Array = []
+	for name in ["Inventory", "Gear", "Skills"]:
+		tabs.append({"id": name, "name": name, "action": "section:" + name})
+	return {"tabs": tabs, "active": active}
+
+
 func _skill_rows() -> Array:
 	var tiles: Array = []
 	for skill in m.SKILLS:
@@ -119,15 +134,18 @@ func _skill_rows() -> Array:
 	var level := m.progression._level(skill)
 	detail["name"] = skill
 	detail["level_text"] = "Level %d. %d XP, %d more to level %d." % [level, int(m.skill_xp[skill]), m.progression._xp_for_level(level + 1) - int(m.skill_xp[skill]), level + 1]
+	if level >= m.progression.LEVEL_CAP:
+		detail["level_text"] = "Level %d, the highest. %d XP." % [level, int(m.skill_xp[skill])]
 	detail["progress"] = m.progression._level_progress(skill)
 	return [
+		_character_tabs("Skills"),
 		{"split": {"recipes": marked, "columns": 4, "detail": detail}},
 		{"note": "Skills grow by doing. Each action gives XP to the skill it trains. Levels unlock recipes, crops, and tools."},
 	]
 
 
 func _inventory_rows() -> Array:
-	var rows: Array = [{"section": "Pack"}]
+	var rows: Array = [_character_tabs("Inventory"), {"section": "Pack"}]
 	var tiles := m._inventory_tiles()
 	if tiles.is_empty():
 		rows.append({"note": "Nothing in the pack yet. Harvest, catch, or gather to fill it."})
@@ -195,6 +213,7 @@ func _gear_rows() -> Array:
 		tile["action"] = "gear_pick:" + str(t["key"])
 		marked.append(tile)
 	return [
+		_character_tabs("Gear"),
 		{"split": {"recipes": marked, "figure": true, "detail": chosen}},
 		{"name": "Defense", "value": str(m._defense())},
 		{"name": "Hit damage", "value": str(m.combat_sys._weapon_damage())},
@@ -241,113 +260,181 @@ func _craft_camp_rows() -> Array:
 	]
 
 
+# The Quests panel: the story's chapters in one tab, and Lowmere's in another when the world is on.
+# The current chapter comes first, and the detail page tells its story.
 func _quest_rows() -> Array:
+	var rows: Array = [{"tab": "Story"}]
+	rows.append_array(_quest_list(m.STORY, m.quests_done, "You have reached the end of the story for now. More chapters are coming."))
+	if m.WORLD_ENABLED:
+		rows.append({"tab": "Lowmere"})
+		rows.append_array(_quest_list(m.GUARDIAN_QUESTS, m.guardian_done, "Lowmere is safe for now."))
+	return rows
+
+
+func _quest_list(quests: Array, done: Variant, all_done: String) -> Array:
 	var rows: Array = []
 	var current: Variant = null
-	for q in m.STORY:
-		if not m.quests_done.has(q["id"]):
+	for q in quests:
+		if not done.has(q["id"]):
 			current = q
 			break
 	if current != null:
 		rows.append({"section": "Current chapter"})
-		rows.append(m._quest_row(current, true))
+		rows.append(_quest_entry(current, done, true))
 	else:
-		rows.append({"note": "You have reached the end of the story for now. More chapters are coming."})
+		rows.append({"note": all_done})
 	rows.append({"section": "Chapters"})
-	for q in m.STORY:
-		rows.append(m._quest_row(q, false))
-	if m.WORLD_ENABLED:
-		rows.append({"section": "Guardian of Lowmere"})
-		var guardian_current: Variant = null
-		for q in m.GUARDIAN_QUESTS:
-			if not m.guardian_done.has(q["id"]):
-				guardian_current = q
-				break
-		if guardian_current != null:
-			rows.append(m._quest_row(guardian_current, true))
-		else:
-			rows.append({"note": "Lowmere is safe for now."})
-		for q in m.GUARDIAN_QUESTS:
-			rows.append(m._quest_row(q, false))
+	for q in quests:
+		rows.append(_quest_entry(q, done, false))
 	return rows
 
 
+func _quest_entry(q: Dictionary, done_ids: Variant, current: bool) -> Dictionary:
+	var done: bool = done_ids.has(q["id"])
+	var shown := mini(m.progression._stat_value(q["stat"]), int(q["goal"]))
+	return {
+		"name": str(q["title"]),
+		"status": "Done" if done else "%d / %d" % [shown, int(q["goal"])],
+		"status_kind": "done" if done else ("ok" if current else "info"),
+		"about": str(q.get("story", "")) if current else "",
+		"value": str(q["text"]),
+		"note": "Reward: %s" % m.progression._reward_text(q["reward"]),
+		"progress": float(shown) / float(q["goal"]),
+	}
+
+
+# What a cost asks for, one line each, marked have or short, for the ledger's detail pane.
+# skill is the skill the cost's "level" is for; level overrides it when the cost has none.
+func _needs(cost: Dictionary, skill: String, level: int = 0) -> Array:
+	var out: Array = []
+	var keys: Array = cost.keys()
+	keys.sort_custom(func(a, b): return a == "coins" and b != "coins")
+	for key in keys:
+		if key in ["level", "season"] or int(cost[key]) <= 0:
+			continue
+		var held: int = m._held(str(key))
+		out.append({"text": "%d %s" % [int(cost[key]), _need_label(str(key))], "have": held, "ok": held >= int(cost[key])})
+	var lvl := int(cost.get("level", level))
+	if skill != "" and lvl > 0:
+		var now: int = m.progression._level(skill)
+		out.append({"text": "%s %d" % [skill, lvl], "have": now, "ok": now >= lvl})
+	if cost.has("season"):
+		var season: String = m._season_of(m._calendar_date(m.day)["month"])
+		out.append({"text": "Only in %s" % str(cost["season"]).to_lower(), "ok": season == str(cost["season"])})
+	return out
+
+
+func _need_label(key: String) -> String:
+	if key == "seeds":
+		return "turnip seeds"
+	if key == "feathers":
+		return "crow feathers"
+	return key.replace("_", " ")
+
+
+# The House panel, in four tabs: the house itself, the day's chores, storage, and what each repair unlocks.
 func _house_rows() -> Array:
-	var rows: Array = [
-		{"section": "Condition"},
-		{"name": "Farmhouse", "value": m.STAGE_NAMES[m.house_stage]},
-	]
+	var rows: Array = [{"tab": "Home", "icon": "house"}]
+	var next_feature := ""
+	for feature in m.HOUSE_FEATURES:
+		if int(feature["stage"]) == m.house_stage + 1:
+			next_feature = str(feature["text"])
+	rows.append({"name": "Farmhouse", "status": m.STAGE_NAMES[m.house_stage], "value": "Repair stage %d of %d." % [m.house_stage, m.MAX_STAGE],
+		"note": "The next repair brings: %s." % next_feature if next_feature != "" else "Fully restored."})
 	if m.house_stage < m.MAX_STAGE:
 		var cost: Dictionary = m.REPAIR_COSTS[m.house_stage]
 		rows.append({
 			"name": "Repair to %s" % m.STAGE_NAMES[m.house_stage + 1],
-			"value": "%d wood, %d fiber, Carpentry %d" % [cost["wood"], cost["fiber"], cost["level"]],
+			"value": "%d wood, %d fiber, Carpentry %d%s" % [cost["wood"], cost["fiber"], cost["level"], (", in %s" % str(cost["season"]).to_lower()) if cost.has("season") else ""],
+			"about": "Unlocks: %s." % next_feature if next_feature != "" else "",
+			"needs": _needs(cost, "Carpentry"),
+			"note": "The paint needs a dry season, so this repair can only be done in summer." if cost.has("season") else "",
 			"button": "Repair",
 			"action": "repair",
 			"enabled": m._can_repair(),
 		})
-	rows.append({"section": "Today's chores"})
-	for chore in m._chore_list():
-		var row := {"name": chore["name"]}
-		if bool(chore["done"]):
-			row["value"] = "Done"
-		else:
-			row["value"] = str(chore["detail"])
-			if str(chore["action"]) != "":
-				row["button"] = chore["button"]
-				row["action"] = chore["action"]
-				row["enabled"] = chore["enabled"]
-		rows.append(row)
-	rows.append({"note": "Each chore left undone adds 1 wear overnight. A night with every chore done brings back %d sanity." % m.WELL_KEPT_SANITY})
-	rows.append_array(_job_rows())
-	rows.append({"section": "Upkeep"})
-	rows.append({"name": "Wear", "value": "%d of %d" % [m.wear, m.WEAR_MAX], "progress": float(m.wear) / float(m.WEAR_MAX)})
-	rows.append({"note": "The house wears a little each night. Mending, tidying, and repairs bring it down. At %d wear, rain ruins a crop overnight. At %d, a fox can get into the coop. A third plot opens at Farming %d once the house is Patched." % [m.WEAR_RUNDOWN, m.WEAR_FOX, m.PLOT_THREE_LEVEL]})
-	rows.append({"section": "Rest"})
-	rows.append({"note": "The bed is in the bedroom. Walk there and press Space from 18:00 to save and end the day. If you aren't in bed by 03:00 you collapse, and your sanity limit drops permanently."})
-	rows.append({"name": "Sanity limit", "value": "%d of %d" % [m.sanity_sys._sanity_max(), int(m.SANITY_MAX)]})
+	rows.append({"name": "Wear", "status": "%d / %d" % [m.wear, m.WEAR_MAX], "status_kind": "short" if m.wear >= m.WEAR_RUNDOWN else "info",
+		"progress": float(m.wear) / float(m.WEAR_MAX),
+		"note": "The house wears a little each night. Mending, tidying, and repairs bring it down. At %d wear, rain ruins a crop overnight. At %d, a fox can get into the coop. A third plot opens at Farming %d once the house is Patched." % [m.WEAR_RUNDOWN, m.WEAR_FOX, m.PLOT_THREE_LEVEL]})
+	rows.append({"name": "Sanity limit", "status": "%d / %d" % [m.sanity_sys._sanity_max(), int(m.SANITY_MAX)],
+		"progress": float(m.sanity_sys._sanity_max()) / float(m.SANITY_MAX),
+		"note": "The bed is in the bedroom. Walk there and press Space from 18:00 to save and end the day. If you aren't in bed by 03:00 you collapse, and your sanity limit drops permanently."})
+	var cleanse_needs := _needs({"crops": m.CLEANSE_CROPS, "level": m.CLEANSE_LEVEL}, "Cleaning")
+	cleanse_needs.append({"text": "Once a day", "ok": m.cleanse_day != m.day})
+	cleanse_needs.append({"text": "Some of the limit lost", "ok": m.sanity_penalty > 0})
 	rows.append({
 		"name": "Cleanse the house",
 		"value": "%d crops, Cleaning %d, once a day: +%d limit" % [m.CLEANSE_CROPS, m.CLEANSE_LEVEL, m.CLEANSE_RELIEF],
+		"about": "Burn an offering of crops to win back %d of the sanity limit." % m.CLEANSE_RELIEF,
+		"needs": cleanse_needs,
 		"button": "Cleanse",
 		"action": "cleanse",
 		"enabled": m.sanity_sys._can_cleanse(),
 	})
-	rows.append({"section": "Storage"})
+
+	rows.append({"tab": "Chores", "icon": "chores"})
+	for chore in m._chore_list():
+		var row := {"name": chore["name"], "value": str(chore["detail"])}
+		if bool(chore["done"]):
+			row["status"] = "Done"
+			row["status_kind"] = "done"
+		elif str(chore["action"]) != "":
+			row["button"] = chore["button"]
+			row["action"] = chore["action"]
+			row["enabled"] = chore["enabled"]
+		else:
+			row["status"] = "Not yet"
+			row["status_kind"] = "short"
+		rows.append(row)
+	rows.append({"note": "Each chore left undone adds 1 wear overnight. A night with every chore done brings back %d sanity." % m.WELL_KEPT_SANITY})
+	for job_row in _job_rows():
+		if job_row.has("name") and m.job_done_day == m.day:
+			job_row["status"] = "Done"
+			job_row["status_kind"] = "done"
+		rows.append(job_row)
+
+	rows.append({"tab": "Storage", "icon": "storage"})
 	if m.cellar_built:
-		rows.append({"name": "Root cellar", "value": "built, holds %d crops. Stand beside it, facing it, and press Space." % m.CELLAR_CAP})
+		rows.append({"name": "Root cellar", "status": "Built", "status_kind": "done", "value": "built, holds %d crops. Stand beside it, facing it, and press Space." % m.CELLAR_CAP})
 	else:
 		rows.append({
-			"name": "Build a root cellar (holds %d crops)" % m.CELLAR_CAP,
+			"name": "Build a root cellar",
 			"value": m.stall._price_text(m.CELLAR_COST),
+			"about": "Holds %d crops, against the house's west wall." % m.CELLAR_CAP,
+			"needs": _needs(m.CELLAR_COST, "Carpentry"),
 			"button": "Build",
 			"action": "build_cellar",
 			"enabled": m._can_afford(m.CELLAR_COST),
 		})
 	if m.cooler_built:
-		rows.append({"name": "Cooler", "value": "built, keeps %d fish fresh. Stand beside it, facing it, and press Space." % m.COOLER_CAP})
+		rows.append({"name": "Cooler", "status": "Built", "status_kind": "done", "value": "built, keeps %d fish fresh. Stand beside it, facing it, and press Space." % m.COOLER_CAP})
 	else:
 		rows.append({
-			"name": "Build a cooler (keeps %d fish fresh)" % m.COOLER_CAP,
+			"name": "Build a cooler",
 			"value": m.stall._price_text(m.COOLER_COST),
+			"about": "Keeps %d fish fresh, inside the house." % m.COOLER_CAP,
+			"needs": _needs(m.COOLER_COST, "Carpentry"),
 			"button": "Build",
 			"action": "build_cooler",
 			"enabled": m._can_afford(m.COOLER_COST),
 		})
 	rows.append({"note": "The workshop, the coop, and the barn are in the Buildings section on the section wheel (Shift)."})
-	rows.append({"section": "Features"})
+
+	rows.append({"tab": "Features", "icon": "features"})
 	for feature in m.HOUSE_FEATURES:
 		var unlocked: bool = m.house_stage >= feature["stage"]
 		rows.append({
-			"name": feature["text"],
-			"value": "unlocked" if unlocked else "at %s" % m.STAGE_NAMES[feature["stage"]],
+			"name": m.STAGE_NAMES[feature["stage"]],
+			"value": str(feature["text"]),
+			"status": "Unlocked" if unlocked else "At %s" % m.STAGE_NAMES[feature["stage"]],
+			"status_kind": "done" if unlocked else "info",
 		})
 	return rows
 
 
 # The coop panel: the hens are fed here. They are ordered from the catalog at the desk.
 func _coop_rows() -> Array:
-	var rows: Array = [{"section": "Hens"}]
+	var rows: Array = [{"tab": "Hens"}]
 	rows.append({
 		"name": "Hens",
 		"value": "%d of %d, order more from the catalog at the desk" % [m.hens, m.COOP_HENS_MAX],
@@ -366,7 +453,7 @@ func _coop_rows() -> Array:
 
 # The barn panel: the goats are fed here. They are ordered from the catalog at the desk.
 func _barn_rows() -> Array:
-	var rows: Array = [{"section": "Goats"}]
+	var rows: Array = [{"tab": "Goats"}]
 	rows.append({
 		"name": "Goats",
 		"value": "%d of %d, order more from the catalog at the desk" % [m.goats, m.BARN_GOATS_MAX],
@@ -383,123 +470,210 @@ func _barn_rows() -> Array:
 	return rows
 
 
-# The Buildings menu: the workshop, the coop, and the barn. Each one is placed on open grass.
+# The Buildings section, in tabs: the homestead ladder, the workshop, the animals' buildings, decor,
+# and the crow bell's parts until the bell is hung. Trail works will be one more tab.
 func _buildings_rows() -> Array:
-	var rows: Array = [{"section": "Workshop"}]
-	if m.smokehouse_built:
-		rows.append({"name": "Smokehouse", "value": "built. Stand beside it, facing it, and press Space to preserve food."})
+	var p: FarmProjects = m.projects
+	var rows: Array = [{"tab": "Homestead", "icon": "homestead"}]
+	var nxt := p._next_step()
+	var total := p._steps().size()
+	rows.append({"name": "Progress", "status": "%d / %d" % [p.steps_done.size(), total],
+		"value": "%d of %d steps done" % [p.steps_done.size(), total],
+		"progress": float(p.steps_done.size()) / float(maxi(1, total)),
+		"note": "Each step done pays %d coins and names the next." % p.STEP_COINS})
+	if nxt.is_empty():
+		rows.append({"note": "Every step is done. The farm is yours."})
 	else:
-		rows.append({
-			"name": "Build a smokehouse (smokes and preserves food)",
-			"value": m.stall._price_text(m.SMOKEHOUSE_COST),
-			"button": "Build",
-			"action": "build_smokehouse",
-			"enabled": m._can_afford(m.SMOKEHOUSE_COST),
-		})
-	if m.furnace_built:
-		rows.append({"name": "Furnace", "value": "built. Stand beside it, facing it, and press Space to smelt ore."})
-	else:
-		rows.append({
-			"name": "Build a furnace (smelts ore into bars)",
-			"value": m.stall._price_text(m.FURNACE_COST),
-			"button": "Build",
-			"action": "build_furnace",
-			"enabled": m._can_afford(m.FURNACE_COST),
-		})
-	if m.woodshed_built:
-		rows.append({"name": "Firewood store and chopping log", "value": "built in the workshop. Stand beside them to store firewood or split wood."})
-	else:
-		rows.append({
-			"name": "Build a firewood store and chopping log",
-			"value": m.stall._price_text(m.WOODSHED_COST) + ("" if m.smokehouse_built or m.furnace_built else ", needs the smokehouse or furnace first"),
-			"button": "Build",
-			"action": "build_woodshed",
-			"enabled": m._can_afford(m.WOODSHED_COST) and (m.smokehouse_built or m.furnace_built),
-		})
+		rows.append({"name": "Next: %s" % nxt["title"], "status": "Next", "value": str(nxt["how"])})
+
+	rows.append({"tab": "Workshop", "icon": "workshop"})
+	rows.append(_build_row("smokehouse", "Smokehouse", m.smokehouse_built, m.SMOKEHOUSE_COST,
+		"Smokes and preserves food.", "built. Stand beside it, facing it, and press Space to preserve food.", true))
+	rows.append(_build_row("furnace", "Furnace", m.furnace_built, m.FURNACE_COST,
+		"Smelts ore into bars.", "built. Stand beside it, facing it, and press Space to smelt ore.", true))
+	var wood_row := _build_row("woodshed", "Firewood store and chopping log", m.woodshed_built, m.WOODSHED_COST,
+		"Stores firewood, and a log to split wood on.", "built in the workshop. Stand beside them to store firewood or split wood.", m.smokehouse_built or m.furnace_built)
+	if not m.woodshed_built:
+		wood_row["needs"].append({"text": "The smokehouse or furnace first", "ok": m.smokehouse_built or m.furnace_built})
+	rows.append(wood_row)
 	rows.append({"note": "The workshop is a walled building against the east wall of the house. Its door is on the south side."})
-	rows.append({"section": "Coop"})
-	if not m.coop_built:
-		rows.append({
-			"name": "Build a coop (holds %d hens)" % m.COOP_HENS_MAX,
-			"value": m.stall._price_text(m.COOP_COST),
-			"button": "Build",
-			"action": "build_coop",
-			"enabled": m._can_build("coop"),
-		})
+
+	rows.append({"tab": "Animals", "icon": "animals"})
+	if m.coop_built:
+		var coop: Dictionary = m._placed_row("Coop", "coop", m.coop_tile, "move_coop")
+		coop["status"] = "Placed" if m.coop_tile.x >= 0 else "Not placed"
+		rows.append(coop)
 	else:
-		rows.append(m._placed_row("Coop", "coop", m.coop_tile, "move_coop"))
-	rows.append({"section": "Barn"})
-	if not m.barn_built:
-		rows.append({
-			"name": "Build a barn (for livestock)",
-			"value": m.stall._price_text(m.BARN_COST),
-			"button": "Build",
-			"action": "build_barn",
-			"enabled": m._can_build("barn"),
-		})
-		rows.append({"note": "The barn is for livestock. Livestock are still to come, so for now it simply stands."})
+		rows.append({"name": "Coop", "value": m.stall._price_text(m.COOP_COST), "about": "Holds %d hens. Order hens from the catalog at the desk." % m.COOP_HENS_MAX,
+			"needs": _needs(m.COOP_COST, "Carpentry"), "button": "Build", "action": "build_coop", "enabled": m._can_build("coop")})
+	if m.barn_built:
+		var barn: Dictionary = m._placed_row("Barn", "barn", m.barn_tile, "move_barn")
+		barn["status"] = "Placed" if m.barn_tile.x >= 0 else "Not placed"
+		rows.append(barn)
 	else:
-		rows.append(m._placed_row("Barn", "barn", m.barn_tile, "move_barn"))
-	return m.projects._rows() + rows
+		rows.append({"name": "Barn", "value": m.stall._price_text(m.BARN_COST), "about": "For livestock. Order goats from the catalog at the desk.",
+			"needs": _needs(m.BARN_COST, "Carpentry"), "button": "Build", "action": "build_barn", "enabled": m._can_build("barn")})
+	rows.append({"note": "Each one is placed on open grass. Move it any time from here."})
+
+	rows.append({"tab": "Decor", "icon": "decor"})
+	for kind in ["lamp", "flowers", "path", "bell"]:
+		var d: Dictionary = p.DECOR[kind]
+		var have := p._count(kind)
+		var row := {"name": str(d["name"]), "about": str(d["desc"]), "value": p._cost_text(kind)}
+		if have >= int(d["max"]):
+			row["status"] = "%d placed" % have if kind != "bell" else "Hung"
+			row["status_kind"] = "done"
+			row["value"] = "as many as there's room for"
+			rows.append(row)
+			continue
+		var needs := _needs(d["cost"], str(d["skill"]), int(d["level"]))
+		if kind == "flowers":
+			needs.append({"text": "In spring or summer", "ok": p._season() in ["Spring", "Summer"]})
+		if kind == "bell":
+			needs.append({"text": "On All Hallows (October 31)", "ok": p._bell_night()})
+		row["needs"] = needs
+		if have > 0:
+			row["status"] = "%d placed" % have
+		row["button"] = "Place"
+		row["action"] = "decor:" + kind
+		row["enabled"] = p._can_place(kind)
+		rows.append(row)
+	rows.append({"note": "Face something you placed and press Space twice to take it down and get its materials back."})
+
+	if not p._has_bell():
+		rows.append({"tab": "Crow bell", "icon": "bell"})
+		for id in p.BELL_PARTS:
+			var part: Dictionary = p.BELL_PARTS[id]
+			var why := p._part_why(id)
+			var row := {"name": str(part["name"]), "about": str(part["desc"]),
+				"value": "%s, %s %d" % [p._cost_list(part["cost"]), part["skill"], int(part["level"])]}
+			if why == "made":
+				row["status"] = "Made"
+				row["status_kind"] = "done"
+			else:
+				var needs := _needs(part["cost"], str(part["skill"]), int(part["level"]))
+				if str(part["season"]) != "":
+					needs.append({"text": "Only in %s" % str(part["season"]).to_lower(), "ok": p._season() == str(part["season"])})
+				if id == "bell_metal":
+					needs.append({"text": "The furnace", "ok": m.furnace_built})
+				row["needs"] = needs
+				row["button"] = "Make"
+				row["action"] = "bellpart:" + id
+				row["enabled"] = why == ""
+			rows.append(row)
+		rows.append({"note": "With all three parts, place the bell from Decor on All Hallows (October 31). The Hollow comes to it that night."})
+	return rows
 
 
-func _settings_rows() -> Array:
+# A workshop building: built, or what it costs. needs_ok is false while another building must come first.
+func _build_row(id: String, label: String, built: bool, cost: Dictionary, about: String, built_text: String, needs_ok: bool) -> Dictionary:
+	if built:
+		return {"name": label, "status": "Built", "status_kind": "done", "value": built_text}
+	return {"name": label, "about": about, "value": m.stall._price_text(cost), "needs": _needs(cost, "Carpentry"),
+		"button": "Build", "action": "build_" + id, "enabled": m._can_afford(cost) and needs_ok}
+
+
+# The controls list, shown from the Pause menu and the start screen.
+func _controls_rows() -> Array:
 	return [
-		{"section": "Controls"},
+		{"section": "Keyboard"},
 		{"name": "Move", "value": "WASD or arrow keys"},
 		{"name": "Talk, sleep, open panels, gather, drink, plant with hands", "value": "Space"},
 		{"name": "Cycle the seed you plant (with the trowel)", "value": "Z and X"},
 		{"name": "Use the tool or weapon in hand: hoe, hose, trowel, axe, pick, rod, sword", "value": "Left click"},
 		{"name": "Bag (Inventory is in the bag)", "value": "Tab"},
 		{"name": "Section wheel: Skills, Gear, Craft, Quests, House, Buildings, Achievements", "value": "Shift, then the mouse"},
-		{"name": "Settings", "value": "Esc"},
+		{"name": "Pause menu: resume, settings, controls, quit", "value": "Esc"},
 		{"name": "Close the open section, the wheel, or the bag", "value": "B or Esc"},
+		{"name": "Next or previous tab in a section", "value": "E and Q"},
 		{"section": "Gamepad"},
 		{"name": "Move", "value": "Left stick or D-pad"},
 		{"name": "Talk, sleep, open panels, gather, drink, plant with hands", "value": "A"},
 		{"name": "Use the tool or weapon in hand: hoe, hose, trowel, axe, pick, rod, sword", "value": "RT"},
 		{"name": "Close the open section, the wheel, or the bag", "value": "B"},
+		{"name": "Next or previous tab in a section", "value": "RB and LB"},
 		{"name": "Bag (Inventory is in the bag)", "value": "Y"},
 		{"name": "Section wheel", "value": "Left stick click, then left stick and A"},
-		{"name": "Settings", "value": "Start"},
-		{"note": "While a panel is open, the D-pad or left stick moves between its buttons, and A presses the highlighted one."},
+		{"name": "Pause menu", "value": "Start"},
+		{"note": "While a panel is open, the D-pad or left stick moves between its entries, A presses the highlighted one, and LB and RB switch tabs."},
 		{"section": "Saving"},
-		{"note": "Progress saves only when you sleep, or when you collapse at 03:00. The save includes your position and open panel."},
-		{"note": "Sound effects and display options are coming later."},
+		{"name": "When the game saves", "value": "Progress saves only when you sleep, or when you collapse at 03:00. The save includes your position and open panel."},
 	]
 
 
+# Settings and Controls share their rows with the start screen, which shows headings. In the game
+# each heading becomes a ledger tab, and each line shows its value on the right.
+func _as_tabs(rows: Array) -> Array:
+	var out: Array = []
+	for row in rows:
+		var copy: Dictionary = row.duplicate()
+		if copy.has("section"):
+			out.append({"tab": str(copy["section"])})
+			continue
+		if copy.has("name") and not copy.has("status") and str(copy.get("value", "")).length() <= 40:
+			copy["status"] = str(copy.get("value", ""))
+			copy["status_kind"] = "info"
+		out.append(copy)
+	return out
+
+
+# The desk, in tabs: the post and the diary, the property tax, pastimes, and the catalog.
 func _desk_rows() -> Array:
-	var rows: Array = [{"section": "Diary"}]
-	rows.append({"name": "Your diary", "value": "a new page to read" if not m.diary_new.is_empty() else "what you have learned, and what to do next", "button": "Read", "action": "diary", "enabled": true})
-	rows.append({"section": "Post on the desk"})
+	var rows: Array = [{"tab": "Post", "icon": "post"}]
+	var diary_new := not m.diary_new.is_empty()
+	rows.append({"name": "Your diary", "status": "New page" if diary_new else "", "status_kind": "ok",
+		"value": "a new page to read" if diary_new else "what you have learned, and what to do next",
+		"button": "Read", "action": "diary", "enabled": true})
+	for letter in m.desk_mail:
+		rows.append({"name": str(letter["title"]), "status": "New" if bool(letter["unread"]) else "Read",
+			"status_kind": "ok" if bool(letter["unread"]) else "done", "value": str(letter["text"])})
 	if m.desk_mail.is_empty():
 		rows.append({"note": "No post. The mail slot in the front door drops letters here."})
-	for letter in m.desk_mail:
-		rows.append({"note": "%s%s
-%s" % [str(letter["title"]), "  (new)" if bool(letter["unread"]) else "", str(letter["text"])]})
-	rows.append({"name": "Put letters away", "value": "read letters go in the drawer", "button": "Clear", "action": "mail_clear", "enabled": m.desk._has_read_mail()})
-	rows.append({"section": "Property tax"})
-	rows.append({"name": "Property value", "value": "%d a quarter" % m.desk._property_value()})
-	rows.append({"note": m.desk._property_text()})
-	rows.append({"name": "Property tax", "value": m.desk._tax_text(), "button": "Pay", "action": "pay_tax", "enabled": m.tax_owed > 0 and m.money >= m.tax_owed})
-	rows.append({"section": "Pastimes"})
-	rows.append({"name": "Played today", "value": "yes" if m.entertained_day == m.day else "no: today's first game gives +%d sanity and %d limit back" % [int(m.rewards.PASTIME_SANITY), int(m.rewards.PASTIME_RELIEF)]})
+	else:
+		rows.append({"name": "Put letters away", "value": "read letters go in the drawer", "button": "Clear", "action": "mail_clear", "enabled": m.desk._has_read_mail()})
+
+	rows.append({"tab": "Tax", "icon": "coins"})
+	rows.append({"name": "Property value", "status": "%d a quarter" % m.desk._property_value(), "value": m.desk._property_text()})
+	rows.append({"name": "Property tax", "status": "Owed" if m.tax_owed > 0 else "Paid up", "status_kind": "short" if m.tax_owed > 0 else "done",
+		"value": m.desk._tax_text(), "needs": [{"text": "%d coins" % m.tax_owed, "have": m.money, "ok": m.money >= m.tax_owed}] if m.tax_owed > 0 else [],
+		"button": "Pay", "action": "pay_tax", "enabled": m.tax_owed > 0 and m.money >= m.tax_owed})
+
+	rows.append({"tab": "Pastimes", "icon": "cards"})
+	var played := m.entertained_day == m.day
+	rows.append({"name": "Played today", "status": "Yes" if played else "Not yet", "status_kind": "done" if played else "short",
+		"value": "yes" if played else "no: today's first game gives +%d sanity and %d limit back" % [int(m.rewards.PASTIME_SANITY), int(m.rewards.PASTIME_RELIEF)]})
 	if m.boredom_loss > 0.0:
-		rows.append({"name": "Sanity limit lost to boredom", "value": "%d, won back by playing" % int(m.boredom_loss)})
-	rows.append({"name": "Solitaire (%s)" % m.desk._hours_text(m.SOLITAIRE_HOURS), "value": "pack of cards: %d games left" % m.card_games, "button": "Play", "action": "pastime:solitaire", "enabled": m.desk._can_pastime("solitaire")})
-	rows.append({"name": "Sudoku (%s)" % m.desk._hours_text(m.SUDOKU_HOURS), "value": "sudoku book: %d puzzles left" % m.sudoku_puzzles, "button": "Play", "action": "pastime:sudoku", "enabled": m.desk._can_pastime("sudoku")})
-	rows.append({"section": "Catalog"})
-	rows.append({"note": "Orders are paid now and come with the next morning's post. Coins: %d." % m.money})
+		rows.append({"name": "Sanity limit lost to boredom", "status": "%d" % int(m.boredom_loss), "status_kind": "short", "value": "%d, won back by playing" % int(m.boredom_loss)})
+	rows.append({"name": "Solitaire (%s)" % m.desk._hours_text(m.SOLITAIRE_HOURS), "value": "pack of cards: %d games left" % m.card_games,
+		"needs": [{"text": "A pack of cards (order one from the catalog)", "ok": m.card_games > 0}],
+		"button": "Play", "action": "pastime:solitaire", "enabled": m.desk._can_pastime("solitaire")})
+	rows.append({"name": "Sudoku (%s)" % m.desk._hours_text(m.SUDOKU_HOURS), "value": "sudoku book: %d puzzles left" % m.sudoku_puzzles,
+		"needs": [{"text": "A sudoku book (order one from the catalog)", "ok": m.sudoku_puzzles > 0}],
+		"button": "Play", "action": "pastime:sudoku", "enabled": m.desk._can_pastime("sudoku")})
+
+	rows.append({"tab": "Catalog", "icon": "catalog"})
 	if not m.desk_orders.is_empty():
-		rows.append({"name": "On order", "value": m.desk._orders_text()})
-	var heading := ""
+		rows.append({"name": "On order", "status": "%d coming" % m.desk_orders.size(), "value": m.desk._orders_text(), "note": "Orders come with the next morning's post."})
+	# Grouped by section, in the order each section first appears.
+	var order: Array = []
 	for item in m.desk._catalog():
+		if not order.has(str(item["section"])):
+			order.append(str(item["section"]))
+	var items: Array = m.desk._catalog()
+	items.sort_custom(func(a, b): return order.find(str(a["section"])) < order.find(str(b["section"])))
+	var heading := ""
+	for item in items:
 		if str(item["section"]) != heading:
 			heading = str(item["section"])
 			rows.append({"section": heading})
-		var detail := str(item["detail"]) if bool(item["ok"]) else str(item["why"])
-		rows.append({"name": "%s (%d coins)" % [str(item["name"]), int(item["price"])], "value": detail, "button": "Order", "action": "order:" + str(item["id"]), "enabled": bool(item["ok"]) and m.money >= int(item["price"])})
+		var price := int(item["price"])
+		var needs: Array = [{"text": "%d coins" % price, "have": m.money, "ok": m.money >= price}]
+		if not bool(item["ok"]):
+			needs.append({"text": str(item["why"]).left(1).to_upper() + str(item["why"]).substr(1), "ok": false})
+		rows.append({"name": str(item["name"]), "status": "%d coins" % price, "status_kind": "ok" if bool(item["ok"]) and m.money >= price else "short",
+			"value": str(item["detail"]) if bool(item["ok"]) else str(item["why"]), "about": str(item["detail"]), "needs": needs,
+			"button": "Order", "action": "order:" + str(item["id"]), "enabled": bool(item["ok"]) and m.money >= price})
+	rows.append({"note": "Orders are paid now and come with the next morning's post. Coins: %d." % m.money})
 	return rows
 
 
@@ -522,7 +696,7 @@ func _cooked_sell_rows() -> Array:
 
 func _smokehouse_rows() -> Array:
 	var rows: Array = [
-		{"section": "Smokehouse"},
+		{"tab": "Smokehouse"},
 		{"note": "Preserved goods keep in your pack, so nothing spoils. Stand beside the smokehouse, facing it, and press Space to open this panel."},
 	]
 	var held: Array = []
@@ -545,12 +719,13 @@ func _smokehouse_rows() -> Array:
 
 
 func _well_rows() -> Array:
-	var rows: Array = [{"section": "Pump"}]
+	var rows: Array = [{"tab": "Pump"}]
 	if not m.well_repaired:
 		rows.append({"name": "Pump", "value": "Seized. The pipe has rotted through, and the crank won't turn."})
 		rows.append({
 			"name": "Repair the pump",
 			"value": "%d wood, %d fiber, Carpentry %d" % [m.WELL_REPAIR["wood"], m.WELL_REPAIR["fiber"], m.WELL_REPAIR["level"]],
+			"needs": _needs(m.WELL_REPAIR, "Carpentry"),
 			"button": "Repair",
 			"action": "repair_well",
 			"enabled": m._can_repair_well(),
@@ -566,13 +741,15 @@ func _well_rows() -> Array:
 		"action": "drink_well",
 		"enabled": m.water < 100.0,
 	})
-	rows.append({"section": "Hose"})
+	rows.append({"tab": "Hose"})
 	if m.hose_attached:
-		rows.append({"name": "Hose", "value": "Attached. It reaches every plot on the farm. Face a crop and press Space to water it."})
+		rows.append({"name": "Hose", "status": "Attached", "status_kind": "done", "value": "Attached. It reaches every plot on the farm. Face a crop and press Space to water it."})
 	else:
 		rows.append({
 			"name": "Attach the hose",
 			"value": "%d fiber, %d resin. It reaches every plot on the farm." % [m.HOSE_COST["fiber"], m.HOSE_COST["resin"]],
+			"about": "It reaches every plot on the farm.",
+			"needs": _needs(m.HOSE_COST, ""),
 			"button": "Attach",
 			"action": "attach_hose",
 			"enabled": m._can_attach_hose(),
@@ -583,16 +760,8 @@ func _well_rows() -> Array:
 func _achievement_rows() -> Array:
 	var total := m.ACHIEVEMENTS.size()
 	var done_count := m.achievements_done.size()
-	var rows: Array = [
-		{"section": "Completion"},
-		{
-			"name": "Achievements",
-			"value": "%d/%d  (%d%%)" % [done_count, total, int(100.0 * done_count / total)],
-			"progress": float(done_count) / float(total),
-		},
-	]
-	if done_count == total:
-		rows.append({"note": "Every achievement earned. Crow Creek Hollow has nothing left to teach you."})
+	# A tab per tier, named without its numeral. Each tab's note gives the tier's count and the total.
+	var rows: Array = []
 	for tier in m.ACHIEVEMENT_TIERS.size():
 		var in_tier: Array = []
 		for a in m.ACHIEVEMENTS:
@@ -602,9 +771,19 @@ func _achievement_rows() -> Array:
 		for a in in_tier:
 			if m.achievements_done.has(a["id"]):
 				tier_done += 1
-		rows.append({"section": "%s   %d/%d" % [m.ACHIEVEMENT_TIERS[tier], tier_done, in_tier.size()]})
+		rows.append({"tab": str(m.ACHIEVEMENT_TIERS[tier]).get_slice(": ", 1)})
 		for a in in_tier:
-			rows.append(m._achievement_row(a))
+			var row: Dictionary = m._achievement_row(a)
+			var earned: bool = m.achievements_done.has(a["id"])
+			row["name"] = str(a["title"])
+			row["status"] = "Done" if earned else str(row["value"])
+			row["status_kind"] = "done" if earned else "info"
+			row["value"] = str(a["text"])
+			row["note"] = "Reward: %s" % m.progression._reward_text(a["reward"])
+			rows.append(row)
+		rows.append({"note": "%s: %d of %d earned. %d of %d (%d%%) overall." % [m.ACHIEVEMENT_TIERS[tier], tier_done, in_tier.size(), done_count, total, int(100.0 * done_count / total)]})
+		if done_count == total:
+			rows.append({"note": "Every achievement earned. Crow Creek Hollow has nothing left to teach you."})
 	return rows
 
 
@@ -662,7 +841,7 @@ func _trade_rows() -> Array:
 
 func _cellar_rows() -> Array:
 	return [
-		{"section": "Root cellar"},
+		{"tab": "Root cellar"},
 		{
 			"name": "Crops stored",
 			"value": "%d/%d" % [m.cellar_stock, m.CELLAR_CAP],
@@ -688,7 +867,7 @@ func _cellar_rows() -> Array:
 
 func _cooler_rows() -> Array:
 	return [
-		{"section": "Cooler"},
+		{"tab": "Cooler"},
 		{
 			"name": "Fish stored",
 			"value": "%d/%d" % [m.cooler_stock, m.COOLER_CAP],
@@ -714,7 +893,7 @@ func _cooler_rows() -> Array:
 
 func _woodstore_rows() -> Array:
 	return [
-		{"section": "Firewood store"},
+		{"tab": "Firewood store"},
 		{"name": "Firewood in the store", "value": "%d of %d" % [m.firewood_store, m.WOODSTORE_CAP], "progress": float(m.firewood_store) / float(m.WOODSTORE_CAP)},
 		{"name": "Firewood in your pack", "value": str(int(m.inventory["firewood"]))},
 		{"name": "Take 5 firewood", "value": "into your pack", "button": "Take", "action": "wood_take:5", "enabled": m.firewood_store > 0},
@@ -726,13 +905,18 @@ func _woodstore_rows() -> Array:
 
 func _furnace_rows() -> Array:
 	var rows: Array = [
-		{"section": "Furnace"},
-		{"note": "Smelting turns ore into bars, with wood as fuel. Bars make metal tools and gear. Stand beside the furnace, facing it, and press Space to open this panel."},
+		{"tab": "Furnace"},
+		{"name": "Bars left today", "status": "%d of %d" % [m.mining._smelts_left(), m.SMELT_DAILY_LIMIT], "status_kind": "info" if m.mining._smelts_left() > 0 else "short",
+			"progress": float(m.mining._smelts_left()) / float(m.SMELT_DAILY_LIMIT),
+			"value": "The furnace makes %d bars a day before it must cool; %d left today." % [m.SMELT_DAILY_LIMIT, m.mining._smelts_left()]},
+		{"note": "Smelting turns ore into bars, with wood as fuel. Bars make metal tools and gear. The furnace makes %d bars a day before it must cool; %d left today. Stand beside the furnace, facing it, and press Space to open this panel." % [m.SMELT_DAILY_LIMIT, m.mining._smelts_left()]},
 	]
 	for kind in ["copper", "iron"]:
 		rows.append({
-			"name": "Smelt a %s bar (1 %s ore, 1 wood)" % [kind, kind],
+			"name": "Smelt %s %s bar (1 %s ore, 1 wood)" % ["an" if kind == "iron" else "a", kind, kind],
 			"value": "Smithing %d, +%d XP. Held: %d ore, %d bars" % [int(m.SMELT_LEVEL[kind]), m.XP_SMELT, int(m.materials[kind + "_ore"]), int(m.materials[kind + "_bar"])],
+			"about": "+%d Smithing XP. You hold %d %s bars." % [m.XP_SMELT, int(m.materials[kind + "_bar"]), kind],
+			"needs": _needs({kind + "_ore": 1, "wood": 1}, "Smithing", int(m.SMELT_LEVEL[kind])) + [{"text": "Bars left today", "ok": m.mining._smelts_left() > 0}],
 			"button": "Smelt",
 			"action": "smelt:" + kind,
 			"enabled": m.mining._can_smelt(kind),
@@ -742,20 +926,21 @@ func _furnace_rows() -> Array:
 
 func _general_shop_rows() -> Array:
 	var rows: Array = [
-		{"section": "Purse"},
-		{"name": "Coins", "value": str(m.money)},
-		{"section": "Buy materials (%d at a time)" % m.GENERAL_BUY_QTY},
+		{"tab": "Buy"},
+		{"note": "Materials come %d at a time. Coins: %d." % [m.GENERAL_BUY_QTY, m.money]},
 	]
 	for key in m.GENERAL_BUY.keys():
 		var price := int(m.GENERAL_BUY[key])
 		rows.append({
 			"name": "%s (%d each)" % [str(key).capitalize(), price],
 			"value": "%d held" % int(m.materials[key]),
+			"needs": [{"text": "%d coins" % (price * m.GENERAL_BUY_QTY), "have": m.money, "ok": m.money >= price * m.GENERAL_BUY_QTY}],
 			"button": "Buy %d" % m.GENERAL_BUY_QTY,
 			"action": "buy:%s" % key,
 			"enabled": m.money >= price * m.GENERAL_BUY_QTY,
 		})
-	rows.append({"section": "Sell materials (half price)"})
+	rows.append({"tab": "Sell"})
+	rows.append({"note": "Materials sell for half what they cost. Coins: %d." % m.money})
 	for key in m.GENERAL_BUY.keys():
 		var sell := maxi(1, int(m.GENERAL_BUY[key]) / 2)
 		rows.append({
@@ -770,18 +955,18 @@ func _general_shop_rows() -> Array:
 
 func _bank_rows() -> Array:
 	var rows: Array = [
-		{"section": "Coins"},
-		{"name": "Held", "value": str(m.money), "button": "Bank all", "action": "dep:coins", "enabled": m.money > 0},
-		{"name": "Banked", "value": str(m.bank_coins), "button": "Take all", "action": "wd:coins", "enabled": m.bank_coins > 0},
-		{"section": "Goods"},
+		{"tab": "Coins"},
+		{"name": "Coins held", "status": "%d coins" % m.money, "status_kind": "info", "value": str(m.money), "button": "Bank all", "action": "dep:coins", "enabled": m.money > 0},
+		{"name": "Coins banked", "status": "%d coins" % m.bank_coins, "status_kind": "info", "value": str(m.bank_coins), "button": "Take all", "action": "wd:coins", "enabled": m.bank_coins > 0},
+		{"tab": "Goods"},
 	]
 	for key in m.bank_materials.keys():
 		var held := int(m.materials[key])
 		var banked := int(m.bank_materials[key])
 		if held == 0 and banked == 0:
 			continue
-		rows.append({"name": "%s: held" % str(key).capitalize(), "value": str(held), "button": "Bank all", "action": "dep:%s" % key, "enabled": held > 0})
-		rows.append({"name": "%s: banked" % str(key).capitalize(), "value": str(banked), "button": "Take all", "action": "wd:%s" % key, "enabled": banked > 0})
+		rows.append({"name": "%s: held" % str(key).capitalize(), "status": str(held), "status_kind": "info", "value": str(held), "button": "Bank all", "action": "dep:%s" % key, "enabled": held > 0})
+		rows.append({"name": "%s: banked" % str(key).capitalize(), "status": str(banked), "status_kind": "info", "value": str(banked), "button": "Take all", "action": "wd:%s" % key, "enabled": banked > 0})
 	if rows.size() == 4:
 		rows.append({"note": "Nothing to bank yet. Goods you deposit are kept safe here, even if you lose them in the wild."})
 	return rows

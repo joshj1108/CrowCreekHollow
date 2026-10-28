@@ -1,6 +1,15 @@
 class_name SaveSystem
 extends RefCounted
 
+# Bumped when a save's keys change shape. Saves from before the number was written count as 1.
+# _migrate lifts an older save one version at a time, so every old save still loads.
+const SAVE_VERSION := 3
+# Keys a save must hold with the right type, or it isn't read: the loader would trip over anything else.
+const DICT_KEYS := ["inventory", "materials", "skill_xp", "stats", "equipment", "quests_done", "achievements_done",
+	"guardian_done", "tool_tier", "bank_materials"]
+const ARRAY_KEYS := ["crops", "brush", "felled", "rocks", "quarry", "cave_mined", "decor", "steps_done", "rook_pages",
+	"desk_mail", "desk_orders", "tips_seen", "diary_new", "hen_ages", "goat_ages", "player_pos", "campsite"]
+
 var m: MainGame
 
 
@@ -70,12 +79,17 @@ func _save_game() -> void:
 		"job_done_day": m.job_done_day,
 		"mend_day": m.mend_day,
 		"mends_today": m.mends_today,
+		"smelt_day": m.smelt_day,
+		"smelts_today": m.smelts_today,
 		"cleanse_day": m.cleanse_day,
 		"event_fired_day": m.event_fired_day,
 		"shadow_steps": m.nights.shadow_steps,
 		"happening_done_day": m.happenings.done_day,
 		"decor": m.projects.decor.keys().map(func(t: Vector2i) -> Array: return [t.x, t.y, m.projects.decor[t]]),
 		"steps_done": m.projects.steps_done.keys(),
+		"bell_day": m.projects.bell_day,
+		"treks_done": m.trek.treks_done,
+		"trek_grove_done": m.trek.grove_done,
 		"rook_pages": m.mystery.found.keys(),
 		"last_visitor": m.nights.last_visitor,
 		"sanity": m.sanity,
@@ -127,18 +141,17 @@ func _save_game() -> void:
 		"diary_new": m.diary_new,
 		"guide_v": 1,
 	}
-	var file := FileAccess.open(m._save_path(), FileAccess.WRITE)
-	if file != null:
-		file.store_string(JSON.stringify(data))
+	data["save_version"] = SAVE_VERSION
+	if not write_save(m._save_path(), data):
+		m._show_message("The game could not be saved. Your last save is still there.")
 
 
 func _load_game() -> bool:
-	if not FileAccess.file_exists(m._save_path()):
+	var data := read_save(m._save_path())
+	if data.is_empty() and recover(m._save_path()) != "":
+		data = read_save(m._save_path())
+	if data.is_empty():
 		return false
-	var parsed: Variant = JSON.parse_string(FileAccess.get_file_as_string(m._save_path()))
-	if typeof(parsed) != TYPE_DICTIONARY:
-		return false
-	var data: Dictionary = parsed
 
 	m.day = int(data.get("day", 1))
 	m.weather_kind = str(data.get("weather_kind", ""))
@@ -166,6 +179,8 @@ func _load_game() -> bool:
 	m.job_done_day = int(data.get("job_done_day", -1))
 	m.mend_day = int(data.get("mend_day", 0))
 	m.mends_today = int(data.get("mends_today", 0))
+	m.smelt_day = int(data.get("smelt_day", 0))
+	m.smelts_today = int(data.get("smelts_today", 0))
 	m.cleanse_day = int(data.get("cleanse_day", 0))
 	m.money = int(data.get("money", 0))
 	_merge_ints(m.bank_materials, data.get("bank_materials"))
@@ -201,10 +216,14 @@ func _load_game() -> bool:
 	m.mystery.found.clear()
 	for id in data.get("rook_pages", []):
 		m.mystery.found[str(id)] = true
+	m.projects.bell_day = int(data.get("bell_day", -1))
+	m.trek.treks_done = int(data.get("treks_done", 0))
+	m.trek.grove_done = bool(data.get("trek_grove_done", false))
 	m.projects.steps_done.clear()
 	for id in data.get("steps_done", []):
 		m.projects.steps_done[str(id)] = true
 	m.nights.last_visitor = str(data.get("last_visitor", ""))
+	m.nights.first_beat = -1   # a first night playing out in the game left behind doesn't carry into this one
 	m.sanity_penalty = int(data.get("sanity_penalty", 0))
 	m.boredom_loss = float(data.get("boredom_loss", 0.0))
 	m.entertained_day = int(data.get("entertained_day", 0))
@@ -316,5 +335,130 @@ func _merge_ints(target: Dictionary, saved: Variant) -> void:
 	if typeof(saved) != TYPE_DICTIONARY:
 		return
 	for key in target.keys():
-		if saved.has(key):
+		if saved.has(key) and typeof(saved[key]) in [TYPE_INT, TYPE_FLOAT, TYPE_BOOL]:
 			target[key] = int(saved[key])
+
+
+# --- Files ---------------------------------------------------------------------------------------
+# A save is written to a .tmp file, read back, and only then moved into place. The save it replaces
+# becomes the .bak, so a crash, a power cut or a bad file never costs more than one night.
+
+static func backup_path(path: String) -> String:
+	return path.get_basename() + ".bak.json"
+
+
+static func temp_path(path: String) -> String:
+	return path.get_basename() + ".tmp.json"
+
+
+static func broken_path(path: String) -> String:
+	return path.get_basename() + ".broken.json"
+
+
+# The save at path, checked and brought up to SAVE_VERSION, or {} if it's missing or can't be used.
+static func read_save(path: String) -> Dictionary:
+	if not FileAccess.file_exists(path):
+		return {}
+	# A JSON instance reports a damaged file quietly, where JSON.parse_string would print an error.
+	var json := JSON.new()
+	if json.parse(FileAccess.get_file_as_string(path)) != OK:
+		return {}
+	var parsed: Variant = json.data
+	if typeof(parsed) != TYPE_DICTIONARY or not _valid(parsed):
+		return {}
+	return _migrate(parsed)
+
+
+static func _valid(data: Dictionary) -> bool:
+	if not data.has("inventory") or typeof(data.get("day")) not in [TYPE_INT, TYPE_FLOAT] or int(data["day"]) < 1:
+		return false
+	if data.has("save_version") and typeof(data["save_version"]) not in [TYPE_INT, TYPE_FLOAT]:
+		return false
+	for key in DICT_KEYS:
+		if data.has(key) and typeof(data[key]) != TYPE_DICTIONARY:
+			return false
+	for key in ARRAY_KEYS:
+		if data.has(key) and typeof(data[key]) != TYPE_ARRAY:
+			return false
+	for c in data.get("crops", []):
+		if typeof(c) != TYPE_DICTIONARY or not (c.has("x") and c.has("y") and c.has("stage")):
+			return false
+	return true
+
+
+# Each step lifts a save one version. Keys a step doesn't name fall back to the loader's defaults,
+# and _merge_ints keeps today's defaults for any material or item an old save never had.
+static func _migrate(data: Dictionary) -> Dictionary:
+	var v := int(data.get("save_version", 1))
+	if v < 2:
+		# Version 2 added the crow bell and treks. A save from before them has started neither.
+		if not data.has("bell_day"):
+			data["bell_day"] = -1
+		if not data.has("treks_done"):
+			data["treks_done"] = 0
+	if v < 3:
+		# Version 3 added the other trek routes. Nobody has walked the woman in the grey shawl to the grove yet.
+		if not data.has("trek_grove_done"):
+			data["trek_grove_done"] = false
+	# A save from a newer build keeps its number; keys this build doesn't know are ignored.
+	data["save_version"] = maxi(v, SAVE_VERSION)
+	return data
+
+
+static func write_save(path: String, data: Dictionary) -> bool:
+	var tmp := temp_path(path)
+	var file := FileAccess.open(tmp, FileAccess.WRITE)
+	if file == null:
+		return false
+	file.store_string(JSON.stringify(data))
+	file.close()
+	# A save that can't be read back is never put in place.
+	if read_save(tmp).is_empty():
+		_remove(tmp)
+		return false
+	# Only a good save becomes the backup, so a damaged one never pushes the last good one out.
+	if not read_save(path).is_empty() and not _move(path, backup_path(path)):
+		return false
+	return _move(tmp, path)
+
+
+# Puts a readable save back at path before it's listed or loaded. Returns "" when the save is fine,
+# "restored" when it came back from the backup, or "lost" when it was damaged and had no backup.
+# A damaged file is kept as .broken.json, so the slot shows empty instead of failing to load.
+static func recover(path: String) -> String:
+	var tmp := temp_path(path)
+	if not read_save(path).is_empty():
+		_remove(tmp)
+		return ""
+	var damaged := FileAccess.file_exists(path)
+	if damaged:
+		_move(path, broken_path(path))
+	# A save written out and read back but not yet moved into place is the newest one there is.
+	if not read_save(tmp).is_empty() and _move(tmp, path):
+		return ""
+	_remove(tmp)
+	if not read_save(backup_path(path)).is_empty():
+		DirAccess.copy_absolute(ProjectSettings.globalize_path(backup_path(path)), ProjectSettings.globalize_path(path))
+		return "restored"
+	return "lost" if damaged else ""
+
+
+# Removes a slot's save with its backup and any half-written copy, as when the farm is taken.
+static func delete_save(path: String) -> void:
+	for p in [path, backup_path(path), temp_path(path)]:
+		_remove(p)
+
+
+static func _move(from: String, to: String) -> bool:
+	var a := ProjectSettings.globalize_path(from)
+	var b := ProjectSettings.globalize_path(to)
+	if DirAccess.rename_absolute(a, b) == OK:
+		return true
+	# Some systems won't rename over a file, so the old one is cleared first.
+	DirAccess.remove_absolute(b)
+	return DirAccess.rename_absolute(a, b) == OK
+
+
+static func _remove(path: String) -> void:
+	if FileAccess.file_exists(path):
+		DirAccess.remove_absolute(ProjectSettings.globalize_path(path))

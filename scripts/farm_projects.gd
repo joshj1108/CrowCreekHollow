@@ -11,15 +11,29 @@ extends RefCounted
 var m: MainGame
 
 const DECOR := {
-	"lamp": {"name": "Lamp post", "cost": {"wood": 3, "iron_bar": 1}, "skill": "Smithing", "level": 2, "max": 8, "blocks": true,
+	"lamp": {"name": "Lamp post", "cost": {"wood": 3, "iron_bar": 1}, "skill": "Smithing", "level": 7, "max": 8, "blocks": true,
 		"desc": "Lights the ground around it at night. In its light the dark doesn't wear on your sanity."},
 	"flowers": {"name": "Flower bed", "cost": {"wood": 1, "seeds": 2}, "skill": "Farming", "level": 2, "max": 6, "blocks": true,
-		"desc": "Each bed gives +1 sanity every morning, except in winter."},
+		"desc": "Planted in spring or summer. Each bed gives +1 sanity every morning, except in winter."},
 	"path": {"name": "Gravel path", "cost": {"stone": 1}, "skill": "", "level": 0, "max": 400, "blocks": false,
 		"desc": "Turns a tile of grass into path. Keeps placing until you run out of stone or press B."},
-	"bell": {"name": "Crow bell", "cost": {"hardwood": 6, "iron_bar": 4, "feathers": 20, "coins": 150}, "skill": "Carpentry", "level": 4, "max": 1, "blocks": true,
-		"desc": "A tall post with an iron bell. While it stands, the field shadow can't reach the house, so the Hollow stops coming, and the night takes a quarter less from your sanity."},
+	"bell": {"name": "Crow bell", "cost": {"bell_metal": 1, "bell_frame": 1, "bell_rope": 1, "feathers": 20, "coins": 150}, "skill": "Carpentry", "level": 6, "max": 1, "blocks": true,
+		"desc": "Hung only on All Hallows, and the Hollow comes to it that night. While it stands, the field shadow can't reach the house, so the Hollow stops coming, and the night takes a quarter less from your sanity."},
 }
+# The crow bell is made over a year: its metal in winter, its frame from a spring storm's oak, its rope from
+# summer's wild flax, and it is hung on All Hallows. A game starts on October 1st, so the earliest is the
+# second All Hallows, day 396.
+const BELL_PARTS := {
+	"bell_metal": {"name": "Bell metal", "season": "Winter", "cost": {"iron_bar": 4, "copper_bar": 2, "feathers": 10}, "skill": "Smithing", "level": 6,
+		"desc": "Cast at the furnace and cooled in the frost, so only in winter."},
+	"bell_frame": {"name": "Bell frame", "season": "", "cost": {"storm_oak": 1, "hardwood": 6}, "skill": "Carpentry", "level": 6,
+		"desc": "A yoke of storm oak. Spring storms split an oak at the wood's edge now and then."},
+	"bell_rope": {"name": "Bell rope", "season": "", "cost": {"flax": 9, "resin": 2}, "skill": "Bushcrafting", "level": 5,
+		"desc": "Twisted from wild flax, which flowers at the wood's edge in summer."},
+}
+const BELL_MONTH := 9           # All Hallows, October 31st: the only day the bell can be hung
+const BELL_DOM := 31
+const PART_XP := 40
 const LAMP_RADIUS := 3.0        # tiles of light around a lamp post
 const BELL_NIGHT_MULT := 0.75
 const STEP_COINS := 20          # paid for each homestead step done
@@ -27,6 +41,7 @@ const REMOVE_SECONDS := 4.0     # time to press Space again to take something do
 
 var decor := {}                 # saved: world tile -> kind
 var steps_done := {}            # saved: step id -> true
+var bell_day := -1              # the day the bell was hung, so the Hollow comes to it that night
 var layer: Node2D
 var lights := {}                # lamp tile -> PointLight2D
 var _remove_tile := Vector2i(-1, -1)
@@ -46,20 +61,20 @@ func _build() -> void:
 # The homestead ladder, in order. Each is done when its test passes.
 func _steps() -> Array:
 	return [
-		{"id": "boarded", "title": "Board up the house", "how": "House section: repair to Boarded.", "done": m.house_stage >= 1},
-		{"id": "coop", "title": "Build the coop", "how": "Buildings section: 6 wood, 4 fiber, Carpentry 2.", "done": m.coop_built},
-		{"id": "patched", "title": "Patch the house", "how": "House section: repair to Patched.", "done": m.house_stage >= 2},
-		{"id": "smokehouse", "title": "Build the smokehouse", "how": "Buildings section, in the workshop.", "done": m.smokehouse_built},
+		{"id": "boarded", "title": "Board up the house", "how": "House section: repair to Boarded, Carpentry 1.", "done": m.house_stage >= 1},
 		{"id": "plot_two", "title": "Open the second plot", "how": "Opens at Farming 2.", "done": m.plot_two_open},
-		{"id": "furnace", "title": "Build the furnace", "how": "Buildings section, in the workshop.", "done": m.furnace_built},
+		{"id": "coop", "title": "Build the coop", "how": "Buildings section: 6 wood, 4 fiber, Carpentry 2.", "done": m.coop_built},
+		{"id": "patched", "title": "Patch the house", "how": "House section: repair to Patched, Carpentry 3.", "done": m.house_stage >= 2},
+		{"id": "smokehouse", "title": "Build the smokehouse", "how": "Buildings section, in the workshop: Carpentry 4.", "done": m.smokehouse_built},
 		{"id": "woodshed", "title": "Build the firewood store", "how": "Buildings section, after the smokehouse or furnace.", "done": m.woodshed_built},
-		{"id": "lamp", "title": "Light the yard", "how": "Place a lamp post (Buildings, Decor): 3 wood, 1 iron bar, Smithing 2.", "done": _count("lamp") >= 1},
-		{"id": "barn", "title": "Build the barn", "how": "Buildings section: 10 wood, 6 fiber, Carpentry 4.", "done": m.barn_built},
-		{"id": "restored", "title": "Restore the house", "how": "House section: repair to Restored.", "done": m.house_stage >= 3},
-		{"id": "flowers", "title": "Plant four flower beds", "how": "Buildings, Decor: 1 wood and 2 turnip seeds each, Farming 2.", "done": _count("flowers") >= 4},
-		{"id": "plot_three", "title": "Open the third plot", "how": "Opens at Farming 4 once the house is Patched.", "done": m.plot_three_open},
+		{"id": "furnace", "title": "Build the furnace", "how": "Buildings section, in the workshop: Carpentry 5.", "done": m.furnace_built},
+		{"id": "lamp", "title": "Light the yard", "how": "Place a lamp post (Buildings, Decor): 3 wood, 1 iron bar, Smithing 7.", "done": _count("lamp") >= 1},
+		{"id": "plot_three", "title": "Open the third plot", "how": "Opens at Farming 9 once the house is Patched.", "done": m.plot_three_open},
+		{"id": "barn", "title": "Build the barn", "how": "Buildings section: 10 wood, 6 fiber, Carpentry 7.", "done": m.barn_built},
 		{"id": "hollow_lantern", "title": "Make the Hollow Lantern", "how": "Craft section, Other tab: the lantern's third tier.", "done": m.lantern_tier >= 3},
-		{"id": "bell", "title": "Hang the crow bell", "how": "Buildings, Decor: 6 hardwood, 4 iron bars, 20 crow feathers, 150 coins, Carpentry 4.", "done": _has_bell()},
+		{"id": "flowers", "title": "Plant four flower beds", "how": "Buildings, Decor, in spring or summer: 1 wood and 2 turnip seeds each, Farming 2.", "done": _count("flowers") >= 4},
+		{"id": "restored", "title": "Restore the house", "how": "House section: repair to Restored, Carpentry 8, in summer when the paint can dry.", "done": m.house_stage >= 3},
+		{"id": "bell", "title": "Hang the crow bell", "how": "Buildings, The crow bell: its metal in winter, its frame from storm oak, its rope from summer flax, then hang it on All Hallows.", "done": _has_bell()},
 	]
 
 
@@ -114,15 +129,60 @@ func _can_afford(kind: String) -> bool:
 
 
 func _can_place(kind: String) -> bool:
-	return _level_ok(kind) and _can_afford(kind) and _count(kind) < int(DECOR[kind]["max"])
+	return _level_ok(kind) and _can_afford(kind) and _count(kind) < int(DECOR[kind]["max"]) and (kind != "bell" or _bell_night()) \
+		and (kind != "flowers" or _season() in ["Spring", "Summer"])
 
 
-func _cost_text(kind: String) -> String:
+func _bell_night() -> bool:
+	var d := m._calendar_date(m.day)
+	return int(d["month"]) == BELL_MONTH and int(d["day"]) == BELL_DOM
+
+
+func _season() -> String:
+	return m._season_of(m._calendar_date(m.day)["month"])
+
+
+# Why a bell part can't be made now: "made", a reason, or "" when it can.
+func _part_why(id: String) -> String:
+	var p: Dictionary = BELL_PARTS[id]
+	if int(m.materials[id]) > 0 or _has_bell():
+		return "made"
+	if m.progression._level(str(p["skill"])) < int(p["level"]):
+		return "needs %s %d" % [p["skill"], int(p["level"])]
+	if str(p["season"]) != "" and _season() != str(p["season"]):
+		return "only in %s" % str(p["season"]).to_lower()
+	if id == "bell_metal" and not m.furnace_built:
+		return "needs the furnace"
+	for key in p["cost"]:
+		if m._held(str(key)) < int(p["cost"][key]):
+			return "needs %s" % _cost_list(p["cost"])
+	return ""
+
+
+func _make_part(id: String) -> void:
+	var why := _part_why(id)
+	var p: Dictionary = BELL_PARTS[id]
+	if why != "":
+		m._show_message("%s: %s." % [p["name"], why])
+		return
+	for key in p["cost"]:
+		m.materials[key] -= int(p["cost"][key])
+	m.materials[id] += 1
+	m.progression._grant_xp(str(p["skill"]), PART_XP)
+	m.play_sfx("repair", 0.05)
+	m._show_message("You make the %s. +%d %s XP. The bell is hung on All Hallows." % [str(p["name"]).to_lower(), PART_XP, p["skill"]])
+
+
+func _cost_list(cost: Dictionary) -> String:
 	var parts: Array = []
-	var cost: Dictionary = DECOR[kind]["cost"]
 	for key in cost:
 		var label := "turnip seeds" if key == "seeds" else ("crow feathers" if key == "feathers" else str(key).replace("_", " "))
 		parts.append("%d %s" % [int(cost[key]), label])
+	return ", ".join(parts)
+
+
+func _cost_text(kind: String) -> String:
+	var parts: Array = [_cost_list(DECOR[kind]["cost"])]
 	var d: Dictionary = DECOR[kind]
 	if str(d["skill"]) != "":
 		parts.append("%s %d" % [d["skill"], int(d["level"])])
@@ -141,31 +201,15 @@ func _pay(kind: String, sign: int) -> void:
 			m.inventory[key] -= n
 
 
-# The Buildings section's rows: progress, then the decor.
-func _rows() -> Array:
-	var rows: Array = [{"section": "Homestead"}]
-	var nxt := _next_step()
-	rows.append({"name": "Progress", "value": "%d of %d steps done" % [steps_done.size(), _steps().size()]})
-	if nxt.is_empty():
-		rows.append({"note": "Every step is done. The farm is yours."})
-	else:
-		rows.append({"name": "Next: %s" % nxt["title"], "value": str(nxt["how"])})
-	rows.append({"section": "Decor"})
-	for kind in ["lamp", "flowers", "path", "bell"]:
-		var d: Dictionary = DECOR[kind]
-		var have := _count(kind)
-		var label := str(d["name"]) + ((" (%d placed)" % have) if have > 0 else "")
-		if have >= int(d["max"]):
-			rows.append({"name": label, "value": "as many as there's room for"})
-			continue
-		rows.append({"name": label, "value": "%s. %s" % [_cost_text(kind), d["desc"]], "button": "Place", "action": "decor:" + kind, "enabled": _can_place(kind)})
-	rows.append({"note": "Face something you placed and press Space twice to take it down and get its materials back."})
-	return rows
-
-
 func _start_place(kind: String) -> void:
 	if m.inside or m.in_cave or m._in_village():
 		m._show_message("You can only place things on the farm.")
+		return
+	if kind == "flowers" and not _season() in ["Spring", "Summer"]:
+		m._show_message("Flower beds go in in spring or summer.")
+		return
+	if kind == "bell" and _level_ok(kind) and _can_afford(kind) and not _bell_night():
+		m._show_message("The crow bell can only be hung on All Hallows, October 31.")
 		return
 	if not _can_place(kind):
 		m._show_message("A %s needs %s." % [str(DECOR[kind]["name"]).to_lower(), _cost_text(kind)])
@@ -181,6 +225,8 @@ func _confirm(kind: String, t: Vector2i) -> void:
 		return
 	_pay(kind, 1)
 	decor[t] = kind
+	if kind == "bell":
+		bell_day = m.day
 	_stamp()
 	m.play_sfx("repair" if kind != "path" else "hoe", 0.05)
 	if kind == "path" and _can_place("path"):

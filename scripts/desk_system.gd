@@ -85,6 +85,7 @@ func _play_pastime(kind: String) -> void:
 func _catalog() -> Array:
 	var items: Array = [
 		{"id": "cards", "section": "Pastimes", "name": "Pack of cards", "price": m.CARDS_PRICE, "detail": "%d games of solitaire" % m.CARDS_GAMES, "ok": true, "why": ""},
+		{"id": "oil", "section": "Supplies", "name": "Lamp oil", "price": m.LAMP_OIL_PRICE, "detail": "%d held, for treks" % int(m.materials["lamp_oil"]), "ok": true, "why": ""},
 		{"id": "sudoku", "section": "Pastimes", "name": "Sudoku book", "price": m.SUDOKU_BOOK_PRICE, "detail": "%d puzzles" % m.SUDOKU_BOOK_PUZZLES, "ok": true, "why": ""},
 		{"id": "seeds_turnip", "section": "Seeds", "name": "5 turnip seeds", "price": m.SEED_TURNIP_PRICE * 5, "detail": "%d held" % int(m.inventory["seeds"]), "ok": true, "why": ""},
 		{"id": "seeds_corn", "section": "Seeds", "name": "4 corn seeds", "price": m.SEED_CORN_PRICE * 4, "detail": "%d held" % int(m.inventory["corn_seeds"]), "ok": m.farm._crop_unlocked("corn"), "why": "needs Farming %d" % m.CORN_LEVEL},
@@ -148,6 +149,8 @@ func _deliver_orders() -> String:
 		match str(id):
 			"cards":
 				m.card_games = m.CARDS_GAMES
+			"oil":
+				m.materials["lamp_oil"] += 1
 			"sudoku":
 				m.sudoku_puzzles = m.SUDOKU_BOOK_PUZZLES
 			"seeds_turnip":
@@ -275,7 +278,7 @@ func _pay_tax() -> void:
 
 # The land is lost: the save is removed and the start screen says why.
 func _evict() -> void:
-	DirAccess.remove_absolute(ProjectSettings.globalize_path(m._save_path()))
+	SaveSystem.delete_save(m._save_path())
 	TitleMenu.notice = "The farm was taken. The property tax went unpaid, and you lost the land."
 	m._quit_to_title()
 

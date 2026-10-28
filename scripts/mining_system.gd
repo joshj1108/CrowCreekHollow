@@ -45,8 +45,14 @@ func _finish_mine(tile: Vector2i) -> void:
 	m.queue_redraw()
 
 
+# The furnace makes SMELT_DAILY_LIMIT bars a day, so stockpiled ore can't buy several Smithing levels at once.
+func _smelts_left() -> int:
+	var used: int = m.smelts_today if m.smelt_day == m.day else 0
+	return m.SMELT_DAILY_LIMIT - used
+
+
 func _can_smelt(kind: String) -> bool:
-	if not m.furnace_built:
+	if not m.furnace_built or _smelts_left() <= 0:
 		return false
 	if m.progression._level("Smithing") < int(m.SMELT_LEVEL[kind]):
 		return false
@@ -57,9 +63,16 @@ func _smelt(kind: String) -> void:
 	if not m.furnace_built:
 		m._show_message("Build a furnace from the House panel first.")
 		return
+	if _smelts_left() <= 0:
+		m._show_message("The furnace needs to cool. Come back tomorrow.")
+		return
 	if not _can_smelt(kind):
 		m._show_message("You need %s ore, a piece of wood, and Smithing %d." % [kind, int(m.SMELT_LEVEL[kind])])
 		return
+	if m.smelt_day != m.day:
+		m.smelt_day = m.day
+		m.smelts_today = 0
+	m.smelts_today += 1
 	m.materials[kind + "_ore"] -= 1
 	m.materials["wood"] -= 1
 	m.materials[kind + "_bar"] += 1

@@ -26,16 +26,31 @@ extends SceneTree
 #   bag             open the bag
 #   title           stay on the title menu instead of starting a game
 #   tab=NAME        open a section, e.g. tab=Craft
+#   page=N          with tab, open the section's Nth ledger tab (counting from 0)
 #   fight           put a creature in front of the player and swing at it, so it is hurt
 #   fish            stand below a fishing spot and cast at it
 #   visitor=ID      bring tonight's night visitor now: field, knock, quiet, crows, pond, watcher, footsteps
 #                   or hollow (use with hour=22 or later)
+#                   first is the scripted first night (a new game gets it anyway at 22:00)
+#   beat=N          with visitor=first, play its beats up to N (0-3; the figure comes at 2)
 #   happening=ID    jump to a day with this daily happening: pedlar, glint, branch, crow_gifts, mushrooms,
 #                   frenzy or neighbour (it is placed, and its morning note shown)
 #   decor=A,B       place decor in a row two tiles below the player: lamp, flowers, path or bell
 #   feel=SOUND      play an action's sound with its burst (harvest, chop, tree_fall, hoe, ...) and pop up a gain
 #   pages=N         Agnes Rook's first N torn pages are found (show them with diary)
 #   steps=N         how far the field shadow has crept toward the house, 0 to 8
+#   walker          jump to a day a walker waits at the farm's north edge, and stand below them
+#   wday=N          with walker, the first day to look from (from 244 all three day walkers wait); wbell: the bell is
+#                   hung, so from day 381 the woman in the grey shawl waits too
+#   trek=N          set out on the mill trek and stand in clearing N (0-3 marked, 0-2 dark), below its event, with the walker
+#   tevent=ID       with trek, the clearing's event: tree, crows, flood, lights, cairn, fog or hollow (the day sets it otherwise)
+#   tdark           with trek, take the dark trail at the fork (trek=1 is then the dark clearing, 2 the mill)
+#   tsign           with trek=0, stand below the fingerpost at the fork
+#   tread           with trek, the fingerpost reads (as with the Waymarks trail work)
+#   nooil           with trek, no lamp oil, so the lantern is out
+#   tall            with trek, the tall one stands in the trees beside you
+#   troute=ID       with trek, the route: mill (default), orchard, chapel or grove; tday=N sets the day (and season)
+#   tnight          with trek, set out at 19:00 (a night trek)
 #   sound           print how loud each ambience loop is playing when the shot is taken
 
 func _initialize() -> void:
@@ -99,6 +114,14 @@ func _initialize() -> void:
 		var ht: Vector2i = main.happenings.tile
 		if ht.x >= 0 and not opt.has("tile"):
 			main.player.position = main._tile_center(ht.x, ht.y + 2)
+	if opt.has("walker"):
+		main.day = maxi(main.trek.FROM_DAY, int(opt.get("wday", main.trek.FROM_DAY)))
+		if opt.has("wbell"):
+			main.projects.bell_day = 1
+		while not main.trek._walker_day(main.day):
+			main.day += 1
+		var wt: Vector2i = main.trek._walker_tile()
+		main.player.position = main._tile_center(wt.x, wt.y + 2)
 	if opt.has("steps"):
 		main.nights.shadow_steps = int(opt["steps"])
 		main._update_shadow_tile()
@@ -109,6 +132,39 @@ func _initialize() -> void:
 		if opt.has("itile"):
 			var it: PackedStringArray = opt["itile"].split(",")
 			main.player.position = main._tile_center(main.INT_ORIGIN.x + int(it[0]), main.INT_ORIGIN.y + int(it[1]))
+	elif opt.has("trek"):
+		main.lantern_tier = maxi(main.lantern_tier, 1)
+		main.materials["lamp_oil"] = 0 if opt.has("nooil") else 3
+		if opt.has("tread"):
+			main.trek.works["waymarks"] = true
+		if opt.has("tnight"):
+			main.current_hour = 19.0
+			main.clock = (19.0 - main.START_HOUR) / (main.DAY_END_HOUR - main.START_HOUR) * main.DAY_LENGTH
+		if opt.has("tday"):
+			main.day = int(opt["tday"])
+		main.trek._start(str(opt.get("troute", "mill")))
+		if opt.has("tdark"):
+			main.trek.dark = true
+			main.trek.route = main.trek._steps(main.trek.route_id)["dark"]
+			main.trek.events = (main.trek.plan["dark"] as Array).duplicate()
+		main.trek.clearing = int(opt["trek"])
+		if opt.has("tevent"):
+			main.trek.events[main.trek.clearing] = opt["tevent"]
+		main.trek._enter_clearing()
+		main.trek.oil_seconds = 0.0 if opt.has("nooil") else main.trek.FLASK_SECONDS
+		main.trek.lit = not opt.has("nooil")
+		var ep: Vector2i = main.trek.event_point
+		if opt.has("tsign") and main.trek.sign_tile.x >= 0:
+			ep = main.trek.sign_tile + Vector2i(0, -1)
+		if ep.x < 0:
+			var pts: Array = main.trek._spec()["points"]
+			ep = Vector2i(int(pts[-2][0]), int(pts[-2][1]))
+		main.player.position = main._tile_center(ep.x, ep.y + 3)
+		main.trek.walker_pos = main.player.position + Vector2(0, main.PX * 1.3)
+		main.trek.crumbs.assign([main.trek.walker_pos, main.player.position])
+		if opt.has("tall"):
+			main.trek.tall_on = true
+			main.trek.tall_pos = main.player.position + Vector2(main.PX * 3.0, -main.PX * 0.5)
 	elif opt.has("cave"):
 		main._enter_cave()
 		if opt.has("ctile"):
@@ -143,6 +199,9 @@ func _initialize() -> void:
 	if opt.has("visitor"):
 		main.event_fired_day = main.day
 		main.nights._begin(opt["visitor"])
+		if opt.has("beat"):
+			# Wind the first night's start back so its beats up to this one have played.
+			main.nights.first_start -= float(main.nights.FIRST_BEATS[int(opt["beat"])])
 		await process_frame
 	if opt.has("fight"):
 		var at: Vector2 = main.player.position + main.player.facing * main.PX
@@ -178,6 +237,8 @@ func _initialize() -> void:
 		await process_frame
 		await process_frame
 	if opt.has("tab"):
+		if opt.has("page"):
+			main.action_bar.ledger_tabs[opt["tab"]] = int(opt["page"])
 		main._toggle_tab(opt["tab"])
 		await process_frame
 		await process_frame

@@ -106,11 +106,14 @@ func _harvest(tile: Vector2i) -> void:
 	m.stats["harvested"] += 1
 	if kind == "pumpkin":
 		m.stats["pumpkins"] += 1
-	m.inventory[m.CROPS[kind]["seed"]] += 1
+	var seed_note := ""
+	if randf() < m.SEED_BACK_CHANCE:
+		m.inventory[m.CROPS[kind]["seed"]] += 1
+		seed_note = " and a seed"
 	var xp: int = m.CROPS[kind]["xp"]
 	m.progression._grant_xp("Farming", xp)
 	var unit := {"turnip": "crops", "corn": "ears", "pumpkin": "pumpkins"}
-	m._show_message("Harvested %s for %d %s. +%d Farming XP" % [_seed_label(kind).to_lower(), yield_count, unit[kind], xp])
+	m._show_message("Harvested %s for %d %s%s. +%d Farming XP" % [_seed_label(kind).to_lower(), yield_count, unit[kind], seed_note, xp])
 
 
 func _start_harvest(kind: String, tile: Vector2i) -> void:

@@ -3,6 +3,10 @@ extends RefCounted
 
 var m: MainGame
 
+const LEVEL_CAP := 10       # the highest level a skill reaches
+const STEEP_FROM := 5       # levels past this cost more each time
+const STEEP_GROWTH := 1.8   # each level past STEEP_FROM costs this many times the one before
+
 
 func _init(main: MainGame) -> void:
 	m = main
@@ -88,18 +92,30 @@ func _reward_text(reward: Dictionary) -> String:
 # level 2 at 100, level 3 at 300, level 4 at 600, level 5 at 1000, level 6 at 1500.
 func _level(skill: String) -> int:
 	var xp := int(m.skill_xp[skill])
-	var n := int(floor((-1.0 + sqrt(1.0 + 4.0 * float(xp) / 50.0)) / 2.0))
-	return n + 1
+	var level := 1
+	while level < LEVEL_CAP and xp >= _xp_for_level(level + 1):
+		level += 1
+	return level
 
 
-# The XP needed to reach a level, counted from the start.
+# The XP needed to reach a level, counted from the start. Up to level 5 each level costs 100 more than the
+# last (100, 300, 600, 1000); after that each costs STEEP_GROWTH times the one before, up to LEVEL_CAP.
 func _xp_for_level(level: int) -> int:
-	return 50 * (level - 1) * level
+	if level <= STEEP_FROM:
+		return 50 * (level - 1) * level
+	var total := 50 * (STEEP_FROM - 1) * STEEP_FROM
+	var cost := 100.0 * (STEEP_FROM - 1)
+	for l in range(STEEP_FROM + 1, level + 1):
+		cost *= STEEP_GROWTH
+		total += roundi(cost)
+	return total
 
 
 # How far through the current level the skill is, from 0.0 to 1.0.
 func _level_progress(skill: String) -> float:
 	var level := _level(skill)
+	if level >= LEVEL_CAP:
+		return 1.0
 	var start := _xp_for_level(level)
 	var span := _xp_for_level(level + 1) - start
 	return clampf(float(int(m.skill_xp[skill]) - start) / float(span), 0.0, 1.0)

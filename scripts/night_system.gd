@@ -76,12 +76,24 @@ const HOLLOW := {"id": "hollow", "where": "door", "sound": "heartbeat",
 	"face_sanity": 20, "feathers": 5,
 	"ignore": "The Hollow waited at the door until morning. Something in your mind gave way.",
 	"ignore_sanity": 30, "limit": 5}
+# The first night is always the same short scare, so a new player meets the dark, their sanity and the bed
+# before the random visitors start. It plays out in beats (game hours after 22:00, about 11 seconds each):
+# the farm goes quiet, steps or knocks, the figure at the field's edge, then a nudge toward the bed.
+const FIRST := {"id": "first", "where": "field", "sound": "hush",
+	"appear": "The crows have stopped calling. The whole farm has gone quiet.",
+	"face": "You walk out to it. It folds into the dark, and a black feather turns in the grass where it stood.",
+	"face_sanity": 2, "feathers": 1, "push": 0,
+	"ignore": "Something walked the farm in the night. There are prints at the field's edge, and they lead to the house.",
+	"ignore_sanity": 3, "creep": 0}
+const FIRST_BEATS := [0.0, 0.4, 0.9, 1.5]
 
 var shadow_steps := 0       # saved: how far the field shadow has crept toward the house
 var last_visitor := ""      # saved: last night's visitor, so the same one doesn't come twice in a row
 var visitor: Dictionary = {}    # tonight's, while it waits for an answer
 var visitor_tile := Vector2i(-1, -1)
 var visitor_end := END_HOUR
+var first_beat := -1        # the first night's next beat while it plays out, -1 otherwise
+var first_start := 0.0
 var charmed := false        # a crow charm was used up tonight: losses are halved
 var layer: Node2D           # the visitors, drawn over the farm's buildings
 var light: PointLight2D     # a faint glow at the visitor, red for the figures, pale for the pond
@@ -107,11 +119,11 @@ func _build() -> void:
 
 # Shows tonight's visitor, or clears it once it is answered.
 func _show_visitor() -> void:
-	var lit := _active() and visitor_tile.x >= 0 and str(visitor["id"]) in ["field", "watcher", "hollow", "pond"]
+	var lit := _active() and visitor_tile.x >= 0 and str(visitor["id"]) in ["field", "first", "watcher", "hollow", "pond"]
 	light.enabled = lit
 	if lit:
 		# The glow sits at eye height, so the eyes and the outline around them show in the dark.
-		var eyes := {"field": 0.75, "watcher": 1.2, "hollow": 1.4, "pond": 0.0}
+		var eyes := {"field": 0.75, "first": 0.75, "watcher": 1.2, "hollow": 1.4, "pond": 0.0}
 		light.position = m._tile_center(visitor_tile.x, visitor_tile.y) + Vector2(0, -m.PX * float(eyes[visitor["id"]]))
 		light.color = Color(0.7, 0.9, 1.0) if visitor["id"] == "pond" else Color(1.0, 0.18, 0.12)
 		light.texture_scale = 1.8 if visitor["id"] == "hollow" else 0.9
@@ -133,6 +145,9 @@ func _active() -> bool:
 
 # 22:00: tonight's visitor arrives. force names one, for checking it (tools/capture.gd).
 func _begin(force := "") -> void:
+	if (force == "" and _first_night()) or force == "first":
+		_begin_first()
+		return
 	m.event_fired_day = m.day
 	m.stats["events"] += 1
 	visitor = _pick()
@@ -159,8 +174,60 @@ func _begin(force := "") -> void:
 		_resolve(false)
 
 
+# No night has come yet: this is a new game's first, on day 1.
+func _first_night() -> bool:
+	return int(m.stats["events"]) == 0
+
+
+# The first night's opening beat. The figure isn't placed until its beat, so it can't be faced before then.
+func _begin_first() -> void:
+	m.event_fired_day = m.day
+	m.stats["events"] += 1
+	visitor = FIRST
+	visitor_end = END_HOUR
+	visitor_tile = Vector2i(-1, -1)
+	charmed = false
+	first_start = m.current_hour
+	first_beat = 1
+	m.ambience.night_event("hush")
+	m._show_message(str(FIRST["appear"]))
+	_show_visitor()
+
+
+# The rest of the first night, beat by beat. It runs on the game clock, so an open menu holds it too.
+func _update_first() -> void:
+	while first_beat >= 0 and m.current_hour >= first_start + float(FIRST_BEATS[first_beat]):
+		var beat := first_beat
+		first_beat = first_beat + 1 if first_beat + 1 < FIRST_BEATS.size() else -1
+		var out := not m.inside
+		if beat == 1:
+			if out:
+				m.ambience.night_event("steps_behind")
+				m._show_message("Footsteps in the grass behind you. When you turn, nobody is there.")
+			else:
+				m.ambience.night_event("knock")
+				m._show_message("Three slow knocks on the front door. Then nothing.")
+			m.sanity_sys._change_sanity(-2.0)
+		elif beat == 2 and _active():
+			visitor_tile = _place("field")
+			m.tonight_shadow = visitor_tile
+			m.ambience.night_event("sting")
+			_show_visitor()
+			if out:
+				m._show_message("Something stands at the edge of the field, facing the house. " + str(HINTS["field"]))
+			else:
+				m._show_message("Through the window: something is standing at the edge of the field, facing the house.")
+		elif beat == 3:
+			m.ambience.night_event("whisper")
+			var text := "The dark wears at your Sanity while you're out in it. Get inside and go to bed: sleep puts it right." 				if out else "Stay in tonight, and go to bed: the house and sleep put your Sanity right."
+			if m.lantern_tier == 0:
+				text += " A lantern would light the way. Build one before tomorrow night."
+			m._show_message(text)
+
+
 func _pick() -> Dictionary:
-	if shadow_steps >= SHADOW_MAX:
+	# The night the crow bell is hung, the Hollow comes to it one last time.
+	if shadow_steps >= SHADOW_MAX or m.projects.bell_day == m.day:
 		return HOLLOW
 	var tier := _tier()
 	var options: Array = []
@@ -198,6 +265,7 @@ func _place(where: String) -> Vector2i:
 
 # Each frame: an encounter not answered in time counts as ignored.
 func _update() -> void:
+	_update_first()
 	if _active() and m.current_hour >= visitor_end:
 		_resolve(false)
 
@@ -208,7 +276,7 @@ func _try_face(tile: Vector2i) -> bool:
 		return false
 	var hit := false
 	match str(visitor["id"]):
-		"field", "watcher", "hollow":
+		"field", "first", "watcher", "hollow":
 			hit = tile == visitor_tile
 		"crows":
 			hit = m._in_big_tree(tile)
@@ -232,10 +300,20 @@ func _on_enter_house() -> void:
 
 
 # Bed (or a collapse) ends the night. A visitor still waiting counts as ignored, and its note joins the
-# morning message.
+# morning message. Going to bed before 22:00 doesn't dodge it: tonight's visitor comes to a sleeping house.
 func _end_night() -> String:
+	first_beat = -1
 	if not _active():
-		return ""
+		if m.event_fired_day == m.day:
+			return ""
+		var first := _first_night()
+		m.event_fired_day = m.day
+		m.stats["events"] += 1
+		visitor = FIRST if first else _pick()
+		charmed = false
+		if int(m.inventory["crow_charm"]) > 0:
+			m.inventory["crow_charm"] -= 1
+			charmed = true
 	return " " + _resolve(false, false)
 
 
@@ -251,6 +329,7 @@ func _resolve(faced: bool, show := true) -> String:
 	loss *= (2.0 if m.sanity_sys._event_active("dread") else 1.0) * (0.5 if m.sanity_sys._event_active("ward") else 1.0)
 	loss *= 0.5 if charmed else 1.0
 	loss *= m.projects._night_mult()   # the crow bell
+	loss *= m.NIGHT_LOSS_MULT
 	m.sanity_sys._change_sanity(-loss)
 	if faced:
 		m.stats["faced"] += 1
@@ -291,7 +370,10 @@ func _crows_peck() -> String:
 		if hit >= 3:
 			break
 		if int(m.crops[pos]["stage"]) > 0:
-			m.crops[pos]["stage"] -= 1
+			# Growth days go back to the start of the lower stage too, or the next watered night undoes it.
+			var stage := int(m.crops[pos]["stage"]) - 1
+			m.crops[pos]["stage"] = stage
+			m.crops[pos]["days"] = ceili(float(stage * int(m.CROP_GROW_DAYS[str(m.crops[pos]["kind"])])) / m.MAX_STAGE)
 			hit += 1
 	if hit == 0:
 		return "They found nothing worth taking."
@@ -311,7 +393,7 @@ func _draw() -> void:
 	var s := m._tile_center(visitor_tile.x, visitor_tile.y)
 	var px := float(m.PX)
 	match str(visitor["id"]):
-		"field", "watcher":
+		"field", "first", "watcher":
 			var tall := 1.6 if visitor["id"] == "watcher" else 1.0
 			ci.draw_colored_polygon(PackedVector2Array([s + Vector2(-px * 0.35, px * 0.4), s + Vector2(px * 0.35, px * 0.4), s + Vector2(px * 0.2, -px * 0.7 * tall), s + Vector2(-px * 0.2, -px * 0.7 * tall)]), Color(0.02, 0.01, 0.05, 0.92))
 			ci.draw_circle(s + Vector2(0, -px * 0.75 * tall), px * 0.26, Color(0.02, 0.01, 0.05, 0.92))

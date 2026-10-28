@@ -5,7 +5,7 @@ extends RefCounted
 ## A food's difficulty (1 to 5) and the level needed to obtain it set what it restores, so harder and
 ## later food fills you more:
 ##   food    = 10 + 12 x difficulty + 3 x level
-##   sanity  = 2 + 2 x difficulty + level
+##   sanity  = 1 + difficulty + level / 2
 ##   HP      = difficulty
 ## Cooked foods are named for what made them and have a picture of their own.
 
@@ -20,6 +20,8 @@ const LIST := [
 		"desc": "Laid by the hens."},
 	{"id": "milk", "held": "milk", "name": "Milk", "icon": "milk", "tint": "b8d4e8", "skill": "Farming", "level": 0, "difficulty": 1, "price": 0, "verb": "Drink",
 		"desc": "Milked from the goats."},
+	{"id": "trail_ration", "held": "trail_ration", "name": "Trail Ration", "icon": "hash", "tint": "c8a060", "skill": "Cooking", "level": 2, "difficulty": 2, "price": 10,
+		"desc": "An egg and a turnip baked hard in a crust. It keeps, and a frightened walker in the Rookery Wood steadies when they eat one."},
 	{"id": "fish_meal", "held": "fish_meal", "name": "Grilled Fish", "icon": "grilled", "tint": "c8864a", "skill": "Cooking", "level": 0, "difficulty": 1, "price": 8,
 		"desc": "A fish grilled over a small fire."},
 	{"id": "turnip_hash", "held": "turnip_hash", "name": "Turnip Hash", "icon": "hash", "tint": "b98a5a", "skill": "Cooking", "level": 0, "difficulty": 1, "price": 8,
@@ -45,6 +47,7 @@ const LIST := [
 ## The food's own skill and level decide when it can be made, and the skill gets xp for each one.
 const RECIPES := [
 	{"food": "fish_meal", "station": "fire", "needs": {"fish": 1, "wood": 1}, "xp": 15},
+	{"food": "trail_ration", "station": "fire", "needs": {"eggs": 1, "turnips": 1, "wood": 1}, "xp": 12},
 	{"food": "turnip_hash", "station": "fire", "needs": {"turnips": 2, "wood": 1}, "xp": 10},
 	{"food": "pumpkin_soup", "station": "fire", "needs": {"pumpkins": 2, "wood": 1}, "xp": 18},
 	{"food": "fish_stew", "station": "fire", "needs": {"fish": 1, "turnips": 2, "wood": 1}, "xp": 18},
@@ -75,7 +78,7 @@ static func food_restore(f: Dictionary) -> float:
 
 
 static func sanity_restore(f: Dictionary) -> float:
-	return 2.0 + 2.0 * float(f["difficulty"]) + float(f["level"])
+	return 1.0 + float(f["difficulty"]) + 0.5 * float(f["level"])
 
 
 static func hp_restore(f: Dictionary) -> int:
