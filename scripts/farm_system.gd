@@ -177,7 +177,8 @@ func _roll_harvest(base: float, miss: String, finish: Callable) -> void:
 		m._show_message(miss)
 
 
-# Watering uses one unit from the tank, and a crop only needs to be watered once a day.
+# Watering uses one unit from the tank for each crop, and a crop only needs to be watered once a day.
+# The hose's head (tool_tier "hose") sets how many crops one press reaches: see _spray_tiles.
 func _water_crop(tile: Vector2i) -> void:
 	if not m.well_repaired or not m.hose_attached:
 		m._show_message("Nothing comes out of the hose. Repair the pump and attach the hose from the Well.")
@@ -185,12 +186,41 @@ func _water_crop(tile: Vector2i) -> void:
 	if m.well_water < 1.0:
 		m._show_message("The tank is dry. It refills each morning.")
 		return
-	m.well_water -= 1.0
+	var n := 0
+	for t in _spray_tiles(tile):
+		if m.well_water < 1.0:
+			break
+		if m.crops.has(t) and int(m.crops[t]["stage"]) < m.MAX_STAGE and int(m.crops[t].get("watered_day", 0)) != m.day:
+			m.well_water -= 1.0
+			m.crops[t]["watered_day"] = m.day
+			m.stats["watered"] += 1
+			n += 1
+	if n == 0:
+		m._show_message("Everything the hose reaches here is watered today.")
+		return
 	m.play_sfx("water", 0.08)
-	m.crops[tile]["watered_day"] = m.day
-	m.stats["watered"] += 1
-	m._show_message("Watered. The tank has %d left." % int(m.well_water))
+	m._show_message(("Watered. " if n == 1 else "Watered %d crops. " % n) + "The tank has %d left." % int(m.well_water))
 	m.queue_redraw()
+
+
+# The tiles one press of the hose waters: the crop you face; with the copper nozzle, the line of three
+# running away from you; with the spray head, the 3 by 3 whose near middle is the crop you face.
+func _spray_tiles(tile: Vector2i) -> Array:
+	var tier := int(m.tool_tier["hose"])
+	if tier <= 0:
+		return [tile]
+	var f: Vector2 = m.player.facing if m.player != null else Vector2.DOWN   # always cardinal
+	var ahead := Vector2i(roundi(f.x), roundi(f.y))
+	var out: Array = []
+	if tier == 1:
+		for k in 3:
+			out.append(tile + ahead * k)
+		return out
+	var side := Vector2i(ahead.y, ahead.x)
+	for k in 3:
+		for s in [-1, 0, 1]:
+			out.append(tile + ahead * k + side * s)
+	return out
 
 
 func _watered_today() -> int:

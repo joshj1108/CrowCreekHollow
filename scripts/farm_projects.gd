@@ -5,8 +5,8 @@ extends RefCounted
 # - Progress: a ladder of homestead steps (repairs, buildings, plots, decor, the crow bell). The Buildings
 #   section shows how far along you are and the next step; each step done pays a little and names the next.
 # - Decor, placed like the coop from the Buildings section: lamp posts that hold back the dark, flower beds
-#   that lift your spirits each morning, gravel paths, and the crow bell, the last big project, which keeps
-#   the Hollow away for good.
+#   that lift your spirits each morning, gravel paths, sprinklers on the plots, and the crow bell, the last
+#   big project, which keeps the Hollow away for good.
 
 var m: MainGame
 
@@ -19,6 +19,8 @@ const DECOR := {
 		"desc": "Turns a tile of grass into path. Keeps placing until you run out of stone or press B."},
 	"apple_tree": {"name": "Apple tree", "cost": {"apple_sapling": 1}, "skill": "Farming", "level": 4, "max": 6, "blocks": true,
 		"desc": "A sapling from the drowned orchard, which the Tull family give once they know you (walk Davy to the orchard). Each bears an apple every autumn morning."},
+	"sprinkler": {"name": "Sprinkler", "cost": {"copper_bar": 5, "iron_bar": 1}, "skill": "Smithing", "level": 4, "max": 12, "blocks": true,
+		"desc": "Set on an empty plot tile and piped from the well. Each dry morning it waters the eight crops around it, a water each from the tank."},
 	"bell": {"name": "Crow bell", "cost": {"bell_metal": 1, "bell_frame": 1, "bell_rope": 1, "bell_clapper": 1, "feathers": 20, "coins": 150}, "skill": "Carpentry", "level": 6, "max": 1, "blocks": true,
 		"desc": "Hung only on All Hallows, and the Hollow comes to it that night. While it stands, the field shadow can't reach the house, so the Hollow stops coming, and the night takes a quarter less from your sanity."},
 }
@@ -218,12 +220,20 @@ func _start_place(kind: String) -> void:
 		return
 	m.placing = "decor:" + kind
 	m._close_panel()
-	m._show_message("Face open grass where the %s should go and press Space. B cancels." % str(DECOR[kind]["name"]).to_lower())
+	var where := "an empty plot tile" if kind == "sprinkler" else "open grass"
+	m._show_message("Face %s where the %s should go and press Space. B cancels." % [where, str(DECOR[kind]["name"]).to_lower()])
+
+
+# A sprinkler goes on a plot tile with no crop; everything else on open grass.
+func _fits(kind: String, t: Vector2i) -> bool:
+	if kind == "sprinkler":
+		return m._in_bounds(t) and m.map[t.y][t.x] == MainGame.Tile.SOIL and not m.crops.has(t) and not decor.has(t) and t != m._player_tile()
+	return m._spot_ok(t, Vector2i.ONE)
 
 
 func _confirm(kind: String, t: Vector2i) -> void:
-	if not m._spot_ok(t, Vector2i.ONE):
-		m._show_message("That spot isn't open grass.")
+	if not _fits(kind, t):
+		m._show_message("That spot isn't an empty plot tile." if kind == "sprinkler" else "That spot isn't open grass.")
 		return
 	_pay(kind, 1)
 	decor[t] = kind
@@ -308,6 +318,32 @@ func _update(darkness: float) -> void:
 		layer.visible = not m.inside and not m.in_cave
 
 
+# Each dry morning, every sprinkler waters the growing crops on the eight tiles around it from the well's
+# tank, while the tank lasts. Rain has already watered them. Returns a note for the morning message.
+func _sprinkle() -> String:
+	if _count("sprinkler") == 0 or not m.well_repaired or not m.hose_attached or m.weather_kind in m.WATER_RAIN_KINDS:
+		return ""
+	var n := 0
+	var dry := false
+	for s in decor:
+		if decor[s] != "sprinkler":
+			continue
+		for dy in [-1, 0, 1]:
+			for dx in [-1, 0, 1]:
+				var t: Vector2i = s + Vector2i(dx, dy)
+				if not m.crops.has(t) or int(m.crops[t]["stage"]) >= m.MAX_STAGE or int(m.crops[t].get("watered_day", 0)) == m.day:
+					continue
+				if m.well_water < 1.0:
+					dry = true
+					continue
+				m.well_water -= 1.0
+				m.crops[t]["watered_day"] = m.day
+				n += 1
+	if n == 0 and not dry:
+		return ""
+	return " The sprinklers watered %d crop%s%s." % [n, "" if n == 1 else "s", ", and ran the tank dry" if dry else ""]
+
+
 # The morning's lift from the flower beds.
 func _morning() -> String:
 	return _apples() + _flowers()
@@ -383,6 +419,18 @@ func _draw() -> void:
 					if _season() == "Autumn":
 						for k in 4:
 							layer.draw_circle(crown + Vector2(px * (-0.22 + 0.15 * k), px * (0.12 if k % 2 == 0 else -0.08)), 3.5, Color("b8442e"))
+			"sprinkler":
+				# A copper riser on a stone foot, with a spinning head and two arms.
+				var foot := c + Vector2(0, px * 0.3)
+				layer.draw_rect(Rect2(foot + Vector2(-px * 0.18, -px * 0.08), Vector2(px * 0.36, px * 0.14)).grow(2.0), ink)
+				layer.draw_rect(Rect2(foot + Vector2(-px * 0.18, -px * 0.08), Vector2(px * 0.36, px * 0.14)), Color("6a6a6a"))
+				layer.draw_line(foot, foot + Vector2(0, -px * 0.55), ink, 6.0)
+				layer.draw_line(foot, foot + Vector2(0, -px * 0.55), Color("b8733a"), 3.0)
+				var head := foot + Vector2(0, -px * 0.6)
+				layer.draw_line(head + Vector2(-px * 0.28, 0), head + Vector2(px * 0.28, 0), ink, 5.0)
+				layer.draw_line(head + Vector2(-px * 0.28, 0), head + Vector2(px * 0.28, 0), Color("c8844a"), 2.0)
+				layer.draw_circle(head, 4.5, ink)
+				layer.draw_circle(head, 3.0, Color("d8a060"))
 			"bell":
 				# A tall post with a crossbar and an iron bell hanging under it.
 				var base := c + Vector2(0, px * 0.4)

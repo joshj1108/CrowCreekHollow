@@ -3,7 +3,7 @@ extends RefCounted
 
 # Bumped when a save's keys change shape. Saves from before the number was written count as 1.
 # _migrate lifts an older save one version at a time, so every old save still loads.
-const SAVE_VERSION := 8
+const SAVE_VERSION := 9
 # Keys a save must hold with the right type, or it isn't read: the loader would trip over anything else.
 const DICT_KEYS := ["inventory", "materials", "skill_xp", "stats", "equipment", "quests_done", "achievements_done",
 	"tool_tier", "trek_walked"]
@@ -51,6 +51,7 @@ func _save_game() -> void:
 		"well_repaired": m.well_repaired,
 		"hose_attached": m.hose_attached,
 		"well_water": m.well_water,
+		"cistern_built": m.cistern_built,
 		"skill_xp": m.skill_xp,
 		"inventory": m.inventory,
 		"materials": m.materials,
@@ -128,6 +129,10 @@ func _save_game() -> void:
 		"goats": m.goats,
 		"goats_fed_day": m.goats_fed_day,
 		"goat_unfed_days": m.goat_unfed_days,
+		"coop_hopper_built": m.coop_hopper_built,
+		"coop_hopper": m.coop_hopper,
+		"barn_hopper_built": m.barn_hopper_built,
+		"barn_hopper": m.barn_hopper,
 		"hen_ages": m.hen_ages,
 		"goat_ages": m.goat_ages,
 		"tax_owed": m.tax_owed,
@@ -164,6 +169,7 @@ func _load_game() -> bool:
 	m.well_repaired = bool(data.get("well_repaired", false))
 	m.hose_attached = bool(data.get("hose_attached", false))
 	m.well_water = float(data.get("well_water", 0.0))
+	m.cistern_built = bool(data.get("cistern_built", false))
 	_merge_ints(m.skill_xp, data.get("skill_xp"))
 	_merge_ints(m.inventory, data.get("inventory"))
 	_migrate_legacy_food(data.get("inventory"))
@@ -301,6 +307,10 @@ func _load_game() -> bool:
 	m.goats = int(data.get("goats", 0))
 	m.goats_fed_day = int(data.get("goats_fed_day", -1))
 	m.goat_unfed_days = int(data.get("goat_unfed_days", 0))
+	m.coop_hopper_built = bool(data.get("coop_hopper_built", false))
+	m.coop_hopper = int(data.get("coop_hopper", 0))
+	m.barn_hopper_built = bool(data.get("barn_hopper_built", false))
+	m.barn_hopper = int(data.get("barn_hopper", 0))
 	# Saves from before ages existed count the animals they had as already grown.
 	m.hen_ages = m.animals._int_list(data["hen_ages"]) if data.has("hen_ages") else m.animals._filled(m.hens, m.HEN_MATURE_DAYS)
 	m.goat_ages = m.animals._int_list(data["goat_ages"]) if data.has("goat_ages") else m.animals._filled(m.goats, m.GOAT_MATURE_DAYS)
@@ -437,6 +447,11 @@ static func _migrate(data: Dictionary) -> Dictionary:
 			data["workshop_y"] = MainGame.WORKSHOP_OLD_IX.y + MainGame.BORDER_Y
 	if v < 8:
 		_migrate_world(data)
+	if v < 9:
+		# Version 9 added the hose heads (tool_tier "hose"), the copper cistern, the feed hoppers and sprinklers
+		# (in decor). An older save has none of them, which the loader's defaults already give; the step is
+		# here so the number marks when they came.
+		pass
 	# A save from a newer build keeps its number; keys this build doesn't know are ignored.
 	data["save_version"] = maxi(v, SAVE_VERSION)
 	return data

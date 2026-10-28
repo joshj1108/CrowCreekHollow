@@ -156,10 +156,10 @@ func _recipes_gear() -> Array:
 
 func _recipes_tools() -> Array:
 	var out: Array = []
-	for kind in ["hatchet", "pick", "rod"]:
+	for kind in ["hatchet", "pick", "rod", "hose"]:
 		var tiers: Array = m.TOOL_TIERS[kind]
 		var have := int(m.tool_tier[kind])
-		var icon := "axe" if kind == "hatchet" else ("pick" if kind == "pick" else "rod")
+		var icon := {"hatchet": "axe", "pick": "pick", "rod": "rod", "hose": "hose"}[kind] as String
 		if have >= tiers.size():
 			out.append({
 				"key": "tool:" + kind, "name": _tool_name(kind), "icon": icon, "tint": m.TINT_TOOL,
@@ -219,6 +219,9 @@ func _tool_desc(kind: String, tier: Dictionary, have: int) -> String:
 	if kind == "rod":
 		var now := "You have no rod yet." if have == 0 else "You have the %s." % _tool_name("rod")
 		return "%s Adds %d%% to your catch chance." % [now, int(float(tier["bonus"]) * 100.0)]
+	if kind == "hose":
+		var reach := "the three crops in a line ahead of you" if have == 0 else "the 3 by 3 of crops just ahead of you"
+		return "Fits the hose so one press waters %s, a water each from the tank." % reach
 	return "Your %s is %s. This is the next tier." % [kind, _tool_name(kind)]
 
 

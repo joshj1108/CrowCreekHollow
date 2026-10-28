@@ -232,6 +232,35 @@ func _run() -> void:
 	m.woodshed_built = false
 	m._build_interior()
 
+	# Version 9: the hose head, the cistern, the hoppers and a sprinkler round-trip; a version 8 save has none.
+	var sprinkler := Vector2i(4 + m.BORDER_X, 20 + m.BORDER_Y)
+	m.tool_tier["hose"] = 2
+	m.cistern_built = true
+	m.coop_hopper_built = true
+	m.coop_hopper = 17
+	m.barn_hopper_built = true
+	m.barn_hopper = 9
+	m.projects.decor[sprinkler] = "sprinkler"
+	_save_on_day(11)
+	m.tool_tier["hose"] = 0
+	m.cistern_built = false
+	m.coop_hopper = 0
+	m.barn_hopper = 0
+	m.projects.decor.erase(sprinkler)
+	_check("hose head, cistern, hoppers and sprinkler round-trip", _load() == 11 and int(m.tool_tier["hose"]) == 2 and m.cistern_built
+		and m.coop_hopper_built and m.coop_hopper == 17 and m.barn_hopper_built and m.barn_hopper == 9 and m.projects.decor.get(sprinkler, "") == "sprinkler")
+	var v8 := _raw(path)
+	v8["save_version"] = 8
+	for key in ["cistern_built", "coop_hopper_built", "coop_hopper", "barn_hopper_built", "barn_hopper"]:
+		v8.erase(key)
+	v8["tool_tier"].erase("hose")
+	v8["decor"] = []
+	_write_text(path, JSON.stringify(v8))
+	m.tool_tier["hose"] = 0     # a key the save lacks keeps what's in memory, as on a fresh start
+	_check("version 8 save: no hose head, cistern, hoppers or sprinklers", _load() == 11 and int(m.tool_tier["hose"]) == 0 and not m.cistern_built
+		and not m.coop_hopper_built and m.coop_hopper == 0 and not m.barn_hopper_built and m.projects._count("sprinkler") == 0
+		and int(SaveSystem.read_save(path).get("save_version", 0)) == SaveSystem.SAVE_VERSION)
+
 	# Saving in the cave puts you at the homestead on load.
 	var home := m._tile_center(m.HOMESTEAD_ARRIVE.x, m.HOMESTEAD_ARRIVE.y)
 	m.in_cave = true

@@ -21,13 +21,19 @@ extends SceneTree
 #   - Bell parts are made as soon as they can be, and the bell is hung on the first All Hallows it can be.
 #   - Fishing only when there is nothing to eat (grilled at once); no fights. Firewood is split straight into the pack once the woodshed stands.
 #   - The day runs 06:00 inside, 07:00-19:00 outdoors, then evening per mode; a desk game is played at 20:00.
+#   - The hose heads, the cistern, the hoppers and the sprinklers (on SPRINKLER_SPOTS) are made as soon as they
+#     can be. The hoppers are topped up under two days' feed; the "chores" line counts the presses that remain.
 # It plays in save slot 8 (not shown on the start screen) and deletes that save when done.
 
 const SLOT := 8
 const TREES_PER_DAY := 6
 const CAVE_ORE_PER_DAY := 8
 const FIBER_KEEP := 6        # a second board is mended only above this much fiber
-const PLANT_CAP := 40.0      # crops kept growing: what the tank waters on a dry day
+# Crops kept growing are what the tank waters on a dry day (m._well_capacity(): 40, 64 with the cistern).
+# Sprinklers go on these plot-one tiles (inner coordinates), one in the middle of each 3 by 3, so the rows
+# planted first are the ones they water; the sim never plants on them.
+const SPRINKLER_SPOTS := [Vector2i(4, 20), Vector2i(7, 20), Vector2i(10, 20), Vector2i(13, 20), Vector2i(16, 20),
+	Vector2i(4, 23), Vector2i(7, 23), Vector2i(10, 23), Vector2i(13, 23), Vector2i(16, 23)]
 
 var m: MainGame
 # The trek routes (TrekSystem.ROUTES), longest first, with the trail rations the sim packs for each. The rest
@@ -58,6 +64,7 @@ var nights := {"faced": 0, "ignored": 0, "skipped": 0, "hollow": 0}
 var spent := {"seeds": 0, "animals": 0, "tax": 0, "pedlar": 0, "cards": 0}
 var earned := {"crops": 0, "eggs_milk": 0}
 var min_sanity := 100.0
+var chores := {"water_presses": 0, "hand_feeds": 0, "hopper_fills": 0, "tidies": 0, "mends": 0}
 var low_days := {}           # days sanity went under LOW_SANITY (the screen darkens)
 var hp_lost := 0
 var empty_hours := {"food": 0.0, "water": 0.0, "warmth": 0.0}
@@ -120,10 +127,14 @@ func _play_day() -> String:
 	_eat_drink()
 	if m.sanity_sys._can_tidy():
 		m.sanity_sys._tidy_house()
-	if m._can_mend():
+		chores["tidies"] += 1
+	# A board is mended when the chore is due, and a second for Carpentry while the fiber lasts.
+	if m._can_mend() and (m.wear >= m.MEND_DUE_WEAR or int(m.materials["fiber"]) > FIBER_KEEP):
 		m._mend_house()
+		chores["mends"] += 1
 	if m._can_mend() and int(m.materials["fiber"]) > FIBER_KEEP:
 		m._mend_house()
+		chores["mends"] += 1
 	if m.sanity_sys._can_cleanse():
 		m.sanity_sys._cleanse_house()
 	if m.tax_owed > 0 and m.money >= m.tax_owed:
@@ -201,7 +212,7 @@ func _pass(h: float, indoors: bool) -> void:
 		m.clock = (m.current_hour - m.START_HOUR) / (m.DAY_END_HOUR - m.START_HOUR) * m.DAY_LENGTH
 		m._update_needs(dh)
 		var dark := smoothstep(m.DUSK_HOUR, m.DUSK_HOUR + 2.0, m.current_hour)
-		m.sanity_sys._update_sanity(dark, dh * m.DAY_LENGTH / (m.DAY_END_HOUR - m.START_HOUR))
+		m.sanity_sys._update_sanity(dark, dh)
 		_track_sanity()
 		for need in empty_hours:
 			if float(m.get(need)) <= 0.0:
@@ -274,7 +285,7 @@ func _soil_tiles() -> Array:
 		for y in range(r.position.y, r.end.y):
 			for x in range(r.position.x, r.end.x):
 				var t := m._world_tile(x, y)
-				if m.map[t.y][t.x] == MainGame.Tile.SOIL:
+				if m.map[t.y][t.x] == MainGame.Tile.SOIL and not SPRINKLER_SPOTS.has(Vector2i(x, y)):
 					out.append(t)
 	return out
 
@@ -284,11 +295,11 @@ func _tend_field() -> void:
 		if int(m.crops[t]["stage"]) >= m.MAX_STAGE:
 			m.farm._harvest(t)
 	for t in m.crops.keys():
-		if int(m.crops[t].get("watered_day", 0)) != m.day and m.well_repaired and m.hose_attached and m.well_water >= 1.0:
-			m.farm._water_crop(t)
+		if _thirsty(t) and m.well_repaired and m.hose_attached and m.well_water >= 1.0:
+			_water(t)
 	m.farm._check_unlocks()
 	# Plant the best seeds first, up to what the tank can water.
-	var room := int(PLANT_CAP) - m.crops.size()
+	var room := int(m._well_capacity()) - m.crops.size()
 	for t in _soil_tiles():
 		if room <= 0:
 			break
@@ -304,8 +315,19 @@ func _tend_field() -> void:
 		m.selected_seed = kind
 		m.farm._plant(t)
 		room -= 1
-		if m.hose_attached and m.well_water >= 1.0:
-			m.farm._water_crop(t)
+		if _thirsty(t) and m.hose_attached and m.well_water >= 1.0:
+			_water(t)
+
+
+func _thirsty(t: Vector2i) -> bool:
+	return m.crops.has(t) and int(m.crops[t]["stage"]) < m.MAX_STAGE and int(m.crops[t].get("watered_day", 0)) != m.day
+
+
+# One press of the hose, facing down the plot (the nozzle and spray head reach further down the rows).
+func _water(t: Vector2i) -> void:
+	m.player.facing = Vector2.RIGHT
+	m.farm._water_crop(t)
+	chores["water_presses"] += 1
 
 
 func _want_flowers() -> bool:
@@ -347,7 +369,7 @@ func _order() -> void:
 	var growing := m.crops.size() + int(m.inventory["seeds"]) + int(m.inventory["corn_seeds"]) + int(m.inventory["pumpkin_seeds"])
 	for id in ["seeds_pumpkin", "seeds_corn", "seeds_turnip"]:
 		var item := m.desk._catalog_item(id)
-		while bool(item["ok"]) and growing < int(PLANT_CAP) + 4 and m.money >= int(item["price"]) + 10 and m.desk_orders.size() < 12:
+		while bool(item["ok"]) and growing < int(m._well_capacity()) + 4 and m.money >= int(item["price"]) + 10 and m.desk_orders.size() < 12:
 			m.desk._order(id)
 			spent["seeds"] += int(item["price"])
 			growing += {"seeds_pumpkin": 3, "seeds_corn": 4, "seeds_turnip": 5}[id]
@@ -366,11 +388,21 @@ func _order() -> void:
 		spent["animals"] += m.GOAT_PRICE
 
 
+# With a hopper, it is topped up when under two days' feed and there are crops to spare, and the animals are
+# fed by hand only when it can't cover tonight.
 func _animals() -> void:
-	if m.animals._can_feed_hens():
+	for which in ["coop", "barn"]:
+		var a := m.animals
+		var need := a._hopper_need(which)
+		if a._hopper_built(which) and need > 0 and a._hopper_stock(which) < need * 2 and m.farm._crop_total() > _reserve() and a._can_fill_hopper(which):
+			a._fill_hopper(which)
+			chores["hopper_fills"] += 1
+	if m.animals._can_feed_hens() and not (m.coop_hopper_built and m.coop_hopper >= m.animals._hopper_need("coop")):
 		m.animals._feed_hens()
-	if m.animals._can_feed_goats():
+		chores["hand_feeds"] += 1
+	if m.animals._can_feed_goats() and not (m.barn_hopper_built and m.barn_hopper >= m.animals._hopper_need("barn")):
 		m.animals._feed_goats()
+		chores["hand_feeds"] += 1
 
 
 func _desk_game() -> void:
@@ -432,13 +464,25 @@ func _craft_and_build() -> void:
 		m.mining._smelt("iron")
 	while m.mining._can_smelt("copper") and int(m.materials["wood"]) > 30:
 		m.mining._smelt("copper")
-	for kind in ["hatchet", "pick"]:
+	for kind in ["hatchet", "pick", "hose"]:
 		if m.crafting._can_craft_tool(kind):
 			m.crafting._craft_tool(kind)
 	if m._can_repair_well():
 		m._repair_well()
 	if m._can_attach_hose():
 		m._attach_hose()
+	if m._can_build_cistern():
+		m._build_cistern()
+	for which in ["coop", "barn"]:
+		if m.animals._can_build_hopper(which):
+			m.animals._build_hopper(which)
+	# Sprinklers on the planned spots, as many as the tank can feed (eight crops each).
+	for spot in SPRINKLER_SPOTS:
+		if m.projects._count("sprinkler") * 8 >= int(m._well_capacity()) or not m.projects._can_place("sprinkler"):
+			break
+		var t := m._world_tile(spot.x, spot.y)
+		if m.map[t.y][t.x] == MainGame.Tile.SOIL and not m.projects.decor.has(t) and m.projects._fits("sprinkler", t):
+			m.projects._confirm("sprinkler", t)
 	if m._can_advance_lantern() and m.lantern_tier < 1:
 		m._advance_lantern()
 	for id in m.projects.BELL_PARTS:
@@ -763,6 +807,19 @@ func _note_milestones() -> void:
 		_mark("well repaired")
 	if m.hose_attached:
 		_mark("hose attached")
+	if int(m.tool_tier["hose"]) >= 1:
+		_mark("copper nozzle")
+	if int(m.tool_tier["hose"]) >= 2:
+		_mark("spray head")
+	if m.cistern_built:
+		_mark("cistern")
+	if m.coop_hopper_built:
+		_mark("coop hopper")
+	if m.barn_hopper_built:
+		_mark("barn hopper")
+	for n in [1, 5, 8]:
+		if m.projects._count("sprinkler") >= n:
+			_mark("sprinklers %d" % n)
 	if m.tax_owed > 0:
 		_mark("tax billed")
 	if m.money >= 150:
@@ -809,6 +866,7 @@ func _summary() -> void:
 		nights, int(min_sanity), int(m.LOW_SANITY), low_days.size(), int(m.sanity_sys._sanity_max()), hp_lost, empty_hours, fished_hours])
 	print("--- coins earned %s, spent %s; hens %d goats %d; property value %d; tax owed %d" % [earned, spent, m.hens, m.goats, m.desk._property_value(), m.tax_owed])
 	print("--- materials: %s" % JSON.stringify(m.materials))
+	print("--- chores over %d days: %s; sprinklers %d" % [m.day - 1, chores, m.projects._count("sprinkler")])
 	if treks_a_week > 0:
 		print("--- treks: %s, trail works done %d: %s" % [trek_log, m.trek.works.size(), m.trek.works.keys()])
 	if caves["visits"] > 0:

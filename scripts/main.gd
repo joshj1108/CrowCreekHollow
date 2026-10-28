@@ -126,12 +126,18 @@ const TOOL_TIERS := {
 		{"name": "Willow rod", "cost": {"sticks": 2, "fiber": 2}, "skill": "Fishing", "level": 2, "bonus": 0.10},
 		{"name": "Hardwood rod", "cost": {"hardwood": 2, "fiber": 2, "resin": 1}, "skill": "Fishing", "level": 5, "bonus": 0.10},
 	],
+	# The hose's head. Tier 0 is the bare hose, one crop a press; a nozzle waters the three crops in a line
+	# ahead of you, and a spray head the 3 by 3 just ahead. Each crop still takes 1 water from the tank.
+	"hose": [
+		{"name": "Copper nozzle", "cost": {"copper_bar": 6, "fiber": 2}, "skill": "Smithing", "level": 3},
+		{"name": "Spray head", "cost": {"copper_bar": 10, "iron_bar": 2}, "skill": "Smithing", "level": 6},
+	],
 }
 # A bandage is made from fiber and resin, and heals when used from the pack.
 const BANDAGE := {"name": "Bandage", "heal": 25, "fiber": 2, "resin": 1, "level": 2, "xp": 8}
 
 # Time runs from 06:00 to 03:00 the next morning (hours 6 to 27).
-const DAY_LENGTH := 240.0   # real seconds for a full day
+const DAY_LENGTH := 420.0   # real seconds for a full day: 7 minutes, 20 seconds a game hour
 
 # The calendar follows the Pacific Northwest, and the first day is October 1st. Months have their usual lengths.
 const MONTH_NAMES := ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"]
@@ -186,6 +192,9 @@ const POND_WATER := 40.0
 const WELL_IX := FarmLayout.WELL_IX   # the top-left tile of the well's footprint
 const WELL_TILES := 2
 const WELL_CAPACITY := 40.0           # water in the tank when it refills each morning
+# The copper cistern, built at the well, holds more: the copper bars that pile up from the cave go here.
+const CISTERN_COST := {"copper_bar": 40, "iron_bar": 4, "level": 5}   # Smithing level
+const CISTERN_CAPACITY := 64.0
 const DRINK_WELL := 35.0
 const WELL_REPAIR := {"wood": 4, "fiber": 3, "level": 2}
 const HOSE_COST := {"fiber": 3, "resin": 2}
@@ -510,7 +519,8 @@ const MEND_WOOD := 1
 const MEND_FIBER := 1
 # Upkeep: the house wears a little each night. Mending, tidying, and repairs bring it down.
 const WEAR_MAX := 10
-const WEAR_PER_NIGHT := 1
+const WEAR_PER_NIGHT := 1      # a restored house wears only every other night
+const MEND_DUE_WEAR := 2       # mending is a chore only once the house has this much wear
 const WEAR_MEND := 2
 const WEAR_TIDY := 1
 const WEAR_REPAIR := 3
@@ -529,6 +539,11 @@ const BARN_GOATS_MAX := 3     # goats the barn holds
 const GOAT_PRICE := 45
 const GOAT_FEED_CROPS := 2    # crops per goat, once a day
 const GOAT_LEAVE_DAYS := 2    # unfed this many days in a row, and a goat wanders off
+# Feed hoppers, one in the coop and one in the barn (Carpentry level). Filled with crops, each feeds its
+# animals at night when they weren't fed by hand, which counts as the day's feeding.
+const COOP_HOPPER_COST := {"wood": 4, "copper_bar": 4, "level": 3}
+const BARN_HOPPER_COST := {"wood": 6, "copper_bar": 6, "level": 7}
+const HOPPER_CAP := 30        # crops a hopper holds: a week and more for four hens, five days for three goats
 const MEND_DAILY_LIMIT := 2   # keeps Carpentry training to a few days per level
 const CLEANSE_LEVEL := 3      # Cleaning level needed to cleanse the house
 const CLEANSE_CROPS := 2      # crops offered per cleanse
@@ -561,9 +576,9 @@ const SUDOKU_BOOK_PUZZLES := 10
 const LOW_SANITY := 30.0
 const SLEEP_SANITY := 12.0
 const TIDY_SANITY := 5.0
-const INDOOR_SANITY_RATE := 0.04    # sanity a second indoors; the boarded house adds SHELTER_SANITY_RATE
-const SHELTER_SANITY_RATE := 0.02
-const DARK_SANITY_DRAIN := 0.08     # sanity a second outdoors in the dark, away from a lamp
+const INDOOR_SANITY_RATE := 0.46    # sanity a game hour indoors; the boarded house adds SHELTER_SANITY_RATE
+const SHELTER_SANITY_RATE := 0.23
+const DARK_SANITY_DRAIN := 0.91     # sanity a game hour outdoors in the dark, away from a lamp
 const NIGHT_LOSS_MULT := 1.5        # scales every night visitor's sanity loss
 const COLLAPSE_SANITY_PENALTY := 5   # permanent cap reduction, curable with a cleanse
 var save_slot := 1                  # which save slot this game reads and writes
@@ -674,7 +689,8 @@ var warmth := 100.0
 var starve_timer := 0.0
 var well_repaired := false
 var hose_attached := false
-var well_water := 0.0      # hours spent with an empty need, toward the next HP lost
+var well_water := 0.0
+var cistern_built := false
 var weather_kind := ""       # today's weather, rolled each morning: see WEATHER_WEIGHTS
 var skill_xp := {"Farming": 0, "Bushcrafting": 0, "Carpentry": 0, "Cleaning": 0, "Fishing": 0, "Cooking": 0, "Combat": 0, "Forestry": 0, "Mining": 0, "Smithing": 0}
 var inventory := {"seeds": STARTING_SEEDS, "corn_seeds": 0, "pumpkin_seeds": 0, "crops": 0, "corn": 0, "pumpkins": 0, "fish": 0, "eggs": 0, "milk": 0, "fish_meal": 0, "turnip_hash": 0, "smoked_fish": 0, "dried_turnip": 0, "pumpkin_soup": 0, "canned_turnip": 0, "fish_stew": 0, "fermented_turnip": 0, "hearty_stew": 0, "bandage": 0, "firewood": 4, "crow_charm": 0, "trail_ration": 0, "bread": 0, "apples": 0}
@@ -692,7 +708,7 @@ const HOTBAR_TOOLS := [
 ]
 const TOOL_LABELS := {"sword": "weapon", "axe": "axe", "pick": "pickaxe", "hoe": "hoe", "trowel": "trowel", "hose": "watering hose", "rod": "fishing pole"}
 
-var tool_tier := {"hatchet": 0, "pick": 0, "rod": 0}     # 0 = none; higher tiers come from TOOL_TIERS
+var tool_tier := {"hatchet": 0, "pick": 0, "rod": 0, "hose": 0}     # 0 = none (the bare hose); higher tiers come from TOOL_TIERS
 var grove_felled := {}
 var rocks := {}                                  # world tile -> true for unbroken rocks
 var brush_day := 0   # the day the brush and trees were last restored
@@ -749,6 +765,10 @@ var goats := 0
 var goat_ages: Array = []         # days old for each goat, kept in step with goats
 var goats_fed_day := -1
 var goat_unfed_days := 0
+var coop_hopper_built := false
+var coop_hopper := 0               # crops in the coop's hopper
+var barn_hopper_built := false
+var barn_hopper := 0
 var plot_three_open := false
 var clean_nights := 0               # nights in a row with every chore done
 var cleanse_day := 0
@@ -1156,7 +1176,7 @@ func _process(delta: float) -> void:
 	_update_lantern(1.0 if in_cave else darkness)
 	projects._update(darkness)
 	_update_cave_mouth_light(smoothstep(DUSK_HOUR, DUSK_HOUR + 2.0, current_hour))
-	sanity_sys._update_sanity(darkness, delta)
+	sanity_sys._update_sanity(darkness, delta * (DAY_END_HOUR - START_HOUR) / DAY_LENGTH)
 
 	_check_doors()
 	farm._check_unlocks()
@@ -3138,6 +3158,15 @@ func _on_panel_action(action_id: String) -> void:
 	if action_id == "feed_goats":
 		animals._feed_goats()
 		return
+	if action_id.begins_with("build_hopper:"):
+		animals._build_hopper(action_id.trim_prefix("build_hopper:"))
+		return
+	if action_id.begins_with("fill_hopper:"):
+		animals._fill_hopper(action_id.trim_prefix("fill_hopper:"))
+		return
+	if action_id == "build_cistern":
+		_build_cistern()
+		return
 	if action_id == "build_smokehouse":
 		_build_smokehouse()
 		return
@@ -3771,7 +3800,7 @@ func _interact() -> void:
 		if crops[tile]["stage"] >= MAX_STAGE:
 			if _need_tool("hoe"):
 				farm._harvest(tile)
-		elif int(crops[tile].get("watered_day", 0)) == day:
+		elif int(crops[tile].get("watered_day", 0)) == day and int(tool_tier["hose"]) == 0:
 			_show_message("Already watered today. It isn't ready yet.")
 		elif _need_tool("hose"):
 			farm._water_crop(tile)
@@ -4121,11 +4150,32 @@ func _repair_well() -> void:
 	materials["fiber"] -= WELL_REPAIR["fiber"]
 	well_repaired = true
 	play_sfx("repair")
-	well_water = WELL_CAPACITY
+	well_water = _well_capacity()
 	stats["pump"] = 1
 	progression._grant_xp("Carpentry", XP_REPAIR)
 	_show_message("You rebuild the pump and the water comes up cold. +%d Carpentry XP" % XP_REPAIR)
 	queue_redraw()
+
+
+func _well_capacity() -> float:
+	return CISTERN_CAPACITY if cistern_built else WELL_CAPACITY
+
+
+func _can_build_cistern() -> bool:
+	return well_repaired and not cistern_built and progression._level("Smithing") >= int(CISTERN_COST["level"]) 		and int(materials["copper_bar"]) >= int(CISTERN_COST["copper_bar"]) and int(materials["iron_bar"]) >= int(CISTERN_COST["iron_bar"])
+
+
+func _build_cistern() -> void:
+	if not _can_build_cistern():
+		_show_message("The cistern needs %d copper bars, %d iron bars, Smithing %d and a working pump." % [int(CISTERN_COST["copper_bar"]), int(CISTERN_COST["iron_bar"]), int(CISTERN_COST["level"])])
+		return
+	materials["copper_bar"] -= int(CISTERN_COST["copper_bar"])
+	materials["iron_bar"] -= int(CISTERN_COST["iron_bar"])
+	cistern_built = true
+	well_water = _well_capacity()
+	progression._grant_xp("Smithing", XP_REPAIR)
+	play_sfx("repair")
+	_show_message("You rivet a copper cistern onto the well. The tank holds %d water now. +%d Smithing XP" % [int(CISTERN_CAPACITY), XP_REPAIR])
 
 
 func _can_attach_hose() -> bool:
@@ -5052,7 +5102,8 @@ func _draw_placement_ghost() -> void:
 		return
 	var top := _tile_in_front()
 	var size := _footprint(placing)
-	var fill := Color(0.2, 0.9, 0.25, 0.5) if _spot_ok(top, size) else Color(0.95, 0.2, 0.15, 0.5)
+	var ok := projects._fits(placing.trim_prefix("decor:"), top) if placing.begins_with("decor:") else _spot_ok(top, size)
+	var fill := Color(0.2, 0.9, 0.25, 0.5) if ok else Color(0.95, 0.2, 0.15, 0.5)
 	for dy in size.y:
 		for dx in size.x:
 			placement_ghost.draw_rect(_tile_rect(top + Vector2i(dx, dy)), fill)
@@ -5101,12 +5152,16 @@ func _do_job() -> void:
 
 func _chore_list() -> Array:
 	var chores: Array = []
-	chores.append({"name": "Tidy the house", "detail": "+%d XP, once a day" % XP_TIDY, "done": tidied_day == day, "button": "Tidy", "action": "tidy", "enabled": sanity_sys._can_tidy()})
-	chores.append({"name": "Mend a board", "detail": "%d wood, %d fiber, +%d XP. %d left today" % [MEND_WOOD, MEND_FIBER, XP_MEND, _mends_left()], "done": mend_day == day and mends_today > 0, "button": "Mend", "action": "mend", "enabled": _can_mend()})
+	# Tidying is a chore once the house is Patched, when it can be tidied; mending only once there's wear to mend.
+	if house_stage >= 2:
+		chores.append({"name": "Tidy the house", "detail": "+%d XP, once a day" % XP_TIDY, "done": tidied_day == day, "button": "Tidy", "action": "tidy", "enabled": sanity_sys._can_tidy()})
+	var mended := mend_day == day and mends_today > 0
+	if wear >= MEND_DUE_WEAR or mended:
+		chores.append({"name": "Mend a board", "detail": "%d wood, %d fiber, +%d XP. %d left today" % [MEND_WOOD, MEND_FIBER, XP_MEND, _mends_left()], "done": mended, "button": "Mend", "action": "mend", "enabled": _can_mend()})
 	if hens > 0:
-		chores.append({"name": "Feed the hens", "detail": "at the coop, %d crops" % (hens * HEN_FEED_CROPS), "done": hens_fed_day == day, "button": "", "action": "", "enabled": false})
+		chores.append({"name": "Feed the hens", "detail": ("at the coop or from its hopper, %d crops" if coop_hopper_built else "at the coop, %d crops") % (hens * HEN_FEED_CROPS), "done": hens_fed_day == day, "button": "", "action": "", "enabled": false})
 	if goats > 0:
-		chores.append({"name": "Feed the goats", "detail": "at the barn, %d crops" % (goats * GOAT_FEED_CROPS), "done": goats_fed_day == day, "button": "", "action": "", "enabled": false})
+		chores.append({"name": "Feed the goats", "detail": ("at the barn or from its hopper, %d crops" if barn_hopper_built else "at the barn, %d crops") % (goats * GOAT_FEED_CROPS), "done": goats_fed_day == day, "button": "", "action": "", "enabled": false})
 	return chores
 
 
@@ -5200,16 +5255,20 @@ func _build_desk_light() -> void:
 # Runs at the end of each day, before the crops grow: the house wears, hens lay or leave,
 # and rain or a fox may strike. Returns a note for the morning message.
 func _settle_day() -> String:
-	var notes := ""
+	var notes := animals._hopper_feed()
 	var missed := 0
-	for chore in _chore_list():
+	var chores := _chore_list()
+	for chore in chores:
 		if not bool(chore["done"]):
 			missed += 1
-	wear = mini(wear + WEAR_PER_NIGHT + missed, WEAR_MAX)
-	clean_nights = clean_nights + 1 if missed == 0 else 0
+	var nightly := WEAR_PER_NIGHT if house_stage < 3 or day % 2 == 0 else 0
+	wear = mini(wear + nightly + missed, WEAR_MAX)
+	# A day with no chores due neither adds to the kept-well streak nor breaks it.
 	if missed > 0:
+		clean_nights = 0
 		notes += " %d chore%s left undone, so the house wears faster." % [missed, "" if missed == 1 else "s"]
-	else:
+	elif not chores.is_empty():
+		clean_nights += 1
 		sanity_sys._change_sanity(WELL_KEPT_SANITY)
 		notes += " The house is kept well, and you sleep easier. +%d sanity." % WELL_KEPT_SANITY
 		notes += rewards._kept_well()
@@ -5468,7 +5527,8 @@ func _dev_unlock_all() -> void:
 		_relocate_building("workshop")
 	well_repaired = true
 	hose_attached = true
-	well_water = WELL_CAPACITY
+	cistern_built = true
+	well_water = _well_capacity()
 	sanity_penalty = 0
 	sanity = SANITY_MAX
 	food = 100.0
@@ -5553,10 +5613,10 @@ func _end_day(base: String, leave_house: bool = true) -> void:
 		upkeep_note += " %d crop%s went thirsty and didn't grow." % [thirsty, "" if thirsty == 1 else "s"]
 	# The pump refills the tank overnight.
 	if well_repaired:
-		well_water = WELL_CAPACITY
+		well_water = _well_capacity()
 	day += 1
 	_roll_weather()
-	var event_note := sanity_sys._begin_day_events()
+	var event_note := projects._sprinkle() + sanity_sys._begin_day_events()
 	clock = 0.0
 	tonight_shadow = Vector2i(-1, -1)
 	_regrow_wild()

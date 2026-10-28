@@ -77,7 +77,7 @@ const HOLLOW := {"id": "hollow", "where": "door", "sound": "heartbeat",
 	"ignore": "The Hollow waited at the door until morning. Something in your mind gave way.",
 	"ignore_sanity": 30, "limit": 5}
 # The first night is always the same short scare, so a new player meets the dark, their sanity and the bed
-# before the random visitors start. It plays out in beats (game hours after 22:00, about 11 seconds each):
+# before the random visitors start. It plays out in beats (game hours after 22:00, about 20 seconds each):
 # the farm goes quiet, steps or knocks, the figure at the field's edge, then a nudge toward the bed.
 const FIRST := {"id": "first", "where": "field", "sound": "hush",
 	"appear": "The crows have stopped calling. The whole farm has gone quiet.",

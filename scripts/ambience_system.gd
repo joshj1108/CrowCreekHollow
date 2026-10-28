@@ -43,7 +43,7 @@ const EVENTS := [
 	{"sounds": ["whisper"], "place": "cave", "time": "any", "fear": 0.5, "every": Vector2(30, 70), "db": -9.0, "side": true},
 ]
 const HEART_FEAR := 0.75       # below a quarter of your sanity, you start to hear your own heart
-const HUSH_SECONDS := 90.0     # a "too quiet" night silences the crickets and the wind for this long
+const HUSH_SECONDS := 160.0    # a "too quiet" night silences the crickets and the wind for this long (about 8 game hours)
 
 var loops := {}                # loop name -> AudioStreamPlayer
 var levels := {}               # loop name -> current strength, 0 to 1

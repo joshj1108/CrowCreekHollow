@@ -366,7 +366,10 @@ func _house_rows() -> Array:
 			row["status"] = "Not yet"
 			row["status_kind"] = "short"
 		rows.append(row)
-	rows.append({"note": "Each chore left undone adds 1 wear overnight. A night with every chore done brings back %d sanity." % m.WELL_KEPT_SANITY})
+	if not m._chore_list().any(func(c: Dictionary) -> bool: return c["action"] == "mend"):
+		rows.append({"name": "Mend a board", "value": "Not due until wear %d. It still trains Carpentry. %d left today" % [m.MEND_DUE_WEAR, m._mends_left()],
+			"button": "Mend", "action": "mend", "enabled": m._can_mend()})
+	rows.append({"note": "Each chore left undone adds 1 wear overnight. A night with every chore done brings back %d sanity; a night with none due keeps the streak as it is." % m.WELL_KEPT_SANITY})
 	for job_row in _job_rows():
 		if job_row.has("name") and m.job_done_day == m.day:
 			job_row["status"] = "Done"
@@ -426,9 +429,26 @@ func _coop_rows() -> Array:
 		"action": "feed_hens",
 		"enabled": m.animals._can_feed_hens(),
 	})
+	rows.append(_hopper_row("coop"))
 	rows.append({"name": "Grown hens", "value": "%d of %d, %d coins each" % [m.animals._grown_count(m.hen_ages, m.HEN_MATURE_DAYS), m.hens, m.HEN_SELL], "button": "Sell a hen", "action": "sell_hen", "enabled": m.animals._grown_count(m.hen_ages, m.HEN_MATURE_DAYS) > 0})
-	rows.append({"note": "A grown hen (%d nights) lays an egg each morning when fed, kept as a meal or sold at the farm stand. Young hens do not lay. Two unfed days in a row and a hen wanders off." % m.HEN_MATURE_DAYS})
+	rows.append({"note": "A grown hen (%d nights) lays an egg each morning when fed, kept as a meal or sold at the farm stand. Young hens do not lay. Two unfed days in a row and a hen wanders off. A filled hopper feeds them on the days you don't." % m.HEN_MATURE_DAYS})
 	return rows
+
+
+# The feed hopper in the coop or the barn: built once, then filled with crops from the pack.
+func _hopper_row(which: String) -> Dictionary:
+	var a: AnimalSystem = m.animals
+	var animal := "hens" if which == "coop" else "goats"
+	if not a._hopper_built(which):
+		var cost := a._hopper_cost(which)
+		return {"name": "Feed hopper", "value": m.stall._price_text(cost),
+			"about": "Holds %d crops and feeds the %s each night you don't feed them by hand." % [m.HOPPER_CAP, animal],
+			"needs": _needs(cost, "Carpentry"), "button": "Build", "action": "build_hopper:" + which, "enabled": a._can_build_hopper(which)}
+	var need := a._hopper_need(which)
+	var days := ", about %d days" % (a._hopper_stock(which) / need) if need > 0 else ""
+	return {"name": "Feed hopper", "value": "%d of %d crops%s" % [a._hopper_stock(which), m.HOPPER_CAP, days],
+		"progress": float(a._hopper_stock(which)) / float(m.HOPPER_CAP),
+		"button": "Fill", "action": "fill_hopper:" + which, "enabled": a._can_fill_hopper(which)}
 
 
 # The barn panel: the goats are fed here. They are ordered from the catalog at the desk.
@@ -445,8 +465,9 @@ func _barn_rows() -> Array:
 		"action": "feed_goats",
 		"enabled": m.animals._can_feed_goats(),
 	})
+	rows.append(_hopper_row("barn"))
 	rows.append({"name": "Grown goats", "value": "%d of %d, %d coins each" % [m.animals._grown_count(m.goat_ages, m.GOAT_MATURE_DAYS), m.goats, m.GOAT_SELL], "button": "Sell a goat", "action": "sell_goat", "enabled": m.animals._grown_count(m.goat_ages, m.GOAT_MATURE_DAYS) > 0})
-	rows.append({"note": "A grown goat (%d nights) gives milk each morning when fed, kept to drink or sold at the farm stand. Young goats do not give milk. Two unfed days in a row and a goat wanders off." % m.GOAT_MATURE_DAYS})
+	rows.append({"note": "A grown goat (%d nights) gives milk each morning when fed, kept to drink or sold at the farm stand. Young goats do not give milk. Two unfed days in a row and a goat wanders off. A filled hopper feeds them on the days you don't." % m.GOAT_MATURE_DAYS})
 	return rows
 
 
@@ -503,7 +524,7 @@ func _buildings_rows() -> Array:
 	rows.append({"note": "Each one is placed on open grass. Move it any time from here."})
 
 	rows.append({"tab": "Decor", "icon": "decor"})
-	for kind in ["lamp", "flowers", "path", "apple_tree", "bell"]:
+	for kind in ["lamp", "flowers", "path", "sprinkler", "apple_tree", "bell"]:
 		var d: Dictionary = p.DECOR[kind]
 		var have := p._count(kind)
 		var row := {"name": str(d["name"]), "about": str(d["desc"]), "value": p._cost_text(kind)}
@@ -761,7 +782,19 @@ func _well_rows() -> Array:
 		})
 		rows.append({"note": "Repairing the pump also refills the tank and gives Carpentry XP."})
 		return rows
-	rows.append({"name": "Water in the tank", "value": "%d of %d" % [int(m.well_water), int(m.WELL_CAPACITY)], "progress": m.well_water / m.WELL_CAPACITY})
+	rows.append({"name": "Water in the tank", "value": "%d of %d" % [int(m.well_water), int(m._well_capacity())], "progress": m.well_water / m._well_capacity()})
+	if m.cistern_built:
+		rows.append({"name": "Copper cistern", "value": "The tank holds %d" % int(m.CISTERN_CAPACITY), "status": "Built", "status_kind": "done"})
+	else:
+		rows.append({
+			"name": "Copper cistern",
+			"about": "A riveted copper tank on the well, so it holds %d water instead of %d. It refills each morning like the old one." % [int(m.CISTERN_CAPACITY), int(m.WELL_CAPACITY)],
+			"value": "%d copper bars, %d iron bars, Smithing %d" % [int(m.CISTERN_COST["copper_bar"]), int(m.CISTERN_COST["iron_bar"]), int(m.CISTERN_COST["level"])],
+			"needs": _needs(m.CISTERN_COST, "Smithing"),
+			"button": "Build",
+			"action": "build_cistern",
+			"enabled": m._can_build_cistern(),
+		})
 	rows.append({"note": "The tank refills each morning. Drinking from the pump costs nothing."})
 	rows.append({
 		"name": "Drink from the pump",
