@@ -488,6 +488,10 @@ func _buildings_rows() -> Array:
 		rows.append({"name": "Next: %s" % nxt["title"], "status": "Next", "value": str(nxt["how"])})
 
 	rows.append({"tab": "Workshop", "icon": "workshop"})
+	if m._is_built("workshop"):
+		var shop: Dictionary = m._placed_row("Workshop", "workshop", m.workshop_tile, "move_workshop")
+		shop["status"] = "Placed"
+		rows.append(shop)
 	rows.append(_build_row("smokehouse", "Smokehouse", m.smokehouse_built, m.SMOKEHOUSE_COST,
 		"Smokes and preserves food.", "built. Stand beside it, facing it, and press Space to preserve food.", true))
 	rows.append(_build_row("furnace", "Furnace", m.furnace_built, m.FURNACE_COST,
@@ -497,7 +501,10 @@ func _buildings_rows() -> Array:
 	if not m.woodshed_built:
 		wood_row["needs"].append({"text": "The smokehouse or furnace first", "ok": m.smokehouse_built or m.furnace_built})
 	rows.append(wood_row)
-	rows.append({"note": "The workshop is a walled building against the east wall of the house. Its door is on the south side."})
+	if m._is_built("workshop"):
+		rows.append({"note": "The workshop is a walled building, %d by %d, with its door on the south side. Move it any time from here; everything in it goes along." % [m.WORKSHOP_SIZE.x, m.WORKSHOP_SIZE.y]})
+	else:
+		rows.append({"note": "The first of the smokehouse or furnace comes with the workshop: you choose where it stands, on %d by %d open grass." % [m.WORKSHOP_SIZE.x, m.WORKSHOP_SIZE.y]})
 
 	rows.append({"tab": "Animals", "icon": "animals"})
 	if m.coop_built:

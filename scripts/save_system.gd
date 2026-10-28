@@ -3,7 +3,7 @@ extends RefCounted
 
 # Bumped when a save's keys change shape. Saves from before the number was written count as 1.
 # _migrate lifts an older save one version at a time, so every old save still loads.
-const SAVE_VERSION := 6
+const SAVE_VERSION := 7
 # Keys a save must hold with the right type, or it isn't read: the loader would trip over anything else.
 const DICT_KEYS := ["inventory", "materials", "skill_xp", "stats", "equipment", "quests_done", "achievements_done",
 	"guardian_done", "tool_tier", "bank_materials", "trek_walked"]
@@ -123,6 +123,8 @@ func _save_game() -> void:
 		"barn_built": m.barn_built,
 		"barn_x": m.barn_tile.x,
 		"barn_y": m.barn_tile.y,
+		"workshop_x": m.workshop_tile.x,
+		"workshop_y": m.workshop_tile.y,
 		"hens": m.hens,
 		"hens_fed_day": m.hens_fed_day,
 		"hen_unfed_days": m.hen_unfed_days,
@@ -290,13 +292,19 @@ func _load_game() -> bool:
 	m.coop_tile = Vector2i(int(data.get("coop_x", -1)), int(data.get("coop_y", -1)))
 	m.barn_built = bool(data.get("barn_built", false))
 	m.barn_tile = Vector2i(int(data.get("barn_x", -1)), int(data.get("barn_y", -1)))
+	m.workshop_tile = Vector2i(int(data.get("workshop_x", -1)), int(data.get("workshop_y", -1)))
 	if not same_layout:
 		# The saved spots belong to the old farm, so each building is placed again.
 		m._show_message("The farm was redrawn since this save. Plantings, brush and felled trees were reset.")
 		if m.coop_built:
-			m._relocate_building("coop", m.barn_tile if m.barn_built else Vector2i(-1, -1), m._footprint("barn"))
+			m._relocate_building("coop")
 		if m.barn_built:
-			m._relocate_building("barn", m.coop_tile if m.coop_built else Vector2i(-1, -1), m._footprint("coop"))
+			m._relocate_building("barn")
+		if m._is_built("workshop"):
+			m._relocate_building("workshop")
+	elif m._is_built("workshop") and m.workshop_tile.x < 0:
+		# A built workshop always has a spot; one without (a hand-edited save) goes by the farmhouse.
+		m._relocate_building("workshop")
 	m.hens = int(data.get("hens", 0))
 	m.hens_fed_day = int(data.get("hens_fed_day", -1))
 	m.hen_unfed_days = int(data.get("hen_unfed_days", 0))
@@ -438,6 +446,11 @@ static func _migrate(data: Dictionary) -> Dictionary:
 			data["trek_last_day"] = int(data.get("day", 0))
 		if not data.has("trek_walked"):
 			data["trek_walked"] = {}
+	if v < 7:
+		# Version 7 lets the workshop be placed and moved. A built one from an older save stays where it stood.
+		if not data.has("workshop_x") and (bool(data.get("smokehouse_built", false)) or bool(data.get("furnace_built", false))):
+			data["workshop_x"] = MainGame.WORKSHOP_OLD_IX.x + MainGame.BORDER_X
+			data["workshop_y"] = MainGame.WORKSHOP_OLD_IX.y + MainGame.BORDER_Y
 	# A save from a newer build keeps its number; keys this build doesn't know are ignored.
 	data["save_version"] = maxi(v, SAVE_VERSION)
 	return data

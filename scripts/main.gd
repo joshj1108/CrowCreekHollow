@@ -323,20 +323,22 @@ const COOLER_CAP := 10
 const CELLAR_COST := {"wood": 4, "fiber": 2, "coins": 25, "level": 1}
 const COOLER_COST := {"wood": 4, "fiber": 4, "coins": 40, "level": 2}
 # The root cellar sits against the house's west wall, like a cellar dug in beside it.
-# The workshop, with the furnace and smokehouse, stands against the east wall.
 # The cooler lives inside the house. House walls are at x 26 to 32 and y 3 to 8 (local to the farm).
 const CELLAR_IX := FarmLayout.CELLAR_IX
-const SMOKEHOUSE_IX := FarmLayout.SMOKEHOUSE_IX
-const FURNACE_IX := FarmLayout.FURNACE_IX
-# The workshop is a walled building against the house's east wall, with a door on its south side.
-const WORKSHOP_RECT := FarmLayout.WORKSHOP_RECT
-const WORKSHOP_DOOR := FarmLayout.WORKSHOP_DOOR
+# The workshop is a walled building placed on open grass like the coop and barn, with a door on its south side.
+# Its pieces stand at fixed places inside it, counted from its top-left corner.
+const WORKSHOP_SIZE := Vector2i(7, 6)
+const SMOKEHOUSE_AT := Vector2i(3, 2)
+const FURNACE_AT := Vector2i(1, 2)
+const WOODSTORE_AT := Vector2i(5, 2)
+const CHOPLOG_AT := Vector2i(5, 4)
+const WORKSHOP_DOOR_AT := Vector2i(3, 5)
+# Where the workshop stood before it could be placed (layout tiles). Saves from then keep it there.
+const WORKSHOP_OLD_IX := FarmLayout.WORKSHOP_RECT.position
 const COOP_SIZE := Vector2i(3, 2)            # the coop is 3 wide and 2 deep, on open grass; its hen door is one tile
 const COOLER_INTERIOR := Vector2i(13, 13)   # in the hall, against its north wall
 const FURNACE_COST := {"wood": 6, "stone": 4, "coins": 80, "level": 5}
 const WOODSHED_COST := {"wood": 4, "fiber": 2, "coins": 40, "level": 2}
-const WOODSTORE_IX := FarmLayout.WOODSTORE_IX
-const CHOPLOG_IX := FarmLayout.CHOPLOG_IX
 const WOODSTORE_CAP := 30
 const FIREWOOD_PER_WOOD := 2
 const FIREWOOD_HOURS := 3.0         # hours of warmth one firewood gives the hearth
@@ -359,7 +361,9 @@ const SMOKEHOUSE_COST := {"wood": 5, "fiber": 3, "coins": 60, "level": 4}
 const STALL_IX := FarmLayout.STALL_IX
 const STALL_IY := FarmLayout.STALL_IY
 const STALL_TILES := Vector2i(3, 2)   # the stall's footprint: as wide as its art, two rows deep
-const RESERVED := FarmLayout.RESERVED
+# Only the cellar's spot is kept clear now. The layout still reserves the workshop's old spot, but the workshop
+# is placed like the coop and barn, so that ground is open.
+const RESERVED := [FarmLayout.CELLAR_IX]
 # Draws every farm tile as one flat colour block, with no ground detail, shadows, tree or building art.
 # Use it to read the layout itself. Set it to false for the full placeholder art.
 const FLAT_FARM_ART := true
@@ -536,6 +540,7 @@ const GUARDIAN_QUESTS := [
 # "story" is the narrative beat, "text" the goal, and "stat" what it reads.
 # Story chapters run in order. The first unfinished one is the Current chapter.
 # "story" is the narrative beat, "text" the goal, and "stat" what it reads.
+# Story Complete (story_end in ACHIEVEMENTS) needs every chapter here, so its goal is this list's size.
 const STORY := [
 	{"id": "first_crop", "title": "Food Takes Time",
 		"story": "Seeds need days to become food. Each night they are watered, they grow. Turnips take a week and pumpkins ten days. Come back when something is ripe, and take it.",
@@ -618,7 +623,7 @@ const ACHIEVEMENTS := [
 	{"id": "feast", "title": "Feast", "text": "Eat 50 meals.", "tier": 3, "stat": "eaten", "goal": 50, "reward": {"seeds": 5, "pumpkin_seeds": 2}},
 	{"id": "cleansed_five", "title": "Clean Conscience", "text": "Cleanse the house 5 times.", "tier": 3, "stat": "cleansed", "goal": 5, "reward": {"seeds": 5, "pumpkin_seeds": 2}},
 	{"id": "lasting", "title": "Lasting", "text": "Sleep in your bed 30 times.", "tier": 3, "stat": "slept", "goal": 30, "reward": {"seeds": 5, "pumpkin_seeds": 2}},
-	{"id": "story_end", "title": "Story Complete", "text": "Finish every story chapter.", "tier": 3, "stat": "story", "goal": 15, "reward": {"seeds": 5, "pumpkin_seeds": 2}},
+	{"id": "story_end", "title": "Story Complete", "text": "Finish every story chapter.", "tier": 3, "stat": "story", "goal": 9, "reward": {"seeds": 5, "pumpkin_seeds": 2}},
 ]
 
 const SKILLS := ["Farming", "Bushcrafting", "Carpentry", "Cleaning", "Fishing", "Cooking", "Combat", "Forestry", "Mining", "Smithing"]
@@ -852,7 +857,9 @@ var coop_built := false
 var coop_tile := Vector2i(-1, -1)  # map tile of the coop's top-left corner, once built
 var barn_built := false
 var barn_tile := Vector2i(-1, -1)  # map tile of the barn's top-left corner, once built
-var placing := ""                  # "coop" or "barn" while the player chooses where it goes
+var workshop_tile := Vector2i(-1, -1)  # map tile of the workshop's top-left corner, once placed
+var workshop_piece := ""           # the smokehouse or furnace waiting on the workshop's spot, while placing it
+var placing := ""                  # "coop", "barn" or "workshop" while the player chooses where it goes
 var placement_ghost: Node2D        # the preview of where the building would stand
 var hen_layer: Node2D              # the hens, drawn on their own so they can move without redrawing the farm
 var hen_pos: Array = []           # each hen's place in the coop, in tiles from its centre
@@ -1432,7 +1439,7 @@ func _draw() -> void:
 				FarmArt.draw_tree_floor(self, cell, FarmArt.hash_int(x, y, 8))
 				_draw_tree_tile(cell, x, y)
 			elif tile == Tile.WALL:
-				FarmArt.draw_wall_tile(self, cell, y == WORKSHOP_RECT.position.y + BORDER_Y)
+				FarmArt.draw_wall_tile(self, cell, y == workshop_tile.y)
 			elif tile == Tile.COOP:
 				FarmArt.draw_gable_tile(self, cell, Vector2i(x, y) - coop_tile, COOP_SIZE, COOP_ROOF, COOP_WALL, "coop")
 			elif tile == Tile.BARN:
@@ -1794,15 +1801,16 @@ const TERRAIN_CODES := {
 func _apply_storage_tiles() -> void:
 	if cellar_built:
 		map[CELLAR_IX.y + BORDER_Y][CELLAR_IX.x + BORDER_X] = Tile.CELLAR
-	if smokehouse_built or furnace_built:
+	if (smokehouse_built or furnace_built) and workshop_tile.x >= 0:
 		_stamp_workshop()
-	if smokehouse_built:
-		map[SMOKEHOUSE_IX.y + BORDER_Y][SMOKEHOUSE_IX.x + BORDER_X] = Tile.SMOKEHOUSE
-	if furnace_built:
-		map[FURNACE_IX.y + BORDER_Y][FURNACE_IX.x + BORDER_X] = Tile.FURNACE
-	if woodshed_built:
-		map[WOODSTORE_IX.y + BORDER_Y][WOODSTORE_IX.x + BORDER_X] = Tile.WOODSTORE
-		map[CHOPLOG_IX.y + BORDER_Y][CHOPLOG_IX.x + BORDER_X] = Tile.CHOPLOG
+		var w := workshop_tile
+		if smokehouse_built:
+			map[w.y + SMOKEHOUSE_AT.y][w.x + SMOKEHOUSE_AT.x] = Tile.SMOKEHOUSE
+		if furnace_built:
+			map[w.y + FURNACE_AT.y][w.x + FURNACE_AT.x] = Tile.FURNACE
+		if woodshed_built:
+			map[w.y + WOODSTORE_AT.y][w.x + WOODSTORE_AT.x] = Tile.WOODSTORE
+			map[w.y + CHOPLOG_AT.y][w.x + CHOPLOG_AT.x] = Tile.CHOPLOG
 	if coop_built and coop_tile.x >= 0:
 		_stamp_footprint(coop_tile, _footprint("coop"), Tile.COOP)
 	if barn_built and barn_tile.x >= 0:
@@ -1813,13 +1821,14 @@ func _apply_storage_tiles() -> void:
 # Walls around the workshop footprint, with a floor inside and a door on the south side. The back wall is two
 # rows deep, so its face is about the farmer's height.
 func _stamp_workshop() -> void:
-	var r := WORKSHOP_RECT
+	var r := Rect2i(workshop_tile, WORKSHOP_SIZE)
 	for y in range(r.position.y, r.end.y):
 		for x in range(r.position.x, r.end.x):
 			var edge := x == r.position.x or x == r.end.x - 1 or y <= r.position.y + 1 or y == r.end.y - 1
-			map[y + BORDER_Y][x + BORDER_X] = Tile.WALL if edge else Tile.FLOOR
+			map[y][x] = Tile.WALL if edge else Tile.FLOOR
 	# A plain opening. DOOR is reserved for the farmhouse, so stepping here doesn't take you indoors.
-	map[WORKSHOP_DOOR.y + BORDER_Y][WORKSHOP_DOOR.x + BORDER_X] = Tile.PATH
+	var door := workshop_tile + WORKSHOP_DOOR_AT
+	map[door.y][door.x] = Tile.PATH
 
 
 # Sets a building's footprint, from its top-left map tile, to the given tile.
@@ -2653,11 +2662,10 @@ func _tree_art(t: Vector2i) -> String:
 # back wall's face fills the top two rows, the low side and front walls the edge tiles, the doorway the middle
 # of the bottom row.
 func _draw_workshop() -> void:
-	var r := WORKSHOP_RECT
-	var top := Vector2i(r.position.x + BORDER_X, r.position.y + BORDER_Y)
-	if map[top.y][top.x] != Tile.WALL:
+	var top := workshop_tile
+	if top.x < 0 or map[top.y][top.x] != Tile.WALL:
 		return
-	draw_texture_rect(FarmSprites.tex("workshop"), Rect2(_tile_rect(top).position, Vector2(r.size) * PX), false)
+	draw_texture_rect(FarmSprites.tex("workshop"), Rect2(_tile_rect(top).position, Vector2(WORKSHOP_SIZE) * PX), false)
 
 
 const OUTBUILDING_ART := {
@@ -3275,6 +3283,9 @@ func _on_panel_action(action_id: String) -> void:
 		return
 	if action_id == "build_furnace":
 		_build_furnace()
+		return
+	if action_id == "move_workshop":
+		_move_workshop()
 		return
 	if action_id == "build_coop" or action_id == "move_coop":
 		_build_coop()
@@ -4498,10 +4509,13 @@ func _build_smokehouse() -> void:
 	if not _can_afford(SMOKEHOUSE_COST):
 		_show_message("You can't build that yet. Needs %s." % stall._price_text(SMOKEHOUSE_COST))
 		return
+	if workshop_tile.x < 0:
+		_start_workshop_placement("smokehouse")
+		return
 	_pay(SMOKEHOUSE_COST)
 	smokehouse_built = true
 	_build_interior()
-	_show_message("The smokehouse is built beside the house. Smoke fish and preserve crops there.")
+	_show_message("The smokehouse is built in the workshop. Smoke fish and preserve crops there.")
 	queue_redraw()
 
 
@@ -4578,10 +4592,13 @@ func _build_furnace() -> void:
 	if not _can_afford(FURNACE_COST):
 		_show_message("You can't build that yet. Needs %s." % stall._price_text(FURNACE_COST))
 		return
+	if workshop_tile.x < 0:
+		_start_workshop_placement("furnace")
+		return
 	_pay(FURNACE_COST)
 	furnace_built = true
 	_build_interior()
-	_show_message("The furnace is built beside the house. Smelt ore into bars there.")
+	_show_message("The furnace is built in the workshop. Smelt ore into bars there.")
 	queue_redraw()
 
 
@@ -5603,15 +5620,31 @@ func _footprint(kind: String) -> Vector2i:
 		return Vector2i.ONE
 	if kind == "barn":
 		return BARN_SIZE
+	if kind == "workshop":
+		return WORKSHOP_SIZE
 	return COOP_SIZE
 
 
+# The workshop counts as built once the smokehouse or furnace stands in it.
 func _is_built(kind: String) -> bool:
+	if kind == "workshop":
+		return smokehouse_built or furnace_built
 	return barn_built if kind == "barn" else coop_built
 
 
 func _placed_tile(kind: String) -> Vector2i:
+	if kind == "workshop":
+		return workshop_tile
 	return barn_tile if kind == "barn" else coop_tile
+
+
+func _set_placed_tile(kind: String, tile: Vector2i) -> void:
+	if kind == "workshop":
+		workshop_tile = tile
+	elif kind == "barn":
+		barn_tile = tile
+	else:
+		coop_tile = tile
 
 
 func _build_cost(kind: String) -> Dictionary:
@@ -5673,12 +5706,24 @@ func _build_barn() -> void:
 	_start_placement("barn")
 
 
+# The first workshop piece is paid for once you choose where the workshop stands; the workshop itself is free.
+func _start_workshop_placement(piece: String) -> void:
+	_start_placement("workshop")
+	if placing == "workshop":
+		workshop_piece = piece
+
+
+func _move_workshop() -> void:
+	workshop_piece = ""
+	_start_placement("workshop")
+
+
 # Choosing a spot: the ghost follows the tile you face. Space places it, B cancels.
 func _start_placement(kind: String) -> void:
 	if inside or in_cave or _in_village():
 		_show_message("You can only build on the farm.")
 		return
-	if not _is_built(kind) and not _can_build(kind):
+	if kind != "workshop" and not _is_built(kind) and not _can_build(kind):
 		_show_message("A %s needs %s." % [kind, stall._price_text(_build_cost(kind))])
 		return
 	placing = kind
@@ -5689,6 +5734,7 @@ func _start_placement(kind: String) -> void:
 
 func _cancel_placement() -> void:
 	placing = ""
+	workshop_piece = ""
 	_show_message("You leave the spot empty for now.")
 
 
@@ -5701,6 +5747,9 @@ func _confirm_placement() -> void:
 	var size := _footprint(kind)
 	if not _spot_ok(top, size):
 		_show_message("There isn't room for the %s there. It needs open grass, clear of crops, rocks, and brush." % kind)
+		return
+	if kind == "workshop":
+		_confirm_workshop(top)
 		return
 	if not _is_built(kind):
 		var cost := _build_cost(kind)
@@ -5726,6 +5775,27 @@ func _confirm_placement() -> void:
 		_show_message("The coop stands here now. Stand beside it, facing it, and press Space to tend the hens.")
 
 
+# Places or moves the workshop. Moving is free and takes its pieces along; a first placement builds the
+# piece that asked for it.
+func _confirm_workshop(top: Vector2i) -> void:
+	var piece := workshop_piece
+	placing = ""
+	workshop_piece = ""
+	if workshop_tile.x >= 0:
+		_stamp_footprint(workshop_tile, WORKSHOP_SIZE, Tile.GRASS)
+	workshop_tile = top
+	if piece == "smokehouse":
+		_build_smokehouse()
+	elif piece == "furnace":
+		_build_furnace()
+	else:
+		_apply_storage_tiles()
+		_show_message("The workshop stands here now, with everything in it.")
+	# The piece could no longer be paid for, so nothing was built and the spot stays free.
+	if not _is_built("workshop"):
+		workshop_tile = Vector2i(-1, -1)
+
+
 # True when an inner farm tile is plain grass in the layout itself, ignoring anything built or planted.
 func _is_open_grass(inner: Vector2i) -> bool:
 	if inner.x < 0 or inner.y < 0 or inner.x >= INNER_W or inner.y >= INNER_H:
@@ -5733,12 +5803,15 @@ func _is_open_grass(inner: Vector2i) -> bool:
 	return FarmLayout.TERRAIN[inner.y].substr(inner.x, 1) == "." and not RESERVED.has(inner)
 
 
-# Moves a coop or barn to the nearest spot that fits, for a save from another layout or one whose spot no
-# longer fits. Refunds its cost if nothing fits at all.
-func _relocate_building(kind: String, other: Vector2i, other_size: Vector2i) -> void:
+# Moves a coop, barn or workshop to the nearest spot that fits, clear of the other two, for a save from another
+# layout or one whose spot no longer fits. An unplaced workshop goes as near the farmhouse door as it fits.
+# A coop or barn is taken down and refunded if nothing fits at all.
+func _relocate_building(kind: String) -> void:
 	var size := _footprint(kind)
 	var from := _placed_tile(kind)
-	if from.x < 0:
+	if from.x < 0 and kind == "workshop":
+		from = Vector2i(BORDER_X + HOUSE_DOOR_IX - WORKSHOP_SIZE.x / 2, BORDER_Y + HOUSE_DOOR_IY + 2)
+	elif from.x < 0:
 		from = Vector2i(INNER_W / 2, INNER_H / 2) + Vector2i(BORDER_X, BORDER_Y)
 	var from_inner := from - Vector2i(BORDER_X, BORDER_Y)
 	var best := Vector2i(-1, -1)
@@ -5751,14 +5824,21 @@ func _relocate_building(kind: String, other: Vector2i, other_size: Vector2i) -> 
 					var c := Vector2i(x + dx, y + dy)
 					if not _is_open_grass(c) or crops.has(c + Vector2i(BORDER_X, BORDER_Y)) or rocks.has(c + Vector2i(BORDER_X, BORDER_Y)) or brush.has(c + Vector2i(BORDER_X, BORDER_Y)) or fish_spots.has(c + Vector2i(BORDER_X, BORDER_Y)):
 						ok = false
-			# The other building must not share any tile with this one.
-			if other.x >= 0 and x < other.x - BORDER_X + other_size.x and x + size.x > other.x - BORDER_X and y < other.y - BORDER_Y + other_size.y and y + size.y > other.y - BORDER_Y:
-				ok = false
+			# The other buildings must not share any tile with this one.
+			for o in ["coop", "barn", "workshop"]:
+				var other := _placed_tile(o)
+				var other_size := _footprint(o)
+				if o != kind and _is_built(o) and other.x >= 0 and x < other.x - BORDER_X + other_size.x and x + size.x > other.x - BORDER_X and y < other.y - BORDER_Y + other_size.y and y + size.y > other.y - BORDER_Y:
+					ok = false
 			if ok:
 				var d: int = absi(x - from_inner.x) + absi(y - from_inner.y)
 				if d < best_d:
 					best_d = d
 					best = Vector2i(x, y)
+	if best.x < 0 and kind == "workshop":
+		# Its pieces can't be taken down, so it goes back to its old spot, which the layout keeps as grass.
+		workshop_tile = WORKSHOP_OLD_IX + Vector2i(BORDER_X, BORDER_Y)
+		return
 	if best.x < 0:
 		var cost := _build_cost(kind)
 		materials["wood"] += int(cost.get("wood", 0))
@@ -5771,12 +5851,8 @@ func _relocate_building(kind: String, other: Vector2i, other_size: Vector2i) -> 
 			coop_tile = Vector2i(-1, -1)
 		_show_message("There was no room left for the %s after the farm changed, so it was taken down and its materials returned." % kind)
 		return
-	var placed := best + Vector2i(BORDER_X, BORDER_Y)
-	if kind == "barn":
-		barn_tile = placed
-	else:
-		coop_tile = placed
-	_show_message("The %s was moved to a clear spot on the new farm." % kind)
+	_set_placed_tile(kind, best + Vector2i(BORDER_X, BORDER_Y))
+	_show_message("The %s was moved to a clear spot on the farm." % kind)
 
 
 # A spot fits when all of its tiles are open grass, clear of crops, rocks, brush, fishing spots, and you.
@@ -6216,6 +6292,8 @@ func _dev_unlock_all() -> void:
 	smokehouse_built = true
 	furnace_built = true
 	woodshed_built = true
+	if workshop_tile.x < 0:
+		_relocate_building("workshop")
 	well_repaired = true
 	hose_attached = true
 	well_water = WELL_CAPACITY

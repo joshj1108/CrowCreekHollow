@@ -20,7 +20,8 @@ extends SceneTree
 #   scale=F         shrink the saved image (default 0.5, so it's cheap to look at; 1 for full size)
 #   crops=A,B       plant every stage of each crop kind in a row on the first plot, e.g. crops=turnip,corn
 #   lantern=N       lantern tier 0-3 (0 = none)
-#   built           build the cellar, smokehouse, furnace and woodshed
+#   built           build the cellar, smokehouse, furnace and woodshed (the workshop goes by the farmhouse)
+#   workshop=X,Y    with built, put the workshop's top-left corner on this farm tile (layout coordinates)
 #   diary           find the diary in the desk and open it
 #   wheel           open the section wheel (wheel=N highlights section N, counting from 0)
 #   bag             open the bag
@@ -57,13 +58,18 @@ extends SceneTree
 #   epilogue        the bell's and the grove's last pages are written too (show them with diary)
 #   dpage=S,P       with diary, turn to section S's page P (counting from 0; the tabs top to bottom)
 #   sound           print how loud each ambience loop is playing when the shot is taken
+#   hold=S          for recording (tools/trailer.ps1): instead of a shot, run S more seconds at 30 fps and quit,
+#                   with the music stopped (the trailer lays one track over every shot); out= isn't needed
+#   walk=D:S,...    with hold, walk direction D (up, down, left, right, or two joined by +) for S seconds, then
+#                   the next; "wait" stands still, and "use" swings the tool in hand once
+#   quiet           with hold, keep the message line empty
 
 func _initialize() -> void:
 	var opt := {"frames": "90", "scale": "0.5"}
 	for a in OS.get_cmdline_user_args():
 		var kv := a.split("=", true, 1)
 		opt[kv[0]] = kv[1] if kv.size() > 1 else "1"
-	if not opt.has("out"):
+	if not opt.has("out") and not opt.has("hold"):
 		push_error("capture.gd: out=PATH is required")
 		quit(1)
 		return
@@ -78,6 +84,10 @@ func _initialize() -> void:
 		# The title menu as the game opens, before a game is started.
 		for i in int(opt["frames"]):
 			await process_frame
+		if opt.has("hold"):
+			await _hold(main, opt)
+			quit()
+			return
 		_save(opt)
 		return
 	main._on_title_start("new", 8)
@@ -94,6 +104,11 @@ func _initialize() -> void:
 		main.smokehouse_built = true
 		main.furnace_built = true
 		main.woodshed_built = true
+		if opt.has("workshop"):
+			var w: PackedStringArray = opt["workshop"].split(",")
+			main.workshop_tile = Vector2i(int(w[0]) + main.BORDER_X, int(w[1]) + main.BORDER_Y)
+		else:
+			main._relocate_building("workshop")
 		main._apply_storage_tiles()
 	if opt.has("lantern"):
 		main.lantern_tier = int(opt["lantern"])
@@ -263,7 +278,44 @@ func _initialize() -> void:
 		main._toggle_tab(opt["tab"])
 		await process_frame
 		await process_frame
+	if opt.has("hold"):
+		await _hold(main, opt)
+		quit()
+		return
 	_save(opt)
+
+
+# Runs the recording's seconds, walking the path in walk= first. Frames are 1/30 s under --fixed-fps 30.
+func _hold(main, opt: Dictionary) -> void:
+	if main.music_player:
+		main.music_player.stop()
+	var left := int(float(opt["hold"]) * 30.0)
+	for leg in opt.get("walk", "").split(",", false):
+		var part: PackedStringArray = leg.split(":")
+		var frames := int(float(part[1]) * 30.0) if part.size() > 1 else 1
+		if part[0] == "use":
+			main._tool_press = true
+			main._swing()
+			main._tool_press = false
+		var keys: Array = []
+		for d in part[0].split("+"):
+			if d in ["up", "down", "left", "right"]:
+				keys.append("move_" + d)
+				Input.action_press("move_" + d)
+		for i in mini(frames, left):
+			await _hold_frame(main, opt)
+		for k in keys:
+			Input.action_release(k)
+		left -= frames
+	for i in maxi(left, 0):
+		await _hold_frame(main, opt)
+
+
+# One recorded frame; with quiet, the message line stays empty so setup messages don't fill the shot.
+func _hold_frame(main, opt: Dictionary) -> void:
+	if opt.has("quiet"):
+		main.message_label.text = ""
+	await process_frame
 
 
 func _save(opt: Dictionary) -> void:

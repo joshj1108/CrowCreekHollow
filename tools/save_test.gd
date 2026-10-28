@@ -200,6 +200,38 @@ func _run() -> void:
 	m.materials["bell_clapper"] = 0     # a key the save lacks keeps what's in memory, as on a fresh start
 	_check("version 4 save without them: no clapper", _load() == 11 and int(m.materials["bell_clapper"]) == 0)
 
+	# Version 7: the workshop's spot round-trips, with its pieces stamped there; an older save with a built
+	# workshop keeps it where it stood, and one without stays unplaced.
+	m.smokehouse_built = true
+	m.woodshed_built = true
+	m.workshop_tile = Vector2i(20 + m.BORDER_X, 14 + m.BORDER_Y)
+	_save_on_day(11)
+	m.workshop_tile = Vector2i(-1, -1)
+	var shop := Vector2i(20 + m.BORDER_X, 14 + m.BORDER_Y)
+	# The game stamps the farm's buildings after loading, as _on_title_start does.
+	var loaded_day := _load()
+	m._build_interior()
+	_check("workshop spot round-trips", loaded_day == 11 and m.workshop_tile == shop
+		and m.map[shop.y + m.SMOKEHOUSE_AT.y][shop.x + m.SMOKEHOUSE_AT.x] == MainGame.Tile.SMOKEHOUSE
+		and m.map[shop.y + m.CHOPLOG_AT.y][shop.x + m.CHOPLOG_AT.x] == MainGame.Tile.CHOPLOG)
+	var v6 := _raw(path)
+	v6["save_version"] = 6
+	v6.erase("workshop_x")
+	v6.erase("workshop_y")
+	_write_text(path, JSON.stringify(v6))
+	var old_shop := m.WORKSHOP_OLD_IX + Vector2i(m.BORDER_X, m.BORDER_Y)
+	loaded_day = _load()
+	m._build_interior()
+	_check("version 6 save: workshop stays where it stood", loaded_day == 11 and m.workshop_tile == old_shop
+		and m.map[old_shop.y + m.SMOKEHOUSE_AT.y][old_shop.x + m.SMOKEHOUSE_AT.x] == MainGame.Tile.SMOKEHOUSE)
+	v6["smokehouse_built"] = false
+	v6["furnace_built"] = false
+	_write_text(path, JSON.stringify(v6))
+	_check("version 6 save without a workshop: none placed", _load() == 11 and m.workshop_tile.x < 0)
+	m.smokehouse_built = false
+	m.woodshed_built = false
+	m._build_interior()
+
 	# Saving in the cave puts you at the homestead on load.
 	var home := m._tile_center(m.HOMESTEAD_ARRIVE.x, m.HOMESTEAD_ARRIVE.y)
 	m.in_cave = true

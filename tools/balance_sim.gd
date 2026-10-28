@@ -176,7 +176,11 @@ func _sleep() -> void:
 	m.sanity_sys._change_sanity(m.SLEEP_SANITY)
 	if m.firewood._fire_lit():
 		m.warmth = 100.0
+	# In earlybed the visitor comes to the sleeping house during _end_day, so the Hollow is counted here.
+	var fired := m.event_fired_day
 	m._end_day("", false)
+	if m.event_fired_day != fired and m.nights.last_visitor == "hollow":
+		nights["hollow"] += 1
 	m.progression._check_achievements()
 	m.progression._check_story()
 	m.projects._check(false)
@@ -507,10 +511,14 @@ func _try_build(id: String, cost: Dictionary) -> String:
 			m.progression._grant_xp("Carpentry", m.XP_REPAIR)
 		"woodshed":
 			m._build_woodshed()
-		"smokehouse":
-			m._build_smokehouse()
-		"furnace":
-			m._build_furnace()
+		"smokehouse", "furnace":
+			# The first piece asks where the workshop goes; the sim puts it by the farmhouse, as a player might.
+			if m.workshop_tile.x < 0:
+				m._relocate_building("workshop")
+			if id == "smokehouse":
+				m._build_smokehouse()
+			else:
+				m._build_furnace()
 	return "done"
 
 
