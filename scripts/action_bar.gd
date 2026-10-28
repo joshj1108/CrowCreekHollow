@@ -32,6 +32,7 @@ const SUBTITLES := {
 	"Pause": "Time is paused while you are here",
 	"Settings": "Saved at once, for every save slot",
 	"Controls": "Keyboard, mouse and gamepad",
+	"Diary": "What you have learned, and what to do next",
 }
 
 const COL_DIM := Color(0.0, 0.0, 0.0, 0.62)
@@ -80,6 +81,27 @@ var _ledger_tab_count := 0      # tabs in the open panel, ledger or a grid panel
 var _grid_tabs := {}            # a grid panel's {"tabs", "active"} row, stepped by LB/RB or Q/E
 var _pad_glyphs := false          # true once a gamepad was used last, so prompts show its buttons
 var _pointer_last := false        # true when the last press came from the mouse
+
+# The diary is a book: a spread of two pages, with a tab marker down its right edge for each section.
+# A panel with a {"book": sections} row shows it; each section is {name, heading, pages}, and each page
+# {title, text, new, done, gap, hand}. Left and right turn a spread (running on into the next section),
+# LB/RB or Q/E jump between sections. The open place is kept until the game closes.
+const PAPER := Color("c4ae84")
+const PAPER_EDGE := Color("8f7a54")
+const INK := Color("2b2016")
+const INK_FADED := Color("6a573c")
+const INK_RED := Color("8a3424")
+const INK_HANDS := {"agnes": Color("3d2414"), "yours": Color("22303e")}
+const LEATHER := Color("3b2417")
+# Each section keeps its ribbon colour, whichever tabs are showing.
+const RIBBONS := {"First day": Color("7a3a2c"), "The farm asks": Color("7a3a2c"), "Notes": Color("4f6b3a"),
+	"Agnes Rook": Color("6b4a6a"), "The wood": Color("3a5a7a"), "Afterword": Color("8a6a3a")}
+var book: HBoxContainer
+var book_spread_box: HBoxContainer
+var book_tabs: VBoxContainer
+var book_sections: Array = []
+var book_section := 0
+var book_spread := 0
 
 
 func _ready() -> void:
@@ -171,6 +193,7 @@ func _build_menu() -> Control:
 	rows_box.add_theme_constant_override("separation", 8)
 	scroll.add_child(rows_box)
 	main.add_child(_build_ledger_frame())
+	main.add_child(_build_book_frame())
 
 	var footer := HBoxContainer.new()
 	footer.add_theme_constant_override("separation", 12)
@@ -223,7 +246,8 @@ func show_panel(tab: String, rows: Array) -> void:
 	var focused := get_viewport().gui_get_focus_owner()
 	if tab == active_tab and focused is Button and focused.has_meta("action"):
 		keep_action = str(focused.get_meta("action"))
-	if tab != active_tab:
+	var opening := tab != active_tab
+	if opening:
 		scroll.scroll_vertical = 0
 		list_scroll.scroll_vertical = 0
 		_ledger_pick = 0
@@ -233,6 +257,19 @@ func show_panel(tab: String, rows: Array) -> void:
 	subtitle_label.text = str(SUBTITLES.get(tab, ""))
 	active_tab = tab
 	_clear(rows_box)
+	var book_row := {}
+	for row in rows:
+		if row is Dictionary and row.has("book"):
+			book_row = row
+	book.visible = not book_row.is_empty()
+	if book.visible:
+		scroll.visible = false
+		ledger.visible = false
+		prompt_bar.visible = true
+		hint_label.visible = false
+		close_button.focus_mode = Control.FOCUS_NONE
+		_show_book(book_row["book"], opening)
+		return
 	var is_ledger := _has_tabs(rows)
 	_grid_tabs = {}
 	for row in rows:
@@ -1012,6 +1049,8 @@ func _refresh_prompts() -> void:
 	var pad := _pad_glyphs
 	var back := "Back" if active_tab in ["Settings", "Controls"] else "Close"
 	var prompts: Array = [["A" if pad else "Space", "Select"], ["B" if pad else "Esc", back]]
+	if book.visible:
+		prompts = [["< >", "Turn page"], ["B" if pad else "Esc", back]]
 	if _ledger_tab_count > 1:
 		prompts.append(["LB RB" if pad else "Q E", "Tabs"])
 	if not active_tab in ["Pause", "Settings", "Controls"]:
@@ -1068,6 +1107,12 @@ var _pointer_held := false
 func _process(delta: float) -> void:
 	if not panel.visible or scroll == null:
 		return
+	# Left and right (keys, D-pad or the left stick) turn the diary's pages.
+	if book.visible:
+		if Input.is_action_just_pressed("move_left"):
+			_turn_page(-1)
+		elif Input.is_action_just_pressed("move_right"):
+			_turn_page(1)
 	var pads := Input.get_connected_joypads()
 	if pads.is_empty():
 		return
@@ -1090,9 +1135,14 @@ func _input(event: InputEvent) -> void:
 		_pad_glyphs = pad
 		if panel.visible and prompt_bar.visible:
 			_rebuild()
-	if not panel.visible or not prompt_bar.visible or _ledger_tab_count < 2:
+	if not panel.visible or not prompt_bar.visible:
 		return
-	if not event.is_pressed() or event.is_echo():
+	# The mouse wheel turns the diary's pages too.
+	if book.visible and event is InputEventMouseButton and event.pressed and event.button_index in [MOUSE_BUTTON_WHEEL_UP, MOUSE_BUTTON_WHEEL_DOWN]:
+		_turn_page(-1 if event.button_index == MOUSE_BUTTON_WHEEL_UP else 1)
+		get_viewport().set_input_as_handled()
+		return
+	if _ledger_tab_count < 2 or not event.is_pressed() or event.is_echo():
 		return
 	var step := 0
 	if event is InputEventKey:
@@ -1108,6 +1158,9 @@ func _input(event: InputEvent) -> void:
 	if step == 0:
 		return
 	get_viewport().set_input_as_handled()
+	if book.visible:
+		_open_book_section(posmod(book_section + step, _ledger_tab_count))
+		return
 	if ledger.visible:
 		_open_ledger_tab(posmod(int(ledger_tabs.get(active_tab, 0)) + step, _ledger_tab_count))
 		return
@@ -1117,6 +1170,281 @@ func _input(event: InputEvent) -> void:
 		if str(tabs[i]["id"]) == str(_grid_tabs.get("active", "")):
 			at = i
 	_on_action_pressed(str(tabs[posmod(at + step, tabs.size())].get("action", "")))
+
+
+# --- The diary's book ------------------------------------------------------------
+
+# The leather cover holding two pages either side of the spine, and the tab markers down its right edge.
+func _build_book_frame() -> Control:
+	book = HBoxContainer.new()
+	book.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	book.add_theme_constant_override("separation", 0)
+	book.visible = false
+	var cover := PanelContainer.new()
+	cover.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	cover.add_theme_stylebox_override("panel", _box(LEATHER, COL_BORDER, 2, 8, 10))
+	book.add_child(cover)
+	book_spread_box = HBoxContainer.new()
+	book_spread_box.add_theme_constant_override("separation", 0)
+	cover.add_child(book_spread_box)
+	book_tabs = VBoxContainer.new()
+	book_tabs.add_theme_constant_override("separation", 6)
+	var top := Control.new()
+	top.custom_minimum_size = Vector2(0, 14)
+	book_tabs.add_child(top)
+	book.add_child(book_tabs)
+	return book
+
+
+func _show_book(sections: Array, opening: bool) -> void:
+	book_sections = sections
+	_ledger_tab_count = sections.size()
+	# Opening the diary turns to the first page not read yet; otherwise it stays where it was left.
+	if opening:
+		for s in sections.size():
+			var pages: Array = sections[s]["pages"]
+			for p in pages.size():
+				if bool(pages[p].get("new", false)):
+					book_section = s
+					book_spread = p / 2
+					_build_book()
+					return
+	_build_book()
+
+
+# Turns to the spread holding a section's page, e.g. for the capture tool.
+func open_book_at(section: int, page: int) -> void:
+	book_section = section
+	book_spread = page / 2
+	if book.visible:
+		_build_book()
+
+
+func _spreads(section: int) -> int:
+	return maxi(1, ceili(float(book_sections[section]["pages"].size()) / 2.0))
+
+
+func _build_book() -> void:
+	if book_sections.is_empty():
+		return
+	book_section = clampi(book_section, 0, book_sections.size() - 1)
+	book_spread = clampi(book_spread, 0, _spreads(book_section) - 1)
+	var section: Dictionary = book_sections[book_section]
+	var pages: Array = section["pages"]
+	_clear(book_spread_box)
+	for side in 2:
+		var index := book_spread * 2 + side
+		var page: Dictionary = pages[index] if index < pages.size() else {"blank": true}
+		book_spread_box.add_child(_build_page(section, page, index, side))
+		if side == 0:
+			var spine := ColorRect.new()
+			spine.color = Color("1e130b")
+			spine.custom_minimum_size = Vector2(6, 0)
+			book_spread_box.add_child(spine)
+	# The tab markers, after the spacer that lines them up with the pages' tops.
+	while book_tabs.get_child_count() > 1:
+		var old := book_tabs.get_child(1)
+		book_tabs.remove_child(old)
+		old.queue_free()
+	for i in book_sections.size():
+		book_tabs.add_child(_build_marker(i))
+	_refresh_prompts()
+
+
+# One page: the section's heading (left page only), the title with "new" or "done", a rule, the text, and
+# the page number with a turn arrow at the outer corner. A torn-out page shows its stub and a faded number.
+func _build_page(section: Dictionary, page: Dictionary, index: int, side: int) -> Control:
+	var small := menu_frame.custom_minimum_size.y < 560.0
+	var gap := bool(page.get("gap", false))
+	var holder := PanelContainer.new()
+	holder.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	var sheet := _box(PAPER, PAPER_EDGE, 0, 0, 0)
+	# Rounded on the outer corners only, so the two pages meet at the spine.
+	for corner in ([CORNER_TOP_LEFT, CORNER_BOTTOM_LEFT] if side == 0 else [CORNER_TOP_RIGHT, CORNER_BOTTOM_RIGHT]):
+		sheet.set_corner_radius(corner, 4)
+	sheet.border_width_bottom = 3
+	if gap:
+		sheet.draw_center = false
+		sheet.border_width_bottom = 0
+		holder.add_child(TornPage.new(side, PAPER, PAPER_EDGE))
+	holder.add_theme_stylebox_override("panel", sheet)
+	var margin := MarginContainer.new()
+	for side_name in ["margin_left", "margin_top", "margin_right"]:
+		margin.add_theme_constant_override(side_name, 18 if small else 24)
+	margin.add_theme_constant_override("margin_bottom", 6)
+	# A torn-out page's words keep clear of the stub at the spine.
+	if gap:
+		margin.add_theme_constant_override("margin_right" if side == 0 else "margin_left", 48)
+	holder.add_child(margin)
+	var column := VBoxContainer.new()
+	column.add_theme_constant_override("separation", 6 if small else 10)
+	margin.add_child(column)
+	var ink: Color = INK_HANDS.get(str(page.get("hand", "")), INK)
+	var faded := COL_MUTED if gap else INK_FADED
+	column.add_child(_book_text(str(section.get("heading", section["name"])) if side == 0 else " ", faded, 12))
+	if page.has("blank"):
+		var filler := Control.new()
+		filler.size_flags_vertical = Control.SIZE_EXPAND_FILL
+		column.add_child(filler)
+	else:
+		var title_line := HBoxContainer.new()
+		title_line.add_theme_constant_override("separation", 10)
+		var title := _book_text(str(page["title"]), COL_MUTED if gap else ink, 18 if small else 21)
+		title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		title_line.add_child(title)
+		if bool(page.get("new", false)):
+			title_line.add_child(_book_text("new", INK_RED, 13))
+		elif bool(page.get("done", false)):
+			title_line.add_child(_book_text("done", INK_FADED, 13))
+		column.add_child(title_line)
+		if not gap:
+			var rule := ColorRect.new()
+			rule.color = Color(PAPER_EDGE, 0.7)
+			rule.custom_minimum_size = Vector2(0, 1)
+			column.add_child(rule)
+		# Long text scrolls rather than running off the page on a small window.
+		var body_scroll := ScrollContainer.new()
+		body_scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
+		body_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+		var body := _book_text(str(page["text"]), COL_MUTED if gap else ink, 14 if small else 16)
+		body.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		body_scroll.add_child(body)
+		column.add_child(body_scroll)
+	var foot := HBoxContainer.new()
+	column.add_child(foot)
+	var step := -1 if side == 0 else 1
+	var arrow := Button.new()
+	arrow.text = "<" if side == 0 else ">"
+	arrow.flat = true
+	arrow.focus_mode = Control.FOCUS_NONE
+	arrow.custom_minimum_size = Vector2(32, 26)
+	arrow.add_theme_font_size_override("font_size", 18)
+	arrow.add_theme_color_override("font_color", faded)
+	arrow.add_theme_color_override("font_hover_color", INK_RED)
+	arrow.add_theme_color_override("font_pressed_color", INK_RED)
+	arrow.pressed.connect(_turn_page.bind(step))
+	arrow.modulate.a = 1.0 if _can_turn(step) else 0.0
+	arrow.disabled = not _can_turn(step)
+	var number := _book_text("" if page.has("blank") else str(index + 1), faded, 12)
+	number.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	number.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	var balance := Control.new()
+	balance.custom_minimum_size = arrow.custom_minimum_size
+	foot.add_child(arrow if side == 0 else balance)
+	foot.add_child(number)
+	foot.add_child(balance if side == 0 else arrow)
+	return holder
+
+
+func _book_text(text: String, color: Color, font_size: int) -> Label:
+	var label := _detail_text(text, color, font_size)
+	label.add_theme_constant_override("line_spacing", 3)
+	return label
+
+
+# A tab marker: a ribbon off the cover's edge. The open one sticks out further, lit with a gold edge, and a
+# section with a page not read yet has a red dot.
+func _build_marker(i: int) -> Control:
+	var section: Dictionary = book_sections[i]
+	var open := i == book_section
+	var ribbon: Color = RIBBONS.get(str(section["name"]), COL_BUTTON_ACTIVE)
+	var marker := Button.new()
+	marker.text = str(section["name"])
+	marker.alignment = HORIZONTAL_ALIGNMENT_LEFT
+	marker.focus_mode = Control.FOCUS_NONE
+	marker.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
+	marker.custom_minimum_size = Vector2(136 if open else 120, 38)
+	marker.add_theme_font_size_override("font_size", 14)
+	marker.add_theme_color_override("font_color", COL_TEXT if open else Color(COL_TEXT, 0.7))
+	marker.add_theme_color_override("font_hover_color", COL_TEXT)
+	marker.add_theme_color_override("font_pressed_color", COL_TEXT)
+	for state in ["normal", "hover", "pressed"]:
+		var fill: Color = ribbon.lightened(0.12) if open or state != "normal" else ribbon.darkened(0.35)
+		var sb := _box(fill, COL_ACCENT if open else ribbon.darkened(0.5), 2 if open else 1, 0, 0)
+		sb.border_width_left = 0
+		sb.set_corner_radius(CORNER_TOP_RIGHT, 6)
+		sb.set_corner_radius(CORNER_BOTTOM_RIGHT, 6)
+		sb.content_margin_left = 12
+		sb.content_margin_right = 22
+		marker.add_theme_stylebox_override(state, sb)
+	marker.pressed.connect(_open_book_section.bind(i))
+	var fresh := false
+	for page in section["pages"]:
+		fresh = fresh or bool(page.get("new", false))
+	if fresh:
+		var dot := Panel.new()
+		dot.add_theme_stylebox_override("panel", _box(COL_SHORT, Color("f0c0a0"), 1, 4, 0))
+		dot.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		dot.set_anchors_preset(Control.PRESET_CENTER_RIGHT)
+		dot.offset_left = -16
+		dot.offset_right = -8
+		dot.offset_top = -4
+		dot.offset_bottom = 4
+		marker.add_child(dot)
+	return marker
+
+
+func _open_book_section(index: int) -> void:
+	if index == book_section:
+		return
+	book_section = index
+	book_spread = 0
+	_on_action_pressed("page_turn")
+	_build_book()
+
+
+# Whether a turn that way has anywhere to go: another spread, or the next (or previous) section.
+func _can_turn(step: int) -> bool:
+	if step < 0:
+		return book_spread > 0 or book_section > 0
+	return book_spread < _spreads(book_section) - 1 or book_section < book_sections.size() - 1
+
+
+# Turns a spread. Past a section's last spread the book runs on into the next section's first.
+func _turn_page(step: int) -> void:
+	if book_sections.is_empty() or not _can_turn(step):
+		return
+	book_spread += step
+	if book_spread < 0:
+		book_section -= 1
+		book_spread = _spreads(book_section) - 1
+	elif book_spread >= _spreads(book_section):
+		book_section += 1
+		book_spread = 0
+	_on_action_pressed("page_turn")
+	_build_book()
+
+
+# A page torn out of the diary: the stub left at the spine, its edge ragged, over the bare inside cover.
+class TornPage extends Control:
+	const RAGGED := [0.0, 7.0, 3.0, 9.0, 1.0, 6.0]
+	var side := 0
+	var paper: Color
+	var edge: Color
+
+	func _init(page_side: int, paper_color: Color, edge_color: Color) -> void:
+		side = page_side
+		paper = paper_color
+		edge = edge_color
+		mouse_filter = Control.MOUSE_FILTER_IGNORE
+
+	func _draw() -> void:
+		draw_rect(Rect2(Vector2.ZERO, size), Color("2a1a10"))
+		var spine_x := size.x if side == 0 else 0.0
+		var dir := -1.0 if side == 0 else 1.0
+		var torn := PackedVector2Array()
+		var y := 0.0
+		var i := 0
+		while y < size.y:
+			torn.append(Vector2(spine_x + dir * (24.0 + RAGGED[i % RAGGED.size()]), y))
+			y += 11.0
+			i += 1
+		torn.append(Vector2(spine_x + dir * 24.0, size.y))
+		var stub := PackedVector2Array([Vector2(spine_x, 0.0)])
+		stub.append_array(torn)
+		stub.append(Vector2(spine_x, size.y))
+		draw_colored_polygon(stub, paper.darkened(0.1))
+		draw_polyline(torn, edge, 1.0)
 
 
 func _on_menu_pressed() -> void:

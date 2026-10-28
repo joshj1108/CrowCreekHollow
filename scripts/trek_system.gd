@@ -159,11 +159,14 @@ const STANDING := {
 	"mill": {"at": 3, "about": "Once Maren knows you, her sister mills for you: 2 flour a walk, for farmhouse bread at the fire."},
 	"orchard": {"at": 3, "about": "Once Davy knows you, his mother sends an apple sapling from the drowned orchard each walk, to plant from Decor."},
 	"chapel": {"at": 2, "about": "Once the vicar knows you, he blesses you each walk: lost sanity limit back (up to 5) and +10 sanity."},
+	"post": {"at": 2, "about": "Once the postman knows you, he brings a parcel each walk from the Rooks' unclaimed post: corn seeds, pumpkin seeds, a bandage or rope, in turn."},
 }
 const STANDING_FLOUR := 2
 const STANDING_APPLES := 3            # from the orchard once you have saplings for every tree
 const BLESS_LIMIT := 5
 const BLESS_SANITY := 10.0
+# The postman's parcels, in turn by walk: [pack or materials key, amount], addressed to the Rooks.
+const PARCELS := [["corn_seeds", 4], ["pumpkin_seeds", 2], ["bandage", 1], ["rope", 1]]
 # Trade: each destination buys some of what you carry, for more than the farm stand pays (_trade, on arriving).
 # Up to TRADE_MAX items a walk, and four of each kind are kept back for you (eggs go into rations). Turnips
 # aren't bought anywhere: they are the rations' staple.
@@ -245,6 +248,17 @@ const ROUTES := {
 			"\"Some nights, from the vicarage, I hear it ringing up here. A bell with no clapper, ringing.\"",
 			"\"There, the chapel. Whatever happens, don't let me stay past dark.\""],
 		"arrive": "The chapel on the hill: a grey stone nave and an empty bell-cote. The vicar lets himself in with a key on a string and comes back from the vestry with flasks of lamp oil. \"For the walk home. And for next time.\""},
+	"post": {"walker": "the postman", "short": "the postman", "she": "he", "her": "him", "his": "his", "to": "the chapel on the hill",
+		"from": 336, "level": 5, "oil": 2, "xp": 160, "feathers": 1, "spot": Vector2i(31, 1), "night": false,
+		"marked": [0, FLIP + 2, 1, FLIP + 5, 4], "dark": [0, FLIP + 6, 3, 4], "extra": ["dogs"],
+		"talk": [
+			"\"I've had the lane's post thirty years. Since the bell came down I come round by your farm and wait to be walked, like everyone.\"",
+			"\"The crows have never liked your farm, not since the Rooks. They follow me as far as the chapel and no further.\"",
+			"\"It was me brought you that torn page, your third morning. It was in my sack with no stamp on it, in her hand. I didn't know what else to do with it.\"",
+			"\"There's a letter I've carried every autumn since she went. Mrs Agnes Rook, care of the chapel. I don't know the hand. It isn't hers.\"",
+			"\"There's the chapel. Wait for me. I never stay long with it.\""],
+		"arrive": "The chapel on the hill, locked, the bell-cote empty. The postman takes a yellowed letter from the bottom of his sack and slides it under the vestry door. \"It'll be back in my sack by morning. It always is.\"",
+		"arrive_after_grove": "The chapel on the hill, locked, the bell-cote empty. The postman reaches into the bottom of his sack and comes up with nothing. \"It's gone.\" He looks at the door a long while. \"Thirty years. Somebody's had it at last.\""},
 	"grove": {"walker": "a woman in a grey shawl", "short": "the woman", "she": "she", "her": "her", "his": "her", "to": "the Hollow's grove",
 		"from": GROVE_DAY, "level": 5, "oil": 2, "xp": 300, "feathers": 5, "spot": Vector2i(19, 1), "night": true,
 		"marked": [0, 1, 5, 2, FLIP + 5, FLIP + 1, 4], "dark": [0, 3, 6, FLIP + 3, FLIP + 6, 4], "extra": ["dogs"],
@@ -1283,7 +1297,8 @@ func _arrive() -> void:
 		home += " Behind you the wood draws back from the farm, and the crows leave the fence."
 	else:
 		home += " The farm feels further from the wood tonight: the field shadow falls back, and tonight's visitor will take half."
-	_end("%s%s %s.%s%s" % [r["arrive"], _grove_pages_text(), ", ".join(gifts), " Twice the pay, for walking by night." if night else "", home], true)
+	var arrive: String = r.get("arrive_after_grove", r["arrive"]) if grove_done else r["arrive"]
+	_end("%s%s %s.%s%s" % [arrive, _grove_pages_text(), ", ".join(gifts), " Twice the pay, for walking by night." if night else "", home], true)
 
 
 # Coming home from a trek, by any route (the balance sim calls this too): the wood's dread, the grove, and
@@ -1348,6 +1363,9 @@ func _gifts(pay: int) -> Array:
 			if int(m.materials["bell_clapper"]) == 0 and not m.projects._has_bell():
 				m.materials["bell_clapper"] = 1
 				out.append("the old bell's clapper in an altar cloth (\"She said we'd want it back. Hang it in yours.\")")
+		"post":
+			m.inventory["crow_charm"] += pay
+			out.append("+%d crow charm%s (\"The crows let me be. I put it down to this.\")" % [pay, "" if pay == 1 else "s"])
 	return out + _standing_gifts(pay) + _trade()
 
 
@@ -1421,6 +1439,16 @@ func _standing_gifts(pay: int) -> Array:
 			m.sanity_sys._change_sanity(BLESS_SANITY * pay)
 			return ["%s+%d sanity%s" % ["the vicar asks to bless you, and will every time you walk him: " if first else "the vicar's blessing, ",
 				int(BLESS_SANITY * pay), (", +%d sanity limit back" % back) if back > 0 else ""]]
+		"post":
+			# A parcel from the Rooks' unclaimed post, a different one each walk.
+			var parcel: Array = PARCELS[(n - at) % PARCELS.size()]
+			var kind := str(parcel[0])
+			var amount := int(parcel[1]) * pay
+			var held: Dictionary = m.inventory if m.inventory.has(kind) else m.materials
+			held[kind] += amount
+			var names := {"corn_seeds": "corn seeds", "pumpkin_seeds": "pumpkin seeds", "bandage": "bandage", "rope": "rope"}
+			return ["%sa parcel addressed to the Rooks: +%d %s" % ["the postman will bring you what's left in his sack for the farm, starting with " if first else "",
+				amount, names[kind]]]
 	return []
 
 
@@ -1683,7 +1711,7 @@ func _draw_dest(r: Rect2i) -> void:
 	match route_id:
 		"orchard":
 			_draw_orchard(r)
-		"chapel":
+		"chapel", "post":
 			_draw_chapel(r)
 		"grove":
 			_draw_grove(r)
@@ -1865,6 +1893,17 @@ func _draw_walker(f: Vector2, shake: float, id := "mill") -> void:
 			layer.draw_circle(f + Vector2(0, -px * 1.22), px * 0.16, Color("dcc4ac"))
 			_box(Rect2(f + Vector2(-px * 0.3, -px * 1.4), Vector2(px * 0.6, px * 0.07)), Color("201c22"))
 			_box(Rect2(f + Vector2(-px * 0.15, -px * 1.58), Vector2(px * 0.3, px * 0.18)), Color("201c22"))
+			return
+		"post":
+			# The postman: a navy coat, a brown satchel on a strap across it, a peaked cap.
+			_box(Rect2(f + Vector2(-px * 0.2, -px * 0.42), Vector2(px * 0.4, px * 0.42)), Color("2a2a34"))
+			_box(Rect2(f + Vector2(-px * 0.24, -px * 0.92), Vector2(px * 0.48, px * 0.52)), Color("2c3a56"))
+			layer.draw_line(f + Vector2(-px * 0.2, -px * 0.9), f + Vector2(px * 0.2, -px * 0.5), Color("6a4a2e"), 3.0)
+			_box(Rect2(f + Vector2(px * 0.14, -px * 0.62), Vector2(px * 0.24, px * 0.22)), Color("7a5634"))
+			layer.draw_circle(f + Vector2(0, -px * 1.08), px * 0.19, ink)
+			layer.draw_circle(f + Vector2(0, -px * 1.08), px * 0.16, Color("e0c8b0"))
+			_box(Rect2(f + Vector2(-px * 0.18, -px * 1.3), Vector2(px * 0.36, px * 0.14)), Color("2c3a56"))
+			_box(Rect2(f + Vector2(-px * 0.18, -px * 1.18), Vector2(px * 0.42, px * 0.05)), Color("1a1a22"))
 			return
 		"grove":
 			# The woman in the grey shawl: tall, the shawl drawn over her head, her face in its shadow.

@@ -155,30 +155,37 @@ func _find_trek_page(id: String) -> void:
 		p["title"], _count(TREK_PAGES), TREK_PAGES.size()])
 
 
-# The diary's section: the pages found, in page order, with the epilogue last.
-func _rows(new_mark: Callable) -> Array:
+# The diary's sections for her pages, as book pages (see PanelRows._diary_rows): her ten, in page order,
+# with a torn-out gap for each one not found; the five from the wood once one is found; and the last pages,
+# in your own hand, once the bell is hung or she is walked to the grove.
+func _sections(is_new: Callable) -> Array:
+	var sections: Array = []
 	if found.is_empty():
-		return []
-	var rows: Array = [{"section": "Agnes Rook's pages (%d of %d)" % [_count(), PAGES.size()]}]
-	for i in PAGES.size():
-		var p: Dictionary = PAGES[i]
-		if found.has(p["id"]):
-			rows.append({"note": "%d. %s%s\n%s" % [i + 1, p["title"], new_mark.call("rook_" + str(p["id"])), p["text"]]})
-		else:
-			rows.append({"name": "%d. Missing" % (i + 1), "value": "not found yet"})
+		return sections
+	sections.append({"name": "Agnes Rook", "heading": "Agnes Rook's pages, %d of %d" % [_count(), PAGES.size()],
+		"pages": _book_pages(PAGES, is_new, "Not found yet.")})
 	if _count(TREK_PAGES) > 0:
-		rows.append({"section": "Pages from the wood (%d of %d)" % [_count(TREK_PAGES), TREK_PAGES.size()]})
-		for i in TREK_PAGES.size():
-			var p: Dictionary = TREK_PAGES[i]
-			if found.has(p["id"]):
-				rows.append({"note": "%d. %s%s\n%s" % [i + 1, p["title"], new_mark.call("rook_" + str(p["id"])), p["text"]]})
-			else:
-				rows.append({"name": "%d. Missing" % (i + 1), "value": "in a hollow tree somewhere"})
+		sections.append({"name": "The wood", "heading": "Pages from the wood, %d of %d" % [_count(TREK_PAGES), TREK_PAGES.size()],
+			"pages": _book_pages(TREK_PAGES, is_new, "In a hollow tree somewhere.")})
+	var last: Array = []
 	if found.has("bell"):
-		rows.append({"note": "%s%s\n%s" % [EPILOGUE["title"], new_mark.call("rook_bell"), EPILOGUE["text"]]})
+		last.append({"title": EPILOGUE["title"], "text": EPILOGUE["text"], "new": is_new.call("rook_bell"), "hand": "yours"})
 	if found.has("grove"):
-		rows.append({"note": "%s%s\n%s" % [GROVE_PAGE["title"], new_mark.call("rook_grove"), _grove_text()]})
-	return rows
+		last.append({"title": GROVE_PAGE["title"], "text": _grove_text(), "new": is_new.call("rook_grove"), "hand": "yours"})
+	if not last.is_empty():
+		sections.append({"name": "Afterword", "heading": "In your own hand", "pages": last})
+	return sections
+
+
+func _book_pages(pages: Array, is_new: Callable, missing: String) -> Array:
+	var out: Array = []
+	for i in pages.size():
+		var p: Dictionary = pages[i]
+		if found.has(p["id"]):
+			out.append({"title": "%d. %s" % [i + 1, p["title"]], "text": p["text"], "new": is_new.call("rook_" + str(p["id"])), "hand": "agnes"})
+		else:
+			out.append({"title": "%d." % (i + 1), "text": missing, "gap": true})
+	return out
 
 
 # The grove page says more once all five pages from the wood were found.

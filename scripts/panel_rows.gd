@@ -68,40 +68,41 @@ func _pause_rows() -> Array:
 func _diary_rows() -> Array:
 	if not m.diary_found:
 		return [{"note": "Your diary is in the desk drawer, in the farmhouse bedroom."}]
-	var rows: Array = [{"section": "The first day"}]
+	return [{"book": _diary_sections()}]
+
+
+# The diary as a book: each section a tab marker down its side, each page {title, text, new, done, gap, hand}.
+func _diary_sections() -> Array:
+	var is_new := func(id: String) -> bool: return m.diary_new.has(id)
+	var sections: Array = []
 	var next := m._guide_step()
-	for i in m.GUIDE.size():
-		var step: Dictionary = m.GUIDE[i]
-		var title := "%d of %d. %s" % [i + 1, m.GUIDE.size(), str(step["title"])]
-		if not next.is_empty() and str(step["id"]) == str(next["id"]):
-			rows.append({"note": "%s%s
-%s" % [title, _new_mark(str(step["id"])), m._fill_controls(str(step["text"]))]})
-			break
-		rows.append({"name": title, "value": "done"})
-	if next.is_empty():
+	if not next.is_empty():
+		# The first day: a page for each step done, then the next one. Later steps stay hidden.
+		var steps: Array = []
+		for i in m.GUIDE.size():
+			var step: Dictionary = m.GUIDE[i]
+			var current := str(step["id"]) == str(next["id"])
+			steps.append({"title": "%d of %d. %s" % [i + 1, m.GUIDE.size(), str(step["title"])],
+				"text": m._fill_controls(str(step["text"])), "new": is_new.call(str(step["id"])), "done": not current})
+			if current:
+				break
+		sections.append({"name": "First day", "heading": "The first day", "pages": steps})
+	else:
 		var chapter := m._current_chapter()
-		rows.append({"section": "What the farm asks"})
-		if chapter.is_empty():
-			rows.append({"note": "Every chapter is done. The farm is yours."})
-		else:
-			rows.append({"note": "%s%s
-%s" % [str(chapter["title"]), _new_mark("story"), m._prompt_text(chapter)]})
-	rows += m.mystery._rows(_new_mark)
+		var page := {"title": "Every chapter is done", "text": "The farm is yours."}
+		if not chapter.is_empty():
+			page = {"title": str(chapter["title"]), "text": "%s\n\n%s" % [str(chapter.get("story", "")), m._prompt_text(chapter)],
+				"new": is_new.call("story")}
+		sections.append({"name": "The farm asks", "heading": "What the farm asks", "pages": [page]})
+	# Notes, in the order they were written.
 	var notes: Array = []
 	for id in m.tips_seen.keys():
 		var tip := m._tip_data(str(id))
 		if tip.has("id") and not str(id).begins_with("g_"):
-			notes.push_front(tip)
+			notes.append({"title": str(tip["title"]), "text": m._fill_controls(str(tip["text"])), "new": is_new.call(str(id))})
 	if not notes.is_empty():
-		rows.append({"section": "Notes"})
-	for tip in notes:
-		rows.append({"note": "%s%s
-%s" % [str(tip["title"]), _new_mark(str(tip["id"])), m._fill_controls(str(tip["text"]))]})
-	return rows
-
-
-func _new_mark(id: String) -> String:
-	return "  (new)" if m.diary_new.has(id) else ""
+		sections.append({"name": "Notes", "heading": "Notes", "pages": notes})
+	return sections + m.mystery._sections(is_new)
 
 
 # The tab strip over Inventory, Gear and Skills, so LB/RB or Q/E step between them.

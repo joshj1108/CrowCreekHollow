@@ -49,10 +49,13 @@ extends SceneTree
 #   tread           with trek, the fingerpost reads (as with the Waymarks trail work)
 #   nooil           with trek, no lamp oil, so the lantern is out
 #   tall            with trek, the tall one stands in the trees beside you
-#   troute=ID       with trek, the route: mill (default), orchard, chapel or grove; tday=N sets the day (and season)
+#   troute=ID       with trek, the route: mill (default), orchard, chapel, post or grove; tday=N sets the day (and season)
 #   tnight          with trek, set out at 19:00 (a night trek)
 #   tsearch         with trek and tevent=hollow, reach into the hollow tree (prints whether it held a page)
 #   tpages=N        Agnes Rook's first N pages from the wood are found (show them with diary, with pages=N for the farm's)
+#   notes           every note is written in the diary (show them with diary)
+#   epilogue        the bell's and the grove's last pages are written too (show them with diary)
+#   dpage=S,P       with diary, turn to section S's page P (counting from 0; the tabs top to bottom)
 #   sound           print how loud each ambience loop is playing when the shot is taken
 
 func _initialize() -> void:
@@ -230,9 +233,18 @@ func _initialize() -> void:
 	if opt.has("tpages"):
 		for i in int(opt["tpages"]):
 			main.mystery.found[main.mystery.TREK_PAGES[i]["id"]] = true
+	if opt.has("notes"):
+		for tip in main.TIPS:
+			main.tips_seen[tip["id"]] = true
+	if opt.has("epilogue"):
+		main.mystery.found["bell"] = true
+		main.mystery.found["grove"] = true
 	if opt.has("diary"):
 		main._find_diary()
 		await process_frame
+		if opt.has("dpage"):
+			var at: PackedStringArray = opt["dpage"].split(",")
+			main.action_bar.open_book_at(int(at[0]), int(at[1]) if at.size() > 1 else 0)
 		await process_frame
 	if opt.has("wheel"):
 		main._toggle_wheel()

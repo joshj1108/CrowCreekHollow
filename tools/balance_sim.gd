@@ -31,9 +31,11 @@ const PLANT_CAP := 40.0      # crops kept growing: what the tank waters on a dry
 
 var m: MainGame
 # The trek routes (TrekSystem.ROUTES), longest first, with the trail rations the sim packs for each. The rest
-# (day, level, clearings, events, pay) comes from TrekSystem in _route_trek.
+# (day, level, clearings, events, pay) comes from TrekSystem in _route_trek. The postman goes before the
+# vicar but is walked every other trek at most (see _trek), so both are walked once he waits.
 const TREK_ROUTES := [
 	{"id": "grove", "rations": 4},
+	{"id": "post", "rations": 3},
 	{"id": "chapel", "rations": 3},
 	{"id": "orchard", "rations": 2},
 	{"id": "mill", "rations": 1},
@@ -47,7 +49,8 @@ var mode := "engaged"
 var treks_a_week := 0
 var rope := 0
 var grove_rations := 0      # rations baked ahead for the grove, one a day once she waits (see _trek)
-var trek_log := {"mill": 0, "orchard": 0, "chapel": 0, "grove": 0, "dark": 0, "floods": 0, "dogs": 0, "skipped": 0, "oil_coins": 0, "works_coins": 0}
+var last_trek := ""         # the route of the last trek walked
+var trek_log := {"mill": 0, "orchard": 0, "chapel": 0, "post": 0, "grove": 0, "dark": 0, "floods": 0, "dogs": 0, "skipped": 0, "oil_coins": 0, "works_coins": 0}
 var days := 60
 var every := 1
 var milestones := {}         # name -> first day
@@ -562,6 +565,8 @@ func _trek() -> void:
 		var id := str(route["id"])
 		if not t._route_open(id) or m.progression._level("Bushcrafting") < int(t.ROUTES[id]["level"]):
 			continue
+		if id == "post" and last_trek == "post":
+			continue
 		var r: Dictionary = _route_trek(route)
 		var oil_cost := maxi(0, int(r["oil"]) - int(m.materials["lamp_oil"])) * OIL_PRICE
 		var rations := int(r["rations"]) - (grove_rations if id == "grove" else 0)
@@ -603,11 +608,12 @@ func _trek() -> void:
 		m.progression._grant_xp("Bushcrafting", int(r["xp"]))
 		m.materials["feathers"] += int(r["feathers"])
 		m.materials["fiber"] += int(r["fiber"])
-		# The route's own gifts (seeds, applewood and flax, lamp oil and storm oak), from the game.
+		# The route's own gifts (seeds, applewood and flax, lamp oil and storm oak, crow charms), from the game.
 		t.night = false
 		t._gifts(1)
 		t._on_arrived()
 		trek_log[id] += 1
+		last_trek = id
 		trek_log["dark"] += int(r["dark"])
 		trek_log["floods"] += int(r["flood"])
 		trek_log["dogs"] += int(r["dogs"])

@@ -3219,6 +3219,9 @@ func _on_bag_slot(index: int) -> void:
 
 
 func _on_panel_action(action_id: String) -> void:
+	if action_id == "page_turn":
+		play_sfx_at("panel", -8.0, 0.1)
+		return
 	if action_id.begins_with("decor:"):
 		projects._start_place(action_id.trim_prefix("decor:"))
 		return
