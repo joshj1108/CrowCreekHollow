@@ -36,7 +36,7 @@ The full list is under **Controls** in the Pause menu and in Settings on the sta
 ## Known rough edges
 
 - The road and towns are switched off in this build, so there are no shops yet. Everything comes from the farm and the cave.
-- Treks into the groves (from the first winter) are new and still rough, and the trail works that ease them aren't in yet. Walker and destination art is placeholder.
+- Treks into the groves (from the first winter) are new and still rough. The trail works that ease them (Buildings, Trail works) are built but barely tested. Walker and destination art is placeholder.
 - The pacing after the first few weeks isn't finished. Skills and farm projects may run out early.
 - Some art is placeholder, and the game has no icon yet.
 - There's no in-game bug report button. Please use the steps below.

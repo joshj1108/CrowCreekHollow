@@ -17,7 +17,7 @@ extends RefCounted
 # - Your lantern burns lamp oil in the wood, a flask every FLASK_SECONDS. Without oil it goes out.
 # - The clock runs slower in the wood (TIME_SCALE), so a trek of a few minutes takes a few hours.
 # - The trail forks at the top of the first clearing: the marked trail (a clearing longer, gentler events) or
-#   the dark trail (harder events, better pay). The fingerpost reads with Bushcrafting (_can_read_sign), or later
+#   the dark trail (harder events, better pay). The fingerpost reads with Bushcrafting (_can_read_sign), or
 #   with the Waymarks trail work. Which arm is which changes with the day.
 # - Events, one a clearing before the end, picked by the day and season (_plan): a fallen tree, the crows,
 #   a flooded hollow (a rope across, or wade at a warmth cost), lights off the path, a cairn of crow skulls,
@@ -263,7 +263,7 @@ var spoke := false              # had a word this clearing
 var warned := false             # the walker has begged you back onto the trail this clearing
 var done_day := 0               # the day a walker was taken, or turned away
 var treks_done := 0             # saved: treks finished, which sets the wood's dread
-var works := {}                 # trail works built, by id (waymarks, footbridge, gate_lamp, boardwalk, waystation, chapel_steps): step 4 fills and saves this
+var works := {}                 # trail works built, by id (waymarks, footbridge, gate_lamp, boardwalk, waystation, chapel_steps): saved, built from the Buildings section
 var _confirm_until := 0.0
 var _confirm_id := ""
 var _flipped := {}              # mirrored layouts, by index (see _layout)
@@ -282,10 +282,57 @@ func _build() -> void:
 	m.add_child(layer)
 
 
-# --- Hooks for the trail works (step 4) ------------------------------------------------------------
+# --- The trail works and their hooks ---------------------------------------------------------------
 
 func _has_work(id: String) -> bool:
 	return bool(works.get(id, false))
+
+
+# The trail works, paid for from the Buildings section, each once, from when its route opens ("route").
+const WORKS := {
+	"waymarks": {"name": "Waymarks", "route": "mill", "cost": {"coins": 150, "wood": 10},
+		"about": "Blazes cut at every fork, so the fingerpost reads without Bushcrafting.",
+		"built": "The forks are blazed: the fingerpost reads for anyone."},
+	"footbridge": {"name": "The mill footbridge", "route": "mill", "cost": {"coins": 300, "wood": 12, "rope": 6},
+		"about": "Planks over the hollows on the mill path, so a flood there is crossed dry.",
+		"built": "The hollows on the mill path are crossed dry."},
+	"gate_lamp": {"name": "A lamp at the gate", "route": "mill", "cost": {"coins": 400, "iron_bar": 2},
+		"about": "A lamp hung at the gap in the trees. The lane sees it, and walkers come twice as often.",
+		"built": "Walkers come two days in three."},
+	"boardwalk": {"name": "The orchard boardwalk", "route": "orchard", "cost": {"coins": 700, "wood": 20, "rope": 8},
+		"about": "A boardwalk over the wet ground: the orchard is one clearing shorter.",
+		"built": "The orchard is a clearing shorter."},
+	"waystation": {"name": "The waystation hut", "route": "chapel", "cost": {"coins": 1200, "wood": 30, "hardwood": 10},
+		"about": "A hut halfway along the long routes (%d clearings or more): a half-hour rest, nerve and warmth full, no oil burned." % WAYSTATION_MIN,
+		"built": "Rest halfway on the long routes."},
+	"chapel_steps": {"name": "The chapel steps", "route": "chapel", "cost": {"coins": 1800, "stone": 30, "iron_bar": 4},
+		"about": "Stone steps up the hill, with iron rails. The chapel by night without the doubled sanity drain.",
+		"built": "The chapel by night costs no more sanity than by day."},
+}
+
+
+# Why a work can't be built now ("built" once it is), or "" when it can.
+func _work_why(id: String) -> String:
+	if _has_work(id):
+		return "built"
+	var w: Dictionary = WORKS[id]
+	if m.day < int(ROUTES[w["route"]]["from"]):
+		return "not until the way to %s opens" % ROUTES[w["route"]]["to"]
+	if not m._can_afford(w["cost"]):
+		return "needs %s" % m.projects._cost_list(w["cost"])
+	return ""
+
+
+func _build_work(id: String) -> void:
+	var why := _work_why(id)
+	var w: Dictionary = WORKS[id]
+	if why != "":
+		m._show_message("%s: %s." % [w["name"], why])
+		return
+	m._pay(w["cost"])
+	works[id] = true
+	m.play_sfx("repair", 0.05)
+	m._show_message("%s is built. %s" % [w["name"], w["built"]])
 
 
 # The fingerpost at a fork reads with Bushcrafting, or for anyone once the Waymarks are cut.

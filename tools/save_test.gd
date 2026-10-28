@@ -114,7 +114,7 @@ func _run() -> void:
 	# An old save from before the version number, the bell and treks.
 	_save_on_day(10)
 	var old := _raw(path)
-	for key in ["save_version", "bell_day", "treks_done", "trek_grove_done"]:
+	for key in ["save_version", "bell_day", "treks_done", "trek_grove_done", "trek_works"]:
 		old.erase(key)
 	for mat in ["lamp_oil", "storm_oak", "flax", "bell_metal", "bell_frame", "bell_rope"]:
 		old["materials"].erase(mat)
@@ -123,8 +123,10 @@ func _run() -> void:
 	m.projects.bell_day = 50
 	m.trek.treks_done = 3
 	m.trek.grove_done = true
+	m.trek.works = {"waymarks": true}
 	_check("old save: loads", _load() == 10)
 	_check("old save: bell not begun, no treks", m.projects.bell_day == -1 and m.trek.treks_done == 0 and not m.trek.grove_done)
+	_check("old save: no trail works", m.trek.works.is_empty())
 	_check("old save: new materials and items present", m.materials.has("lamp_oil") and m.materials.has("bell_rope") and m.inventory.has("trail_ration"))
 	_check("old save: migrated version", int(SaveSystem.read_save(path).get("save_version", 0)) == SaveSystem.SAVE_VERSION)
 	# A save whose numbers are null instead of numbers.
@@ -139,14 +141,17 @@ func _run() -> void:
 	m.projects.bell_day = 12
 	m.trek.treks_done = 2
 	m.trek.grove_done = true
+	m.trek.works = {"footbridge": true, "chapel_steps": true}
 	_save_on_day(11)
 	m.materials["lamp_oil"] = 0
 	m.inventory["trail_ration"] = 0
 	m.projects.bell_day = -1
 	m.trek.treks_done = 0
 	m.trek.grove_done = false
+	m.trek.works = {}
 	_check("new fields round-trip", _load() == 11 and int(m.materials["lamp_oil"]) == 3 and int(m.materials["storm_oak"]) == 2
 		and int(m.inventory["trail_ration"]) == 4 and m.projects.bell_day == 12 and m.trek.treks_done == 2 and m.trek.grove_done)
+	_check("trail works round-trip", m.trek.works.size() == 2 and m.trek._has_work("footbridge") and m.trek._has_work("chapel_steps"))
 
 	# Saving in the cave puts you at the homestead on load.
 	var home := m._tile_center(m.HOMESTEAD_ARRIVE.x, m.HOMESTEAD_ARRIVE.y)

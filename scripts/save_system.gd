@@ -3,12 +3,12 @@ extends RefCounted
 
 # Bumped when a save's keys change shape. Saves from before the number was written count as 1.
 # _migrate lifts an older save one version at a time, so every old save still loads.
-const SAVE_VERSION := 3
+const SAVE_VERSION := 4
 # Keys a save must hold with the right type, or it isn't read: the loader would trip over anything else.
 const DICT_KEYS := ["inventory", "materials", "skill_xp", "stats", "equipment", "quests_done", "achievements_done",
 	"guardian_done", "tool_tier", "bank_materials"]
 const ARRAY_KEYS := ["crops", "brush", "felled", "rocks", "quarry", "cave_mined", "decor", "steps_done", "rook_pages",
-	"desk_mail", "desk_orders", "tips_seen", "diary_new", "hen_ages", "goat_ages", "player_pos", "campsite"]
+	"desk_mail", "desk_orders", "tips_seen", "diary_new", "hen_ages", "goat_ages", "player_pos", "campsite", "trek_works"]
 
 var m: MainGame
 
@@ -90,6 +90,7 @@ func _save_game() -> void:
 		"bell_day": m.projects.bell_day,
 		"treks_done": m.trek.treks_done,
 		"trek_grove_done": m.trek.grove_done,
+		"trek_works": m.trek.works.keys(),
 		"rook_pages": m.mystery.found.keys(),
 		"last_visitor": m.nights.last_visitor,
 		"sanity": m.sanity,
@@ -219,6 +220,10 @@ func _load_game() -> bool:
 	m.projects.bell_day = int(data.get("bell_day", -1))
 	m.trek.treks_done = int(data.get("treks_done", 0))
 	m.trek.grove_done = bool(data.get("trek_grove_done", false))
+	m.trek.works.clear()
+	for id in data.get("trek_works", []):
+		if TrekSystem.WORKS.has(str(id)):
+			m.trek.works[str(id)] = true
 	m.projects.steps_done.clear()
 	for id in data.get("steps_done", []):
 		m.projects.steps_done[str(id)] = true
@@ -400,6 +405,10 @@ static func _migrate(data: Dictionary) -> Dictionary:
 		# Version 3 added the other trek routes. Nobody has walked the woman in the grey shawl to the grove yet.
 		if not data.has("trek_grove_done"):
 			data["trek_grove_done"] = false
+	if v < 4:
+		# Version 4 added the trail works. None are built yet.
+		if not data.has("trek_works"):
+			data["trek_works"] = []
 	# A save from a newer build keeps its number; keys this build doesn't know are ignored.
 	data["save_version"] = maxi(v, SAVE_VERSION)
 	return data

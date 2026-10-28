@@ -3225,6 +3225,9 @@ func _on_panel_action(action_id: String) -> void:
 	if action_id.begins_with("bellpart:"):
 		projects._make_part(action_id.trim_prefix("bellpart:"))
 		return
+	if action_id.begins_with("work:"):
+		trek._build_work(action_id.trim_prefix("work:"))
+		return
 	if action_id.begins_with("pastime:") or action_id.begins_with("order:") or action_id == "pay_tax" or action_id == "mail_clear" or action_id == "diary":
 		desk._desk_action(action_id)
 		return

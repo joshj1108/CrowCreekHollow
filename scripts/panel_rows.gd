@@ -471,7 +471,7 @@ func _barn_rows() -> Array:
 
 
 # The Buildings section, in tabs: the homestead ladder, the workshop, the animals' buildings, decor,
-# and the crow bell's parts until the bell is hung. Trail works will be one more tab.
+# the crow bell's parts until the bell is hung, and the trail works once walkers come.
 func _buildings_rows() -> Array:
 	var p: FarmProjects = m.projects
 	var rows: Array = [{"tab": "Homestead", "icon": "homestead"}]
@@ -562,6 +562,27 @@ func _buildings_rows() -> Array:
 				row["enabled"] = why == ""
 			rows.append(row)
 		rows.append({"note": "With all three parts, place the bell from Decor on All Hallows (October 31). The Hollow comes to it that night."})
+
+	if m.day >= TrekSystem.FROM_DAY:
+		rows.append({"tab": "Trail works", "icon": "lantern"})
+		for id in TrekSystem.WORKS:
+			var w: Dictionary = TrekSystem.WORKS[id]
+			var why: String = m.trek._work_why(id)
+			var row := {"name": str(w["name"]), "about": str(w["about"]), "value": p._cost_list(w["cost"])}
+			if why == "built":
+				row["status"] = "Built"
+				row["status_kind"] = "done"
+				row["value"] = str(w["built"])
+			else:
+				var needs := _needs(w["cost"], "")
+				var r: Dictionary = TrekSystem.ROUTES[w["route"]]
+				needs.append({"text": "The way to %s open" % r["to"], "ok": m.day >= int(r["from"])})
+				row["needs"] = needs
+				row["button"] = "Build"
+				row["action"] = "work:" + id
+				row["enabled"] = why == ""
+			rows.append(row)
+		rows.append({"note": "Each work is built once, from when its route opens, and eases every trek after."})
 	return rows
 
 

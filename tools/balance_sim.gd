@@ -43,20 +43,9 @@ const CLEARING_SANITY := 2.0    # the wood's sanity drain and the tall one, a cl
 const EVENT_SANITY := 3.0       # crows, lights or dogs
 const OIL_PRICE := 8
 const ROPE_FIBER := 2
-# Each work can be paid for from its day (when its route opens).
-const TRAIL_WORKS := [
-	{"id": "waymarks", "day": 62, "coins": 150, "wood": 10},
-	{"id": "footbridge", "day": 62, "coins": 300, "wood": 12, "rope": 6},
-	{"id": "gate lamp", "day": 62, "coins": 400, "iron_bar": 2},
-	{"id": "boardwalk", "day": 152, "coins": 700, "wood": 20, "rope": 8},
-	{"id": "waystation", "day": 244, "coins": 1200, "wood": 30, "hardwood": 10},
-	{"id": "chapel steps", "day": 244, "coins": 1800, "stone": 30, "iron_bar": 4},
-]
-
 var mode := "engaged"
 var treks_a_week := 0
 var rope := 0
-var works_done := 0
 var trek_log := {"mill": 0, "orchard": 0, "chapel": 0, "grove": 0, "dark": 0, "floods": 0, "dogs": 0, "skipped": 0, "oil_coins": 0, "works_coins": 0}
 var days := 60
 var every := 1
@@ -665,26 +654,30 @@ func _spare() -> int:
 	return m.money - m.tax_owed - (m.desk._property_value() if bill_soon else 0)
 
 
+# The trail works (TrekSystem.WORKS), in order, each built through the game once the coins and materials are
+# there. The sim keeps its rope apart, so it is lent to the game's materials for the build.
 func _trail_works() -> void:
-	if works_done >= TRAIL_WORKS.size() or m.day < int(TRAIL_WORKS[works_done]["day"]):
+	var t := m.trek
+	var id := ""
+	for k in t.WORKS:
+		if not t._has_work(k):
+			id = k
+			break
+	if id == "" or m.day < int(t.ROUTES[t.WORKS[id]["route"]]["from"]):
 		return
-	var w: Dictionary = TRAIL_WORKS[works_done]
-	if int(w.get("rope", 0)) > rope and int(m.materials["fiber"]) >= ROPE_FIBER:
+	var cost: Dictionary = t.WORKS[id]["cost"]
+	if int(cost.get("rope", 0)) > rope and int(m.materials["fiber"]) >= ROPE_FIBER:
 		m.materials["fiber"] -= ROPE_FIBER   # twist a rope toward it
 		rope += 1
-	if _spare() < int(w["coins"]) + 100 or rope < int(w.get("rope", 0)):
+	if _spare() < int(cost["coins"]) + 100:
 		return
-	for k in w:
-		if not k in ["id", "day", "coins", "rope"] and int(m.materials[k]) < int(w[k]):
-			return
-	m.money -= int(w["coins"])
-	trek_log["works_coins"] += int(w["coins"])
-	rope -= int(w.get("rope", 0))
-	for k in w:
-		if not k in ["id", "day", "coins", "rope"]:
-			m.materials[k] -= int(w[k])
-	works_done += 1
-	_mark("work: " + str(w["id"]))
+	m.materials["rope"] = rope
+	if t._work_why(id) == "":
+		t._build_work(id)
+		trek_log["works_coins"] += int(cost["coins"])
+		_mark("work: " + id)
+	rope = int(m.materials["rope"])
+	m.materials["rope"] = 0
 
 
 # --- Nights -------------------------------------------------------------------------------
@@ -789,7 +782,7 @@ func _summary() -> void:
 	print("--- coins earned %s, spent %s; hens %d goats %d; property value %d; tax owed %d" % [earned, spent, m.hens, m.goats, m.desk._property_value(), m.tax_owed])
 	print("--- materials: %s" % JSON.stringify(m.materials))
 	if treks_a_week > 0:
-		print("--- treks: %s, trail works done %d" % [trek_log, works_done])
+		print("--- treks: %s, trail works done %d: %s" % [trek_log, m.trek.works.size(), m.trek.works.keys()])
 	if caves["visits"] > 0:
 		print("--- cave: %.1f copper and %.1f iron nodes a day on average, over %d visits" % [
 			float(caves["copper"]) / caves["visits"], float(caves["iron"]) / caves["visits"], caves["visits"]])
