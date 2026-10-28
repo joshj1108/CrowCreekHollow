@@ -3,10 +3,10 @@ extends RefCounted
 
 # Bumped when a save's keys change shape. Saves from before the number was written count as 1.
 # _migrate lifts an older save one version at a time, so every old save still loads.
-const SAVE_VERSION := 5
+const SAVE_VERSION := 6
 # Keys a save must hold with the right type, or it isn't read: the loader would trip over anything else.
 const DICT_KEYS := ["inventory", "materials", "skill_xp", "stats", "equipment", "quests_done", "achievements_done",
-	"guardian_done", "tool_tier", "bank_materials"]
+	"guardian_done", "tool_tier", "bank_materials", "trek_walked"]
 const ARRAY_KEYS := ["crops", "brush", "felled", "rocks", "quarry", "cave_mined", "decor", "steps_done", "rook_pages",
 	"desk_mail", "desk_orders", "tips_seen", "diary_new", "hen_ages", "goat_ages", "player_pos", "campsite", "trek_works"]
 
@@ -89,6 +89,8 @@ func _save_game() -> void:
 		"steps_done": m.projects.steps_done.keys(),
 		"bell_day": m.projects.bell_day,
 		"treks_done": m.trek.treks_done,
+		"trek_last_day": m.trek.last_day,
+		"trek_walked": m.trek.walked,
 		"trek_grove_done": m.trek.grove_done,
 		"trek_works": m.trek.works.keys(),
 		"rook_pages": m.mystery.found.keys(),
@@ -219,6 +221,13 @@ func _load_game() -> bool:
 		m.mystery.found[str(id)] = true
 	m.projects.bell_day = int(data.get("bell_day", -1))
 	m.trek.treks_done = int(data.get("treks_done", 0))
+	m.trek.last_day = int(data.get("trek_last_day", 0))
+	m.trek.walked.clear()
+	var walked: Variant = data.get("trek_walked", {})
+	if typeof(walked) == TYPE_DICTIONARY:
+		for id in walked:
+			if TrekSystem.ROUTES.has(str(id)) and typeof(walked[id]) in [TYPE_INT, TYPE_FLOAT]:
+				m.trek.walked[str(id)] = int(walked[id])
 	m.trek.grove_done = bool(data.get("trek_grove_done", false))
 	m.trek.works.clear()
 	for id in data.get("trek_works", []):
@@ -421,6 +430,14 @@ static func _migrate(data: Dictionary) -> Dictionary:
 					ready = false
 			if ready:
 				mats["bell_clapper"] = 1
+	if v < 6:
+		# Version 6 brought the wood closer to a farm that goes too long without a trek. An older save starts its
+		# count on the day it was saved, so loading it doesn't find the wood already at the fence. It also counts
+		# walks by route for the walkers' standing; an older save didn't, so its walkers start from none.
+		if not data.has("trek_last_day"):
+			data["trek_last_day"] = int(data.get("day", 0))
+		if not data.has("trek_walked"):
+			data["trek_walked"] = {}
 	# A save from a newer build keeps its number; keys this build doesn't know are ignored.
 	data["save_version"] = maxi(v, SAVE_VERSION)
 	return data

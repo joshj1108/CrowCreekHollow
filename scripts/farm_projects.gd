@@ -17,6 +17,8 @@ const DECOR := {
 		"desc": "Planted in spring or summer. Each bed gives +1 sanity every morning, except in winter."},
 	"path": {"name": "Gravel path", "cost": {"stone": 1}, "skill": "", "level": 0, "max": 400, "blocks": false,
 		"desc": "Turns a tile of grass into path. Keeps placing until you run out of stone or press B."},
+	"apple_tree": {"name": "Apple tree", "cost": {"apple_sapling": 1}, "skill": "Farming", "level": 4, "max": 6, "blocks": true,
+		"desc": "A sapling from the drowned orchard, which the Tull family give once they know you (walk Davy to the orchard). Each bears an apple every autumn morning."},
 	"bell": {"name": "Crow bell", "cost": {"bell_metal": 1, "bell_frame": 1, "bell_rope": 1, "bell_clapper": 1, "feathers": 20, "coins": 150}, "skill": "Carpentry", "level": 6, "max": 1, "blocks": true,
 		"desc": "Hung only on All Hallows, and the Hollow comes to it that night. While it stands, the field shadow can't reach the house, so the Hollow stops coming, and the night takes a quarter less from your sanity."},
 }
@@ -308,6 +310,19 @@ func _update(darkness: float) -> void:
 
 # The morning's lift from the flower beds.
 func _morning() -> String:
+	return _apples() + _flowers()
+
+
+# Each apple tree drops an apple every autumn morning.
+func _apples() -> String:
+	var trees := _count("apple_tree")
+	if trees == 0 or _season() != "Autumn":
+		return ""
+	m.inventory["apples"] += trees
+	return " The apple tree%s dropped %d apple%s in the night." % ["" if trees == 1 else "s", trees, "" if trees == 1 else "s"]
+
+
+func _flowers() -> String:
 	var beds := _count("flowers")
 	if beds == 0:
 		return ""
@@ -351,6 +366,23 @@ func _draw() -> void:
 					layer.draw_line(p, p + Vector2(0, 6), Color("4a7a3a"), 2.0)
 					layer.draw_circle(p, 4.5, ink)
 					layer.draw_circle(p, 3.5, colours[(k + t.x) % colours.size()])
+			"apple_tree":
+				# A short trunk under a round crown, bare in winter, with apples in autumn.
+				var foot := c + Vector2(0, px * 0.4)
+				layer.draw_line(foot, foot + Vector2(0, -px * 0.6), ink, 8.0)
+				layer.draw_line(foot, foot + Vector2(0, -px * 0.6), Color("5a3a26"), 5.0)
+				var crown := foot + Vector2(0, -px * 0.85)
+				if winter:
+					for k in 3:
+						var tip := crown + Vector2(px * (k - 1) * 0.3, -px * 0.25)
+						layer.draw_line(foot + Vector2(0, -px * 0.55), tip, Color("5a3a26"), 3.0)
+				else:
+					layer.draw_circle(crown, px * 0.42 + 2.0, ink)
+					layer.draw_circle(crown, px * 0.42, Color("4a6a32"))
+					layer.draw_circle(crown + Vector2(-px * 0.1, -px * 0.1), px * 0.24, Color("5a7a3a"))
+					if _season() == "Autumn":
+						for k in 4:
+							layer.draw_circle(crown + Vector2(px * (-0.22 + 0.15 * k), px * (0.12 if k % 2 == 0 else -0.08)), 3.5, Color("b8442e"))
 			"bell":
 				# A tall post with a crossbar and an iron bell hanging under it.
 				var base := c + Vector2(0, px * 0.4)

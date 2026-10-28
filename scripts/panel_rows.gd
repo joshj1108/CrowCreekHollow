@@ -516,7 +516,7 @@ func _buildings_rows() -> Array:
 	rows.append({"note": "Each one is placed on open grass. Move it any time from here."})
 
 	rows.append({"tab": "Decor", "icon": "decor"})
-	for kind in ["lamp", "flowers", "path", "bell"]:
+	for kind in ["lamp", "flowers", "path", "apple_tree", "bell"]:
 		var d: Dictionary = p.DECOR[kind]
 		var have := p._count(kind)
 		var row := {"name": str(d["name"]), "about": str(d["desc"]), "value": p._cost_text(kind)}
@@ -591,6 +591,19 @@ func _buildings_rows() -> Array:
 				row["enabled"] = why == ""
 			rows.append(row)
 		rows.append({"note": "Each work is built once, from when its route opens, and eases every trek after."})
+		# The walkers, and what each gives once they know you.
+		rows.append({"section": "Walkers"})
+		for id in TrekSystem.STANDING:
+			var s: Dictionary = TrekSystem.STANDING[id]
+			var n := int(m.trek.walked.get(id, 0))
+			var row := {"name": m.trek._cap(str(TrekSystem.ROUTES[id]["walker"])), "about": str(s["about"]),
+				"value": "walked %d time%s" % [n, "" if n == 1 else "s"]}
+			if n >= int(s["at"]):
+				row["status"] = "Knows you"
+				row["status_kind"] = "done"
+			else:
+				row["status"] = "%d more walk%s" % [int(s["at"]) - n, "" if int(s["at"]) - n == 1 else "s"]
+			rows.append(row)
 	return rows
 
 

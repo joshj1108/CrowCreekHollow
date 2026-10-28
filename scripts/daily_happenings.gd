@@ -61,6 +61,8 @@ var layer: Node2D
 var _rng := RandomNumberGenerator.new()
 var _picks: Array[int] = []     # the happening for each day from day 2
 
+const CROW_GIFTS_AFTER_GROVE := 3.0
+
 
 func _init(main: MainGame) -> void:
 	m = main
@@ -76,7 +78,9 @@ func _raw_pick(day: int) -> int:
 	_rng.seed = hash([day, "happening"])
 	var weights := PackedFloat32Array()
 	for h in HAPPENINGS:
-		weights.append(float(h["weight"]) if _in_season(h, day) else 0.0)
+		# Once the Hollow sleeps, the crows bring their gifts far more often.
+		var w := float(h["weight"]) * (CROW_GIFTS_AFTER_GROVE if h["id"] == "crow_gifts" and m.trek.grove_done else 1.0)
+		weights.append(w if _in_season(h, day) else 0.0)
 	return _rng.rand_weighted(weights)
 
 

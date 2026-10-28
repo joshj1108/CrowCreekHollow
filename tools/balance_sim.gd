@@ -46,6 +46,7 @@ const ROPE_FIBER := 2
 var mode := "engaged"
 var treks_a_week := 0
 var rope := 0
+var grove_rations := 0      # rations baked ahead for the grove, one a day once she waits (see _trek)
 var trek_log := {"mill": 0, "orchard": 0, "chapel": 0, "grove": 0, "dark": 0, "floods": 0, "dogs": 0, "skipped": 0, "oil_coins": 0, "works_coins": 0}
 var days := 60
 var every := 1
@@ -546,13 +547,24 @@ func _trek() -> void:
 	if (m.day % 7) >= treks_a_week:
 		return
 	var t := m.trek
+	# Once the woman in the grey shawl waits, a ration a day is baked ahead for her walk, as a player would,
+	# since the hens and goats leave few crops spare on any one day.
+	var grove_need := 0
+	for route in TREK_ROUTES:
+		if route["id"] == "grove":
+			grove_need = int(route["rations"])
+	if t._route_open("grove") and grove_rations < grove_need and m.farm._crop_total() > 0 			and int(m.inventory["eggs"]) + int(m.inventory["milk"]) > 0 and int(m.materials["wood"]) > 0:
+		m.inventory["eggs" if int(m.inventory["eggs"]) > 0 else "milk"] -= 1
+		m.farm._spend_crops(1)
+		m.materials["wood"] -= 1
+		grove_rations += 1
 	for route in TREK_ROUTES:
 		var id := str(route["id"])
 		if not t._route_open(id) or m.progression._level("Bushcrafting") < int(t.ROUTES[id]["level"]):
 			continue
 		var r: Dictionary = _route_trek(route)
 		var oil_cost := maxi(0, int(r["oil"]) - int(m.materials["lamp_oil"])) * OIL_PRICE
-		var rations := int(r["rations"])
+		var rations := int(r["rations"]) - (grove_rations if id == "grove" else 0)
 		var ration_food := int(m.inventory["eggs"]) + int(m.inventory["milk"])
 		var need_rope := maxi(0, int(r["rope"]) - rope)
 		var short := ""
@@ -560,7 +572,7 @@ func _trek() -> void:
 			short = "coins"
 		elif ration_food < rations:
 			short = "eggs/milk"
-		elif m.farm._crop_total() < rations + 2:
+		elif m.farm._crop_total() < rations + (2 if rations > 0 else 0):
 			short = "crops"
 		elif int(m.materials["wood"]) < rations:
 			short = "wood"
@@ -568,6 +580,8 @@ func _trek() -> void:
 			short = "rope"
 		if short != "":
 			trek_log["short " + short] = int(trek_log.get("short " + short, 0)) + 1
+			if id == "grove":
+				trek_log["grove short " + short] = int(trek_log.get("grove short " + short, 0)) + 1
 			continue
 		# Oil is bought for what the walk burns, after any the chapel's vicar gave.
 		m.money -= oil_cost
@@ -581,6 +595,8 @@ func _trek() -> void:
 			m.materials["wood"] -= 1
 		m.materials["fiber"] -= need_rope * ROPE_FIBER
 		rope += need_rope - int(r["rope"])
+		if id == "grove":
+			grove_rations = 0
 		_pass(float(r["hours"]), false)
 		m.sanity_sys._change_sanity(-float(r["sanity"]))
 		_track_sanity()
@@ -590,9 +606,7 @@ func _trek() -> void:
 		# The route's own gifts (seeds, applewood and flax, lamp oil and storm oak), from the game.
 		t.night = false
 		t._gifts(1)
-		t.treks_done += 1
-		if id == "grove":
-			t.grove_done = true
+		t._on_arrived()
 		trek_log[id] += 1
 		trek_log["dark"] += int(r["dark"])
 		trek_log["floods"] += int(r["flood"])

@@ -164,6 +164,28 @@ func _run() -> void:
 	_check("clapper and trek pages round-trip", _load() == 11 and int(m.materials["bell_clapper"]) == 1
 		and m.mystery.found.has("t1") and m.mystery.found.has("t2") and m.mystery._next_trek_page("mill") == ""
 		and m.mystery._next_trek_page("orchard") == "t3")
+	# Version 6: the day of the last trek and the walkers' standing round-trip, with flour, saplings, bread
+	# and apples; an older save counts the wood from its own day, and its walkers from none.
+	m.trek.last_day = 9
+	m.trek.walked = {"mill": 3, "chapel": 1}
+	m.materials["flour"] = 4
+	m.materials["apple_sapling"] = 1
+	m.inventory["bread"] = 2
+	m.inventory["apples"] = 5
+	_save_on_day(11)
+	m.trek.last_day = 0
+	m.trek.walked = {}
+	m.materials["flour"] = 0
+	m.inventory["bread"] = 0
+	_check("last trek day and standing round-trip", _load() == 11 and m.trek.last_day == 9 and int(m.trek.walked.get("mill", 0)) == 3
+		and int(m.trek.walked.get("chapel", 0)) == 1 and int(m.materials["flour"]) == 4 and int(m.materials["apple_sapling"]) == 1
+		and int(m.inventory["bread"]) == 2 and int(m.inventory["apples"]) == 5)
+	var v5 := _raw(path)
+	v5["save_version"] = 5
+	v5.erase("trek_last_day")
+	v5.erase("trek_walked")
+	_write_text(path, JSON.stringify(v5))
+	_check("version 5 save: wood counts from the save's day, no standing", _load() == 11 and m.trek.last_day == 11 and m.trek.walked.is_empty())
 	# A version 4 save with the three bell parts made, and one with them not made: only the first gets the clapper.
 	var v4 := _raw(path)
 	v4["save_version"] = 4

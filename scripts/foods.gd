@@ -22,6 +22,10 @@ const LIST := [
 		"desc": "Milked from the goats."},
 	{"id": "trail_ration", "held": "trail_ration", "name": "Trail Ration", "icon": "hash", "tint": "c8a060", "skill": "Cooking", "level": 2, "difficulty": 2, "price": 10,
 		"desc": "An egg and a turnip baked hard in a crust. It keeps, and a frightened walker in the Rookery Wood steadies when they eat one."},
+	{"id": "apple", "held": "apples", "name": "Apple", "icon": "turnip", "tint": "b8442e", "skill": "Farming", "level": 4, "difficulty": 2, "price": 0,
+		"desc": "From an apple tree grown from the drowned orchard's stock. Sharp and sweet, and it keeps."},
+	{"id": "bread", "held": "bread", "name": "Farmhouse Bread", "icon": "hash", "tint": "c89a58", "skill": "Cooking", "level": 3, "difficulty": 3, "price": 14,
+		"desc": "A loaf of the mill's flour and an egg, baked at the fire. It keeps, and on a trek a walker who has run out of rations takes heart from it."},
 	{"id": "fish_meal", "held": "fish_meal", "name": "Grilled Fish", "icon": "grilled", "tint": "c8864a", "skill": "Cooking", "level": 0, "difficulty": 1, "price": 8,
 		"desc": "A fish grilled over a small fire."},
 	{"id": "turnip_hash", "held": "turnip_hash", "name": "Turnip Hash", "icon": "hash", "tint": "b98a5a", "skill": "Cooking", "level": 0, "difficulty": 1, "price": 8,
@@ -48,6 +52,7 @@ const LIST := [
 const RECIPES := [
 	{"food": "fish_meal", "station": "fire", "needs": {"fish": 1, "wood": 1}, "xp": 15},
 	{"food": "trail_ration", "station": "fire", "needs": {"eggs": 1, "turnips": 1, "wood": 1}, "xp": 12},
+	{"food": "bread", "station": "fire", "needs": {"flour": 2, "eggs": 1, "wood": 1}, "xp": 20},
 	{"food": "turnip_hash", "station": "fire", "needs": {"turnips": 2, "wood": 1}, "xp": 10},
 	{"food": "pumpkin_soup", "station": "fire", "needs": {"pumpkins": 2, "wood": 1}, "xp": 18},
 	{"food": "fish_stew", "station": "fire", "needs": {"fish": 1, "turnips": 2, "wood": 1}, "xp": 18},

@@ -226,8 +226,9 @@ func _update_first() -> void:
 
 
 func _pick() -> Dictionary:
-	# The night the crow bell is hung, the Hollow comes to it one last time.
-	if shadow_steps >= SHADOW_MAX or m.projects.bell_day == m.day:
+	# The night the crow bell is hung, the Hollow comes to it one last time. Once Agnes is walked to the grove,
+	# it sleeps and never comes again.
+	if (shadow_steps >= SHADOW_MAX and not m.trek.grove_done) or m.projects.bell_day == m.day:
 		return HOLLOW
 	var tier := _tier()
 	var options: Array = []
@@ -329,6 +330,7 @@ func _resolve(faced: bool, show := true) -> String:
 	loss *= (2.0 if m.sanity_sys._event_active("dread") else 1.0) * (0.5 if m.sanity_sys._event_active("ward") else 1.0)
 	loss *= 0.5 if charmed else 1.0
 	loss *= m.projects._night_mult()   # the crow bell
+	loss *= m.trek._night_mult()       # walked someone today, the wood come close, or the Hollow asleep
 	loss *= m.NIGHT_LOSS_MULT
 	m.sanity_sys._change_sanity(-loss)
 	if faced:
@@ -358,6 +360,12 @@ func _resolve(faced: bool, show := true) -> String:
 		else:
 			# While the crow bell stands, the shadow stops a step short of the house.
 			shadow_steps = mini(SHADOW_MAX - (1 if m.projects._has_bell() else 0), shadow_steps + int(v.get("creep", 0)))
+	# While the wood is close it pushes the shadow a step nearer every night, whatever the visitor.
+	if m.trek._wood_close() and v["id"] != "hollow":
+		shadow_steps = mini(SHADOW_MAX - (1 if m.projects._has_bell() else 0), shadow_steps + 1)
+	# Once the Hollow sleeps, the field has no shadow.
+	if m.trek.grove_done:
+		shadow_steps = 0
 	if show and text != "":
 		m._show_message(text)
 	return text

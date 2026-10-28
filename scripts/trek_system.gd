@@ -150,7 +150,37 @@ const NIGHT_TALL_SPEED := 0.3
 const NIGHT_OIL := 1                  # a flask more to set out by night
 
 # The Hollow's grove opens late in the second autumn, once the crow bell is hung, and is walked once.
-const GROVE_DAY := 381                # October 15th of the second year
+const GROVE_DAY := 397                # the day after the second All Hallows, the first the bell can be hung
+# What treks do for the nights. Coming home from a walk pushes the field shadow back and halves what tonight's
+# visitor takes; too long without one and the wood creeps up to the farm, and the nights take more and push the
+# shadow closer, until someone is walked again. Once Agnes is walked to the grove, the Hollow sleeps.
+# Standing: once a walker has been walked "at" times, every walk to their route gives more (_standing_gifts).
+const STANDING := {
+	"mill": {"at": 3, "about": "Once Maren knows you, her sister mills for you: 2 flour a walk, for farmhouse bread at the fire."},
+	"orchard": {"at": 3, "about": "Once Davy knows you, his mother sends an apple sapling from the drowned orchard each walk, to plant from Decor."},
+	"chapel": {"at": 2, "about": "Once the vicar knows you, he blesses you each walk: lost sanity limit back (up to 5) and +10 sanity."},
+}
+const STANDING_FLOUR := 2
+const STANDING_APPLES := 3            # from the orchard once you have saplings for every tree
+const BLESS_LIMIT := 5
+const BLESS_SANITY := 10.0
+# Trade: each destination buys some of what you carry, for more than the farm stand pays (_trade, on arriving).
+# Up to TRADE_MAX items a walk, and four of each kind are kept back for you (eggs go into rations). Turnips
+# aren't bought anywhere: they are the rations' staple.
+const TRADE := {
+	"mill": {"who": "Maren's sister", "goods": ["corn"], "what": "corn, for the mill"},
+	"orchard": {"who": "the Tull family", "goods": ["eggs", "milk"], "what": "eggs and milk, since the dogs took their hens"},
+	"chapel": {"who": "the vicar", "goods": ["pumpkins", "fish"], "what": "pumpkins and fish, for the soup he gives out"},
+}
+const TRADE_MULT := 1.5
+const TRADE_MAX := 10
+const TRADE_KEEP := 4
+const BREAD_NERVE := 50.0             # a loaf, given when the rations are gone
+const TREK_PUSH := 1                  # shadow steps back on coming home from a trek
+const WALKED_NIGHT := 0.5             # what tonight's visitor takes, the day you walked someone
+const WOOD_DAYS := 12                 # days without a trek before the wood comes closer (from the first walker day)
+const WOOD_CLOSE_NIGHT := 1.25        # what each night takes while it is close
+const GROVE_NIGHT := 0.75             # what each night takes once the Hollow sleeps
 # The waystation hut trail work: a rest halfway on the long routes (nerve and warmth back, no oil burned).
 const WAYSTATION_MIN := 5             # routes with at least this many clearings have a halfway hut
 
@@ -265,6 +295,8 @@ var spoke := false              # had a word this clearing
 var warned := false             # the walker has begged you back onto the trail this clearing
 var done_day := 0               # the day a walker was taken, or turned away
 var treks_done := 0             # saved: treks finished, which sets the wood's dread
+var walked := {}                # saved: walks finished, by route, for the walkers' standing
+var last_day := 0               # saved: the day the last trek arrived (0: none yet), for the wood coming closer
 var works := {}                 # trail works built, by id (waymarks, footbridge, gate_lamp, boardwalk, waystation, chapel_steps): saved, built from the Buildings section
 var _confirm_until := 0.0
 var _confirm_id := ""
@@ -401,16 +433,22 @@ func _walker_tile(id := "mill") -> Vector2i:
 
 func _morning_note() -> String:
 	if not _walker_day(m.day):
-		return ""
+		return _wood_note()
 	var names: Array = []
 	for id in ROUTES:
 		if _route_open(id):
 			names.append("%s (to %s)" % [ROUTES[id]["walker"], ROUTES[id]["to"]])
 	if names.is_empty():
-		return ""
+		return _wood_note()
 	var who: String = names[0] if names.size() == 1 else ", ".join(names.slice(0, -1)) + " and " + str(names[-1])
 	return " %s %s waiting at the gap in the trees north of the house, wanting walking through the wood, before three." % [
-		_cap(who), "is" if names.size() == 1 else "are"]
+		_cap(who), "is" if names.size() == 1 else "are"] + _wood_note()
+
+
+func _wood_note() -> String:
+	if not _wood_close():
+		return ""
+	return " The wood has crept up to the north fence in the night, and crows sit along it, watching the house. Walk someone through, and it will draw back."
 
 
 func _oil_needed(id := "mill", by_night := false) -> int:
@@ -512,14 +550,33 @@ func _ask(id: String) -> void:
 		_confirm_id = id
 		var steps := _steps(id)
 		var rations := int(m.inventory["trail_ration"])
+		var loaves := int(m.inventory["bread"])
 		var bandages := int(m.inventory["bandage"])
-		m._show_message(_w("{W} wants walking to %s through the Rookery Wood, %d or %d clearings as the trail forks.%s A flask of oil burns little more than a minute in there. You have %d lamp oil, %d trail ration%s, %d rope and %d bandage%s. Press Space again to set out.") % [
+		m._show_message(_w("{W} wants walking to %s through the Rookery Wood, %d or %d clearings as the trail forks.%s A flask of oil burns little more than a minute in there. You have %d lamp oil, %d trail ration%s%s, %d rope and %d bandage%s.%s%s Press Space again to set out.") % [
 			r["to"], (steps["dark"] as Array).size(), (steps["marked"] as Array).size(),
 			" By night: twice the pay, and the dark will cost you far more." if by_night else "",
-			int(m.materials["lamp_oil"]), rations, "" if rations == 1 else "s", int(m.materials["rope"]),
-			bandages, "" if bandages == 1 else "s"])
+			int(m.materials["lamp_oil"]), rations, "" if rations == 1 else "s",
+			(", %d loa%s of bread" % [loaves, "f" if loaves == 1 else "ves"]) if loaves > 0 else "", int(m.materials["rope"]),
+			bandages, "" if bandages == 1 else "s", _standing_note(id), _trade_note(id)])
 		return
 	_start(id)
+
+
+# Said when you ask a walker: what the destination buys.
+func _trade_note(id: String) -> String:
+	if not TRADE.has(id):
+		return ""
+	return " At %s, %s will buy %s: up to %d, for half again what the stand pays." % [ROUTES[id]["to"], TRADE[id]["who"], TRADE[id]["what"], TRADE_MAX]
+
+
+# Said when you ask a walker: how near they are to knowing you, or that they do.
+func _standing_note(id: String) -> String:
+	if not STANDING.has(id):
+		return ""
+	var left := int(STANDING[id]["at"]) - int(walked.get(id, 0))
+	if left <= 0:
+		return _w(" {W} knows you now.")
+	return _w(" (Walk {her} %d more time%s and {she}'ll know you: see Buildings, Trail works.)") % [left, "" if left == 1 else "s"]
 
 
 func _start(id := "mill") -> void:
@@ -1008,6 +1065,10 @@ func _interact(tile: Vector2i) -> void:
 			m.inventory["trail_ration"] -= 1
 			nerve = minf(100.0, nerve + RATION_NERVE)
 			m._show_message(_w("You hand {w} a trail ration. {She} eats it slowly, and {his} hands stop shaking. Nerve +%d.") % int(RATION_NERVE))
+		elif (nerve < RATION_BELOW or frozen) and int(m.inventory["bread"]) > 0:
+			m.inventory["bread"] -= 1
+			nerve = minf(100.0, nerve + BREAD_NERVE)
+			m._show_message(_w("You break a loaf of farmhouse bread with {w}. It's still soft, and {she} eats like {she} hasn't in days. Nerve +%d.") % int(BREAD_NERVE))
 		elif not spoke:
 			spoke = true
 			nerve = minf(100.0, nerve + WORD_NERVE)
@@ -1209,15 +1270,58 @@ func _arrive() -> void:
 	m.materials["feathers"] += feathers
 	m.materials["fiber"] += fiber
 	m.progression._grant_xp("Bushcrafting", xp)
-	treks_done += 1
-	if route_id == "grove":
-		grove_done = true
+	var was_close := _wood_close()
+	_on_arrived()
 	m.play_sfx("chime", 0.03)
 	gifts.append("+%d crow feather%s" % [feathers, "" if feathers == 1 else "s"])
 	gifts.append("+%d fiber gathered on the way" % fiber)
 	gifts.append("+%d Bushcrafting XP%s" % [xp, " (more for the dark trail)" if dark else ""])
-	_end("%s %s.%s You walk home alone by the short way, quickly." % [
-		r["arrive"], ", ".join(gifts), " Twice the pay, for walking by night." if night else ""], true)
+	var home := " You walk home alone by the short way, quickly."
+	if route_id == "grove":
+		home += " That night there is no shadow in the field."
+	elif was_close:
+		home += " Behind you the wood draws back from the farm, and the crows leave the fence."
+	else:
+		home += " The farm feels further from the wood tonight: the field shadow falls back, and tonight's visitor will take half."
+	_end("%s%s %s.%s%s" % [r["arrive"], _grove_pages_text(), ", ".join(gifts), " Twice the pay, for walking by night." if night else "", home], true)
+
+
+# Coming home from a trek, by any route (the balance sim calls this too): the wood's dread, the grove, and
+# the nights it holds back.
+func _on_arrived() -> void:
+	treks_done += 1
+	walked[route_id] = int(walked.get(route_id, 0)) + 1
+	last_day = m.day
+	if route_id == "grove":
+		grove_done = true
+		m.nights.shadow_steps = 0
+	else:
+		m.nights.shadow_steps = maxi(0, m.nights.shadow_steps - TREK_PUSH)
+
+
+# At the grove, with all five of her pages from the wood, you hold them out to her.
+func _grove_pages_text() -> String:
+	if route_id != "grove" or m.mystery._count(m.mystery.TREK_PAGES) < m.mystery.TREK_PAGES.size():
+		return ""
+	return " You hold out her pages. She turns through them to the last and smiles at her own hand. \"Keep them. Someone will need to follow.\""
+
+
+# The wood has come up to the farm: no trek for WOOD_DAYS, counted from the first walker day.
+func _wood_close() -> bool:
+	if grove_done or m.day < FROM_DAY:
+		return false
+	return m.day - maxi(last_day, FROM_DAY) > WOOD_DAYS
+
+
+# What tonight takes, by the treks: half the day you walked someone, more while the wood is close, less once
+# the Hollow sleeps. NightSystem._resolve multiplies the visitor's loss by it.
+func _night_mult() -> float:
+	var mult := WALKED_NIGHT if last_day == m.day else 1.0
+	if _wood_close():
+		mult *= WOOD_CLOSE_NIGHT
+	if grove_done:
+		mult *= GROVE_NIGHT
+	return mult
 
 
 # The route's own gifts, given now, as text for the message.
@@ -1244,7 +1348,80 @@ func _gifts(pay: int) -> Array:
 			if int(m.materials["bell_clapper"]) == 0 and not m.projects._has_bell():
 				m.materials["bell_clapper"] = 1
 				out.append("the old bell's clapper in an altar cloth (\"She said we'd want it back. Hang it in yours.\")")
-	return out
+	return out + _standing_gifts(pay) + _trade()
+
+
+# What one of a pack item fetches at the farm stand.
+func _stand_price(kind: String) -> int:
+	match kind:
+		"crops":
+			return m.farm._crop_price("turnip")
+		"corn":
+			return m.farm._crop_price("corn")
+		"pumpkins":
+			return m.farm._crop_price("pumpkin")
+		"fish":
+			return m.SELL_FISH
+		"eggs":
+			return m.SELL_EGG
+		"milk":
+			return m.SELL_MILK
+	return 0
+
+
+# The destination buys what it wants from your pack, best-paying first, keeping TRADE_KEEP of each back.
+func _trade() -> Array:
+	if not TRADE.has(route_id):
+		return []
+	var goods: Array = (TRADE[route_id]["goods"] as Array).duplicate()
+	goods.sort_custom(func(a, b): return _stand_price(a) > _stand_price(b))
+	var left := TRADE_MAX
+	var sold := 0
+	var coins := 0
+	for kind in goods:
+		var n := mini(left, maxi(0, int(m.inventory[kind]) - TRADE_KEEP))
+		if n <= 0:
+			continue
+		m.inventory[kind] -= n
+		coins += n * int(round(_stand_price(kind) * TRADE_MULT))
+		sold += n
+		left -= n
+	if sold == 0:
+		return []
+	m.money += coins
+	m.stats["sold"] += sold
+	return ["%s bought %d of what you carried for %d coins" % [TRADE[route_id]["who"], sold, coins]]
+
+
+# What a walker gives once they know you, from the walk that makes it STANDING's "at" (this walk counts).
+func _standing_gifts(pay: int) -> Array:
+	if not STANDING.has(route_id):
+		return []
+	var n := int(walked.get(route_id, 0)) + 1
+	var at := int(STANDING[route_id]["at"])
+	if n < at:
+		return []
+	var first := n == at
+	match route_id:
+		"mill":
+			m.materials["flour"] += STANDING_FLOUR * pay
+			return ["%s+%d flour from the mill" % ["Maren's sister will mill for you now: " if first else "", STANDING_FLOUR * pay]]
+		"orchard":
+			# Once there are saplings enough for every tree the farm can hold, she sends apples instead.
+			var room := int(m.projects.DECOR["apple_tree"]["max"]) - m.projects._count("apple_tree") - int(m.materials["apple_sapling"])
+			if room <= 0:
+				m.inventory["apples"] += STANDING_APPLES * pay
+				return ["+%d apples from the drowned orchard" % (STANDING_APPLES * pay)]
+			m.materials["apple_sapling"] += mini(pay, room)
+			return ["%s+%d apple sapling%s" % ["Davy's mother says you're one of theirs now, and sends grafts from the drowned trees: " if first else "",
+				mini(pay, room), "" if mini(pay, room) == 1 else "s"]]
+		"chapel":
+			var back := mini(BLESS_LIMIT * pay, m.sanity_penalty)
+			m.sanity_penalty -= back
+			m.sanity_sys._change_sanity(BLESS_SANITY * pay)
+			return ["%s+%d sanity%s" % ["the vicar asks to bless you, and will every time you walk him: " if first else "the vicar's blessing, ",
+				int(BLESS_SANITY * pay), (", +%d sanity limit back" % back) if back > 0 else ""]]
+	return []
 
 
 # How much the wood has learned you: 0 on the first trek, up to MAX_DREAD.

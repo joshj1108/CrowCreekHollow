@@ -53,6 +53,12 @@ const TREK_PAGES := [
 const EPILOGUE := {"id": "bell", "title": "The bell rings again",
 	"text": "You hang the bell where you think she hung hers, and ring it once at dusk. Under the great tree, something answers, low, and then is still. The crows settle. For the first time, the field is only a field."}
 
+# Walking Agnes to the grove (TrekSystem) adds the story's last page. With all five of her pages from the wood,
+# she has told you more.
+const GROVE_PAGE := {"id": "grove", "title": "The Hollow sleeps",
+	"text": "I walked her to the grove, and she went in after him. That night there was no shadow in the field. The bell rang at dusk the way it does now, and from somewhere far off in the Rookery Wood, something rang back.",
+	"all_pages": "I walked her to the grove, and she went in after him. Before she went, she told me why the path goes round: Elias walks it to keep the Hollow shut, and he has been waiting a long time for someone to take a turn. Now there are two of them. That night there was no shadow in the field, and when the bell rang at dusk, something in the wood rang back."}
+
 var found := {}                 # saved: page id -> true
 var _events := {}               # this session: things seen that a page waits on (knock, field, crows, hollow)
 
@@ -87,6 +93,7 @@ func _check(quiet := false) -> void:
 		"p9": _events.has("hollow"),
 		"p10": m.house_stage >= 3,
 		"bell": m.projects._has_bell(),
+		"grove": m.trek.grove_done,
 	}
 	for id in due:
 		if due[id] and not found.has(id):
@@ -100,6 +107,8 @@ func _check(quiet := false) -> void:
 func _page(id: String) -> Dictionary:
 	if id == "bell":
 		return EPILOGUE
+	if id == "grove":
+		return GROVE_PAGE
 	for p in PAGES + TREK_PAGES:
 		if p["id"] == id:
 			return p
@@ -113,6 +122,9 @@ func _find(id: String) -> void:
 	m.play_sfx("chime", 0.0)
 	if id == "bell":
 		m._show_message("The bell rings out over the field, and something under the great tree answers. A last page is in your diary.")
+		return
+	if id == "grove":
+		m._show_message("You write down what happened at the grove. It's in your diary: \"%s\"." % GROVE_PAGE["title"])
 		return
 	m._show_message("%s It's in your diary: \"%s\" (%d of %d)." % [p["found"], p["title"], _count(), PAGES.size()])
 
@@ -164,4 +176,11 @@ func _rows(new_mark: Callable) -> Array:
 				rows.append({"name": "%d. Missing" % (i + 1), "value": "in a hollow tree somewhere"})
 	if found.has("bell"):
 		rows.append({"note": "%s%s\n%s" % [EPILOGUE["title"], new_mark.call("rook_bell"), EPILOGUE["text"]]})
+	if found.has("grove"):
+		rows.append({"note": "%s%s\n%s" % [GROVE_PAGE["title"], new_mark.call("rook_grove"), _grove_text()]})
 	return rows
+
+
+# The grove page says more once all five pages from the wood were found.
+func _grove_text() -> String:
+	return str(GROVE_PAGE["all_pages" if _count(TREK_PAGES) == TREK_PAGES.size() else "text"])
