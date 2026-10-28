@@ -47,10 +47,9 @@ func _recipe_card(r: Dictionary) -> Dictionary:
 	}
 
 
-# What a recipe input is held as. Turnips are the crops in the pack; the rest are pack or material counts.
+# What a recipe input is held as. Turnips are the crops in the pack, a group (any fish, berries) sums its
+# members; the rest are pack or material counts.
 func _recipe_held(key: String) -> int:
-	if key == "turnips":
-		return int(m.inventory["crops"])
 	return m._held(key)
 
 
@@ -105,6 +104,9 @@ func _eat_food(food_id: String) -> void:
 	if f.is_empty():
 		return
 	var key := str(f["held"])
+	if bool(f.get("inedible", false)):
+		m._show_message("%s isn't eaten as it is. It goes into a remedy." % str(f["name"]))
+		return
 	if int(m.inventory[key]) <= 0:
 		m._show_message("You have no %s left." % str(f["name"]).to_lower())
 		return
@@ -113,9 +115,22 @@ func _eat_food(food_id: String) -> void:
 	m.sanity_sys._change_sanity(Foods.sanity_restore(f))
 	m.hp = mini(m.max_hp(), m.hp + Foods.hp_restore(f))
 	m.food = minf(100.0, m.food + Foods.food_restore(f))
+	# Some foods warm you, slake thirst, or steady a walker on a trek as well.
+	var fx: Dictionary = f.get("effect", {})
+	var also := ""
+	if fx.has("warm"):
+		m.warmth = minf(100.0, m.warmth + float(fx["warm"]))
+		also += " It warms you through."
+	if fx.has("water"):
+		m.water = minf(100.0, m.water + float(fx["water"]))
+	if fx.has("nerve") and m.trek.active:
+		m.trek.nerve = minf(100.0, m.trek.nerve + float(fx["nerve"]))
+		also += " You share it with the walker, and they steady."
+	if float(fx.get("calm", 0)) < 0.0:
+		also += " Something about it stays with you."
 	m.play_sfx("eat", 0.05)
 	var verb := str(f.get("verb", "Eat")).to_lower()
-	m._show_message("You %s the %s. Food %d/100, HP %d/%d" % [verb, str(f["name"]).to_lower(), m.food, m.hp, m.max_hp()])
+	m._show_message("You %s the %s. Food %d/100, HP %d/%d%s" % [verb, str(f["name"]).to_lower(), m.food, m.hp, m.max_hp(), also])
 
 
 # The first cooked food in the pack, for the miller's bread. Empty when there is none.
@@ -127,9 +142,17 @@ func _first_cooked() -> String:
 	return ""
 
 
+# What the farm stand pays for one. Crops, eggs, milk and perch use main.gd's price constants.
 func _food_price(food_id: String) -> int:
 	if m.CROP_VALUE.has(food_id):
 		return m.farm._crop_price(food_id)
+	match food_id:
+		"egg":
+			return m.SELL_EGG
+		"milk":
+			return m.SELL_MILK
+		"perch":
+			return m.SELL_FISH
 	return int(Foods.find(food_id).get("price", 0))
 
 
@@ -151,7 +174,7 @@ func _sell_food(food_id: String) -> void:
 
 
 func _pack_used() -> int:
-	var used := m._slots_for(int(m.inventory["fish"])) + m._slots_for(int(m.inventory["bandage"])) + m._slots_for(int(m.inventory["firewood"]))
+	var used := m._slots_for(int(m.inventory["bandage"])) + m._slots_for(int(m.inventory["firewood"]))
 	for f in Foods.LIST:
 		used += m._slots_for(int(m.inventory[str(f["held"])]))
 	return used
@@ -197,17 +220,7 @@ func _sell(kind: String) -> void:
 	if count <= 0:
 		m._show_message("You have nothing to sell.")
 		return
-	var price := m.farm._crop_price("turnip")
-	if kind == "corn":
-		price = m.farm._crop_price("corn")
-	if kind == "pumpkins":
-		price = m.farm._crop_price("pumpkin")
-	if kind == "fish":
-		price = m.SELL_FISH
-	if kind == "eggs":
-		price = m.SELL_EGG
-	if kind == "milk":
-		price = m.SELL_MILK
+	var price := _food_price(str(Foods.by_held(kind).get("id", "")))
 	m.inventory[kind] = 0
 	m.money += count * price
 	m.stats["sold"] += count
@@ -222,8 +235,6 @@ func _pack_cells() -> Array:
 			cells.append({"color": str(f["tint"]), "label": str(f["name"]), "tip": "%s. %s" % [str(f["name"]), m._food_stats_text(f)]})
 	for _i in int(m.inventory["firewood"]):
 		cells.append({"color": "9a6a3a", "label": "Firewood", "tip": "Split logs for the hearth."})
-	for _i in int(m.inventory["fish"]):
-		cells.append({"color": "6fb8d9", "label": "Fish", "tip": "Fish. Spoils overnight unless stored in the cooler."})
 	while cells.size() < _pack_capacity():
 		cells.append({"empty": true, "tip": "Empty slot"})
 	return cells

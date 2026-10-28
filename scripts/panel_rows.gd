@@ -185,11 +185,11 @@ func _inventory_rows() -> Array:
 	rows.append({"name": "Outside", "value": "%d°F, %s" % [roundi(m._temperature()), str(m.WEATHER_NAMES.get(m.weather_kind, "Overcast")).to_lower()]})
 	rows.append({"note": "Food and water drain through the day. Drink from the pond or the pump to refill water. Warmth drains outdoors on cold days, refills in the house, and is full again after a night's sleep. An empty need costs HP."})
 	rows.append({"section": "Planting"})
-	rows.append({"name": "Planting with", "value": m.farm._seed_label(m.selected_seed)})
+	rows.append({"name": "Planting with", "value": "%s (grows in %s)" % [m.farm._seed_label(m.selected_seed), m.farm._seasons_text(m.selected_seed)]})
 	var growing := m.crops.size()
 	if growing > 0:
 		rows.append({"name": "Watered today", "value": "%d of %d growing crops" % [m.farm._watered_today(), growing], "progress": float(m.farm._watered_today()) / float(growing)})
-	var kinds := m.farm._unlocked_kinds()
+	var kinds: Array = m.farm._unlocked_kinds().filter(func(k) -> bool: return m.farm._in_season(k))
 	if kinds.size() > 1:
 		var labels: Array = []
 		for kind in kinds:
@@ -850,106 +850,91 @@ func _achievement_rows() -> Array:
 
 
 func _trade_rows() -> Array:
-	return [
+	var rows: Array = [
 		{"section": "Purse"},
 		{"name": "Coins", "value": str(m.money)},
 		{"section": "Sell from your pack"},
-		{
-			"name": "Turnips (%d each)" % m.farm._crop_price("turnip"),
-			"value": "%d held" % int(m.inventory["crops"]),
+	]
+	# Everything the stand buys that you carry: crops, the animals' goods, fish and forage, then cooked food.
+	var any := false
+	for f in Foods.LIST:
+		if f["kind"] == "cooked":
+			continue
+		var held := int(m.inventory[str(f["held"])])
+		var price := m.stall._food_price(str(f["id"]))
+		if held <= 0 or price <= 0:
+			continue
+		any = true
+		rows.append({
+			"name": "%s (%d each)" % [str(f["name"]), price],
+			"value": "%d held" % held,
 			"button": "Sell all",
-			"action": "sell_crops",
-			"enabled": int(m.inventory["crops"]) > 0,
-		},
-		{
-			"name": "Corn (%d each)" % m.farm._crop_price("corn"),
-			"value": "%d held" % int(m.inventory["corn"]),
-			"button": "Sell all",
-			"action": "sell_corn",
-			"enabled": int(m.inventory["corn"]) > 0,
-		},
-		{
-			"name": "Pumpkins (%d each)" % m.farm._crop_price("pumpkin"),
-			"value": "%d held" % int(m.inventory["pumpkins"]),
-			"button": "Sell all",
-			"action": "sell_pumpkins",
-			"enabled": int(m.inventory["pumpkins"]) > 0,
-		},
-		{
-			"name": "Fish (%d each)" % m.SELL_FISH,
-			"value": "%d held" % int(m.inventory["fish"]),
-			"button": "Sell all",
-			"action": "sell_fish",
-			"enabled": int(m.inventory["fish"]) > 0,
-		},
-		{
-			"name": "Eggs (%d each)" % m.SELL_EGG,
-			"value": "%d held" % int(m.inventory["eggs"]),
-			"button": "Sell all",
-			"action": "sell_eggs",
-			"enabled": int(m.inventory["eggs"]) > 0,
-		},
-		{
-			"name": "Goat milk (%d each)" % m.SELL_MILK,
-			"value": "%d held" % int(m.inventory["milk"]),
-			"button": "Sell all",
-			"action": "sell_milk",
-			"enabled": int(m.inventory["milk"]) > 0,
-		},
-		] + _cooked_sell_rows() + [
+			"action": "sell_food:" + str(f["id"]),
+			"enabled": true,
+		})
+	var cooked := _cooked_sell_rows()
+	if not any and cooked.is_empty():
+		rows.append({"name": "Nothing to sell", "value": "Crops, fish, forage, eggs, milk and cooked food sell here."})
+	return rows + cooked + [
 		{"note": "The farm stand is open from 06:00 to 18:00. It only buys what you carry, so take crops or fish out of storage first."},
 	]
 
 
 func _cellar_rows() -> Array:
+	var total := m.farm._cellar_total()
+	var in_pack := m.farm._keepable_in_pack()
 	return [
 		{"tab": "Root cellar"},
 		{
 			"name": "Crops stored",
-			"value": "%d/%d" % [m.cellar_stock, m.CELLAR_CAP],
-			"progress": float(m.cellar_stock) / float(m.CELLAR_CAP),
+			"value": "%d/%d" % [total, m.CELLAR_CAP],
+			"progress": float(total) / float(m.CELLAR_CAP),
 		},
+		{"name": "In the cellar", "value": m.farm._cellar_text()},
 		{
-			"name": "Store crops from your pack",
-			"value": "%d in pack" % int(m.inventory["crops"]),
+			"name": "Store crops that keep",
+			"value": "%d in pack" % in_pack,
 			"button": "Store",
 			"action": "store_crops",
-			"enabled": int(m.inventory["crops"]) > 0 and m.cellar_stock < m.CELLAR_CAP,
+			"enabled": in_pack > 0 and total < m.CELLAR_CAP,
 		},
 		{
 			"name": "Take crops into your pack",
 			"value": "%d free slots" % m.stall._pack_free(),
 			"button": "Take",
 			"action": "take_crops",
-			"enabled": m.cellar_stock > 0 and m.stall._pack_free() > 0,
+			"enabled": total > 0 and m.stall._pack_free() > 0,
 		},
-		{"note": "Crops keep here. Nothing spoils in the cellar."},
+		{"note": "Turnips, potatoes, leeks, parsnips and garlic keep here. Nothing spoils in the cellar. Corn, pumpkins, greens and berries don't keep, so eat, cook or sell them."},
 	]
 
 
 func _cooler_rows() -> Array:
+	var total := m.fishing._cooler_total()
+	var in_pack := m._held("any_fish")
 	return [
 		{"tab": "Cooler"},
 		{
 			"name": "Fish stored",
-			"value": "%d/%d" % [m.cooler_stock, m.COOLER_CAP],
-			"progress": float(m.cooler_stock) / float(m.COOLER_CAP),
+			"value": "%d/%d" % [total, m.COOLER_CAP],
+			"progress": float(total) / float(m.COOLER_CAP),
 		},
+		{"name": "In the cooler", "value": m.fishing._cooler_text()},
 		{
 			"name": "Store fish from your pack",
-			"value": "%d in pack" % int(m.inventory["fish"]),
+			"value": "%d in pack" % in_pack,
 			"button": "Store",
 			"action": "store_fish",
-			"enabled": int(m.inventory["fish"]) > 0 and m.cooler_stock < m.COOLER_CAP,
+			"enabled": in_pack > 0 and total < m.COOLER_CAP,
 		},
 		{
 			"name": "Take fish into your pack",
 			"value": "%d free slots" % m.stall._pack_free(),
 			"button": "Take",
 			"action": "take_fish",
-			"enabled": m.cooler_stock > 0 and m.stall._pack_free() > 0,
+			"enabled": total > 0 and m.stall._pack_free() > 0,
 		},
-		{"note": "Fish in your pack spoil overnight. Fish kept here do not."},
+		{"note": "Fish in your pack spoil overnight. Fish kept here do not. The best fish go in first."},
 	]
 
 

@@ -163,7 +163,7 @@ Each year has a few dated events. When one starts, the morning message announces
 
 ## Daily job
 
-- The House panel (H) has one **daily job**, separate from the chores so skipping it adds no wear. It rotates each day through crops, fish, wood, stone, resin, cooked food, and preserves. Each asks for a few of those items, which are used up when you deliver them. Delivering pays coins and XP in the job's skill, and only one delivery counts per day.
+- The House panel (H) has one **daily job**, separate from the chores so skipping it adds no wear. It rotates each day through crops (any), fish (any), wood, stone, resin, forage (any), cooked food, and preserves. Each asks for a few of those items, which are used up when you deliver them. Delivering pays coins and XP in the job's skill, and only one delivery counts per day.
 
 ## Music
 
@@ -196,7 +196,18 @@ Saves from before this change reset chapter progress. Stat-based achievements re
 - Coins are the money. The HUD shows them, and they're saved.
 - The **farm stand** sits on the path east of the house. It is open **06:00 to 18:00**. Walk up to it and press Space to trade.
 - The farm stand **only buys what you carry**. Take crops or fish out of storage first.
-- Sell prices: turnips 8 each, corn 10 each, pumpkins 15 each, fish 6 each, eggs 8 each, goat milk 16 each, and cooked food from 8 to 20 each, as listed on the Trade panel.
+- The Trade panel lists only what you carry that the stand buys, each with **Sell all**. Sell prices:
+
+| Kind | Each |
+|---|---|
+| Crops | turnip 8, kale 6, peas 3, corn 10, potato 6, leek 14, pumpkin 15, parsnip 11, strawberry 9, garlic 17, blueberry 8 (`CROP_VALUE`) |
+| Animals | egg 8 (`SELL_EGG`), goat milk 16 (`SELL_MILK`) |
+| Fish | perch 6 (`SELL_FISH`), bluegill 5, crappie 8, bullhead 9, trout 10, lamprey 12, pale carp 26, sturgeon 45 |
+| Forage | rose hips and nettles 3, salmonberries and blackberries 4, fiddleheads 5, huckleberries 7, yellowfoot 9, oyster mushrooms 10, chanterelles 12, morels 16, ghost pipe 22 |
+| Cooked | 8 (grilled fish, hash, tea) to 80 (sturgeon steak); see Cooking |
+
+- Apples aren't sold at the stand.
+- **Balance check (October 2026, after the seasonal crops, fish and forage).** `tools/balance_sim.gd` now plants by season (best coins a watered day, only what can ripen before its season ends), picks every forageable each morning, cooks the seasonal recipes that don't use turnips, eggs or flour, and sells fish, forage and cooked food. 400 days, treks=3: **engaged 41,400 coins, ignore 40,042, earlybed 40,387** (before this content: 24,440 / 20,426 / 21,254). Engaged earned crops 8,023, eggs and milk 20,032, forage 7,410, cooked 10,467 (mostly pumpkin soup, bramble jam and dried mushrooms); seeds cost 3,858. Sanity: lowest 61 engaged, 43 ignore (hollow nights in summer), 58 earlybed; never under 30, limit 100 at the end. About 65 crops withered a year (kale and other regrowers left in at the season's end). The sim never grew peas, leeks, strawberries or blueberries (it ranks others higher) and only fishes when hungry, so fish earned nothing. Forage (about 18 coins a day) and cooking are new income on top of the already high eggs and milk: the economy pass should look at forage prices and counts, cooked prices, and kale's regrowing.
 - The stand only sells. Seeds and livestock are ordered from the **catalog** at the desk (see Farmhouse).
 
 ## Pack, bags, and storage
@@ -213,19 +224,22 @@ Saves from before this change reset chapter progress. Stat-based achievements re
 | Haversack | +10 | 120 coins, 4 wood, 8 fiber | 3 |
 | Backpack | +10 | 300 coins, 8 wood, 12 fiber | 5 |
 
-- **Root cellar** (built from the House panel, stores **30 crops**): 25 coins, 4 wood, 2 fiber, Carpentry 1. It is dug against the house's west wall, so it reads as part of the house. Stand beside it, facing it, and press Space to store or take crops. Nothing spoils in the cellar. Storing is always manual: harvests go to the pack, and a harvest is refused if the pack is full.
-- **Cooler** (built from the House panel, stores **10 fish**): 40 coins, 4 wood, 4 fiber, Carpentry 2. Fish kept in the cooler don't spoil. It sits inside the house, in the hall. Stand beside it, facing it, and press Space to store or take fish.
-- **Fish spoil:** any fish still in the pack at the end of the day are lost. The end-of-day message says how many. Storing fish in the cooler is the only way to keep them overnight.
+- **Root cellar** (built from the House panel, stores **30 crops** of the kinds that keep: turnips, potatoes, leeks, parsnips and garlic, counted by kind in `cellar`): 25 coins, 4 wood, 2 fiber, Carpentry 1. It is dug against the house's west wall, so it reads as part of the house. Stand beside it, facing it, and press Space to store or take crops. Nothing spoils in the cellar. Storing is always manual: harvests go to the pack, and a harvest is refused if the pack is full.
+- **Cooler** (built from the House panel, stores **10 fish** of any kind, counted by kind in `cooler`): 40 coins, 4 wood, 4 fiber, Carpentry 2. Fish kept in the cooler don't spoil. It sits inside the house, in the hall. Stand beside it, facing it, and press Space to store or take fish.
+- **Fish spoil:** any raw fish of any kind still in the pack at the end of the day are lost. The end-of-day message says how many. Storing fish in the cooler is the only way to keep them overnight.
 - **Full pack:** storage is always manual. A full pack stops harvesting and fishing with a message. Store fish in the cooler, or sell or cook them, to keep going.
 
 **Smokehouse** (built from the Buildings menu, in the workshop): 60 coins, 5 wood, 3 fiber, Carpentry 4. Stand beside it, facing it, and press Space to preserve food. Preserved goods live in the pack and never spoil overnight.
 
 | Method | Input | Needs | Makes | Sells | Skill |
 |---|---|---|---|---|---|
-| Smoke a fish | 1 fish | 1 wood | Smoked fish | 11 | Cooking 2 |
+| Smoke a fish | 1 fish (any) | 1 wood | Smoked fish | 11 | Cooking 2 |
 | Dry turnips | 2 turnips | none | Dried crops | 9 | Farming 2 |
 | Can turnips | 2 turnips | 1 fiber | Canned turnip | 10 | Cooking 3 |
 | Ferment turnips | 2 turnips | 1 wood | Fermented turnip | 11 | Cooking 4 |
+| Make jam | 3 berries (any) | 1 fiber | Bramble jam | 16 | Cooking 2 |
+| Dry mushrooms | 2 mushrooms (any) | none | Dried mushrooms | 20 | Cooking 3 |
+| Smoke a lamprey | 1 lamprey | 1 wood | Smoked lamprey | 34 | Cooking 4 |
 
 Each press makes one item and gives XP in that skill. Preserved goods show in the pack and sell on the Trade panel.
 
@@ -254,22 +268,108 @@ Achievements track stats and never reset. Each pays a small reward. Earning all 
 ## Cooking
 
 - Cooking is a skill (same level curve as Skills).
-- Every cooked food is named for what made it and has its own picture. At the fire (the Craft panel's Cooking tab): **Grilled fish** (1 fish, 1 wood), **Turnip hash** (2 turnips, 1 wood), **Pumpkin soup** (2 pumpkins, 1 wood, Cooking 3), **Fish stew** (1 fish, 2 turnips, 1 wood, Cooking 3), and **Hearty stew** (1 smoked fish, 2 turnips, 1 wood, Cooking 5).
-- At the smokehouse: smoked fish, dried turnip, canned turnip, and fermented turnip (see the table above).
-- Each food has a difficulty (1 to 4) and the level needed to obtain it. Both set how much it restores, and cooking it gives XP in its skill.
+- Every cooked food is named for what made it and has its own picture. Recipes are in `Foods.RECIPES` (`scripts/foods.gd`). A recipe input is a pack key (turnips, potatoes, trout...), a material (wood, fiber, flour), or a **group**: *fish (any)*, *berries (any)* (strawberries, blueberries, salmonberries, huckleberries, blackberries) or *mushrooms (any)* (chanterelles, yellowfoot, oyster mushrooms, morels). A group is spent cheapest first.
+- Some foods do more than fill you (`effect` in `Foods.LIST`): **warm** (warmth), **water**, **calm** (sanity on top of the usual; below zero it unsettles you) and **nerve** (eaten on a trek, it steadies the walker too). The detail card lists them.
+- At the fire (the Craft panel's Cooking tab):
+
+| Dish | Needs | Level | Sells | Also |
+|---|---|---|---|---|
+| Grilled fish | 1 fish (any), 1 wood | Cooking 0 | 8 | |
+| Turnip hash | 2 turnips, 1 wood | Cooking 0 | 8 | |
+| Baked potato | 1 potato, 1 wood | Cooking 1 | 9 | +10 warmth |
+| Rose hip tea | 3 rose hips, 1 wood | Cooking 1 | 8 | +15 warmth, +20 water, +4 calm |
+| Nettle soup | 2 nettles, 1 wood | Cooking 1 | 10 | +10 warmth, +15 water |
+| Trail ration | 1 egg, 1 turnip, 1 wood | Cooking 2 | 10 | steadies a walker (trek) |
+| Pea soup | 3 peas, 1 wood | Cooking 2 | 12 | +15 warmth |
+| Fiddlehead fry | 2 fiddleheads, 1 egg, 1 wood | Cooking 2 | 14 | |
+| Farmhouse bread | 2 flour, 1 egg, 1 wood | Cooking 3 | 14 | for a walker with no rations |
+| Pumpkin soup | 2 pumpkins, 1 wood | Cooking 3 | 12 | +10 warmth |
+| Fish stew | 1 fish (any), 2 turnips, 1 wood | Cooking 3 | 13 | +10 warmth |
+| Colcannon | 2 potatoes, 1 kale, 1 milk, 1 wood | Cooking 3 | 18 | +10 warmth |
+| Leek and potato soup | 1 leek, 2 potatoes, 1 wood | Cooking 3 | 20 | +25 warmth, +10 water |
+| Roast roots | 2 parsnips, 1 turnip, 1 wood | Cooking 3 | 22 | +15 warmth |
+| Bullhead fry | 1 bullhead, 1 corn, 1 wood | Cooking 3 | 16 | +10 warmth |
+| Corn chowder | 2 corn, 1 potato, 1 milk, 1 wood | Cooking 4 | 24 | +20 warmth |
+| Forager's stew | 2 mushrooms (any), 1 leek, 1 wood | Cooking 4 | 22 | +25 nerve, +10 warmth |
+| Garlic trout | 1 trout, 1 garlic, 1 wood | Cooking 4 | 26 | +6 calm |
+| Apple crumble | 2 apples, 1 flour, 1 wood | Cooking 4 | 22 | +8 calm |
+| Hearty stew | 1 smoked fish, 2 turnips, 1 wood | Cooking 5 | 20 | +15 warmth |
+| Pumpkin pie | 1 pumpkin, 1 flour, 1 egg, 1 wood | Cooking 5 | 30 | +10 calm |
+| Berry cobbler | 3 berries (any), 1 flour, 1 egg, 1 wood | Cooking 5 | 30 | +10 calm, +15 nerve |
+| Ghost pipe tincture | 1 ghost pipe, 2 rose hips, 1 wood | Bushcrafting 5 | 40 | +20 calm, +40 nerve |
+| Sturgeon steak | 1 sturgeon, 1 garlic, 1 wood | Cooking 6 | 80 | +20 warmth, +10 calm |
+
+- At the smokehouse: smoked fish, dried turnip, canned turnip, fermented turnip, bramble jam, dried mushrooms and smoked lamprey (see the table under Pack, bags, and storage).
+- Each food has a difficulty (1 to 5) and the level needed to obtain it. Both set how much it restores, and cooking it gives XP in its skill.
 - Foods are kept in the pack as their own stacks. Eat them from the bag or the Inventory panel.
 
 ## Farming and crops
 
-- Three crop kinds:
-  - **Turnip** (starter): yields 1 crop, and half the time 1 seed back (`SEED_BACK_CHANCE`), so seeds are an ongoing cost. 25 XP. 7 days. Sells for 8.
-  - **Corn** (Farming 2): yields 2 ears, and half the time 1 corn seed back. 30 XP. 8 days. Sells for 10. Seeds are 6 coins each, sold 4 at a time. Corn is food and animal feed like the other crops, but has no recipes and doesn't keep in the cellar. Art: `art/farm/crop_corn.png` (SpriteCook, four 16 px stages); its ripe frame is the corn icon in `art/ui/icons.png`.
-  - **Pumpkin** (Farming 3): yields 2 pumpkins, and half the time 1 pumpkin seed back. 40 XP. 10 days. Sells for 15.
-- Planting uses the **selected seed**. Switch it in the Inventory panel once a second kind is unlocked; it steps through the unlocked kinds. If the selected kind isn't unlocked yet, turnip is planted.
-- Feeding animals and offerings take turnips first, then corn, then pumpkins.
+- Eleven crop kinds, each with the Pacific Northwest seasons it grows in (`CROPS` in `main.gd`, days in `CROP_GROW_DAYS`, prices in `CROP_VALUE`). **Planting out of season is refused**, and a crop still in the ground when its seasons end **withers** the next morning. The morning note warns three days before a season turns, and again on its last day, while any crop would wither. Turnips grow in every season, so the trail rations always have their staple.
+
+| Crop | Seasons | Farming | Days | Yield | Regrows | Seed back | XP | Sells | Seeds (catalog) | Cellar |
+|---|---|---|---|---|---|---|---|---|---|---|
+| Turnip | all year | 0 | 7 | 1 | | 50% | 25 | 8 | 5 for 15 | keeps |
+| Kale | autumn, winter | 1 | 6 | 1 | every 4 days | 10% | 14 | 6 | 5 for 20 | |
+| Peas | spring | 1 | 6 | 2 | every 3 days | 10% | 12 | 3 | 5 for 15 | |
+| Corn | summer, autumn | 2 | 8 | 2 | | 50% | 30 | 10 | 4 for 24 | |
+| Potato | spring, summer | 2 | 8 | 3 | | 50% | 30 | 6 | 4 for 20 | keeps |
+| Leek | winter, spring | 2 | 9 | 1 | | 50% | 32 | 14 | 4 for 28 | keeps |
+| Pumpkin | summer, autumn | 3 | 10 | 2 | | 50% | 40 | 15 | 3 for 30 | |
+| Parsnip | winter, spring | 3 | 9 | 2 | | 50% | 38 | 11 | 4 for 32 | keeps |
+| Strawberry | spring, summer | 4 | 8 | 1 | every 4 days | 5% | 18 | 9 | 3 for 42 | |
+| Garlic | autumn, winter | 4 | 12 | 2 | | 50% | 45 | 17 | 3 for 36 | keeps |
+| Blueberry | summer | 5 | 10 | 2 | every 5 days | none | 20 | 8 | 2 for 50 | |
+
+- **Regrowing crops** stay in the ground after picking and go back to `CROP_GROW_DAYS - regrow` watered days, so they ripen again after that many more watered days, until their season ends. The rest come up when harvested.
+- What each season offers: spring has turnips, peas, potatoes, leeks, parsnips and strawberries; summer turnips, corn, potatoes, pumpkins, strawberries and blueberries; autumn turnips, kale, corn, pumpkins and garlic; winter turnips, kale, leeks, parsnips and garlic. A new game starts on October 1st, so the first crops past turnips are kale (Farming 1), corn (2) and pumpkins (3), and the first winter has leeks, parsnips and garlic to grow.
+- Planting uses the **selected seed**. The trowel's cycle (and the Inventory panel's Switch) steps through the seeds you hold that are unlocked and in season. If the selected kind isn't unlocked, turnip is planted. The seed tiles in the Inventory panel give each kind's seasons, days and yield.
+- Seeds come from the catalog at the desk, one pack per kind (`pack` and `seed_price` in `CROPS`), and can be ordered out of season to plant when it comes.
+- Feeding animals and offerings take crops **cheapest first** (peas, kale and potatoes before turnips; garlic last). Apples aren't crops for this.
 - Planting gives 5 XP.
+- Art: turnip, corn and pumpkin have SpriteCook strips (`art/farm/crop_<kind>.png`, four 16 px stages). The other eight are drawn in code (`FarmArt.draw_crop`) until their strips are made; `FarmSprites.has` picks the strip when one exists. Their pack icons are code-drawn too (`ActionBar.RecipeIcon`: leafy, pod, potato, leek, root, berry, bulb, seed_t).
 - **Crops need water.** A crop grows overnight only if it was watered that day. A crop that wasn't watered stays at its stage, and the morning message says how many went thirsty. Watering is covered under Well and watering: by hand one crop a press at first, then a nozzle (3 a press, Smithing 3), a spray head (9 a press, Smithing 6) and sprinklers that water each morning (Smithing 4). The tank (40, or 64 with the copper cistern) is still what limits how many crops can grow on a dry day.
 - Plot two stays overgrown until Farming 2. Walking up to it says so.
+
+## Fishing
+
+- How fishing works (spots, rolls, rods) is under Skills. Every catch is now one of eight pond fish (`FishingSystem.FISH`; names, prices and food in `Foods.LIST`). When a roll lands, a fish is drawn by weight from the ones biting: those in season, at the right hour, and at or under your Fishing level. Perch always bite, so there is always something. The cast message lists what is biting.
+- "Day" is 06:00 to dusk (19:00), "night" from dusk to 03:00, "late" from 22:00, when the night visitors come.
+
+| Fish | When | Fishing | Weight | Sells | Notes |
+|---|---|---|---|---|---|
+| Yellow perch | all year, any hour | 1 | 40 | 6 (`SELL_FISH`) | the old "fish" key |
+| Bluegill | summer, day | 1 | 35 | 5 | |
+| Cutthroat trout | spring and autumn, day | 2 | 22 | 10 | garlic trout |
+| Black crappie | winter and spring, any hour | 2 | 28 | 8 | the winter fish |
+| Brown bullhead | summer and autumn, night | 3 | 40 | 9 | bullhead fry |
+| Lamprey | winter and spring, night | 4 | 22 | 12 | -2 calm raw; smoked lamprey |
+| Pale carp | all year, late | 5 | 7 | 26 | landing one costs 3 sanity, eating it raw 8 |
+| White sturgeon | all year, day | 6 | 3 | 45 | sturgeon steak |
+
+- XP is 15 a catch plus 5 for each Fishing level the fish needs past the first. Night catches are counted (`stats["night_fish"]`).
+- Every raw fish **spoils** in the pack overnight. The cooler keeps 10 fish of any kind; the dearest go in first and come out first. Raw fish can be eaten ("Eat raw"), sold, smoked, or cooked into any fish (any) recipe, and the vicar buys all but the pale carp on a chapel trek.
+
+## Forage
+
+- Wild food comes up at the edges of things (`scripts/forage_system.gd`). Each morning **3** forageables, plus one per three Bushcrafting levels (at most 7), come up on open grass beside the farm's trees; yesterday's unpicked ones go over. Each trek clearing has **2** beside the trail. Face one and press Space to pick it (no tool): **8 XP plus 3 per level** the find needs, in Bushcrafting. A full pack leaves it where it is.
+- What comes up is drawn by weight from what's in season and known at your Bushcrafting level. The day's farm finds are saved with the day.
+
+| Forage | Seasons | Bushcrafting | Weight | Sells | Used in |
+|---|---|---|---|---|---|
+| Stinging nettles | spring | 1 | 30 | 3 | nettle soup |
+| Fiddleheads | spring | 1 | 24 | 5 | fiddlehead fry |
+| Salmonberries | spring, summer | 1 | 24 | 4 | berries |
+| Blackberries | summer, autumn | 1 | 30 | 4 | berries |
+| Rose hips | autumn, winter | 1 | 30 | 3 | rose hip tea, tincture |
+| Chanterelles | autumn | 2 | 20 | 12 | mushrooms |
+| Yellowfoot | winter | 2 | 22 | 9 | mushrooms |
+| Huckleberries | summer | 3 | 18 | 7 | berries |
+| Oyster mushrooms | winter, spring | 3 | 16 | 10 | mushrooms |
+| Morels | spring | 4 | 8 | 16 | mushrooms |
+| Ghost pipe | summer, autumn | 5 | 5 | 22 | ghost pipe tincture (not eaten raw) |
+
+- Forage is drawn in code on its own layer (a rosette, a mushroom cluster, a berry cane, fern curls or white pipes, in the find's colour). The daily job can ask for 3 forage of any kind.
 
 ## Farmhouse
 
@@ -305,12 +405,12 @@ The house is drawn in four stages that match its repair level. **Decrepit** has 
 
 - The Skills panel (K) is a grid of ten picture tiles, each showing the skill's drawing and its level. Picking one fills the detail card with what trains the skill, its XP bar, and the XP left to the next level.
 - Ten skills, each with XP and levels. Each level costs more than the last: level 2 at 100 XP, level 3 at 300, level 4 at 600, level 5 at 1000 (50 × (L−1) × L XP in total). Past level 5 each level costs 1.8 times the one before (`STEEP_GROWTH` in `progression_system.gd`): level 6 at 1720, 7 at 3016, 8 at 5349, 9 at 9548, and level 10, the highest (`LEVEL_CAP`), at 17106:
-  - **Farming:** planting gives 5 XP. Turnips give 25 XP and pumpkins give 40 XP on harvest. Level 2 opens plot two. Level 3 unlocks pumpkins.
-  - **Bushcrafting:** gathering a brush pile gives 10 XP. Level 3 adds three thicket piles.
+  - **Farming:** planting gives 5 XP, and each harvest its crop's XP (12 to 45, see Farming and crops). Level 2 opens plot two. Levels 1 to 5 unlock the crops.
+  - **Bushcrafting:** gathering a brush pile gives 10 XP; picking forage 8 plus 3 per level the find needs (see Forage). Level 3 adds three thicket piles.
   - **Carpentry:** each house repair gives 30 XP. Mending a board (1 wood, 1 fiber, from the House panel) gives 15 XP, capped at 2 mends per day so the house can't be finished in one day. Training to level 2 takes about 3 days, and level 3 takes about a week.
   - **Cleaning:** each daily tidy gives 20 XP. At Cleaning 2, a tidy also gives +3 sanity. Cleaning 3 unlocks the cleanse.
-  - **Cooking:** cooking a fish gives 15 XP and cooking crops gives 10 XP. See Cooking above.
-  - **Fishing:** face a sparkling spot on the pond edge and press Space to start fishing it, like RuneScape. While you keep still and face the spot, you roll for a catch every 3 seconds. The chance starts at 50% and rises 3% per level, up to 90%. Each catch gives 15 XP. Each spot stays active for 15 to 30 seconds, then goes quiet and a new spot appears elsewhere on the pond edge. There are 3 spots, with one more at Fishing 3 and another at Fishing 5. Moving, going inside, opening a panel, or pressing Space again reels the line in. The spot you fish looks like any other spot: no ring is drawn around it, and the cast line and bobber show which one you're on.
+  - **Cooking:** each recipe gives its own XP (10 to 40). See Cooking above.
+  - **Fishing:** face a sparkling spot on the pond edge and press Space to start fishing it, like RuneScape. While you keep still and face the spot, you roll for a catch every 3 seconds. The chance starts at 50% and rises 3% per level, up to 90%. Each catch gives 15 XP, plus 5 for each level the fish needs past the first; which fish it is depends on season and hour (see Fishing). Each spot stays active for 15 to 30 seconds, then goes quiet and a new spot appears elsewhere on the pond edge. There are 3 spots, with one more at Fishing 3 and another at Fishing 5. Moving, going inside, opening a panel, or pressing Space again reels the line in. The spot you fish looks like any other spot: no ring is drawn around it, and the cast line and bobber show which one you're on.
 - Levels will unlock new areas, tools, and fortifications.
 
 ## Survival (bushcrafting and lanterns)
@@ -570,7 +670,7 @@ There is no tip card: everything the game teaches is written in the **diary**, s
 - Quitting mid-day loses that day's progress since the last save. Position and panel are saved at the same moment, so they reflect the last sleep or collapse.
 - **Saves are safe against crashes.** Each save is written to `hallowvale_save_N.tmp.json`, read back and checked, and only then moved over the real file; the save it replaces becomes `hallowvale_save_N.bak.json`. Only a good save becomes the backup, so a damaged file never pushes the last good one out.
 - **Recovery.** Before the start screen lists the slots, each slot is checked: the file must be JSON, hold a day of 1 or more and an inventory, and have the right type for each list and table the loader reads. A damaged or missing save comes back from its backup (or from a complete `.tmp` save left by a crash mid-move, which is newer), and the start screen says once which slot was restored and to what day. A damaged save with no backup is kept as `.broken.json` and the slot shows empty, so Continue never starts a new game over it by mistake. Loading does the same check, in case the start screen didn't.
-- **Save versions.** Each save records `save_version` (now 8; saves without one count as 1). On load, `SaveSystem._migrate` lifts an old save one version at a time: version 2 added the crow bell (`bell_day`) and treks (`treks_done`), and older saves start with neither begun. Version 8 cut the wider land (the towns, the bank, the campsite, the Lowmere quests, the bows and crossbows): an older save's banked goods and coins go back to the pack and purse, a bow or crossbow in hand is taken apart for what it cost, arrows and bolts are dropped, and a save made out in the land wakes at the homestead. Materials and items an old save never had (lamp oil, storm oak, flax, bell parts, trail rations) keep their new-game amounts. A save from a newer build still loads; keys this build doesn't know are ignored.
+- **Save versions.** Each save records `save_version` (now 10; saves without one count as 1). On load, `SaveSystem._migrate` lifts an old save one version at a time: version 2 added the crow bell (`bell_day`) and treks (`treks_done`), and older saves start with neither begun. Version 8 cut the wider land (the towns, the bank, the campsite, the Lowmere quests, the bows and crossbows): an older save's banked goods and coins go back to the pack and purse, a bow or crossbow in hand is taken apart for what it cost, arrows and bolts are dropped, and a save made out in the land wakes at the homestead. Materials and items an old save never had (lamp oil, storm oak, flax, bell parts, trail rations) keep their new-game amounts. Version 10 added the seasonal crops, fish and forage: the cellar and cooler are kept by kind (`cellar`, `cooler`), an older save's cellar count becomes turnips and its cooler count perch, and today's forage is saved with `forage_day`. A save from a newer build still loads; keys this build doesn't know are ignored.
 - Saving in the mining cave records the homestead as your position. A trek still going at day end is called off before the save, so you wake at home. When the farm is taken for unpaid tax, the save, its backup and any `.tmp` are all deleted, so nothing brings the farm back.
 - `tools/save_test.gd` checks all of this headless in slot 9 (truncated, empty and garbage files, wrong types, a missing save with a backup, a crash mid-move, an old save, a version 7 save made in the wider land, cave and trek saves, eviction).
 
@@ -757,7 +857,8 @@ Particles do not run indoors or in the cave. Nothing in the grade pass changes g
 - `progression_system.gd` (`progression`): skill XP, levels, story, achievements and rewards.
 - `save_system.gd` (`saver`): saving, loading and the saved position.
 - `craft_system.gd` (`crafting`): recipes, gear, tools and bandages.
-- `fishing_system.gd` (`fishing`): fish spots, casting and reeling, and the cooler.
+- `fishing_system.gd` (`fishing`): the pond's fish and when they bite, fish spots, casting and reeling, and the cooler.
+- `forage_system.gd` (`forage`): the day's forage on the farm's edges and in the trek clearings, picking it, and its layer.
 - `ambience_system.gd` (`ambience`): the looping beds and the occasional sounds of the farm, the house and the cave.
 - `mining_system.gd` (`mining`): rocks, cave ore, smelting and brush gathering.
 - `combat_system.gd` (`combat_sys`): foes and weapon damage.

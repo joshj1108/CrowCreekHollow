@@ -261,6 +261,43 @@ func _run() -> void:
 		and not m.coop_hopper_built and m.coop_hopper == 0 and not m.barn_hopper_built and m.projects._count("sprinkler") == 0
 		and int(SaveSystem.read_save(path).get("save_version", 0)) == SaveSystem.SAVE_VERSION)
 
+	# Version 10: seasonal crops, fish and forage in the pack, the cellar and cooler by kind, and today's forage.
+	m.inventory["leeks"] = 3
+	m.inventory["trout"] = 2
+	m.inventory["chanterelles"] = 4
+	m.inventory["garlic_seeds"] = 6
+	m.cellar = {"crops": 5, "potatoes": 7}
+	m.cooler = {"fish": 2, "sturgeon": 1}
+	var kale_tile := Vector2i(6 + m.BORDER_X, 21 + m.BORDER_Y)
+	m.crops[kale_tile] = {"stage": 2, "kind": "kale", "days": 4, "watered_day": 0}
+	var find := Vector2i(3 + m.BORDER_X, 3 + m.BORDER_Y)
+	m.forage.spots = {find: "rosehips"}
+	m.forage.spots_day = 11   # the day _save_on_day saves on
+	_save_on_day(11)
+	m.inventory["leeks"] = 0
+	m.inventory["trout"] = 0
+	m.cellar = {}
+	m.cooler = {}
+	m.forage.spots = {}
+	_check("seasonal items, stores by kind and forage round-trip", _load() == 11 and int(m.inventory["leeks"]) == 3 and int(m.inventory["trout"]) == 2
+		and int(m.inventory["chanterelles"]) == 4 and int(m.inventory["garlic_seeds"]) == 6
+		and int(m.cellar.get("potatoes", 0)) == 7 and int(m.cellar.get("crops", 0)) == 5 and int(m.cooler.get("sturgeon", 0)) == 1
+		and str(m.crops.get(kale_tile, {}).get("kind", "")) == "kale" and m.forage.spots.get(find, "") == "rosehips")
+	var v9 := _raw(path)
+	v9["save_version"] = 9
+	for key in ["cellar", "cooler", "forage", "forage_day"]:
+		v9.erase(key)
+	v9["cellar_stock"] = 12
+	v9["cooler_stock"] = 4
+	for key in ["leeks", "trout", "chanterelles", "garlic_seeds"]:
+		v9["inventory"].erase(key)
+	_write_text(path, JSON.stringify(v9))
+	m.inventory["leeks"] = 0   # keys the save lacks keep what's in memory, as on a fresh start
+	m.inventory["trout"] = 0
+	_check("version 9 save: cellar turnips and cooler perch carried over", _load() == 11 and int(m.cellar.get("crops", 0)) == 12
+		and int(m.cooler.get("fish", 0)) == 4 and m.farm._cellar_total() == 12 and m.fishing._cooler_total() == 4
+		and int(m.inventory["leeks"]) == 0 and int(m.inventory["trout"]) == 0)
+
 	# Saving in the cave puts you at the homestead on load.
 	var home := m._tile_center(m.HOMESTEAD_ARRIVE.x, m.HOMESTEAD_ARRIVE.y)
 	m.in_cave = true

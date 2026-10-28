@@ -42,7 +42,8 @@ const COLORS := {
 }
 const LEAVES := {"Spring": ["7fbf5a", "a0d070"], "Summer": ["4a8a3a", "6aa04a"], "Autumn": ["d0703a", "e0a040", "b04a2a"], "Winter": ["8a7a5a", "6a5a4a"]}
 const ITEM_NAMES := {"crops": "Turnip", "seeds": "Turnip seed", "corn_seeds": "Corn seed", "pumpkin_seeds": "Pumpkin seed",
-	"pumpkins": "Pumpkin", "eggs": "Egg", "crow_charm": "Crow charm"}
+	"pumpkins": "Pumpkin", "eggs": "Egg", "crow_charm": "Crow charm", "fish": "Perch", "potatoes": "Potato",
+	"leeks": "Leek", "parsnips": "Parsnip", "strawberries": "Strawberry", "blueberries": "Blueberry"}
 
 var layer: Node2D               # the particles, in the world under the day's light
 var pop_layer: Node2D           # the pop-ups, on their own canvas so the night tint doesn't dim them

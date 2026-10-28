@@ -26,6 +26,14 @@ static func tex_flipped(name: String, flip_x: bool, flip_y: bool) -> Texture2D:
 	return t
 
 
+# True when the art exists, so callers can fall back to code-drawn shapes for art not made yet.
+static func has(name: String) -> bool:
+	var key := "has|" + name
+	if not _cache.has(key):
+		_cache[key] = ResourceLoader.exists(DIR + name + ".png")
+	return bool(_cache[key])
+
+
 static func variant(x: int, y: int, count: int) -> int:
 	var h := (x * 73856093) ^ (y * 19349663) ^ (8 * 83492791)
 	return absi(h) % count

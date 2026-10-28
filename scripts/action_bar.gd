@@ -1743,6 +1743,84 @@ class RecipeIcon extends Control:
 			"bar":
 				_shape(_poly([[0.12, 0.62], [0.28, 0.34], [0.72, 0.34], [0.88, 0.62], [0.72, 0.74], [0.28, 0.74]]), tint)
 				draw_line(_pt(0.3, 0.42), _pt(0.7, 0.42), light, 0.04 * _sz)
+			# Code-only pictures for the seasonal crops, fish, forage and dishes, tinted per item.
+			"fish_t":
+				_shape(_ellipse(0.42, 0.5, 0.36, 0.2), tint)
+				_shape(_poly([[0.72, 0.5], [0.96, 0.28], [0.96, 0.72]]), dark)
+				draw_line(_pt(0.3, 0.42), _pt(0.6, 0.42), light, 0.03 * _sz)
+				draw_circle(_pt(0.2, 0.46), 0.04 * _sz, OUTLINE)
+			"seed_t":
+				_shape(_ellipse(0.38, 0.58, 0.16, 0.22), tint)
+				_shape(_ellipse(0.62, 0.5, 0.16, 0.22), tint.darkened(0.15))
+				draw_circle(_pt(0.36, 0.52), 0.04 * _sz, light)
+			"leafy":
+				for a in [-0.5, 0.0, 0.5]:
+					_shape(_ellipse(0.5 + a * 0.4, 0.42 + absf(a) * 0.12, 0.2, 0.32), tint if a != 0.0 else light.darkened(0.15))
+				draw_line(_pt(0.5, 0.92), _pt(0.5, 0.3), dark, 0.03 * _sz)
+			"pod":
+				_shape(_poly([[0.14, 0.7], [0.4, 0.42], [0.86, 0.24], [0.66, 0.5], [0.3, 0.76]]), tint)
+				for k in 3:
+					draw_circle(_pt(0.36 + 0.14 * float(k), 0.58 - 0.08 * float(k)), 0.06 * _sz, light)
+			"potato":
+				_shape(_ellipse(0.5, 0.58, 0.36, 0.26), tint)
+				for p in [[0.36, 0.52], [0.58, 0.64], [0.66, 0.48]]:
+					draw_circle(_pt(p[0], p[1]), 0.025 * _sz, dark)
+			"leek":
+				_box(Rect2(_pt(0.42, 0.42), Vector2(0.16, 0.48) * _sz), Color("efeadc"))
+				_shape(_poly([[0.42, 0.44], [0.2, 0.06], [0.48, 0.38]]), tint)
+				_shape(_poly([[0.58, 0.44], [0.8, 0.06], [0.52, 0.38]]), tint.darkened(0.2))
+				draw_line(_pt(0.44, 0.92), _pt(0.56, 0.92), Color("8a7a5a"), 0.05 * _sz)
+			"root":
+				_shape(_poly([[0.3, 0.2], [0.7, 0.2], [0.54, 0.94], [0.46, 0.94]]), tint)
+				_shape(_poly([[0.44, 0.22], [0.3, 0.02], [0.5, 0.18]]), Color("5f9a3a"))
+				_shape(_poly([[0.56, 0.22], [0.72, 0.04], [0.52, 0.18]]), Color("5f9a3a"))
+				draw_line(_pt(0.4, 0.4), _pt(0.52, 0.42), dark, 0.02 * _sz)
+			"berry":
+				_shape(_poly([[0.5, 0.3], [0.3, 0.12], [0.5, 0.2], [0.7, 0.12]]), Color("5f9a3a"))
+				for p in [[0.36, 0.5], [0.62, 0.48], [0.48, 0.72], [0.7, 0.72], [0.3, 0.74]]:
+					_shape(_ellipse(p[0], p[1], 0.13, 0.13), tint)
+					draw_circle(_pt(p[0] - 0.04, p[1] - 0.04), 0.03 * _sz, light)
+			"bulb":
+				_shape(_poly([[0.5, 0.06], [0.58, 0.3], [0.42, 0.3]]), Color("8aa86a"))
+				_shape(_ellipse(0.5, 0.6, 0.32, 0.3), tint)
+				draw_line(_pt(0.5, 0.32), _pt(0.5, 0.88), dark, 0.02 * _sz)
+				draw_line(_pt(0.34, 0.42), _pt(0.36, 0.82), dark, 0.02 * _sz)
+				draw_line(_pt(0.66, 0.42), _pt(0.64, 0.82), dark, 0.02 * _sz)
+			"fern":
+				draw_arc(_pt(0.5, 0.36), 0.2 * _sz, PI * 0.5, PI * 2.2, 14, tint, 0.09 * _sz)
+				draw_line(_pt(0.5, 0.56), _pt(0.46, 0.94), tint, 0.08 * _sz)
+				draw_circle(_pt(0.5, 0.36), 0.07 * _sz, light)
+			"hip":
+				for p in [[0.36, 0.56], [0.64, 0.48]]:
+					_shape(_ellipse(p[0], p[1], 0.16, 0.22), tint)
+					draw_line(_pt(p[0], p[1] - 0.22), _pt(p[0], p[1] - 0.32), OUTLINE, 0.04 * _sz)
+				draw_line(_pt(0.36, 0.24), _pt(0.64, 0.16), Color("5a4a2a"), 0.04 * _sz)
+			"mushroom":
+				_box(Rect2(_pt(0.42, 0.46), Vector2(0.16, 0.44) * _sz), light)
+				var cap := PackedVector2Array()
+				for i in range(13):
+					var a := PI + PI * float(i) / 12.0
+					cap.append(_pt(0.5, 0.5) + Vector2(cos(a) * 0.38, sin(a) * 0.32) * _sz)
+				_shape(cap, tint)
+			"pipe":
+				for x in [0.32, 0.52, 0.7]:
+					draw_line(_pt(x, 0.92), _pt(x, 0.38), tint, 0.07 * _sz)
+					_shape(_ellipse(x + 0.06, 0.34, 0.08, 0.1), tint)
+				draw_circle(_pt(0.6, 0.34), 0.025 * _sz, Color("404050"))
+			"dish":
+				_bowl_dish(tint)
+				draw_line(_pt(0.4, 0.3), _pt(0.36, 0.1), Color(1, 1, 1, 0.6), 0.03 * _sz)
+				draw_line(_pt(0.6, 0.3), _pt(0.64, 0.1), Color(1, 1, 1, 0.6), 0.03 * _sz)
+			"tea":
+				_box(Rect2(_pt(0.24, 0.38), Vector2(0.44, 0.5) * _sz), Color("e8e0d0"))
+				_box(Rect2(_pt(0.28, 0.42), Vector2(0.36, 0.14) * _sz), tint)
+				draw_arc(_pt(0.72, 0.6), 0.1 * _sz, -PI * 0.5, PI * 0.5, 8, OUTLINE, 0.04 * _sz)
+				draw_line(_pt(0.4, 0.3), _pt(0.36, 0.1), Color(1, 1, 1, 0.6), 0.03 * _sz)
+			"pie":
+				_shape(_poly([[0.08, 0.56], [0.92, 0.56], [0.8, 0.8], [0.2, 0.8]]), Color("c89a58"))
+				_shape(_ellipse(0.5, 0.56, 0.42, 0.14), tint)
+				for x in [0.32, 0.5, 0.68]:
+					draw_line(_pt(x, 0.46), _pt(x + 0.04, 0.66), Color("e8c890"), 0.04 * _sz)
 			_:
 				draw_circle(_pt(0.5, 0.5), 0.3 * _sz, tint)
 

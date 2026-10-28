@@ -17,6 +17,20 @@ func _crop_unlocked(kind: String) -> bool:
 	return m.progression._level("Farming") >= int(m.CROPS[kind]["level"])
 
 
+# True when the kind grows in the season (today's when none is given). Turnips grow in every season.
+func _in_season(kind: String, season: String = "") -> bool:
+	var seasons: Array = m.CROPS[kind]["seasons"]
+	return seasons.is_empty() or seasons.has(season if season != "" else m._season_today())
+
+
+# "every season", "spring", "autumn and winter".
+func _seasons_text(kind: String) -> String:
+	var seasons: Array = m.CROPS[kind]["seasons"]
+	if seasons.is_empty():
+		return "every season"
+	return " and ".join(PackedStringArray(seasons)).to_lower()
+
+
 # The crop kinds Farming has unlocked, in unlock order.
 func _unlocked_kinds() -> Array:
 	var kinds: Array = []
@@ -26,14 +40,18 @@ func _unlocked_kinds() -> Array:
 	return kinds
 
 
-# Steps through the seeds you have in the pouch: turnip always, corn and pumpkin once Farming reaches their levels.
+# Steps through the seeds in the pouch that can go in the ground today: unlocked, held, and in season.
 func _cycle_seed(step: int) -> void:
 	var options: Array = []
+	var held_out := false
 	for kind in _unlocked_kinds():
 		if int(m.inventory[m.CROPS[kind]["seed"]]) > 0:
-			options.append(kind)
+			if _in_season(kind):
+				options.append(kind)
+			else:
+				held_out = true
 	if options.is_empty():
-		m._show_message("You have no seeds to plant.")
+		m._show_message(("None of your seeds will take in %s." % m._season_today().to_lower()) if held_out else "You have no seeds to plant.")
 		return
 	var at := options.find(m.selected_seed)
 	var idx: int
@@ -46,7 +64,9 @@ func _cycle_seed(step: int) -> void:
 
 
 func _switch_seed() -> void:
-	var kinds := _unlocked_kinds()
+	var kinds: Array = _unlocked_kinds().filter(func(k) -> bool: return _in_season(k))
+	if kinds.is_empty():
+		kinds = _unlocked_kinds()
 	m.selected_seed = str(kinds[posmod(kinds.find(m.selected_seed) + 1, kinds.size())])
 	m._show_message("You'll plant %s seeds now." % _seed_label(m.selected_seed).to_lower())
 
@@ -75,14 +95,17 @@ func _check_unlocks() -> void:
 
 
 func _plant(tile: Vector2i) -> void:
-	m.play_sfx("plant", 0.06)
 	var kind := m.selected_seed
-	if not _crop_unlocked(kind):
+	if not m.CROPS.has(kind) or not _crop_unlocked(kind):
 		kind = "turnip"
+	if not _in_season(kind):
+		m._show_message("%s won't take in %s. It grows in %s." % [_seed_label(kind), m._season_today().to_lower(), _seasons_text(kind)])
+		return
 	var seed_key: String = m.CROPS[kind]["seed"]
 	if m.inventory[seed_key] <= 0:
 		m._show_message("You're out of %s seeds." % _seed_label(kind).to_lower())
 		return
+	m.play_sfx("plant", 0.06)
 	m.inventory[seed_key] -= 1
 	m.crops[tile] = {"stage": 0, "kind": kind, "days": 0}
 	if m.weather_kind in m.WATER_RAIN_KINDS:
@@ -93,27 +116,71 @@ func _plant(tile: Vector2i) -> void:
 
 
 func _harvest(tile: Vector2i) -> void:
-	m.play_sfx("harvest", 0.06)
 	var kind: String = m.crops[tile]["kind"]
-	var yield_count: int = m.CROPS[kind]["yield"]
+	var crop: Dictionary = m.CROPS[kind]
+	var yield_count: int = crop["yield"]
 	# Harvests go to the pack only. Storing in the cellar is up to the player.
-	var held_key: String = m.CROPS[kind]["held"]
+	var held_key: String = crop["held"]
 	if not m.stall._pack_room(int(m.inventory[held_key]), yield_count):
 		m._show_message("Your pack is full. Store crops in the root cellar, or sell them.")
 		return
+	m.play_sfx("harvest", 0.06)
 	m.inventory[held_key] += yield_count
-	m.crops.erase(tile)
+	# A crop that regrows stays in the ground and goes back a few watered days; the rest come up.
+	var again := ""
+	if crop.has("regrow"):
+		var days := maxi(0, int(m.CROP_GROW_DAYS[kind]) - int(crop["regrow"]))
+		m.crops[tile]["days"] = days
+		m.crops[tile]["stage"] = m._stage_for(kind, days)
+		again = " It will bear again in %d watered days." % int(crop["regrow"])
+	else:
+		m.crops.erase(tile)
 	m.stats["harvested"] += 1
 	if kind == "pumpkin":
 		m.stats["pumpkins"] += 1
 	var seed_note := ""
-	if randf() < m.SEED_BACK_CHANCE:
-		m.inventory[m.CROPS[kind]["seed"]] += 1
+	if randf() < float(crop["seed_back"]):
+		m.inventory[crop["seed"]] += 1
 		seed_note = " and a seed"
-	var xp: int = m.CROPS[kind]["xp"]
+	var xp: int = crop["xp"]
 	m.progression._grant_xp("Farming", xp)
-	var unit := {"turnip": "crops", "corn": "ears", "pumpkin": "pumpkins"}
-	m._show_message("Harvested %s for %d %s%s. +%d Farming XP" % [_seed_label(kind).to_lower(), yield_count, unit[kind], seed_note, xp])
+	var food := Foods.by_held(held_key)
+	m._show_message("Harvested %d %s%s. +%d Farming XP%s" % [yield_count, str(food.get("name", _seed_label(kind))).to_lower(), seed_note, xp, again])
+
+
+# Crops whose seasons have ended wither in the morning. Called once the new day's date is set.
+func _wither() -> String:
+	var gone := 0
+	for pos in m.crops.keys():
+		if not _in_season(str(m.crops[pos]["kind"])):
+			m.crops.erase(pos)
+			gone += 1
+	if gone == 0:
+		return ""
+	m.stats["withered"] += gone
+	return " The season has turned: %d crop%s withered in the ground." % [gone, "" if gone == 1 else "s"]
+
+
+# A warning three days before the season turns, and again on its last day, while crops would wither.
+func _season_warning() -> String:
+	var today := m._season_today()
+	var tomorrow := m._season_of(m._calendar_date(m.day + 1)["month"])
+	var in_two := m._season_of(m._calendar_date(m.day + 2)["month"])
+	var in_three := m._season_of(m._calendar_date(m.day + 3)["month"])
+	var next := ""
+	if tomorrow != today:
+		next = tomorrow
+	elif in_three != today and in_two == today:
+		next = in_three
+	if next == "":
+		return ""
+	var doomed := 0
+	for pos in m.crops:
+		if not _in_season(str(m.crops[pos]["kind"]), next):
+			doomed += 1
+	if doomed == 0:
+		return ""
+	return " %s comes %s: %d crop%s won't survive it. Harvest what you can." % [next, "tomorrow" if tomorrow != today else "in three days", doomed, "" if doomed == 1 else "s"]
 
 
 func _start_harvest(kind: String, tile: Vector2i) -> void:
@@ -231,7 +298,7 @@ func _watered_today() -> int:
 	return n
 
 
-# Turnips, corn and pumpkins all feed you and the animals. Food and offerings count them together.
+# Every crop feeds you and the animals. Food and offerings count them together (apples aren't crops).
 func _crop_total() -> int:
 	var total := 0
 	for kind in m.CROPS:
@@ -239,46 +306,96 @@ func _crop_total() -> int:
 	return total
 
 
-# Uses crops for food or offerings, taking turnips first, then corn, then pumpkins.
+# The crop kinds cheapest first: what the animals and the offerings take first.
+func _feed_order() -> Array:
+	var kinds: Array = m.CROPS.keys()
+	kinds.sort_custom(func(a, b) -> bool: return int(m.CROP_VALUE[a]) < int(m.CROP_VALUE[b]))
+	return kinds
+
+
+# Uses crops for food or offerings, cheapest first (peas, kale and potatoes before turnips; garlic last).
 func _spend_crops(amount: int) -> void:
-	for kind in m.CROPS:
+	for kind in _feed_order():
 		var key: String = m.CROPS[kind]["held"]
 		var take := mini(amount, int(m.inventory[key]))
 		m.inventory[key] -= take
 		amount -= take
 
 
-# How much one crop sells for: its seed's cost spread over its yield, plus its difficulty.
 func _crop_price(kind: String) -> int:
 	return int(m.CROP_VALUE[kind])
 
 
+# --- The root cellar: the crops that keep (turnips, potatoes, leeks, parsnips, garlic), CELLAR_CAP in all ---
+
+func _cellar_total() -> int:
+	var total := 0
+	for key in m.cellar:
+		total += int(m.cellar[key])
+	return total
+
+
+func _cellar_keys() -> Array:
+	var out: Array = []
+	for kind in m.CROPS:
+		if bool(m.CROPS[kind]["keeps"]):
+			out.append(str(m.CROPS[kind]["held"]))
+	return out
+
+
+func _keepable_in_pack() -> int:
+	var n := 0
+	for key in _cellar_keys():
+		n += int(m.inventory[key])
+	return n
+
+
 func _store_crops() -> void:
-	var amount := mini(int(m.inventory["crops"]), m.CELLAR_CAP - m.cellar_stock)
-	if amount <= 0:
-		m._show_message("Nothing to store, or the cellar is full.")
+	var stored := 0
+	for key in _cellar_keys():
+		var amount := mini(int(m.inventory[key]), m.CELLAR_CAP - _cellar_total())
+		if amount <= 0:
+			continue
+		m.inventory[key] -= amount
+		m.cellar[key] = int(m.cellar.get(key, 0)) + amount
+		stored += amount
+	if stored <= 0:
+		m._show_message("Nothing that keeps to store, or the cellar is full.")
 		return
-	m.inventory["crops"] -= amount
-	m.cellar_stock += amount
-	m._show_message("You store %d crops in the cellar." % amount)
+	m._show_message("You store %d crops in the cellar." % stored)
 
 
 func _take_crops() -> void:
-	var amount := mini(m.cellar_stock, m.stall._pack_free())
-	if amount <= 0:
+	var taken := 0
+	for key in _cellar_keys():
+		while int(m.cellar.get(key, 0)) > 0 and m.stall._pack_room(int(m.inventory[key]), 1):
+			m.inventory[key] += 1
+			m.cellar[key] = int(m.cellar[key]) - 1
+			taken += 1
+	if taken <= 0:
 		m._show_message("Your pack is full, or the cellar is empty.")
 		return
-	m.cellar_stock -= amount
-	m.inventory["crops"] += amount
-	m._show_message("You take %d crops from the cellar." % amount)
+	m._show_message("You take %d crops from the cellar." % taken)
+
+
+# What the cellar holds, as "12 turnip, 3 leek".
+func _cellar_text() -> String:
+	var parts: Array = []
+	for key in _cellar_keys():
+		var n := int(m.cellar.get(key, 0))
+		if n > 0:
+			parts.append("%d %s" % [n, str(Foods.by_held(key).get("name", key)).to_lower()])
+	return ", ".join(PackedStringArray(parts)) if not parts.is_empty() else "nothing yet"
 
 
 func _seed_cells() -> Array:
-	return [
-		{"color": "a8d46f", "label": "Turnip", "count": str(m.inventory["seeds"]), "tip": "Turnip seeds. Kept in the seed pouch."},
-		{"color": "e8c440", "label": "Corn", "count": str(m.inventory["corn_seeds"]), "tip": "Corn seeds. Farming %d to plant." % m.CORN_LEVEL},
-		{"color": "d98a35", "label": "Pumpkin", "count": str(m.inventory["pumpkin_seeds"]), "tip": "Pumpkin seeds. Farming %d to plant." % m.PUMPKIN_LEVEL},
-	]
+	var cells: Array = []
+	for kind in m.CROPS:
+		var c: Dictionary = m.CROPS[kind]
+		var lvl := int(c["level"])
+		cells.append({"color": str(c["colors"][3]), "label": str(c["label"]), "count": str(m.inventory[c["seed"]]),
+			"tip": "%s seeds. Grows in %s.%s" % [str(c["label"]), _seasons_text(kind), (" Farming %d to plant." % lvl) if lvl > 0 else ""]})
+	return cells
 
 
 func _crops_to_array() -> Array:

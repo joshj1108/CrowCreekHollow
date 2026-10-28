@@ -690,14 +690,157 @@ static func _leaf(ci: CanvasItem, base: Vector2, tip: Vector2, width: float, col
 
 # A crop at one of its four stages. Turnips show leaves that grow into a purple-shouldered bulb.
 # Pumpkins show a sprout, then a vine, then a round fruit with ribs and a stem. Watered soil is darker.
-static func draw_crop(ci: CanvasItem, c: Vector2, u: float, kind: String, stage: int, watered: bool) -> void:
-	var soil := Color("3d2a1c") if watered else Color("5a3d28")
+static func draw_crop(ci: CanvasItem, c: Vector2, u: float, kind: String, stage: int, watered: bool, soil := true) -> void:
 	var base := c + Vector2(0, u * 0.32)
-	ci.draw_colored_polygon(ellipse(base, u * 0.38, u * 0.11), soil)
-	if kind == "pumpkin":
-		_pumpkin(ci, base, u, stage)
+	if soil:
+		ci.draw_colored_polygon(ellipse(base, u * 0.38, u * 0.11), Color("3d2a1c") if watered else Color("5a3d28"))
+	# Every crop starts as the same pair of seed leaves.
+	if stage == 0:
+		_leaf(ci, base, base + Vector2(-0.13, -0.2) * u, 0.05 * u, Color("7ab850"))
+		_leaf(ci, base, base + Vector2(0.13, -0.2) * u, 0.05 * u, Color("7ab850"))
+		return
+	match kind:
+		"pumpkin":
+			_pumpkin(ci, base, u, stage)
+		"kale":
+			_kale(ci, base, u, stage)
+		"peas":
+			_peas(ci, base, u, stage)
+		"corn":
+			_corn(ci, base, u, stage)
+		"potato":
+			_potato(ci, base, u, stage)
+		"leek":
+			_leek(ci, base, u, stage)
+		"parsnip":
+			_root(ci, base, u, stage, Color("e8dcb0"), Color("d8c890"), Color("5f9a3a"))
+		"strawberry":
+			_berries(ci, base, u, stage, Color("4f9a3a"), Color("d83a3a"), false)
+		"garlic":
+			_garlic(ci, base, u, stage)
+		"blueberry":
+			_berries(ci, base, u, stage, Color("3f6a3a"), Color("4a5aa8"), true)
+		_:
+			_turnip(ci, base, u, stage)
+
+
+# A root crop with its shoulder showing above the soil: parsnips (turnips have their own purple top).
+static func _root(ci: CanvasItem, base: Vector2, u: float, stage: int, shoulder: Color, ring: Color, leaf: Color) -> void:
+	if stage >= 2:
+		var r := 0.1 if stage == 2 else 0.15
+		ci.draw_colored_polygon(ellipse(base + Vector2(0, -0.02) * u, r * u, r * 0.6 * u), shoulder)
+		ci.draw_polyline(ellipse(base + Vector2(0, -0.04) * u, r * 0.6 * u, r * 0.3 * u), ring, 1.0)
+	var reach := 0.38 + 0.12 * float(stage)
+	for a in [-0.55, -0.2, 0.2, 0.55]:
+		_leaf(ci, base, base + Vector2(a, -1.0).normalized() * reach * u, (0.05 + 0.015 * float(stage)) * u, leaf)
+
+
+# Kale: a rosette of broad blue-green leaves with crinkled edges, taller as it grows.
+static func _kale(ci: CanvasItem, base: Vector2, u: float, stage: int) -> void:
+	var leaf := Color("3f6a4a")
+	var edge := Color("5a8a6a")
+	var reach := 0.3 + 0.14 * float(stage)
+	ci.draw_line(base, base + Vector2(0, -reach * 0.5) * u, Color("6a8a5a"), 2.0)
+	for a in [-0.8, -0.35, 0.35, 0.8, 0.0]:
+		var tip := base + Vector2(a, -1.0).normalized() * reach * u
+		_leaf(ci, base + Vector2(0, -0.06) * u, tip, (0.09 + 0.03 * float(stage)) * u, leaf if a != 0.0 else edge)
+		if stage >= 3:
+			ci.draw_circle(tip, 0.045 * u, edge)
+
+
+# Peas: a cane trellis the vine climbs, flowering, then hung with pods.
+static func _peas(ci: CanvasItem, base: Vector2, u: float, stage: int) -> void:
+	var cane := Color("8a6a40")
+	var top := 0.25 + 0.17 * float(stage)
+	for x in [-0.22, 0.22]:
+		ci.draw_line(base + Vector2(x, 0.02) * u, base + Vector2(x * 0.6, -top - 0.06) * u, cane, 2.0)
+	ci.draw_line(base + Vector2(-0.18, -top * 0.6) * u, base + Vector2(0.18, -top * 0.6) * u, cane, 1.5)
+	var vine := Color("6fae4a")
+	var pts := PackedVector2Array()
+	for i in 6:
+		var t := float(i) / 5.0
+		pts.append(base + Vector2(sin(t * 6.0) * 0.12, -t * top) * u)
+	ci.draw_polyline(pts, vine, 2.0)
+	for i in range(1, 5):
+		_leaf(ci, pts[i], pts[i] + Vector2(0.12 if i % 2 == 0 else -0.12, -0.04) * u, 0.04 * u, vine)
+	if stage == 2:
+		for i in [2, 4]:
+			ci.draw_circle(pts[i] + Vector2(0.06, 0) * u, 0.035 * u, Color("f0eef8"))
+	elif stage >= 3:
+		for i in [1, 3, 4]:
+			ci.draw_colored_polygon(ellipse(pts[i] + Vector2(0.09 if i % 2 == 1 else -0.09, 0.04) * u, 0.035 * u, 0.08 * u), Color("8fc860"))
+
+
+# Corn: a stalk with long arching leaves, and a yellow ear once ripe.
+static func _corn(ci: CanvasItem, base: Vector2, u: float, stage: int) -> void:
+	var leaf := Color("5f8a3a")
+	var h := 0.3 + 0.2 * float(stage)
+	ci.draw_line(base, base + Vector2(0, -h) * u, Color("7a9a4a"), 3.0)
+	for k in stage + 1:
+		var y := -h * (0.3 + 0.22 * float(k))
+		var side := -1.0 if k % 2 == 0 else 1.0
+		_leaf(ci, base + Vector2(0, y) * u, base + Vector2(side * 0.32, y + 0.08) * u, 0.05 * u, leaf)
+	if stage >= 3:
+		ci.draw_colored_polygon(ellipse(base + Vector2(0.08, -h * 0.55) * u, 0.05 * u, 0.12 * u), Color("e8c440"))
+		ci.draw_line(base + Vector2(0, -h) * u, base + Vector2(0, -h - 0.08) * u, Color("c8a070"), 2.0)
+
+
+# Potatoes: a low bushy mound of leaves, flowering pale when the tubers are ready.
+static func _potato(ci: CanvasItem, base: Vector2, u: float, stage: int) -> void:
+	var leaf := Color("4f8a34")
+	var r := 0.12 + 0.07 * float(stage)
+	for p in [Vector2(-0.6, -0.5), Vector2(0.6, -0.5), Vector2(0, -0.9), Vector2(-0.3, -0.2), Vector2(0.3, -0.2)]:
+		ci.draw_colored_polygon(ellipse(base + p * r * u, r * 0.6 * u, r * 0.45 * u), leaf if p.y < -0.6 else leaf.lightened(0.12))
+	if stage >= 3:
+		for p in [Vector2(-0.4, -1.0), Vector2(0.3, -1.2), Vector2(0.6, -0.6)]:
+			ci.draw_circle(base + p * r * u, 0.035 * u, Color("f0e8f8"))
+			ci.draw_circle(base + p * r * u, 0.015 * u, Color("e8c440"))
+
+
+# Leeks: a few white shanks standing up, each with a fan of flat blue-green leaves.
+static func _leek(ci: CanvasItem, base: Vector2, u: float, stage: int) -> void:
+	var h := 0.18 + 0.1 * float(stage)
+	for x in ([0.0] if stage == 1 else [-0.14, 0.0, 0.14]):
+		var foot := base + Vector2(x, 0) * u
+		var neck := foot + Vector2(0, -h) * u
+		ci.draw_line(foot, neck, Color("efeadc"), 3.0 + float(stage))
+		_leaf(ci, neck, neck + Vector2(-0.14, -0.22) * u, 0.035 * u, Color("6f9a7a"))
+		_leaf(ci, neck, neck + Vector2(0.14, -0.24) * u, 0.035 * u, Color("5a8a6a"))
+
+
+# Garlic: thin upright leaves; at harvest they yellow and the white bulb shows at the soil.
+static func _garlic(ci: CanvasItem, base: Vector2, u: float, stage: int) -> void:
+	var leaf := Color("8aa86a") if stage >= 3 else Color("6f9a5a")
+	var h := 0.3 + 0.12 * float(stage)
+	if stage >= 3:
+		ci.draw_colored_polygon(ellipse(base + Vector2(0, -0.04) * u, 0.1 * u, 0.08 * u), Color("efe6d8"))
+	for a in [-0.25, -0.08, 0.08, 0.25]:
+		_leaf(ci, base + Vector2(0, -0.04) * u, base + Vector2(a, -h) * u, 0.025 * u, leaf)
+
+
+# A low fruiting plant: strawberries along the ground, or a small round blueberry bush.
+static func _berries(ci: CanvasItem, base: Vector2, u: float, stage: int, leaf: Color, fruit: Color, bush: bool) -> void:
+	var spots: Array
+	if bush:
+		var r := 0.1 + 0.06 * float(stage)
+		ci.draw_line(base, base + Vector2(0, -r) * u, Color("5a4a32"), 2.0)
+		for p in [Vector2(-0.7, -1.2), Vector2(0.7, -1.2), Vector2(0, -1.8), Vector2(-0.4, -0.7), Vector2(0.4, -0.7)]:
+			ci.draw_colored_polygon(ellipse(base + p * r * u, r * 0.7 * u, r * 0.6 * u), leaf if p.y < -1.0 else leaf.lightened(0.1))
+		spots = [Vector2(-0.6, -1.3), Vector2(0.5, -1.0), Vector2(0.1, -1.8), Vector2(-0.2, -0.8)].map(func(p): return p * r)
 	else:
-		_turnip(ci, base, u, stage)
+		var r := 0.12 + 0.05 * float(stage)
+		for a in [-0.9, -0.3, 0.3, 0.9]:
+			var tip := base + Vector2(sin(a), -cos(a) * 0.7) * r * 1.6 * u
+			ci.draw_line(base, tip, leaf.darkened(0.2), 1.0)
+			ci.draw_colored_polygon(ellipse(tip, r * 0.5 * u, r * 0.4 * u), leaf)
+		spots = [Vector2(-0.22, -0.02), Vector2(0.2, -0.04), Vector2(0.04, -0.2)]
+	if stage == 2:
+		for p in spots:
+			ci.draw_circle(base + p * u, 0.03 * u, Color("f4f0e8"))
+	elif stage >= 3:
+		for p in spots:
+			ci.draw_circle(base + p * u, 0.05 * u, Color("1d1611"))
+			ci.draw_circle(base + p * u, 0.04 * u, fruit)
 
 
 static func _turnip(ci: CanvasItem, base: Vector2, u: float, stage: int) -> void:

@@ -214,10 +214,12 @@ const BED_INTERIOR := Vector2i(1, 5)  # the bed's bottom-left tile (see BED_RECT
 const EVENT_HOUR := 22.0
 
 const MAX_STAGE := 3        # 0 = seed, 3 = ready to harvest
-const CROP_GROW_DAYS := {"turnip": 7, "corn": 8, "pumpkin": 10}   # watered days from seed to ready
+# Watered days from seed to ready. A crop with "regrow" in CROPS goes back that many days after each picking.
+const CROP_GROW_DAYS := {"turnip": 7, "kale": 6, "peas": 6, "corn": 8, "potato": 8, "leek": 9, "pumpkin": 10, "parsnip": 9,
+	"strawberry": 8, "garlic": 12, "blueberry": 10}
 # What a sold crop fetches at the farm stand, and what food from it is worth.
-const CROP_VALUE := {"turnip": 8, "corn": 10, "pumpkin": 15}
-const SEED_BACK_CHANCE := 0.5   # odds a harvest gives its seed back, so seeds stay an ongoing cost
+const CROP_VALUE := {"turnip": 8, "kale": 6, "peas": 3, "corn": 10, "potato": 6, "leek": 14, "pumpkin": 15, "parsnip": 11,
+	"strawberry": 9, "garlic": 17, "blueberry": 8}
 const STAGE_NAMES := ["Decrepit", "Boarded", "Patched", "Restored"]
 # Tips: diary pages written as the player reaches each part of the farm, once each, when its condition
 # is met (see _tip_ready).
@@ -286,17 +288,38 @@ const CAVE_LANTERN_BOOST := 4.0
 const CAVE_MOUTH_ENERGY := 0.6
 const WINDOW_ENERGY := 0.45
 
-# Crops. Turnips are the starter crop. Corn needs Farming 2 and pumpkins Farming 3; both yield more.
-# held is the pack key the harvest goes to. Listed in unlock order, which is the seed cycling order.
+# Crops. Turnips are the starter crop and grow in every season; the rest have the Pacific Northwest seasons they
+# grow in (seasons; planting out of season is refused, and a crop still in the ground when its seasons end withers).
+# held is the pack key the harvest goes to, seed the seed pouch key. seed_back is the odds a harvest gives its seed
+# back, so seeds stay an ongoing cost. regrow crops stay in the ground after picking and are ready again that many
+# watered days later. keeps: stored in the root cellar. pack and seed_price are the catalog's pack size and price
+# per seed. Listed in unlock order, which is the seed cycling order.
 const CORN_LEVEL := 2
 const PUMPKIN_LEVEL := 3
 const CROPS := {
-	"turnip": {"label": "Turnip", "seed": "seeds", "held": "crops", "level": 0, "yield": 1, "xp": 25, "colors": ["8fd16b", "4f9a3a", "2f7a2a", "e8b440"]},
-	"corn": {"label": "Corn", "seed": "corn_seeds", "held": "corn", "level": CORN_LEVEL, "yield": 2, "xp": 30, "colors": ["9fc86a", "5f8a3a", "3f6a2a", "e8c440"]},
-	"pumpkin": {"label": "Pumpkin", "seed": "pumpkin_seeds", "held": "pumpkins", "level": PUMPKIN_LEVEL, "yield": 2, "xp": 40, "colors": ["9fd27a", "d98a35", "c26a1f", "f2a13a"]},
+	"turnip": {"label": "Turnip", "seed": "seeds", "held": "crops", "level": 0, "yield": 1, "xp": 25, "seasons": [], "seed_back": 0.5,
+		"pack": 5, "seed_price": 3, "keeps": true, "colors": ["8fd16b", "4f9a3a", "2f7a2a", "e8b440"]},
+	"kale": {"label": "Kale", "seed": "kale_seeds", "held": "kale", "level": 1, "yield": 1, "xp": 14, "seasons": ["Autumn", "Winter"], "regrow": 4,
+		"seed_back": 0.1, "pack": 5, "seed_price": 4, "keeps": false, "colors": ["6f9a5a", "3f6a4a", "2f5a3a", "5a7a8a"]},
+	"peas": {"label": "Pea", "seed": "pea_seeds", "held": "peas", "level": 1, "yield": 2, "xp": 12, "seasons": ["Spring"], "regrow": 3,
+		"seed_back": 0.1, "pack": 5, "seed_price": 3, "keeps": false, "colors": ["9fd27a", "6fae4a", "4f8a34", "8fc860"]},
+	"corn": {"label": "Corn", "seed": "corn_seeds", "held": "corn", "level": CORN_LEVEL, "yield": 2, "xp": 30, "seasons": ["Summer", "Autumn"],
+		"seed_back": 0.5, "pack": 4, "seed_price": 6, "keeps": false, "colors": ["9fc86a", "5f8a3a", "3f6a2a", "e8c440"]},
+	"potato": {"label": "Potato", "seed": "potato_seeds", "held": "potatoes", "level": 2, "yield": 3, "xp": 30, "seasons": ["Spring", "Summer"],
+		"seed_back": 0.5, "pack": 4, "seed_price": 5, "keeps": true, "colors": ["8fc86a", "5f8a3a", "3f6a2a", "e8e0f0"]},
+	"leek": {"label": "Leek", "seed": "leek_seeds", "held": "leeks", "level": 2, "yield": 1, "xp": 32, "seasons": ["Winter", "Spring"],
+		"seed_back": 0.5, "pack": 4, "seed_price": 7, "keeps": true, "colors": ["a8c878", "6f9a5a", "4f7a4a", "efeadc"]},
+	"pumpkin": {"label": "Pumpkin", "seed": "pumpkin_seeds", "held": "pumpkins", "level": PUMPKIN_LEVEL, "yield": 2, "xp": 40, "seasons": ["Summer", "Autumn"],
+		"seed_back": 0.5, "pack": 3, "seed_price": 10, "keeps": false, "colors": ["9fd27a", "d98a35", "c26a1f", "f2a13a"]},
+	"parsnip": {"label": "Parsnip", "seed": "parsnip_seeds", "held": "parsnips", "level": 3, "yield": 2, "xp": 38, "seasons": ["Winter", "Spring"],
+		"seed_back": 0.5, "pack": 4, "seed_price": 8, "keeps": true, "colors": ["8fc86a", "5f9a3a", "4f8a34", "e8dcb0"]},
+	"strawberry": {"label": "Strawberry", "seed": "strawberry_seeds", "held": "strawberries", "level": 4, "yield": 1, "xp": 18, "seasons": ["Spring", "Summer"], "regrow": 4,
+		"seed_back": 0.05, "pack": 3, "seed_price": 14, "keeps": false, "colors": ["7fbf5a", "4f9a3a", "3f7a2a", "d83a3a"]},
+	"garlic": {"label": "Garlic", "seed": "garlic_seeds", "held": "garlic", "level": 4, "yield": 2, "xp": 45, "seasons": ["Autumn", "Winter"],
+		"seed_back": 0.5, "pack": 3, "seed_price": 12, "keeps": true, "colors": ["a8c88a", "7aa06a", "5a8a4a", "efe6d8"]},
+	"blueberry": {"label": "Blueberry", "seed": "blueberry_seeds", "held": "blueberries", "level": 5, "yield": 2, "xp": 20, "seasons": ["Summer"], "regrow": 5,
+		"seed_back": 0.0, "pack": 2, "seed_price": 25, "keeps": false, "colors": ["6f9a5a", "4f7a4a", "3f6a3a", "4a5aa8"]},
 }
-# A crop sells for its seed's cost spread over its yield, plus this difficulty bonus.
-# Pumpkins need Farming 3 and more care, so each one sells for more than a turnip.
 
 # Pack: crops, fish, and meals share the pack. Seeds have their own pouch.
 const BAG_BASE := 20
@@ -368,9 +391,7 @@ const TAX_GRACE_DAYS := 14          # days to pay a bill after it arrives
 const TAX_FINAL_DAYS := 7           # days overdue before the final notice
 const TAX_EVICT_DAYS := 14          # days overdue before the land is lost
 const DESK_IX := Vector2i(4, 3)     # the desk's left tile (it is two wide), in the bedroom: post lands here
-const SEED_TURNIP_PRICE := 3    # per seed, sold in packs of 5
-const SEED_CORN_PRICE := 6      # per seed, sold in packs of 4
-const SEED_PUMPKIN_PRICE := 10  # per seed, sold in packs of 3
+# Seed prices and pack sizes are in CROPS (seed_price, pack).
 
 const XP_HIT := 4
 const BASE_HP := 10
@@ -693,7 +714,20 @@ var well_water := 0.0
 var cistern_built := false
 var weather_kind := ""       # today's weather, rolled each morning: see WEATHER_WEIGHTS
 var skill_xp := {"Farming": 0, "Bushcrafting": 0, "Carpentry": 0, "Cleaning": 0, "Fishing": 0, "Cooking": 0, "Combat": 0, "Forestry": 0, "Mining": 0, "Smithing": 0}
-var inventory := {"seeds": STARTING_SEEDS, "corn_seeds": 0, "pumpkin_seeds": 0, "crops": 0, "corn": 0, "pumpkins": 0, "fish": 0, "eggs": 0, "milk": 0, "fish_meal": 0, "turnip_hash": 0, "smoked_fish": 0, "dried_turnip": 0, "pumpkin_soup": 0, "canned_turnip": 0, "fish_stew": 0, "fermented_turnip": 0, "hearty_stew": 0, "bandage": 0, "firewood": 4, "crow_charm": 0, "trail_ration": 0, "bread": 0, "apples": 0}
+# The pack and the seed pouch: every food in Foods.LIST and every seed in CROPS, plus the few other things carried.
+var inventory := _starting_inventory()
+
+
+static func _starting_inventory() -> Dictionary:
+	var inv := {"seeds": STARTING_SEEDS, "bandage": 0, "firewood": 4, "crow_charm": 0}
+	for kind in CROPS:
+		if not inv.has(CROPS[kind]["seed"]):
+			inv[CROPS[kind]["seed"]] = 0
+	for f in Foods.LIST:
+		inv[str(f["held"])] = 0
+	return inv
+
+
 var materials := {"wood": 0, "sticks": 0, "fiber": 0, "resin": 0, "hardwood": 0, "stone": 0, "copper_ore": 0, "iron_ore": 0, "copper_bar": 0, "iron_bar": 0, "feathers": 0,
 	"storm_oak": 0, "flax": 0, "bell_metal": 0, "bell_frame": 0, "bell_rope": 0, "bell_clapper": 0, "lamp_oil": 0, "rope": 0, "flour": 0, "apple_sapling": 0}
 # The hotbar, in slot order. Slots after these are empty.
@@ -717,7 +751,8 @@ var stats := {"jobs": 0, "planted": 0, "harvested": 0, "gathered": 0, "slept": 0
 	"fished": 0, "caught": 0, "mended": 0, "cleansed": 0, "cooked": 0, "eaten": 0,
 	"pumpkins": 0, "collapses": 0, "events": 0, "sold": 0, "spoiled": 0,
 	"defeated": 0, "preserved": 0, "felled": 0, "mined": 0,
-	"drank": 0, "watered": 0, "pump": 0, "hose": 0, "rain_days": 0, "events_seen": 0, "goats_bought": 0, "faced": 0}
+	"drank": 0, "watered": 0, "pump": 0, "hose": 0, "rain_days": 0, "events_seen": 0, "goats_bought": 0, "faced": 0,
+	"withered": 0, "foraged": 0, "night_fish": 0}
 var achievements_done := {}     # achievement id -> true
 var quests_done := {}               # quest id -> true
 var selected_seed := "turnip"
@@ -746,10 +781,11 @@ var hen_ages: Array = []          # days old for each hen, kept in step with hen
 # The daily job: one delivery a day, rotating through these. Turn the items in for coins and XP.
 const JOBS := [
 	{"id": "crops", "name": "Deliver crops", "need": {"crops": 3}, "coins": 30, "skill": "Farming", "xp": 12},
-	{"id": "fish", "name": "Deliver fish", "need": {"fish": 2}, "coins": 26, "skill": "Fishing", "xp": 12},
+	{"id": "fish", "name": "Deliver fish", "need": {"any_fish": 2}, "coins": 26, "skill": "Fishing", "xp": 12},
 	{"id": "wood", "name": "Deliver wood", "need": {"wood": 6}, "coins": 24, "skill": "Forestry", "xp": 12},
 	{"id": "stone", "name": "Deliver stone", "need": {"stone": 4}, "coins": 22, "skill": "Mining", "xp": 12},
 	{"id": "resin", "name": "Deliver resin", "need": {"resin": 3}, "coins": 20, "skill": "Bushcrafting", "xp": 12},
+	{"id": "forage", "name": "Deliver forage", "need": {"forage": 3}, "coins": 24, "skill": "Bushcrafting", "xp": 14},
 	{"id": "meals", "name": "Deliver meals", "need": {"fish_meal": 1, "turnip_hash": 1}, "coins": 34, "skill": "Cooking", "xp": 12},
 	{"id": "preserved", "name": "Deliver preserves", "need": {"smoked_fish": 1, "dried_turnip": 1}, "coins": 40, "skill": "Cooking", "xp": 16},
 ]
@@ -802,8 +838,8 @@ var tax_stage := 0                  # 0 none sent, 1 overdue reminder sent, 2 fi
 var desk_mail: Array = []           # letters on the desk: {"title", "text", "unread"}
 var desk_light: PointLight2D        # red light on the desk while post is unread
 var fire_hours := 0.0
-var cellar_stock := 0          # crops in the root cellar
-var cooler_stock := 0          # fish in the cooler
+var cellar := {}              # pack key -> crops in the root cellar (only crops that keep)
+var cooler := {}              # pack key -> fish in the cooler
 var hp := BASE_HP
 var foes: Array = []           # creatures in the cave or dogs on a trek, rebuilt on each visit
 var swing_cool := 0.0
@@ -876,6 +912,7 @@ var firewood: FirewoodSystem
 var farm: FarmSystem
 var animals: AnimalSystem
 var desk: DeskSystem
+var forage: ForageSystem
 var lantern_light: PointLight2D
 var window_lights: Array = []   # glows for the lit windows, one PointLight2D each
 var porch_light: PointLight2D     # the lamp by the door, once the house is restored
@@ -897,6 +934,7 @@ func _ready() -> void:
 	TitleMenu.migrate_old_folder()
 	panels = PanelRows.new(self)
 	desk = DeskSystem.new(self)
+	forage = ForageSystem.new(self)
 	animals = AnimalSystem.new(self)
 	farm = FarmSystem.new(self)
 	firewood = FirewoodSystem.new(self)
@@ -1045,6 +1083,7 @@ func _on_title_start(mode: String, slot: int) -> void:
 	_build_crows()
 	nights._build()
 	happenings._build()
+	forage._build()
 	trek._build()
 	projects._build()
 	feel._build()
@@ -1162,6 +1201,7 @@ func _process(delta: float) -> void:
 		nights._begin()
 	nights._update()
 	happenings._update()
+	forage._update()
 	trek._update(delta)
 	if Engine.get_process_frames() % 30 == 0:
 		projects._check(true)
@@ -1353,8 +1393,13 @@ func _draw() -> void:
 		var stage: int = crop["stage"]
 		var center := _tile_center(pos.x, pos.y)
 		var watered_now := int(crop.get("watered_day", 0)) == day
-		if FARM_SPRITES:
+		if FARM_SPRITES and FarmSprites.has("crop_" + str(crop["kind"])):
 			_draw_crop_sprite(_tile_rect(pos), str(crop["kind"]), stage, watered_now)
+		elif FARM_SPRITES:
+			# Crops without sprite art yet: the soil as the sprites draw it, then the code-drawn plant.
+			if watered_now:
+				draw_rect(_tile_rect(pos), WATERED_SOIL)
+			FarmArt.draw_crop(self, center, PX, str(crop["kind"]), stage, watered_now, false)
 		else:
 			FarmArt.draw_crop(self, center, PX, str(crop["kind"]), stage, watered_now)
 
@@ -3411,12 +3456,11 @@ func _raw_inventory_tiles() -> Array:
 		var sells := stall._food_price(str(f["id"]))
 		if sells > 0:
 			desc += " Sells for %d coins." % sells
+		if f["kind"] == "fish":
+			desc += " Spoils overnight unless it is kept in the cooler."
+		var inedible := bool(f.get("inedible", false))
 		tiles.append(_stack_tile("pack:" + str(f["id"]), str(f["name"]), str(f["icon"]), str(f["tint"]), n, "in the pack",
-			desc, "eat_food:" + str(f["id"]), str(f.get("verb", "Eat"))))
-	n = int(inventory["fish"])
-	if n > 0:
-		tiles.append(_stack_tile("pack:fish", "Fish", "fish", "6fb8d9", n, "in the pack",
-			"Caught from the pond. Spoils overnight unless it is kept in the cooler. Sells for %d coins." % SELL_FISH, "", ""))
+			desc, "" if inedible else "eat_food:" + str(f["id"]), "" if inedible else str(f.get("verb", "Eat"))))
 	n = int(inventory["bandage"])
 	if n > 0:
 		tiles.append(_stack_tile("pack:bandage", str(BANDAGE["name"]), "bandage", "e8e0d0", n, "in the pack",
@@ -3429,25 +3473,23 @@ func _raw_inventory_tiles() -> Array:
 	if n > 0:
 		tiles.append(_stack_tile("pack:firewood", "Firewood", "firewood", "9a6a3a", n, "in the pack",
 			"Split logs for the hearth. Feed the fire from the hearth in the house.", "", ""))
-	var turnip_ok := true
-	tiles.append(_stack_tile("seed:turnip", "Turnip seeds", "seed", "a8d46f", int(inventory["seeds"]), "in the pouch",
-		"Planted in tilled soil. Kept in the seed pouch.", "", ""))
-	var corn_ok := progression._level("Farming") >= CORN_LEVEL
-	var corn := _stack_tile("seed:corn", "Corn seeds", "seed", "e8c440", int(inventory["corn_seeds"]), "in the pouch",
-		"A harvest of two ears per plant. Needs Farming %d to plant." % CORN_LEVEL, "", "")
-	corn["enabled"] = corn_ok
-	corn["level_ok"] = corn_ok
-	if not corn_ok:
-		corn["level_text"] = "Needs Farming %d" % CORN_LEVEL
-	tiles.append(corn)
-	var pumpkin_ok := progression._level("Farming") >= PUMPKIN_LEVEL
-	var pumpkin := _stack_tile("seed:pumpkin", "Pumpkin seeds", "pumpkin_seed", "d98a35", int(inventory["pumpkin_seeds"]), "in the pouch",
-		"Larger harvest of three crops per plant. Needs Farming %d to plant." % PUMPKIN_LEVEL, "", "")
-	pumpkin["enabled"] = pumpkin_ok
-	pumpkin["level_ok"] = pumpkin_ok
-	if not pumpkin_ok:
-		pumpkin["level_text"] = "Needs Farming %d" % PUMPKIN_LEVEL
-	tiles.append(pumpkin)
+	for kind in CROPS:
+		var c: Dictionary = CROPS[kind]
+		var lvl := int(c["level"])
+		var ok := progression._level("Farming") >= lvl
+		var icon: String = {"turnip": "seed", "corn": "seed", "pumpkin": "pumpkin_seed"}.get(kind, "seed_t")
+		var food := Foods.by_held(str(c["held"]))
+		var about := "Grows in %s, ready in %d watered days, %d a plant%s." % [farm._seasons_text(kind), int(CROP_GROW_DAYS[kind]), int(c["yield"]),
+			(", and bears again every %d days" % int(c["regrow"])) if c.has("regrow") else ""]
+		var tile := _stack_tile("seed:" + kind, "%s seeds" % str(c["label"]), icon, str(food.get("tint", c["colors"][3])), int(inventory[c["seed"]]), "in the pouch",
+			about + (" Needs Farming %d to plant." % lvl if lvl > 0 else ""), "", "")
+		tile["enabled"] = ok
+		tile["level_ok"] = ok
+		if not ok:
+			tile["level_text"] = "Needs Farming %d" % lvl
+		if int(inventory[c["seed"]]) <= 0 and kind != "turnip":
+			continue
+		tiles.append(tile)
 	for key in MATERIAL_INFO.keys():
 		n = int(materials.get(key, 0))
 		if n > 0:
@@ -3511,8 +3553,13 @@ func _cost_lines(cost: Dictionary) -> Array:
 func _held(mat: String) -> int:
 	if mat == "coins":
 		return money
-	if mat == "crops":
-		return farm._crop_total()
+	if mat == "turnips":
+		return int(inventory["crops"])
+	if Foods.is_group(mat):
+		var total := 0
+		for key in Foods.group(mat):
+			total += int(inventory[key])
+		return total
 	if materials.has(mat):
 		return int(materials[mat])
 	return int(inventory.get(mat, 0))
@@ -3699,6 +3746,8 @@ func _interact() -> void:
 	if not inside and nights._try_face(tile):
 		return
 	if not inside and happenings._try_take(tile):
+		return
+	if not inside and not _tool_press and forage._try_pick(tile):
 		return
 	if not inside and trek._try_walker(tile):
 		return
@@ -4121,12 +4170,24 @@ func _rod_bonus() -> float:
 
 
 func _need_label(key: String) -> String:
+	if Foods.is_group(key):
+		return str(Foods.GROUP_LABELS[key])
 	return key.replace("_", " ")
 
 
+# Spends a recipe's or a job's input. A group (any fish, berries, mushrooms, crops) is spent cheapest first.
 func _spend_recipe_input(key: String, n: int) -> void:
 	if key == "turnips":
 		inventory["crops"] -= n
+	elif key == "crops":
+		farm._spend_crops(n)
+	elif Foods.is_group(key):
+		var keys := Foods.group(key)
+		keys.sort_custom(func(a, b) -> bool: return stall._food_price(str(Foods.by_held(a)["id"])) < stall._food_price(str(Foods.by_held(b)["id"])))
+		for k in keys:
+			var take := mini(n, int(inventory[k]))
+			inventory[k] -= take
+			n -= take
 	elif materials.has(key):
 		materials[key] -= n
 	else:
@@ -4134,7 +4195,22 @@ func _spend_recipe_input(key: String, n: int) -> void:
 
 
 func _food_stats_text(f: Dictionary) -> String:
-	return "Restores %d food, %d sanity, %d HP." % [int(Foods.food_restore(f)), int(Foods.sanity_restore(f)), Foods.hp_restore(f)]
+	if bool(f.get("inedible", false)):
+		return "Not eaten as it is; it goes into a remedy."
+	var sanity := int(Foods.sanity_restore(f))
+	var text := "Restores %d food, %s, %d HP." % [int(Foods.food_restore(f)),
+		("%d sanity" % sanity) if sanity >= 0 else ("costs %d sanity" % -sanity), Foods.hp_restore(f)]
+	var fx: Dictionary = f.get("effect", {})
+	var extra: Array = []
+	if fx.has("warm"):
+		extra.append("+%d warmth" % int(fx["warm"]))
+	if fx.has("water"):
+		extra.append("+%d water" % int(fx["water"]))
+	if fx.has("nerve"):
+		extra.append("+%d nerve to a walker on a trek" % int(fx["nerve"]))
+	if not extra.is_empty():
+		text += " Also " + ", ".join(PackedStringArray(extra)) + "."
+	return text
 
 
 func _can_repair_well() -> bool:
@@ -5117,7 +5193,7 @@ func _job_today() -> Dictionary:
 func _job_need_text(job: Dictionary) -> String:
 	var parts: Array = []
 	for item in job["need"].keys():
-		parts.append("%d %s" % [int(job["need"][item]), str(item).replace("_", " ")])
+		parts.append("%d %s" % [int(job["need"][item]), _need_label(str(item))])
 	return ", ".join(parts)
 
 
@@ -5137,11 +5213,7 @@ func _do_job() -> void:
 		return
 	var job := _job_today()
 	for item in job["need"].keys():
-		var n := int(job["need"][item])
-		if materials.has(str(item)):
-			materials[item] -= n
-		else:
-			inventory[item] -= n
+		_spend_recipe_input(str(item), int(job["need"][item]))
 	money += int(job["coins"])
 	progression._grant_xp(str(job["skill"]), int(job["xp"]))
 	job_done_day = day
@@ -5173,6 +5245,10 @@ func _calendar_date(day_number: int) -> Dictionary:
 		dom -= MONTH_DAYS[m]
 		m = (m + 1) % 12
 	return {"month": m, "day": dom}
+
+
+func _season_today() -> String:
+	return _season_of(_calendar_date(day)["month"])
 
 
 # Pacific Northwest seasons: winter is December to February, spring is March to May, summer is June to August.
@@ -5590,8 +5666,10 @@ func _end_day(base: String, leave_house: bool = true) -> void:
 	if inside and leave_house:
 		_leave_house()
 	# Fish left in the pack spoil overnight. The cooler keeps them.
-	var spoiled := int(inventory["fish"])
-	inventory["fish"] = 0
+	var spoiled := 0
+	for key in Foods.group("any_fish"):
+		spoiled += int(inventory[key])
+		inventory[key] = 0
 	stats["spoiled"] += spoiled
 	var spoil_note := (" %d fish spoiled in your pack overnight." % spoiled) if spoiled > 0 else ""
 	var upkeep_note := night_note + _settle_day() + projects._morning()
@@ -5615,11 +5693,13 @@ func _end_day(base: String, leave_house: bool = true) -> void:
 	if well_repaired:
 		well_water = _well_capacity()
 	day += 1
+	upkeep_note += farm._wither() + farm._season_warning()
 	_roll_weather()
 	var event_note := projects._sprinkle() + sanity_sys._begin_day_events()
 	clock = 0.0
 	tonight_shadow = Vector2i(-1, -1)
 	_regrow_wild()
+	forage._new_day()
 	_update_shadow_tile()
 	var happening_note := happenings._start_day(true)
 	var mail_note := desk._mail_day()

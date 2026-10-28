@@ -3,7 +3,7 @@ extends RefCounted
 
 # Bumped when a save's keys change shape. Saves from before the number was written count as 1.
 # _migrate lifts an older save one version at a time, so every old save still loads.
-const SAVE_VERSION := 9
+const SAVE_VERSION := 10
 # Keys a save must hold with the right type, or it isn't read: the loader would trip over anything else.
 const DICT_KEYS := ["inventory", "materials", "skill_xp", "stats", "equipment", "quests_done", "achievements_done",
 	"tool_tier", "trek_walked"]
@@ -64,8 +64,10 @@ func _save_game() -> void:
 		"bag_tier": m.bag_tier,
 		"cellar_built": m.cellar_built,
 		"cooler_built": m.cooler_built,
-		"cellar_stock": m.cellar_stock,
-		"cooler_stock": m.cooler_stock,
+		"cellar": m.cellar,
+		"cooler": m.cooler,
+		"forage": m.forage._to_save(),
+		"forage_day": m.forage.spots_day,
 		"smokehouse_built": m.smokehouse_built,
 		"furnace_built": m.furnace_built,
 		"woodshed_built": m.woodshed_built,
@@ -194,8 +196,10 @@ func _load_game() -> bool:
 	m.bag_tier = int(data.get("bag_tier", 0))
 	m.cellar_built = bool(data.get("cellar_built", false))
 	m.cooler_built = bool(data.get("cooler_built", false))
-	m.cellar_stock = int(data.get("cellar_stock", 0))
-	m.cooler_stock = int(data.get("cooler_stock", 0))
+	m.cellar = _stock(data.get("cellar"), m.farm._cellar_keys())
+	m.cooler = _stock(data.get("cooler"), Foods.group("any_fish"))
+	if int(data.get("forage_day", -1)) == m.day:
+		m.forage._from_save(data.get("forage"), m.day)
 	m.smokehouse_built = bool(data.get("smokehouse_built", false))
 	m.furnace_built = bool(data.get("furnace_built", false))
 	m.woodshed_built = bool(data.get("woodshed_built", false))
@@ -347,6 +351,17 @@ func _load_game() -> bool:
 	return true
 
 
+# A store's counts by pack key, keeping only the keys it can hold.
+func _stock(saved: Variant, keys: Array) -> Dictionary:
+	var out := {}
+	if typeof(saved) != TYPE_DICTIONARY:
+		return out
+	for key in keys:
+		if saved.has(key) and typeof(saved[key]) in [TYPE_INT, TYPE_FLOAT] and int(saved[key]) > 0:
+			out[key] = int(saved[key])
+	return out
+
+
 func _merge_ints(target: Dictionary, saved: Variant) -> void:
 	if typeof(saved) != TYPE_DICTIONARY:
 		return
@@ -452,6 +467,14 @@ static func _migrate(data: Dictionary) -> Dictionary:
 		# (in decor). An older save has none of them, which the loader's defaults already give; the step is
 		# here so the number marks when they came.
 		pass
+	if v < 10:
+		# Version 10 added the seasonal crops, the pond's other fish and forage. The cellar and the cooler hold
+		# each kind apart now: an older save's cellar was all turnips ("crops") and its cooler all perch ("fish").
+		# Its crops are all turnips, corn and pumpkins, which keep growing; any out of season wither the next morning.
+		if not data.has("cellar"):
+			data["cellar"] = {"crops": int(data.get("cellar_stock", 0))}
+		if not data.has("cooler"):
+			data["cooler"] = {"fish": int(data.get("cooler_stock", 0))}
 	# A save from a newer build keeps its number; keys this build doesn't know are ignored.
 	data["save_version"] = maxi(v, SAVE_VERSION)
 	return data

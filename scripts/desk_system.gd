@@ -87,10 +87,14 @@ func _catalog() -> Array:
 		{"id": "cards", "section": "Pastimes", "name": "Pack of cards", "price": m.CARDS_PRICE, "detail": "%d games of solitaire" % m.CARDS_GAMES, "ok": true, "why": ""},
 		{"id": "oil", "section": "Supplies", "name": "Lamp oil", "price": m.LAMP_OIL_PRICE, "detail": "%d held, for treks" % int(m.materials["lamp_oil"]), "ok": true, "why": ""},
 		{"id": "sudoku", "section": "Pastimes", "name": "Sudoku book", "price": m.SUDOKU_BOOK_PRICE, "detail": "%d puzzles" % m.SUDOKU_BOOK_PUZZLES, "ok": true, "why": ""},
-		{"id": "seeds_turnip", "section": "Seeds", "name": "5 turnip seeds", "price": m.SEED_TURNIP_PRICE * 5, "detail": "%d held" % int(m.inventory["seeds"]), "ok": true, "why": ""},
-		{"id": "seeds_corn", "section": "Seeds", "name": "4 corn seeds", "price": m.SEED_CORN_PRICE * 4, "detail": "%d held" % int(m.inventory["corn_seeds"]), "ok": m.farm._crop_unlocked("corn"), "why": "needs Farming %d" % m.CORN_LEVEL},
-		{"id": "seeds_pumpkin", "section": "Seeds", "name": "3 pumpkin seeds", "price": m.SEED_PUMPKIN_PRICE * 3, "detail": "%d held" % int(m.inventory["pumpkin_seeds"]), "ok": m.progression._level("Farming") >= m.PUMPKIN_LEVEL, "why": "needs Farming %d" % m.PUMPKIN_LEVEL},
 	]
+	# A pack of each crop's seeds, from CROPS. Seeds can be ordered out of season, to plant when it comes.
+	for kind in m.CROPS:
+		var c: Dictionary = m.CROPS[kind]
+		var pack := int(c["pack"])
+		items.append({"id": "seeds_" + kind, "section": "Seeds", "name": "%d %s seeds" % [pack, str(c["label"]).to_lower()],
+			"price": int(c["seed_price"]) * pack, "detail": "%d held, grows in %s" % [int(m.inventory[c["seed"]]), m.farm._seasons_text(kind)],
+			"ok": m.farm._crop_unlocked(kind), "why": "needs Farming %d" % int(c["level"])})
 	var hens_coming := m.hens + _on_order("hen")
 	items.append({"id": "hen", "section": "Livestock", "name": "Hen", "price": m.HEN_PRICE, "detail": "%d of %d in the coop" % [hens_coming, m.COOP_HENS_MAX],
 		"ok": m.coop_built and hens_coming < m.COOP_HENS_MAX, "why": "build the coop first" if not m.coop_built else "the coop is full"})
@@ -153,17 +157,15 @@ func _deliver_orders() -> String:
 				m.materials["lamp_oil"] += 1
 			"sudoku":
 				m.sudoku_puzzles = m.SUDOKU_BOOK_PUZZLES
-			"seeds_turnip":
-				m.inventory["seeds"] += 5
-			"seeds_corn":
-				m.inventory["corn_seeds"] += 4
-			"seeds_pumpkin":
-				m.inventory["pumpkin_seeds"] += 3
 			"hen":
 				m.hens += 1
 			"goat":
 				m.goats += 1
 				m.stats["goats_bought"] += 1
+			var other:
+				var kind := str(other).trim_prefix("seeds_")
+				if str(other).begins_with("seeds_") and m.CROPS.has(kind):
+					m.inventory[m.CROPS[kind]["seed"]] += int(m.CROPS[kind]["pack"])
 	m.desk_orders = []
 	_add_letter("Delivery", "Your catalog order came: %s. Any animals are already in their pens." % list)
 	return " Your catalog order came: %s." % list

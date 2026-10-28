@@ -19,7 +19,10 @@ extends SceneTree
 #   - Each day takes every brush pile and up to TREES_PER_DAY trees, mines every farm rock, and breaks up to
 #     CAVE_ORE_PER_DAY ore nodes from the day's real cave layout (copper, then iron).
 #   - Bell parts are made as soon as they can be, and the bell is hung on the first All Hallows it can be.
-#   - Fishing only when there is nothing to eat (grilled at once); no fights. Firewood is split straight into the pack once the woodshed stands.
+#   - Crops are planted by season, best coins a day first, and only when they can ripen before the season ends.
+#   - Every forageable on the farm is picked each morning; the seasonal recipes that don't use turnips, eggs or
+#     flour are cooked at midday, and fish, forage and cooked food are sold.
+#   - Fishing only when there is nothing to eat (grilled at once, any fish that bites then); no fights. Firewood is split straight into the pack once the woodshed stands.
 #   - The day runs 06:00 inside, 07:00-19:00 outdoors, then evening per mode; a desk game is played at 20:00.
 #   - The hose heads, the cistern, the hoppers and the sprinklers (on SPRINKLER_SPOTS) are made as soon as they
 #     can be. The hoppers are topped up under two days' feed; the "chores" line counts the presses that remain.
@@ -62,7 +65,9 @@ var every := 1
 var milestones := {}         # name -> first day
 var nights := {"faced": 0, "ignored": 0, "skipped": 0, "hollow": 0}
 var spent := {"seeds": 0, "animals": 0, "tax": 0, "pedlar": 0, "cards": 0}
-var earned := {"crops": 0, "eggs_milk": 0}
+var earned := {"crops": 0, "eggs_milk": 0, "fish": 0, "forage": 0, "cooked": 0}
+var grown := {}             # crop kind -> harvested
+var cooked := {}            # food id -> made by _cook
 var min_sanity := 100.0
 var chores := {"water_presses": 0, "hand_feeds": 0, "hopper_fills": 0, "tidies": 0, "mends": 0}
 var low_days := {}           # days sanity went under LOW_SANITY (the screen darkens)
@@ -146,11 +151,13 @@ func _play_day() -> String:
 	_happening()
 	_tend_field()
 	_gather()
+	_forage()
 	_animals()
 	_pass(6.0, false)
 	_eat_drink()
 	_craft_and_build()
 	_tend_field()   # anything planted with new seeds today
+	_cook()
 	_sell()
 	_order()
 	_trek()
@@ -227,9 +234,9 @@ func _pass(h: float, indoors: bool) -> void:
 func _eat_drink() -> void:
 	while m.food < 65.0:
 		var ate := false
-		for id in ["turnip", "corn", "egg", "milk", "pumpkin", "turnip_hash", "fish_meal"]:
+		for id in _eat_order():
 			var f := Foods.find(id)
-			if not f.is_empty() and int(m.inventory[str(f["held"])]) > 0:
+			if int(m.inventory[str(f["held"])]) > 0:
 				m.stall._eat_food(id)
 				ate = true
 				break
@@ -242,21 +249,55 @@ func _eat_drink() -> void:
 		m._drink_pond()
 
 
-# With nothing to eat, an hour at the pond: about two fish (half the rolls land, a roll every 3 seconds),
-# grilled over a fire for 1 wood each.
+# Cheapest food first, leaving the trek rations, bread, raw fish and anything that unsettles you.
+func _eat_order() -> Array:
+	var out: Array = []
+	for f in Foods.LIST:
+		if bool(f.get("inedible", false)) or f["kind"] == "fish" or str(f["id"]) in ["trail_ration", "bread"]:
+			continue
+		if float(f.get("effect", {}).get("calm", 0)) < 0.0:
+			continue
+		out.append(str(f["id"]))
+	out.sort_custom(func(a, b) -> bool: return m.stall._food_price(a) < m.stall._food_price(b))
+	return out
+
+
+# With nothing to eat, an hour at the pond: about two fish (half the rolls land, a roll every 3 seconds) of
+# whatever bites at this hour and season, grilled over a fire for 1 wood each.
 func _fish_for_supper() -> bool:
 	if int(m.materials["wood"]) < 2 or m.current_hour > 21.0:
 		return false
 	_pass(1.0, false)
 	fished_hours += 1
 	for i in 2:
-		m.inventory["fish"] += 1
+		var id := m.fishing._pick_fish()
+		m.inventory[str(Foods.find(id)["held"])] += 1
+		m.stats["caught"] += 1
 		m.progression._grant_xp("Fishing", m.XP_FISH)
 		if m.stall._can_make("fish_meal"):
 			m.stall._make_food("fish_meal")
 	return int(m.inventory["fish_meal"]) > 0
 
 
+# Today's forage on the farm's edges, all of it.
+func _forage() -> void:
+	for t in m.forage.spots.keys():
+		m.forage._try_pick(t)
+
+
+# Cooks what it can from the seasonal crops, fish and forage, at the fire and the smokehouse. Recipes that use
+# turnips, eggs or flour are left alone: those go to feed, rations and bread. A few wood are kept back.
+func _cook() -> void:
+	for r in Foods.RECIPES:
+		var id := str(r["food"])
+		var needs: Dictionary = r["needs"]
+		if needs.has("turnips") or needs.has("eggs") or needs.has("flour") or id in ["trail_ration", "bread"]:
+			continue
+		var made := 0
+		while made < 6 and m.stall._can_make(id) and int(m.materials["wood"]) > 8:
+			m.stall._make_food(id)
+			cooked[id] = int(cooked.get(id, 0)) + 1
+			made += 1
 func _happening() -> void:
 	var h := m.happenings
 	if not h._pending():
@@ -293,12 +334,15 @@ func _soil_tiles() -> Array:
 func _tend_field() -> void:
 	for t in m.crops.keys():
 		if int(m.crops[t]["stage"]) >= m.MAX_STAGE:
+			var kind := str(m.crops[t]["kind"])
 			m.farm._harvest(t)
+			grown[kind] = int(grown.get(kind, 0)) + int(m.CROPS[kind]["yield"])
 	for t in m.crops.keys():
 		if _thirsty(t) and m.well_repaired and m.hose_attached and m.well_water >= 1.0:
 			_water(t)
 	m.farm._check_unlocks()
-	# Plant the best seeds first, up to what the tank can water.
+	# Plant the best seeds that grow this season first, up to what the tank can water. Nothing is planted
+	# that couldn't ripen before its season ends.
 	var room := int(m._well_capacity()) - m.crops.size()
 	for t in _soil_tiles():
 		if room <= 0:
@@ -306,8 +350,8 @@ func _tend_field() -> void:
 		if m.crops.has(t):
 			continue
 		var kind := ""
-		for k in ["pumpkin", "corn", "turnip"]:
-			if m.farm._crop_unlocked(k) and int(m.inventory[m.CROPS[k]["seed"]]) > (2 if k == "turnip" and _want_flowers() else 0):
+		for k in _best_kinds():
+			if int(m.inventory[m.CROPS[k]["seed"]]) > (2 if k == "turnip" and _want_flowers() else 0):
 				kind = k
 				break
 		if kind == "":
@@ -319,6 +363,29 @@ func _tend_field() -> void:
 			_water(t)
 
 
+# The unlocked kinds that grow today and have time to ripen before their season ends, best value a day first.
+func _best_kinds() -> Array:
+	var out: Array = []
+	for k in m.CROPS:
+		if not m.farm._crop_unlocked(k) or not m.farm._in_season(k):
+			continue
+		var grow := int(m.CROP_GROW_DAYS[k]) + 1
+		if not m.farm._in_season(k, m._season_of(m._calendar_date(m.day + grow)["month"])):
+			continue
+		out.append(k)
+	out.sort_custom(func(a, b) -> bool: return _value_a_day(a) > _value_a_day(b))
+	return out
+
+
+# Coins a crop earns a watered day: its yield at the stand over its days, less the seed it costs, and for
+# a crop that regrows, the pickings after the first count at the regrow pace.
+func _value_a_day(k: String) -> float:
+	var c: Dictionary = m.CROPS[k]
+	var value := float(m.CROP_VALUE[k] * int(c["yield"]))
+	var seed_cost := float(c["seed_price"]) * (1.0 - float(c["seed_back"]))
+	if c.has("regrow"):
+		return value / float(c["regrow"]) - seed_cost / 30.0
+	return (value - seed_cost) / float(m.CROP_GROW_DAYS[k])
 func _thirsty(t: Vector2i) -> bool:
 	return m.crops.has(t) and int(m.crops[t]["stage"]) < m.MAX_STAGE and int(m.crops[t].get("watered_day", 0)) != m.day
 
@@ -340,41 +407,54 @@ func _reserve() -> int:
 
 func _sell() -> void:
 	# Keep a few crops back for food, feed, the cleanse and trek rations, of any kind; sell the rest,
-	# dearest first, so the cheap turnips are the ones kept.
+	# dearest first, so the cheap ones are the ones kept.
 	var keep := _reserve() + (4 if treks_a_week > 0 else 0)
-	for k in ["pumpkins", "corn", "crops"]:
+	var kinds: Array = m.CROPS.keys()
+	kinds.sort_custom(func(a, b) -> bool: return int(m.CROP_VALUE[a]) > int(m.CROP_VALUE[b]))
+	for kind in kinds:
+		var k := str(m.CROPS[kind]["held"])
 		var extra := mini(int(m.inventory[k]), m.farm._crop_total() - keep)
 		if extra <= 0:
 			continue
-		var rest := int(m.inventory[k]) - extra
-		m.inventory[k] = extra
-		var before := m.money
-		m.stall._sell(k)
-		earned["crops"] += m.money - before
-		m.inventory[k] = rest
-	for k in ["eggs", "milk", "fish"]:
-		var keep_n := 4 if treks_a_week > 0 and k != "fish" else 0
-		var n := int(m.inventory[k]) - keep_n
-		if n <= 0:
-			continue
-		var before := m.money
-		m.inventory[k] = n
-		m.stall._sell(k)
-		m.inventory[k] = keep_n
-		earned["eggs_milk"] += m.money - before
+		earned["crops"] += _sell_some(k, extra)
+	for k in ["eggs", "milk"]:
+		var keep_n := 4 if treks_a_week > 0 else 0
+		earned["eggs_milk"] += _sell_some(k, int(m.inventory[k]) - keep_n)
+	# Raw fish spoil tonight; forage and cooked food are for selling once the sim has eaten.
+	for f in Foods.LIST:
+		var k := str(f["held"])
+		if f["kind"] == "fish":
+			earned["fish"] += _sell_some(k, int(m.inventory[k]))
+		elif f["kind"] == "forage":
+			earned["forage"] += _sell_some(k, int(m.inventory[k]))
+		elif f["kind"] == "cooked" and not str(f["id"]) in ["trail_ration", "bread", "fish_meal"]:
+			earned["cooked"] += _sell_some(k, int(m.inventory[k]))
+
+
+# Sells n of a pack key at the stand, keeping the rest. Returns the coins.
+func _sell_some(k: String, n: int) -> int:
+	if n <= 0:
+		return 0
+	var rest := int(m.inventory[k]) - n
+	m.inventory[k] = n
+	var before := m.money
+	m.stall._sell(k)
+	m.inventory[k] = rest
+	return m.money - before
 
 
 func _order() -> void:
-	# Seeds: enough to keep the field full, best kind first.
-	var growing := m.crops.size() + int(m.inventory["seeds"]) + int(m.inventory["corn_seeds"]) + int(m.inventory["pumpkin_seeds"])
-	for id in ["seeds_pumpkin", "seeds_corn", "seeds_turnip"]:
-		var item := m.desk._catalog_item(id)
-		while bool(item["ok"]) and growing < int(m._well_capacity()) + 4 and m.money >= int(item["price"]) + 10 and m.desk_orders.size() < 12:
-			m.desk._order(id)
-			spent["seeds"] += int(item["price"])
-			growing += {"seeds_pumpkin": 3, "seeds_corn": 4, "seeds_turnip": 5}[id]
-		if bool(item["ok"]):
-			break
+	# Seeds: enough to keep the field full, of the best kind that grows now (turnips when nothing else is unlocked).
+	var growing := m.crops.size()
+	for k in m.CROPS:
+		growing += int(m.inventory[m.CROPS[k]["seed"]]) if m.farm._in_season(k) else 0
+	var best := _best_kinds()
+	var kind := str(best[0]) if not best.is_empty() else "turnip"
+	var item := m.desk._catalog_item("seeds_" + kind)
+	while bool(item["ok"]) and growing < int(m._well_capacity()) + 4 and m.money >= int(item["price"]) + 10 and m.desk_orders.size() < 12:
+		m.desk._order("seeds_" + kind)
+		spent["seeds"] += int(item["price"])
+		growing += int(m.CROPS[kind]["pack"])
 	if m.card_games <= 0 and m.sudoku_puzzles <= 0 and not m.desk_orders.has("cards") and m.money >= m.CARDS_PRICE + 10:
 		m.desk._order("cards")
 		spent["cards"] += m.CARDS_PRICE
@@ -866,6 +946,8 @@ func _summary() -> void:
 		nights, int(min_sanity), int(m.LOW_SANITY), low_days.size(), int(m.sanity_sys._sanity_max()), hp_lost, empty_hours, fished_hours])
 	print("--- coins earned %s, spent %s; hens %d goats %d; property value %d; tax owed %d" % [earned, spent, m.hens, m.goats, m.desk._property_value(), m.tax_owed])
 	print("--- materials: %s" % JSON.stringify(m.materials))
+	print("--- harvested %s; withered %d" % [JSON.stringify(grown), int(m.stats["withered"])])
+	print("--- foraged %d, fish caught %d (%d at night), cooked by _cook %s" % [int(m.stats["foraged"]), int(m.stats["caught"]), int(m.stats["night_fish"]), JSON.stringify(cooked)])
 	print("--- chores over %d days: %s; sprinklers %d" % [m.day - 1, chores, m.projects._count("sprinkler")])
 	if treks_a_week > 0:
 		print("--- treks: %s, trail works done %d: %s" % [trek_log, m.trek.works.size(), m.trek.works.keys()])

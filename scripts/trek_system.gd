@@ -171,9 +171,10 @@ const PARCELS := [["corn_seeds", 4], ["pumpkin_seeds", 2], ["bandage", 1], ["rop
 # Up to TRADE_MAX items a walk, and four of each kind are kept back for you (eggs go into rations). Turnips
 # aren't bought anywhere: they are the rations' staple.
 const TRADE := {
-	"mill": {"who": "Maren's sister", "goods": ["corn"], "what": "corn, for the mill"},
-	"orchard": {"who": "the Tull family", "goods": ["eggs", "milk"], "what": "eggs and milk, since the dogs took their hens"},
-	"chapel": {"who": "the vicar", "goods": ["pumpkins", "fish"], "what": "pumpkins and fish, for the soup he gives out"},
+	"mill": {"who": "Maren's sister", "goods": ["corn", "potatoes", "garlic"], "what": "corn, potatoes and garlic, for the mill's kitchen"},
+	"orchard": {"who": "the Tull family", "goods": ["eggs", "milk", "kale", "peas"], "what": "eggs and milk, since the dogs took their hens, and greens"},
+	"chapel": {"who": "the vicar", "goods": ["pumpkins", "leeks", "parsnips", "fish", "trout", "crappie", "bullhead", "sturgeon"],
+		"what": "pumpkins, leeks, parsnips and fish, for the soup he gives out (not the pale ones; he won't have those in the house)"},
 }
 const TRADE_MULT := 1.5
 const TRADE_MAX := 10
@@ -687,6 +688,7 @@ func _enter_clearing() -> void:
 	roped = false
 	sign_seen = false
 	_lay_out()
+	m.forage._lay_trek()
 	var start: Array = _spec()["points"][0]
 	_place_at(m._tile_center(int(start[0]), int(start[1]) - 2))
 	crows_found = false
@@ -1040,6 +1042,8 @@ func _interact(tile: Vector2i) -> void:
 	if m._tool_press and m._active_tool() == "sword":
 		m._swing()
 		return
+	if not m._tool_press and m.forage._try_pick_trek(tile):
+		return
 	var px := float(m.PX)
 	var kind := m._kind_at(tile)
 	if kind == MainGame.Tile.FENCE:
@@ -1371,20 +1375,8 @@ func _gifts(pay: int) -> Array:
 
 # What one of a pack item fetches at the farm stand.
 func _stand_price(kind: String) -> int:
-	match kind:
-		"crops":
-			return m.farm._crop_price("turnip")
-		"corn":
-			return m.farm._crop_price("corn")
-		"pumpkins":
-			return m.farm._crop_price("pumpkin")
-		"fish":
-			return m.SELL_FISH
-		"eggs":
-			return m.SELL_EGG
-		"milk":
-			return m.SELL_MILK
-	return 0
+	var f := Foods.by_held(kind)
+	return m.stall._food_price(str(f["id"])) if not f.is_empty() else 0
 
 
 # The destination buys what it wants from your pack, best-paying first, keeping TRADE_KEEP of each back.
