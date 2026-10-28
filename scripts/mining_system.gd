@@ -81,35 +81,6 @@ func _smelt(kind: String) -> void:
 	m._show_message("You smelt a %s bar. +%d Smithing XP" % [kind, m.XP_SMELT])
 
 
-func _fill_quarry() -> void:
-	m.quarry.clear()
-	for spot in m.ASHFORD_QUARRY:
-		m.quarry[m.ASHFORD_ORIGIN + spot] = true
-
-
-func _quarry(tile: Vector2i) -> void:
-	var pick := int(m.tool_tier["pick"])
-	if pick < 1:
-		m._show_message("The quarry rock is too hard for your hands. Craft a stone pick from the Craft panel.")
-		return
-	m.farm._start_harvest("quarry", tile)
-	m._show_message("You start working the quarry rock.")
-
-
-func _finish_quarry(tile: Vector2i) -> void:
-	var pick := int(m.tool_tier["pick"])
-	m.play_sfx("rock_break", 0.06)
-	m.quarry.erase(tile)
-	var kind := "copper_ore" if m.progression._level("Mining") >= 3 else "stone"
-	if m.progression._level("Mining") >= 5 and pick >= 2 and randf() < 0.5:
-		kind = "iron_ore"
-	m.materials[kind] += 1
-	m.stats["mined"] += 1
-	m.progression._grant_xp("Mining", m.XP_MINE)
-	m._show_message("You work the quarry rock. +1 %s. +%d Mining XP" % [kind.replace("_", " "), m.XP_MINE])
-	m.queue_redraw()
-
-
 # Copper needs a stone pick and Mining 2. Iron needs a copper pick and Mining 5.
 func _mine_cave(tile: Vector2i, kind: int) -> void:
 	var iron := kind == m.Tile.ORE_IRON

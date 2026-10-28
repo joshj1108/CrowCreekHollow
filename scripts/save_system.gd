@@ -3,12 +3,16 @@ extends RefCounted
 
 # Bumped when a save's keys change shape. Saves from before the number was written count as 1.
 # _migrate lifts an older save one version at a time, so every old save still loads.
-const SAVE_VERSION := 7
+const SAVE_VERSION := 8
 # Keys a save must hold with the right type, or it isn't read: the loader would trip over anything else.
 const DICT_KEYS := ["inventory", "materials", "skill_xp", "stats", "equipment", "quests_done", "achievements_done",
-	"guardian_done", "tool_tier", "bank_materials", "trek_walked"]
-const ARRAY_KEYS := ["crops", "brush", "felled", "rocks", "quarry", "cave_mined", "decor", "steps_done", "rook_pages",
-	"desk_mail", "desk_orders", "tips_seen", "diary_new", "hen_ages", "goat_ages", "player_pos", "campsite", "trek_works"]
+	"tool_tier", "trek_walked"]
+const ARRAY_KEYS := ["crops", "brush", "felled", "rocks", "cave_mined", "decor", "steps_done", "rook_pages",
+	"desk_mail", "desk_orders", "tips_seen", "diary_new", "hen_ages", "goat_ages", "player_pos", "trek_works"]
+# What version 8 cut along with the wider land. A save from before it keeps none of these keys.
+const WORLD_KEYS := ["zone", "world_version", "campsite", "guardian_done", "quarry", "bank_materials", "bank_coins"]
+# The ranged weapons cut in version 8, with the materials they cost, given back to an older save that made one.
+const CUT_WEAPONS := {"hardwood_bow": {"hardwood": 3, "fiber": 2}, "crossbow": {"hardwood": 4, "copper_bar": 2}}
 
 var m: MainGame
 
@@ -53,11 +57,7 @@ func _save_game() -> void:
 		"stats": m.stats,
 		"quests_done": m.quests_done,
 		"tutorial_v2": true,
-		"zone": m.zone,
-		"world_version": 1,
-		"campsite": [m.campsite.x, m.campsite.y],
 		"hp": m.hp,
-		"guardian_done": m.guardian_done,
 		"equipment": m.equipment,
 		"money": m.money,
 		"bag_tier": m.bag_tier,
@@ -109,10 +109,7 @@ func _save_game() -> void:
 		"rock_day": m.rock_day,
 		"felled": m._felled_to_array(),
 		"rocks": m._tiles_to_array(m.rocks),
-		"quarry": m._tiles_to_array(m.quarry),
 		"tool_tier": m.tool_tier,
-		"bank_materials": m.bank_materials,
-		"bank_coins": m.bank_coins,
 		"cave_mined": m._tiles_to_array(m.cave_mined),
 		"cave_mined_day": m.cave_mined_day,
 		"wear": m.wear,
@@ -188,8 +185,6 @@ func _load_game() -> bool:
 	m.smelts_today = int(data.get("smelts_today", 0))
 	m.cleanse_day = int(data.get("cleanse_day", 0))
 	m.money = int(data.get("money", 0))
-	_merge_ints(m.bank_materials, data.get("bank_materials"))
-	m.bank_coins = int(data.get("bank_coins", 0))
 	m.bag_tier = int(data.get("bag_tier", 0))
 	m.cellar_built = bool(data.get("cellar_built", false))
 	m.cooler_built = bool(data.get("cooler_built", false))
@@ -200,17 +195,12 @@ func _load_game() -> bool:
 	m.woodshed_built = bool(data.get("woodshed_built", false))
 	m.firewood_store = int(data.get("firewood_store", 0))
 	m.fire_hours = float(data.get("fire_hours", 0.0))
-	m.saved_zone = int(data.get("zone", 0)) if int(data.get("world_version", 0)) >= 1 else 0
-	var saved_camp: Variant = data.get("campsite", null)
-	if typeof(saved_camp) == TYPE_ARRAY and saved_camp.size() == 2:
-		m.campsite = Vector2i(int(saved_camp[0]), int(saved_camp[1]))
-		m._apply_campsite()
 	m.hp = int(data.get("hp", m.BASE_HP))
-	m.guardian_done = data.get("guardian_done", {})
 	var saved_eq: Variant = data.get("equipment", {})
 	if typeof(saved_eq) == TYPE_DICTIONARY:
 		for slot in m.equipment.keys():
-			if saved_eq.has(slot):
+			# A piece this build doesn't know would trip every lookup in GEAR_ITEMS, so its slot is left empty.
+			if saved_eq.has(slot) and (str(saved_eq[slot]) == "" or m.GEAR_ITEMS.has(str(saved_eq[slot]))):
 				m.equipment[slot] = str(saved_eq[slot])
 	m.event_fired_day = int(data.get("event_fired_day", 0))
 	m.nights.shadow_steps = int(data.get("shadow_steps", 0))
@@ -344,12 +334,6 @@ func _load_game() -> bool:
 		m.cave_mined.clear()
 		for c in data["cave_mined"]:
 			m.cave_mined[Vector2i(int(c[0]), int(c[1]))] = true
-	if data.has("quarry"):
-		m.quarry.clear()
-		for q in data["quarry"]:
-			m.quarry[Vector2i(int(q[0]), int(q[1]))] = true
-	else:
-		m.mining._fill_quarry()
 	return true
 
 
@@ -451,9 +435,50 @@ static func _migrate(data: Dictionary) -> Dictionary:
 		if not data.has("workshop_x") and (bool(data.get("smokehouse_built", false)) or bool(data.get("furnace_built", false))):
 			data["workshop_x"] = MainGame.WORKSHOP_OLD_IX.x + MainGame.BORDER_X
 			data["workshop_y"] = MainGame.WORKSHOP_OLD_IX.y + MainGame.BORDER_Y
+	if v < 8:
+		_migrate_world(data)
 	# A save from a newer build keeps its number; keys this build doesn't know are ignored.
 	data["save_version"] = maxi(v, SAVE_VERSION)
 	return data
+
+
+# Version 8 cut the wider land: the towns, the bank, the campsite, the Lowmere quests and the ranged weapons.
+# Banked goods and coins come back to the pack and purse, a bow or crossbow is taken apart for what it cost,
+# and arrows and bolts are dropped. A save made out in the land wakes at the homestead.
+static func _migrate_world(data: Dictionary) -> void:
+	var mats: Variant = data.get("materials")
+	if typeof(mats) != TYPE_DICTIONARY:
+		mats = {}
+		data["materials"] = mats
+	var banked: Variant = data.get("bank_materials")
+	if typeof(banked) == TYPE_DICTIONARY:
+		for key in banked:
+			if typeof(banked[key]) in [TYPE_INT, TYPE_FLOAT] and int(banked[key]) > 0:
+				mats[key] = int(mats.get(key, 0)) + int(banked[key])
+	if typeof(data.get("bank_coins")) in [TYPE_INT, TYPE_FLOAT]:
+		data["money"] = int(data.get("money", 0)) + int(data["bank_coins"])
+	mats.erase("arrows")
+	mats.erase("bolts")
+	var eq: Variant = data.get("equipment")
+	if typeof(eq) == TYPE_DICTIONARY:
+		for slot in eq:
+			var id := str(eq[slot])
+			if CUT_WEAPONS.has(id):
+				for key in CUT_WEAPONS[id]:
+					mats[key] = int(mats.get(key, 0)) + int(CUT_WEAPONS[id][key])
+				eq[slot] = ""
+	if int(data.get("zone", 0)) != 0 and int(data.get("world_version", 0)) >= 1:
+		var home := Vector2(MainGame.HOMESTEAD_ARRIVE) * MainGame.PX + Vector2.ONE * MainGame.PX * 0.5
+		data["player_pos"] = [home.x, home.y]
+		data["inside"] = false
+	if str(data.get("open_tab", "")) in ["Shop", "Bank"]:
+		data["open_tab"] = ""
+	var stats: Variant = data.get("stats")
+	if typeof(stats) == TYPE_DICTIONARY:
+		for key in ["talks", "delivered", "stalkers", "visited", "crops_given"]:
+			stats.erase(key)
+	for key in WORLD_KEYS:
+		data.erase(key)
 
 
 static func write_save(path: String, data: Dictionary) -> bool:

@@ -1565,14 +1565,6 @@ class RecipeIcon extends Control:
 				_box(Rect2(_pt(0.08, 0.36), Vector2(0.84, 0.04) * _sz), light)
 				for x in [0.2, 0.5, 0.8]:
 					draw_circle(_pt(x, 0.5), 0.035 * _sz, light)
-			"bow":
-				draw_arc(_pt(0.7, 0.5), 0.44 * _sz, PI * 0.5, PI * 1.5, 24, OUTLINE, 0.1 * _sz)
-				draw_arc(_pt(0.7, 0.5), 0.44 * _sz, PI * 0.5, PI * 1.5, 24, tint, 0.07 * _sz)
-				draw_line(_pt(0.7, 0.06), _pt(0.7, 0.94), light, 0.02 * _sz)
-			"arrow":
-				draw_line(_pt(0.12, 0.88), _pt(0.84, 0.16), light, 0.05 * _sz)
-				_shape(_poly([[0.94, 0.06], [0.58, 0.14], [0.86, 0.42]]), metal)
-				_shape(_poly([[0.08, 0.92], [0.12, 0.6], [0.4, 0.88]]), tint)
 			"bowl":
 				var bowl := PackedVector2Array()
 				for i in range(17):

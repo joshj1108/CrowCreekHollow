@@ -240,35 +240,14 @@ func _craft_rows() -> Array:
 			tiles.append(tile)
 		rows.append({"split": {"recipes": tiles, "columns": 4, "detail": chosen}})
 	rows.append({"note": m.crafting._craft_footer()})
-	if m.craft_tab == "other":
-		rows.append_array(_craft_camp_rows())
 	return rows
 
 
-func _craft_camp_rows() -> Array:
-	if not m._in_village():
-		return []
-	return [
-		{"section": "Campsite"},
-		{
-			"name": "Set up camp here",
-			"value": "%d wood, %d fiber, Bushcrafting %d. Face open ground." % [int(m.CAMP_COST["wood"]), int(m.CAMP_COST["fiber"]), m.CAMP_LEVEL],
-			"button": "Camp",
-			"action": "camp",
-			"enabled": m._can_camp(),
-		},
-		{"note": "A campsite is safe from foes. Rest there from 18:00 like a bed. It saves the game and ends the day. Setting up a new camp moves the old one."},
-	]
-
-
-# The Quests panel: the story's chapters in one tab, and Lowmere's in another when the world is on.
+# The Quests panel: the story's chapters.
 # The current chapter comes first, and the detail page tells its story.
 func _quest_rows() -> Array:
 	var rows: Array = [{"tab": "Story"}]
 	rows.append_array(_quest_list(m.STORY, m.quests_done, "You have reached the end of the story for now. More chapters are coming."))
-	if m.WORLD_ENABLED:
-		rows.append({"tab": "Lowmere"})
-		rows.append_array(_quest_list(m.GUARDIAN_QUESTS, m.guardian_done, "Lowmere is safe for now."))
 	return rows
 
 
@@ -971,54 +950,6 @@ func _furnace_rows() -> Array:
 			"action": "smelt:" + kind,
 			"enabled": m.mining._can_smelt(kind),
 		})
-	return rows
-
-
-func _general_shop_rows() -> Array:
-	var rows: Array = [
-		{"tab": "Buy"},
-		{"note": "Materials come %d at a time. Coins: %d." % [m.GENERAL_BUY_QTY, m.money]},
-	]
-	for key in m.GENERAL_BUY.keys():
-		var price := int(m.GENERAL_BUY[key])
-		rows.append({
-			"name": "%s (%d each)" % [str(key).capitalize(), price],
-			"value": "%d held" % int(m.materials[key]),
-			"needs": [{"text": "%d coins" % (price * m.GENERAL_BUY_QTY), "have": m.money, "ok": m.money >= price * m.GENERAL_BUY_QTY}],
-			"button": "Buy %d" % m.GENERAL_BUY_QTY,
-			"action": "buy:%s" % key,
-			"enabled": m.money >= price * m.GENERAL_BUY_QTY,
-		})
-	rows.append({"tab": "Sell"})
-	rows.append({"note": "Materials sell for half what they cost. Coins: %d." % m.money})
-	for key in m.GENERAL_BUY.keys():
-		var sell := maxi(1, int(m.GENERAL_BUY[key]) / 2)
-		rows.append({
-			"name": "%s (%d each)" % [str(key).capitalize(), sell],
-			"value": "%d held" % int(m.materials[key]),
-			"button": "Sell all",
-			"action": "sellmat:%s" % key,
-			"enabled": int(m.materials[key]) > 0,
-		})
-	return rows
-
-
-func _bank_rows() -> Array:
-	var rows: Array = [
-		{"tab": "Coins"},
-		{"name": "Coins held", "status": "%d coins" % m.money, "status_kind": "info", "value": str(m.money), "button": "Bank all", "action": "dep:coins", "enabled": m.money > 0},
-		{"name": "Coins banked", "status": "%d coins" % m.bank_coins, "status_kind": "info", "value": str(m.bank_coins), "button": "Take all", "action": "wd:coins", "enabled": m.bank_coins > 0},
-		{"tab": "Goods"},
-	]
-	for key in m.bank_materials.keys():
-		var held := int(m.materials[key])
-		var banked := int(m.bank_materials[key])
-		if held == 0 and banked == 0:
-			continue
-		rows.append({"name": "%s: held" % str(key).capitalize(), "status": str(held), "status_kind": "info", "value": str(held), "button": "Bank all", "action": "dep:%s" % key, "enabled": held > 0})
-		rows.append({"name": "%s: banked" % str(key).capitalize(), "status": str(banked), "status_kind": "info", "value": str(banked), "button": "Take all", "action": "wd:%s" % key, "enabled": banked > 0})
-	if rows.size() == 4:
-		rows.append({"note": "Nothing to bank yet. Goods you deposit are kept safe here, even if you lose them in the wild."})
 	return rows
 
 

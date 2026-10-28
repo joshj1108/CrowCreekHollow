@@ -95,25 +95,6 @@ const ROCK_SPOTS := FarmLayout.ROCK_SPOTS
 const XP_MINE := 8
 const ORE_CHANCE := 0.15
 const ORE_MINING_LEVEL := 2
-# A campsite is set up in the wider land from wood and fiber. It is safe from foes
-# within a few tiles, and you can rest there from 18:00 like a bed.
-const CAMP_COST := {"wood": 4, "fiber": 3}
-const CAMP_LEVEL := 2
-const CAMP_SAFE_RADIUS := 3.0
-const NO_CAMP := Vector2i(-1, -1)
-# Quarry rocks in Ashford, in village tiles. They yield copper ore from Mining 3,
-# and iron ore from Mining 5 with a copper pick or better.
-const ASHFORD_QUARRY := [Vector2i(26, 16), Vector2i(30, 18), Vector2i(34, 15), Vector2i(9, 17)]
-# The world: one generated land, 768 by 912 tiles, the full size of the original map.
-const WORLD_W := 768
-const WORLD_H := 912
-const WORLD_SEED := 20031
-const ROAD_Y := 450
-const PORTAL_TILE := Vector2i(352, 450)   # the stone that takes you back home
-const PORTAL_ARRIVE := Vector2i(354, 450) # where you step out of the farm's portal
-# false keeps play on the homestead: the east portal is off, the wider land and its
-# towns are unreachable, and the Guardian of Lowmere quests are hidden.
-const WORLD_ENABLED := false
 # The mining cave, entered from the homestead's west edge. Its ore is copper and iron.
 const CAVE_W := 40
 const CAVE_H := 24
@@ -127,8 +108,6 @@ const TREK_LANTERN_BOOST := 1.6          # the lantern in the Rookery Wood's glo
 const LAMP_OIL_PRICE := 8                # a flask of lamp oil from the catalog, for treks
 const CAVE_ORE_CHANCE := 0.05            # odds a rock wall touching the tunnels holds ore (about 7 a day)
 const CAVE_IRON_CHANCE := 0.015          # ... and that deep ore is iron (about 2 a day)
-const LOWMERE_ORIGIN := Vector2i(380, 440)
-const ASHFORD_ORIGIN := Vector2i(470, 440)
 # Tool tiers. A hatchet fells trees. Hardwood needs a copper hatchet or better.
 const TOOL_TIERS := {
 	"hatchet": [
@@ -347,13 +326,6 @@ const XP_CHOP_LOG := 6
 const SMELT_LEVEL := {"copper": 1, "iron": 4}
 const XP_SMELT := 10
 const SMELT_DAILY_LIMIT := 8      # bars the furnace makes a day before it must cool overnight
-# Ammunition is fletched at the Craft panel and used up by each shot.
-const AMMO := {
-	"arrows": {"name": "Arrows", "yield": 5, "cost": {"wood": 1, "fiber": 1}, "skill": "Bushcrafting", "level": 2},
-	"bolts": {"name": "Bolts", "yield": 3, "cost": {"hardwood": 1, "copper_bar": 1}, "skill": "Smithing", "level": 2},
-}
-const SHOT_SPEED := 320.0
-const SHOT_LIFE := 0.9
 const SMOKEHOUSE_COST := {"wood": 5, "fiber": 3, "coins": 60, "level": 4}
 # Preserving turns food into goods that keep in the pack. Each method needs a skill
 # level and makes one item per press at the smokehouse.
@@ -391,14 +363,6 @@ const SEED_TURNIP_PRICE := 3    # per seed, sold in packs of 5
 const SEED_CORN_PRICE := 6      # per seed, sold in packs of 4
 const SEED_PUMPKIN_PRICE := 10  # per seed, sold in packs of 3
 
-# The road east of the farm leads to Lowmere. It is walked in daylight only.
-const VILLAGE_W := 36
-const VILLAGE_H := 20
-const VILLAGE_GATE := Vector2i(0, 10)
-const VILLAGE_HOUSES := [Rect2i(4, 3, 5, 4), Rect2i(13, 2, 6, 4), Rect2i(8, 14, 5, 4)]
-const VILLAGE_WATER := Rect2i(19, 13, 2, 2)
-# Hollows gather in the clearing east of the village wood. They respawn each morning.
-const HOLLOW_SPAWNS := [Vector2i(28, 9), Vector2i(31, 13), Vector2i(33, 8)]
 const XP_HIT := 4
 const BASE_HP := 10
 const HOMESTEAD_ARRIVE := Vector2i(BORDER_X + INNER_W - 3, BORDER_Y + INNER_H / 2)
@@ -409,56 +373,11 @@ const SWING_ARC := 0.3        # how far off straight ahead a foe can be and stil
 const INVULN_TIME := 0.9      # seconds of safety after a hit
 # Foes roam their area and chase when you come close. Stats are per kind.
 const FOES := {
-	"hollow": {"hp": 6, "speed": 26.0, "chase": 52.0, "dmg": 2, "aggro": 3.0, "cool": 1.2, "color": "1a1020", "xp": 20, "drop": "fiber"},
-	"stalker": {"hp": 10, "speed": 36.0, "chase": 84.0, "dmg": 3, "aggro": 4.5, "cool": 1.0, "color": "3a2a4a", "xp": 30, "drop": "resin"},
 	"bat": {"hp": 4, "speed": 40.0, "chase": 70.0, "dmg": 1, "aggro": 3.5, "cool": 0.9, "color": "3a3040", "xp": 12, "drop": "fiber"},
 	"lizard": {"hp": 8, "speed": 22.0, "chase": 44.0, "dmg": 2, "aggro": 3.0, "cool": 1.3, "color": "5f7a3a", "xp": 18, "drop": "resin"},
 	"snake": {"hp": 6, "speed": 30.0, "chase": 56.0, "dmg": 2, "aggro": 3.5, "cool": 1.1, "color": "6a5a2a", "xp": 16, "drop": "fiber"},
 	"dog": {"hp": 5, "speed": 30.0, "chase": 90.0, "dmg": 2, "aggro": 4.5, "cool": 1.1, "color": "4a3a2e", "xp": 16, "drop": "fiber"},   # feral dogs on treks (TrekSystem)
 }
-const STALKER_SPAWNS := [Vector2i(26, 8), Vector2i(29, 12), Vector2i(31, 7)]
-const ASHFORD_HOUSES := [Rect2i(5, 3, 6, 5), Rect2i(14, 13, 5, 4)]
-const ASHFORD_WATER := Rect2i(22, 4, 3, 3)
-
-# Generated towns fill the rest of the world. Each cell of the grid may hold one town.
-const TOWN_SEED := 40417
-const TOWN_CELL := 80
-const TOWN_CHANCE := 0.75
-const TOWN_KINDS := [
-	{"kind": "hamlet", "w": 28, "h": 20, "weight": 5},
-	{"kind": "town", "w": 40, "h": 28, "weight": 3},
-	{"kind": "castle", "w": 34, "h": 26, "weight": 3},
-	{"kind": "manor", "w": 20, "h": 16, "weight": 2},
-]
-const TOWN_START_CLEAR := Rect2i(300, 380, 280, 140)   # keeps the portal road free
-const TOWN_NAME_START := ["Ash", "Brook", "Crow", "Dun", "Elm", "Fen", "Gale", "Hollow", "Iron", "Kettle", "Lark", "Mere", "Nettle", "Oak", "Pike", "Reed", "Stone", "Thorn", "Vale", "Wick", "Yew"]
-const TOWN_NAME_END := ["bury", "ford", "holt", "more", "stead", "ton", "wick", "field", "hythe", "dale", "moor", "by"]
-const TOWN_FIRST := ["Alder", "Bram", "Cora", "Dell", "Edda", "Frank", "Gwen", "Hal", "Ivy", "Jory", "Kit", "Lenna", "Mabel", "Nell", "Osric", "Pell", "Quinn", "Rhea", "Sol", "Tobin", "Una", "Vern", "Wat", "Yara"]
-const TOWN_LAST := ["Ashby", "Brightwater", "Cole", "Dunmore", "Fairlight", "Greave", "Ingle", "Joss", "Kell", "Latch", "Marsh", "Nye", "Pryce", "Rook", "Sayer", "Teague"]
-const TOWN_NPC_COLORS := ["d8d0b0", "b6e0a0", "e0c48c", "c98f5a", "a3c9e0", "e0a0b6", "c0b0e0"]
-const GENERAL_BUY := {"wood": 3, "fiber": 2, "resin": 5, "stone": 4, "hardwood": 8}
-const GENERAL_BUY_QTY := 10
-const TOWN_ROLES := {
-	"town": ["shop_general", "shop_grocer", "bank", "home", "home", "home", "home"],
-	"hamlet": ["shop_general", "home", "home", "home"],
-	"castle": ["bank", "home", "home"],
-	"manor": ["home"],
-}
-
-const ASHFORD_NPCS := [
-	{"id": "harrow", "name": "Harrow the Miller", "pos": Vector2i(12, 9), "color": "d8d0b0", "lines": [
-		"The mill has stopped turning. The stones need grinding, and the millers have gone to the wood.",
-		"Strange things came down the road at dusk. They move faster than anything from Lowmere.",
-		"Bring me five crops and I'll grind flour. The mill will turn again.",
-		"The wheel turns! Thank you, guardian. Ashford owes you more than flour.",
-	]},
-	{"id": "wren", "name": "Wren", "pos": Vector2i(20, 11), "color": "b6e0a0", "lines": [
-		"Careful on the road. Stalkers don't wait for you to see them.",
-		"They chased me all the way to the bridge. I still hear them at night.",
-		"The mill is the heart of Ashford. Harrow is stubborn, but he's right.",
-		"You've given us back the road. We won't forget it.",
-	]},
-]
 # Gear you can craft with wood, fiber, and resin. Crafting equips the piece at once.
 const GEAR_ITEMS := {
 	"hoe": {"name": "Hoe", "slot": "hand_r", "dmg": 1, "def": 0, "level": 1, "cost": {}},
@@ -489,53 +408,7 @@ const GEAR_ITEMS := {
 	"wood_shield": {"name": "Hardwood shield", "slot": "offhand", "dmg": 0, "def": 2, "level": 4, "skill": "Forestry", "cost": {"hardwood": 3, "fiber": 2}},
 	"copper_shield": {"name": "Copper shield", "slot": "offhand", "dmg": 0, "def": 3, "level": 3, "skill": "Smithing", "cost": {"copper_bar": 4, "hardwood": 1}},
 	"iron_shield": {"name": "Iron shield", "slot": "offhand", "dmg": 0, "def": 4, "level": 6, "skill": "Smithing", "cost": {"iron_bar": 4, "hardwood": 1}},
-	"hardwood_bow": {"name": "Hardwood bow", "slot": "hand_r", "dmg": 3, "def": 0, "level": 3, "skill": "Forestry", "cost": {"hardwood": 3, "fiber": 2}, "ammo": "arrows", "cool": 0.6},
-	"crossbow": {"name": "Crossbow", "slot": "hand_r", "dmg": 6, "def": 0, "level": 3, "skill": "Smithing", "cost": {"hardwood": 4, "copper_bar": 2}, "ammo": "bolts", "cool": 1.2},
 }
-const NPCS := [
-	{"id": "mara", "name": "Mara the Reeve", "pos": Vector2i(8, 9), "color": "e0c48c", "lines": [
-		"Welcome to Lowmere. Few of us still stand. Talk with the others and see how they fare.",
-		"The hollow ones came out of the wood at dusk. Keep them out of the fields.",
-		"Tomas has been asking after you. He's been without bread for days.",
-		"You've made Lowmere a little safer. Keep walking the road by day.",
-	]},
-	{"id": "tomas", "name": "Tomas the Baker", "pos": Vector2i(16, 11), "color": "c98f5a", "lines": [
-		"The ovens are cold and the flour is gone. If you ever have a warm meal to spare...",
-		"Those things don't care that we're hungry. Keep your strength up.",
-		"Bring me something cooked, and I'll see that the village eats tonight.",
-		"Thank you. I've not seen a warm loaf in weeks.",
-	]},
-	{"id": "elsie", "name": "Elsie", "pos": Vector2i(22, 9), "color": "a3c9e0", "lines": [
-		"Don't go into the wood after dark. That's where they come from.",
-		"I saw one by the wood's edge. It had no face, only eyes.",
-		"The clearing east of the wood is where they gather. Go slow.",
-		"Papa says you're the guardian now. I'm glad it's you.",
-	]},
-]
-const GUARDIAN_QUESTS := [
-	{"id": "meet", "title": "Meet the Village",
-		"story": "Lowmere is small and frightened. Its people have heard the things in the wood at night. Learn their names, and they'll trust you with their troubles.",
-		"text": "Talk with the villagers. (3 conversations)", "stat": "talks", "goal": 3, "reward": {"coins": 20}},
-	{"id": "first_horror", "title": "The First Horror",
-		"story": "The hollow ones gather in the clearing east of the wood. Each one is hollow and slow, but they don't stop. Face one and press Space to fight it.",
-		"text": "Defeat 3 hollow ones.", "stat": "defeated", "goal": 3, "reward": {"skill": "Combat", "xp": 60}},
-	{"id": "bread", "title": "Bread for Tomas",
-		"story": "Tomas has no flour and no fire to bake with. A cooked meal from your homestead would mean the world to him.",
-		"text": "Bring a meal to Tomas.", "stat": "delivered", "goal": 1, "reward": {"coins": 40}},
-	{"id": "hold_road", "title": "Hold the Road",
-		"story": "The road to Lowmere is only safe while someone walks it. Keep the clearing quiet, and the village can sleep at night.",
-		"text": "Defeat 10 hollow ones in total.", "stat": "defeated", "goal": 10, "reward": {"coins": 80, "pumpkin_seeds": 3}},
-	{"id": "ashford", "title": "The Road East",
-		"story": "Beyond the wood, the road runs on to Ashford, where the mill has stopped turning. Walk it in daylight and see what has happened there.",
-		"text": "Reach Ashford.", "stat": "visited", "goal": 1, "reward": {"coins": 50}},
-	{"id": "flour", "title": "Flour for the Mill",
-		"story": "Harrow the miller will grind grain for anyone who brings him food for the hands that work the stones. Five crops would keep the mill turning another week.",
-		"text": "Give 5 crops to Harrow.", "stat": "crops_given", "goal": 5, "reward": {"coins": 60, "pumpkin_seeds": 2}},
-	{"id": "stalkers", "title": "Stalkers on the Road",
-		"story": "Faster things hunt the road beyond Lowmere. They are quick and their claws are long. Only strikes will stop them.",
-		"text": "Defeat 5 stalkers.", "stat": "stalkers", "goal": 5, "reward": {"skill": "Combat", "xp": 120}},
-]
-
 # Story chapters run in order. The first unfinished one is the Current chapter.
 # "story" is the narrative beat, "text" the goal, and "stat" what it reads.
 # Story chapters run in order. The first unfinished one is the Current chapter.
@@ -717,9 +590,9 @@ var diary_icon: HudIcon            # the diary by the vitals, with a dot while a
 var diary_label: Label
 
 
-enum Tile { TREE, GRASS, SOIL, PATH, WATER, HOUSE, DOOR, FLOOR, WALL, EXIT, BED, STATION, DESK, FALLOW, STALL, CELLAR, COOLER, GATE, SMOKEHOUSE, FURNACE, PORTAL, CAMP, CAVE_MOUTH, CAVE_EXIT, ORE_COPPER, ORE_IRON, COOP, BARN, TABLE, FIREPLACE, WELL, PORCH, WOODSTORE, CHOPLOG, FENCE, ROCK, ROOF, SCARECROW }
+enum Tile { TREE, GRASS, SOIL, PATH, WATER, HOUSE, DOOR, FLOOR, WALL, EXIT, BED, STATION, DESK, FALLOW, STALL, CELLAR, COOLER, SMOKEHOUSE, FURNACE, CAVE_MOUTH, CAVE_EXIT, ORE_COPPER, ORE_IRON, COOP, BARN, TABLE, FIREPLACE, WELL, PORCH, WOODSTORE, CHOPLOG, FENCE, ROCK, ROOF, SCARECROW }
 
-const BLOCKING := [Tile.TREE, Tile.WATER, Tile.HOUSE, Tile.WALL, Tile.BED, Tile.STATION, Tile.DESK, Tile.STALL, Tile.CELLAR, Tile.COOLER, Tile.SMOKEHOUSE, Tile.FURNACE, Tile.CAMP, Tile.ORE_COPPER, Tile.ORE_IRON, Tile.COOP, Tile.BARN, Tile.TABLE, Tile.FIREPLACE, Tile.WELL, Tile.WOODSTORE, Tile.CHOPLOG, Tile.FENCE, Tile.ROCK, Tile.SCARECROW]
+const BLOCKING := [Tile.TREE, Tile.WATER, Tile.HOUSE, Tile.WALL, Tile.BED, Tile.STATION, Tile.DESK, Tile.STALL, Tile.CELLAR, Tile.COOLER, Tile.SMOKEHOUSE, Tile.FURNACE, Tile.ORE_COPPER, Tile.ORE_IRON, Tile.COOP, Tile.BARN, Tile.TABLE, Tile.FIREPLACE, Tile.WELL, Tile.WOODSTORE, Tile.CHOPLOG, Tile.FENCE, Tile.ROCK, Tile.SCARECROW]
 
 const TILE_COLORS := {
 	Tile.TREE: Color("2f4f2f"),
@@ -739,12 +612,10 @@ const TILE_COLORS := {
 	Tile.STALL: Color("b5793d"),
 	Tile.CELLAR: Color("a88ad0"),
 	Tile.COOLER: Color("7fc4e0"),
-	Tile.GATE: Color("8f7a4f"),
 	Tile.SMOKEHOUSE: Color("9a5a3a"),
 	Tile.FURNACE: Color("5c5c66"),
 	Tile.WOODSTORE: Color("6b4a2e"),
 	Tile.CHOPLOG: Color("5a3a22"),
-	Tile.PORTAL: Color("6a4fc0"),
 	Tile.CAVE_MOUTH: Color("2a2a30"),
 	Tile.CAVE_EXIT: Color("a08050"),
 	Tile.ORE_COPPER: Color("b87333"),
@@ -758,7 +629,6 @@ const TILE_COLORS := {
 	Tile.SCARECROW: Color("7a6a4a"),
 	Tile.TABLE: Color("7a5230"),
 	Tile.FIREPLACE: Color("5a5650"),
-	Tile.CAMP: Color("d07a30"),
 	Tile.PORCH: Color("8a6a46"),
 }
 
@@ -767,17 +637,8 @@ const NIGHT_TINT := Color("3a3f6e")
 # The cave has no daylight at any hour: almost black, so only a lantern's ring shows the tunnels.
 const CAVE_TINT := Color("050508")
 
-enum Zone { HOMESTEAD, VILLAGE, ASHFORD, WILDS, TOWN }
 
 var map: Array = []                 # farm tiles, [y][x]
-var world := PackedByteArray()      # the whole land, index y * WORLD_W + x
-var campsite := NO_CAMP             # the one campsite, in world tiles
-var world_map_tex: Texture2D = null # the whole land as a small picture for the minimap
-var towns: Array = []               # generated towns: origin, size, kind, title, npcs
-var current_town := -1              # index into towns while the player is in one
-var active_shop := ""               # the shop open in the Shop panel
-var bank_materials := {"wood": 0, "sticks": 0, "fiber": 0, "resin": 0, "hardwood": 0, "stone": 0, "copper_ore": 0, "iron_ore": 0, "copper_bar": 0, "iron_bar": 0, "arrows": 0, "bolts": 0, "feathers": 0}
-var bank_coins := 0
 var in_cave := false                # standing in the mining cave
 var cave: Array = []                # cave tiles, [y][x], in cave tile coordinates
 var cave_spawns: Array = []         # creatures placed on each entry: {kind, tile}
@@ -817,7 +678,7 @@ var well_water := 0.0      # hours spent with an empty need, toward the next HP 
 var weather_kind := ""       # today's weather, rolled each morning: see WEATHER_WEIGHTS
 var skill_xp := {"Farming": 0, "Bushcrafting": 0, "Carpentry": 0, "Cleaning": 0, "Fishing": 0, "Cooking": 0, "Combat": 0, "Forestry": 0, "Mining": 0, "Smithing": 0}
 var inventory := {"seeds": STARTING_SEEDS, "corn_seeds": 0, "pumpkin_seeds": 0, "crops": 0, "corn": 0, "pumpkins": 0, "fish": 0, "eggs": 0, "milk": 0, "fish_meal": 0, "turnip_hash": 0, "smoked_fish": 0, "dried_turnip": 0, "pumpkin_soup": 0, "canned_turnip": 0, "fish_stew": 0, "fermented_turnip": 0, "hearty_stew": 0, "bandage": 0, "firewood": 4, "crow_charm": 0, "trail_ration": 0, "bread": 0, "apples": 0}
-var materials := {"wood": 0, "sticks": 0, "fiber": 0, "resin": 0, "hardwood": 0, "stone": 0, "copper_ore": 0, "iron_ore": 0, "copper_bar": 0, "iron_bar": 0, "arrows": 0, "bolts": 0, "feathers": 0,
+var materials := {"wood": 0, "sticks": 0, "fiber": 0, "resin": 0, "hardwood": 0, "stone": 0, "copper_ore": 0, "iron_ore": 0, "copper_bar": 0, "iron_bar": 0, "feathers": 0,
 	"storm_oak": 0, "flax": 0, "bell_metal": 0, "bell_frame": 0, "bell_rope": 0, "bell_clapper": 0, "lamp_oil": 0, "rope": 0, "flour": 0, "apple_sapling": 0}
 # The hotbar, in slot order. Slots after these are empty.
 const HOTBAR_TOOLS := [
@@ -833,14 +694,13 @@ const TOOL_LABELS := {"sword": "weapon", "axe": "axe", "pick": "pickaxe", "hoe":
 
 var tool_tier := {"hatchet": 0, "pick": 0, "rod": 0}     # 0 = none; higher tiers come from TOOL_TIERS
 var grove_felled := {}
-var quarry := {}                                   # Ashford quarry rocks, village tile -> true
 var rocks := {}                                  # world tile -> true for unbroken rocks
 var brush_day := 0   # the day the brush and trees were last restored
 var rock_day := 0    # the day the rocks were last restored
 var stats := {"jobs": 0, "planted": 0, "harvested": 0, "gathered": 0, "slept": 0, "tidied": 0,
 	"fished": 0, "caught": 0, "mended": 0, "cleansed": 0, "cooked": 0, "eaten": 0,
 	"pumpkins": 0, "collapses": 0, "events": 0, "sold": 0, "spoiled": 0,
-	"talks": 0, "defeated": 0, "delivered": 0, "stalkers": 0, "visited": 0, "crops_given": 0, "preserved": 0, "felled": 0, "mined": 0,
+	"defeated": 0, "preserved": 0, "felled": 0, "mined": 0,
 	"drank": 0, "watered": 0, "pump": 0, "hose": 0, "rain_days": 0, "events_seen": 0, "goats_bought": 0, "faced": 0}
 var achievements_done := {}     # achievement id -> true
 var quests_done := {}               # quest id -> true
@@ -922,14 +782,10 @@ var tax_stage := 0                  # 0 none sent, 1 overdue reminder sent, 2 fi
 var desk_mail: Array = []           # letters on the desk: {"title", "text", "unread"}
 var desk_light: PointLight2D        # red light on the desk while post is unread
 var fire_hours := 0.0
-var shots: Array = []                 # arrows and bolts in flight, not saved
 var cellar_stock := 0          # crops in the root cellar
 var cooler_stock := 0          # fish in the cooler
-var zone: int = Zone.HOMESTEAD
-var saved_zone := 0
 var hp := BASE_HP
-var guardian_done := {}        # guardian quest id -> true
-var foes: Array = []           # enemies in the current village, rebuilt on each visit
+var foes: Array = []           # creatures in the cave or dogs on a trek, rebuilt on each visit
 var swing_cool := 0.0
 var swing_dir := Vector2.DOWN
 var invuln := 0.0
@@ -1048,7 +904,7 @@ func _ready() -> void:
 	ambience = AmbienceSystem.new(self)
 	ambience.setup()
 	_build_map()
-	_generate_world()
+	_generate_cave()
 	_find_pond_edges()
 	save_slot = TitleMenu.active_slot
 	# The start screen comes first. The world is built once the player picks Continue, New Game, or a slot.
@@ -1087,11 +943,11 @@ const SFX_NAMES := ["chop", "pick", "hoe", "tree_fall", "rock_break", "step", "p
 	"crow", "crow_far", "owl", "howl", "snap_far", "steps_behind", "whisper", "heartbeat", "sting", "knock", "hen",
 	"creak", "creak_high", "settle", "thunder_in",
 	"drip", "drip_low", "cave_rumble", "skitter", "cave_moan", "pebbles", "cave_in",
-	"swing", "hit", "hurt", "block", "shoot", "foe_die", "growl", "screech", "hiss",
+	"swing", "hit", "hurt", "block", "foe_die", "growl", "screech", "hiss",
 	"cast", "splash", "reel",
-	"fire_feed", "split", "smelt", "craft", "cloth", "cook", "feed", "sweep", "cleanse", "portal", "sleep", "collapse"]
+	"fire_feed", "split", "smelt", "craft", "cloth", "cook", "feed", "sweep", "cleanse", "sleep", "collapse"]
 # The sound each kind of foe makes when it notices you.
-const FOE_SOUNDS := {"hollow": "growl", "stalker": "growl", "bat": "screech", "lizard": "hiss", "snake": "hiss", "dog": "growl"}
+const FOE_SOUNDS := {"bat": "screech", "lizard": "hiss", "snake": "hiss", "dog": "growl"}
 
 
 func _load_sfx() -> void:
@@ -1220,7 +1076,7 @@ func _process(delta: float) -> void:
 	if not tree_bake_started:
 		tree_bake_started = true
 		_bake_tree_sprites()
-	if not in_cave and not _in_village():
+	if not in_cave:
 		var cam := camera.get_screen_center_position()
 		var cam_tile := Vector2i(floori(cam.x / PX), floori(cam.y / PX))
 		if cam_tile != last_cam_tile:
@@ -1306,17 +1162,11 @@ func _process(delta: float) -> void:
 	farm._check_unlocks()
 	progression._check_story()
 	progression._check_achievements()
-	_check_guardian()
 	fishing._update_fish_spots(delta)
 	fishing._update_fishing(delta)
 	farm._update_harvest(delta)
 	_update_crows(delta)
 	combat_sys._update_foes(delta)
-	combat_sys._update_shots(delta)
-	_update_region()
-	if _in_village() and current_hour >= STALL_CLOSE_HOUR and not _at_campsite():
-		_go_home("Night falls. You are driven back to the homestead.")
-	fish_layer.visible = zone == Zone.HOMESTEAD
 
 	var minutes := int(fmod(current_hour, 1.0) * 60.0)
 	var low := food < 25.0 or water < 25.0 or warmth < 25.0
@@ -1387,9 +1237,6 @@ func _draw() -> void:
 			trek._draw_map()
 		else:
 			_draw_cave()
-		return
-	if _in_village():
-		_draw_world()
 		return
 	var view := get_viewport_rect().size / camera.zoom
 	var top_left := camera.get_screen_center_position() - view * 0.5
@@ -1654,7 +1501,7 @@ func _make_ambience(dot: Texture2D, color: Color, scale_px: float, alpha: float,
 func _update_ambience() -> void:
 	if leaves_fx == null:
 		return
-	var on_farm := not inside and not in_cave and not _in_village() and world_started
+	var on_farm := not inside and not in_cave and world_started
 	var season := _season_of(_calendar_date(day)["month"])
 	var view := get_viewport_rect().size / camera.zoom
 	var centre := camera.get_screen_center_position()
@@ -1782,8 +1629,6 @@ func _build_map() -> void:
 			var t := Tile.TREE
 			if ix >= 0 and ix < INNER_W and iy >= 0 and iy < INNER_H:
 				t = TERRAIN_CODES[FarmLayout.TERRAIN[iy].substr(ix, 1)]
-				if WORLD_ENABLED and ix == INNER_W - 1 and iy == INNER_H / 2:
-					t = Tile.PORTAL
 			row.append(t)
 		map.append(row)
 
@@ -1883,15 +1728,13 @@ func _set_interior(x: int, y: int, kind: int) -> void:
 func _respawn_brush() -> void:
 	_fill_brush()
 	_fill_rocks()
-	mining._fill_quarry()
 	brush_day = day
 	rock_day = day
 	queue_redraw()
 
 
-# Brush and trees grow back once a week, and rocks every two weeks. The quarry refills each morning.
+# Brush and trees grow back once a week, and rocks every two weeks.
 func _regrow_wild() -> void:
-	mining._fill_quarry()
 	if day - brush_day >= BRUSH_REGROW_DAYS:
 		_fill_brush()
 		brush_day = day
@@ -2027,7 +1870,7 @@ func _build_window_lights() -> void:
 
 # The pond's shine, drawn every frame while on the farm.
 func _draw_water_shimmer() -> void:
-	if not world_started or inside or in_cave or _in_village():
+	if not world_started or inside or in_cave:
 		return
 	var view := get_viewport_rect().size / camera.zoom
 	var top_left := camera.get_screen_center_position() - view * 0.5
@@ -2308,9 +2151,6 @@ func _bar_box(color: Color) -> StyleBoxFlat:
 # Applies what loading saved: position, indoors or not, and the open panel.
 func _restore_saved_state() -> void:
 	farm._check_unlocks()
-	zone = saved_zone
-	if not WORLD_ENABLED:
-		zone = Zone.HOMESTEAD
 	hp = clampi(hp, 1, max_hp())
 	if has_saved_pos:
 		player.position = saved_pos
@@ -2319,12 +2159,9 @@ func _restore_saved_state() -> void:
 		# A spot saved before the house was resized may now be inside a wall or the furniture.
 		if not _in_interior(_player_tile()) or BLOCKING.has(_kind_at(_player_tile())):
 			player.position = _wake_spot()
-	elif not WORLD_ENABLED and not _in_bounds(_player_tile()):
-		# A save made in the wider land returns to the homestead when the world is off.
+	elif not _in_bounds(_player_tile()):
+		# A save made out in the old wider land returns to the homestead.
 		player.position = _tile_center(HOMESTEAD_ARRIVE.x, HOMESTEAD_ARRIVE.y)
-	if _in_village():
-		_sync_region()
-		combat_sys._spawn_foes()
 	if saved_inside:
 		inside = true
 	_set_bounds()
@@ -2815,13 +2652,6 @@ func _update_minimap() -> void:
 		_place_minimap(Vector2(CAVE_W, CAVE_H) * Minimap.PX_PER_TILE)
 		minimap.update_view(cave, TILE_COLORS, [], Vector2(_player_tile()), Vector2i(-1, -1))
 		return
-	if _in_village():
-		# In the world the minimap shows the whole land, with the player on it.
-		if world_map_tex == null:
-			_build_world_minimap()
-		_place_minimap(Vector2(WORLD_W, WORLD_H) * Minimap.WORLD_PX_PER_TILE)
-		minimap.update_world(world_map_tex, Vector2i(WORLD_W, WORLD_H), Vector2(_player_tile()) + Vector2(0.5, 0.5))
-		return
 	# Indoors the minimap shows the house, since the player isn't on the farm.
 	_place_minimap(Vector2(MAP_W, MAP_H) * Minimap.PX_PER_TILE)
 	var player_tile: Vector2 = Vector2(HOUSE_DOOR_IX + BORDER_X, HOUSE_DOOR_IY + BORDER_Y) if inside else player.position / PX
@@ -3248,8 +3078,6 @@ func _on_panel_action(action_id: String) -> void:
 	if action_id.begins_with("sell_food:"):
 		stall._sell_food(action_id.trim_prefix("sell_food:"))
 		return
-	if action_id.begins_with("ammo:"):
-		crafting._craft_ammo(action_id.trim_prefix("ammo:"))
 		return
 	if action_id.begins_with("tool:"):
 		crafting._craft_tool(action_id.trim_prefix("tool:"))
@@ -3259,18 +3087,6 @@ func _on_panel_action(action_id: String) -> void:
 		return
 	if action_id.begins_with("smelt:"):
 		mining._smelt(action_id.trim_prefix("smelt:"))
-		return
-	if action_id.begins_with("buy:"):
-		stall._buy_material(action_id.trim_prefix("buy:"))
-		return
-	if action_id.begins_with("sellmat:"):
-		stall._sell_material(action_id.trim_prefix("sellmat:"))
-		return
-	if action_id.begins_with("dep:") or action_id.begins_with("wd:"):
-		stall._bank_move(action_id)
-		return
-	if action_id == "camp":
-		_place_campsite()
 		return
 	if action_id == "build_woodshed":
 		_build_woodshed()
@@ -3440,10 +3256,6 @@ func _refresh_panel() -> void:
 			rows = panels._achievement_rows()
 		"Trade":
 			rows = panels._trade_rows()
-		"Shop":
-			rows = panels._general_shop_rows()
-		"Bank":
-			rows = panels._bank_rows()
 		"Cellar":
 			rows = panels._cellar_rows()
 		"Cooler":
@@ -3486,7 +3298,7 @@ const SKILL_INFO := {
 	"Cleaning": {"icon": "broom", "tint": "4a6b7a", "desc": "Tidies the house."},
 	"Fishing": {"icon": "fish", "tint": "3a5a7a", "desc": "Works the sparkling spots at the pond."},
 	"Cooking": {"icon": "bowl", "tint": "8a4f2a", "desc": "Turns catches and crops into meals and preserves."},
-	"Combat": {"icon": "sword", "tint": "6b3a3a", "desc": "Earned by guarding Lowmere and fighting foes."},
+	"Combat": {"icon": "sword", "tint": "6b3a3a", "desc": "Earned by fighting the creatures in the cave and the dogs on the trails."},
 	"Forestry": {"icon": "axe", "tint": "3f5a2a", "desc": "Fells trees for wood and hardwood."},
 	"Mining": {"icon": "pick", "tint": "5a5a5a", "desc": "Breaks rocks for stone and ore."},
 	"Smithing": {"icon": "anvil", "tint": "7a5a2a", "desc": "Turns ore into bars and metal gear."},
@@ -3507,14 +3319,12 @@ const MATERIAL_INFO := {
 	"sticks": {"name": "Sticks", "icon": "sticks", "tint": "8a6a3a", "desc": "Dry sticks from the brush piles. Crude hatchets and rods are made from them."},
 	"fiber": {"name": "Fiber", "icon": "fiber", "tint": "8a8a4a", "desc": "Plant fiber for wraps, leggings, and the hose."},
 	"resin": {"name": "Resin", "icon": "resin", "tint": "b5703a", "desc": "Sticky sap for caps, amulets, and the hose."},
-	"hardwood": {"name": "Hardwood", "icon": "log", "tint": "4a3426", "desc": "Dense wood for stronger gear and bolts."},
-	"stone": {"name": "Stone", "icon": "stone", "tint": "7a7a7a", "desc": "Rough stone from the quarry and the cave."},
+	"hardwood": {"name": "Hardwood", "icon": "log", "tint": "4a3426", "desc": "Dense wood for stronger tools and shields."},
+	"stone": {"name": "Stone", "icon": "stone", "tint": "7a7a7a", "desc": "Rough stone from the farm's rocks and the cave."},
 	"copper_ore": {"name": "Copper ore", "icon": "ore", "tint": "b87333", "desc": "Raw copper. Smelt it at the furnace."},
 	"iron_ore": {"name": "Iron ore", "icon": "ore", "tint": "6b6b6b", "desc": "Raw iron. Smelt it at the furnace."},
 	"copper_bar": {"name": "Copper bar", "icon": "bar", "tint": "c97f45", "desc": "Smelted copper, ready for smithing."},
 	"iron_bar": {"name": "Iron bar", "icon": "bar", "tint": "8d98a6", "desc": "Smelted iron, ready for smithing."},
-	"arrows": {"name": "Arrows", "icon": "arrow", "tint": "6b4a3a", "desc": "Ammunition for the bow. Each shot uses one."},
-	"bolts": {"name": "Bolts", "icon": "arrow", "tint": "6b6b6b", "desc": "Ammunition for ranged weapons. Each shot uses one."},
 	"feathers": {"name": "Crow feathers", "icon": "feather", "tint": "2a2632", "desc": "Left behind by the things that come at night, when you face them. Bound into crow charms."},
 	"storm_oak": {"name": "Storm oak", "icon": "log", "tint": "3a2a22", "desc": "Heartwood from an oak split by a spring storm. The crow bell's frame is cut from it."},
 	"flax": {"name": "Wild flax", "icon": "fiber", "tint": "5a7ab0", "desc": "Long stems from the wild flax that flowers in summer. Twisted into the crow bell's rope."},
@@ -3684,8 +3494,6 @@ func _level_text(skill: String, level: int) -> String:
 
 
 func _slot_icon(item: Dictionary) -> String:
-	if item.has("ammo"):
-		return "bow"
 	match str(item["slot"]):
 		"hand_r":
 			return "sword"
@@ -3851,9 +3659,6 @@ func _interact() -> void:
 		else:
 			_interact_cave()
 		return
-	if _in_village():
-		_interact_village()
-		return
 	if fishing._is_fishing():
 		fishing._stop_fishing("You reel in your line.")
 		return
@@ -3997,8 +3802,6 @@ func _place_key() -> String:
 		return "cave"
 	if inside:
 		return "house"
-	if _in_village():
-		return "village"
 	return "farm"
 
 
@@ -4073,7 +3876,7 @@ func _set_roost_lights() -> void:
 
 
 func _update_crows(delta: float) -> void:
-	var on_farm := world_started and not inside and not in_cave and not _in_village()
+	var on_farm := world_started and not inside and not in_cave
 	if crow_layer == null:
 		return
 	if not on_farm:
@@ -4602,86 +4405,7 @@ func _build_furnace() -> void:
 	queue_redraw()
 
 
-# --- Ranged combat and ammunition ----------------------------------------------
-
-func _can_fletch(kind: String) -> bool:
-	var ammo: Dictionary = AMMO[kind]
-	if progression._level(str(ammo["skill"])) < int(ammo["level"]):
-		return false
-	return _has_materials(ammo["cost"])
-
-
-# --- The Ashford quarry ------------------------------------------------------------
-
-
-# --- The world ----------------------------------------------------------------
-
-# Builds the whole land from a seed: forest, lakes, and open ground, then stamps
-# Lowmere and Ashford in and lays the road between them and the portal.
-func _generate_world() -> void:
-	var forest := FastNoiseLite.new()
-	forest.seed = WORLD_SEED
-	forest.frequency = 0.02
-	forest.noise_type = FastNoiseLite.TYPE_SIMPLEX_SMOOTH
-	var lakes := FastNoiseLite.new()
-	lakes.seed = WORLD_SEED + 1
-	lakes.frequency = 0.03
-	lakes.noise_type = FastNoiseLite.TYPE_SIMPLEX_SMOOTH
-	world = PackedByteArray()
-	world.resize(WORLD_W * WORLD_H)
-	for y in WORLD_H:
-		for x in WORLD_W:
-			var t := Tile.GRASS
-			if x < 2 or y < 2 or x >= WORLD_W - 2 or y >= WORLD_H - 2:
-				t = Tile.TREE
-			elif lakes.get_noise_2d(x, y) > 0.55:
-				t = Tile.WATER
-			elif forest.get_noise_2d(x, y) > 0.35:
-				t = Tile.TREE
-			world[y * WORLD_W + x] = t
-	for x in range(PORTAL_TILE.x, ASHFORD_ORIGIN.x + VILLAGE_W):
-		world[ROAD_Y * WORLD_W + x] = Tile.PATH
-	_plan_towns()
-	_stamp_village(LOWMERE_ORIGIN, _build_zone_map(VILLAGE_HOUSES, VILLAGE_WATER, 26, true))
-	_stamp_village(ASHFORD_ORIGIN, _build_zone_map(ASHFORD_HOUSES, ASHFORD_WATER, 24, false))
-	_layout_towns()
-	world[PORTAL_TILE.y * WORLD_W + PORTAL_TILE.x] = Tile.PORTAL
-	_build_world_minimap()
-	_generate_cave()
-
-
-# Copies a village's houses, water, gates and trees into the world. Its open ground and
-# its outer edge are left as the land already is, so the town sits in the forest
-# instead of inside a wall of trees. Its gates become road.
-func _stamp_village(origin: Vector2i, local: Array) -> void:
-	for y in VILLAGE_H:
-		for x in VILLAGE_W:
-			var k: int = local[y][x]
-			var edge := x == 0 or y == 0 or x == VILLAGE_W - 1 or y == VILLAGE_H - 1
-			if k == Tile.GATE:
-				k = Tile.PATH
-			elif k == Tile.GRASS or (k == Tile.TREE and edge):
-				continue
-			var idx := (origin.y + y) * WORLD_W + origin.x + x
-			# Roads stay walkable: a building never covers a road tile.
-			if world[idx] == Tile.PATH and k != Tile.PATH:
-				continue
-			world[idx] = k
-
-
-# The whole land as a small picture for the minimap: one pixel per 4 tiles, each pixel
-# showing the tile at its centre. Rebuilt when the land changes (the campsite moves).
-func _build_world_minimap() -> void:
-	var step := int(round(1.0 / Minimap.WORLD_PX_PER_TILE))
-	var w := WORLD_W / step
-	var h := WORLD_H / step
-	var img := Image.create(w, h, false, Image.FORMAT_RGBA8)
-	for y in h:
-		for x in w:
-			var k: int = world[(y * step + step / 2) * WORLD_W + x * step + step / 2]
-			img.set_pixel(x, y, Minimap.grade(TILE_COLORS[k]))
-	world_map_tex = ImageTexture.create_from_image(img)
-
+# --- The minimap -------------------------------------------------------------
 
 # Sizes the minimap box for whichever map it is showing. Only changes when needed.
 func _place_minimap(mini_size: Vector2) -> void:
@@ -4900,13 +4624,13 @@ func _cave_is(x: int, y: int, kinds: Array) -> bool:
 	return kinds.has(cave[y][x])
 
 
-# Creatures with SpriteCook sheets (art/farm/foe_<kind>.png, facing right). Hollows and stalkers keep their
+# Creatures with SpriteCook sheets (art/farm/foe_<kind>.png, facing right). The trek dogs keep their
 # drawn shapes.
 const FOE_ANIMATED := ["bat", "lizard", "snake"]
 const FOE_FPS := 8.0
 
 
-# Foes and arrows in flight. Shared by the world and the cave.
+# Foes in the cave.
 func _draw_combat() -> void:
 	for foe in foes:
 		var pos: Vector2 = foe["pos"]
@@ -4932,572 +4656,26 @@ func _draw_combat() -> void:
 			draw_circle(pos, PX * 0.32, body)
 			draw_circle(pos + Vector2(-5, -4), 2.5, Color(0.9, 0.1, 0.1))
 			draw_circle(pos + Vector2(5, -4), 2.5, Color(0.9, 0.1, 0.1))
-	for shot in shots:
-		var shot_pos: Vector2 = shot["pos"]
-		var shot_vel: Vector2 = shot["vel"]
-		draw_line(shot_pos - shot_vel.normalized() * PX * 0.5, shot_pos, Color("e8e0c0"), 2.0)
 
 
-# --- Generated towns -----------------------------------------------------------
-
-# Picks where the towns go and carves the roads between them. Runs before the villages
-# are stamped. Lowmere and Ashford are hubs too, and a minimum spanning road network
-# joins every hub, so the whole land is reachable from the portal.
-func _plan_towns() -> void:
-	var rng := RandomNumberGenerator.new()
-	rng.seed = TOWN_SEED
-	towns = []
-	current_town = -1
-	var taken: Array[Rect2i] = [TOWN_START_CLEAR, Rect2i(LOWMERE_ORIGIN, Vector2i(VILLAGE_W, VILLAGE_H)), Rect2i(ASHFORD_ORIGIN, Vector2i(VILLAGE_W, VILLAGE_H))]
-	var cols := ceili(float(WORLD_W) / TOWN_CELL)
-	var rows := ceili(float(WORLD_H) / TOWN_CELL)
-	for cy in rows:
-		for cx in cols:
-			if rng.randf() > TOWN_CHANCE:
-				continue
-			var pick: Dictionary = _pick_town_kind(rng)
-			var w: int = pick["w"]
-			var h: int = pick["h"]
-			var x := cx * TOWN_CELL + rng.randi_range(4, TOWN_CELL - w - 4)
-			var y := cy * TOWN_CELL + rng.randi_range(4, TOWN_CELL - h - 4)
-			var rect := Rect2i(x, y, w, h)
-			if rect.end.x > WORLD_W - 4 or rect.end.y > WORLD_H - 4:
-				continue
-			var clash := false
-			for other in taken:
-				if rect.grow(4).intersects(other):
-					clash = true
-					break
-			if clash:
-				continue
-			taken.append(rect)
-			towns.append({"kind": pick["kind"], "origin": Vector2i(x, y), "w": w, "h": h, "title": _town_title(rng, str(pick["kind"])), "npcs": []})
-	var hubs: Array[Vector2i] = [_village_hub(LOWMERE_ORIGIN), _village_hub(ASHFORD_ORIGIN)]
-	for town in towns:
-		hubs.append(_town_hub(town))
-	# Prim's algorithm: each new hub joins by its shortest road to the network so far.
-	var n := hubs.size()
-	var in_tree: Array = []
-	for i in n:
-		in_tree.append(i == 0)
-	for step in n - 1:
-		var best_d := INF
-		var best_i := -1
-		var best_j := -1
-		for i in n:
-			if not in_tree[i]:
-				continue
-			for j in n:
-				if in_tree[j]:
-					continue
-				var d := float(hubs[i].distance_squared_to(hubs[j]))
-				if d < best_d:
-					best_d = d
-					best_i = i
-					best_j = j
-		if best_j < 0:
-			break
-		in_tree[best_j] = true
-		_carve_road(hubs[best_i], hubs[best_j])
-
-
-func _pick_town_kind(rng: RandomNumberGenerator) -> Dictionary:
-	var total := 0
-	for k in TOWN_KINDS:
-		total += int(k["weight"])
-	var roll := rng.randi_range(1, total)
-	for k in TOWN_KINDS:
-		roll -= int(k["weight"])
-		if roll <= 0:
-			return k
-	return TOWN_KINDS[0]
-
-
-func _town_title(rng: RandomNumberGenerator, kind: String) -> String:
-	var base: String = TOWN_NAME_START[rng.randi() % TOWN_NAME_START.size()] + TOWN_NAME_END[rng.randi() % TOWN_NAME_END.size()]
-	if kind == "castle":
-		return base + " Keep"
-	if kind == "manor":
-		return base + " Manor"
-	return base
-
-
-func _village_hub(origin: Vector2i) -> Vector2i:
-	return origin + Vector2i(VILLAGE_W / 2, VILLAGE_GATE.y)
-
-
-func _town_hub(town: Dictionary) -> Vector2i:
-	var origin: Vector2i = town["origin"]
-	return origin + Vector2i(int(town["w"]) / 2, int(town["h"]) / 2)
-
-
-# An L-shaped road of plain path: across, then along.
-func _carve_road(a: Vector2i, b: Vector2i) -> void:
-	var step_x := 1 if b.x >= a.x else -1
-	var x := a.x
-	while x != b.x:
-		world[a.y * WORLD_W + x] = Tile.PATH
-		x += step_x
-	var step_y := 1 if b.y >= a.y else -1
-	var y := a.y
-	while y != b.y:
-		world[y * WORLD_W + b.x] = Tile.PATH
-		y += step_y
-	world[b.y * WORLD_W + b.x] = Tile.PATH
-
-
-# Lays out every generated town in the world, after the villages are stamped.
-func _layout_towns() -> void:
-	var rng := RandomNumberGenerator.new()
-	rng.seed = TOWN_SEED + 1
-	for i in towns.size():
-		_layout_town(i, rng)
-
-
-# Builds one town in a local grid, then stamps it. A cross of streets runs through the
-# middle. Buildings sit in the spaces between them and never cover a road.
-func _layout_town(index: int, rng: RandomNumberGenerator) -> void:
-	var town: Dictionary = towns[index]
-	var w: int = town["w"]
-	var h: int = town["h"]
-	var kind: String = town["kind"]
-	var origin: Vector2i = town["origin"]
-	var title: String = town["title"]
-	var sx := w / 2
-	var sy := h / 2
-	var local: Array = []
-	var occ: Array = []
-	for y in h:
-		var row: Array = []
-		var orow: Array = []
-		for x in w:
-			row.append(Tile.GRASS)
-			orow.append(false)
-		local.append(row)
-		occ.append(orow)
-	for x in w:
-		local[sy][x] = Tile.PATH
-		occ[sy][x] = true
-	for y in h:
-		local[y][sx] = Tile.PATH
-		occ[y][sx] = true
-	var npcs: Array = []
-	if kind == "castle" or kind == "manor":
-		for x in w:
-			local[0][x] = Tile.WALL
-			occ[0][x] = true
-			local[h - 1][x] = Tile.WALL
-			occ[h - 1][x] = true
-		for y in h:
-			local[y][0] = Tile.WALL
-			occ[y][0] = true
-			local[y][w - 1] = Tile.WALL
-			occ[y][w - 1] = true
-		# The gates sit where the streets cross the wall.
-		local[0][sx] = Tile.PATH
-		local[h - 1][sx] = Tile.PATH
-		local[sy][0] = Tile.PATH
-		local[sy][w - 1] = Tile.PATH
-		var keep := Rect2i(sx - 4, 3, 8, 6) if kind == "castle" else Rect2i(sx - 3, 3, 6, 5)
-		_mark_block(local, occ, keep)
-		var lord_door := Vector2i(keep.position.x + keep.size.x / 2, keep.end.y)
-		occ[lord_door.y][lord_door.x] = true
-		_add_npc(npcs, index, rng, "lord", lord_door, title)
-	for role in TOWN_ROLES[kind]:
-		var rect := _find_room(occ, rng, w, h)
-		if rect.size == Vector2i.ZERO:
-			continue
-		_mark_block(local, occ, rect)
-		var door := Vector2i(rect.position.x + rect.size.x / 2, rect.end.y)
-		occ[door.y][door.x] = true
-		_add_npc(npcs, index, rng, str(role), door, title)
-	# Scattered trees on open ground, away from the streets and buildings.
-	for y in h:
-		for x in w:
-			if local[y][x] == Tile.GRASS and not occ[y][x] and (x * 7 + y * 5 + index * 3) % 11 == 0:
-				local[y][x] = Tile.TREE
-	for y in h:
-		for x in w:
-			var idx := (origin.y + y) * WORLD_W + origin.x + x
-			var k: int = local[y][x]
-			if world[idx] == Tile.PATH and k != Tile.PATH:
-				continue
-			world[idx] = k
-	town["npcs"] = npcs
-
-
-func _find_room(occ: Array, rng: RandomNumberGenerator, w: int, h: int) -> Rect2i:
-	for attempt in 200:
-		var bw := rng.randi_range(4, 6)
-		var bh := rng.randi_range(3, 5)
-		var bx := rng.randi_range(2, w - bw - 2)
-		var by := rng.randi_range(2, h - bh - 2)
-		var rect := Rect2i(bx, by, bw, bh)
-		if _room_free(occ, rect):
-			return rect
-	return Rect2i()
-
-
-# A room fits if it and a one-tile margin (including the doorstep) are all free.
-func _room_free(occ: Array, rect: Rect2i) -> bool:
-	for y in range(rect.position.y - 1, rect.end.y + 2):
-		for x in range(rect.position.x - 1, rect.end.x + 2):
-			if occ[y][x]:
-				return false
-	return true
-
-
-func _mark_block(local: Array, occ: Array, rect: Rect2i) -> void:
-	for y in range(rect.position.y, rect.end.y):
-		for x in range(rect.position.x, rect.end.x):
-			local[y][x] = Tile.HOUSE
-			occ[y][x] = true
-
-
-func _add_npc(npcs: Array, index: int, rng: RandomNumberGenerator, role: String, spot: Vector2i, title: String) -> void:
-	var first: String = TOWN_FIRST[rng.randi() % TOWN_FIRST.size()]
-	var last: String = TOWN_LAST[rng.randi() % TOWN_LAST.size()]
-	var npc := {
-		"id": "t%d_%d" % [index, npcs.size()],
-		"pos": spot,
-		"role": role,
-		"color": TOWN_NPC_COLORS[rng.randi() % TOWN_NPC_COLORS.size()],
-	}
-	match role:
-		"shop_general":
-			npc["name"] = "%s the Trader" % first
-			npc["shop"] = "general"
-			npc["lines"] = ["Wood, fiber, stone. Name what you need.", "Fair prices, fair coin."]
-		"shop_grocer":
-			npc["name"] = "%s the Grocer" % first
-			npc["shop"] = "grocer"
-			npc["lines"] = ["Seed here, and I'll buy your crops and fish.", "Pumpkin seed needs a steady hand at Farming."]
-		"bank":
-			npc["name"] = "%s the Banker" % first
-			npc["bank"] = true
-			npc["lines"] = ["Your coins and goods are safe with us.", "Deposit what you don't need to carry."]
-		"lord":
-			npc["name"] = "%s of %s" % [first, title]
-			npc["lines"] = ["The land is ours to keep, for now.", "Travellers are welcome, as long as they keep the peace."]
-		_:
-			npc["name"] = "%s %s" % [first, last]
-			npc["lines"] = ["Good day, traveller.", "Keep to the road after dark.", "The forest here is quiet, but it listens.", "We have lived in %s for three generations." % title]
-	npcs.append(npc)
-
-
-func _town_at(tile: Vector2i) -> int:
-	for i in towns.size():
-		var town: Dictionary = towns[i]
-		var rect := Rect2i(town["origin"], Vector2i(int(town["w"]), int(town["h"])))
-		if rect.has_point(tile):
-			return i
-	return -1
-
-
-# --- Shops and the bank ------------------------------------------------------
-
-
-# --- Campsites ----------------------------------------------------------------
-
-func _can_camp() -> bool:
-	return progression._level("Bushcrafting") >= CAMP_LEVEL and _has_materials(CAMP_COST)
-
-
-func _place_campsite() -> void:
-	if not _in_village():
-		_show_message("A campsite goes in the wider land, away from the homestead.")
-		return
-	var tile := _tile_in_front()
-	var kind := _kind_at(tile)
-	if (kind != Tile.GRASS and kind != Tile.PATH) or _npc_index(tile) != -1:
-		_show_message("Face open ground to set up camp.")
-		return
-	if not _can_camp():
-		_show_message("You need %d wood, %d fiber, and Bushcrafting %d to set up camp." % [int(CAMP_COST["wood"]), int(CAMP_COST["fiber"]), CAMP_LEVEL])
-		return
-	for mat in CAMP_COST.keys():
-		materials[mat] -= int(CAMP_COST[mat])
-	if campsite != NO_CAMP:
-		world[campsite.y * WORLD_W + campsite.x] = Tile.GRASS
-	campsite = tile
-	_apply_campsite()
-	progression._grant_xp("Bushcrafting", 15)
-	saver._save_game()
-	_show_message("You set up camp. Rest there from 18:00. +15 Bushcrafting XP")
-	queue_redraw()
-
-
-func _apply_campsite() -> void:
-	if campsite != NO_CAMP:
-		world[campsite.y * WORLD_W + campsite.x] = Tile.CAMP
-		_build_world_minimap()
-
-
-func _near_campsite(tile: Vector2i) -> bool:
-	return campsite != NO_CAMP and not in_cave and Vector2(tile - campsite).length() <= CAMP_SAFE_RADIUS
-
-
-func _at_campsite() -> bool:
-	return _in_village() and _near_campsite(_player_tile())
-
-
-# Resting at the campsite works like sleeping in the bed, but the world is kept.
-func _rest_at_camp() -> void:
-	if current_hour < SLEEP_HOUR:
-		_show_message("You aren't tired yet. You can rest at the camp after 18:00.")
-		return
-	stats["slept"] += 1
-	sanity_sys._change_sanity(SLEEP_SANITY)
-	warmth = 100.0
-	_end_day("You rest by the campsite through the night.", false)
-
-
-# --- Slot grids for the pack, seed pouch, and equipment ---------------------
-
-
-# Ten slots in four columns. The top row holds the back, head, neck, and belt.
-# The lantern hangs from the belt, so the offhand is free for a shield.
-# --- Lowmere and the road ---------------------------------------------------
-
-# A village is a grass field with a road along row 10, a west gate to the
-# previous place, and an east gate to the next one when there is one.
-func _build_zone_map(houses: Array, water: Rect2i, wood_x: int, east_gate: bool) -> Array:
-	var out: Array = []
-	for y in VILLAGE_H:
-		var row: Array = []
-		for x in VILLAGE_W:
-			var t := Tile.GRASS
-			if x == 0 or y == 0 or y == VILLAGE_H - 1 or x == VILLAGE_W - 1:
-				t = Tile.TREE
-			if x >= wood_x and (x * 7 + y * 3) % 11 == 0:
-				t = Tile.TREE
-			if y == VILLAGE_GATE.y:
-				t = Tile.PATH
-			row.append(t)
-		out.append(row)
-	for rect in houses:
-		for y in range(rect.position.y, rect.end.y):
-			for x in range(rect.position.x, rect.end.x):
-				out[y][x] = Tile.HOUSE
-	for y in range(water.position.y, water.end.y):
-		for x in range(water.position.x, water.end.x):
-			out[y][x] = Tile.WATER
-	out[VILLAGE_GATE.y][0] = Tile.GATE
-	if east_gate:
-		out[VILLAGE_GATE.y][VILLAGE_W - 1] = Tile.GATE
-	return out
-
-
-# True in the world, outside the farm. Lowmere, Ashford, and the open land are all in the world.
-func _in_village() -> bool:
-	return zone != Zone.HOMESTEAD
-
-
-func _region_origin() -> Vector2i:
-	if zone == Zone.ASHFORD:
-		return ASHFORD_ORIGIN
-	if zone == Zone.VILLAGE:
-		return LOWMERE_ORIGIN
-	if zone == Zone.TOWN and current_town >= 0:
-		var town: Dictionary = towns[current_town]
-		return town["origin"]
-	return Vector2i.ZERO
-
-
-func _region_at(tile: Vector2i) -> int:
-	if Rect2i(LOWMERE_ORIGIN, Vector2i(VILLAGE_W, VILLAGE_H)).has_point(tile):
-		return Zone.VILLAGE
-	if Rect2i(ASHFORD_ORIGIN, Vector2i(VILLAGE_W, VILLAGE_H)).has_point(tile):
-		return Zone.ASHFORD
-	if _town_at(tile) >= 0:
-		return Zone.TOWN
-	return Zone.WILDS
-
-
-func _zone_npcs() -> Array:
-	if zone == Zone.ASHFORD:
-		return ASHFORD_NPCS
-	if zone == Zone.VILLAGE:
-		return NPCS
-	if zone == Zone.TOWN and current_town >= 0:
-		var town: Dictionary = towns[current_town]
-		return town["npcs"]
-	return []
-
-
-# Sets the zone and the town from where the player stands, without announcing it.
-func _sync_region() -> void:
-	var tile := _player_tile()
-	zone = _region_at(tile)
-	current_town = _town_at(tile) if zone == Zone.TOWN else -1
-
-
-func _npc_index(tile: Vector2i) -> int:
-	var npcs := _zone_npcs()
-	var local := tile - _region_origin()
-	for i in npcs.size():
-		if npcs[i]["pos"] == local:
-			return i
-	return -1
-
+# --- Foes and combat ----------------------------------------------------------
 
 func max_hp() -> int:
 	return BASE_HP + progression._level("Combat") - 1
 
 
-func _go_home(reason: String) -> void:
-	_enter_zone(Zone.HOMESTEAD, HOMESTEAD_ARRIVE, reason)
-
-
-func _enter_zone(z: int, arrive: Vector2i, reason: String) -> void:
-	play_sfx("portal")
-	zone = z
-	in_cave = false
-	fishing._stop_fishing("")
-	player.position = _tile_center(arrive.x, arrive.y)
-	_on_region_change()
-	_set_bounds()
-	queue_redraw()
-	if reason != "":
-		_show_message(reason)
-
-
-# Runs when the player moves between the farm, the open land, and the villages.
-func _on_region_change() -> void:
-	if zone == Zone.ASHFORD:
-		stats["visited"] += 1
-	combat_sys._spawn_foes()
-
-
-# Keeps the region in step with where the player is walking in the world.
-func _update_region() -> void:
-	if not _in_village():
-		return
-	queue_redraw()
-	var tile := _player_tile()
-	var z := _region_at(tile)
-	var town := _town_at(tile) if z == Zone.TOWN else -1
-	if z == zone and town == current_town:
-		return
-	zone = z
-	current_town = town
-	_on_region_change()
-	if zone == Zone.VILLAGE:
-		_show_message("You come into Lowmere.")
-	elif zone == Zone.ASHFORD:
-		_show_message("You come into Ashford. Something watches from the road.")
-	elif zone == Zone.TOWN and current_town >= 0:
-		var title := str(towns[current_town]["title"])
-		_show_message("You come into %s." % title)
-
-
-# Walking the road is daylight only. At dusk the gate pushes you back.
-func _refuse_gate(tile: Vector2i) -> void:
-	player.position += Vector2(PX if tile.x == 0 else -PX, 0)
-	play_sfx("buzz")
-	_show_message("The road is dark. Walk it in daylight.")
-
-
-func _interact_village() -> void:
-	var idx := _npc_index(_tile_in_front())
-	if idx >= 0:
-		if not _tool_press:
-			_talk(_zone_npcs()[idx])
-		return
-	if zone == Zone.ASHFORD and quarry.has(_tile_in_front()):
-		if _need_tool("pick"):
-			mining._quarry(_tile_in_front())
-		return
-	if campsite != NO_CAMP and _tile_in_front() == campsite:
-		if not _tool_press:
-			_rest_at_camp()
-		return
-	_swing()
-
-
-func _talk(npc: Dictionary) -> void:
-	stats["talks"] += 1
-	var lines: Array = npc["lines"]
-	if npc.has("shop"):
-		active_shop = str(npc["shop"])
-		open_tab = "Trade" if active_shop == "grocer" else "Shop"
-		_refresh_panel()
-		return
-	if npc.has("bank"):
-		open_tab = "Bank"
-		_refresh_panel()
-		return
-	if npc.has("role"):
-		_show_message("%s: %s" % [npc["name"], lines[int(stats["talks"]) % lines.size()]])
-		return
-	if npc["id"] == "tomas" and stall._first_cooked() != "" and int(stats["delivered"]) == 0:
-		inventory[stall._first_cooked()] -= 1
-		stats["delivered"] += 1
-		_show_message("Tomas: Bread and thanks. The village eats tonight.")
-		return
-	if npc["id"] == "harrow" and farm._crop_total() >= 5 and int(stats["crops_given"]) < 5:
-		farm._spend_crops(5)
-		stats["crops_given"] += 5
-		_show_message("Harrow: Five crops. The wheel will turn again.")
-		return
-	var stage := mini(guardian_done.size(), lines.size() - 1)
-	_show_message("%s: %s" % [npc["name"], lines[stage]])
-
-
-# Each tick, you swing and the hollow answers. Moving away breaks the fight.
-# Losing a fight sends you home, shaken. You're back at full health by morning.
+# Losing a fight in the cave or on a trek sends you home, shaken. You're back at full health by morning.
 func _fallen() -> void:
 	play_sfx("sting")
 	sanity_sys._change_sanity(-10.0)
 	hp = max_hp()
-	_go_home("You collapse in the wood. You wake at the homestead, shaken. Sanity -10.")
-
-
-func _check_guardian() -> void:
-	if not WORLD_ENABLED:
-		return
-	for q in GUARDIAN_QUESTS:
-		if guardian_done.has(q["id"]):
-			continue
-		if progression._stat_value(q["stat"]) < q["goal"]:
-			break
-		guardian_done[q["id"]] = true
-		progression._grant_reward(q["reward"])
-		_show_message("Guardian quest complete: %s. Reward: %s" % [q["title"], progression._reward_text(q["reward"])])
-
-
-func _draw_world() -> void:
-	# Only the tiles the camera can see are drawn, so the full-size world stays fast.
-	var view := get_viewport_rect().size / camera.zoom
-	var top_left := camera.get_screen_center_position() - view * 0.5
-	var x0 := clampi(floori(top_left.x / PX) - 1, 0, WORLD_W - 1)
-	var y0 := clampi(floori(top_left.y / PX) - 1, 0, WORLD_H - 1)
-	var x1 := clampi(ceili((top_left.x + view.x) / PX) + 1, 0, WORLD_W - 1)
-	var y1 := clampi(ceili((top_left.y + view.y) / PX) + 1, 0, WORLD_H - 1)
-	for y in range(y0, y1 + 1):
-		for x in range(x0, x1 + 1):
-			var world_kind: int = world[y * WORLD_W + x]
-			if world_kind == Tile.TREE:
-				FarmArt.draw_tree(self, _tile_rect(Vector2i(x, y)), FarmArt.hash_int(x, y, 3), 0)
-			else:
-				draw_rect(_tile_rect(Vector2i(x, y)), TILE_COLORS[world_kind])
-	var origin := _region_origin()
-	for npc in _zone_npcs():
-		var c := _tile_center(origin.x + npc["pos"].x, origin.y + npc["pos"].y)
-		draw_circle(c, PX * 0.3, Color(str(npc["color"])))
-		# Name above each villager, using the first name only to keep it short.
-		var first_name := str(npc["name"]).split(" ")[0]
-		# Cream on a dark outline, like the HUD's text.
-		draw_string_outline(ThemeDB.fallback_font, c + Vector2(-PX * 1.5, -PX * 0.6), first_name, HORIZONTAL_ALIGNMENT_CENTER, PX * 3, 12, 4, Color(0.05, 0.04, 0.03, 0.92))
-		draw_string(ThemeDB.fallback_font, c + Vector2(-PX * 1.5, -PX * 0.6), first_name, HORIZONTAL_ALIGNMENT_CENTER, PX * 3, 12, Color("e8dcc0"))
-	for pos in quarry:
-		var qc := _tile_center(pos.x, pos.y)
-		draw_circle(qc, PX * 0.3, Color("6a6a4a"))
-		draw_circle(qc + Vector2(-5, -4), PX * 0.08, Color("c9b46a"))
-	_draw_combat()
-
-
-# --- Foes and combat ----------------------------------------------------------
+	in_cave = false
+	foes = []
+	fishing._stop_fishing("")
+	player.position = _tile_center(HOMESTEAD_ARRIVE.x, HOMESTEAD_ARRIVE.y)
+	_set_bounds()
+	queue_redraw()
+	_show_message("You collapse. You wake at the homestead, shaken. Sanity -10.")
 
 
 func _swing() -> void:
@@ -5509,9 +4687,6 @@ func _swing() -> void:
 		_show_message("Equip a weapon from Gear to fight.")
 		return
 	var weapon := str(equipment["hand_r"])
-	if weapon != "" and GEAR_ITEMS[weapon].has("ammo"):
-		combat_sys._fire(weapon)
-		return
 	if swing_cool > 0.0:
 		return
 	swing_cool = SWING_COOLDOWN
@@ -5665,8 +4840,8 @@ func _can_build(kind: String) -> bool:
 func _unstick() -> void:
 	placing = ""
 	_close_panel()
-	if inside or in_cave or _in_village():
-		_show_message("Unstick works on the farm. Leave the house, cave, or village first.")
+	if inside or in_cave:
+		_show_message("Unstick works on the farm. Leave the house or the cave first.")
 		return
 	var start := Vector2i(BORDER_X + HOUSE_DOOR_IX, BORDER_Y + HOUSE_DOOR_IY + 1)
 	var free := _nearest_open_tile(start)
@@ -5720,7 +4895,7 @@ func _move_workshop() -> void:
 
 # Choosing a spot: the ghost follows the tile you face. Space places it, B cancels.
 func _start_placement(kind: String) -> void:
-	if inside or in_cave or _in_village():
+	if inside or in_cave:
 		_show_message("You can only build on the farm.")
 		return
 	if kind != "workshop" and not _is_built(kind) and not _can_build(kind):
@@ -6093,9 +5268,6 @@ func _wake_spot() -> Vector2:
 func _try_sleep() -> void:
 	if transitioning:
 		return
-	if _in_village():
-		_show_message("You can only sleep in your own bed, at the homestead.")
-		return
 	if current_hour < SLEEP_HOUR:
 		_show_message("You aren't tired yet. The bed will be there after 18:00.")
 		return
@@ -6327,7 +5499,7 @@ func _update_lantern(darkness: float) -> void:
 	else:
 		lantern_light.energy = energy
 	# Lit windows glow once the house has glass, and the porch lamp once it is restored.
-	var outdoors := not inside and not in_cave and not _in_village() and world_started
+	var outdoors := not inside and not in_cave and world_started
 	var lit := outdoors and house_stage >= 2 and darkness > 0.1
 	var glow := WINDOW_ENERGY * (0.6 + 0.4 * darkness) * (1.0 if house_stage == 3 else 0.75)
 	for light in window_lights:
@@ -6351,9 +5523,6 @@ func _update_cave_mouth_light(darkness: float) -> void:
 
 # Ends the day and saves. Both sleeping and collapsing come through here.
 func _end_day(base: String, leave_house: bool = true) -> void:
-	# Resting at a campsite keeps you in the wider land. Everywhere else in the world sends you home.
-	if _in_village() and not _at_campsite():
-		_go_home("")
 	trek._abort()
 	hp = max_hp()
 	# Tonight's visitor, if still waiting, is settled before the door opens in the morning.
@@ -6420,22 +5589,13 @@ func _check_doors() -> void:
 		elif kind == Tile.CAVE_EXIT:
 			_leave_cave()
 		return
-	if not _in_village() and not inside and kind == Tile.CAVE_MOUTH:
+	if not inside and kind == Tile.CAVE_MOUTH:
 		_enter_cave()
-		return
-	if _in_village():
-		if kind == Tile.PORTAL and tile == PORTAL_TILE:
-			_enter_zone(Zone.HOMESTEAD, HOMESTEAD_ARRIVE, "You step back through the portal to the homestead.")
 		return
 	if not inside and kind == Tile.DOOR:
 		_enter_house()
 	elif inside and kind == Tile.EXIT:
 		_leave_house()
-	elif not inside and WORLD_ENABLED and kind == Tile.PORTAL:
-		if current_hour >= STALL_CLOSE_HOUR:
-			_refuse_gate(tile)
-		else:
-			_enter_zone(Zone.WILDS, PORTAL_ARRIVE, "You step through the portal into the wider land.")
 
 
 func _enter_house() -> void:
@@ -6464,14 +5624,6 @@ func _set_bounds() -> void:
 		camera.limit_top = 0
 		camera.limit_right = CAVE_W * PX
 		camera.limit_bottom = CAVE_H * PX
-		return
-	if _in_village():
-		player.min_pos = _tile_center(1, 1)
-		player.max_pos = _tile_center(WORLD_W - 2, WORLD_H - 2)
-		camera.limit_left = 0
-		camera.limit_top = 0
-		camera.limit_right = WORLD_W * PX
-		camera.limit_bottom = WORLD_H * PX
 		return
 	if inside:
 		player.min_pos = _tile_center(INT_ORIGIN.x + 1, INT_ORIGIN.y + INT_BEDROOM.position.y)
@@ -6540,10 +5692,6 @@ func _kind_at(tile: Vector2i) -> int:
 		if tile.x < 0 or tile.y < 0 or tile.x >= CAVE_W or tile.y >= CAVE_H:
 			return Tile.WALL
 		return cave[tile.y][tile.x]
-	if _in_village():
-		if tile.x < 0 or tile.y < 0 or tile.x >= WORLD_W or tile.y >= WORLD_H:
-			return Tile.TREE
-		return world[tile.y * WORLD_W + tile.x]
 	if _in_interior(tile):
 		return interior[tile.y - INT_ORIGIN.y][tile.x - INT_ORIGIN.x]
 	if not _in_bounds(tile):
@@ -6555,10 +5703,8 @@ func _is_blocked_world(p: Vector2) -> bool:
 	var t := Vector2i(floori(p.x / PX), floori(p.y / PX))
 	if BLOCKING.has(_kind_at(t)):
 		return true
-	# Rocks are solid like the trees: the farm's rocks and the village quarry rocks. Inside the cave the
-	# farm rocks' coordinates mean nothing, so they only count out on the farm.
-	if _in_village():
-		return _npc_index(t) != -1 or quarry.has(t)
+	# Rocks are solid like the trees. Inside the cave the farm rocks' coordinates mean nothing,
+	# so they only count out on the farm.
 	return not inside and not in_cave and (brush.has(t) or rocks.has(t) or projects._blocks(t))
 
 
@@ -6935,8 +6081,8 @@ func _draw_hen_layer() -> void:
 
 # Each hen wanders inside the coop: it walks to a spot, pauses, then picks another.
 func _update_hens(delta: float) -> void:
-	# The animals live on the farm, so they stay hidden in the cave, the house, and the village.
-	var on_farm := not inside and not in_cave and not _in_village()
+	# The animals live on the farm, so they stay hidden in the cave and the house.
+	var on_farm := not inside and not in_cave
 	hen_layer.visible = on_farm and coop_built and coop_tile.x >= 0 and hens > 0
 	if not hen_layer.visible:
 		return
@@ -7010,7 +6156,7 @@ func _goat_ellipse(center: Vector2, rx: float, ry: float) -> PackedVector2Array:
 
 # Goats wander a little in front of the barn, pausing between steps.
 func _update_goats(delta: float) -> void:
-	var goats_on_farm := not inside and not in_cave and not _in_village()
+	var goats_on_farm := not inside and not in_cave
 	goat_layer.visible = goats_on_farm and barn_built and barn_tile.x >= 0 and goats > 0
 	if not goat_layer.visible:
 		return

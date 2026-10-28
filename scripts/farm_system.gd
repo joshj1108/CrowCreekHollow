@@ -157,11 +157,6 @@ func _update_harvest(delta: float) -> void:
 				_stop_harvest("")
 				return
 			_roll_harvest(m.MINE_BASE_CHANCE + m.TOOL_TIER_CHANCE * float(m.tool_tier["pick"]), "The rock won't give yet.", func() -> void: m.mining._finish_mine(tile))
-		"quarry":
-			if not m.quarry.has(tile):
-				_stop_harvest("")
-				return
-			_roll_harvest(m.MINE_BASE_CHANCE + m.TOOL_TIER_CHANCE * float(m.tool_tier["pick"]), "The quarry rock won't give yet.", func() -> void: m.mining._finish_quarry(tile))
 		"cave_ore":
 			if not (m._kind_at(tile) == m.Tile.ORE_COPPER or m._kind_at(tile) == m.Tile.ORE_IRON):
 				_stop_harvest("")

@@ -826,7 +826,7 @@ func _update(delta: float) -> void:
 	if nerve_col != null:
 		nerve_col.visible = active
 	if not active:
-		layer.visible = _any_waiting() and not m.inside and not m.in_cave and not m._in_village()
+		layer.visible = _any_waiting() and not m.inside and not m.in_cave
 		if layer.visible:
 			layer.queue_redraw()
 		return

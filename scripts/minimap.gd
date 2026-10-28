@@ -25,17 +25,11 @@ var tile_colors: Dictionary = {}
 var bushes: Array = []
 var player_tile := Vector2.ZERO
 var shadow := Vector2i(-1, -1)   # (-1, -1) hides the shadow
-var world_texture: Texture2D = null   # the whole land, one pixel per WORLD_PX_PER_TILE tiles
-var world_tiles := Vector2i.ZERO
 var markers: Array = []   # landmarks on the farm map, each [tile centre, Icon]
 var icons_tex: Texture2D = load(ICONS_PATH) if ResourceLoader.exists(ICONS_PATH) else null
 
-# The whole world at 1 pixel per 4 tiles. Each pixel is a sampled tile, not an average.
-const WORLD_PX_PER_TILE := 0.25
-
 
 func update_view(tiles_in: Array, colors: Dictionary, bushes_in: Array, player_tile_in: Vector2, shadow_in: Vector2i, markers_in: Array = []) -> void:
-	world_texture = null
 	markers = markers_in
 	tiles = tiles_in
 	tile_colors = colors
@@ -45,25 +39,7 @@ func update_view(tiles_in: Array, colors: Dictionary, bushes_in: Array, player_t
 	queue_redraw()
 
 
-# Shows the whole world. player_tile_in is in world tiles.
-func update_world(texture: Texture2D, world_size: Vector2i, player_tile_in: Vector2) -> void:
-	world_texture = texture
-	world_tiles = world_size
-	player_tile = player_tile_in
-	tiles = []
-	bushes = []
-	shadow = Vector2i(-1, -1)
-	queue_redraw()
-
-
 func _draw() -> void:
-	if world_texture != null:
-		draw_rect(Rect2(Vector2.ZERO, size), FRAME_COLOR)
-		draw_texture_rect(world_texture, Rect2(Vector2.ZERO, size), false)
-		var k := size / Vector2(world_tiles)
-		_draw_player(player_tile * k)
-		_draw_frame()
-		return
 	var s := PX_PER_TILE
 	draw_rect(Rect2(Vector2.ZERO, size), FRAME_COLOR)
 	for y in tiles.size():

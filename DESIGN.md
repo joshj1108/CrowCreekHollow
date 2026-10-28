@@ -14,8 +14,8 @@ A top-down farming game with heavy psychological horror, built in Godot 4.7.
 - **Section wheel.** Shift, or a click on the left stick, opens a ring of the menus that aren't in the bag: Skills, Gear, Craft, Quests, Diary, House, Buildings, and Achievements. The mouse hovers and clicks a section. On a controller the left stick highlights one and A opens it. B or Esc closes the wheel, and from a section returns to the wheel. Choosing a section closes the wheel and shows that section alone. Sections can't be opened while the wheel is up, the bag is up, or another section is open.
 
 - Move: WASD or arrow keys
-- Hand actions (talk, sleep, tidy, cleanse, cook, gather brush, drink from the pond, open panels, confirm placement, rest at camp): Space or A, facing the tile.
-- Tool and weapon actions (hoe, hose, trowel, axe, pick, rod, sword, bow): RT or a left click, facing the tile. A tool press on a tool target with the wrong tool in hand says which tool to select. With the trowel in hand, the D-pad up and down, or Z and X on the keyboard, cycle the seed you plant (the left stick does not) (turnip, then pumpkin once Farming reaches its level, skipping any you have none of), and do not walk you. A hand press on one says to use RT or click.
+- Hand actions (talk, sleep, tidy, cleanse, cook, gather brush, drink from the pond, open panels, confirm placement): Space or A, facing the tile.
+- Tool and weapon actions (hoe, hose, trowel, axe, pick, rod, sword): RT or a left click, facing the tile. A tool press on a tool target with the wrong tool in hand says which tool to select. With the trowel in hand, the D-pad up and down, or Z and X on the keyboard, cycle the seed you plant (the left stick does not) (turnip, then pumpkin once Farming reaches its level, skipping any you have none of), and do not walk you. A hand press on one says to use RT or click.
 - Walk into the farmhouse door to go inside. Walk onto the exit mat to leave.
 - The section wheel: Shift opens it (see Section wheel below). J opens and closes the diary (see The diary). The Pause menu is Esc only. The Inventory is opened from the bag (Tab).
 - The bag (grid, bottom-right corner): Tab opens and closes it. Click a slot to use it, or move with the arrow keys and press Enter.
@@ -43,7 +43,7 @@ A top-down farming game with heavy psychological horror, built in Godot 4.7.
 - **The hotbar** shows ten framed slots with each tool's icon centred in its slot and the slot number small in the top-left corner. The active tool's name sits **under** the slots, in gold.
 - Trees are SpriteCook sprites (`art/farm/tree_*.png`), 32×48: two tiles wide and three tall, standing on the bottom centre of their tile. Kinds are autumn oaks, Douglas firs, willows and dead trees, picked by a hash of the tile. The forest border is mostly firs with oaks mixed in; the grove inside the farm is mostly oaks. Out of every twelve trees, one is dead. Willows grow where the layout lists them, by the pond. Each tree is nudged a few pixels by its position, and border trees overlap, so the outer forest reads as dense woodland. Trees block movement. Trees on or north of the player's row are drawn with the ground, behind the player; those south of it are drawn over the player (`tree_front_layer`). A felled grove tree leaves a stump.
 - **The great tree** is a 3 by 3 block of trees in the middle of the yard. It can't be felled, and the game says so when you face it. The crows roost in its crown from 20:00 and leave at dawn. Their eyes glow red, bright enough to show through the night tint, and each roost perch has a faint red light while a crow sits there. Crows are SpriteCook art: a perched sprite, and a four-frame flight cycle that follows each crow's flap. The roost perches sit on the great tree's art (`ROOST_SPOTS`): the two bare branch tips and two spots on top of the crown.
-- Rocks on the farm, and quarry rocks in the village, block movement like trees. You can still break a rock from the tile next to it.
+- Rocks on the farm block movement like trees. You can still break a rock from the tile next to it.
 - Storage labels (Cellar, Smoke, Furnace) stay on screen when their building is at the view's edge.
 - The farm's buildings hug the house: the cellar against the west wall. The workshop is a walled building, 7 by 6, with a door on its south side, placed and moved like the coop and barn, so it can stand by the house. Its furnace and smokehouse stand inside. The cooler is inside the house. The workshop, coop, and barn are built and moved from the Buildings menu (U).
 
@@ -54,21 +54,21 @@ A top-down farming game with heavy psychological horror, built in Godot 4.7.
 - **House tabs:** Home (the farmhouse, the next repair, including the summer-only restore, wear, the sanity limit and the bed, cleansing), Chores (the chores and the daily job), Storage (root cellar, cooler), Features (what each repair stage unlocks).
 - **Buildings tabs:** Homestead (steps done with a bar, and the next step), Workshop (the workshop's Move row once it stands, then smokehouse, furnace, firewood store; the first of the smokehouse or furnace places the workshop, and the store needs one of them first), Animals (coop, barn: build, then place or move), Decor (lamp post, flower bed, gravel path, crow bell, each with its skill, season or All Hallows need), and Crow bell (its three parts and the clapper, until the bell is hung). The mill path's Trail works will be one more tab.
 - **Desk tabs:** Post (the diary, each letter as an entry marked New or Read with its text on the detail page, and Put letters away), Tax (property value, and the tax owed with Pay), Pastimes (played today, any limit lost to boredom, solitaire and sudoku), Catalog (grouped by Pastimes, Supplies, Seeds and Livestock, each with its price and anything else it needs, and what's on order).
-- **Small panels:** Furnace (a "Bars left today" line with a bar, then each smelt with its ore, wood, Smithing level and the day's limit), Smokehouse, Coop (Hens), Barn (Goats), Root cellar, Cooler and Firewood store are one tab each, so they show no tab strip. The Well has Pump and Hose tabs, the general shop Buy and Sell, and the bank Coins and Goods. An entry whose button can't be pressed shows its short value in rust (such as "0 held"), or "Not yet".
+- **Small panels:** Furnace (a "Bars left today" line with a bar, then each smelt with its ore, wood, Smithing level and the day's limit), Smokehouse, Coop (Hens), Barn (Goats), Root cellar, Cooler and Firewood store are one tab each, so they show no tab strip. The Well has Pump and Hose tabs. An entry whose button can't be pressed shows its short value in rust (such as "0 held"), or "Not yet".
 - **Pause** is one ledger tab with no status on its lines, so it reads as a plain menu, and its prompts leave out Sections. A quit waiting for its second press shows "Press again" in rust, and its detail page says progress since the last sleep is lost.
 - **Grid panels with tabs:** Inventory, Gear and Skills share a tab strip (in that order), so LB/RB or Q/E step between them in place. Craft's tab strip (its own sub-tabs) steps the same way. Their tab buttons are out of the focus path (the D-pad stays on the grid), carry the tab keys at their ends, and these panels show the prompt bar instead of the old hint line.
-- **Quests** has a Story tab (and Lowmere when the world is on): the current chapter first, then every chapter with Done or its count. The detail page tells the current chapter's story, the goal, a bar and the reward. The old Details and Hide buttons are gone.
+- **Quests** has a Story tab: the current chapter first, then every chapter with Done or its count. The detail page tells the current chapter's story, the goal, a bar and the reward. The old Details and Hide buttons are gone.
 - **Achievements** has a tab per tier (Settler, Homesteader, Keeper, Hollow Hand), each achievement with Done or its count, and a note giving the tier's count and the overall total.
 - **Settings and Controls** keep their rows shared with the start screen, which still shows headings. In the game each heading becomes a tab (Sound, Display, Messages; Keyboard, Gamepad, Saving) and each line shows its value on the right. A volume line steps down and up with left and right (its detail page has - and + for the mouse). From these two, the prompt reads Back, since B returns to the Pause menu.
 - Needs lines are marked [x] (have) and [ ] (short), since the default font has no tick or cross.
 - **Ledger plan:** every panel is moved; the diary is a book with its own tab markers (see The diary). What's left is the SpriteCook art. Skills, Inventory, Gear and Craft keep their picture grids and take the tab keys and prompt bar. Art to make in SpriteCook later: tab planks (normal, open), a 16 px strip of prompt glyphs (A, B, LB, RB, L3, Q, E, Space, Esc, Shift) and a strip of tab icons; until then they are drawn in code.
-- **Any open menu pauses the day.** While any section is open (Skills, Inventory, Craft, Quests, shops, the bank, the Pause menu, Settings, and the rest) the clock stops, foes stand still, and the player can't move. Closing the menu resumes the day where it left off.
+- **Any open menu pauses the day.** While any section is open (Skills, Inventory, Craft, Quests, the Pause menu, Settings, and the rest) the clock stops, foes stand still, and the player can't move. Closing the menu resumes the day where it left off.
 - Panels rebuild only when their content changes, so buttons don't disappear mid-click.
 - The open panel is saved and reopened on load.
 
 ## Art
 
-The farmer is a SpriteCook sprite (`art/player/`): a 16×32 figure in a straw hat, rust shirt and blue overalls, with 8-frame idles and walks facing down, up and right. Facing left mirrors the right-facing sheets. The idle facing away is one SpriteCook frame held still with a one-pixel breathing bob on the head and shoulders, because the generated back idles kept stepping in place. Tool actions have their own SpriteCook sheets, `farmer_<action>_<down|up|right>.png`, for the hoe, hose, axe, pickaxe, trowel, sword and casting: each plays across its action, and chop and mine loop with their cycle from frame 2 (the first two frames are the empty-handed idle). Waiting for a bite holds the cast's last frame, with a line drawn from the rod's tip to a bobber. The tool only shows while it is being used. A raised sword guard and firing a bow have no sheets yet, so those still draw the held tool in code over the sprite. There is no character creator: New Game goes straight into the game with this look. If the sheets are missing, the code-drawn farmer below is used. The code-drawn farmer has a straw hat with a band, a shirt under blue overalls with straps and a buckle, and boots. The face turns with the facing direction: eyes and a mouth when facing you, one eye to the side, and hair only from behind. While walking, the legs and arms swing in opposition and the body bobs with each step. A small marker in front shows what you'll interact with.
+The farmer is a SpriteCook sprite (`art/player/`): a 16×32 figure in a straw hat, rust shirt and blue overalls, with 8-frame idles and walks facing down, up and right. Facing left mirrors the right-facing sheets. The idle facing away is one SpriteCook frame held still with a one-pixel breathing bob on the head and shoulders, because the generated back idles kept stepping in place. Tool actions have their own SpriteCook sheets, `farmer_<action>_<down|up|right>.png`, for the hoe, hose, axe, pickaxe, trowel, sword and casting: each plays across its action, and chop and mine loop with their cycle from frame 2 (the first two frames are the empty-handed idle). Waiting for a bite holds the cast's last frame, with a line drawn from the rod's tip to a bobber. The tool only shows while it is being used. A raised sword guard has no sheet yet, so it still draws the held tool in code over the sprite. There is no character creator: New Game goes straight into the game with this look. If the sheets are missing, the code-drawn farmer below is used. The code-drawn farmer has a straw hat with a band, a shirt under blue overalls with straps and a buckle, and boots. The face turns with the facing direction: eyes and a mouth when facing you, one eye to the side, and hair only from behind. While walking, the legs and arms swing in opposition and the body bobs with each step. A small marker in front shows what you'll interact with.
 
 - 16×16 base tiles, scaled 3× in-game (`SCALE = 3`), nearest-neighbor filtering.
 - Muted, desaturated daytime palette from the colour grade (see Graphics). Night uses a cool, shadowy tint via `CanvasModulate`.
@@ -95,7 +95,7 @@ All sprites are being remade in SpriteCook in one style. The older ChatGPT art i
 - Two plots: **Plot one** is tilled from the start. **Plot two** is overgrown and opens at Farming 2. A third fallow plot sits beside them and opens at Farming 9 once the house is Patched.
 - The layout comes from a diagram (see Code layout). Fences and rocks block movement; the dock, the island and the path are walkable.
 - Trees, water, the house walls, and brush piles block movement. The player slides along walls.
-- A minimap in the top-right shows the farm, brush piles, the player, and the shadow on event nights. Its colours are graded toward the game's muted look (part way to grey, darker and a little cooler; `Minimap.grade`, also used for the world map), and each tile is shaded a little lighter or darker so fields and woods read as texture. The house, the well, the cave and the player are SpriteCook icons (`art/ui/minimap_icons.png`, four 16 px cells); without the art they fall back to blue squares and a dot.
+- A minimap in the top-right shows the farm, brush piles, the player, and the shadow on event nights. Its colours are graded toward the game's muted look (part way to grey, darker and a little cooler; `Minimap.grade`), and each tile is shaded a little lighter or darker so fields and woods read as texture. The house, the well, the cave and the player are SpriteCook icons (`art/ui/minimap_icons.png`, four 16 px cells); without the art they fall back to blue squares and a dot.
 - The farmhouse interior sits below the farm and has its own camera bounds. It is 22 by 20 tiles, sized for the two-tile-tall farmer.
 
 ## Day and night
@@ -122,10 +122,10 @@ All sprites are being remade in SpriteCook in one style. The older ChatGPT art i
 ## Sound effects
 
 - Short sounds play for the things you do: footsteps (about every third of a second of walking), planting, harvesting, watering, eating, drinking, repairs, coins for catalog orders, opening and closing panels, entering and leaving the house, chopping and mining, gathering, achievements, goats bleating now and then, and thunder on some downpour mornings (muffled, with a rattling window, if you wake inside).
-- Tools sound on every swing, in time with the animation (when the blade or point lands, with the camera jolt): an axe biting wood, a pick clacking on stone, a hoe turning soil. A tree comes down with a crack, a rush through the air and a heavy thud; a rock, quarry stone or cave ore breaks with a crack and tumbling pieces. These have a bright bite on top, so they carry on laptop and phone speakers.
-- Fighting: a swing whooshes, blows land with a thud, a block knocks and rings, bows and slings twang, being hit gets a pained breath, and foes die with a falling wail. Each foe calls out when it notices you: hollows and stalkers growl, bats shriek, lizards and snakes hiss.
-- Chores and crafts: casting, reeling in and a fish splashing up; feeding the hearth, splitting firewood, smelting, whittling tools and gear, tearing a bandage, cooking, scattering feed, sweeping when you tidy, and a soft shimmer when you cleanse. Every sale, purchase and bank move chinks coins, and hens cluck now and then.
-- Moments: a wavering chord through the portal, a hollow gust stepping into the cave, a falling lullaby when you sleep, a deep boom and pounding heart when you collapse at 03:00, a dread swell when you fall in the wood, and a buzz when the road is too dark to walk.
+- Tools sound on every swing, in time with the animation (when the blade or point lands, with the camera jolt): an axe biting wood, a pick clacking on stone, a hoe turning soil. A tree comes down with a crack, a rush through the air and a heavy thud; a rock or cave ore breaks with a crack and tumbling pieces. These have a bright bite on top, so they carry on laptop and phone speakers.
+- Fighting: a swing whooshes, blows land with a thud, a block knocks and rings, being hit gets a pained breath, and foes die with a falling wail. Each foe calls out when it notices you: dogs growl, bats shriek, lizards and snakes hiss.
+- Chores and crafts: casting, reeling in and a fish splashing up; feeding the hearth, splitting firewood, smelting, whittling tools and gear, tearing a bandage, cooking, scattering feed, sweeping when you tidy, and a soft shimmer when you cleanse. Every sale and purchase chinks coins, and hens cluck now and then.
+- Moments: a hollow gust stepping into the cave, a falling lullaby when you sleep, a deep boom and pounding heart when you collapse at 03:00, and a dread swell when you fall in a fight.
 - Night events have their own sound: a dread swell for the figures, three slow knocks on the wall, and for the "too quiet" night, the crickets and wind fall silent for a while.
 - The sounds are generated by `tools/make_sfx.py` (numpy synthesis, written to OGG with soundfile) and live in `audio/sfx/`. Each can be replaced by a file with the same name.
 - They are built to sound physical rather than beepy: filtered noise and crackle for dirt, leaves and food, struck wood and metal partials for hammers, tools, coins and latches, a plucked note in the harvest, a music-box run for achievements, a formant voice for the goats, and a short room or outdoor reverb on each. Each is levelled to the loudness the game's per-sound volumes were tuned for.
@@ -263,7 +263,7 @@ Achievements track stats and never reset. Each pays a small reward. Earning all 
   - **Corn** (Farming 2): yields 2 ears, and half the time 1 corn seed back. 30 XP. 8 days. Sells for 10. Seeds are 6 coins each, sold 4 at a time. Corn is food and animal feed like the other crops, but has no recipes and doesn't keep in the cellar. Art: `art/farm/crop_corn.png` (SpriteCook, four 16 px stages); its ripe frame is the corn icon in `art/ui/icons.png`.
   - **Pumpkin** (Farming 3): yields 2 pumpkins, and half the time 1 pumpkin seed back. 40 XP. 10 days. Sells for 15.
 - Planting uses the **selected seed**. Switch it in the Inventory panel once a second kind is unlocked; it steps through the unlocked kinds. If the selected kind isn't unlocked yet, turnip is planted.
-- Feeding animals, offerings and Harrow's crops take turnips first, then corn, then pumpkins.
+- Feeding animals and offerings take turnips first, then corn, then pumpkins.
 - Planting gives 5 XP.
 - **Crops need water.** A crop grows overnight only if it was watered that day. A crop that wasn't watered stays at its stage, and the morning message says how many went thirsty. Watering is covered under Well and watering.
 - Plot two stays overgrown until Farming 2. Walking up to it says so.
@@ -342,7 +342,7 @@ The house is drawn in four stages that match its repair level. **Decrepit** has 
 - **Water** drains about 3 an hour, and 1.6 times faster on hot days (75°F and up). Face the **pond** and press Space to drink, for +40 water.
 - **Warmth** depends on the temperature. Outside it drains when it's below 50°F, faster the colder it gets. In mild weather it slowly refills. Inside the house it refills, faster once the house is patched. Sleeping in bed fills it to 100.
 - **Hale:** while food, water and warmth are all at 70 or more, every skill gains 20% more XP. A gold **Hale** tag shows beside the meters while it lasts.
-- If any need is empty, you lose 1 HP every 2 hours until it's filled. Dropping to 0 HP collapses you at the homestead, as in the wilds.
+- If any need is empty, you lose 1 HP every 2 hours until it's filled. Dropping to 0 HP collapses you at the homestead, as losing a fight does.
 - **Temperature** is shown in °F. It's the season's average (winter 40, spring 51, summer 67, autumn 54), plus a daily swing of about 7 degrees, coldest near dawn and warmest in the evening, plus the day's weather (sun +6, overcast 0, fog −2, drizzle −3, rain −4, downpour −6, snow −10).
 
 ## Sanity and horror
@@ -564,38 +564,27 @@ There is no tip card: everything the game teaches is written in the **diary**, s
 - Quitting mid-day loses that day's progress since the last save. Position and panel are saved at the same moment, so they reflect the last sleep or collapse.
 - **Saves are safe against crashes.** Each save is written to `hallowvale_save_N.tmp.json`, read back and checked, and only then moved over the real file; the save it replaces becomes `hallowvale_save_N.bak.json`. Only a good save becomes the backup, so a damaged file never pushes the last good one out.
 - **Recovery.** Before the start screen lists the slots, each slot is checked: the file must be JSON, hold a day of 1 or more and an inventory, and have the right type for each list and table the loader reads. A damaged or missing save comes back from its backup (or from a complete `.tmp` save left by a crash mid-move, which is newer), and the start screen says once which slot was restored and to what day. A damaged save with no backup is kept as `.broken.json` and the slot shows empty, so Continue never starts a new game over it by mistake. Loading does the same check, in case the start screen didn't.
-- **Save versions.** Each save records `save_version` (now 2; saves without one count as 1). On load, `SaveSystem._migrate` lifts an old save one version at a time: version 2 added the crow bell (`bell_day`) and treks (`treks_done`), and older saves start with neither begun. Materials and items an old save never had (lamp oil, storm oak, flax, bell parts, trail rations) keep their new-game amounts. A save from a newer build still loads; keys this build doesn't know are ignored.
+- **Save versions.** Each save records `save_version` (now 8; saves without one count as 1). On load, `SaveSystem._migrate` lifts an old save one version at a time: version 2 added the crow bell (`bell_day`) and treks (`treks_done`), and older saves start with neither begun. Version 8 cut the wider land (the towns, the bank, the campsite, the Lowmere quests, the bows and crossbows): an older save's banked goods and coins go back to the pack and purse, a bow or crossbow in hand is taken apart for what it cost, arrows and bolts are dropped, and a save made out in the land wakes at the homestead. Materials and items an old save never had (lamp oil, storm oak, flax, bell parts, trail rations) keep their new-game amounts. A save from a newer build still loads; keys this build doesn't know are ignored.
 - Saving in the mining cave records the homestead as your position. A trek still going at day end is called off before the save, so you wake at home. When the farm is taken for unpaid tax, the save, its backup and any `.tmp` are all deleted, so nothing brings the farm back.
-- `tools/save_test.gd` checks all of this headless in slot 9 (truncated, empty and garbage files, wrong types, a missing save with a backup, a crash mid-move, an old save, cave and trek saves, eviction).
-
-## The world: the portal, the road, and the wilds
-
-**Currently off.** `WORLD_ENABLED` is `false`, so play stays on the homestead. The east portal is gone, the wider land and its towns are unreachable, and the Guardian of Lowmere quests are hidden. The code stays in place, and setting the flag back to `true` restores it.
-
-- The farm's **east gate is a portal**. Walking through it takes you into the world, at the portal stone's east side. The portal shuts at 18:00.
-- The **portal stone** in the world takes you back to the homestead.
-- The **world is 768 by 912 tiles**, generated from a fixed seed with forest, lakes, and open ground. Its edge is a line of trees.
-- **Lowmere** and **Ashford** are stamped into the world along a road. The road runs from the portal, through Lowmere, and east to Ashford. The towns have no walls: their houses, water and gates sit in the forest, and the road goes through their gates.
-- **The minimap** shows the whole land in the world, with you as a dot. On the farm it shows the farm as before.
-- You enter each village by walking into its area, and that sets its region. Hollows gather in Lowmere, and stalkers wait on the Ashford road. The open land has no foes yet.
-- **Night:** from 18:00 the world sends you back to the homestead, unless you are at your campsite.
-- The world draws only the tiles near the camera, so the full size stays fast.
-
+- `tools/save_test.gd` checks all of this headless in slot 9 (truncated, empty and garbage files, wrong types, a missing save with a backup, a crash mid-move, an old save, a version 7 save made in the wider land, cave and trek saves, eviction).
 
 ## Combat (real time)
 
-Combat happens while you move, in the style of Stardew Valley.
+Combat happens while you move, in the style of Stardew Valley. There are two places to fight: the creatures in the mining cave, and the feral dogs on some treks (see Groves and treks).
 
-- **Swing:** press Space to swing your right-hand weapon in the direction you face. A swing reaches 1.5 tiles in a forward arc and has a 0.5 second cooldown. Only the player's swing animation shows it; no arc is drawn on the ground. Villagers still take priority: if one is in front, Space talks to them.
-- Foes and cave creatures have no health bars. A hit makes them flash pale, and that is the only sign of damage.
-- **Foes roam** their area and wander when you're far away. They **chase** you when you're within their aggro range. Each foe has a contact attack on a cooldown.
-  - **Hollow** (Lowmere wood): 6 HP, slow, 2 damage, aggro 3 tiles.
-  - **Stalker** (the Ashford road): 10 HP, fast, 3 damage, aggro 4.5 tiles, drops resin.
+- **Swing:** with the sword slot selected, press RT or click to swing your right-hand weapon in the direction you face. A swing reaches 1.5 tiles in a forward arc and has a 0.5 second cooldown. Only the player's swing animation shows it; no arc is drawn on the ground.
+- **Block:** hold LT or right click with a weapon in hand to raise a guard. A blow from the front is turned aside.
+- Foes have no health bars. A hit makes them flash pale, and that is the only sign of damage.
+- **Foes roam** their area and wander when you're far away. They **chase** you when you're within their aggro range. Each foe has a contact attack on a cooldown. Their stats are `FOES` in `main.gd`:
+  - **Bat** (cave): 4 HP, fast, 1 damage.
+  - **Lizard** (cave): 8 HP, slow, 2 damage.
+  - **Snake** (cave): 6 HP, quick, 2 damage.
+  - **Dog** (treks): 5 HP, quick to chase, 2 damage.
 - **Damage:** a swing deals your weapon's damage plus a random bonus of up to half your Combat level. Foe hits are reduced by your total armor defense, with a minimum of 1.
 - **Invulnerability:** after you're hit, you have 0.9 seconds of safety and you're knocked back a little.
-- **Kills** give Combat XP (20 for hollows, 30 for stalkers) and sometimes a material drop: fiber from hollows, resin from stalkers.
+- **Kills** give Combat XP (12 to 18 by kind) and sometimes fiber or resin.
 - **Combat** is a skill (same level curve as Skills). Each hit gives 4 XP. Max HP is 10 plus Combat level − 1.
-- Food heals HP by its difficulty, from 1 to 4. Sleeping restores full HP. Losing all HP sends you home, shaken, with a 10 sanity penalty.
+- Food heals HP by its difficulty, from 1 to 4. Sleeping restores full HP. Losing all HP sends you home, shaken, with a 10 sanity penalty; on a trek it ends the trek.
 
 ## Gear and crafting
 
@@ -603,7 +592,7 @@ The Gear panel has ten slots in four columns: Back (your bag), Head, Neck, Belt 
 
 The Gear panel (G) is laid out as a person. Head, neck, chest, legs, and feet run down the middle. The back (your bag) sits beside the neck, the main hand beside the chest on the left, and the gloves beside the legs on the left. The off hand sits beside the chest on the right, and the belt (lantern) beside the legs. The toolbelt (hoe, axe, and pickaxe) sits in a row below. Each worn piece shows its drawing, and an empty slot is dim. Picking a tile fills the detail card with the piece's damage and armor, and its Craft button opens the Craft panel. Defense and hit damage are listed under the figure. The wrist slot is the gloves slot.
 
-**The Craft panel is a grid of pictures.** Each sub-tab shows its recipes as tiles, four across: a drawn picture of the item with its name under it. Items you can't make yet are dimmed, but they still show, so you can see what they need. Picking a tile fills the detail card on the right: the picture, its name, what it does (damage, armor, or what it yields), its level requirement (green-red coloring shows whether you meet it), each material with how much you hold against how much it costs, and a single button (Make, Build, Cook, Upgrade, or Best when a tool is at its top tier). The card stays on the screen while you pick another tile, so you can compare recipes without scrolling. The Campsite section still sits below the grid on the Other tab. Pictures are SpriteCook icons from `art/ui/icons.png` (52 icons, 16 pixels, drawn at a whole multiple so they stay crisp); ore and bars pick their iron or copper icon by the item's tint. An item kind without icon art falls back to the shapes drawn in code (the RecipeIcon in the action bar). The same icons show in the bag, the hotbar and the Inventory. Every picture has a soft shadow beneath it and a dark outline around its filled shapes, so they stay readable at the small tile size.
+**The Craft panel is a grid of pictures.** Each sub-tab shows its recipes as tiles, four across: a drawn picture of the item with its name under it. Items you can't make yet are dimmed, but they still show, so you can see what they need. Picking a tile fills the detail card on the right: the picture, its name, what it does (damage, armor, or what it yields), its level requirement (green-red coloring shows whether you meet it), each material with how much you hold against how much it costs, and a single button (Make, Build, Cook, Upgrade, or Best when a tool is at its top tier). The card stays on the screen while you pick another tile, so you can compare recipes without scrolling. Pictures are SpriteCook icons from `art/ui/icons.png` (52 icons, 16 pixels, drawn at a whole multiple so they stay crisp); ore and bars pick their iron or copper icon by the item's tint. An item kind without icon art falls back to the shapes drawn in code (the RecipeIcon in the action bar). The same icons show in the bag, the hotbar and the Inventory. Every picture has a soft shadow beneath it and a dark outline around its filled shapes, so they stay readable at the small tile size.
 
 | Piece | Slot | Effect | Bushcrafting | Cost |
 |---|---|---|---|---|
@@ -621,45 +610,7 @@ The Gear panel (G) is laid out as a person. Head, neck, chest, legs, and feet ru
 
 Crafting gives 10 Bushcrafting XP.
 
-Quests in the Quests panel, under Guardian of Lowmere, run in order:
-
-| # | Quest | Goal | Reward |
-|---|---|---|---|
-| 1 | Meet the Village | Talk with villagers (3 conversations) | 20 coins |
-| 2 | The First Horror | Defeat 3 hollows | 60 Combat XP |
-| 3 | Bread for Tomas | Bring a meal to Tomas | 40 coins |
-| 4 | Hold the Road | Defeat 10 hollows in total | 80 coins, 3 pumpkin seeds |
-| 5 | The Road East | Reach Ashford | 50 coins |
-| 6 | Flour for the Mill | Give 5 crops to Harrow | 60 coins, 2 pumpkin seeds |
-| 7 | Stalkers on the Road | Defeat 5 stalkers | 120 Combat XP |
-
-Later: more villages and roads, more creatures, and guardian quests that need combat or exploration. Defense stacks across slots, so a full set can turn most hits into single points of damage. That needs a playtest before it is tuned.
-
-## Towns, shops, and the bank
-
-The whole land is filled with towns, planned from a fixed seed so every game gets the same map.
-
-- **Towns:** about 70 towns sit on a grid across the world, never overlapping. There are four kinds: hamlets (about 28 by 20 tiles), towns (about 40 by 28), castles (about 34 by 26, with a wall and a keep), and manors (about 20 by 16, walled, with a manor house). Each town is named, and a castle or manor takes "Keep" or "Manor" after its name.
-- **Layout:** a cross of streets runs through every town. Houses sit in the spaces between them, with trees on the open ground.
-- **Roads:** a road network joins every town and village, so the whole land is reachable on foot from the portal. Roads are always walkable, and no building covers one.
-- **Villagers:** each town has homeowners who chat. A town also has, depending on its kind:
-  - a **general store** (hamlets and towns): buys materials and sells wood, fiber, resin, stone, and hardwood. You buy 10 at a time, and sell all you hold at half price.
-  - a **grocer** (towns): opens the trade panel, to sell crops, fish, and cooked food.
-  - a **banker** (towns and castles): see below.
-  - a **lord** (castles and manors) at the keep door.
-- **The bank:** deposit and take back materials and coins. Banked goods are kept safe and saved with the game.
-- **Safety:** generated towns have no foes. The wilds between them are open land with the usual wild spaces.
-
-## Campsites
-
-A campsite lets you stay out in the wider land overnight. It is built, not placed by the map.
-
-- **Setting up:** from the Craft panel's Other tab, Campsite section, while in the world. Face open ground (grass or path) and press Camp. It costs 4 wood and 3 fiber, needs Bushcrafting 2, and gives 15 Bushcrafting XP.
-- **One at a time:** setting up a new campsite moves your camp. The old tile goes back to grass.
-- **Safe:** foes cannot attack you while you stand at the campsite, and they will not enter within 3 tiles of it.
-- **Resting:** face the campsite and interact with it from 18:00, as you would a bed. It saves the game, advances the day, and keeps you in the wider land. The dusk rule does not send you home from it.
-- **Saved:** the campsite is kept with the game and returns when you load.
-- The homestead keeps its own bed, which still works only at the homestead.
+Defense stacks across slots, so a full set can turn most hits into single points of damage. That needs a playtest before it is tuned.
 
 ## Forestry and tools
 
@@ -695,19 +646,10 @@ A campsite lets you stay out in the wider land overnight. It is built, not place
 - The Craft panel's **Tools** tab holds them. Hatchets and picks are upgraded there one tier at a time, in order.
 - The action bar panel now scrolls, so long crafting lists fit on screen.
 
-## Shields and ranged weapons
+## Shields
 
 - **Shields** go in the **off hand**. Hardwood shields (Forestry 4) use hardwood and fiber. Copper (Smithing 3) and iron (Smithing 6) shields are heavier and give more defense.
-- **Bows** (hardwood, Forestry 3) and **crossbows** (hardwood and copper, Smithing 3) go in the **main hand**. The attack button fires them in the direction you face, and only in Lowmere and Ashford, where the foes are. A bow fires every 0.6 seconds for 3 damage. A crossbow fires every 1.2 seconds for 6 damage.
-- **Arrows** (wood and fiber, Bushcrafting 2) and **bolts** (hardwood and copper, Smithing 2) are fletched from the Craft panel's Tools tab, Ammunition section. Each shot uses one. Shots that miss are lost, since there is no pickup yet.
-- Melee and ranged attacks both use the same button. The bow or crossbow in the main hand decides which one you get.
-
-## The Ashford quarry
-
-- Four **quarry rocks** sit in Ashford, and they come back each morning.
-- You need a pick. Without one, a quarry rock is too hard to break.
-- At **Mining 3**, a quarry rock gives copper ore. At **Mining 5**, with a copper pick or better, there is an even chance of iron ore instead.
-- The quarry works in Ashford only. Farm rocks never give iron.
+- A shield adds its defense like any worn piece. Blocking needs only a weapon in hand, not a shield.
 
 ## Gathering and metal
 
@@ -718,29 +660,25 @@ Each gathering skill has its own tool. The tool's material sets what it can brea
 | Skill | Gathered from | Tool | Gives |
 |---|---|---|---|
 | Bushcrafting (existing) | Brush piles, thickets | None | Wood, fiber, resin |
-| Forestry | Trees on the farm edge and in the Lowmere wood | Hatchet | Wood, hardwood |
-| Mining | Rocks on the farm, the Ashford quarry | Pick | Stone; copper and iron ore |
+| Forestry | The grove's trees on the farm | Hatchet | Wood, hardwood |
+| Mining | Rocks on the farm, ore in the cave | Pick | Stone; copper and iron ore |
 | Smithing | A furnace built from the Buildings menu | None | Bars from ore and wood; metal gear and tools from bars |
 
-**Hardwood is a key material.** It goes into tool handles and smithing fuel, and into the weapons and gear below.
+**Hardwood is a key material.** It goes into tool handles, rods and **shields** (offhand, hardwood and metal).
 
-- **Shields** (offhand) are made from hardwood and metal.
-- **Bows and crossbows** (ranged, right hand) are made from hardwood. Crossbows also need metal parts. Both need ammunition, which is not designed yet.
-- **Wands and staves** (magic) are made from hardwood once magic exists. Magic is not designed yet.
-
-**Ore never comes from the farm.** Copper and iron come from the Ashford quarry only.
+**Ore comes from the farm's rocks and the cave.** Farm rocks give a little copper; the mining cave gives copper and is the only source of iron.
 
 **Farm rocks** are cleared like brush piles and mostly give stone, which is worth little. From Mining 2 there is a small chance of copper ore instead.
 
 **Tool tiers:** a stone hatchet or pick (from farm stone) comes after the first tools. Copper tools come from Smithing, and iron tools after that. Trees need any hatchet. Hardwood needs a copper hatchet or better. Copper ore needs a pick. Iron ore needs a copper pick or better.
 
-Levels are first-pass values and will be tuned in playtesting. Ammunition arrows and bolts are used up on shots, and there is no pickup yet. Magic (staves and wands) is not designed.
+Levels are first-pass values and will be tuned in playtesting. Ranged weapons and magic are not in the game.
 
 **Decided:** the offhand (left hand) is for the shield. The lantern moves to a **belt** slot, so it can be worn without taking a hand. The lantern keeps its light ring and upgrades as before. Moving it is a grid change to be made when shields are built.
 
 ## The mining cave
 
-A cave on the homestead, entered from the farm's west edge. It is the only place to get iron ore, and the only place to fight.
+A cave on the homestead, entered from the farm's west edge. It is the only place to get iron ore, and the main place to fight (the feral dogs on treks are the other).
 
 - **Entrance:** step onto the cave mouth on the farm's west edge. The exit mat inside takes you back out to the farm.
 - **Dark:** the cave is always open, but it has no daylight at any hour. Without a lantern it is pitch black; a lantern lights its usual ring, glowing stronger than outdoors (`CAVE_TINT`, `CAVE_LANTERN_BOOST`). Sanity still follows the time of day, not the cave's dark.
@@ -789,11 +727,11 @@ The farm reads as a finished picture rather than flat colour blocks. Four layers
 - **Seasonal particles.** Each one follows the camera and only runs in its season. Autumn drops SpriteCook leaves (`weather_leaves`: maple, oak, elm and birch, one picked per particle) that spin as they fall. Spring drifts SpriteCook petals (`weather_petals`). Summer dusk brings blinking fireflies. Particles are CPU-driven and stay small in number, so they cost little.
 - **Weather sprites.** The weather overlay (`scripts/weather.gd`) draws from SpriteCook art. Rain falls as crisp streaks one art pixel wide, each landing at its own spot on screen and playing the last three frames of `weather_splash` (a burst, a ring and a ripple). Snow uses the flake cells of `weather_drops`: mostly small clumps, some nearer and doubled, and a few full flakes. Fog rolls by in faint wisps (`weather_fog`, drawn 2.5 to 4 times its size). Clouds are shadows passing over the land: the SpriteCook `weather_cloud` (128×64), darkened to the shadow colour and drawn at 3× or 4×, some mirrored. Without the art, the old soft shapes are drawn.
 
-Particles do not run indoors, in the cave, or in the village. Nothing in the grade pass changes game logic, so the save and the rules are untouched.
+Particles do not run indoors or in the cave. Nothing in the grade pass changes game logic, so the save and the rules are untouched.
 
 ## Code layout
 
-`scripts/main.gd` (`class_name MainGame`) is the scene root. It owns the shared state, the drawing, the input and panel glue, the HUD, the world and map build, the lights, the crows, and the title and settings flow. The rules for each domain live in their own `RefCounted` script, which is built once in `_ready` and kept as a member on main:
+`scripts/main.gd` (`class_name MainGame`) is the scene root. It owns the shared state, the drawing, the input and panel glue, the HUD, the map build, the lights, the crows, and the title and settings flow. The rules for each domain live in their own `RefCounted` script, which is built once in `_ready` and kept as a member on main:
 
 - `panel_rows.gd` (`panels`): the row lists for every panel.
 - `desk_system.gd` (`desk`): finding the diary, pastimes, the catalog and its deliveries, mail, the property tax and eviction. The diary itself (pages, the HUD icon) is in `main.gd` under "The diary", its rows in `panel_rows.gd`.
@@ -808,14 +746,14 @@ Particles do not run indoors, in the cave, or in the village. Nothing in the gra
 - `trek_system.gd` (`trek`): treks into the Rookery Wood: the walker at the north edge, the clearings (laid into the cave's grid), the walker's nerve, lamp oil, and the trek events.
 - `game_feel.gd` (`feel`): action bursts, the bigger shakes, and the pop-ups for XP, coins and items.
 - `mystery.gd` (`mystery`): Agnes Rook's torn pages, when each turns up, and the diary's section for them.
-- `stall_system.gd` (`stall`): the farm stand, cooking, food, the pack and the bank.
+- `stall_system.gd` (`stall`): the farm stand, cooking, food and the pack.
 - `progression_system.gd` (`progression`): skill XP, levels, story, achievements and rewards.
 - `save_system.gd` (`saver`): saving, loading and the saved position.
 - `craft_system.gd` (`crafting`): recipes, gear, tools and bandages.
 - `fishing_system.gd` (`fishing`): fish spots, casting and reeling, and the cooler.
 - `ambience_system.gd` (`ambience`): the looping beds and the occasional sounds of the farm, the house and the cave.
-- `mining_system.gd` (`mining`): rocks, the Ashford quarry, cave ore, smelting and brush gathering.
-- `combat_system.gd` (`combat_sys`): foes, shots and weapon damage.
+- `mining_system.gd` (`mining`): rocks, cave ore, smelting and brush gathering.
+- `combat_system.gd` (`combat_sys`): foes and weapon damage.
 
 Each class holds `var m: MainGame` and reads main's state through it. A member is named after its job, and never after a name main already uses as a local or variable (main has a local `combat`, which is why the combat member is `combat_sys`). Drawing (`_draw_*`), the engine callbacks, and anything connected to a signal stays on main, because it needs the node.
 
@@ -832,7 +770,7 @@ The farm is a hand-read grid. `tools/farm_grid.txt` holds one character per inne
 - The rocks around the cave are one 96×80 SpriteCook hillside (`hillside`): mossy stone ledges six tiles wide and five tall, its foot level with the entrance sill, so the cave reads as cut into a hill. The rock tiles under it are drawn as grass; the rocks in the row below keep their own boulder sprites at its base.
 - The cave entrance is a 64×48 SpriteCook sprite (`cave_mouth`): a timber-framed doorway in a mossy rock face, four tiles wide and three tall, its doorway (about the farmer's height) centred on the cave-mouth tile. Inside, the exit is a 32×32 sprite (`cave_exit`) of stone steps up into daylight, over two exit tiles in the middle of the south wall, where you arrive; leaving puts you on the path just south of the cave mouth.
 - Inside, the cave is drawn in SpriteCook art too: a packed-earth floor everywhere, the rock walls laid over it on the dual grid (darkened by `CAVE_WALL_TINT` so the tunnels read), copper and iron ore sprites on the ore tiles, and wooden steps up into daylight on the exit tile (`_draw_cave_sprites` in `main.gd`).
-- Hens and goats are SpriteCook walk cycles (`hen_walk`, `goat_walk`, four frames facing right). Each faces the way it is walking, steps while it moves and stands on its first frame while it waits; the flock starts its cycles out of step. Bats, lizards and snakes are SpriteCook animations (`foe_<kind>.png`, four frames): the bat flaps all the time, the lizard and snake animate only while they move and face the way they last moved sideways, and all three turn pale when hit. Hollows and stalkers keep their drawn shapes.
+- Hens and goats are SpriteCook walk cycles (`hen_walk`, `goat_walk`, four frames facing right). Each faces the way it is walking, steps while it moves and stands on its first frame while it waits; the flock starts its cycles out of step. Bats, lizards and snakes are SpriteCook animations (`foe_<kind>.png`, four frames): the bat flaps all the time, the lizard and snake animate only while they move and face the way they last moved sideways, and all three turn pale when hit. The trek dogs keep their drawn shapes.
 - The coop is a 3×2 footprint and the barn 5×3, sized so a hen fits the coop's door and a goat the barn's. Each is one SpriteCook sprite (`coop` 48×64, `barn` 80×80) as wide as its footprint, standing on its bottom edge with the roof rising above, and sorted with the trees so the farmer walks behind it from the north. The hens peck in the yard in front of the coop and the goats graze in front of the barn. A coop or barn from an older save that no longer fits where it stood is moved to the nearest clear grass.
 - The great tree's base is a 3 by 3 block. Its middle and bottom rows (`B`) block movement; its top row (`b`) is walkable grass. Its art (a SpriteCook sprite, 128×128) is drawn larger than that base, 8 by 8 tiles, with the base at the bottom centre. The art above the base does not block. The player walks behind the canopy when north of the base, and in front of the base when south of it (`_update_big_tree_depth` in `main.gd`).
 - Plot one and plot two are soil (brown in the diagram); plot three is fallow (olive).
@@ -851,8 +789,7 @@ A save records the layout's version. When the version changes, the save is migra
 ## Deferred
 
 - More of the story beyond Agnes Rook's pages (see The farm's past): what the Hollow is, and whether Elias and Agnes can be found.
-- **A cave system for combat.** A place to fight, and Combat's main source of XP. It would also restore the Combat training that the hollows and stalkers used to give.
-- **Wolves that threaten livestock.** Needs livestock first. Wolves would come after the cave system, so there's a reason to guard the animals.
+- **Wolves that threaten livestock.** Needs livestock first. With the cave and the trek dogs in, wolves would give a reason to guard the animals.
 
 ## Open decisions
 

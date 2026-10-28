@@ -73,7 +73,7 @@ func _gear_slot_tile(slot: String, label: String, icon: String) -> Dictionary:
 			"costs": [], "action": "open_craft", "button": "Craft",
 		}
 	var item: Dictionary = m.GEAR_ITEMS[id]
-	tint = m.TINT_WEAPON if slot == "hand_r" or item.has("ammo") else (m.TINT_ACCESSORY if slot == "neck" or slot == "wrist" else m.TINT_ARMOR)
+	tint = m.TINT_WEAPON if slot == "hand_r" else (m.TINT_ACCESSORY if slot == "neck" or slot == "wrist" else m.TINT_ARMOR)
 	var parts: Array = []
 	if int(item["dmg"]) > 0:
 		parts.append("Damage %d" % int(item["dmg"]))
@@ -141,9 +141,7 @@ func _recipes_gear() -> Array:
 		if worn:
 			desc = "Already worn. " + desc
 		var tint := m.TINT_WEAPON
-		if item.has("ammo"):
-			tint = m.TINT_WEAPON
-		elif str(item["slot"]) in ["head", "chest", "legs", "feet", "offhand"]:
+		if str(item["slot"]) in ["head", "chest", "legs", "feet", "offhand"]:
 			tint = m.TINT_ARMOR
 		elif str(item["slot"]) in ["neck", "wrist"]:
 			tint = m.TINT_ACCESSORY
@@ -176,15 +174,6 @@ func _recipes_tools() -> Array:
 			"costs": m._cost_lines(tier["cost"]), "level_text": m._level_text(str(tier["skill"]), int(tier["level"])),
 			"level_ok": m.progression._level(str(tier["skill"])) >= int(tier["level"]), "enabled": _can_craft_tool(kind),
 			"action": "tool:" + kind, "button": "Make",
-		})
-	for kind in ["arrows", "bolts"]:
-		var ammo: Dictionary = m.AMMO[kind]
-		out.append({
-			"key": "ammo:" + kind, "name": str(ammo["name"]), "icon": "arrow", "tint": m.TINT_TOOL,
-			"desc": "Makes %d at a time. You hold %d." % [int(ammo["yield"]), int(m.materials[kind])],
-			"costs": m._cost_lines(ammo["cost"]), "level_text": m._level_text(str(ammo["skill"]), int(ammo["level"])),
-			"level_ok": m.progression._level(str(ammo["skill"])) >= int(ammo["level"]), "enabled": m._can_fletch(kind),
-			"action": "ammo:" + kind, "button": "Make",
 		})
 	return out
 
@@ -263,19 +252,6 @@ func _craft_tool(kind: String) -> void:
 	m.progression._grant_xp(str(tier["skill"]), 10)
 	m.play_sfx("craft")
 	m._show_message("You make a %s. +10 %s XP" % [tier["name"], tier["skill"]])
-
-
-func _craft_ammo(kind: String) -> void:
-	if not m._can_fletch(kind):
-		m._show_message("You need the materials and skill level to make %s." % kind)
-		return
-	var ammo: Dictionary = m.AMMO[kind]
-	for mat in ammo["cost"].keys():
-		m.materials[mat] -= int(ammo["cost"][mat])
-	m.materials[kind] += int(ammo["yield"])
-	m.progression._grant_xp(str(ammo["skill"]), 6)
-	m.play_sfx("craft")
-	m._show_message("You make %d %s. +6 %s XP" % [int(ammo["yield"]), kind, ammo["skill"]])
 
 
 func _can_craft(id: String) -> bool:

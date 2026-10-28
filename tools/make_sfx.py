@@ -27,11 +27,11 @@ LOUDNESS = {
     "creak": -12.0, "creak_high": -13.0, "settle": -11.0, "thunder_in": -8.0,
     "drip": -14.0, "drip_low": -14.0, "cave_rumble": -10.0, "skitter": -14.0, "cave_moan": -12.0,
     "pebbles": -14.0, "cave_in": -11.0,
-    "swing": -14.0, "hit": -10.0, "hurt": -10.0, "block": -11.0, "shoot": -12.0, "foe_die": -11.0,
+    "swing": -14.0, "hit": -10.0, "hurt": -10.0, "block": -11.0, "foe_die": -11.0,
     "growl": -10.0, "screech": -14.0, "hiss": -15.0,
     "cast": -13.0, "splash": -12.0, "reel": -18.0,
     "fire_feed": -12.0, "split": -13.0, "smelt": -11.0, "craft": -14.0, "cloth": -15.0, "cook": -15.0,
-    "feed": -17.0, "sweep": -16.0, "cleanse": -13.0, "portal": -11.0, "sleep": -13.0, "collapse": -7.0,
+    "feed": -17.0, "sweep": -16.0, "cleanse": -13.0, "sleep": -13.0, "collapse": -7.0,
     "chop": -10.0, "pick": -11.0, "hoe": -13.0, "tree_fall": -8.0, "rock_break": -9.0,
 }
 
@@ -639,15 +639,6 @@ def block():
     return reverb(mix(wood, ring, hp(noise(0.004), 2500) * 0.6), 0.3, 0.15, 3500)
 
 
-def shoot():
-    # A bowstring or sling letting go, and the shot hissing away.
-    twang = lp(pluck(98.0, 0.35, 0.3), 1500) * env(int(0.35 * SR), 0.001, 12)
-    zip_len = 0.22
-    t = t_axis(zip_len)
-    whizz = bp(noise(zip_len), np.interp(t, [0, zip_len], [2600, 900]), 2.0) * np.exp(-9 * t)
-    return reverb(mix(twang, hp(noise(0.006), 1000) * 0.5, place(silence(0.3), whizz, 0.02, 0.5)), 0.2, 0.06, 3500)
-
-
 def foe_die():
     # A creature collapsing: a falling wail and a crumbling, dry sound.
     length = 1.0
@@ -819,16 +810,6 @@ def cleanse():
     return reverb(out, 1.6, 0.45, 6000)
 
 
-def portal():
-    # The portal folding around you: a wavering chord and a deep rush of air.
-    length = 2.0
-    t = t_axis(length)
-    chord = sum(np.sin(2 * np.pi * f * t + 3 * np.sin(2 * np.pi * 0.7 * t)) for f in [220.0, 221.7, 329.6, 331.0, 466.2])
-    swell = np.sin(np.pi * t / length) ** 2
-    rush = bp(noise(length), np.interp(t, [0, length], [300, 1800]), 1.0)
-    return reverb((lp(chord, 1500) * 0.3 + rush * 0.6) * swell, 1.6, 0.5, 3000)
-
-
 def sleep():
     # Lying down: a slow, low, falling lullaby.
     out = silence(3.2)
@@ -920,11 +901,11 @@ SOUNDS = {
     "creak": creak, "creak_high": creak_high, "settle": settle, "thunder_in": thunder_in,
     "drip": drip, "drip_low": drip_low, "cave_rumble": cave_rumble, "skitter": skitter, "cave_moan": cave_moan,
     "pebbles": pebbles, "cave_in": cave_in,
-    "swing": swing, "hit": hit, "hurt": hurt, "block": block, "shoot": shoot, "foe_die": foe_die,
+    "swing": swing, "hit": hit, "hurt": hurt, "block": block, "foe_die": foe_die,
     "growl": growl, "screech": screech, "hiss": hiss,
     "cast": cast, "splash": splash, "reel": reel,
     "fire_feed": fire_feed, "split": split, "smelt": smelt, "craft": craft, "cloth": cloth, "cook": cook,
-    "feed": feed, "sweep": sweep, "cleanse": cleanse, "portal": portal, "sleep": sleep, "collapse": collapse,
+    "feed": feed, "sweep": sweep, "cleanse": cleanse, "sleep": sleep, "collapse": collapse,
 }
 
 

@@ -240,6 +240,35 @@ func _run() -> void:
 	var pos: Array = _raw(path)["player_pos"]
 	_check("cave save records the homestead", is_equal_approx(float(pos[0]), home.x) and is_equal_approx(float(pos[1]), home.y))
 
+	# A version 7 save made out in the wider land, with goods in the bank, a crossbow in hand and bolts in the pack.
+	var v7 := _raw(path)
+	v7["save_version"] = 7
+	v7["zone"] = 4
+	v7["world_version"] = 1
+	v7["player_pos"] = [9000.0, 12000.0]
+	v7["campsite"] = [400, 450]
+	v7["guardian_done"] = {"meet": true}
+	v7["quarry"] = [[496, 456]]
+	v7["bank_materials"] = {"wood": 7, "iron_bar": 2, "arrows": 5}
+	v7["bank_coins"] = 55
+	v7["money"] = 10
+	v7["materials"]["wood"] = 1
+	v7["materials"]["hardwood"] = 0
+	v7["materials"]["bolts"] = 6
+	v7["equipment"]["hand_r"] = "crossbow"
+	v7["open_tab"] = "Bank"
+	_write_text(path, JSON.stringify(v7))
+	var migrated := SaveSystem.read_save(path)
+	_check("version 7 world save: world keys dropped", not migrated.has("zone") and not migrated.has("campsite")
+		and not migrated.has("bank_materials") and not migrated.has("guardian_done") and not migrated.has("quarry"))
+	_check("version 7 world save: loads", _load() == 12)
+	_check("version 7 world save: bank comes home", int(m.materials["wood"]) == 8 and int(m.materials["iron_bar"]) >= 2 and m.money == 65)
+	_check("version 7 world save: crossbow refunded, ammo gone", m.equipment["hand_r"] == "" and int(m.materials["hardwood"]) == 4
+		and not m.materials.has("bolts") and not m.materials.has("arrows"))
+	_check("version 7 world save: wakes at the homestead", m.has_saved_pos and m.saved_pos.distance_to(home) < 1.0)
+	_check("version 7 world save: no bank panel", m.saved_panel == "")
+	_save_on_day(12)
+
 	# A trek still going at day end is called off before the save.
 	m.trek._start()
 	var trek_save := _raw(path)

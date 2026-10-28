@@ -30,7 +30,7 @@ signal struck(kind: String)   # a tool connected with the ground or a tree; main
 
 # What the figure holds, set by main.gd each frame.
 var held := ""                # hotbar tool: sword, axe, pick, hoe, trowel, hose, rod, or ""
-var held_item := ""           # the gear item in the sword slot (a weapon or bow), or ""
+var held_item := ""           # the weapon in the sword slot, or ""
 var blocking := false         # a sword raised in guard
 var loop_kind := ""           # a looping action from the world: chop, mine, fish, or ""
 
@@ -104,7 +104,6 @@ const KEYS := {
 	"water": [[0.0, 0.3, 0.0, 0.0, 0.0], [0.18, 1.2, 0.0, 0.08, 0.0], [0.85, 1.25, 0.0, 0.1, 0.0], [1.0, 0.3, 0.0, 0.0, 0.0]],
 	"cast": [[0.0, 0.4, 0.0, 0.0, 0.0], [0.35, -1.5, -0.6, -0.12, 0.0], [0.55, 1.3, 0.5, 0.15, 0.0], [0.7, 1.0, 0.1, 0.1, 0.0], [1.0, 0.3, 0.0, 0.0, 0.0]],
 	"fish": [[0.0, 0.95, 0.1, 0.04, 0.0], [0.5, 1.05, -0.1, 0.06, 0.0], [1.0, 0.95, 0.1, 0.04, 0.0]],
-	"fire": [[0.0, 1.45, 0.0, 0.04, 0.0], [0.3, 1.35, 0.0, 0.0, 0.0], [1.0, 1.45, 0.0, 0.04, 0.0]],
 }
 
 
@@ -120,7 +119,7 @@ const GROUND_Y := 18.0      # where the sheet's bottom row (the feet) sits, in l
 const IDLE_FPS := 6.0
 # Tool actions have their own sheets, farmer_<action>_<down|up|right>.png, and play once across the action
 # (or once per cycle for chop and mine). The tool is only seen while it is used. An action without a sheet
-# (a raised guard, firing a bow) still draws the held tool in code, scaled up to suit the sprite, from a
+# (a raised guard) still draws the held tool in code, scaled up to suit the sprite, from a
 # shoulder at TOOL_ORIGIN.
 const ACTION_SHEETS := ["hoe", "water", "chop", "mine", "plant", "swing", "cast"]
 # The generated swings start from the empty-handed idle pose, so the looping ones play from this frame on.
@@ -731,19 +730,9 @@ func _draw_stick(hand: Vector2, dir: Vector2, length: float) -> void:
 	draw_line(hand, hand + dir * length * 0.5, WOOD_DARK, 0.6)
 
 
-# The sword slot: the weapon in the main hand, or a bow or crossbow when it is a ranged weapon.
+# The sword slot: the weapon in the main hand.
 func _draw_blade(hand: Vector2, dir: Vector2, perp: Vector2) -> void:
 	if held_item == "":
-		return
-	if held_item == "crossbow":
-		draw_line(hand, hand + dir * 12.0, WOOD, 2.2)
-		draw_line(hand + dir * 10.0 - perp * 6.0, hand + dir * 10.0 + perp * 6.0, WOOD_DARK, 2.0)
-		return
-	if held_item.find("bow") != -1:
-		var center := hand + dir * 5.0
-		var ang := dir.angle()
-		draw_arc(center, 9.0, ang - 1.1, ang + 1.1, 8, WOOD, 2.0)
-		draw_line(center + Vector2.from_angle(ang - 1.1) * 9.0, center + Vector2.from_angle(ang + 1.1) * 9.0, LINE, 0.6)
 		return
 	var steel: Color = BLADE.get(held_item, Color("b8c0c8"))
 	var base := hand + dir * 2.0

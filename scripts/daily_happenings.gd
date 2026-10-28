@@ -183,7 +183,7 @@ func _neighbour_gift() -> String:
 # Each frame: the yard's thing shows only on the farm, and the pedlar closes up at six.
 func _update() -> void:
 	if layer != null:
-		layer.visible = not m.inside and not m.in_cave and m.zone == MainGame.Zone.HOMESTEAD
+		layer.visible = not m.inside and not m.in_cave
 	if not today.is_empty() and today["id"] == "pedlar" and done_day != m.day and m.current_hour >= PEDLAR_LEAVES and tile.x >= 0:
 		tile = Vector2i(-1, -1)
 		_redraw()
@@ -192,7 +192,7 @@ func _update() -> void:
 # Leaving the house reminds you of anything still waiting in the yard.
 func _on_leave_house() -> void:
 	# Only by day, so it never talks over the night's visitor.
-	if _pending() and m.zone == MainGame.Zone.HOMESTEAD and m.current_hour < m.DUSK_HOUR:
+	if _pending() and m.current_hour < m.DUSK_HOUR:
 		m._show_message(str(today["remind"]))
 
 

@@ -215,58 +215,6 @@ func _sell(kind: String) -> void:
 	m._show_message("Sold %d for %d coins." % [count, count * price])
 
 
-func _buy_material(key: String) -> void:
-	if not m.GENERAL_BUY.has(key):
-		return
-	var price := int(m.GENERAL_BUY[key]) * m.GENERAL_BUY_QTY
-	if m.money < price:
-		m._show_message("That costs %d coins. You have %d." % [price, m.money])
-		return
-	m.money -= price
-	m.materials[key] += m.GENERAL_BUY_QTY
-	m.play_sfx("coin")
-	m._show_message("You buy %d %s for %d coins." % [m.GENERAL_BUY_QTY, key, price])
-
-
-func _sell_material(key: String) -> void:
-	if not m.GENERAL_BUY.has(key):
-		return
-	var count := int(m.materials[key])
-	if count <= 0:
-		m._show_message("You have none of that to sell.")
-		return
-	var price := maxi(1, int(m.GENERAL_BUY[key]) / 2)
-	m.materials[key] = 0
-	m.money += count * price
-	m.play_sfx("coin")
-	m._show_message("Sold %d %s for %d coins." % [count, key, count * price])
-
-
-func _bank_move(action_id: String) -> void:
-	var deposit := action_id.begins_with("dep:")
-	var key := action_id.trim_prefix("dep:") if deposit else action_id.trim_prefix("wd:")
-	if key == "coins":
-		if deposit:
-			m.bank_coins += m.money
-			m.play_sfx("coin")
-			m._show_message("You bank %d coins." % m.money)
-			m.money = 0
-		else:
-			m.money += m.bank_coins
-			m.play_sfx("coin")
-			m._show_message("You take %d coins from the bank." % m.bank_coins)
-			m.bank_coins = 0
-		return
-	if not m.bank_materials.has(key):
-		return
-	if deposit:
-		m.bank_materials[key] += int(m.materials[key])
-		m.materials[key] = 0
-	else:
-		m.materials[key] += int(m.bank_materials[key])
-		m.bank_materials[key] = 0
-
-
 func _pack_cells() -> Array:
 	var cells: Array = []
 	for f in Foods.LIST:

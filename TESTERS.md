@@ -35,7 +35,7 @@ The full list is under **Controls** in the Pause menu and in Settings on the sta
 
 ## Known rough edges
 
-- The road and towns are switched off in this build, so there are no shops yet. Everything comes from the farm and the cave.
+- There are no towns or shops to travel to. Everything comes from the farm, the cave, the catalog at the desk and the treks. Saves from older builds that went out to the towns still load: anything left in the bank comes back to your pack, and a bow or crossbow is taken apart for its materials.
 - Treks into the groves (from the first winter) are new and still rough. The trail works that ease them (Buildings, Trail works) are built but barely tested. Walker and destination art is placeholder.
 - The pacing after the first few weeks isn't finished. Skills and farm projects may run out early.
 - Some art is placeholder, and the game has no icon yet.

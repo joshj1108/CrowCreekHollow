@@ -8,56 +8,6 @@ func _init(main: MainGame) -> void:
 	m = main
 
 
-func _fire(weapon: String) -> void:
-	if m.swing_cool > 0.0:
-		return
-	var item: Dictionary = m.GEAR_ITEMS[weapon]
-	var ammo := str(item["ammo"])
-	if int(m.materials[ammo]) < 1:
-		m._show_message("You're out of %s. Make more from the Craft panel." % ammo)
-		return
-	m.materials[ammo] -= 1
-	m.swing_cool = float(item["cool"])
-	m.player.play_act("fire", 0.35)
-	m.play_sfx("shoot", 0.06)
-	var dir: Vector2 = m.player.facing.normalized()
-	m.shots.append({"pos": m.player.position, "vel": dir * m.SHOT_SPEED, "life": m.SHOT_LIFE, "dmg": int(item["dmg"])})
-	m.queue_redraw()
-
-
-func _update_shots(delta: float) -> void:
-	if not m._in_village():
-		m.shots.clear()
-		return
-	if m.shots.is_empty():
-		return
-	for shot in m.shots.duplicate():
-		var pos: Vector2 = shot["pos"] + shot["vel"] * delta
-		shot["pos"] = pos
-		shot["life"] = float(shot["life"]) - delta
-		var hit := false
-		for foe in m.foes.duplicate():
-			var gap: Vector2 = foe["pos"] - pos
-			if gap.length() < m.PX * 0.45:
-				_shot_hits(foe, int(shot["dmg"]))
-				hit = true
-				break
-		if hit or float(shot["life"]) <= 0.0 or m._is_blocked_world(pos):
-			m.shots.erase(shot)
-	m.queue_redraw()
-
-
-func _shot_hits(foe: Dictionary, amount: int) -> void:
-	foe["hp"] = int(foe["hp"]) - amount
-	foe["flash"] = 0.2
-	m.play_sfx("hit", 0.08)
-	m.progression._grant_xp("Combat", m.XP_HIT)
-	if int(foe["hp"]) <= 0:
-		_kill_foe(foe)
-	else:
-		m._show_message("Your shot hits the %s for %d." % [str(foe["kind"]), amount])
-
-
 func _new_foe(kind: String, tile: Vector2i) -> Dictionary:
 	var center := m._tile_center(tile.x, tile.y)
 	return {
@@ -72,22 +22,13 @@ func _spawn_foes() -> void:
 	if m.in_cave:
 		for spawn in m.cave_spawns:
 			m.foes.append(_new_foe(str(spawn["kind"]), spawn["tile"]))
-		m.queue_redraw()
-		return
-	var origin := m._region_origin()
-	if m.zone == m.Zone.VILLAGE:
-		for spot in m.HOLLOW_SPAWNS:
-			m.foes.append(_new_foe("hollow", origin + spot))
-	elif m.zone == m.Zone.ASHFORD:
-		for spot in m.STALKER_SPAWNS:
-			m.foes.append(_new_foe("stalker", origin + spot))
 	m.queue_redraw()
 
 
 func _update_foes(delta: float) -> void:
 	m.swing_cool = maxf(0.0, m.swing_cool - delta)
 	m.invuln = maxf(0.0, m.invuln - delta)
-	if not (m._in_village() or m.in_cave):
+	if not m.in_cave:
 		m.player.modulate = Color.WHITE
 		return
 	m.player.modulate = Color(1.0, 0.55, 0.55) if m.invuln > 0.0 else Color.WHITE
@@ -140,12 +81,10 @@ func _move_foe(foe: Dictionary, step: Vector2) -> void:
 
 func _foe_free(p: Vector2) -> bool:
 	var t := Vector2i(floori(p.x / m.PX), floori(p.y / m.PX))
-	return not m.BLOCKING.has(m._kind_at(t)) and m._npc_index(t) == -1 and not m._near_campsite(t)
+	return not m.BLOCKING.has(m._kind_at(t))
 
 
 func _foe_attack(foe: Dictionary) -> void:
-	if m._at_campsite():
-		return
 	if m.invuln > 0.0:
 		return
 	# A held block turns aside a blow from the front.
@@ -174,8 +113,6 @@ func _kill_foe(foe: Dictionary) -> void:
 	m.foes.erase(foe)
 	m.play_sfx("foe_die", 0.1)
 	m.stats["defeated"] += 1
-	if foe["kind"] == "stalker":
-		m.stats["stalkers"] += 1
 	m.progression._grant_xp("Combat", int(st["xp"]))
 	var note := "+%d Combat XP" % int(st["xp"])
 	var drop := str(st["drop"])

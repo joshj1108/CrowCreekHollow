@@ -204,7 +204,7 @@ func _pay(kind: String, sign: int) -> void:
 
 
 func _start_place(kind: String) -> void:
-	if m.inside or m.in_cave or m._in_village():
+	if m.inside or m.in_cave:
 		m._show_message("You can only place things on the farm.")
 		return
 	if kind == "flowers" and not _season() in ["Spring", "Summer"]:
@@ -300,12 +300,12 @@ func _lit(t: Vector2i) -> bool:
 
 # Each frame: lamps glow after dusk, and only out on the farm.
 func _update(darkness: float) -> void:
-	var on := not m.inside and not m.in_cave and not m._in_village() and darkness > 0.1
+	var on := not m.inside and not m.in_cave and darkness > 0.1
 	for l in lights.values():
 		(l as PointLight2D).enabled = on
 		(l as PointLight2D).energy = m.WINDOW_ENERGY * (0.7 + 0.5 * darkness)
 	if layer != null:
-		layer.visible = not m.inside and not m.in_cave and not m._in_village()
+		layer.visible = not m.inside and not m.in_cave
 
 
 # The morning's lift from the flower beds.

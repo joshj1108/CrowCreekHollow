@@ -235,7 +235,7 @@ func _pick() -> Dictionary:
 	for v in VISITORS:
 		if int(v["tier"]) > tier or v["id"] == last_visitor:
 			continue
-		if v.get("outdoors", false) and (m.inside or m.in_cave or m._in_village()):
+		if v.get("outdoors", false) and (m.inside or m.in_cave):
 			continue
 		if v["id"] == "pond" and m.pond_edges.is_empty():
 			continue
