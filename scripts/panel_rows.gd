@@ -561,7 +561,15 @@ func _buildings_rows() -> Array:
 				row["action"] = "bellpart:" + id
 				row["enabled"] = why == ""
 			rows.append(row)
-		rows.append({"note": "With all three parts, place the bell from Decor on All Hallows (October 31). The Hollow comes to it that night."})
+		var clapper := {"name": "Old clapper", "about": "The vicar kept the old bell's clapper when he cut it down. Walk him to the chapel on the hill and he gives it to you.",
+			"value": "a chapel trek, from summer, Bushcrafting %d" % int(TrekSystem.ROUTES["chapel"]["level"])}
+		if int(m.materials["bell_clapper"]) > 0:
+			clapper["status"] = "Given"
+			clapper["status_kind"] = "done"
+		else:
+			clapper["status"] = "With the vicar"
+		rows.append(clapper)
+		rows.append({"note": "With the three parts and the clapper, place the bell from Decor on All Hallows (October 31). The Hollow comes to it that night."})
 
 	if m.day >= TrekSystem.FROM_DAY:
 		rows.append({"tab": "Trail works", "icon": "lantern"})

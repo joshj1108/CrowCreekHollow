@@ -3,7 +3,7 @@ extends RefCounted
 
 # Bumped when a save's keys change shape. Saves from before the number was written count as 1.
 # _migrate lifts an older save one version at a time, so every old save still loads.
-const SAVE_VERSION := 4
+const SAVE_VERSION := 5
 # Keys a save must hold with the right type, or it isn't read: the loader would trip over anything else.
 const DICT_KEYS := ["inventory", "materials", "skill_xp", "stats", "equipment", "quests_done", "achievements_done",
 	"guardian_done", "tool_tier", "bank_materials"]
@@ -409,6 +409,18 @@ static func _migrate(data: Dictionary) -> Dictionary:
 		# Version 4 added the trail works. None are built yet.
 		if not data.has("trek_works"):
 			data["trek_works"] = []
+	if v < 5:
+		# Version 5 added the old bell's clapper, a fourth thing the bell needs, from the vicar on a chapel trek
+		# (Agnes's pages from the wood go in rook_pages with the rest). A save that already made all three
+		# parts but hasn't hung the bell gets it, so a farm that was ready for All Hallows still is.
+		var mats: Variant = data.get("materials")
+		if typeof(mats) == TYPE_DICTIONARY and int(data.get("bell_day", -1)) < 0 and not mats.has("bell_clapper"):
+			var ready := true
+			for part in ["bell_metal", "bell_frame", "bell_rope"]:
+				if typeof(mats.get(part)) not in [TYPE_INT, TYPE_FLOAT] or int(mats[part]) < 1:
+					ready = false
+			if ready:
+				mats["bell_clapper"] = 1
 	# A save from a newer build keeps its number; keys this build doesn't know are ignored.
 	data["save_version"] = maxi(v, SAVE_VERSION)
 	return data

@@ -17,12 +17,12 @@ const DECOR := {
 		"desc": "Planted in spring or summer. Each bed gives +1 sanity every morning, except in winter."},
 	"path": {"name": "Gravel path", "cost": {"stone": 1}, "skill": "", "level": 0, "max": 400, "blocks": false,
 		"desc": "Turns a tile of grass into path. Keeps placing until you run out of stone or press B."},
-	"bell": {"name": "Crow bell", "cost": {"bell_metal": 1, "bell_frame": 1, "bell_rope": 1, "feathers": 20, "coins": 150}, "skill": "Carpentry", "level": 6, "max": 1, "blocks": true,
+	"bell": {"name": "Crow bell", "cost": {"bell_metal": 1, "bell_frame": 1, "bell_rope": 1, "bell_clapper": 1, "feathers": 20, "coins": 150}, "skill": "Carpentry", "level": 6, "max": 1, "blocks": true,
 		"desc": "Hung only on All Hallows, and the Hollow comes to it that night. While it stands, the field shadow can't reach the house, so the Hollow stops coming, and the night takes a quarter less from your sanity."},
 }
 # The crow bell is made over a year: its metal in winter, its frame from a spring storm's oak, its rope from
-# summer's wild flax, and it is hung on All Hallows. A game starts on October 1st, so the earliest is the
-# second All Hallows, day 396.
+# summer's wild flax, its clapper from the vicar (the old bell's, given on a chapel trek), and it is hung on
+# All Hallows. A game starts on October 1st, so the earliest is the second All Hallows, day 396.
 const BELL_PARTS := {
 	"bell_metal": {"name": "Bell metal", "season": "Winter", "cost": {"iron_bar": 4, "copper_bar": 2, "feathers": 10}, "skill": "Smithing", "level": 6,
 		"desc": "Cast at the furnace and cooled in the frost, so only in winter."},
@@ -74,7 +74,7 @@ func _steps() -> Array:
 		{"id": "hollow_lantern", "title": "Make the Hollow Lantern", "how": "Craft section, Other tab: the lantern's third tier.", "done": m.lantern_tier >= 3},
 		{"id": "flowers", "title": "Plant four flower beds", "how": "Buildings, Decor, in spring or summer: 1 wood and 2 turnip seeds each, Farming 2.", "done": _count("flowers") >= 4},
 		{"id": "restored", "title": "Restore the house", "how": "House section: repair to Restored, Carpentry 8, in summer when the paint can dry.", "done": m.house_stage >= 3},
-		{"id": "bell", "title": "Hang the crow bell", "how": "Buildings, The crow bell: its metal in winter, its frame from storm oak, its rope from summer flax, then hang it on All Hallows.", "done": _has_bell()},
+		{"id": "bell", "title": "Hang the crow bell", "how": "Buildings, The crow bell: its metal in winter, its frame from storm oak, its rope from summer flax, its clapper from the vicar on a chapel trek, then hang it on All Hallows.", "done": _has_bell()},
 	]
 
 

@@ -51,6 +51,8 @@ extends SceneTree
 #   tall            with trek, the tall one stands in the trees beside you
 #   troute=ID       with trek, the route: mill (default), orchard, chapel or grove; tday=N sets the day (and season)
 #   tnight          with trek, set out at 19:00 (a night trek)
+#   tsearch         with trek and tevent=hollow, reach into the hollow tree (prints whether it held a page)
+#   tpages=N        Agnes Rook's first N pages from the wood are found (show them with diary, with pages=N for the farm's)
 #   sound           print how loud each ambience loop is playing when the shot is taken
 
 func _initialize() -> void:
@@ -165,6 +167,10 @@ func _initialize() -> void:
 		if opt.has("tall"):
 			main.trek.tall_on = true
 			main.trek.tall_pos = main.player.position + Vector2(main.PX * 3.0, -main.PX * 0.5)
+		if opt.has("tsearch") and main.trek.side_tile.x >= 0:
+			var before: int = main.mystery._count(main.mystery.TREK_PAGES)
+			main.trek._search_hollow()
+			print("hollow tree held a page: ", main.mystery._count(main.mystery.TREK_PAGES) > before)
 	elif opt.has("cave"):
 		main._enter_cave()
 		if opt.has("ctile"):
@@ -221,6 +227,9 @@ func _initialize() -> void:
 	if opt.has("pages"):
 		for i in int(opt["pages"]):
 			main.mystery.found[main.mystery.PAGES[i]["id"]] = true
+	if opt.has("tpages"):
+		for i in int(opt["tpages"]):
+			main.mystery.found[main.mystery.TREK_PAGES[i]["id"]] = true
 	if opt.has("diary"):
 		main._find_diary()
 		await process_frame

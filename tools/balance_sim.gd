@@ -739,7 +739,7 @@ func _note_milestones() -> void:
 		_mark("tax billed")
 	if m.money >= 150:
 		_mark("150 coins held")
-	for k in ["storm_oak", "flax", "bell_metal", "bell_frame", "bell_rope"]:
+	for k in ["storm_oak", "flax", "bell_metal", "bell_frame", "bell_rope", "bell_clapper"]:
 		if int(m.materials[k]) > 0:
 			_mark("got " + k)
 

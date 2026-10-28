@@ -813,7 +813,7 @@ var weather_kind := ""       # today's weather, rolled each morning: see WEATHER
 var skill_xp := {"Farming": 0, "Bushcrafting": 0, "Carpentry": 0, "Cleaning": 0, "Fishing": 0, "Cooking": 0, "Combat": 0, "Forestry": 0, "Mining": 0, "Smithing": 0}
 var inventory := {"seeds": STARTING_SEEDS, "corn_seeds": 0, "pumpkin_seeds": 0, "crops": 0, "corn": 0, "pumpkins": 0, "fish": 0, "eggs": 0, "milk": 0, "fish_meal": 0, "turnip_hash": 0, "smoked_fish": 0, "dried_turnip": 0, "pumpkin_soup": 0, "canned_turnip": 0, "fish_stew": 0, "fermented_turnip": 0, "hearty_stew": 0, "bandage": 0, "firewood": 4, "crow_charm": 0, "trail_ration": 0}
 var materials := {"wood": 0, "sticks": 0, "fiber": 0, "resin": 0, "hardwood": 0, "stone": 0, "copper_ore": 0, "iron_ore": 0, "copper_bar": 0, "iron_bar": 0, "arrows": 0, "bolts": 0, "feathers": 0,
-	"storm_oak": 0, "flax": 0, "bell_metal": 0, "bell_frame": 0, "bell_rope": 0, "lamp_oil": 0, "rope": 0}
+	"storm_oak": 0, "flax": 0, "bell_metal": 0, "bell_frame": 0, "bell_rope": 0, "bell_clapper": 0, "lamp_oil": 0, "rope": 0}
 # The hotbar, in slot order. Slots after these are empty.
 const HOTBAR_TOOLS := [
 	{"id": "sword", "name": "Weapon", "icon": "sword", "tint": "6b4a3a"},
@@ -3508,6 +3508,7 @@ const MATERIAL_INFO := {
 	"bell_frame": {"name": "Bell frame", "icon": "log", "tint": "5a3a26", "desc": "The crow bell's yoke, cut from storm oak. Hung on All Hallows."},
 	"lamp_oil": {"name": "Lamp oil", "icon": "resin", "tint": "d8b050", "desc": "A flask of lamp oil from the catalog. In the Rookery Wood your lantern burns one in about a minute, and goes out without it."},
 	"bell_rope": {"name": "Bell rope", "icon": "fiber", "tint": "c8b080", "desc": "The crow bell's rope, twisted from wild flax. Hung on All Hallows."},
+	"bell_clapper": {"name": "Old clapper", "icon": "bar", "tint": "3a3a40", "desc": "The iron clapper from Agnes Rook's bell, which the vicar kept when he cut it down. The crow bell can't ring without it."},
 	"rope": {"name": "Rope", "icon": "fiber", "tint": "b89a68", "desc": "Twisted from fiber (Craft, Other). On a trek, tied across a flooded hollow, it takes the walker over dry."},
 }
 var inventory_selected := ""   # the pack item whose details show; remembered while the panel is open

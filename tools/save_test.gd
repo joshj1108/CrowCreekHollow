@@ -153,6 +153,31 @@ func _run() -> void:
 		and int(m.inventory["trail_ration"]) == 4 and m.projects.bell_day == 12 and m.trek.treks_done == 2 and m.trek.grove_done)
 	_check("trail works round-trip", m.trek.works.size() == 2 and m.trek._has_work("footbridge") and m.trek._has_work("chapel_steps"))
 
+	# Version 5: the clapper and Agnes's pages from the wood round-trip.
+	m.materials["bell_clapper"] = 1
+	m.mystery.found["t1"] = true
+	m.mystery.found["t2"] = true
+	_save_on_day(11)
+	m.materials["bell_clapper"] = 0
+	m.mystery.found.erase("t1")
+	m.mystery.found.erase("t2")
+	_check("clapper and trek pages round-trip", _load() == 11 and int(m.materials["bell_clapper"]) == 1
+		and m.mystery.found.has("t1") and m.mystery.found.has("t2") and m.mystery._next_trek_page("mill") == ""
+		and m.mystery._next_trek_page("orchard") == "t3")
+	# A version 4 save with the three bell parts made, and one with them not made: only the first gets the clapper.
+	var v4 := _raw(path)
+	v4["save_version"] = 4
+	v4["bell_day"] = -1
+	v4["materials"].erase("bell_clapper")
+	for part in ["bell_metal", "bell_frame", "bell_rope"]:
+		v4["materials"][part] = 1
+	_write_text(path, JSON.stringify(v4))
+	_check("version 4 save with the bell's parts: gets the clapper", _load() == 11 and int(m.materials["bell_clapper"]) == 1)
+	v4["materials"]["bell_rope"] = 0
+	_write_text(path, JSON.stringify(v4))
+	m.materials["bell_clapper"] = 0     # a key the save lacks keeps what's in memory, as on a fresh start
+	_check("version 4 save without them: no clapper", _load() == 11 and int(m.materials["bell_clapper"]) == 0)
+
 	# Saving in the cave puts you at the homestead on load.
 	var home := m._tile_center(m.HOMESTEAD_ARRIVE.x, m.HOMESTEAD_ARRIVE.y)
 	m.in_cave = true

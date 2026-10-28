@@ -113,7 +113,9 @@ const CAIRN_COINS := 5
 const CAIRN_SANITY := 6.0
 const CAIRN_NERVE := 15.0
 const CAIRN_SNUB := 10.0
-# The hollow tree: a feather bundle, old coins, or a nest of bones. Better on the dark trail.
+# The hollow tree: a feather bundle, old coins, or a nest of bones. Better on the dark trail. While one of
+# Agnes's pages from the wood waits on this route (Mystery._next_trek_page), it holds that instead this often.
+const HOLLOW_PAGE := 0.5
 const HOLLOW_FEATHERS := 3
 const HOLLOW_COINS := Vector2i(6, 12)
 const HOLLOW_DARK_BONUS := 2          # on the dark trail: this many more feathers, or this many times the coins
@@ -1112,6 +1114,10 @@ func _search_hollow() -> void:
 	event_done = true
 	var rng := RandomNumberGenerator.new()
 	rng.seed = hash([m.day, "hollow", clearing])
+	var page: String = m.mystery._next_trek_page(route_id)
+	if page != "" and rng.randf() < HOLLOW_PAGE:
+		m.mystery._find_trek_page(page)
+		return
 	var roll := rng.randf()
 	var more := _trail() == "dark"
 	if roll < 0.4:
@@ -1234,6 +1240,10 @@ func _gifts(pay: int) -> Array:
 			if season == "Spring":
 				m.materials["storm_oak"] += pay
 				out.append("+%d storm oak from the split tree in the churchyard" % pay)
+			# The old bell's clapper, once: the crow bell can't be hung without it.
+			if int(m.materials["bell_clapper"]) == 0 and not m.projects._has_bell():
+				m.materials["bell_clapper"] = 1
+				out.append("the old bell's clapper in an altar cloth (\"She said we'd want it back. Hang it in yours.\")")
 	return out
 
 
