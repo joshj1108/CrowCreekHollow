@@ -329,6 +329,31 @@ func _run() -> void:
 		and int(SaveSystem.read_save(path).get("save_version", 0)) == SaveSystem.SAVE_VERSION)
 	m.cellar_built = false
 
+	# Version 12: the walk to the wood's edge and the first Hollow sighting, in week one. A new game has neither;
+	# an older save past day 4 has both done (and the new chapter), one before it plays them as a new game would.
+	m.trek.edge_done = true
+	m.nights.sighting_seen = true
+	_save_on_day(11)
+	m.trek.edge_done = false
+	m.nights.sighting_seen = false
+	_check("edge walk and sighting round-trip", _load() == 11 and m.trek.edge_done and m.nights.sighting_seen)
+	var v11 := _raw(path)
+	v11["save_version"] = 11
+	v11.erase("trek_edge_done")
+	v11.erase("sighting_seen")
+	(v11["quests_done"] as Dictionary).erase("edge")
+	_write_text(path, JSON.stringify(v11))
+	_check("version 11 save past day 4: edge walk, sighting and chapter done", _load() == 11 and m.trek.edge_done
+		and m.nights.sighting_seen and m.quests_done.has("edge") and m.trek._route_open("mill") == (m.day >= m.trek.FROM_DAY)
+		and not m.trek._route_open("edge"))
+	v11["day"] = 3
+	v11["treks_done"] = 0   # a save that has walked anyone has the walk to the edge done whatever the day
+	_write_text(path, JSON.stringify(v11))
+	_check("version 11 save on day 3: edge walk and sighting still to come", _load() == 3 and not m.trek.edge_done
+		and not m.nights.sighting_seen and not m.quests_done.has("edge"))
+	m.trek.edge_done = false
+	m.nights.sighting_seen = false
+
 	# Saving in the cave puts you at the homestead on load.
 	var home := m._tile_center(m.HOMESTEAD_ARRIVE.x, m.HOMESTEAD_ARRIVE.y)
 	m.in_cave = true

@@ -50,6 +50,9 @@ const TREK_PAGES := [
 	{"id": "t5", "title": "The ring of trees", "from": "chapel",
 		"text": "The crows brought me here. There is a path worn in a ring, and Elias is on it, just ahead of me, always just ahead. If you are reading this, go home. Keep the fire lit. Ring the bell every night, and I will hear it. A."},
 ]
+# Page 7 is usually left by the first Hollow sighting, in its first week or two (NightSystem.SIGHTING); the crows
+# leave it otherwise.
+const SIGHTING_FOUND := "Where it stood, a torn page is caught on the fence wire."
 const EPILOGUE := {"id": "bell", "title": "The bell rings again",
 	"text": "You hang the bell where you think she hung hers, and ring it once at dusk. Under the great tree, something answers, low, and then is still. The crows settle. For the first time, the field is only a field."}
 
@@ -69,8 +72,18 @@ func _init(main: MainGame) -> void:
 
 # A night visitor answered or left: the knocking, the field figure, the crows and the Hollow each leave a page.
 func _on_visitor(id: String, faced: bool) -> void:
-	if id == "knock" or id == "crows" or id == "hollow" or (id == "field" and faced):
+	if id == "knock" or id == "crows" or id == "hollow" or id == "sighting" or (id == "field" and faced):
 		_events[id] = true
+
+
+# The first Hollow sighting (NightSystem) leaves her page about the hollow under the great tree, where it stood.
+# The text is how it went; returns false (nothing said) when that page was already found some other way.
+func _on_sighting(text: String) -> bool:
+	_events["sighting"] = true
+	if found.has("p7"):
+		return false
+	_find("p7", text + " ")
+	return true
 
 
 # The crows' gifts under the great tree also carry their page.
@@ -88,7 +101,7 @@ func _check(quiet := false) -> void:
 		"p4": int(m.materials["feathers"]) >= 3 or int(m.inventory["crow_charm"]) > 0,
 		"p5": int(m.stats["sold"]) >= 1,
 		"p6": m.house_stage >= 2,
-		"p7": _events.has("crows"),
+		"p7": _events.has("crows") or _events.has("sighting"),
 		"p8": m.in_cave and not m.trek.active,
 		"p9": _events.has("hollow"),
 		"p10": m.house_stage >= 3,
@@ -115,7 +128,7 @@ func _page(id: String) -> Dictionary:
 	return {}
 
 
-func _find(id: String) -> void:
+func _find(id: String, lead := "") -> void:
 	found[id] = true
 	var p := _page(id)
 	m._diary_page("rook_" + id)
@@ -126,7 +139,8 @@ func _find(id: String) -> void:
 	if id == "grove":
 		m._show_message("You write down what happened at the grove. It's in your diary: \"%s\"." % GROVE_PAGE["title"])
 		return
-	m._show_message("%s It's in your diary: \"%s\" (%d of %d)." % [p["found"], p["title"], _count(), PAGES.size()])
+	var how := str(SIGHTING_FOUND if id == "p7" and _events.has("sighting") else p["found"])
+	m._show_message("%s%s It's in your diary: \"%s\" (%d of %d)." % [lead, how, p["title"], _count(), PAGES.size()])
 
 
 func _count(pages := PAGES) -> int:

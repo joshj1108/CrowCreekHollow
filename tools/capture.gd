@@ -32,8 +32,10 @@ extends SceneTree
 #   fish            stand below a fishing spot and cast at it
 #   visitor=ID      bring tonight's night visitor now: field, knock, quiet, crows, pond, watcher, footsteps
 #                   or hollow (use with hour=22 or later)
-#                   first is the scripted first night (a new game gets it anyway at 22:00)
-#   beat=N          with visitor=first, play its beats up to N (0-3; the figure comes at 2)
+#                   first is the scripted first night (a new game gets it anyway at 22:00); sighting is the
+#                   first Hollow sighting (the night of the walk to the wood's edge)
+#   beat=N          with visitor=first, play its beats up to N (0-3; the figure comes at 2); with visitor=sighting,
+#                   up to N (0-2: the crows go up at 0, the shape stands at the field's far edge at 1, and goes at 2)
 #   happening=ID    jump to a day with this daily happening: pedlar, glint, branch, crow_gifts, mushrooms,
 #                   frenzy or neighbour (it is placed, and its morning note shown)
 #   decor=A,B       place decor in a row two tiles below the player: lamp, flowers, path, fence, bench, birdbath,
@@ -44,15 +46,18 @@ extends SceneTree
 #   steps=N         how far the field shadow has crept toward the house, 0 to 8
 #   walker          jump to a day a walker waits at the farm's north edge, and stand below them
 #   wday=N          with walker, the first day to look from (from 244 all three day walkers wait); wbell: the bell is
-#                   hung, so from day 381 the woman in the grey shawl waits too
+#                   hung, so from day 381 the woman in the grey shawl waits too; wedge: day 4, Old Maren waits to be
+#                   walked to the wood's edge (the first trek)
 #   trek=N          set out on the mill trek and stand in clearing N (0-3 marked, 0-2 dark), below its event, with the walker
 #   tevent=ID       with trek, the clearing's event: tree, crows, flood, lights, cairn, fog or hollow (the day sets it otherwise)
 #   tdark           with trek, take the dark trail at the fork (trek=1 is then the dark clearing, 2 the mill)
 #   tsign           with trek=0, stand below the fingerpost at the fork
 #   tread           with trek, the fingerpost reads (as with the Waymarks trail work)
 #   nooil           with trek, no lamp oil, so the lantern is out
-#   tall            with trek, the tall one stands in the trees beside you
-#   troute=ID       with trek, the route: mill (default), orchard, chapel, post or grove; tday=N sets the day (and season)
+#   tall            with trek, the tall one stands in the trees beside you (with troute=edge, its eyes in the
+#                   second clearing's trees, staying put as on the walk to the wood's edge)
+#   troute=ID       with trek, the route: mill (default), orchard, chapel, post, grove, or edge (the tutorial walk to
+#                   the wood's edge: trek=0 the fallen tree, trek=1 the stile); tday=N sets the day (and season)
 #   tnight          with trek, set out at 19:00 (a night trek)
 #   tsearch         with trek and tevent=hollow, reach into the hollow tree (prints whether it held a page)
 #   tpages=N        Agnes Rook's first N pages from the wood are found (show them with diary, with pages=N for the farm's)
@@ -144,8 +149,13 @@ func _initialize() -> void:
 		var ht: Vector2i = main.happenings.tile
 		if ht.x >= 0 and not opt.has("tile"):
 			main.player.position = main._tile_center(ht.x, ht.y + 2)
-	if opt.has("walker"):
+	if opt.has("walker") and opt.has("wedge"):
+		main.day = main.trek.EDGE_DAY
+		var et: Vector2i = main.trek._walker_tile("edge")
+		main.player.position = main._tile_center(et.x, et.y + 2)
+	elif opt.has("walker"):
 		main.day = maxi(main.trek.FROM_DAY, int(opt.get("wday", main.trek.FROM_DAY)))
+		main.trek.edge_done = true
 		if opt.has("wbell"):
 			main.projects.bell_day = 1
 		while not main.trek._walker_day(main.day):
@@ -195,6 +205,7 @@ func _initialize() -> void:
 		if opt.has("tall"):
 			main.trek.tall_on = true
 			main.trek.tall_pos = main.player.position + Vector2(main.PX * 3.0, -main.PX * 0.5)
+			main.trek.glimpse_until = 9999.0
 		if opt.has("tsearch") and main.trek.side_tile.x >= 0:
 			var before: int = main.mystery._count(main.mystery.TREK_PAGES)
 			main.trek._search_hollow()
@@ -232,10 +243,14 @@ func _initialize() -> void:
 			await process_frame
 	if opt.has("visitor"):
 		main.event_fired_day = main.day
+		main.nights.first_beat = -1   # a new game's own first night may have begun during the warm-up frames
 		main.nights._begin(opt["visitor"])
 		if opt.has("beat"):
 			# Wind the first night's start back so its beats up to this one have played.
-			main.nights.first_start -= float(main.nights.FIRST_BEATS[int(opt["beat"])])
+			if opt["visitor"] == "sighting":
+				main.nights.sight_start -= float(main.nights.SIGHTING_BEATS[int(opt["beat"])])
+			else:
+				main.nights.first_start -= float(main.nights.FIRST_BEATS[int(opt["beat"])])
 		await process_frame
 	if opt.has("fight"):
 		var at: Vector2 = main.player.position + main.player.facing * main.PX

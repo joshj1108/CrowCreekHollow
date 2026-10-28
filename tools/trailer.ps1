@@ -28,13 +28,15 @@ $Sequence = @(
 	@{ card = 'The Rooks farmed here before you.'; secs = 2.5 }
 	@{ shot = 'spring'; secs = 4;   opts = 'quiet season=Spring weather=sunny hour=8 crops=turnip,corn walk=right:3' }
 	@{ shot = 'summer'; secs = 4;   opts = 'quiet season=Summer weather=sunny hour=13 built stage=3 walk=left:3.5' }
-	@{ shot = 'walker'; secs = 4;   opts = 'quiet walker weather=fog walk=up:1' }
+	@{ shot = 'walker'; secs = 4;   opts = 'quiet walker wedge weather=fog walk=up:1' }
 	@{ shot = 'winter'; secs = 4;   opts = 'quiet season=Winter weather=snow hour=17 walk=down:3' }
 	@{ card = 'Day is work.|Night is dread.'; secs = 3 }
 	@{ shot = 'house';  secs = 3.5; opts = 'quiet inside stage=3 hour=22 lantern=2 walk=right:1.5' }
 	@{ shot = 'crows';  secs = 4;   opts = 'quiet tile=55,27 hour=22 lantern=2 weather=cloudy'; gamma = 1.5 }
 	@{ shot = 'figure'; secs = 4;   opts = 'hour=22 lantern=2 visitor=first beat=2'; gamma = 1.4 }
+	@{ shot = 'sighting'; secs = 4; opts = 'tile=54,17 hour=22 lantern=2 visitor=sighting beat=1'; gamma = 1.4 }
 	@{ card = 'She went after him, into the wood.'; secs = 2.5 }
+	@{ shot = 'edge';   secs = 4;   opts = 'trek=1 troute=edge tday=4 tall walk=up:1' }
 	@{ shot = 'fork';   secs = 4;   opts = 'trek=0 tsign tevent=fog walk=up:2' }
 	@{ shot = 'tall';   secs = 4;   opts = 'trek=1 tdark tall tnight' }
 	@{ shot = 'cave';   secs = 3;   opts = 'cave lantern=2 fight'; gamma = 1.4 }

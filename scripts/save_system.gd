@@ -3,7 +3,7 @@ extends RefCounted
 
 # Bumped when a save's keys change shape. Saves from before the number was written count as 1.
 # _migrate lifts an older save one version at a time, so every old save still loads.
-const SAVE_VERSION := 11
+const SAVE_VERSION := 12
 # Keys a save must hold with the right type, or it isn't read: the loader would trip over anything else.
 const DICT_KEYS := ["inventory", "materials", "skill_xp", "stats", "equipment", "quests_done", "achievements_done",
 	"tool_tier", "trek_walked"]
@@ -95,6 +95,8 @@ func _save_game() -> void:
 		"trek_last_day": m.trek.last_day,
 		"trek_walked": m.trek.walked,
 		"trek_grove_done": m.trek.grove_done,
+		"trek_edge_done": m.trek.edge_done,
+		"sighting_seen": m.nights.sighting_seen,
 		"trek_works": m.trek.works.keys(),
 		"estate": m.estate._to_save(),
 		"stand_glut": m.stall.glut,
@@ -235,6 +237,8 @@ func _load_game() -> bool:
 			if TrekSystem.ROUTES.has(str(id)) and typeof(walked[id]) in [TYPE_INT, TYPE_FLOAT]:
 				m.trek.walked[str(id)] = int(walked[id])
 	m.trek.grove_done = bool(data.get("trek_grove_done", false))
+	m.trek.edge_done = bool(data.get("trek_edge_done", false))
+	m.nights.sighting_seen = bool(data.get("sighting_seen", false))
 	m.trek.works.clear()
 	for id in data.get("trek_works", []):
 		if TrekSystem.WORKS.has(str(id)):
@@ -483,6 +487,19 @@ static func _migrate(data: Dictionary) -> Dictionary:
 		# Version 11 added the house extensions, furniture, paint and wallpaper and the land deed ("estate"), and
 		# the farm stand's demand ("stand_glut"). An older save has none of them, which the loader's defaults give.
 		pass
+	if v < 12:
+		# Version 12 moved the first trek into week one: Old Maren asks to be walked to the wood's edge from day 4
+		# (TrekSystem.EDGE_DAY), the mill only after that, and the first Hollow sighting comes that night. A save
+		# already past day 4, or that has walked anyone, has them done, so it neither replays them nor waits on
+		# them for the mill; its story counts the new chapter as done too.
+		var past := int(data.get("day", 1)) > TrekSystem.EDGE_DAY or int(data.get("treks_done", 0)) > 0
+		if not data.has("trek_edge_done"):
+			data["trek_edge_done"] = past
+		if not data.has("sighting_seen"):
+			data["sighting_seen"] = past
+		var quests: Variant = data.get("quests_done")
+		if past and typeof(quests) == TYPE_DICTIONARY:
+			quests["edge"] = true
 	# A save from a newer build keeps its number; keys this build doesn't know are ignored.
 	data["save_version"] = maxi(v, SAVE_VERSION)
 	return data

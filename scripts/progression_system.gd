@@ -20,6 +20,8 @@ func _stat_value(stat: String) -> int:
 			return m.lantern_tier
 		"story":
 			return m.quests_done.size()
+		"edge_walked":
+			return 1 if m.trek.edge_done else 0
 	if stat.begins_with("level_"):
 		return _level(stat.trim_prefix("level_"))
 	return int(m.stats.get(stat, 0))

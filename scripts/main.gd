@@ -239,6 +239,7 @@ const TIPS := [
 	{"id": "smelt", "title": "Smelting and preserving", "text": "Stand beside the furnace and press {hand} to smelt ore into bars. The smokehouse preserves food, and the cooler keeps fish fresh."},
 	{"id": "needs", "title": "Food, water, and warmth", "text": "Food and water drain through the day, and warmth drops outside on cold days. Eat from the bag ({bag}), drink from the pond, and warm up in the house. Sleep to be fully warm again, but only with a fire lit: feed the hearth from the firewood store at the workshop."},
 	{"id": "cave", "title": "The mine", "text": "The cave is at the west edge of the farm. Each day it lays out differently, with ore to mine and creatures to watch for."},
+	{"id": "wood", "title": "The Rookery Wood", "text": "People from the lane wait at the gap in the trees north of the house to be walked through the wood: from day 14, about one morning in three, Old Maren to her sister's mill. Press {hand} beside a walker to hear where, and again to set out. In the wood your lantern burns a flask of lamp oil (the catalog, 8 coins) a little over a minute, and goes out without one. The walker's nerve falls in the dark, off the trail, and when you get far ahead; a word ({hand} beside them) or a trail ration (Cooking, at the fire) brings it back, and at 0 they run home. The tall one walks the deep wood: lift the lantern at it ({hand}, close by) before it reaches them. Each walk keeps the wood, and the nights, back a little."},
 ]
 # How often, in seconds, the player is reminded that the diary waits in the desk until it is found.
 const DIARY_HINT_EVERY := 90.0
@@ -446,21 +447,27 @@ const GEAR_ITEMS := {
 	"iron_shield": {"name": "Iron shield", "slot": "offhand", "dmg": 0, "def": 4, "level": 6, "skill": "Smithing", "cost": {"iron_bar": 4, "hardwood": 1}},
 }
 # Story chapters run in order. The first unfinished one is the Current chapter.
-# "story" is the narrative beat, "text" the goal, and "stat" what it reads.
-# Story chapters run in order. The first unfinished one is the Current chapter.
-# "story" is the narrative beat, "text" the goal, and "stat" what it reads.
+# "story" is the narrative beat, "text" the goal, and "stat" what it reads. The first week runs: the first
+# night (bed), a lantern, then Old Maren to the wood's edge (TrekSystem's "edge" route, from day 4), so the
+# first hour holds the farm, the first night's scare, the first trek and the first Hollow sighting after it.
 # Story Complete (story_end in ACHIEVEMENTS) needs every chapter here, so its goal is this list's size.
 const STORY := [
+	{"id": "bed", "title": "Sleep Under Your Own Roof",
+		"story": "Something walks this farm after dark. Your body can only work so long, and the house is the one safe place. The bed is in the bedroom. Reach it before 03:00, or the night takes you where you stand.",
+		"text": "Sleep in the bed before 03:00.", "stat": "slept", "goal": 1, "reward": {"skill": "Carpentry", "xp": 40}},
+	{"id": "light", "title": "Light the Way",
+		"story": "Last night something stood at the edge of the field and watched the house. The night here is longer than the day, and it is not empty. A lantern keeps the dark a little further off, and the people down the lane won't walk with anyone who hasn't one.",
+		"text": "Build a Tin Lantern.", "prompt": "Open Craft from the section wheel ({wheel}) and build a Tin Lantern in the Other tab: 2 wood and 2 fiber, at Bushcrafting 2.",
+		"stat": "lantern_tier", "goal": 1, "reward": {"seeds": 3}},
+	{"id": "edge", "title": "To the Wood's Edge",
+		"story": "Since Agnes Rook's bell came down, nobody from the lane crosses the Rookery Wood alone. Old Maren, from the last cottage, wants walking as far as its edge, by daylight. She has never asked anyone at this farm before.",
+		"text": "Walk Old Maren to the wood's edge.",
+		"prompt": "From day 4 she waits at the gap in the trees north of the house until 15:00. Stand beside her and press {hand}. Keep her in your lantern's light and on the trail, and press {hand} beside her for a word when she's frightened.",
+		"stat": "edge_walked", "goal": 1, "reward": {"skill": "Bushcrafting", "xp": 20}},
 	{"id": "first_crop", "title": "Food Takes Time",
 		"story": "Seeds need days to become food. Each night they are watered, they grow. Turnips take a week and pumpkins ten days. Come back when something is ripe, and take it.",
 		"text": "Harvest one ripe crop.",
 		"prompt": "{tool:hoe} to select the hoe. Once a crop is ripe, face it and press {use} to harvest it.", "stat": "harvested", "goal": 1, "reward": {"skill": "Farming", "xp": 50}},
-	{"id": "light", "title": "Light the Way",
-		"story": "The night here is longer than the day, and it is not empty. A lantern keeps the dark a little further off.",
-		"text": "Build a Tin Lantern.", "stat": "lantern_tier", "goal": 1, "reward": {"seeds": 3}},
-	{"id": "bed", "title": "Sleep Under Your Own Roof",
-		"story": "Your body can only work so long. The bed is in the bedroom. Reach it before 03:00, or the night takes you where you stand.",
-		"text": "Sleep in the bed before 03:00.", "stat": "slept", "goal": 1, "reward": {"skill": "Carpentry", "xp": 40}},
 	{"id": "second_plot", "title": "The Overgrown Plot",
 		"story": "The second plot is choked with weeds. Clearing it takes more skill than you have yet.",
 		"text": "Reach Farming level 2.", "stat": "level_Farming", "goal": 2, "reward": {"pumpkin_seeds": 3}},
@@ -532,7 +539,7 @@ const ACHIEVEMENTS := [
 	{"id": "feast", "title": "Feast", "text": "Eat 50 meals.", "tier": 3, "stat": "eaten", "goal": 50, "reward": {"seeds": 5, "pumpkin_seeds": 2}},
 	{"id": "cleansed_five", "title": "Clean Conscience", "text": "Cleanse the house 5 times.", "tier": 3, "stat": "cleansed", "goal": 5, "reward": {"seeds": 5, "pumpkin_seeds": 2}},
 	{"id": "lasting", "title": "Lasting", "text": "Sleep in your bed 30 times.", "tier": 3, "stat": "slept", "goal": 30, "reward": {"seeds": 5, "pumpkin_seeds": 2}},
-	{"id": "story_end", "title": "Story Complete", "text": "Finish every story chapter.", "tier": 3, "stat": "story", "goal": 9, "reward": {"seeds": 5, "pumpkin_seeds": 2}},
+	{"id": "story_end", "title": "Story Complete", "text": "Finish every story chapter.", "tier": 3, "stat": "story", "goal": 10, "reward": {"seeds": 5, "pumpkin_seeds": 2}},
 ]
 
 const SKILLS := ["Farming", "Bushcrafting", "Carpentry", "Cleaning", "Fishing", "Cooking", "Combat", "Forestry", "Mining", "Smithing"]
@@ -2778,6 +2785,8 @@ func _tip_ready(id: String) -> bool:
 			return furnace_built or smokehouse_built
 		"cellar":
 			return cellar_built
+		"wood":
+			return trek.edge_done
 	return false
 
 

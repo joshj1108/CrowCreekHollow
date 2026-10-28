@@ -86,6 +86,20 @@ const FIRST := {"id": "first", "where": "field", "sound": "hush",
 	"ignore": "Something walked the farm in the night. There are prints at the field's edge, and they lead to the house.",
 	"ignore_sanity": 3, "creep": 0}
 const FIRST_BEATS := [0.0, 0.4, 0.9, 1.5]
+# The first sighting of the Hollow, once (sighting_seen, saved): the night of the walk to the wood's edge, or by
+# SIGHTING_BY if Maren hasn't been walked. In beats like the first night: every crow in the great tree goes up;
+# the crow-black shape stands at the far edge of the field and looks at the house; then it comes apart into crows
+# that pour into the great tree's roots, and leaves Agnes's page about the hollow there (Mystery._on_sighting).
+# It never comes closer and never moves the field shadow; it costs about what the first night does.
+const SIGHTING := {"id": "sighting", "where": "far", "sound": "crow",
+	"appear": "Every crow in the great tree goes up at once, crying, and wheels over the farm in the dark.",
+	"face": "You start toward it across the field. Before you are halfway it comes apart into crows, hundreds of them, that pour low over the crops and down into the roots of the great tree. Then the field is only a field.",
+	"face_sanity": 2, "feathers": 0, "push": 0,
+	"ignore": "It comes apart into crows, hundreds of them, that pour low over the crops and down into the roots of the great tree. Then the field is only a field.",
+	"asleep": "In the night every crow in the great tree went up at once; you heard them in your sleep. At first light the grass at the field's far edge is pressed flat in a wide ring, wider than a man would leave.",
+	"ignore_sanity": 2, "creep": 0}
+const SIGHTING_BEATS := [0.0, 0.5, 1.3]
+const SIGHTING_BY := 9
 
 var shadow_steps := 0       # saved: how far the field shadow has crept toward the house
 var last_visitor := ""      # saved: last night's visitor, so the same one doesn't come twice in a row
@@ -94,6 +108,9 @@ var visitor_tile := Vector2i(-1, -1)
 var visitor_end := END_HOUR
 var first_beat := -1        # the first night's next beat while it plays out, -1 otherwise
 var first_start := 0.0
+var sighting_seen := false  # saved: the first Hollow sighting has played
+var sight_beat := -1        # the sighting's next beat while it plays out, -1 otherwise
+var sight_start := 0.0
 var charmed := false        # a crow charm was used up tonight: losses are halved
 var layer: Node2D           # the visitors, drawn over the farm's buildings
 var light: PointLight2D     # a faint glow at the visitor, red for the figures, pale for the pond
@@ -119,15 +136,16 @@ func _build() -> void:
 
 # Shows tonight's visitor, or clears it once it is answered.
 func _show_visitor() -> void:
-	var lit := _active() and visitor_tile.x >= 0 and str(visitor["id"]) in ["field", "first", "watcher", "hollow", "pond"]
+	var lit := _active() and visitor_tile.x >= 0 and str(visitor["id"]) in ["field", "first", "watcher", "hollow", "pond", "sighting"]
 	light.enabled = lit
 	if lit:
 		# The glow sits at eye height, so the eyes and the outline around them show in the dark.
-		var eyes := {"field": 0.75, "first": 0.75, "watcher": 1.2, "hollow": 1.4, "pond": 0.0}
+		var eyes := {"field": 0.75, "first": 0.75, "watcher": 1.2, "hollow": 1.4, "sighting": 1.4, "pond": 0.0}
+		var big := str(visitor["id"]) in ["hollow", "sighting"]
 		light.position = m._tile_center(visitor_tile.x, visitor_tile.y) + Vector2(0, -m.PX * float(eyes[visitor["id"]]))
 		light.color = Color(0.7, 0.9, 1.0) if visitor["id"] == "pond" else Color(1.0, 0.18, 0.12)
-		light.texture_scale = 1.8 if visitor["id"] == "hollow" else 0.9
-		light.energy = 1.6 if visitor["id"] == "hollow" else 0.9
+		light.texture_scale = 1.8 if big else 0.9
+		light.energy = 1.6 if big else 0.9
 	layer.queue_redraw()
 
 
@@ -147,6 +165,9 @@ func _active() -> bool:
 func _begin(force := "") -> void:
 	if (force == "" and _first_night()) or force == "first":
 		_begin_first()
+		return
+	if (force == "" and _sighting_night()) or force == "sighting":
+		_begin_sighting()
 		return
 	m.event_fired_day = m.day
 	m.stats["events"] += 1
@@ -225,6 +246,56 @@ func _update_first() -> void:
 			m._show_message(text)
 
 
+# Tonight is the first sighting: after the first night, the night of the walk to the wood's edge (or by
+# SIGHTING_BY), once.
+func _sighting_night() -> bool:
+	return not sighting_seen and not _first_night() and (m.trek.edge_done or m.day >= SIGHTING_BY)
+
+
+func _begin_sighting() -> void:
+	m.event_fired_day = m.day
+	m.stats["events"] += 1
+	sighting_seen = true
+	visitor = SIGHTING
+	visitor_end = END_HOUR
+	visitor_tile = Vector2i(-1, -1)
+	charmed = false
+	sight_start = m.current_hour
+	sight_beat = 1
+	m.ambience.night_event("crow")
+	m._show_message(str(SIGHTING["appear"]))
+	_show_visitor()
+
+
+# The sighting's beats: the shape at the far edge, then it comes apart into crows and leaves a page.
+func _update_sighting() -> void:
+	while sight_beat >= 0 and m.current_hour >= sight_start + float(SIGHTING_BEATS[sight_beat]):
+		var beat := sight_beat
+		sight_beat = sight_beat + 1 if sight_beat + 1 < SIGHTING_BEATS.size() else -1
+		if not _active() or visitor["id"] != "sighting":
+			sight_beat = -1
+			return
+		if beat == 1:
+			visitor_tile = _place("far")
+			m.tonight_shadow = visitor_tile
+			m.ambience.night_event("heartbeat")
+			_show_visitor()
+			var seen := "At the far edge of the field" if not m.inside else "Through the window, at the far edge of the field,"
+			m._show_message("%s stands something far bigger than the thing from your first night: taller than the door, ragged at the edges like a cloud of crows, with two red eyes. It doesn't come closer. It only looks at the house." % seen)
+		elif beat == 2:
+			_leave_sighting(false)
+
+
+# The sighting ends, faced or not: it goes into the great tree's roots, and Agnes's page about the hollow there
+# is left where it stood (Mystery._on_sighting), or just the message once that page is already found.
+func _leave_sighting(faced: bool) -> void:
+	sight_beat = -1
+	var text := str(SIGHTING["face"] if faced else SIGHTING["ignore"])
+	_resolve(faced, false)
+	if not m.mystery._on_sighting(text):
+		m._show_message(text)
+
+
 func _pick() -> Dictionary:
 	# The night the crow bell is hung, the Hollow comes to it one last time. Once Agnes is walked to the grove,
 	# it sleeps and never comes again.
@@ -257,6 +328,9 @@ func _place(where: String) -> Vector2i:
 			return m._world_tile(m.HOUSE_IX + m.HOUSE_W, m.HOUSE_IY + 1)
 		"door":
 			return m._world_tile(m.HOUSE_DOOR_IX, m.HOUSE_DOOR_IY + 2)
+		"far":
+			# The field's far edge, where the shadow starts, however far it has crept since.
+			return Vector2i(m.BORDER_X + m.INNER_W - 2, m.shadow_tile.y)
 		"tree":
 			return m._world_tile(m.BIG_TREE_INNER.x + 1, m.BIG_TREE_INNER.y + 1)
 		"pond":
@@ -267,6 +341,7 @@ func _place(where: String) -> Vector2i:
 # Each frame: an encounter not answered in time counts as ignored.
 func _update() -> void:
 	_update_first()
+	_update_sighting()
 	if _active() and m.current_hour >= visitor_end:
 		_resolve(false)
 
@@ -279,6 +354,11 @@ func _try_face(tile: Vector2i) -> bool:
 	match str(visitor["id"]):
 		"field", "first", "watcher", "hollow":
 			hit = tile == visitor_tile
+		"sighting":
+			# It goes before you reach it: walking out at it ends it, faced.
+			if visitor_tile.x >= 0 and tile.distance_to(visitor_tile) <= 6.0:
+				_leave_sighting(true)
+				return true
 		"crows":
 			hit = m._in_big_tree(tile)
 		"pond":
@@ -304,13 +384,17 @@ func _on_enter_house() -> void:
 # morning message. Going to bed before 22:00 doesn't dodge it: tonight's visitor comes to a sleeping house.
 func _end_night() -> String:
 	first_beat = -1
+	sight_beat = -1
 	if not _active():
 		if m.event_fired_day == m.day:
 			return ""
 		var first := _first_night()
+		var sighting := not first and _sighting_night()
 		m.event_fired_day = m.day
 		m.stats["events"] += 1
-		visitor = FIRST if first else _pick()
+		visitor = FIRST if first else (SIGHTING if sighting else _pick())
+		if sighting:
+			sighting_seen = true
 		charmed = false
 		if int(m.inventory["crow_charm"]) > 0:
 			m.inventory["crow_charm"] -= 1
@@ -326,6 +410,9 @@ func _resolve(faced: bool, show := true) -> String:
 	m.tonight_shadow = Vector2i(-1, -1)
 	_show_visitor()
 	var text := str(v["face"] if faced else v["ignore"])
+	# Slept through, the sighting is only what you find in the morning.
+	if not show and not faced and v.has("asleep"):
+		text = str(v["asleep"])
 	var loss := float(v["face_sanity"] if faced else v["ignore_sanity"])
 	loss *= (2.0 if m.sanity_sys._event_active("dread") else 1.0) * (0.5 if m.sanity_sys._event_active("ward") else 1.0)
 	loss *= 0.5 if charmed else 1.0
@@ -408,7 +495,7 @@ func _draw() -> void:
 			ci.draw_circle(s + Vector2(0, -px * 0.75 * tall), px * 0.26, Color(0.02, 0.01, 0.05, 0.92))
 			ci.draw_circle(s + Vector2(-5, -px * 0.78 * tall), 2.5, Color(3.0, 0.3, 0.2))
 			ci.draw_circle(s + Vector2(5, -px * 0.78 * tall), 2.5, Color(3.0, 0.3, 0.2))
-		"hollow":
+		"hollow", "sighting":
 			# Twice the farmer's height, ragged at the edges like a cloud of crows.
 			for k in 7:
 				var a := TAU * float(k) / 7.0

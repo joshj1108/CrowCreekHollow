@@ -4,7 +4,9 @@ extends RefCounted
 # Treks into the Rookery Wood (DESIGN.md, Groves and treks). Since Agnes Rook's bell came down nobody from the
 # lane crosses the wood alone, so now and then people wait at the gap in the trees north of the house and ask
 # to be walked. Each route (ROUTES) has its walker, who waits at their own spot: Space beside one picks that route.
-# Old Maren to the mill (first winter), the Tull boy to the drowned orchard (spring), the vicar to the chapel on
+# First, in the first week, Old Maren asks to be walked only to the wood's edge (the "edge" route: two short
+# clearings by day, a fallen tree and a glimpse of the tall one, which teaches the walker, the lantern and the oil
+# and raises no dread). Then Old Maren to the mill (from FROM_DAY), the Tull boy to the drowned orchard (spring), the vicar to the chapel on
 # the hill (summer), and once, late in the second autumn after the bell is hung, a woman in a grey shawl to the
 # Hollow's grove. The chapel and grove walkers also wait into the evening: set out after 18:00 for a night trek
 # (double pay, double the wood's sanity drain).
@@ -28,7 +30,15 @@ extends RefCounted
 var m: MainGame
 
 const WALKER_SPOT := Vector2i(25, 1)  # inner farm tile at the north edge, above the house, where walkers wait
-const FROM_DAY := 62                  # walkers come from the first winter (December 1st)
+const FROM_DAY := 14                  # the mill path opens (day 62, the first winter, until October 2026)
+const EDGE_DAY := 4                   # Old Maren first waits to be walked to the wood's edge (she says so the morning before)
+const EDGE_OIL := 2                   # flasks she brings if you have fewer, so nobody is stuck without coins
+const EDGE_GLOOM := 0.45              # the wood's edge is lighter than the deep wood (GLOOM)
+const EDGE_GLIMPSE_AT := 6.0          # seconds into the second clearing before the tall one's eyes show
+const EDGE_GLIMPSE_SECONDS := 7.0     # how long they stay before they are gone
+const EDGE_COINS := 10
+const EDGE_XP := 25
+const WOOD_FROM := 62                 # the wood comes closer only from the first winter, whatever day the mill opens
 const COME_EVERY := 3                 # about one day in this many
 const START_BY := 15.0                # a trek must start by 15:00; the walker gives up waiting then
 const CONFIRM_SECONDS := 4.0          # press Space again within this to set out (or to wade)
@@ -210,6 +220,11 @@ const CLEARINGS := [
 		"event": 4, "detour": [[32, 16], [28, 14], [21, 14], [19, 12]], "trail": "marked"},
 	{"points": [[18, 22, 1], [18, 19, 1], [30, 17, 1], [33, 13, 0], [24, 10, 0], [12, 9, 1], [8, 5, 1], [16, 3, 1], [18, 1, 1]],
 		"event": 3, "detour": [[31, 17], [36, 15], [36, 11], [29, 9], [27, 10]], "trail": "dark"},
+	# The wood's edge (the "edge" route): two short clearings, a fallen tree in the first and the stile at the end.
+	{"points": [[20, 22, 2], [20, 18, 2], [12, 15, 2], [12, 11, 0], [22, 8, 1], [22, 4, 2], [20, 1, 1]],
+		"event": 3, "detour": [[12, 15], [7, 14], [6, 10], [10, 7], [19, 9]]},
+	{"points": [[20, 22, 2], [20, 19, 2], [28, 16, 2], [28, 11, 2], [18, 9, 2], [14, 6, 2], [20, 4, 2], [20, 1, 1]],
+		"event": -1, "detour": [], "dest": Rect2i(24, 1, 5, 3)},
 ]
 const FLIP := 100                     # a layout index FLIP + i is clearing i mirrored left to right
 const MARKED_ROUTE := [0, 1, 2, 4]    # the mill path's clearings by the marked trail
@@ -220,6 +235,13 @@ const DARK_ROUTE := [0, 3, 4]         # ... and by the dark trail
 # base pay on arriving (dread, the dark trail and the night add to it). "talk" is a line a clearing (the last
 # line at the end), and the {w} {W} {she} {She} {her} {his} tokens in messages name the walker (see _w).
 const ROUTES := {
+	"edge": {"walker": "Old Maren", "short": "Maren", "she": "she", "her": "her", "his": "her", "to": "the wood's edge",
+		"from": EDGE_DAY, "level": 0, "oil": 1, "xp": EDGE_XP, "feathers": 0, "spot": Vector2i(25, 1), "night": false,
+		"marked": [7, 8], "dark": [7, 8], "extra": [],
+		"talk": [
+			"\"I'm Maren, from the last cottage down the lane. I walked this alone every Sunday, once. Since they took the bell down, nobody does.\"",
+			"\"There's the stile. Past it is the old way on to the mill, where my sister Ruth is.\""],
+		"arrive": "At the stile Maren stops and looks down the old trail into the dark of the trees. \"That's the way to the mill. The town met there, the night they voted Agnes Rook's bell down. I was there.\" She doesn't say how she voted. \"I'll want walking all the way, in a week or so, once you know the wood. Ask me about Agnes then.\""},
 	"mill": {"walker": "Old Maren", "short": "Maren", "she": "she", "her": "her", "his": "her", "to": "the mill",
 		"from": FROM_DAY, "level": 0, "oil": 1, "xp": REWARD_XP, "feathers": 0, "spot": Vector2i(25, 1), "night": false,
 		"marked": MARKED_ROUTE, "dark": DARK_ROUTE, "extra": [],
@@ -279,6 +301,9 @@ var active := false
 var route_id := "mill"          # which route (a key of ROUTES): set when you pick a walker
 var night := false              # set out after NIGHT_FROM
 var grove_done := false         # saved: the woman in the grey shawl has been walked to the grove
+var edge_done := false          # saved: Old Maren has been walked to the wood's edge (the first trek, in week one)
+var glimpsed := false           # on the walk to the wood's edge: the tall one's eyes have shown and gone
+var glimpse_until := 0.0
 var clearing := 0               # how far along the route: an index into route and events
 var route: Array = MARKED_ROUTE # the clearings walked (the fork may change it)
 var dark := false               # took the dark trail at the fork
@@ -450,13 +475,18 @@ func _night_sanity() -> float:
 func _route_open(id: String) -> bool:
 	if m.day < int(ROUTES[id]["from"]):
 		return false
+	# Maren asks for the wood's edge every day until she's walked there, and only then for the mill.
+	if id == "edge":
+		return not edge_done
+	if id == "mill" and not edge_done:
+		return false
 	if id == "grove":
 		return m.projects.bell_day >= 0 and not grove_done
 	return true
 
 
 func _waiting(id := "mill") -> bool:
-	if active or done_day == m.day or not _walker_day(m.day) or not _route_open(id):
+	if active or done_day == m.day or not _route_open(id) or (id != "edge" and not _walker_day(m.day)):
 		return false
 	return m.current_hour < START_BY or (bool(ROUTES[id]["night"]) and m.current_hour < NIGHT_UNTIL)
 
@@ -475,16 +505,27 @@ func _walker_tile(id := "mill") -> Vector2i:
 
 func _morning_note() -> String:
 	if not _walker_day(m.day):
-		return _wood_note()
+		return _edge_note() + _wood_note()
 	var names: Array = []
 	for id in ROUTES:
-		if _route_open(id):
+		if _route_open(id) and id != "edge":
 			names.append("%s (to %s)" % [ROUTES[id]["walker"], ROUTES[id]["to"]])
 	if names.is_empty():
-		return _wood_note()
+		return _edge_note() + _wood_note()
 	var who: String = names[0] if names.size() == 1 else ", ".join(names.slice(0, -1)) + " and " + str(names[-1])
 	return " %s %s waiting at the gap in the trees north of the house, wanting walking through the wood, before three." % [
 		_cap(who), "is" if names.size() == 1 else "are"] + _wood_note()
+
+
+# The first week: the morning before, Maren says she'll come; from EDGE_DAY she waits every day until walked.
+func _edge_note() -> String:
+	if edge_done:
+		return ""
+	if m.day == EDGE_DAY - 1:
+		return " Old Maren from the last cottage down the lane stopped at the gate at first light. She'll be back tomorrow morning: she wants walking as far as the edge of the Rookery Wood, and says you'll want a lantern."
+	if m.day >= EDGE_DAY:
+		return " Old Maren is waiting at the gap in the trees north of the house, wanting walking to the wood's edge, before three."
+	return ""
 
 
 func _wood_note() -> String:
@@ -519,6 +560,9 @@ func _steps(id: String) -> Dictionary:
 # The day's events on a route, for both trails, and which arm of the fingerpost is the marked one. The
 # balance sim reads it too.
 func _plan(day: int, id := "mill") -> Dictionary:
+	# The wood's edge is always the same gentle walk: a fallen tree, then the stile.
+	if id == "edge":
+		return {"marked": ["tree", ""], "dark": ["tree", ""], "marked_right": true}
 	var rng := RandomNumberGenerator.new()
 	rng.seed = hash([day, "trek"]) if id == "mill" else hash([day, "trek", id])
 	var season := _season_on(day)
@@ -580,8 +624,15 @@ func _ask(id: String) -> void:
 		m._show_message(_w("\"It's too late to be there by daylight. After six we could walk it by night, if you dare.\""))
 		return
 	if m.lantern_tier <= 0:
-		m._show_message(_w("\"Not without a light.\" {W} won't go into the wood until you have a lantern."))
+		m._show_message(_w("\"Not without a light.\" {W} won't go into the wood until you have a lantern.%s") % (
+			" (A Tin Lantern: Craft, Other tab, Bushcrafting 2.)" if id == "edge" else ""))
 		return
+	var oil_note := ""
+	var short := EDGE_OIL - int(m.materials["lamp_oil"])
+	if id == "edge" and short > 0:
+		oil_note = " She takes %d flask%s of lamp oil from her basket and gives %s to you: \"I'm not daft enough to go in there without.\" A flask burns little more than a minute in the wood; more comes from the catalog, 8 coins." % [
+			short, "" if short == 1 else "s", "it" if short == 1 else "them"]
+		m.materials["lamp_oil"] = EDGE_OIL
 	if int(m.materials["lamp_oil"]) < _oil_needed(id, by_night):
 		m._show_message(_w("\"Have you oil for that lantern?\" You need %d lamp oil from the catalog to walk {her} to %s%s.") % [
 			_oil_needed(id, by_night), r["to"], " by night" if by_night else ""])
@@ -590,6 +641,10 @@ func _ask(id: String) -> void:
 	if now > _confirm_until or _confirm_id != id:
 		_confirm_until = now + CONFIRM_SECONDS
 		_confirm_id = id
+		if id == "edge":
+			m._show_message("\"Only as far as the edge of the wood, by daylight. Two clearings, no more.\"%s Her nerve will show beside your needs: keep her in your lantern's light and on the trail, and a word (Space beside her) steadies her. You have %d lamp oil. Press Space again to set out." % [
+				oil_note, int(m.materials["lamp_oil"])])
+			return
 		var steps := _steps(id)
 		var rations := int(m.inventory["trail_ration"])
 		var loaves := int(m.inventory["bread"])
@@ -637,12 +692,17 @@ func _start(id := "mill") -> void:
 	m.foes = []
 	plan = _plan(m.day, id)
 	dark = false
+	glimpsed = false
+	glimpse_until = 0.0
 	route = _steps(id)["marked"]
 	events = (plan["marked"] as Array).duplicate()
 	if nerve_col != null:
 		(nerve_col.get_child(0) as Label).text = "%s's nerve" % _cap(str(ROUTES[id]["short"]))
 	_enter_clearing()
 	var by_night := " The sky is dark already; the wood is darker." if night else ""
+	if id == "edge":
+		m._show_message("You lead Maren through the gap in the trees. The light goes green, then grey, and your lantern burns oil in here. Her nerve shows by your needs: keep her close, in your light and on the path.")
+		return
 	if _dread() > 0:
 		m._show_message(_w("You lead {w} through the gap in the trees.%s The wood is quieter than last time, as if it has been waiting. It knows you now (dread %d of %d). Press Space beside {her} for a word, or a trail ration.") % [by_night, _dread(), MAX_DREAD])
 		return
@@ -996,6 +1056,9 @@ func _crows(_delta: float) -> void:
 # The tall one walks the trees toward the walker. Near your light it backs away; if it reaches them, it is gone
 # again for a while and their nerve is badly shaken.
 func _tall(delta: float) -> void:
+	if route_id == "edge":
+		_glimpse()
+		return
 	if clearing < (0 if _dread() >= 2 else TALL_FROM):
 		return
 	var px := float(m.PX)
@@ -1018,6 +1081,25 @@ func _tall(delta: float) -> void:
 	elif tall_pos.distance_to(m.player.position) > 16.0 * px:
 		tall_on = false
 		tall_back_at = clearing_time + TALL_BACK * 0.5
+
+
+# On the walk to the wood's edge the tall one only shows itself, once, in the second clearing: its eyes high in
+# the trees, standing still, gone again before it comes near. It never touches Maren.
+func _glimpse() -> void:
+	if clearing < 1 or glimpsed:
+		return
+	if not tall_on:
+		if clearing_time < EDGE_GLIMPSE_AT:
+			return
+		tall_on = true
+		tall_pos = _tall_spawn()
+		glimpse_until = clearing_time + EDGE_GLIMPSE_SECONDS
+		m.play_sfx("snap_far", 0.05)
+		m._show_message("High in the trees, two red eyes, higher than a man's. They don't move. Maren hasn't seen them. Lift the lantern at them (Space, close by), or walk on and keep her talking.")
+	elif clearing_time >= glimpse_until:
+		tall_on = false
+		glimpsed = true
+		m._show_message("When you look again, the eyes are gone. Something tall walks in this wood. Deeper in, it won't keep its distance.")
 
 
 # A tree tile well away from you both, toward the walker's side of the wood.
@@ -1095,6 +1177,11 @@ func _interact(tile: Vector2i) -> void:
 		else:
 			m._show_message("You drive the crows off a last time, and they give up and go. -%d sanity, +1 crow feather." % int(CROW_SANITY))
 		layer.queue_redraw()
+		return
+	if tall_on and route_id == "edge" and m.player.position.distance_to(tall_pos) <= TALL_REACH * px:
+		tall_on = false
+		glimpsed = true
+		m._show_message("You lift the lantern at it, and there is nothing there: bark, and the dark between the trunks. Deeper in, it won't be so shy.")
 		return
 	if tall_on and m.player.position.distance_to(tall_pos) <= TALL_REACH * px:
 		tall_on = false
@@ -1305,6 +1392,17 @@ func _on_step(kind: int) -> void:
 # The walker pays in kind: each route its own gifts (some by season), feathers, the fiber gathered on the way and
 # Bushcrafting XP. The dark trail and the dread add to it, and a night trek doubles it all.
 func _arrive() -> void:
+	if route_id == "edge":
+		var paid := _edge_pay()
+		_on_arrived()
+		# The chapter and the diary's note on the wood are settled now, so their messages don't cover Maren's.
+		m.progression._check_story()
+		m.tips_seen["wood"] = true
+		m._diary_page("wood")
+		m.play_sfx("chime", 0.03)
+		_end("%s %s. You walk her home to her cottage by the lane. Your diary has a new page, The Rookery Wood, and the next chapter." % [
+			ROUTES["edge"]["arrive"], ", ".join(paid)], true)
+		return
 	var r: Dictionary = ROUTES[route_id]
 	var d := _dread()
 	var pay := NIGHT_PAY if night else 1
@@ -1332,9 +1430,22 @@ func _arrive() -> void:
 	_end("%s%s %s.%s%s" % [arrive, _grove_pages_text(), ", ".join(gifts), " Twice the pay, for walking by night." if night else "", home], true)
 
 
+# Maren's thanks for the walk to the wood's edge (the balance sim calls this too): a little, as text.
+func _edge_pay() -> Array:
+	m.money += EDGE_COINS
+	m.materials["fiber"] += 2
+	m.progression._grant_xp("Bushcrafting", EDGE_XP)
+	return ["+%d coins from her purse" % EDGE_COINS, "+2 fiber gathered on the way", "+%d Bushcrafting XP" % EDGE_XP]
+
+
 # Coming home from a trek, by any route (the balance sim calls this too): the wood's dread, the grove, and
-# the nights it holds back.
+# the nights it holds back. The walk to the wood's edge only teaches: the wood doesn't learn you from it.
 func _on_arrived() -> void:
+	if route_id == "edge":
+		edge_done = true
+		last_day = m.day
+		m.nights.shadow_steps = maxi(0, m.nights.shadow_steps - TREK_PUSH)
+		return
 	treks_done += 1
 	walked[route_id] = int(walked.get(route_id, 0)) + 1
 	last_day = m.day
@@ -1354,9 +1465,9 @@ func _grove_pages_text() -> String:
 
 # The wood has come up to the farm: no trek for WOOD_DAYS, counted from the first walker day.
 func _wood_close() -> bool:
-	if grove_done or m.day < FROM_DAY:
+	if grove_done or m.day < WOOD_FROM:
 		return false
-	return m.day - maxi(last_day, FROM_DAY) > WOOD_DAYS
+	return m.day - maxi(last_day, WOOD_FROM) > WOOD_DAYS
 
 
 # What tonight takes, by the treks: half the day you walked someone, more while the wood is close, less once
@@ -1495,7 +1606,7 @@ func _end(text: String, arrived: bool) -> void:
 	m.player.position = m._tile_center(out.x, out.y)
 	m._set_bounds()
 	if arrived:
-		_pass_hours(1.0)
+		_pass_hours(0.5 if route_id == "edge" else 1.0)
 	if nerve_col != null:
 		nerve_col.visible = false
 	m.queue_redraw()
@@ -1541,7 +1652,7 @@ func _make_rope() -> void:
 # --- Light and drawing ------------------------------------------------------------------------------
 
 func _tint(darkness: float) -> Color:
-	var gloom: float = (GLOOM_DARK if _trail() == "dark" else GLOOM) + float(SEASON_GLOOM.get(_season_on(m.day), 0.0))
+	var gloom: float = (GLOOM_DARK if _trail() == "dark" else (EDGE_GLOOM if route_id == "edge" else GLOOM)) + float(SEASON_GLOOM.get(_season_on(m.day), 0.0))
 	return m._light_tint().lerp(m.NIGHT_TINT, maxf(darkness, gloom))
 
 
@@ -1734,6 +1845,8 @@ func _draw_dest(r: Rect2i) -> void:
 			_draw_chapel(r)
 		"grove":
 			_draw_grove(r)
+		"edge":
+			_draw_stile(r)
 		_:
 			_draw_mill(r)
 
@@ -1804,6 +1917,38 @@ func _draw_grove(r: Rect2i) -> void:
 		var p := c + Vector2(cos(a) * px * 1.8, sin(a) * px * 0.7 - px * 1.6)
 		m.draw_line(p + Vector2(-px * 0.2, 0), p, Color("141018"), 3.0)
 		m.draw_line(p, p + Vector2(px * 0.2, 0), Color("141018"), 3.0)
+
+
+# The wood's edge: an old split-rail fence across the top of the clearing, a stile at its west end by the way
+# on, and a leaning fingerpost with one arm, toward the mill.
+func _draw_stile(r: Rect2i) -> void:
+	var px := float(m.PX)
+	var ink := Color("1d1611")
+	var wood := Color("6a4a32")
+	var base := Vector2(r.position) * px
+	var w := r.size.x * px
+	var h := r.size.y * px
+	m.draw_rect(Rect2(base, Vector2(w, h)), Color("26302a"))
+	for k in 2:
+		var y := base.y + h * (0.45 + 0.25 * k)
+		m.draw_line(Vector2(base.x - px * 0.6, y), Vector2(base.x + w, y), ink, 7.0)
+		m.draw_line(Vector2(base.x - px * 0.6, y), Vector2(base.x + w, y), Color("7a5a3e"), 4.0)
+	for k in 4:
+		var x := base.x + w * (0.05 + 0.3 * k)
+		m.draw_rect(Rect2(Vector2(x, base.y + h * 0.3), Vector2(px * 0.18, h * 0.6)).grow(2.0), ink)
+		m.draw_rect(Rect2(Vector2(x, base.y + h * 0.3), Vector2(px * 0.18, h * 0.6)), wood)
+	for k in 2:
+		var step := Rect2(Vector2(base.x - px * 0.9, base.y + h * (0.55 + 0.2 * k)), Vector2(px * 0.8, px * 0.16))
+		m.draw_rect(step.grow(2.0), ink)
+		m.draw_rect(step, Color("8a6a48"))
+	var post := Vector2(base.x + w * 0.55, base.y + h * 0.95)
+	m.draw_line(post, post + Vector2(px * 0.15, -h * 0.85), ink, 7.0)
+	m.draw_line(post, post + Vector2(px * 0.15, -h * 0.85), wood, 4.0)
+	var arm := PackedVector2Array([post + Vector2(px * 0.1, -h * 0.8), post + Vector2(-px * 1.4, -h * 0.75), post + Vector2(-px * 1.6, -h * 0.66), post + Vector2(-px * 1.4, -h * 0.57), post + Vector2(px * 0.1, -h * 0.62)])
+	m.draw_colored_polygon(arm, Color("7a5a3e"))
+	var outline := arm.duplicate()
+	outline.append(arm[0])
+	m.draw_polyline(outline, ink, 2.0)
 
 
 # The mill: a stone ground floor, a boarded upper floor, a steep roof, and its wheel on the east side.

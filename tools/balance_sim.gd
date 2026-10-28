@@ -15,6 +15,8 @@ extends SceneTree
 #   every=N     print one table row every N days (default 1)
 #   treks=N     go on N treks a week (default 0), on the longest open route the supplies allow. The routes,
 #               events, forks and gifts come from TrekSystem; walking time and sanity are estimated (_route_trek).
+#               With treks, Old Maren is first walked to the wood's edge, the first day she waits with a lantern
+#               built (day 4), which opens the mill path from day 14 (_edge_trek).
 # Approximations, since these need walking or real time:
 #   - Each day takes every brush pile and up to TREES_PER_DAY trees (while the wood is under WOODPILE or the
 #     hardwood under HARDWOOD_WANT, as a player stops felling once the woodpile is full), mines every farm rock, and breaks up to
@@ -73,7 +75,7 @@ var treks_a_week := 0
 var rope := 0
 var grove_rations := 0      # rations baked ahead for the grove, one a day once she waits (see _trek)
 var last_trek := ""         # the route of the last trek walked
-var trek_log := {"mill": 0, "orchard": 0, "chapel": 0, "post": 0, "grove": 0, "dark": 0, "floods": 0, "dogs": 0, "skipped": 0, "oil_coins": 0, "works_coins": 0, "trade_coins": 0}
+var trek_log := {"edge": 0, "mill": 0, "orchard": 0, "chapel": 0, "post": 0, "grove": 0, "dark": 0, "floods": 0, "dogs": 0, "skipped": 0, "oil_coins": 0, "works_coins": 0, "trade_coins": 0}
 var days := 60
 var every := 1
 var milestones := {}         # name -> first day
@@ -846,9 +848,13 @@ func _trek() -> void:
 	if treks_a_week <= 0:
 		return
 	_trail_works()
+	var t := m.trek
+	# Old Maren to the wood's edge, the first day she waits once a lantern is built (TrekSystem's "edge" route).
+	if t._route_open("edge") and m.lantern_tier > 0:
+		_edge_trek()
+		return
 	if (m.day % 7) >= treks_a_week:
 		return
-	var t := m.trek
 	# Once the woman in the grey shawl waits, a ration a day is baked ahead for her walk, as a player would,
 	# since the hens and goats leave few crops spare on any one day.
 	var grove_need := 0
@@ -921,6 +927,21 @@ func _trek() -> void:
 		_mark("trek: " + id)
 		return
 	trek_log["skipped"] += 1
+
+
+# The walk to the wood's edge: Maren tops the oil up to EDGE_OIL and one flask burns; two short clearings by day.
+# Its pay and its end (no dread) come from the game; trek_log["edge"] is the day it was walked.
+func _edge_trek() -> void:
+	var t := m.trek
+	t.route_id = "edge"
+	m.materials["lamp_oil"] = maxi(int(m.materials["lamp_oil"]), t.EDGE_OIL) - 1
+	_pass(1.0, false)
+	m.sanity_sys._change_sanity(-CLEARING_SANITY * 2.0)
+	_track_sanity()
+	t._edge_pay()
+	t._on_arrived()
+	trek_log["edge"] = m.day
+	_mark("trek: edge")
 
 
 # A trek on a route, from the real day plan (TrekSystem._plan, _steps) and pay (ROUTES, dread, the dark trail).

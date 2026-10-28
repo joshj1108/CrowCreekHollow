@@ -27,7 +27,7 @@ The full list is under **Controls** in the Pause menu and in Settings on the sta
 
 ## What to focus on
 
-1. **The first night.** Start a new game and stay up past 22:00 on day 1. Was it scary, confusing, too long, or too easy to miss? (If you go to bed early you skip it. That's allowed, but tell us if you did.)
+1. **The first hour.** Start a new game and play the first four or five days. Stay up past 22:00 on day 1 for the first night. From day 4, Old Maren waits at the gap in the trees north of the house (you need a Tin Lantern first; she brings the lamp oil): walk her to the wood's edge, then stay up past 22:00 that night. Was each of these scary, confusing, too long, or too easy to miss? Did the walk teach you her nerve, the lantern and the oil well enough for the longer walk to the mill from day 14? (If you go to bed early you skip the nights. That's allowed, but tell us if you did.)
 2. **The first week.** Is it clear what to do next? Where did you get stuck, bored or lost? Did money, food, water or sanity feel too tight or too loose?
 3. **Saving and loading.** Sleep, quit, then Continue or Load. Are you back where you were, with everything you had? Try more than one save slot.
 4. **Settings.** Volume, fullscreen or windowed, window size, screen shake and message speed. Do they work, and are they still set after you restart the game?
@@ -36,7 +36,7 @@ The full list is under **Controls** in the Pause menu and in Settings on the sta
 ## Known rough edges
 
 - There are no towns or shops to travel to. Everything comes from the farm, the cave, the catalog at the desk and the treks. Saves from older builds that went out to the towns still load: anything left in the bank comes back to your pack, and a bow or crossbow is taken apart for its materials.
-- Treks into the groves (from the first winter) are new and still rough. The trail works that ease them (Buildings, Trail works) are built but barely tested. Walker and destination art is placeholder.
+- Treks into the groves (the mill from day 14, the rest later) are new and still rough. The trail works that ease them (Buildings, Trail works) are built but barely tested. Walker and destination art is placeholder.
 - The pacing after the first few weeks isn't finished. Skills and farm projects may run out early.
 - Some art is placeholder, and the game has no icon yet.
 - There's no in-game bug report button. Please use the steps below.
