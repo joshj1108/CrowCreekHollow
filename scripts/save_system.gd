@@ -3,7 +3,7 @@ extends RefCounted
 
 # Bumped when a save's keys change shape. Saves from before the number was written count as 1.
 # _migrate lifts an older save one version at a time, so every old save still loads.
-const SAVE_VERSION := 13
+const SAVE_VERSION := 14
 # Keys a save must hold with the right type, or it isn't read: the loader would trip over anything else.
 const DICT_KEYS := ["inventory", "materials", "skill_xp", "stats", "equipment", "quests_done", "achievements_done",
 	"tool_tier", "trek_walked", "night_seen"]
@@ -99,6 +99,7 @@ func _save_game() -> void:
 		"trek_edge_done": m.trek.edge_done,
 		"sighting_seen": m.nights.sighting_seen,
 		"trek_works": m.trek.works.keys(),
+		"folk": m.folk._to_save(),
 		"estate": m.estate._to_save(),
 		"stand_glut": m.stall.glut,
 		"rook_pages": m.mystery.found.keys(),
@@ -244,6 +245,7 @@ func _load_game() -> bool:
 	m.trek.grove_done = bool(data.get("trek_grove_done", false))
 	m.trek.edge_done = bool(data.get("trek_edge_done", false))
 	m.nights.sighting_seen = bool(data.get("sighting_seen", false))
+	m.folk._from_save(data.get("folk", {}))
 	m.trek.works.clear()
 	for id in data.get("trek_works", []):
 		if TrekSystem.WORKS.has(str(id)):
@@ -526,6 +528,19 @@ static func _migrate(data: Dictionary) -> Dictionary:
 			for id in ["field", "first", "knock", "crows", "pond", "watcher", "footsteps", "hollow", "raid"]:
 				seen_ids[id] = met
 			data["night_seen"] = seen_ids
+	if v < 14:
+		# Version 14 made the walkers neighbours (FolkSystem): friendship, gifts, requests, scenes and farm visits.
+		# Friendship counts the walks already made (trek_walked), so every walker keeps the standing they had; an
+		# older save has met each walker it has walked, and Maren once she was walked to the wood's edge.
+		if not data.has("folk"):
+			var met: Array = []
+			var walked: Variant = data.get("trek_walked", {})
+			for id in FolkSystem.IDS:
+				if typeof(walked) == TYPE_DICTIONARY and int(walked.get(id, 0)) > 0:
+					met.append(id)
+			if bool(data.get("trek_edge_done", false)) and not "mill" in met:
+				met.append("mill")
+			data["folk"] = {"met": met}
 	# A save from a newer build keeps its number; keys this build doesn't know are ignored.
 	data["save_version"] = maxi(v, SAVE_VERSION)
 	return data

@@ -18,6 +18,9 @@ extends SceneTree
 #               events, forks and gifts come from TrekSystem; walking time and sanity are estimated (_route_trek).
 #               With treks, Old Maren is first walked to the wood's edge, the first day she waits with a lantern
 #               built (day 4), which opens the mill path from day 14 (_edge_trek).
+#   - The walkers as neighbours (_folk, FolkSystem): at midday each one at the gate or come by the farm gets a word,
+#     any scene due is seen through, requests are handed over when the pack holds them, and each is given the
+#     loved or liked food they'd want most, if the pack holds more than GIFT_KEEP of it. The row's last column is their hearts.
 # Approximations, since these need walking or real time:
 #   - Each day takes every brush pile and up to TREES_PER_DAY trees (while the wood is under WOODPILE or the
 #     hardwood under HARDWOOD_WANT, as a player stops felling once the woodpile is full), mines every farm rock, and breaks up to
@@ -80,6 +83,7 @@ const WIN_PER_TIER := 0.06
 const STRIKE_CHANCE := 0.4
 const RAID_WIN := 0.75
 const ROPE_FIBER := 2
+const GIFT_KEEP := 3        # a walker's gift is only given from more than this many held, so rations and meals come first
 var mode := "engaged"
 var treks_a_week := 0
 var rope := 0
@@ -102,6 +106,7 @@ var hp_lost := 0
 var empty_hours := {"food": 0.0, "water": 0.0, "warmth": 0.0}
 var fished_hours := 0
 var made_charms := 0
+var folk_log := {"gifts": 0, "loved": 0, "talks": 0, "visits": 0, "requests": 0, "scenes": []}
 var caves := {"visits": 0, "copper": 0, "iron": 0}   # ore nodes seen in the day's cave
 
 
@@ -137,7 +142,7 @@ func _process(_delta: float) -> bool:
 
 func _run() -> void:
 	print("mode=%s days=%d" % [mode, days])
-	print("day date   coins san/max fea  Fa Ca Cl Bu Fo Mi Sm steps shd tax  grow wood fib wear kept night")
+	print("day date   coins san/max fea  Fa Ca Cl Bu Fo Mi Sm steps shd tax  grow wood fib wear kept night  hearts M/D/V/P")
 	for i in days:
 		var night := _play_day()
 		_note_milestones()
@@ -189,6 +194,7 @@ func _play_day() -> String:
 	_craft_and_build()
 	_tend_field()   # anything planted with new seeds today
 	_cook()
+	_folk()
 	_sell()
 	_order()
 	_trek()
@@ -859,6 +865,35 @@ func _split_firewood() -> void:
 
 # On trek days, the longest open route the supplies allow. Oil is bought; a ration is an egg or milk, a crop
 # and a wood; rope is fiber. Then a trail work, when the coins and materials are there.
+# The walkers as neighbours (FolkSystem), at midday once the cooking is done: a word with whoever waits at the
+# gate or has come by the farm, any scene that is due seen through, a request handed over when the pack holds it
+# (talking does that), and the gift each would like best of what the pack holds, before the rest is sold.
+func _folk() -> void:
+	var f := m.folk
+	var here: Array = []
+	for id in f.IDS:
+		if m.trek._waiting(id):
+			f._on_gate(id)
+			here.append(id)
+	if f._visiting():
+		var id: String = f.visitor
+		folk_log["visits"] += 1
+		var r: Dictionary = f._talk(id)
+		if str(r["kind"]) == "scene":
+			f._scene_done(id, r["scene"])
+			folk_log["scenes"].append("%s %d" % [str(r["scene"]["id"]), m.day])
+			r = f._talk(id)
+		here.append(id)
+	for id in here:
+		folk_log["talks"] += 1
+		var key: String = f._best_gift(id, GIFT_KEEP)
+		if key != "" and f._can_give(id):
+			if f._taste(id, key) == "loved":
+				folk_log["loved"] += 1
+			f._give(key, id)
+			folk_log["gifts"] += 1
+
+
 func _trek() -> void:
 	if treks_a_week <= 0:
 		return
@@ -1140,7 +1175,8 @@ func _row(night: String) -> void:
 		m.day, str(m.MONTH_NAMES[int(d["month"])]).substr(0, 3), int(d["day"]), m.money, int(m.sanity), int(m.sanity_sys._sanity_max()),
 		int(m.materials["feathers"]), _lv("Farming"), _lv("Carpentry"), _lv("Cleaning"), _lv("Bushcrafting"), _lv("Forestry"),
 		_lv("Mining"), _lv("Smithing"), _steps_done(), m.nights.shadow_steps, m.tax_owed, m.crops.size(),
-		int(m.materials["wood"]), int(m.materials["fiber"]), m.wear, m.clean_nights, night])
+		int(m.materials["wood"]), int(m.materials["fiber"]), m.wear, m.clean_nights, night]
+		+ "  %d/%d/%d/%d" % [m.folk._hearts("mill"), m.folk._hearts("orchard"), m.folk._hearts("chapel"), m.folk._hearts("post")])
 
 
 func _steps_done() -> int:
@@ -1182,6 +1218,11 @@ func _summary() -> void:
 	if caves["visits"] > 0:
 		print("--- cave: %.1f copper and %.1f iron nodes a day on average, over %d visits" % [
 			float(caves["copper"]) / caves["visits"], float(caves["iron"]) / caves["visits"], caves["visits"]])
+	var f := m.folk
+	print("--- folk: %d visits, %d words, %d gifts (%d loved), %d requests done; hearts Maren %d, Davy %d, vicar %d, postman %d" % [
+		folk_log["visits"], folk_log["talks"], folk_log["gifts"], folk_log["loved"], f.requests_done.size(),
+		f._hearts("mill"), f._hearts("orchard"), f._hearts("chapel"), f._hearts("post")])
+	print("--- scenes seen (day): %s" % ", ".join(folk_log["scenes"]))
 	var e := m.estate
 	print("--- crow charms made %d" % made_charms)
 	print("--- estate: extensions %s, furniture %s, paint %s, paper %s, deed %d/%d; fences %d; stand glut %s" % [

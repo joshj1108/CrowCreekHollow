@@ -917,6 +917,7 @@ var nights: NightSystem
 var madness: MadnessSystem
 var happenings: DailyHappenings
 var trek: TrekSystem
+var folk: FolkSystem
 var projects: FarmProjects
 var estate: EstateSystem
 var feel: GameFeel
@@ -959,6 +960,7 @@ func _ready() -> void:
 	rewards = HomesteadRewards.new(self)
 	happenings = DailyHappenings.new(self)
 	trek = TrekSystem.new(self)
+	folk = FolkSystem.new(self)
 	projects = FarmProjects.new(self)
 	estate = EstateSystem.new(self)
 	feel = GameFeel.new(self)
@@ -1103,6 +1105,7 @@ func _on_title_start(mode: String, slot: int) -> void:
 	happenings._build()
 	forage._build()
 	trek._build()
+	folk._build()
 	projects._build()
 	feel._build()
 	projects._stamp()
@@ -1110,6 +1113,7 @@ func _on_title_start(mode: String, slot: int) -> void:
 	mystery._check(true)
 	_update_shadow_tile()
 	happenings._start_day(false)
+	folk._start_day(false)
 	if loaded:
 		_restore_saved_state()
 		_show_message("Welcome back. Day %d." % day)
@@ -1166,7 +1170,7 @@ func _process(delta: float) -> void:
 		if layer != null:
 			layer.visible = not in_cave
 	# Any open menu pauses the day: the clock stops, foes stand still, and only the menu responds.
-	player.paused = open_tab != "" or _bag_open() or _wheel_open()
+	player.paused = open_tab != "" or _bag_open() or _wheel_open() or folk._in_scene()
 	# The bag's corner button only shows when no section or wheel covers the farm.
 	if bag != null:
 		bag.toggle_button.visible = open_tab == "" and not _wheel_open()
@@ -1180,6 +1184,10 @@ func _process(delta: float) -> void:
 	player.set_loop(_loop_action())
 	_update_diary_icon()
 	if player.paused:
+		# A walker's scene (FolkSystem) holds the day while its pages are turned.
+		if folk._in_scene() and open_tab == "":
+			folk._scene_keys()
+			return
 		_handle_keys()
 		_refresh_panel()
 		if _bag_open():
@@ -3155,6 +3163,16 @@ func _on_panel_action(action_id: String) -> void:
 	if action_id.begins_with("bellpart:"):
 		projects._make_part(action_id.trim_prefix("bellpart:"))
 		return
+	if action_id.begins_with("folk_gift:"):
+		folk._give(action_id.trim_prefix("folk_gift:"))
+		_refresh_panel()
+		return
+	if action_id.begins_with("folk_req:"):
+		var req := folk._request(action_id.trim_prefix("folk_req:"))
+		if not req.is_empty() and folk._here(str(req["who"])) and folk._has_wants(req):
+			folk._say(str(req["who"]), "smile", folk._deliver(req))
+		_refresh_panel()
+		return
 	if action_id.begins_with("work:"):
 		trek._build_work(action_id.trim_prefix("work:"))
 		return
@@ -3790,6 +3808,8 @@ func _interact() -> void:
 	if not inside and happenings._try_take(tile):
 		return
 	if not inside and not _tool_press and forage._try_pick(tile):
+		return
+	if not inside and folk._try_visit(tile):
 		return
 	if not inside and trek._try_walker(tile):
 		return
@@ -5704,6 +5724,8 @@ func _update_cave_mouth_light(darkness: float) -> void:
 # Ends the day and saves. Both sleeping and collapsing come through here.
 func _end_day(base: String, leave_house: bool = true) -> void:
 	trek._abort()
+	if folk.dialogue != null:
+		folk.dialogue.close()
 	hp = max_hp()
 	# Tonight's visitor, if still waiting, is settled before the door opens in the morning.
 	var night_note := nights._end_night()
@@ -5747,7 +5769,7 @@ func _end_day(base: String, leave_house: bool = true) -> void:
 	forage._new_day()
 	stall._recover()
 	_update_shadow_tile()
-	var happening_note := happenings._start_day(true)
+	var happening_note := happenings._start_day(true) + folk._start_day(true)
 	var mail_note := desk._mail_day() + estate._mail_day()
 	_show_message("%s Your crops grew overnight.%s%s The morning is %s.%s" % [
 		base, spoil_note, upkeep_note, str(WEATHER_NAMES.get(weather_kind, "overcast")).to_lower(), event_note + happening_note + trek._morning_note() + mail_note])

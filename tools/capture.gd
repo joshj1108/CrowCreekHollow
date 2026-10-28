@@ -54,6 +54,9 @@ extends SceneTree
 #   wday=N          with walker, the first day to look from (from 244 all three day walkers wait); wbell: the bell is
 #                   hung, so from day 381 the woman in the grey shawl waits too; wedge: day 4, Old Maren waits to be
 #                   walked to the wood's edge (the first trek)
+#   folk=ID         a neighbour visits the farm today (mill, orchard, chapel or post) and you stand below them; use
+#                   with hour= 9 to 16 (wday=N sets the day, default 60). fscene=N plays their Nth friendship scene
+#                   (0-3) in the dialogue box, turned to page fpage=P; fsay shows today's line instead (fexpr=FACE)
 #   trek=N          set out on the mill trek and stand in clearing N (0-3 marked, 0-2 dark), below its event, with the walker
 #   tevent=ID       with trek, the clearing's event: tree, crows, flood, lights, cairn, fog or hollow (the day sets it otherwise)
 #   tdark           with trek, take the dark trail at the fork (trek=1 is then the dark clearing, 2 the mill)
@@ -332,6 +335,29 @@ func _initialize() -> void:
 		await process_frame
 	if opt.has("bag"):
 		main._toggle_bag()
+		await process_frame
+		await process_frame
+	if opt.has("folk"):
+		# A neighbour come by the farm today (FolkSystem), and you below them; use with hour= between 9 and 16.
+		var who := str(opt["folk"])
+		main.day = maxi(main.day, int(opt.get("wday", 60)))
+		main.trek.edge_done = true
+		main.folk.visit_day = main.day
+		main.folk.visitor = who
+		main.folk.spot = main.folk._spot(who)
+		var ft: Vector2i = main.folk.spot
+		main.player.position = main._tile_center(ft.x, ft.y + 1)
+		main.player.facing = Vector2.UP
+		# A few frames first, so the HUD and the visitor are drawn before a scene holds the day.
+		for i in 10:
+			await process_frame
+		if opt.has("fscene"):
+			var sc: Dictionary = main.folk.SCENES[who][int(opt["fscene"])]
+			main.folk.dialogue.play(sc["pages"], func() -> void: pass, "Space: next")
+			for i in int(opt.get("fpage", "0")):
+				main.folk.dialogue.advance()
+		elif opt.has("fsay"):
+			main.folk._say(who, str(opt.get("fexpr", "neutral")), str(main.folk._line(who)["t"]))
 		await process_frame
 		await process_frame
 	if opt.has("tab"):

@@ -607,6 +607,7 @@ func _try_walker(tile: Vector2i) -> bool:
 			continue
 		var w := _walker_tile(id)
 		if tile == w or m._player_tile() == w + Vector2i(0, 1):
+			m.folk._on_gate(id)
 			_ask(id)
 			return true
 	return false
@@ -670,10 +671,10 @@ func _trade_note(id: String) -> String:
 func _standing_note(id: String) -> String:
 	if not STANDING.has(id):
 		return ""
-	var left := int(STANDING[id]["at"]) - int(walked.get(id, 0))
+	var left := int(STANDING[id]["at"]) - m.folk._hearts(id)
 	if left <= 0:
 		return _w(" {W} knows you now.")
-	return _w(" (Walk {her} %d more time%s and {she}'ll know you: see Buildings, Trail works.)") % [left, "" if left == 1 else "s"]
+	return _w(" (%d more heart%s of friendship and {she}'ll know you: walks, a word, gifts and help raise it. See Quests, Folk.)") % [left, "" if left == 1 else "s"]
 
 
 func _start(id := "mill") -> void:
@@ -915,7 +916,7 @@ func _update(delta: float) -> void:
 	if nerve_col != null:
 		nerve_col.visible = active
 	if not active:
-		layer.visible = _any_waiting() and not m.inside and not m.in_cave
+		layer.visible = (_any_waiting() or m.folk._visiting()) and not m.inside and not m.in_cave
 		if layer.visible:
 			layer.queue_redraw()
 		return
@@ -1204,9 +1205,9 @@ func _interact(tile: Vector2i) -> void:
 		elif not spoke:
 			spoke = true
 			nerve = minf(100.0, nerve + WORD_NERVE)
-			m._show_message(_talk())
+			m.folk._say_trek(route_id, _talk(), nerve)
 		else:
-			m._show_message("\"I'm all right. Keep going.\"" if nerve >= 50.0 else _w("\"Is it much further?\" {She} is pale."))
+			m.folk._say_trek(route_id, "\"I'm all right. Keep going.\"" if nerve >= 50.0 else _w("\"Is it much further?\" {She} is pale."), nerve)
 		return
 	m._swing()
 
@@ -1441,6 +1442,7 @@ func _edge_pay() -> Array:
 # Coming home from a trek, by any route (the balance sim calls this too): the wood's dread, the grove, and
 # the nights it holds back. The walk to the wood's edge only teaches: the wood doesn't learn you from it.
 func _on_arrived() -> void:
+	m.folk._on_walked(route_id, night)
 	if route_id == "edge":
 		edge_done = true
 		last_day = m.day
@@ -1541,15 +1543,16 @@ func _trade() -> Array:
 	return ["%s bought %d of what you carried for %d coins" % [TRADE[route_id]["who"], sold, coins]]
 
 
-# What a walker gives once they know you, from the walk that makes it STANDING's "at" (this walk counts).
+# What a walker gives once they know you: from when their friendship reaches STANDING's "at" in hearts (this
+# walk counts). The first walks give a heart each, so "at" walks always get there, as the old standing did.
 func _standing_gifts(pay: int) -> Array:
 	if not STANDING.has(route_id):
 		return []
 	var n := int(walked.get(route_id, 0)) + 1
 	var at := int(STANDING[route_id]["at"])
-	if n < at:
+	if m.folk._hearts(route_id, 1) < at:
 		return []
-	var first := n == at
+	var first := m.folk._hearts(route_id) < at
 	match route_id:
 		"mill":
 			m.materials["flour"] += STANDING_FLOUR * pay
@@ -1571,7 +1574,7 @@ func _standing_gifts(pay: int) -> Array:
 				int(BLESS_SANITY * pay), (", +%d sanity limit back" % back) if back > 0 else ""]]
 		"post":
 			# A parcel from the Rooks' unclaimed post, a different one each walk.
-			var parcel: Array = PARCELS[(n - at) % PARCELS.size()]
+			var parcel: Array = PARCELS[posmod(n - at, PARCELS.size())]
 			var kind := str(parcel[0])
 			var amount := int(parcel[1]) * pay
 			var held: Dictionary = m.inventory if m.inventory.has(kind) else m.materials
@@ -1983,6 +1986,10 @@ func _draw_layer() -> void:
 			if _waiting(id):
 				var w := _walker_tile(id)
 				_draw_walker(m._tile_center(w.x, w.y) + Vector2(0, px * 0.42), 0.0, id)
+		# A neighbour come by the farm (FolkSystem), drawn as on the walks.
+		if m.folk._visiting():
+			var v: Vector2i = m.folk.spot
+			_draw_walker(m._tile_center(v.x, v.y) + Vector2(0, px * 0.42), 0.0, m.folk.visitor)
 		return
 	var shake := 0.0 if nerve > 30.0 else sin(Time.get_ticks_msec() / 40.0) * 1.5
 	_draw_walker(walker_pos + Vector2(0, px * 0.42), shake, route_id)

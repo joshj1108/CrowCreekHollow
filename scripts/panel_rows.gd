@@ -243,11 +243,12 @@ func _craft_rows() -> Array:
 	return rows
 
 
-# The Quests panel: the story's chapters.
-# The current chapter comes first, and the detail page tells its story.
+# The Quests panel: the story's chapters, then the Folk tab (FolkSystem._rows): the walkers' friendship,
+# gifts and requests. The current chapter comes first, and the detail page tells its story.
 func _quest_rows() -> Array:
 	var rows: Array = [{"tab": "Story"}]
 	rows.append_array(_quest_list(m.STORY, m.quests_done, "You have reached the end of the story for now. More chapters are coming."))
+	rows.append_array(m.folk._rows())
 	return rows
 
 
@@ -618,13 +619,14 @@ func _buildings_rows() -> Array:
 		for id in TrekSystem.STANDING:
 			var s: Dictionary = TrekSystem.STANDING[id]
 			var n := int(m.trek.walked.get(id, 0))
+			var h: int = m.folk._hearts(id)
 			var row := {"name": m.trek._cap(str(TrekSystem.ROUTES[id]["walker"])), "about": str(s["about"]),
-				"value": "walked %d time%s" % [n, "" if n == 1 else "s"]}
-			if n >= int(s["at"]):
+				"value": "walked %d time%s, %d heart%s of friendship (Quests, Folk)" % [n, "" if n == 1 else "s", h, "" if h == 1 else "s"]}
+			if h >= int(s["at"]):
 				row["status"] = "Knows you"
 				row["status_kind"] = "done"
 			else:
-				row["status"] = "%d more walk%s" % [int(s["at"]) - n, "" if int(s["at"]) - n == 1 else "s"]
+				row["status"] = "%d more heart%s" % [int(s["at"]) - h, "" if int(s["at"]) - h == 1 else "s"]
 			rows.append(row)
 	return rows
 

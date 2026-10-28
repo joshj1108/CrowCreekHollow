@@ -379,6 +379,41 @@ func _run() -> void:
 		and int(SaveSystem.read_save(path).get("save_version", 0)) == SaveSystem.SAVE_VERSION)
 	m.nights.seen = {}
 
+	# Version 14: the walkers' friendship, scenes, gift tastes, requests and today's visitor round-trip, and an old
+	# save keeps each walker's standing from the walks it made (friendship counts them) and has met them.
+	m.trek.walked = {"mill": 3, "post": 1}
+	m.folk.bonus = {"mill": 7, "orchard": 24}
+	m.folk.met = {"mill": true, "orchard": true}
+	m.folk.seen = {"maren_lamp": 10}
+	m.folk.tastes = {"mill:bramble_jam": "loved"}
+	m.folk.requests = {"maren_eggs": 10}
+	m.folk.requests_done = {"davy_fish": 9}
+	m.folk.talk_day = {"mill": 11}
+	m.folk.gift_day = {"mill": 11}
+	m.folk.gifts_given = 4
+	m.folk.visit_day = 11
+	m.folk.visitor = "orchard"
+	_save_on_day(11)
+	m.folk._from_save({})
+	m.trek.walked = {}
+	_check("friendship, scenes, tastes, requests and visit round-trip", _load() == 11 and m.folk._hearts("mill") == 3
+		and m.folk._points("mill") == 67 and m.folk._hearts("orchard") == 1 and m.folk.seen.has("maren_lamp")
+		and str(m.folk.tastes.get("mill:bramble_jam", "")) == "loved" and m.folk.requests.has("maren_eggs")
+		and m.folk.requests_done.has("davy_fish") and m.folk.gifts_given == 4 and m.folk.visitor == "orchard"
+		and m.folk.visit_day == 11 and not m.folk._can_give("mill"))
+	var v13 := _raw(path)
+	v13["save_version"] = 13
+	v13.erase("folk")
+	v13["trek_walked"] = {"mill": 4, "chapel": 2}
+	v13["trek_edge_done"] = true
+	_write_text(path, JSON.stringify(v13))
+	_check("version 13 save: walks become friendship, standing kept", _load() == 11 and m.folk._hearts("mill") == 3
+		and m.folk._points("mill") == 64 and m.folk._hearts("chapel") == 2 and m.folk.met.has("chapel") and m.folk.met.has("mill")
+		and not m.folk.met.has("post") and m.folk.seen.is_empty() and m.folk.gifts_given == 0
+		and m.folk._hearts("chapel") >= int(TrekSystem.STANDING["chapel"]["at"]))
+	m.folk._from_save({})
+	m.trek.walked = {}
+
 	# Saving in the cave puts you at the homestead on load.
 	var home := m._tile_center(m.HOMESTEAD_ARRIVE.x, m.HOMESTEAD_ARRIVE.y)
 	m.in_cave = true
