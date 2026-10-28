@@ -14,7 +14,7 @@ const FOOTSTEPS_HOURS := 1.0    # the footsteps give an hour to reach the house
 const SHADOW_MAX := 8           # steps from the field's far edge to the house; at the last, the Hollow comes
 const SHADOW_STEP := 4          # tiles the shadow moves per step
 const TIER_NIGHTS := [0, 7, 14] # nights lived before each tier of visitors can come
-const CHARM := {"name": "Crow charm", "feathers": 3, "fiber": 1, "level": 2, "xp": 6}
+const CHARM := {"name": "Crow charm", "feathers": 4, "sticks": 1, "level": 2, "xp": 6}
 const FEATHER_TINT := "2a2632"
 # How to answer each visitor, added to its message until the player has faced a few.
 const HINTS := {
@@ -330,6 +330,7 @@ func _resolve(faced: bool, show := true) -> String:
 	loss *= (2.0 if m.sanity_sys._event_active("dread") else 1.0) * (0.5 if m.sanity_sys._event_active("ward") else 1.0)
 	loss *= 0.5 if charmed else 1.0
 	loss *= m.projects._night_mult()   # the crow bell
+	loss *= m.estate._night_mult()     # the second storey
 	loss *= m.trek._night_mult()       # walked someone today, the wood come close, or the Hollow asleep
 	loss *= m.NIGHT_LOSS_MULT
 	m.sanity_sys._change_sanity(-loss)
@@ -424,17 +425,17 @@ func _draw() -> void:
 
 func _can_make_charm() -> bool:
 	return m.progression._level("Bushcrafting") >= int(CHARM["level"]) \
-		and int(m.materials["feathers"]) >= int(CHARM["feathers"]) and int(m.materials["fiber"]) >= int(CHARM["fiber"])
+		and int(m.materials["feathers"]) >= int(CHARM["feathers"]) and int(m.materials["sticks"]) >= int(CHARM["sticks"])
 
 
 func _charm_recipe() -> Dictionary:
 	var costs: Array = [
 		{"label": "%d crow feathers" % int(CHARM["feathers"]), "have": m._held("feathers"), "need": int(CHARM["feathers"])},
-		{"label": "%d fiber" % int(CHARM["fiber"]), "have": m._held("fiber"), "need": int(CHARM["fiber"])},
+		{"label": "%d stick" % int(CHARM["sticks"]), "have": m._held("sticks"), "need": int(CHARM["sticks"])},
 	]
 	return {
 		"key": "crow_charm", "name": str(CHARM["name"]), "icon": "pendant", "tint": FEATHER_TINT,
-		"desc": "Feathers bound with fiber. Carried at 22:00, it is used up and halves what the night takes from your sanity. +%d Bushcrafting XP." % int(CHARM["xp"]),
+		"desc": "Feathers bound on a twig. Carried at 22:00, it is used up and halves what the night takes from your sanity. +%d Bushcrafting XP." % int(CHARM["xp"]),
 		"costs": costs, "level_text": m._level_text("Bushcrafting", int(CHARM["level"])),
 		"level_ok": m.progression._level("Bushcrafting") >= int(CHARM["level"]), "enabled": _can_make_charm(),
 		"action": "make_charm", "button": "Make",
@@ -443,10 +444,10 @@ func _charm_recipe() -> Dictionary:
 
 func _make_charm() -> void:
 	if not _can_make_charm():
-		m._show_message("A crow charm needs %d crow feathers, %d fiber and Bushcrafting %d." % [int(CHARM["feathers"]), int(CHARM["fiber"]), int(CHARM["level"])])
+		m._show_message("A crow charm needs %d crow feathers, %d stick and Bushcrafting %d." % [int(CHARM["feathers"]), int(CHARM["sticks"]), int(CHARM["level"])])
 		return
 	m.materials["feathers"] -= int(CHARM["feathers"])
-	m.materials["fiber"] -= int(CHARM["fiber"])
+	m.materials["sticks"] -= int(CHARM["sticks"])
 	m.inventory["crow_charm"] += 1
 	m.progression._grant_xp("Bushcrafting", int(CHARM["xp"]))
 	m.play_sfx("craft", 0.05)

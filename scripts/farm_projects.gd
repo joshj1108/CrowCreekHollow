@@ -21,6 +21,16 @@ const DECOR := {
 		"desc": "A sapling from the drowned orchard, which the Tull family give once they know you (walk Davy to the orchard). Each bears an apple every autumn morning."},
 	"sprinkler": {"name": "Sprinkler", "cost": {"copper_bar": 5, "iron_bar": 1}, "skill": "Smithing", "level": 4, "max": 12, "blocks": true,
 		"desc": "Set on an empty plot tile and piped from the well. Each dry morning it waters the eight crops around it, a water each from the tank."},
+	"sprinkler_big": {"name": "Spray sprinkler", "cost": {"copper_bar": 15, "iron_bar": 3}, "skill": "Smithing", "level": 8, "max": 6, "blocks": true,
+		"desc": "A brass head on a tall copper riser, set on an empty plot tile. Each dry morning it waters the 24 crops in the five by five around it, a water each from the tank."},
+	"fence": {"name": "Wattle fence", "cost": {"sticks": 2, "wood": 1}, "skill": "", "level": 0, "max": 300, "blocks": true,
+		"desc": "Woven sticks between posts. Fences join up with the fences beside them. Keeps placing until you run short or press B."},
+	"bench": {"name": "Garden bench", "cost": {"hardwood": 6, "iron_bar": 1}, "skill": "Carpentry", "level": 4, "max": 4, "blocks": true,
+		"desc": "A hardwood bench with iron ends."},
+	"birdbath": {"name": "Birdbath", "cost": {"stone": 12, "copper_bar": 3}, "skill": "", "level": 0, "max": 3, "blocks": true,
+		"desc": "A stone bowl on a pillar with a copper rim. The crows don't drink from it."},
+	"weathervane": {"name": "Weathervane", "cost": {"copper_bar": 8, "iron_bar": 2, "coins": 60}, "skill": "Smithing", "level": 5, "max": 1, "blocks": true,
+		"desc": "A copper cockerel on an iron post. It turns to face the field at night, whatever the wind."},
 	"bell": {"name": "Crow bell", "cost": {"bell_metal": 1, "bell_frame": 1, "bell_rope": 1, "bell_clapper": 1, "feathers": 20, "coins": 150}, "skill": "Carpentry", "level": 6, "max": 1, "blocks": true,
 		"desc": "Hung only on All Hallows, and the Hollow comes to it that night. While it stands, the field shadow can't reach the house, so the Hollow stops coming, and the night takes a quarter less from your sanity."},
 }
@@ -35,6 +45,7 @@ const BELL_PARTS := {
 	"bell_rope": {"name": "Bell rope", "season": "", "cost": {"flax": 9, "resin": 2}, "skill": "Bushcrafting", "level": 5,
 		"desc": "Twisted from wild flax, which flowers at the wood's edge in summer."},
 }
+const SPRINKLERS := {"sprinkler": 1, "sprinkler_big": 2}   # kind -> tiles of reach each way
 const BELL_MONTH := 9           # All Hallows, October 31st: the only day the bell can be hung
 const BELL_DOM := 31
 const PART_XP := 40
@@ -220,20 +231,20 @@ func _start_place(kind: String) -> void:
 		return
 	m.placing = "decor:" + kind
 	m._close_panel()
-	var where := "an empty plot tile" if kind == "sprinkler" else "open grass"
+	var where := "an empty plot tile" if kind in SPRINKLERS else "open grass"
 	m._show_message("Face %s where the %s should go and press Space. B cancels." % [where, str(DECOR[kind]["name"]).to_lower()])
 
 
 # A sprinkler goes on a plot tile with no crop; everything else on open grass.
 func _fits(kind: String, t: Vector2i) -> bool:
-	if kind == "sprinkler":
+	if kind in SPRINKLERS:
 		return m._in_bounds(t) and m.map[t.y][t.x] == MainGame.Tile.SOIL and not m.crops.has(t) and not decor.has(t) and t != m._player_tile()
 	return m._spot_ok(t, Vector2i.ONE)
 
 
 func _confirm(kind: String, t: Vector2i) -> void:
 	if not _fits(kind, t):
-		m._show_message("That spot isn't an empty plot tile." if kind == "sprinkler" else "That spot isn't open grass.")
+		m._show_message("That spot isn't an empty plot tile." if kind in SPRINKLERS else "That spot isn't open grass.")
 		return
 	_pay(kind, 1)
 	decor[t] = kind
@@ -245,8 +256,13 @@ func _confirm(kind: String, t: Vector2i) -> void:
 		# Paths keep going, one tile at a time, until the stone runs out or B is pressed.
 		m._show_message("Path laid. Face the next tile and press Space, or B to stop. %d stone left." % int(m.materials["stone"]))
 		return
+	if kind == "fence" and _can_place("fence"):
+		m._show_message("Fence put up. Face the next tile and press Space, or B to stop. %d sticks left." % int(m.materials["sticks"]))
+		return
 	m.placing = ""
 	m._show_message("The %s stands here now." % str(DECOR[kind]["name"]).to_lower() if kind != "path" else "That was the last of your stone.")
+	if kind == "fence":
+		m._show_message("That was the last of your sticks or wood for fencing.")
 	_check(true)
 
 
@@ -321,15 +337,16 @@ func _update(darkness: float) -> void:
 # Each dry morning, every sprinkler waters the growing crops on the eight tiles around it from the well's
 # tank, while the tank lasts. Rain has already watered them. Returns a note for the morning message.
 func _sprinkle() -> String:
-	if _count("sprinkler") == 0 or not m.well_repaired or not m.hose_attached or m.weather_kind in m.WATER_RAIN_KINDS:
+	if _count("sprinkler") + _count("sprinkler_big") == 0 or not m.well_repaired or not m.hose_attached or m.weather_kind in m.WATER_RAIN_KINDS:
 		return ""
 	var n := 0
 	var dry := false
 	for s in decor:
-		if decor[s] != "sprinkler":
+		if not decor[s] in SPRINKLERS:
 			continue
-		for dy in [-1, 0, 1]:
-			for dx in [-1, 0, 1]:
+		var reach: int = SPRINKLERS[decor[s]]
+		for dy in range(-reach, reach + 1):
+			for dx in range(-reach, reach + 1):
 				var t: Vector2i = s + Vector2i(dx, dy)
 				if not m.crops.has(t) or int(m.crops[t]["stage"]) >= m.MAX_STAGE or int(m.crops[t].get("watered_day", 0)) == m.day:
 					continue
@@ -431,6 +448,59 @@ func _draw() -> void:
 				layer.draw_line(head + Vector2(-px * 0.28, 0), head + Vector2(px * 0.28, 0), Color("c8844a"), 2.0)
 				layer.draw_circle(head, 4.5, ink)
 				layer.draw_circle(head, 3.0, Color("d8a060"))
+			"sprinkler_big":
+				# A taller copper riser with a brass head and four arms.
+				var foot := c + Vector2(0, px * 0.3)
+				layer.draw_rect(Rect2(foot + Vector2(-px * 0.22, -px * 0.1), Vector2(px * 0.44, px * 0.16)).grow(2.0), ink)
+				layer.draw_rect(Rect2(foot + Vector2(-px * 0.22, -px * 0.1), Vector2(px * 0.44, px * 0.16)), Color("6a6a6a"))
+				layer.draw_line(foot, foot + Vector2(0, -px * 0.85), ink, 7.0)
+				layer.draw_line(foot, foot + Vector2(0, -px * 0.85), Color("b8733a"), 4.0)
+				var head := foot + Vector2(0, -px * 0.9)
+				for arm in [Vector2(px * 0.36, 0), Vector2(px * 0.2, -px * 0.14)]:
+					layer.draw_line(head - arm, head + arm, ink, 5.0)
+					layer.draw_line(head - arm, head + arm, Color("d8b048"), 2.0)
+				layer.draw_circle(head, 5.5, ink)
+				layer.draw_circle(head, 4.0, Color("e8c060"))
+			"fence":
+				# A post, with woven rails reaching toward any fence beside it.
+				var post := Rect2(c + Vector2(-px * 0.08, -px * 0.45), Vector2(px * 0.16, px * 0.8))
+				for side in [Vector2i(1, 0), Vector2i(-1, 0)]:
+					if decor.get(t + side, "") == "fence":
+						for k in 2:
+							var y := c.y - px * (0.25 - 0.25 * k)
+							layer.draw_line(Vector2(c.x, y), Vector2(c.x + px * 0.5 * side.x, y), ink, 6.0)
+							layer.draw_line(Vector2(c.x, y), Vector2(c.x + px * 0.5 * side.x, y), Color("8a6a40"), 3.0)
+				if decor.get(t + Vector2i(0, -1), "") == "fence":
+					layer.draw_line(c, c + Vector2(0, -px), ink, 6.0)
+					layer.draw_line(c, c + Vector2(0, -px), Color("8a6a40"), 3.0)
+				layer.draw_rect(post.grow(2.0), ink)
+				layer.draw_rect(post, Color("6b4a30"))
+			"bench":
+				var seat := Rect2(c + Vector2(-px * 0.45, -px * 0.1), Vector2(px * 0.9, px * 0.16))
+				var back := Rect2(c + Vector2(-px * 0.45, -px * 0.45), Vector2(px * 0.9, px * 0.14))
+				for x in [seat.position.x + 2, seat.end.x - 6]:
+					layer.draw_rect(Rect2(x - 1, back.position.y - 1, 6, px * 0.75), ink)
+					layer.draw_rect(Rect2(x, back.position.y, 4, px * 0.72), Color("3a3a40"))
+				for r in [back, seat]:
+					layer.draw_rect((r as Rect2).grow(2.0), ink)
+					layer.draw_rect(r, Color("7a5434"))
+			"birdbath":
+				var foot := c + Vector2(0, px * 0.35)
+				layer.draw_rect(Rect2(foot + Vector2(-px * 0.1, -px * 0.5), Vector2(px * 0.2, px * 0.5)).grow(2.0), ink)
+				layer.draw_rect(Rect2(foot + Vector2(-px * 0.1, -px * 0.5), Vector2(px * 0.2, px * 0.5)), Color("8a8a84"))
+				var bowl := Rect2(foot + Vector2(-px * 0.4, -px * 0.72), Vector2(px * 0.8, px * 0.24))
+				layer.draw_rect(bowl.grow(2.0), ink)
+				layer.draw_rect(bowl, Color("b8733a"))
+				layer.draw_rect(bowl.grow(-3.0), Color("9a9a94") if winter else Color("5a7a9a"))
+			"weathervane":
+				var base := c + Vector2(0, px * 0.4)
+				layer.draw_line(base, base + Vector2(0, -px * 2.0), ink, 6.0)
+				layer.draw_line(base, base + Vector2(0, -px * 2.0), Color("3a3a40"), 3.0)
+				var top := base + Vector2(0, -px * 2.0)
+				layer.draw_line(top + Vector2(-px * 0.35, px * 0.3), top + Vector2(px * 0.35, px * 0.3), ink, 3.0)
+				var bird := PackedVector2Array([top + Vector2(-px * 0.4, 0), top + Vector2(px * 0.1, -px * 0.25), top + Vector2(px * 0.4, -px * 0.1), top + Vector2(px * 0.15, px * 0.1)])
+				layer.draw_colored_polygon(bird, Color("b8733a"))
+				layer.draw_polyline(bird + PackedVector2Array([bird[0]]), ink, 2.0)
 			"bell":
 				# A tall post with a crossbar and an iron bell hanging under it.
 				var base := c + Vector2(0, px * 0.4)

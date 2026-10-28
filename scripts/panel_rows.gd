@@ -378,12 +378,12 @@ func _house_rows() -> Array:
 
 	rows.append({"tab": "Storage", "icon": "storage"})
 	if m.cellar_built:
-		rows.append({"name": "Root cellar", "status": "Built", "status_kind": "done", "value": "built, holds %d crops. Stand beside it, facing it, and press Space." % m.CELLAR_CAP})
+		rows.append({"name": "Root cellar", "status": "Built", "status_kind": "done", "value": "built, holds %d crops. Stand beside it, facing it, and press Space." % m.estate._cellar_cap()})
 	else:
 		rows.append({
 			"name": "Build a root cellar",
 			"value": m.stall._price_text(m.CELLAR_COST),
-			"about": "Holds %d crops, against the house's west wall." % m.CELLAR_CAP,
+			"about": "Holds %d crops, against the house's west wall." % m.estate._cellar_cap(),
 			"needs": _needs(m.CELLAR_COST, "Carpentry"),
 			"button": "Build",
 			"action": "build_cellar",
@@ -487,6 +487,8 @@ func _buildings_rows() -> Array:
 	else:
 		rows.append({"name": "Next: %s" % nxt["title"], "status": "Next", "value": str(nxt["how"])})
 
+	rows += _estate_rows()
+
 	rows.append({"tab": "Workshop", "icon": "workshop"})
 	if m._is_built("workshop"):
 		var shop: Dictionary = m._placed_row("Workshop", "workshop", m.workshop_tile, "move_workshop")
@@ -524,7 +526,7 @@ func _buildings_rows() -> Array:
 	rows.append({"note": "Each one is placed on open grass. Move it any time from here."})
 
 	rows.append({"tab": "Decor", "icon": "decor"})
-	for kind in ["lamp", "flowers", "path", "sprinkler", "apple_tree", "bell"]:
+	for kind in ["lamp", "flowers", "path", "fence", "sprinkler", "sprinkler_big", "apple_tree", "bench", "birdbath", "weathervane", "bell"]:
 		var d: Dictionary = p.DECOR[kind]
 		var have := p._count(kind)
 		var row := {"name": str(d["name"]), "about": str(d["desc"]), "value": p._cost_text(kind)}
@@ -615,6 +617,79 @@ func _buildings_rows() -> Array:
 	return rows
 
 
+# The house extensions, then the furniture, the paint and the wallpaper (EstateSystem).
+func _estate_rows() -> Array:
+	var e: EstateSystem = m.estate
+	var rows: Array = [{"tab": "Extensions", "icon": "homestead"}]
+	for id in e.EXTENSIONS:
+		var x: Dictionary = e.EXTENSIONS[id]
+		var why := e._why(id)
+		var row := {"name": str(x["name"]), "about": e._about(id), "value": m.stall._price_text(x["cost"])}
+		if why == "built":
+			row["status"] = "Built"
+			row["status_kind"] = "done"
+			row["value"] = e._built_text(id)
+		else:
+			var needs := _needs(x["cost"], "Carpentry")
+			needs.append({"text": "The house %s" % str(m.STAGE_NAMES[int(x["stage"])]), "ok": m.house_stage >= int(x["stage"])})
+			if id == "cellar_room":
+				needs.append({"text": "The root cellar", "ok": m.cellar_built})
+			if x.has("after"):
+				needs.append({"text": "The %s" % str(e.EXTENSIONS[x["after"]]["name"]).to_lower(), "ok": e._has(str(x["after"]))})
+			row["needs"] = needs
+			row["button"] = "Build"
+			row["action"] = "ext:" + id
+			row["enabled"] = why == ""
+		rows.append(row)
+	rows.append({"note": "Each extension adds %d%% to the property value, until the land deed is bought." % int(e.EXTENSION_VALUE * 100)})
+
+	rows.append({"tab": "Furnishing", "icon": "decor"})
+	rows.append({"section": "Furniture"})
+	for id in e.FURNITURE:
+		var f: Dictionary = e.FURNITURE[id]
+		var why := e._furniture_why(id)
+		var row := {"name": str(f["name"]), "about": "%s +%d sanity each morning." % [f["about"], int(e.COMFORT_SANITY)], "value": m.projects._cost_list(f["cost"])}
+		if why == "bought":
+			row["status"] = "In the house"
+			row["status_kind"] = "done"
+		else:
+			var needs := _needs(f["cost"], "")
+			if int(f["stage"]) > 0:
+				needs.append({"text": "The house %s" % str(m.STAGE_NAMES[int(f["stage"])]), "ok": m.house_stage >= int(f["stage"])})
+			row["needs"] = needs
+			row["button"] = "Buy"
+			row["action"] = "furn:" + id
+			row["enabled"] = why == ""
+		rows.append(row)
+	rows.append({"section": "Outside paint (%s)" % m.projects._cost_list(e.PAINT_COST)})
+	for id in e.PAINTS:
+		var why := e._paint_why(id)
+		var row := {"name": str(e.PAINTS[id]["name"]), "value": "the house's colour now" if why == "current" else "from the Restored stage"}
+		if why == "current":
+			row["status"] = "Painted"
+			row["status_kind"] = "done"
+		else:
+			row["needs"] = _needs(e.PAINT_COST, "") + [{"text": "The house Restored", "ok": m.house_stage >= 3}]
+			row["button"] = "Paint"
+			row["action"] = "paint:" + id
+			row["enabled"] = why == ""
+		rows.append(row)
+	rows.append({"section": "Wallpaper (%s)" % m.projects._cost_list(e.PAPER_COST)})
+	for id in e.PAPERS:
+		var why := e._paper_why(id)
+		var row := {"name": str(e.PAPERS[id]["name"]), "value": "on the walls now" if why == "current" else "from the Patched stage"}
+		if why == "current":
+			row["status"] = "Hung"
+			row["status_kind"] = "done"
+		else:
+			row["needs"] = _needs(e.PAPER_COST, "") + [{"text": "The house Patched", "ok": m.house_stage >= 2}]
+			row["button"] = "Hang"
+			row["action"] = "paper:" + id
+			row["enabled"] = why == ""
+		rows.append(row)
+	return rows
+
+
 # A workshop building: built, or what it costs. needs_ok is false while another building must come first.
 func _build_row(id: String, label: String, built: bool, cost: Dictionary, about: String, built_text: String, needs_ok: bool) -> Dictionary:
 	if built:
@@ -687,6 +762,21 @@ func _desk_rows() -> Array:
 	rows.append({"name": "Property tax", "status": "Owed" if m.tax_owed > 0 else "Paid up", "status_kind": "short" if m.tax_owed > 0 else "done",
 		"value": m.desk._tax_text(), "needs": [{"text": "%d coins" % m.tax_owed, "have": m.money, "ok": m.money >= m.tax_owed}] if m.tax_owed > 0 else [],
 		"button": "Pay", "action": "pay_tax", "enabled": m.tax_owed > 0 and m.money >= m.tax_owed})
+	var deed_why := m.estate._deed_why()
+	var deed := {"name": "Land deed", "about": "Buy the farm outright from the town, %d coins at a time. Once it is paid, no tax is owed again." % m.estate.DEED_STEP,
+		"value": m.estate._deed_text(), "progress": float(m.estate.deed_paid) / float(m.estate.DEED_PRICE)}
+	if deed_why == "owned":
+		deed["status"] = "Yours"
+		deed["status_kind"] = "done"
+	else:
+		deed["status"] = "%d / %d" % [m.estate.deed_paid, m.estate.DEED_PRICE]
+		deed["needs"] = [{"text": "The house Patched", "ok": m.estate._deed_open()}, {"text": "%d coins" % m.estate._deed_step(), "have": m.money, "ok": m.money >= m.estate._deed_step()}]
+		if m.tax_owed > 0:
+			deed["needs"].append({"text": "No tax owed", "ok": false})
+		deed["button"] = "Pay %d" % m.estate._deed_step()
+		deed["action"] = "pay_deed"
+		deed["enabled"] = deed_why == ""
+	rows.append(deed)
 
 	rows.append({"tab": "Pastimes", "icon": "cards"})
 	var played := m.entertained_day == m.day
@@ -734,14 +824,24 @@ func _cooked_sell_rows() -> Array:
 		var held := int(m.inventory[str(f["held"])])
 		if held <= 0:
 			continue
-		rows.append({
-			"name": "%s (%d each)" % [str(f["name"]), m.stall._food_price(str(f["id"]))],
-			"value": "%d held" % held,
-			"button": "Sell all",
-			"action": "sell_food:" + str(f["id"]),
-			"enabled": true,
-		})
+		rows.append(_sell_row(f, held))
 	return rows
+
+
+# A Sell all row: the price the next one fetches, and how many more the lane takes today at full price.
+func _sell_row(f: Dictionary, held: int) -> Dictionary:
+	var id := str(f["id"])
+	var price := m.stall._food_price(id)
+	var now := m.stall._price_now(id)
+	var left := m.stall._full_left(id)
+	return {
+		"name": "%s (%d each)" % [str(f["name"]), now] if now >= price else "%s (%d each, %d when wanted)" % [str(f["name"]), now, price],
+		"value": "%d held, %d all for %d" % [held, held, m.stall._sale_value(id, held)],
+		"about": "The lane takes %d more today at full price." % left if left > 0 else "The lane has had its fill: it pays less until it wants more.",
+		"button": "Sell all",
+		"action": "sell_food:" + id,
+		"enabled": true,
+	}
 
 
 func _smokehouse_rows() -> Array:
@@ -865,18 +965,12 @@ func _trade_rows() -> Array:
 		if held <= 0 or price <= 0:
 			continue
 		any = true
-		rows.append({
-			"name": "%s (%d each)" % [str(f["name"]), price],
-			"value": "%d held" % held,
-			"button": "Sell all",
-			"action": "sell_food:" + str(f["id"]),
-			"enabled": true,
-		})
+		rows.append(_sell_row(f, held))
 	var cooked := _cooked_sell_rows()
 	if not any and cooked.is_empty():
 		rows.append({"name": "Nothing to sell", "value": "Crops, fish, forage, eggs, milk and cooked food sell here."})
 	return rows + cooked + [
-		{"note": "The farm stand is open from 06:00 to 18:00. It only buys what you carry, so take crops or fish out of storage first."},
+		{"note": "The farm stand is open from 06:00 to 18:00. It only buys what you carry, so take crops or fish out of storage first. The lane takes only so many of each thing a day at full price; sell a spread, or keep some back for another day."},
 	]
 
 
@@ -887,8 +981,8 @@ func _cellar_rows() -> Array:
 		{"tab": "Root cellar"},
 		{
 			"name": "Crops stored",
-			"value": "%d/%d" % [total, m.CELLAR_CAP],
-			"progress": float(total) / float(m.CELLAR_CAP),
+			"value": "%d/%d" % [total, m.estate._cellar_cap()],
+			"progress": float(total) / float(m.estate._cellar_cap()),
 		},
 		{"name": "In the cellar", "value": m.farm._cellar_text()},
 		{
@@ -896,7 +990,7 @@ func _cellar_rows() -> Array:
 			"value": "%d in pack" % in_pack,
 			"button": "Store",
 			"action": "store_crops",
-			"enabled": in_pack > 0 and total < m.CELLAR_CAP,
+			"enabled": in_pack > 0 and total < m.estate._cellar_cap(),
 		},
 		{
 			"name": "Take crops into your pack",
@@ -960,10 +1054,10 @@ func _furnace_rows() -> Array:
 	]
 	for kind in ["copper", "iron"]:
 		rows.append({
-			"name": "Smelt %s %s bar (1 %s ore, 1 wood)" % ["an" if kind == "iron" else "a", kind, kind],
+			"name": "Smelt %s %s bar (%d %s ore, 1 wood)" % ["an" if kind == "iron" else "a", kind, int(m.SMELT_ORE[kind]), kind],
 			"value": "Smithing %d, +%d XP. Held: %d ore, %d bars" % [int(m.SMELT_LEVEL[kind]), m.XP_SMELT, int(m.materials[kind + "_ore"]), int(m.materials[kind + "_bar"])],
 			"about": "+%d Smithing XP. You hold %d %s bars." % [m.XP_SMELT, int(m.materials[kind + "_bar"]), kind],
-			"needs": _needs({kind + "_ore": 1, "wood": 1}, "Smithing", int(m.SMELT_LEVEL[kind])) + [{"text": "Bars left today", "ok": m.mining._smelts_left() > 0}],
+			"needs": _needs({kind + "_ore": int(m.SMELT_ORE[kind]), "wood": 1}, "Smithing", int(m.SMELT_LEVEL[kind])) + [{"text": "Bars left today", "ok": m.mining._smelts_left() > 0}],
 			"button": "Smelt",
 			"action": "smelt:" + kind,
 			"enabled": m.mining._can_smelt(kind),

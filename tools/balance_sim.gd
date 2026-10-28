@@ -16,9 +16,16 @@ extends SceneTree
 #   treks=N     go on N treks a week (default 0), on the longest open route the supplies allow. The routes,
 #               events, forks and gifts come from TrekSystem; walking time and sanity are estimated (_route_trek).
 # Approximations, since these need walking or real time:
-#   - Each day takes every brush pile and up to TREES_PER_DAY trees, mines every farm rock, and breaks up to
+#   - Each day takes every brush pile and up to TREES_PER_DAY trees (while the wood is under WOODPILE or the
+#     hardwood under HARDWOOD_WANT, as a player stops felling once the woodpile is full), mines every farm rock, and breaks up to
 #     CAVE_ORE_PER_DAY ore nodes from the day's real cave layout (copper, then iron).
 #   - Bell parts are made as soon as they can be, and the bell is hung on the first All Hallows it can be.
+#   - The stand's demand curve is followed: each kind is sold while it fetches SELL_AT of its price, keepers wait
+#     in the cellar, and seeds are bought for the best SPREAD kinds. The long goals (StallSystem, EstateSystem)
+#     are bought in order: the root cellar, the cellar room, the porch and the second storey, furniture cheapest
+#     first, wallpaper and paint once, FENCES of fence, the bench, birdbath and weathervane; deed instalments go
+#     in whenever no open extension or trail work is waiting only on coins. A crow charm is made for each night
+#     from feathers spare of the bell's and the second storey's.
 #   - Crops are planted by season, best coins a day first, and only when they can ripen before the season ends.
 #   - Every forageable on the farm is picked each morning; the seasonal recipes that don't use turnips, eggs or
 #     flour are cooked at midday, and fish, forage and cooked food are sold.
@@ -32,6 +39,13 @@ const SLOT := 8
 const TREES_PER_DAY := 6
 const CAVE_ORE_PER_DAY := 8
 const FIBER_KEEP := 6        # a second board is mended only above this much fiber
+const SELL_AT := 0.6         # goods are sold while the stand pays at least this share of the price
+const SPREAD := 3            # seeds are bought for this many of the best kinds, the one least in hand first
+const KEEP_COINS := 150      # coins kept in hand when buying the long goals
+const DEED_FLOAT := 600      # coins kept in hand beyond a deed instalment
+const WOODPILE := 200        # trees are felled while the wood is under this, or the hardwood under HARDWOOD_WANT
+const HARDWOOD_WANT := 150
+const FENCES := 120          # wattle fence the sim puts up, ten a day while the sticks last
 # Crops kept growing are what the tank waters on a dry day (m._well_capacity(): 40, 64 with the cistern).
 # Sprinklers go on these plot-one tiles (inner coordinates), one in the middle of each 3 by 3, so the rows
 # planted first are the ones they water; the sim never plants on them.
@@ -59,12 +73,12 @@ var treks_a_week := 0
 var rope := 0
 var grove_rations := 0      # rations baked ahead for the grove, one a day once she waits (see _trek)
 var last_trek := ""         # the route of the last trek walked
-var trek_log := {"mill": 0, "orchard": 0, "chapel": 0, "post": 0, "grove": 0, "dark": 0, "floods": 0, "dogs": 0, "skipped": 0, "oil_coins": 0, "works_coins": 0}
+var trek_log := {"mill": 0, "orchard": 0, "chapel": 0, "post": 0, "grove": 0, "dark": 0, "floods": 0, "dogs": 0, "skipped": 0, "oil_coins": 0, "works_coins": 0, "trade_coins": 0}
 var days := 60
 var every := 1
 var milestones := {}         # name -> first day
 var nights := {"faced": 0, "ignored": 0, "skipped": 0, "hollow": 0}
-var spent := {"seeds": 0, "animals": 0, "tax": 0, "pedlar": 0, "cards": 0}
+var spent := {"seeds": 0, "animals": 0, "tax": 0, "pedlar": 0, "cards": 0, "estate": 0}
 var earned := {"crops": 0, "eggs_milk": 0, "fish": 0, "forage": 0, "cooked": 0}
 var grown := {}             # crop kind -> harvested
 var cooked := {}            # food id -> made by _cook
@@ -74,6 +88,7 @@ var low_days := {}           # days sanity went under LOW_SANITY (the screen dar
 var hp_lost := 0
 var empty_hours := {"food": 0.0, "water": 0.0, "warmth": 0.0}
 var fished_hours := 0
+var made_charms := 0
 var caves := {"visits": 0, "copper": 0, "iron": 0}   # ore nodes seen in the day's cave
 
 
@@ -191,7 +206,7 @@ func _play_day() -> String:
 
 func _sleep() -> void:
 	m.stats["slept"] += 1
-	m.sanity_sys._change_sanity(m.SLEEP_SANITY)
+	m.sanity_sys._change_sanity(m.SLEEP_SANITY + m.estate._sleep_bonus())
 	if m.firewood._fire_lit():
 		m.warmth = 100.0
 	# In earlybed the visitor comes to the sleeping house during _end_day, so the Hollow is counted here.
@@ -408,27 +423,67 @@ func _reserve() -> int:
 func _sell() -> void:
 	# Keep a few crops back for food, feed, the cleanse and trek rations, of any kind; sell the rest,
 	# dearest first, so the cheap ones are the ones kept.
+	# Each kind is sold while the stand pays at least SELL_AT of its price; the rest waits for another day
+	# (the keepers in the cellar), unless the pack is nearly full.
 	var keep := _reserve() + (4 if treks_a_week > 0 else 0)
+	_cellar_swap()
 	var kinds: Array = m.CROPS.keys()
 	kinds.sort_custom(func(a, b) -> bool: return int(m.CROP_VALUE[a]) > int(m.CROP_VALUE[b]))
 	for kind in kinds:
 		var k := str(m.CROPS[kind]["held"])
-		var extra := mini(int(m.inventory[k]), m.farm._crop_total() - keep)
+		var extra := mini(_worth_selling(k), m.farm._crop_total() - keep)
 		if extra <= 0:
 			continue
 		earned["crops"] += _sell_some(k, extra)
 	for k in ["eggs", "milk"]:
 		var keep_n := 4 if treks_a_week > 0 else 0
-		earned["eggs_milk"] += _sell_some(k, int(m.inventory[k]) - keep_n)
-	# Raw fish spoil tonight; forage and cooked food are for selling once the sim has eaten.
+		earned["eggs_milk"] += _sell_some(k, mini(_worth_selling(k), int(m.inventory[k]) - keep_n))
+	# Raw fish spoil tonight, so they all go; forage and cooked food are for selling once the sim has eaten.
 	for f in Foods.LIST:
 		var k := str(f["held"])
 		if f["kind"] == "fish":
 			earned["fish"] += _sell_some(k, int(m.inventory[k]))
 		elif f["kind"] == "forage":
-			earned["forage"] += _sell_some(k, int(m.inventory[k]))
+			earned["forage"] += _sell_some(k, _worth_selling(k))
 		elif f["kind"] == "cooked" and not str(f["id"]) in ["trail_ration", "bread", "fish_meal"]:
-			earned["cooked"] += _sell_some(k, int(m.inventory[k]))
+			earned["cooked"] += _sell_some(k, _worth_selling(k))
+	# A full pack is emptied of the cheapest goods at whatever they fetch.
+	if m.stall._pack_free() < 4:
+		for f in Foods.LIST:
+			var k := str(f["held"])
+			if f["kind"] in ["forage", "cooked"] and not str(f["id"]) in ["trail_ration", "bread", "fish_meal"]:
+				earned[str(f["kind"])] += _sell_some(k, int(m.inventory[k]))
+			elif f["kind"] == "crop" and m.CROP_VALUE.has(str(f["id"])):
+				earned["crops"] += _sell_some(k, mini(int(m.inventory[k]), m.farm._crop_total() - keep))
+
+
+# How many of a pack key the stand takes while it pays at least SELL_AT of its price.
+func _worth_selling(k: String) -> int:
+	var id := str(Foods.by_held(k).get("id", ""))
+	var held := int(m.inventory[k])
+	var price := m.stall._food_price(id)
+	var n := 0
+	while n < held and m.stall._sale_value(id, n + 1) - m.stall._sale_value(id, n) >= price * SELL_AT:
+		n += 1
+	return n
+
+
+# With the cellar built, crops that keep go down into it when the stand is full of them, and come back up
+# when it wants them again.
+func _cellar_swap() -> void:
+	if not m.cellar_built:
+		return
+	for key in m.farm._cellar_keys():
+		var id := str(Foods.by_held(key).get("id", ""))
+		var want := m.stall._full_left(id)
+		var up := mini(int(m.cellar.get(key, 0)), maxi(0, want - int(m.inventory[key])))
+		if up > 0:
+			m.cellar[key] = int(m.cellar[key]) - up
+			m.inventory[key] += up
+		var down := mini(maxi(0, int(m.inventory[key]) - want - 4), m.estate._cellar_cap() - m.farm._cellar_total())
+		if down > 0:
+			m.inventory[key] -= down
+			m.cellar[key] = int(m.cellar.get(key, 0)) + down
 
 
 # Sells n of a pack key at the stand, keeping the rest. Returns the coins.
@@ -448,13 +503,29 @@ func _order() -> void:
 	var growing := m.crops.size()
 	for k in m.CROPS:
 		growing += int(m.inventory[m.CROPS[k]["seed"]]) if m.farm._in_season(k) else 0
-	var best := _best_kinds()
-	var kind := str(best[0]) if not best.is_empty() else "turnip"
-	var item := m.desk._catalog_item("seeds_" + kind)
-	while bool(item["ok"]) and growing < int(m._well_capacity()) + 4 and m.money >= int(item["price"]) + 10 and m.desk_orders.size() < 12:
+	# The best few kinds, the one least in hand first, so the field grows a spread the stand will take.
+	var best := _best_kinds().slice(0, SPREAD)
+	if best.is_empty():
+		best = ["turnip"]
+	var on_hand := {}
+	for k in best:
+		on_hand[k] = int(m.inventory[m.CROPS[k]["seed"]])
+	for t in m.crops:
+		var ck := str(m.crops[t]["kind"])
+		if on_hand.has(ck):
+			on_hand[ck] += 1
+	while growing < int(m._well_capacity()) + 4 and m.desk_orders.size() < 12:
+		var kind := str(best[0])
+		for k in best:
+			if int(on_hand[k]) < int(on_hand[kind]):
+				kind = k
+		var item := m.desk._catalog_item("seeds_" + kind)
+		if not bool(item["ok"]) or m.money < int(item["price"]) + 10:
+			break
 		m.desk._order("seeds_" + kind)
 		spent["seeds"] += int(item["price"])
 		growing += int(m.CROPS[kind]["pack"])
+		on_hand[kind] += int(m.CROPS[kind]["pack"])
 	if m.card_games <= 0 and m.sudoku_puzzles <= 0 and not m.desk_orders.has("cards") and m.money >= m.CARDS_PRICE + 10:
 		m.desk._order("cards")
 		spent["cards"] += m.CARDS_PRICE
@@ -505,6 +576,8 @@ func _gather() -> void:
 			var t := m._world_tile(spot.x, spot.y)
 			if felled >= TREES_PER_DAY or m.grove_felled.has(t):
 				continue
+			if int(m.materials["wood"]) >= WOODPILE and (int(m.materials["hardwood"]) >= HARDWOOD_WANT or int(m.tool_tier["hatchet"]) < 3):
+				break
 			m.firewood._finish_chop(t)
 			felled += 1
 	for t in m.rocks.keys():
@@ -539,8 +612,8 @@ func _cave() -> void:
 
 
 func _craft_and_build() -> void:
-	# Iron bars for the tools, lamp and bell; copper is smelted with spare wood, for Smithing XP.
-	while m.mining._can_smelt("iron") and int(m.materials["wood"]) > 4 and int(m.materials["iron_bar"]) < 9:
+	# Iron bars first, for the tools, lamps, bell, works and extensions; copper is smelted with spare wood.
+	while m.mining._can_smelt("iron") and int(m.materials["wood"]) > 4:
 		m.mining._smelt("iron")
 	while m.mining._can_smelt("copper") and int(m.materials["wood"]) > 30:
 		m.mining._smelt("copper")
@@ -588,7 +661,101 @@ func _craft_and_build() -> void:
 			continue
 		var r := _try_build(str(item[0]), item[2])
 		if r == "wait":
-			return
+			break
+	_estate()
+
+
+# The long goals, once the homestead's next step isn't short of anything: the cellar room, then furniture
+# (cheapest first), wallpaper and paint once each, the porch, the second storey, then the land deed in
+# instalments. Each is bought only from coins spare of the tax and KEEP_COINS. Fences go up from spare sticks,
+# and the bench, birdbath and weathervane once there is plenty.
+func _estate() -> void:
+	var e := m.estate
+	if not m.cellar_built and m._can_afford(m.CELLAR_COST) and _spare() >= int(m.CELLAR_COST["coins"]) + KEEP_COINS:
+		m._build_storage("cellar")
+		_mark("root cellar")
+	# A crow charm for tonight, from feathers spare of the bell's.
+	var bell_feathers := (0 if m.projects._has_bell() else 30) + (0 if m.estate._has("second_storey") else int(m.estate.EXTENSIONS["second_storey"]["cost"]["feathers"]))
+	if int(m.inventory["crow_charm"]) < 1 and int(m.materials["feathers"]) >= bell_feathers + int(m.nights.CHARM["feathers"]) and m.nights._can_make_charm():
+		m.nights._make_charm()
+		made_charms += 1
+	var spare := _spare() - KEEP_COINS
+	for id in ["cellar_room", "porch", "second_storey"]:
+		if e._has(id):
+			continue
+		if e._why(id) == "":
+			if spare >= int(e.EXTENSIONS[id]["cost"]["coins"]):
+				e._build(id)
+				_mark("ext: " + id)
+				spent["estate"] += int(e.EXTENSIONS[id]["cost"]["coins"])
+			return   # saving for it
+		if m.house_stage >= int(e.EXTENSIONS[id]["stage"]) and (id != "second_storey" or e._has("porch")):
+			_note_short(id, e.EXTENSIONS[id]["cost"])   # short of coins, materials or Carpentry: buy smaller things meanwhile
+	var pieces: Array = e.FURNITURE.keys()
+	pieces.sort_custom(func(a, b) -> bool: return int(e.FURNITURE[a]["cost"].get("coins", 0)) < int(e.FURNITURE[b]["cost"].get("coins", 0)))
+	for id in pieces:
+		if e._furniture_why(id) == "" and spare >= int(e.FURNITURE[id]["cost"]["coins"]):
+			e._buy_furniture(id)
+			spare -= int(e.FURNITURE[id]["cost"]["coins"])
+			spent["estate"] += int(e.FURNITURE[id]["cost"]["coins"])
+			_mark("furniture: " + id)
+	if e.paper == "plain" and e._paper_why("damask") == "" and spare >= 300:
+		e._repaper("damask")
+		spent["estate"] += int(e.PAPER_COST["coins"])
+		_mark("wallpaper")
+	if e.paint == "plain" and e._paint_why("sage") == "" and spare >= 400:
+		e._repaint("sage")
+		spent["estate"] += int(e.PAINT_COST["coins"])
+		_mark("paint")
+	if e._deed_why() == "" and spare >= e._deed_step() + DEED_FLOAT and not _saving_up():
+		spent["estate"] += e._deed_step()
+		e._pay_deed()
+		_mark("deed begun")
+		if e._deed_owned():
+			_mark("deed owned")
+	var placed := 0
+	while placed < 10 and m.projects._count("fence") < FENCES and int(m.materials["wood"]) > 20 and m.projects._can_place("fence"):
+		var t := _open_grass()
+		if t.x < 0:
+			break
+		m.projects._confirm("fence", t)
+		placed += 1
+	if spare >= 300:
+		for kind in ["bench", "birdbath", "weathervane"]:
+			if m.projects._can_place(kind) and m.projects._count(kind) < 1:
+				m.projects._confirm(kind, _open_grass())
+				_mark("decor: " + kind)
+
+
+# True while an open extension or trail work lacks only coins: the deed waits for it.
+func _saving_up() -> bool:
+	var costs: Array = []
+	for id in m.estate.EXTENSIONS:
+		var x: Dictionary = m.estate.EXTENSIONS[id]
+		if not m.estate._has(id) and m.house_stage >= int(x["stage"]) and (not x.has("after") or m.estate._has(str(x["after"]))) 				and (id != "cellar_room" or m.cellar_built):
+			costs.append(x["cost"])
+	for id in m.trek.WORKS:
+		if not m.trek._has_work(id) and m.day >= int(m.trek.ROUTES[m.trek.WORKS[id]["route"]]["from"]):
+			costs.append(m.trek.WORKS[id]["cost"])
+	for cost in costs:
+		var c: Dictionary = (cost as Dictionary).duplicate()
+		var coins := int(c.get("coins", 0))
+		c.erase("coins")
+		if c.has("rope"):
+			c.erase("rope")   # the sim keeps its rope apart
+		if m._can_afford(c) and m.money < coins + DEED_FLOAT:
+			return true
+	return false
+
+
+# Marks what an extension is still short of, once each.
+func _note_short(id: String, cost: Dictionary) -> void:
+	for k in cost:
+		if k == "level":
+			if m.progression._level("Carpentry") < int(cost[k]):
+				_mark("%s waits: Carpentry" % id)
+		elif m._held(str(k)) < int(cost[k]):
+			_mark("%s waits: %s" % [id, k])
 
 
 # Returns "done", "skip" (locked by a level or a rare material) or "wait" (save up for it).
@@ -742,7 +909,9 @@ func _trek() -> void:
 		m.materials["fiber"] += int(r["fiber"])
 		# The route's own gifts (seeds, applewood and flax, lamp oil and storm oak, crow charms), from the game.
 		t.night = false
+		var before := m.money
 		t._gifts(1)
+		trek_log["trade_coins"] += m.money - before
 		t._on_arrived()
 		trek_log[id] += 1
 		last_trek = id
@@ -772,7 +941,7 @@ func _route_trek(route: Dictionary) -> Dictionary:
 	var n: int = (t._steps(id)["dark" if dark else "marked"] as Array).size()
 	var d: int = t._dread()
 	r["dark"] = dark
-	r["oil"] = ceili(n * CLEARING_SECONDS / t.FLASK_SECONDS)
+	r["oil"] = ceili(n * CLEARING_SECONDS / t._flask_seconds())
 	r["hours"] = 0.5 + 0.75 * n
 	r["fiber"] = n
 	r["xp"] = int(spec["xp"]) + t.DREAD_XP * d + (t.DARK_XP if dark else 0)
@@ -802,7 +971,7 @@ func _route_trek(route: Dictionary) -> Dictionary:
 # Coins free to spend: what is owed, or the next bill from a month before it comes, is kept back.
 func _spare() -> int:
 	var d := m._calendar_date(m.day + 30)
-	var bill_soon := m.TAX_MONTHS.has(int(d["month"])) and m.tax_owed == 0
+	var bill_soon := m.TAX_MONTHS.has(int(d["month"])) and m.tax_owed == 0 and not m.estate._deed_owned()
 	return m.money - m.tax_owed - (m.desk._property_value() if bill_soon else 0)
 
 
@@ -954,5 +1123,9 @@ func _summary() -> void:
 	if caves["visits"] > 0:
 		print("--- cave: %.1f copper and %.1f iron nodes a day on average, over %d visits" % [
 			float(caves["copper"]) / caves["visits"], float(caves["iron"]) / caves["visits"], caves["visits"]])
+	var e := m.estate
+	print("--- crow charms made %d" % made_charms)
+	print("--- estate: extensions %s, furniture %s, paint %s, paper %s, deed %d/%d; fences %d; stand glut %s" % [
+		e.built.keys(), e.furniture.keys(), e.paint, e.paper, e.deed_paid, e.DEED_PRICE, m.projects._count("fence"), JSON.stringify(m.stall.glut)])
 	var next := m.projects._next_step()
 	print("--- next step: %s" % str(next.get("title", "all done")))

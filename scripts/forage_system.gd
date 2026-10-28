@@ -20,8 +20,8 @@ const FORAGE := [
 	{"id": "morels", "seasons": ["Spring"], "level": 4, "weight": 8},
 	{"id": "ghost_pipe", "seasons": ["Summer", "Autumn"], "level": 5, "weight": 5},
 ]
-const PER_MORNING := 3            # on the farm each morning, plus one per three Bushcrafting levels
-const MAX_PER_MORNING := 7
+const PER_MORNING := 2            # on the farm each morning, plus one per three Bushcrafting levels
+const MAX_PER_MORNING := 5
 const PER_CLEARING := 2           # on each trek clearing
 const XP_BASE := 8                # Bushcrafting XP a pick, plus XP_PER_LEVEL for each level the find needs
 const XP_PER_LEVEL := 3

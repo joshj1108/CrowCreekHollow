@@ -20,6 +20,8 @@ func _read_desk() -> void:
 func _desk_action(action_id: String) -> void:
 	if action_id == "pay_tax":
 		_pay_tax()
+	elif action_id == "pay_deed":
+		m.estate._pay_deed()
 	elif action_id == "diary":
 		m._open_diary()
 		return
@@ -219,18 +221,28 @@ func _building_count() -> int:
 	return n
 
 
-# The property value: the quarterly bill, from the house, the buildings, the plots and how clean the farm is kept.
+# Lamp posts and sprinklers on the farm, for the property value.
+func _fixture_count() -> int:
+	return m.projects._count("lamp") + m.projects._count("sprinkler") + m.projects._count("sprinkler_big")
+
+
+# The property value: the quarterly bill, from the house and its extensions, the buildings, the plots, the
+# livestock and the fixtures. Keeping the farm well doesn't raise it. Nothing is billed once the deed is bought.
 func _property_value() -> int:
 	var house_mult := pow(m.PROPERTY_HOUSE_GROWTH, m.house_stage)
-	var building_mult := 1.0 + m.PROPERTY_PER_BUILDING * _building_count()
+	var building_mult := 1.0 + m.PROPERTY_PER_BUILDING * _building_count() + m.estate.EXTENSION_VALUE * m.estate.built.size()
 	var plot_mult := 1.0 + m.PROPERTY_PER_PLOT * (int(m.plot_two_open) + int(m.plot_three_open))
-	return roundi(m.PROPERTY_TAX * house_mult * building_mult * plot_mult)
+	var stock := m.PROPERTY_PER_HEN * m.hens + m.PROPERTY_PER_GOAT * m.goats + m.PROPERTY_PER_FIXTURE * _fixture_count()
+	return roundi(m.PROPERTY_TAX * house_mult * building_mult * plot_mult) + stock
 
 
 func _property_text() -> String:
-	return "%d coins a quarter. Starts at %d; x%.1f per house upgrade, +%d%% per building (%d), +%d%% per farm plot past the first (%d)." % [
+	if m.estate._deed_owned():
+		return "The deed is yours: no tax is owed on the farm."
+	return "%d coins a quarter. Starts at %d; x%.1f per house upgrade, +%d%% per building (%d), +%d%% per extension (%d), +%d%% per farm plot past the first (%d), and %d a hen, %d a goat, %d a lamp post or sprinkler." % [
 		_property_value(), m.PROPERTY_TAX, m.PROPERTY_HOUSE_GROWTH, int(m.PROPERTY_PER_BUILDING * 100), _building_count(),
-		int(m.PROPERTY_PER_PLOT * 100), int(m.plot_two_open) + int(m.plot_three_open)]
+		int(m.estate.EXTENSION_VALUE * 100), m.estate.built.size(),
+		int(m.PROPERTY_PER_PLOT * 100), int(m.plot_two_open) + int(m.plot_three_open), m.PROPERTY_PER_HEN, m.PROPERTY_PER_GOAT, m.PROPERTY_PER_FIXTURE]
 
 
 func _tax_evicts() -> bool:
@@ -241,7 +253,7 @@ func _tax_evicts() -> bool:
 func _mail_day() -> String:
 	var note := _deliver_orders()
 	var date := m._calendar_date(m.day)
-	if int(date["day"]) == 1 and m.TAX_MONTHS.has(int(date["month"])) and m.day > 1:
+	if int(date["day"]) == 1 and m.TAX_MONTHS.has(int(date["month"])) and m.day > 1 and not m.estate._deed_owned():
 		if m.tax_owed == 0:
 			m.tax_due_day = m.day + m.TAX_GRACE_DAYS
 			m.tax_stage = 0

@@ -3,7 +3,7 @@ extends RefCounted
 
 # Bumped when a save's keys change shape. Saves from before the number was written count as 1.
 # _migrate lifts an older save one version at a time, so every old save still loads.
-const SAVE_VERSION := 10
+const SAVE_VERSION := 11
 # Keys a save must hold with the right type, or it isn't read: the loader would trip over anything else.
 const DICT_KEYS := ["inventory", "materials", "skill_xp", "stats", "equipment", "quests_done", "achievements_done",
 	"tool_tier", "trek_walked"]
@@ -96,6 +96,8 @@ func _save_game() -> void:
 		"trek_walked": m.trek.walked,
 		"trek_grove_done": m.trek.grove_done,
 		"trek_works": m.trek.works.keys(),
+		"estate": m.estate._to_save(),
+		"stand_glut": m.stall.glut,
 		"rook_pages": m.mystery.found.keys(),
 		"last_visitor": m.nights.last_visitor,
 		"sanity": m.sanity,
@@ -196,6 +198,8 @@ func _load_game() -> bool:
 	m.bag_tier = int(data.get("bag_tier", 0))
 	m.cellar_built = bool(data.get("cellar_built", false))
 	m.cooler_built = bool(data.get("cooler_built", false))
+	m.estate._from_save(data.get("estate"))   # before the cellar: the cellar room lets it keep every crop
+	m.stall._glut_from_save(data.get("stand_glut"))
 	m.cellar = _stock(data.get("cellar"), m.farm._cellar_keys())
 	m.cooler = _stock(data.get("cooler"), Foods.group("any_fish"))
 	if int(data.get("forage_day", -1)) == m.day:
@@ -475,6 +479,10 @@ static func _migrate(data: Dictionary) -> Dictionary:
 			data["cellar"] = {"crops": int(data.get("cellar_stock", 0))}
 		if not data.has("cooler"):
 			data["cooler"] = {"fish": int(data.get("cooler_stock", 0))}
+	if v < 11:
+		# Version 11 added the house extensions, furniture, paint and wallpaper and the land deed ("estate"), and
+		# the farm stand's demand ("stand_glut"). An older save has none of them, which the loader's defaults give.
+		pass
 	# A save from a newer build keeps its number; keys this build doesn't know are ignored.
 	data["save_version"] = maxi(v, SAVE_VERSION)
 	return data

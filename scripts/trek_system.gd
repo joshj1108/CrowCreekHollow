@@ -176,8 +176,9 @@ const TRADE := {
 	"chapel": {"who": "the vicar", "goods": ["pumpkins", "leeks", "parsnips", "fish", "trout", "crappie", "bullhead", "sturgeon"],
 		"what": "pumpkins, leeks, parsnips and fish, for the soup he gives out (not the pale ones; he won't have those in the house)"},
 }
-const TRADE_MULT := 1.5
-const TRADE_MAX := 10
+const TRADE_MULT := 1.25
+const TRADE_MAX := 8
+const CART_TRADE := 6                 # more a walk with the mill handcart (a trail work)
 const TRADE_KEEP := 4
 const BREAD_NERVE := 50.0             # a loaf, given when the rations are gone
 const TREK_PUSH := 1                  # shadow steps back on coming home from a trek
@@ -337,6 +338,8 @@ func _has_work(id: String) -> bool:
 	return bool(works.get(id, false))
 
 
+const CACHE_FLASK_SECONDS := 110
+const POST_LAMPS_NERVE := 90.0
 # The trail works, paid for from the Buildings section, each once, from when its route opens ("route").
 const WORKS := {
 	"waymarks": {"name": "Waymarks", "route": "mill", "cost": {"coins": 150, "wood": 10},
@@ -357,7 +360,31 @@ const WORKS := {
 	"chapel_steps": {"name": "The chapel steps", "route": "chapel", "cost": {"coins": 1800, "stone": 30, "iron_bar": 4},
 		"about": "Stone steps up the hill, with iron rails. The chapel by night without the doubled sanity drain.",
 		"built": "The chapel by night costs no more sanity than by day."},
+	"handcart": {"name": "The mill handcart", "route": "mill", "cost": {"coins": 600, "hardwood": 30, "iron_bar": 10},
+		"about": "An iron-tyred cart kept at the mill. Each walk the destination buys %d more of what you carry." % CART_TRADE,
+		"built": "Each destination buys %d more a walk." % CART_TRADE},
+	"oil_cache": {"name": "Oil tins at the stiles", "route": "orchard", "cost": {"coins": 900, "copper_bar": 40, "iron_bar": 4},
+		"about": "Sealed copper tins of oil at each stile, to top the lantern up: a flask lasts %d seconds instead of %d." % [CACHE_FLASK_SECONDS, FLASK_SECONDS],
+		"built": "A flask of oil lasts %d seconds." % CACHE_FLASK_SECONDS},
+	"post_lamps": {"name": "Lamps on the post road", "route": "post", "cost": {"coins": 1500, "iron_bar": 16, "copper_bar": 30, "hardwood": 20},
+		"about": "Iron lamp posts along the post road, lit by the postman. Every walker sets out steadier: nerve starts at %d instead of %d." % [POST_LAMPS_NERVE, NERVE_START],
+		"built": "Walkers set out with nerve %d." % POST_LAMPS_NERVE},
 }
+
+
+# The mill handcart: the destinations buy more of what you carry.
+func _trade_max() -> int:
+	return TRADE_MAX + (CART_TRADE if _has_work("handcart") else 0)
+
+
+# The oil tins at the stiles: a flask lasts longer.
+func _flask_seconds() -> float:
+	return float(CACHE_FLASK_SECONDS) if _has_work("oil_cache") else FLASK_SECONDS
+
+
+# The lamps on the post road: every walker sets out steadier.
+func _nerve_start() -> float:
+	return POST_LAMPS_NERVE if _has_work("post_lamps") else NERVE_START
 
 
 # Why a work can't be built now ("built" once it is), or "" when it can.
@@ -581,7 +608,7 @@ func _ask(id: String) -> void:
 func _trade_note(id: String) -> String:
 	if not TRADE.has(id):
 		return ""
-	return " At %s, %s will buy %s: up to %d, for half again what the stand pays." % [ROUTES[id]["to"], TRADE[id]["who"], TRADE[id]["what"], TRADE_MAX]
+	return " At %s, %s will buy %s: up to %d, for a quarter more than the stand pays." % [ROUTES[id]["to"], TRADE[id]["who"], TRADE[id]["what"], _trade_max()]
 
 
 # Said when you ask a walker: how near they are to knowing you, or that they do.
@@ -601,7 +628,7 @@ func _start(id := "mill") -> void:
 	active = true
 	done_day = m.day
 	clearing = 0
-	nerve = NERVE_START
+	nerve = _nerve_start()
 	oil_seconds = 0.0
 	lit = true
 	m.fishing._stop_fishing("")
@@ -947,7 +974,7 @@ func _burn(delta: float) -> void:
 		return
 	if int(m.materials["lamp_oil"]) > 0:
 		m.materials["lamp_oil"] -= 1
-		oil_seconds = FLASK_SECONDS
+		oil_seconds = _flask_seconds()
 		if clearing_time > 1.0:
 			m._show_message("The lantern gutters. You refill it. %d lamp oil left." % int(m.materials["lamp_oil"]))
 	else:
@@ -1385,7 +1412,7 @@ func _trade() -> Array:
 		return []
 	var goods: Array = (TRADE[route_id]["goods"] as Array).duplicate()
 	goods.sort_custom(func(a, b): return _stand_price(a) > _stand_price(b))
-	var left := TRADE_MAX
+	var left := _trade_max()
 	var sold := 0
 	var coins := 0
 	for kind in goods:

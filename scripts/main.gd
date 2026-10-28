@@ -89,6 +89,7 @@ const ROOST_SIZE := 4         # perches in its crown
 const ROOST_ALT := 3.4        # how high the crown perches sit, in tiles
 const ROOST_SPOTS := [Vector2(-2.6, 2.7), Vector2(-0.7, 4.4), Vector2(0.9, 4.5), Vector2(2.6, 2.5)]  # perches on the tree's art
 const XP_FELL := 20
+const HARDWOOD_CHANCE := 0.4    # a tree felled with an iron hatchet gives a hardwood this often
 # Rocks on the farm. Breaking one gives stone. A pick gives more, and from Mining 2 a small chance of copper ore.
 # Some sit inside the plots: a rock must be broken before that soil can be planted.
 const ROCK_SPOTS := FarmLayout.ROCK_SPOTS
@@ -106,8 +107,8 @@ const CAVE_MIN_CREATURE_DEPTH := 8       # creatures start at least this far fro
 const CAVE_IRON_DEPTH := 12              # iron ore only this far in
 const TREK_LANTERN_BOOST := 1.6          # the lantern in the Rookery Wood's gloom (see TrekSystem)
 const LAMP_OIL_PRICE := 8                # a flask of lamp oil from the catalog, for treks
-const CAVE_ORE_CHANCE := 0.05            # odds a rock wall touching the tunnels holds ore (about 7 a day)
-const CAVE_IRON_CHANCE := 0.015          # ... and that deep ore is iron (about 2 a day)
+const CAVE_ORE_CHANCE := 0.035           # odds a rock wall touching the tunnels holds ore (about 5 a day)
+const CAVE_IRON_CHANCE := 0.0125         # ... and that deep ore is iron (about 2 a day)
 # Tool tiers. A hatchet fells trees. Hardwood needs a copper hatchet or better.
 const TOOL_TIERS := {
 	"hatchet": [
@@ -218,8 +219,9 @@ const MAX_STAGE := 3        # 0 = seed, 3 = ready to harvest
 const CROP_GROW_DAYS := {"turnip": 7, "kale": 6, "peas": 6, "corn": 8, "potato": 8, "leek": 9, "pumpkin": 10, "parsnip": 9,
 	"strawberry": 8, "garlic": 12, "blueberry": 10}
 # What a sold crop fetches at the farm stand, and what food from it is worth.
-const CROP_VALUE := {"turnip": 8, "kale": 6, "peas": 3, "corn": 10, "potato": 6, "leek": 14, "pumpkin": 15, "parsnip": 11,
-	"strawberry": 9, "garlic": 17, "blueberry": 8}
+# Each pays well over its seed (see the Money section of DESIGN.md); the stand's demand curve (StallSystem) caps a day.
+const CROP_VALUE := {"turnip": 9, "kale": 7, "peas": 5, "corn": 13, "potato": 8, "leek": 18, "pumpkin": 19, "parsnip": 15,
+	"strawberry": 12, "garlic": 24, "blueberry": 13}
 const STAGE_NAMES := ["Decrepit", "Boarded", "Patched", "Restored"]
 # Tips: diary pages written as the player reaches each part of the farm, once each, when its condition
 # is met (see _tip_ready).
@@ -299,7 +301,7 @@ const PUMPKIN_LEVEL := 3
 const CROPS := {
 	"turnip": {"label": "Turnip", "seed": "seeds", "held": "crops", "level": 0, "yield": 1, "xp": 25, "seasons": [], "seed_back": 0.5,
 		"pack": 5, "seed_price": 3, "keeps": true, "colors": ["8fd16b", "4f9a3a", "2f7a2a", "e8b440"]},
-	"kale": {"label": "Kale", "seed": "kale_seeds", "held": "kale", "level": 1, "yield": 1, "xp": 14, "seasons": ["Autumn", "Winter"], "regrow": 4,
+	"kale": {"label": "Kale", "seed": "kale_seeds", "held": "kale", "level": 1, "yield": 1, "xp": 14, "seasons": ["Autumn", "Winter"], "regrow": 5,
 		"seed_back": 0.1, "pack": 5, "seed_price": 4, "keeps": false, "colors": ["6f9a5a", "3f6a4a", "2f5a3a", "5a7a8a"]},
 	"peas": {"label": "Pea", "seed": "pea_seeds", "held": "peas", "level": 1, "yield": 2, "xp": 12, "seasons": ["Spring"], "regrow": 3,
 		"seed_back": 0.1, "pack": 5, "seed_price": 3, "keeps": false, "colors": ["9fd27a", "6fae4a", "4f8a34", "8fc860"]},
@@ -356,7 +358,8 @@ const FIREWOOD_HOURS := 3.0         # hours of warmth one firewood gives the hea
 const FIRE_MAX_HOURS := 12.0        # the hearth holds at most four firewood's worth
 const XP_CHOP_LOG := 6
 const SMELT_LEVEL := {"copper": 1, "iron": 4}
-const XP_SMELT := 10
+const SMELT_ORE := {"copper": 3, "iron": 2}   # ore a bar takes: the cave's copper is poor, and its iron little better
+const XP_SMELT := 20               # 10 until copper took three ore a bar, so Smithing keeps its pace
 const SMELT_DAILY_LIMIT := 8      # bars the furnace makes a day before it must cool overnight
 const SMOKEHOUSE_COST := {"wood": 5, "fiber": 3, "coins": 60, "level": 4}
 # Preserving turns food into goods that keep in the pack. Each method needs a skill
@@ -376,16 +379,19 @@ const FARM_SPRITES := true
 const LAYOUT_VERSION := FarmLayout.VERSION
 const STALL_CLOSE_HOUR := 18.0
 const SELL_FISH := 6
-const SELL_EGG := 8                 # farm stand price for an egg: about the turnip a hen eats for it
-const SELL_MILK := 16               # farm stand price for a jug of goat milk: about the 2 turnips a goat eats for it
+const SELL_EGG := 3                 # farm stand price for an egg: under the turnip a hen eats, so eggs are worth more cooked
+const SELL_MILK := 6               # farm stand price for a jug of goat milk: under the 2 crops a goat eats, likewise
 const HEN_SELL := 20                # what a grown hen fetches at the coop
 const GOAT_SELL := 70               # what a grown goat fetches at the barn
 const HEN_MATURE_DAYS := 7          # nights before a hen is grown and starts laying: a week
 const GOAT_MATURE_DAYS := 10        # nights before a goat is grown and starts giving milk: ten days
-const PROPERTY_TAX := 40            # coins per quarter at the start: the base of the property value
+const PROPERTY_TAX := 50            # coins per quarter at the start: the base of the property value
 const PROPERTY_HOUSE_GROWTH := 1.8  # each house upgrade multiplies the value (exponential)
 const PROPERTY_PER_BUILDING := 0.05 # +5% for each building on the farm
 const PROPERTY_PER_PLOT := 0.25     # +25% for each farm plot unlocked past the first
+const PROPERTY_PER_HEN := 3         # coins a quarter for each hen, each goat, and each lamp post or sprinkler
+const PROPERTY_PER_GOAT := 8
+const PROPERTY_PER_FIXTURE := 4
 const TAX_MONTHS := [0, 3, 6, 9]    # January, April, July, October: the bill comes on the 1st
 const TAX_GRACE_DAYS := 14          # days to pay a bill after it arrives
 const TAX_FINAL_DAYS := 7           # days overdue before the final notice
@@ -904,6 +910,7 @@ var nights: NightSystem
 var happenings: DailyHappenings
 var trek: TrekSystem
 var projects: FarmProjects
+var estate: EstateSystem
 var feel: GameFeel
 var mystery: Mystery
 var rewards: HomesteadRewards
@@ -944,6 +951,7 @@ func _ready() -> void:
 	happenings = DailyHappenings.new(self)
 	trek = TrekSystem.new(self)
 	projects = FarmProjects.new(self)
+	estate = EstateSystem.new(self)
 	feel = GameFeel.new(self)
 	mystery = Mystery.new(self)
 	stall = StallSystem.new(self)
@@ -1588,7 +1596,8 @@ func _draw_house() -> void:
 		return  # the house is drawn as one sprite by house_roof_layer
 	var origin := _world_tile(HOUSE_IX, HOUSE_IY)
 	var rect := Rect2(Vector2(origin) * PX, Vector2(HOUSE_W, HOUSE_H) * PX)
-	FarmArt.draw_house(self, rect, house_stage, HOUSE_WALLS[house_stage], HOUSE_ROOFS[house_stage])
+	FarmArt.draw_house(self, rect, house_stage, HOUSE_WALLS[house_stage] * estate._paint_tint(), HOUSE_ROOFS[house_stage])
+	estate._draw_outside(self, rect, rect.end.y - PX)
 
 
 # --- Setup -------------------------------------------------------------------
@@ -2470,7 +2479,8 @@ func _draw_house_roof_layer() -> void:
 	var top := porch_top - HOUSE_WALL_BOTTOM_TILES
 	var left := float(origin.x) + HOUSE_SPRITE_OFFSET_X
 	var rect := Rect2(left * PX, top * PX, HOUSE_SPRITE_TILES.x * PX, HOUSE_SPRITE_TILES.y * PX)
-	house_roof_layer.draw_texture_rect(FarmSprites.tex("house_stage_%d" % house_stage), rect, false)
+	house_roof_layer.draw_texture_rect(FarmSprites.tex("house_stage_%d" % house_stage), rect, false, estate._paint_tint())
+	estate._draw_outside(house_roof_layer, rect, porch_top * PX)
 	house_roof_drawn_stage = house_stage
 
 
@@ -3134,7 +3144,23 @@ func _on_panel_action(action_id: String) -> void:
 	if action_id.begins_with("work:"):
 		trek._build_work(action_id.trim_prefix("work:"))
 		return
-	if action_id.begins_with("pastime:") or action_id.begins_with("order:") or action_id == "pay_tax" or action_id == "mail_clear" or action_id == "diary":
+	if action_id.begins_with("ext:"):
+		estate._build(action_id.trim_prefix("ext:"))
+		_refresh_panel()
+		return
+	if action_id.begins_with("furn:"):
+		estate._buy_furniture(action_id.trim_prefix("furn:"))
+		_refresh_panel()
+		return
+	if action_id.begins_with("paint:"):
+		estate._repaint(action_id.trim_prefix("paint:"))
+		_refresh_panel()
+		return
+	if action_id.begins_with("paper:"):
+		estate._repaper(action_id.trim_prefix("paper:"))
+		_refresh_panel()
+		return
+	if action_id.begins_with("pastime:") or action_id.begins_with("order:") or action_id == "pay_tax" or action_id == "pay_deed" or action_id == "mail_clear" or action_id == "diary":
 		desk._desk_action(action_id)
 		return
 	if action_id.begins_with("cook:"):
@@ -3393,7 +3419,7 @@ const MATERIAL_INFO := {
 	"sticks": {"name": "Sticks", "icon": "sticks", "tint": "8a6a3a", "desc": "Dry sticks from the brush piles. Crude hatchets and rods are made from them."},
 	"fiber": {"name": "Fiber", "icon": "fiber", "tint": "8a8a4a", "desc": "Plant fiber for wraps, leggings, and the hose."},
 	"resin": {"name": "Resin", "icon": "resin", "tint": "b5703a", "desc": "Sticky sap for caps, amulets, and the hose."},
-	"hardwood": {"name": "Hardwood", "icon": "log", "tint": "4a3426", "desc": "Dense wood for stronger tools and shields."},
+	"hardwood": {"name": "Hardwood", "icon": "log", "tint": "4a3426", "desc": "Dense wood for stronger tools, shields, furniture and the house extensions. An iron hatchet finds it in some trees."},
 	"stone": {"name": "Stone", "icon": "stone", "tint": "7a7a7a", "desc": "Rough stone from the farm's rocks and the cave."},
 	"copper_ore": {"name": "Copper ore", "icon": "ore", "tint": "b87333", "desc": "Raw copper. Smelt it at the furnace."},
 	"iron_ore": {"name": "Iron ore", "icon": "ore", "tint": "6b6b6b", "desc": "Raw iron. Smelt it at the furnace."},
@@ -4421,7 +4447,7 @@ func _build_storage(which: String) -> void:
 	_pay(cost)
 	if which == "cellar":
 		cellar_built = true
-		_show_message("The root cellar is dug beside the house. It holds %d crops." % CELLAR_CAP)
+		_show_message("The root cellar is dug beside the house. It holds %d crops." % estate._cellar_cap())
 	else:
 		cooler_built = true
 		_show_message("The cooler is built beside the house. It keeps %d fish fresh." % COOLER_CAP)
@@ -5407,7 +5433,7 @@ func _try_sleep() -> void:
 		_show_message("You aren't tired yet. The bed will be there after 18:00.")
 		return
 	stats["slept"] += 1
-	sanity_sys._change_sanity(SLEEP_SANITY)
+	sanity_sys._change_sanity(SLEEP_SANITY + estate._sleep_bonus())
 	if firewood._fire_lit():
 		warmth = 100.0
 	else:
@@ -5672,7 +5698,7 @@ func _end_day(base: String, leave_house: bool = true) -> void:
 		inventory[key] = 0
 	stats["spoiled"] += spoiled
 	var spoil_note := (" %d fish spoiled in your pack overnight." % spoiled) if spoiled > 0 else ""
-	var upkeep_note := night_note + _settle_day() + projects._morning()
+	var upkeep_note := night_note + _settle_day() + projects._morning() + estate._morning()
 	# Rain waters every crop. Otherwise a crop must have been watered today to grow.
 	if weather_kind in WATER_RAIN_KINDS:
 		stats["rain_days"] += 1
@@ -5700,9 +5726,10 @@ func _end_day(base: String, leave_house: bool = true) -> void:
 	tonight_shadow = Vector2i(-1, -1)
 	_regrow_wild()
 	forage._new_day()
+	stall._recover()
 	_update_shadow_tile()
 	var happening_note := happenings._start_day(true)
-	var mail_note := desk._mail_day()
+	var mail_note := desk._mail_day() + estate._mail_day()
 	_show_message("%s Your crops grew overnight.%s%s The morning is %s.%s" % [
 		base, spoil_note, upkeep_note, str(WEATHER_NAMES.get(weather_kind, "overcast")).to_lower(), event_note + happening_note + trek._morning_note() + mail_note])
 	if desk._tax_evicts():
@@ -5888,6 +5915,9 @@ func _draw_interior(ci: CanvasItem, front: bool) -> void:
 			var pos := Vector2i(x, y)
 			var cell := _tile_rect(INT_ORIGIN + pos)
 			_draw_interior_piece(ci, cell, pos, interior[y][x])
+			if interior[y][x] == Tile.WALL and house_stage >= 2 and _wall_face_row(pos) >= 0:
+				estate._draw_paper(ci, cell, pos)   # the wallpaper shows on every wall face
+			estate._draw_furniture(ci, cell, pos)
 			# Storage is labeled so it's easy to find.
 			if interior[y][x] == Tile.COOLER:
 				ci.draw_rect(cell, Color(1, 1, 1, 0.8), false, 2.0)

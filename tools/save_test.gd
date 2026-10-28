@@ -298,6 +298,37 @@ func _run() -> void:
 		and int(m.cooler.get("fish", 0)) == 4 and m.farm._cellar_total() == 12 and m.fishing._cooler_total() == 4
 		and int(m.inventory["leeks"]) == 0 and int(m.inventory["trout"]) == 0)
 
+	# Version 11: the house extensions, furniture, paint, wallpaper, the land deed, and the stand's demand.
+	# The cellar room keeps every crop, so a cellar of kale loads with it.
+	m.cellar_built = true
+	m.estate.built = {"cellar_room": true, "porch": true}
+	m.estate.furniture = {"clock": true}
+	m.estate.paint = "sage"
+	m.estate.paper = "toile"
+	m.estate.deed_paid = 1500
+	m.estate.deed_offered = true
+	m.stall.glut = {"egg": 4.0, "kale": 13.0}
+	m.cellar = {"kale": 9}
+	_save_on_day(11)
+	m.estate._from_save({})
+	m.stall.glut = {}
+	m.cellar = {}
+	_check("estate, deed and stand demand round-trip", _load() == 11 and m.estate._has("cellar_room") and m.estate._has("porch")
+		and not m.estate._has("second_storey") and m.estate.furniture.has("clock") and m.estate.paint == "sage" and m.estate.paper == "toile"
+		and m.estate.deed_paid == 1500 and m.estate.deed_offered and is_equal_approx(float(m.stall.glut.get("kale", 0.0)), 13.0)
+		and int(m.cellar.get("kale", 0)) == 9)
+	var v10 := _raw(path)
+	v10["save_version"] = 10
+	v10.erase("estate")
+	v10.erase("stand_glut")
+	v10["cellar"] = {"crops": 3, "kale": 9}
+	_write_text(path, JSON.stringify(v10))
+	_check("version 10 save: no extensions, deed or glut; only keepers in the cellar", _load() == 11 and m.estate.built.is_empty()
+		and m.estate.furniture.is_empty() and m.estate.paint == "plain" and m.estate.deed_paid == 0 and m.stall.glut.is_empty()
+		and int(m.cellar.get("crops", 0)) == 3 and not m.cellar.has("kale")
+		and int(SaveSystem.read_save(path).get("save_version", 0)) == SaveSystem.SAVE_VERSION)
+	m.cellar_built = false
+
 	# Saving in the cave puts you at the homestead on load.
 	var home := m._tile_center(m.HOMESTEAD_ARRIVE.x, m.HOMESTEAD_ARRIVE.y)
 	m.in_cave = true

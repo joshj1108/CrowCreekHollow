@@ -36,7 +36,9 @@ extends SceneTree
 #   beat=N          with visitor=first, play its beats up to N (0-3; the figure comes at 2)
 #   happening=ID    jump to a day with this daily happening: pedlar, glint, branch, crow_gifts, mushrooms,
 #                   frenzy or neighbour (it is placed, and its morning note shown)
-#   decor=A,B       place decor in a row two tiles below the player: lamp, flowers, path or bell
+#   decor=A,B       place decor in a row two tiles below the player: lamp, flowers, path, fence, bench, birdbath,
+#                   weathervane, sprinkler_big or bell
+#   estate          build every house extension and buy every piece of furniture (with paint=ID, paper=ID)
 #   feel=SOUND      play an action's sound with its burst (harvest, chop, tree_fall, hoe, ...) and pop up a gain
 #   pages=N         Agnes Rook's first N torn pages are found (show them with diary)
 #   steps=N         how far the field shadow has crept toward the house, 0 to 8
@@ -99,6 +101,14 @@ func _initialize() -> void:
 	if opt.has("stage"):
 		main.house_stage = int(opt["stage"])
 		main._build_interior()
+	if opt.has("estate"):
+		for id in main.estate.EXTENSIONS:
+			main.estate.built[id] = true
+		for id in main.estate.FURNITURE:
+			main.estate.furniture[id] = true
+		main.estate.paint = str(opt.get("paint", "plain"))
+		main.estate.paper = str(opt.get("paper", "plain"))
+		main.house_roof_drawn_stage = -1   # redraw the house with them
 	if opt.has("built"):
 		main.cellar_built = true
 		main.smokehouse_built = true

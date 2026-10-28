@@ -11,7 +11,7 @@ func _init(main: MainGame) -> void:
 func _gather(tile: Vector2i) -> void:
 	m.play_sfx("gather", 0.05)
 	m.brush.erase(tile)
-	m.materials["sticks"] += 2
+	m.materials["sticks"] += 1
 	m.materials["fiber"] += 1
 	m.stats["gathered"] += 1
 	var found := "sticks and fiber"
@@ -56,7 +56,7 @@ func _can_smelt(kind: String) -> bool:
 		return false
 	if m.progression._level("Smithing") < int(m.SMELT_LEVEL[kind]):
 		return false
-	return int(m.materials[kind + "_ore"]) >= 1 and int(m.materials["wood"]) >= 1
+	return int(m.materials[kind + "_ore"]) >= int(m.SMELT_ORE[kind]) and int(m.materials["wood"]) >= 1
 
 
 func _smelt(kind: String) -> void:
@@ -67,13 +67,13 @@ func _smelt(kind: String) -> void:
 		m._show_message("The furnace needs to cool. Come back tomorrow.")
 		return
 	if not _can_smelt(kind):
-		m._show_message("You need %s ore, a piece of wood, and Smithing %d." % [kind, int(m.SMELT_LEVEL[kind])])
+		m._show_message("You need %d %s ore, a piece of wood, and Smithing %d." % [int(m.SMELT_ORE[kind]), kind, int(m.SMELT_LEVEL[kind])])
 		return
 	if m.smelt_day != m.day:
 		m.smelt_day = m.day
 		m.smelts_today = 0
 	m.smelts_today += 1
-	m.materials[kind + "_ore"] -= 1
+	m.materials[kind + "_ore"] -= int(m.SMELT_ORE[kind])
 	m.materials["wood"] -= 1
 	m.materials[kind + "_bar"] += 1
 	m.play_sfx("smelt", 0.04)

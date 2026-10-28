@@ -338,7 +338,7 @@ func _cellar_total() -> int:
 func _cellar_keys() -> Array:
 	var out: Array = []
 	for kind in m.CROPS:
-		if bool(m.CROPS[kind]["keeps"]):
+		if bool(m.CROPS[kind]["keeps"]) or m.estate._has("cellar_room"):   # the cellar room keeps every crop
 			out.append(str(m.CROPS[kind]["held"]))
 	return out
 
@@ -353,7 +353,7 @@ func _keepable_in_pack() -> int:
 func _store_crops() -> void:
 	var stored := 0
 	for key in _cellar_keys():
-		var amount := mini(int(m.inventory[key]), m.CELLAR_CAP - _cellar_total())
+		var amount := mini(int(m.inventory[key]), m.estate._cellar_cap() - _cellar_total())
 		if amount <= 0:
 			continue
 		m.inventory[key] -= amount

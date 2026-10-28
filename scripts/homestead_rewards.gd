@@ -12,8 +12,8 @@ var m: MainGame
 
 const HALE_NEED := 70.0         # food, water and warmth all at least this
 const HALE_XP := 1.2            # skill XP while hale
-const KEPT_COINS_PER_NIGHT := 2 # odd-job coins per night of the streak
-const KEPT_COINS_MAX := 20
+const KEPT_COINS_PER_NIGHT := 1 # odd-job coins per night of the streak
+const KEPT_COINS_MAX := 8
 const KEPT_CHARM_EVERY := 7     # a crow charm on the step every this many clean nights in a row
 const PASTIME_SANITY := 5.0
 const PASTIME_RELIEF := 2.0     # sanity limit won back per finished desk game

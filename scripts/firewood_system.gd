@@ -23,9 +23,9 @@ func _finish_chop(tile: Vector2i) -> void:
 	m._apply_grove()
 	m.materials["wood"] += 3
 	var found := "3 wood"
-	if int(m.tool_tier["hatchet"]) >= 3:
-		m.materials["hardwood"] += 2
-		found += ", 2 hardwood"
+	if int(m.tool_tier["hatchet"]) >= 3 and randf() < m.HARDWOOD_CHANCE:
+		m.materials["hardwood"] += 1
+		found += ", 1 hardwood"
 	m.stats["felled"] += 1
 	m.progression._grant_xp("Forestry", m.XP_FELL)
 	m._show_message("You fell the tree. +%s. +%d Forestry XP" % [found, m.XP_FELL])
