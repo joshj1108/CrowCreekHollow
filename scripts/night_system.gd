@@ -847,11 +847,15 @@ func _end_raid(won: bool, show := true, by_lamp := false) -> String:
 	seen["raid"] = int(seen.get("raid", 0)) + 1
 	var text := RAID_LAMP % ("barn" if kind == "barn" else "coop") if by_lamp else str(r["won" if won else "lost"])
 	if won:
+		if not by_lamp:
+			m.progression._bump("raids_won")
 		if kind == "crows" and not by_lamp:
 			m.materials["feathers"] += 1
 	else:
 		match kind:
 			"fox":
+				if m.hens > 0:
+					m.progression._bump("animals_lost")
 				m.hens = maxi(0, m.hens - 1)
 			"crows":
 				raid_loss = "eggs"
@@ -859,6 +863,7 @@ func _end_raid(won: bool, show := true, by_lamp := false) -> String:
 				raid_loss = "milk"
 				if m.wear >= m.WEAR_FOX and m.goats > 0:
 					m.goats -= 1
+					m.progression._bump("animals_lost")
 					text += " One of the goats broke out and is gone."
 		m.animals._sync_ages()
 	if show:
@@ -936,6 +941,7 @@ func _resolve(faced: bool, show := true, key := "") -> String:
 	var before := shadow_steps
 	if faced:
 		m.stats["faced"] += 1
+		m.progression._bump("faced_" + last_visitor)   # each kind faced, for the achievements
 		var feathers := int(v.get("feathers", 0))
 		if v["id"] == "crows" and not crow_at.is_empty():
 			feathers = _scared()
@@ -1058,6 +1064,7 @@ func _blight_crops(n: int, from: Vector2i) -> int:
 		if not _peck(pos):
 			m.crops.erase(pos)
 		hit += 1
+	m.stats["blighted"] = int(m.stats.get("blighted", 0)) + hit   # Only a Field (AchievementSystem)
 	marks.queue_redraw()
 	return hit
 

@@ -933,31 +933,28 @@ func _well_rows() -> Array:
 	return rows
 
 
+# A tab per group (AchievementSystem.GROUPS). Hidden ones show as "???" until earned. Each tab's note gives the
+# group's count and the overall total.
 func _achievement_rows() -> Array:
-	var total := m.ACHIEVEMENTS.size()
-	var done_count := m.achievements_done.size()
-	# A tab per tier, named without its numeral. Each tab's note gives the tier's count and the total.
+	var list := AchievementSystem.LIST
+	var total := list.size()
+	var done_count := 0
+	for a in list:
+		if m.achievements_done.has(a["id"]):
+			done_count += 1
 	var rows: Array = []
-	for tier in m.ACHIEVEMENT_TIERS.size():
-		var in_tier: Array = []
-		for a in m.ACHIEVEMENTS:
-			if a["tier"] == tier:
-				in_tier.append(a)
-		var tier_done := 0
-		for a in in_tier:
+	for g in AchievementSystem.GROUPS.size():
+		var in_group := 0
+		var group_done := 0
+		rows.append({"tab": str(AchievementSystem.GROUPS[g])})
+		for a in list:
+			if int(a["group"]) != g:
+				continue
+			in_group += 1
 			if m.achievements_done.has(a["id"]):
-				tier_done += 1
-		rows.append({"tab": str(m.ACHIEVEMENT_TIERS[tier]).get_slice(": ", 1)})
-		for a in in_tier:
-			var row: Dictionary = m._achievement_row(a)
-			var earned: bool = m.achievements_done.has(a["id"])
-			row["name"] = str(a["title"])
-			row["status"] = "Done" if earned else str(row["value"])
-			row["status_kind"] = "done" if earned else "info"
-			row["value"] = str(a["text"])
-			row["note"] = "Reward: %s" % m.progression._reward_text(a["reward"])
-			rows.append(row)
-		rows.append({"note": "%s: %d of %d earned. %d of %d (%d%%) overall." % [m.ACHIEVEMENT_TIERS[tier], tier_done, in_tier.size(), done_count, total, int(100.0 * done_count / total)]})
+				group_done += 1
+			rows.append(m.ach._row(a))
+		rows.append({"note": "%s: %d of %d earned. %d of %d (%d%%) overall." % [AchievementSystem.GROUPS[g], group_done, in_group, done_count, total, int(100.0 * done_count / total)]})
 		if done_count == total:
 			rows.append({"note": "Every achievement earned. Crow Creek Hollow has nothing left to teach you."})
 	return rows

@@ -452,6 +452,27 @@ func _run() -> void:
 	m.act.beats = {}
 	m.act.endings = {}
 
+	# Version 16: the achievements are keyed by their Steam API names. An old save keeps the ones whose old id
+	# has a match and drops the rest; counters added as things happen (crop_, faced_) load back.
+	m.achievements_done = {"ACH_EDGE": true}
+	m.stats["crop_kale"] = 4
+	m.stats["faced_watcher"] = 2
+	_save_on_day(13)
+	m.achievements_done = {}
+	m.stats.erase("crop_kale")
+	m.stats.erase("faced_watcher")
+	_check("achievements and new counters round-trip", _load() == 13 and m.achievements_done.has("ACH_EDGE")
+		and int(m.stats.get("crop_kale", 0)) == 4 and int(m.stats.get("faced_watcher", 0)) == 2)
+	var v15 := _raw(path)
+	v15["save_version"] = 15
+	v15["achievements_done"] = {"first_fruit": true, "brush_clear": true, "hollow_light": true, "story_end": true}
+	_write_text(path, JSON.stringify(v15))
+	_check("version 15 save: old achievements mapped, the unmatched dropped", _load() == 13
+		and m.achievements_done.has("ACH_FIRST_HARVEST") and m.achievements_done.has("ACH_HOLLOW_LANTERN")
+		and m.achievements_done.has("ACH_ALL_CHAPTERS") and not m.achievements_done.has("brush_clear")
+		and m.achievements_done.size() == 3)
+	m.achievements_done = {}
+
 	# Saving in the cave puts you at the homestead on load.
 	var home := m._tile_center(m.HOMESTEAD_ARRIVE.x, m.HOMESTEAD_ARRIVE.y)
 	m.in_cave = true

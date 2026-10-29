@@ -93,6 +93,7 @@ var trek_log := {"edge": 0, "mill": 0, "orchard": 0, "chapel": 0, "post": 0, "gr
 var days := 60
 var every := 1
 var milestones := {}         # name -> first day
+var ach_days := {}           # achievement id -> the day the nightly check first found it earned
 var nights := {"faced": 0, "ignored": 0, "lost": 0, "skipped": 0, "hollow": 0, "raids_won": 0, "blessed": 0}
 var day_min := {}            # day -> lowest sanity that day, for the madness tiers
 var spent := {"seeds": 0, "animals": 0, "tax": 0, "pedlar": 0, "cards": 0, "estate": 0}
@@ -237,7 +238,10 @@ func _sleep() -> void:
 	m._end_day("", false)
 	if m.event_fired_day != fired and m.nights.last_visitor == "hollow":
 		nights["hollow"] += 1
-	m.progression._check_achievements()
+	m.progression._check_achievements(true)
+	for id in m.achievements_done:
+		if not ach_days.has(id):
+			ach_days[id] = m.day
 	m.progression._check_story()
 	m.projects._check(false)
 	m.mystery._check()
@@ -984,6 +988,8 @@ func _trek() -> void:
 		var act_note := m.act._on_trek_arrived(id)   # the second year's beats at the orchard and the mill
 		if act_note != "":
 			_mark("act at " + id)
+		t.dark = bool(r["dark"])   # for the achievements' counters (dark trail, by night, nothing given)
+		t.fed = rations
 		t._on_arrived()
 		trek_log[id] += 1
 		last_trek = id
@@ -1261,3 +1267,18 @@ func _summary() -> void:
 		e.built.keys(), e.furniture.keys(), e.paint, e.paper, e.deed_paid, e.DEED_PRICE, m.projects._count("fence"), JSON.stringify(m.stall.glut)])
 	var next := m.projects._next_step()
 	print("--- next step: %s" % str(next.get("title", "all done")))
+	_print_achievements()
+
+
+# The achievements earned (AchievementSystem, checked each night), with the day, and the ones not earned.
+func _print_achievements() -> void:
+	var got: Array = []
+	var missing: Array = []
+	for ach in AchievementSystem.LIST:
+		var id := str(ach["id"])
+		if ach_days.has(id):
+			got.append("%s=%d" % [id.trim_prefix("ACH_"), int(ach_days[id])])
+		else:
+			missing.append("%s %d/%d" % [id.trim_prefix("ACH_"), m.ach._value(ach), m.ach._goal(ach)])
+	print("--- achievements earned %d of %d by day %d: %s" % [got.size(), AchievementSystem.LIST.size(), m.day, ", ".join(got)])
+	print("--- achievements not earned (value/goal): %s" % ", ".join(missing))

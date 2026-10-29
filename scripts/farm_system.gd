@@ -136,6 +136,7 @@ func _harvest(tile: Vector2i) -> void:
 	else:
 		m.crops.erase(tile)
 	m.stats["harvested"] += 1
+	m.progression._bump("crop_" + kind)   # Every Row (AchievementSystem)
 	if kind == "pumpkin":
 		m.stats["pumpkins"] += 1
 	var seed_note := ""

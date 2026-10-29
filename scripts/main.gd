@@ -450,7 +450,7 @@ const GEAR_ITEMS := {
 # "story" is the narrative beat, "text" the goal, and "stat" what it reads. The first week runs: the first
 # night (bed), a lantern, then Old Maren to the wood's edge (TrekSystem's "edge" route, from day 4), so the
 # first hour holds the farm, the first night's scare, the first trek and the first Hollow sighting after it.
-# Story Complete (story_end in ACHIEVEMENTS) needs every chapter here, so its goal is this list's size.
+# The Second All Hallows (ACH_ALL_CHAPTERS in AchievementSystem) needs every chapter here: its goal is this list's size.
 const STORY := [
 	{"id": "bed", "title": "Sleep Under Your Own Roof",
 		"story": "Something walks this farm after dark. Your body can only work so long, and the house is the one safe place. The bed is in the bedroom. Reach it before 03:00, or the night takes you where you stand.",
@@ -526,59 +526,7 @@ const STORY := [
 		"stat": "grove_walked", "goal": 1, "reward": {"skill": "Bushcrafting", "xp": 200}},
 ]
 
-# Achievements are a tiered list toward 100% completion. Each one tracks a stat.
-const ACHIEVEMENT_TIERS := ["Tier I: Settler", "Tier II: Homesteader", "Tier III: Keeper", "Tier IV: Hollow Hand"]
-const ACHIEVEMENTS := [
-	{"id": "first_seeds", "title": "First Seeds", "text": "Plant a seed.", "tier": 0, "stat": "planted", "goal": 1, "reward": {"seeds": 2}},
-	{"id": "first_fruit", "title": "First Fruit", "text": "Harvest a crop.", "tier": 0, "stat": "harvested", "goal": 1, "reward": {"seeds": 2}},
-	{"id": "brush_clear", "title": "Brush Clearer", "text": "Gather from 3 brush piles.", "tier": 0, "stat": "gathered", "goal": 3, "reward": {"wood": 2, "fiber": 2}},
-	{"id": "first_catch", "title": "Hook and Line", "text": "Catch a fish.", "tier": 0, "stat": "caught", "goal": 1, "reward": {"seeds": 2}},
-	{"id": "first_meal", "title": "Warm Meal", "text": "Cook a meal.", "tier": 0, "stat": "cooked", "goal": 1, "reward": {"seeds": 2}},
-	{"id": "first_sleep", "title": "Sleeper", "text": "Sleep in your bed.", "tier": 0, "stat": "slept", "goal": 1, "reward": {"seeds": 2}},
-	{"id": "tin_light", "title": "Tin Light", "text": "Build a Tin Lantern.", "tier": 0, "stat": "lantern_tier", "goal": 1, "reward": {"seeds": 2}},
-	{"id": "boarded", "title": "Boarded Up", "text": "Repair the house to Boarded.", "tier": 0, "stat": "house_stage", "goal": 1, "reward": {"wood": 2, "fiber": 2}},
-	{"id": "first_tidy", "title": "Tidy Hands", "text": "Tidy the house once.", "tier": 0, "stat": "tidied", "goal": 1, "reward": {"seeds": 2}},
-	{"id": "goat_keeper", "title": "Goat Keeper", "text": "Buy a goat for the barn.", "tier": 0, "stat": "goats_bought", "goal": 1, "reward": {"seeds": 2}},
-	{"id": "first_drink", "title": "Cool Water", "text": "Drink from the pond or the pump.", "tier": 0, "stat": "drank", "goal": 1, "reward": {"seeds": 2}},
-	{"id": "first_water", "title": "Hose Hand", "text": "Water a crop with the hose.", "tier": 0, "stat": "watered", "goal": 1, "reward": {"seeds": 2}},
-
-	{"id": "ten_harvests", "title": "Ten Harvests", "text": "Harvest 10 crops.", "tier": 1, "stat": "harvested", "goal": 10, "reward": {"wood": 2, "fiber": 2}},
-	{"id": "carpenter", "title": "Carpenter's Hand", "text": "Mend 6 boards.", "tier": 1, "stat": "mended", "goal": 6, "reward": {"wood": 2, "fiber": 2}},
-	{"id": "good_catch", "title": "Good Catch", "text": "Catch 10 fish.", "tier": 1, "stat": "caught", "goal": 10, "reward": {"wood": 2, "fiber": 2}},
-	{"id": "meal_plan", "title": "Meal Planner", "text": "Eat 5 meals.", "tier": 1, "stat": "eaten", "goal": 5, "reward": {"wood": 2, "fiber": 2}},
-	{"id": "patched", "title": "Patched Up", "text": "Repair the house to Patched.", "tier": 1, "stat": "house_stage", "goal": 2, "reward": {"wood": 2, "fiber": 2}},
-	{"id": "brass_light", "title": "Brass Light", "text": "Build a Brass Lantern.", "tier": 1, "stat": "lantern_tier", "goal": 2, "reward": {"wood": 2, "fiber": 2}},
-	{"id": "farmer_2", "title": "Growing Hands", "text": "Reach Farming level 2.", "tier": 1, "stat": "level_Farming", "goal": 2, "reward": {"wood": 2, "fiber": 2}},
-	{"id": "bush_3", "title": "Thicket Walker", "text": "Reach Bushcrafting level 3.", "tier": 1, "stat": "level_Bushcrafting", "goal": 3, "reward": {"wood": 2, "fiber": 2}},
-	{"id": "cleaner", "title": "Clean Air", "text": "Tidy the house 5 times.", "tier": 1, "stat": "tidied", "goal": 5, "reward": {"wood": 2, "fiber": 2}},
-	{"id": "pump_fixed", "title": "Working Pump", "text": "Repair the well pump.", "tier": 1, "stat": "pump", "goal": 1, "reward": {"wood": 2, "fiber": 2}},
-	{"id": "hose_on", "title": "Garden Hose", "text": "Attach the hose to the pump.", "tier": 1, "stat": "hose", "goal": 1, "reward": {"fiber": 2}},
-	{"id": "rain_days", "title": "Rain Keeps Them Green", "text": "Live through 5 rainy days.", "tier": 1, "stat": "rain_days", "goal": 5, "reward": {"wood": 2, "fiber": 2}},
-
-	{"id": "restored", "title": "Restored", "text": "Restore the farmhouse fully.", "tier": 2, "stat": "house_stage", "goal": 3, "reward": {"wood": 3, "fiber": 3}},
-	{"id": "pumpkin_grower", "title": "Pumpkin Grower", "text": "Harvest 3 pumpkins.", "tier": 2, "stat": "pumpkins", "goal": 3, "reward": {"wood": 3, "fiber": 3}},
-	{"id": "cleansed", "title": "Cleansed", "text": "Cleanse the house once.", "tier": 2, "stat": "cleansed", "goal": 1, "reward": {"wood": 3, "fiber": 3}},
-	{"id": "fishmonger", "title": "Fishmonger", "text": "Catch 30 fish.", "tier": 2, "stat": "caught", "goal": 30, "reward": {"wood": 3, "fiber": 3}},
-	{"id": "carpenter_3", "title": "Tradesman", "text": "Reach Carpentry level 3.", "tier": 2, "stat": "level_Carpentry", "goal": 3, "reward": {"wood": 3, "fiber": 3}},
-	{"id": "fisher_3", "title": "Patient Angler", "text": "Reach Fishing level 3.", "tier": 2, "stat": "level_Fishing", "goal": 3, "reward": {"wood": 3, "fiber": 3}},
-	{"id": "hollow_light", "title": "Hollow Light", "text": "Build a Hollow Lantern.", "tier": 2, "stat": "lantern_tier", "goal": 3, "reward": {"wood": 3, "fiber": 3}},
-	{"id": "survivor", "title": "Survivor", "text": "Sleep in your bed 10 times.", "tier": 2, "stat": "slept", "goal": 10, "reward": {"wood": 3, "fiber": 3}},
-	{"id": "watcher", "title": "Field Watcher", "text": "Live through 5 nights of events.", "tier": 2, "stat": "events", "goal": 5, "reward": {"wood": 3, "fiber": 3}},
-	{"id": "faced", "title": "Into the Dark", "text": "Face 10 things that come in the night.", "tier": 2, "stat": "faced", "goal": 10, "reward": {"feathers": 3, "fiber": 3}},
-	{"id": "waterer", "title": "Tender of the Plots", "text": "Water 50 crops with the hose.", "tier": 2, "stat": "watered", "goal": 50, "reward": {"wood": 3, "fiber": 3}},
-	{"id": "season_3", "title": "Turning Seasons", "text": "Live through 3 seasonal events.", "tier": 1, "stat": "events_seen", "goal": 3, "reward": {"wood": 2, "fiber": 2}},
-
-	{"id": "season_6", "title": "A Full Year", "text": "Live through 6 seasonal events.", "tier": 3, "stat": "events_seen", "goal": 6, "reward": {"seeds": 5}},
-	{"id": "hundred_harvests", "title": "Full Barns", "text": "Harvest 100 crops.", "tier": 3, "stat": "harvested", "goal": 100, "reward": {"seeds": 5, "pumpkin_seeds": 2}},
-	{"id": "master_farmer", "title": "Master Farmer", "text": "Reach Farming level 5.", "tier": 3, "stat": "level_Farming", "goal": 5, "reward": {"seeds": 5, "pumpkin_seeds": 2}},
-	{"id": "master_carpenter", "title": "Master Carpenter", "text": "Reach Carpentry level 5.", "tier": 3, "stat": "level_Carpentry", "goal": 5, "reward": {"seeds": 5, "pumpkin_seeds": 2}},
-	{"id": "master_fisher", "title": "Master Angler", "text": "Reach Fishing level 5.", "tier": 3, "stat": "level_Fishing", "goal": 5, "reward": {"seeds": 5, "pumpkin_seeds": 2}},
-	{"id": "master_cook", "title": "Master Cook", "text": "Reach Cooking level 5.", "tier": 3, "stat": "level_Cooking", "goal": 5, "reward": {"seeds": 5, "pumpkin_seeds": 2}},
-	{"id": "feast", "title": "Feast", "text": "Eat 50 meals.", "tier": 3, "stat": "eaten", "goal": 50, "reward": {"seeds": 5, "pumpkin_seeds": 2}},
-	{"id": "cleansed_five", "title": "Clean Conscience", "text": "Cleanse the house 5 times.", "tier": 3, "stat": "cleansed", "goal": 5, "reward": {"seeds": 5, "pumpkin_seeds": 2}},
-	{"id": "lasting", "title": "Lasting", "text": "Sleep in your bed 30 times.", "tier": 3, "stat": "slept", "goal": 30, "reward": {"seeds": 5, "pumpkin_seeds": 2}},
-	{"id": "story_end", "title": "Story Complete", "text": "Finish every story chapter.", "tier": 3, "stat": "story", "goal": 17, "reward": {"seeds": 5, "pumpkin_seeds": 2}},
-]
+# The achievements are in AchievementSystem (achievement_system.gd, m.ach).
 
 const SKILLS := ["Farming", "Bushcrafting", "Carpentry", "Cleaning", "Fishing", "Cooking", "Combat", "Forestry", "Mining", "Smithing"]
 const XP_PLANT := 5
@@ -804,7 +752,7 @@ var stats := {"jobs": 0, "planted": 0, "harvested": 0, "gathered": 0, "slept": 0
 	"defeated": 0, "preserved": 0, "felled": 0, "mined": 0,
 	"drank": 0, "watered": 0, "pump": 0, "hose": 0, "rain_days": 0, "events_seen": 0, "goats_bought": 0, "faced": 0,
 	"withered": 0, "foraged": 0, "night_fish": 0}
-var achievements_done := {}     # achievement id -> true
+var achievements_done := {}     # achievement id (its Steam API name, AchievementSystem.LIST) -> true
 var quests_done := {}               # quest id -> true
 var selected_seed := "turnip"
 var lantern_tier := 0               # 0 = none built yet
@@ -949,6 +897,7 @@ var fishing: FishingSystem
 var crafting: CraftSystem
 var saver: SaveSystem
 var progression: ProgressionSystem
+var ach: AchievementSystem
 var stall: StallSystem
 var sanity_sys: SanitySystem
 var nights: NightSystem
@@ -1007,6 +956,7 @@ func _ready() -> void:
 	act = StoryAct.new(self)
 	stall = StallSystem.new(self)
 	progression = ProgressionSystem.new(self)
+	ach = AchievementSystem.new(self)
 	saver = SaveSystem.new(self)
 	crafting = CraftSystem.new(self)
 	fishing = FishingSystem.new(self)
@@ -4456,19 +4406,6 @@ func _temperature() -> float:
 	return base + 7.0 * swing + float(WEATHER_TEMP.get(weather_kind, 0.0))
 
 
-# --- Achievements ------------------------------------------------------------
-
-
-func _achievement_row(a: Dictionary) -> Dictionary:
-	var done: bool = achievements_done.has(a["id"])
-	var shown := mini(progression._stat_value(a["stat"]), a["goal"])
-	return {
-		"name": "%s%s" % [a["title"], "   (done)" if done else ""],
-		"value": "%d/%d" % [shown, a["goal"]],
-		"progress": float(shown) / float(a["goal"]),
-		"note": "%s  Reward: %s" % [a["text"], progression._reward_text(a["reward"])],
-	}
-
 # --- Pack and bags -----------------------------------------------------------
 
 # Like items stack in the pack up to STACK_SIZE to a slot. Each kind takes as many slots as its stacks need.
@@ -5475,6 +5412,7 @@ func _settle_day() -> String:
 			if hen_unfed_days >= HEN_LEAVE_DAYS:
 				hens -= 1
 				hen_unfed_days = 0
+				progression._bump("animals_lost")
 				notes += " A hungry hen wandered off."
 	if goats > 0:
 		if goats_fed_day == day and nights.raid_loss == "milk":
@@ -5494,6 +5432,7 @@ func _settle_day() -> String:
 			if goat_unfed_days >= GOAT_LEAVE_DAYS:
 				goats -= 1
 				goat_unfed_days = 0
+				progression._bump("animals_lost")
 				notes += " A hungry goat wandered off."
 	nights.raid_loss = ""   # the night's raids (NightSystem) took their hen or goat already
 	animals._sync_ages()
@@ -5808,6 +5747,7 @@ func _end_day(base: String, leave_house: bool = true) -> void:
 	upkeep_note += farm._wither() + farm._season_warning()
 	_roll_weather()
 	nights._morning()
+	ach._morning()
 	var event_note := projects._sprinkle() + sanity_sys._begin_day_events() + sanity_sys._morning_bless()
 	clock = 0.0
 	tonight_shadow = Vector2i(-1, -1)

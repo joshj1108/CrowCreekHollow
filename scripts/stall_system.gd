@@ -163,6 +163,7 @@ func _make_food(food_id: String) -> void:
 		m._spend_recipe_input(str(key), int(r["needs"][key]))
 	m.inventory[food_id] += 1
 	m.stats["cooked"] += 1
+	m.progression._bump("cook_" + food_id)   # Agnes's Kitchen (AchievementSystem)
 	m.progression._grant_xp(skill, int(r["xp"]))
 	m.play_sfx("cook")
 	m._show_message("You make %s. +%d %s XP" % [str(f["name"]).to_lower(), int(r["xp"]), skill])

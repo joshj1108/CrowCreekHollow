@@ -333,6 +333,7 @@ var fog_lift_at := -1.0
 var roped := false
 var sign_seen := false
 var spoke := false              # had a word this clearing
+var fed := 0                    # rations and loaves given (or left on the cairn) this trek: none is Nothing in the Pack
 var warned := false             # the walker has begged you back onto the trail this clearing
 var done_day := 0               # the day a walker was taken, or turned away
 var treks_done := 0             # saved: treks finished, which sets the wood's dread
@@ -695,6 +696,7 @@ func _start(id := "mill") -> void:
 	m.foes = []
 	plan = _plan(m.day, id)
 	dark = false
+	fed = 0
 	glimpsed = false
 	glimpse_until = 0.0
 	route = _steps(id)["marked"]
@@ -1198,10 +1200,12 @@ func _interact(tile: Vector2i) -> void:
 	if m.player.position.distance_to(walker_pos) <= px * 1.6:
 		if (nerve < RATION_BELOW or frozen) and int(m.inventory["trail_ration"]) > 0:
 			m.inventory["trail_ration"] -= 1
+			fed += 1
 			nerve = minf(100.0, nerve + RATION_NERVE)
 			m._show_message(_w("You hand {w} a trail ration. {She} eats it slowly, and {his} hands stop shaking. Nerve +%d.") % int(RATION_NERVE))
 		elif (nerve < RATION_BELOW or frozen) and int(m.inventory["bread"]) > 0:
 			m.inventory["bread"] -= 1
+			fed += 1
 			nerve = minf(100.0, nerve + BREAD_NERVE)
 			m._show_message(_w("You break a loaf of farmhouse bread with {w}. It's still soft, and {she} eats like {she} hasn't in days. Nerve +%d.") % int(BREAD_NERVE))
 		elif not spoke:
@@ -1260,6 +1264,8 @@ func _cross_flood() -> void:
 		return
 	m.warmth = maxf(0.0, m.warmth - cost)
 	nerve = maxf(0.0, nerve - nerve_cost)
+	if _winter():
+		m.progression._bump("winter_wade")
 	event_done = true
 	_unblock()
 	m.play_sfx("water", 0.04)
@@ -1291,11 +1297,13 @@ func _offer() -> void:
 		gift = "%d coins" % CAIRN_COINS
 	elif int(m.inventory["trail_ration"]) > 0:
 		m.inventory["trail_ration"] -= 1
+		fed += 1
 		gift = "a trail ration"
 	else:
 		m._show_message("You have nothing to leave: not %d coins, not a ration." % CAIRN_COINS)
 		return
 	event_done = true
+	m.progression._bump("cairn_offered")
 	m.sanity_sys._change_sanity(CAIRN_SANITY)
 	nerve = minf(100.0, nerve + CAIRN_NERVE)
 	m.play_sfx("coin", 0.04)
@@ -1343,6 +1351,7 @@ func _follow_lights() -> void:
 	if rng.randf() < LIGHTS_SHORTCUT:
 		var near: Array = pts[-2]
 		_place_at(m._tile_center(int(near[0]), int(near[1])))
+		m.progression._bump("lights_true")
 		m._show_message(_w("You follow the lights off the path, {w} clinging to your sleeve. They lead you through the trees by a way you'd never have found, and go out. The way on is just ahead."))
 	else:
 		_pass_hours(1.0)
@@ -1456,6 +1465,15 @@ func _on_arrived() -> void:
 		return
 	treks_done += 1
 	walked[route_id] = int(walked.get(route_id, 0)) + 1
+	# The achievements' counters (AchievementSystem): by the dark trail, by night, both, and with nothing given.
+	if dark:
+		m.progression._bump("dark_treks")
+	if night:
+		m.progression._bump("night_treks")
+	if dark and night:
+		m.progression._bump("dark_night_treks")
+	if fed == 0:
+		m.progression._bump("bare_treks")
 	last_day = m.day
 	if route_id == "grove":
 		grove_done = true

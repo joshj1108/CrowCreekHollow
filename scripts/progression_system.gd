@@ -55,15 +55,9 @@ func _check_story() -> void:
 		m._show_quest_prompt()
 
 
-func _check_achievements() -> void:
-	for a in m.ACHIEVEMENTS:
-		if m.achievements_done.has(a["id"]):
-			continue
-		if _stat_value(a["stat"]) >= a["goal"]:
-			m.achievements_done[a["id"]] = true
-			m.play_sfx("chime")
-			_grant_reward(a["reward"])
-			m._show_message("Achievement: %s. Reward: %s" % [a["title"], _reward_text(a["reward"])])
+# The achievements (AchievementSystem): each frame from main, throttled there; force checks now (the balance sim).
+func _check_achievements(force := false) -> void:
+	m.ach._check(force)
 
 
 func _grant_reward(reward: Dictionary) -> void:

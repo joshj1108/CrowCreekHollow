@@ -152,6 +152,8 @@ func _sanity_max() -> float:
 
 func _change_sanity(amount: float) -> void:
 	m.sanity = clampf(m.sanity + amount, 0.0, _sanity_max())
+	if m.sanity < AchievementSystem.DEEP:
+		m.stats["deep_madness"] = 1   # Back From Under (AchievementSystem): the last madness tier reached
 
 
 # hours: game hours since the last call. The rates are per game hour, so a longer day doesn't change them.

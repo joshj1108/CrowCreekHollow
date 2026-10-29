@@ -107,6 +107,7 @@ func _fish_roll() -> void:
 			_stop_fishing("A %s, but there's no room in your pack for it. You let it go." % str(f["name"]).to_lower())
 			return
 		m.stats["caught"] += 1
+		m.progression._bump("fish_" + id)   # Every Fish in the Pond (AchievementSystem)
 		if _is_night():
 			m.stats["night_fish"] += 1
 		m.inventory[key] += 1

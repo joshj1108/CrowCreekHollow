@@ -3,7 +3,7 @@ extends RefCounted
 
 # Bumped when a save's keys change shape. Saves from before the number was written count as 1.
 # _migrate lifts an older save one version at a time, so every old save still loads.
-const SAVE_VERSION := 15
+const SAVE_VERSION := 16
 # Keys a save must hold with the right type, or it isn't read: the loader would trip over anything else.
 const DICT_KEYS := ["inventory", "materials", "skill_xp", "stats", "equipment", "quests_done", "achievements_done",
 	"tool_tier", "trek_walked", "night_seen"]
@@ -187,7 +187,7 @@ func _load_game() -> bool:
 	_merge_ints(m.inventory, data.get("inventory"))
 	_migrate_legacy_food(data.get("inventory"))
 	_merge_ints(m.materials, data.get("materials"))
-	_merge_ints(m.stats, data.get("stats"))
+	_merge_ints(m.stats, data.get("stats"), true)
 	# Saves before version 2 used the old quest list, so their progress is reset.
 	# Stat-based achievements re-check from saved stats on the next frame.
 	var story_v := int(data.get("story_version", 1))
@@ -389,12 +389,14 @@ func _stock(saved: Variant, keys: Array) -> Dictionary:
 	return out
 
 
-func _merge_ints(target: Dictionary, saved: Variant) -> void:
+# add_new: also take saved keys the target doesn't start with (the stats, whose counters are added by
+# ProgressionSystem._bump as things first happen: gifts, endings, the achievements' crop_ and faced_ counters).
+func _merge_ints(target: Dictionary, saved: Variant, add_new := false) -> void:
 	if typeof(saved) != TYPE_DICTIONARY:
 		return
-	for key in target.keys():
+	for key in (saved.keys() if add_new else target.keys()):
 		if saved.has(key) and typeof(saved[key]) in [TYPE_INT, TYPE_FLOAT, TYPE_BOOL]:
-			target[key] = int(saved[key])
+			target[str(key)] = int(saved[key])
 
 
 # --- Files ---------------------------------------------------------------------------------------
@@ -556,6 +558,11 @@ static func _migrate(data: Dictionary) -> Dictionary:
 			if bool(data.get("trek_grove_done", false)):
 				act["endings"] = {"bell": int(data.get("day", 1))}
 			data["act"] = act
+	if v < 16:
+		# Version 16 replaced the tiered achievements with the signature moments (AchievementSystem), keyed by
+		# their Steam API names. Earned ones carry over where an old id has a match (OLD_IDS); the rest are
+		# dropped, and every new one re-checks from the saved stats on the next frame.
+		data["achievements_done"] = AchievementSystem.migrate_ids(data.get("achievements_done", {}))
 	# A save from a newer build keeps its number; keys this build doesn't know are ignored.
 	data["save_version"] = maxi(v, SAVE_VERSION)
 	return data

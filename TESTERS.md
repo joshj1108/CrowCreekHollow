@@ -39,6 +39,7 @@ The full list is under **Controls** in the Pause menu and in Settings on the sta
 - Treks into the groves (the mill from day 14, the rest later) are new and still rough. The trail works that ease them (Buildings, Trail works) are built but barely tested. Walker and destination art is placeholder.
 - The pacing after the first few weeks isn't finished. Skills and farm projects may run out early.
 - Some art is placeholder, and the game has no icon yet.
+- The achievements were redone as the game's big moments (the wood, the nights, the walkers, the endings), with no item rewards. A save from an older build keeps the ones that still exist; the rest are gone, and anything you have already done counts again within a second of loading. Some (marked ???) stay hidden until you earn them. If one you are sure you earned never shows, please tell us which.
 - There's no in-game bug report button. Please use the steps below.
 
 ## What to send back
@@ -55,6 +56,7 @@ For each problem, or for your overall impressions, please send:
 
    - `hallowvale_save_1.json`, `_2` and `_3`: your save slots (the `.bak.json` files hold the save before that one). Send the slot you were playing.
    - `settings.cfg`: your settings.
+   - `profile.cfg`: the endings any of your saves has reached (for the achievement that wants all three).
    - `logs\godot.log`: the log from the last run. Older runs are in the same folder with the date in the name. **Copy the log before you start the game again**, because each launch begins a new one.
 
 Zipping the whole folder and sending that works too.
