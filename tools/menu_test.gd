@@ -42,6 +42,7 @@ func _run() -> void:
 	await _pause_cases()
 	await _wheel_cases()
 	await _section_cases()
+	await _craft_pad_cases()
 	await _diary_cases()
 	await _bag_cases()
 	await _small_panel_cases()
@@ -344,6 +345,83 @@ func _section_cases() -> void:
 	_check("quests: the Folk tab opens with focus", _focus_ok())
 	await _key(KEY_ESCAPE)
 	await _key(KEY_ESCAPE)
+
+
+# --- Craft on a controller, start to finish ----------------------------------------
+
+func _craft_pad_cases() -> void:
+	var pressed: Array = []
+	var record := func(action_id: String) -> void: pressed.append(action_id)
+	m.action_bar.action_pressed.connect(record)
+	await _close_all()
+	# L3, the stick toward Craft (third round the ring, straight right), then A.
+	await _pad(JOY_BUTTON_LEFT_STICK)
+	Input.parse_input_event(_axis_event(JOY_AXIS_LEFT_X, 0.9))
+	await _frames(2)
+	await _axis(JOY_AXIS_LEFT_X, 0.0)
+	_check("craft pad: the stick highlights Craft", m.wheel.highlight == 2)
+	await _pad(JOY_BUTTON_A)
+	await _frames(2)
+	_check("craft pad: A opens Craft with a recipe in focus", m.open_tab == "Craft" and _focus_ok() and str(_focus().get_meta("action", "")).begins_with("craft_pick:"))
+	var first := _focus()
+	await _pad(JOY_BUTTON_DPAD_RIGHT)
+	_check("craft pad: the D-pad moves to the next recipe", _focus_ok() and _focus() != first and str(_focus().get_meta("action", "")).begins_with("craft_pick:"))
+	await _pad(JOY_BUTTON_DPAD_DOWN)
+	_check("craft pad: the D-pad moves down a row", _focus_ok() and str(_focus().get_meta("action", "")).begins_with("craft_pick:"))
+	await _pad(JOY_BUTTON_DPAD_UP)
+	await _pad(JOY_BUTTON_DPAD_LEFT)
+	_check("craft pad: and back to the first", _focus() == first or str(_focus().get_meta("action", "")) == str(first.get_meta("action", "")) if is_instance_valid(first) else _focus_ok())
+	# Pick the first craftable recipe with A, then reach Make and press it.
+	var made := false
+	for tile in _focusables(m.action_bar.rows_box):
+		var action := str(tile.get_meta("action", ""))
+		if not action.begins_with("craft_pick:"):
+			continue
+		tile.grab_focus()
+		await _frames(1)
+		await _pad(JOY_BUTTON_A)
+		await _frames(2)
+		_check("craft pad: A picks the recipe and keeps focus on it", _focus_ok() and str(_focus().get_meta("action", "")) == action)
+		var make := _make_button()
+		if make == null:
+			continue
+		for i in 6:
+			if _focus() == make:
+				break
+			await _pad(JOY_BUTTON_DPAD_RIGHT)
+		_check("craft pad: the D-pad reaches Make", _focus() == make)
+		pressed.clear()
+		await _pad(JOY_BUTTON_A)
+		await _frames(2)
+		_check("craft pad: A on Make crafts", pressed.any(func(a: String) -> bool: return a.begins_with("craft:")))
+		_check("craft pad: focus stays in the panel after crafting", _focus_ok() and m.action_bar.panel.is_ancestor_of(_focus()))
+		made = true
+		break
+	_check("craft pad: some recipe could be made", made)
+	# RB to the next sub-tab, then the D-pad still works there.
+	var tab := m.craft_tab
+	await _pad(JOY_BUTTON_RIGHT_SHOULDER)
+	await _frames(2)
+	_check("craft pad: RB switches the sub-tab with focus on a recipe", m.craft_tab != tab and _focus_ok())
+	var here := _focus()
+	await _pad(JOY_BUTTON_DPAD_RIGHT)
+	_check("craft pad: the D-pad works on the new sub-tab", _focus_ok() and _focus() != here)
+	await _pad(JOY_BUTTON_LEFT_SHOULDER)
+	await _frames(2)
+	_check("craft pad: LB switches back", m.craft_tab == tab and _focus_ok())
+	await _pad(JOY_BUTTON_B)
+	_check("craft pad: B goes back to the wheel", m.open_tab == "" and m.wheel.open)
+	await _pad(JOY_BUTTON_B)
+	m.action_bar.action_pressed.disconnect(record)
+	await _handed_back("craft pad")
+
+
+# The detail card's Make (or Equip) button, when it can be pressed.
+func _make_button() -> Button:
+	for c in _focusables(m.action_bar.rows_box):
+		if c is Button and not c.has_meta("action") and c.get_parent() is VBoxContainer:
+			return c
+	return null
 
 
 # --- The diary ------------------------------------------------------------------
