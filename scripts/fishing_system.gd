@@ -223,6 +223,29 @@ func _take_fish() -> void:
 	m._show_message("You take %d fish from the cooler." % taken)
 
 
+# Stores (or takes) amount of one fish, or all of it when amount is -1, up to the cooler's room or the pack's.
+func _move_fish(key: String, amount: int, storing: bool) -> void:
+	if not key in _fish_keys():
+		return
+	var name := str(Foods.by_held(key).get("name", key)).to_lower()
+	var want := int(m.inventory[key]) if storing else int(m.cooler.get(key, 0))
+	if amount >= 0:
+		want = mini(want, amount)
+	var moved := 0
+	for i in want:
+		if storing and _cooler_total() >= m.COOLER_CAP:
+			break
+		if not storing and not m.stall._pack_room(int(m.inventory[key]), 1):
+			break
+		m.inventory[key] += -1 if storing else 1
+		m.cooler[key] = int(m.cooler.get(key, 0)) + (1 if storing else -1)
+		moved += 1
+	if moved <= 0:
+		m._show_message("The cooler is full." if storing else "Your pack is full.")
+		return
+	m._show_message("You %s %d %s." % ["store" if storing else "take", moved, name])
+
+
 func _cooler_text() -> String:
 	var parts: Array = []
 	for key in _fish_keys():

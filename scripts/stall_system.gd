@@ -226,18 +226,19 @@ func _food_price(food_id: String) -> int:
 	return int(Foods.find(food_id).get("price", 0))
 
 
-func _sell_food(food_id: String) -> void:
+# Sells amount of a food, or all of it when amount is -1.
+func _sell_food(food_id: String, amount: int = -1) -> void:
 	var f := Foods.find(food_id)
 	if f.is_empty():
 		return
 	var key := str(f["held"])
-	var count := int(m.inventory[key])
+	var count := int(m.inventory[key]) if amount < 0 else mini(amount, int(m.inventory[key]))
 	if count <= 0:
 		m._show_message("You have nothing to sell.")
 		return
 	var coins := _sale_value(food_id, count)
 	_record_sale(food_id, count)
-	m.inventory[key] = 0
+	m.inventory[key] -= count
 	m.money += coins
 	m.stats["sold"] += count
 	m.play_sfx("coin")

@@ -78,8 +78,11 @@ func _take_firewood(amount: int) -> void:
 	m._show_message("You take %d firewood." % n)
 
 
-func _store_firewood() -> void:
+# Stores amount firewood, or all you carry when amount is -1, up to the store's room.
+func _store_firewood(amount: int = -1) -> void:
 	var n := mini(int(m.inventory["firewood"]), m.WOODSTORE_CAP - m.firewood_store)
+	if amount >= 0:
+		n = mini(n, amount)
 	if n <= 0:
 		m._show_message("There is nothing to store, or the store is full.")
 		return

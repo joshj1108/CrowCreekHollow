@@ -58,6 +58,13 @@ var title_label: Label
 var subtitle_label: Label
 var scroll: ScrollContainer
 var rows_box: VBoxContainer
+var grid_top: VBoxContainer       # a grid panel's tab strip, fixed above its list
+var grid_body: HBoxContainer      # the scrolling list on the left, and side_scroll on the right
+var side_column: VBoxContainer   # beside the list: the picked recipe's card, and its button pinned below
+var side_scroll: ScrollContainer  # the card, which scrolls only when its text is longer than the column
+var side_box: VBoxContainer
+var side_foot: VBoxContainer      # the card's button (Make, Cook), always in view
+const SIDE_WIDTH := 300
 var active_tab := ""
 var _last_key := ""
 
@@ -84,6 +91,10 @@ var _pointer_last := false        # true when the last press came from the mouse
 var _detail_button: Button        # the picked recipe's Make (Cook, Equip...) button in a grid panel
 var _picked_action := ""          # the picked tile's action, for focus to return to
 var _jump_key := ""               # a tile picked with A, Space or Enter: focus moves to its detail button
+var _amounts := {}                # an amount entry's chosen count, by its amount_id, kept until the game closes
+var _amount_hold := 0.0           # how long left or right has been held on an amount entry, for the repeat
+const AMOUNT_REPEAT_DELAY := 0.35
+const AMOUNT_REPEAT := 0.07
 
 # The diary is a book: a spread of two pages, with a tab marker down its right edge for each section.
 # A panel with a {"book": sections} row shows it; each section is {name, heading, pages}, and each page
@@ -184,17 +195,40 @@ func _build_menu() -> Control:
 	titles.add_child(subtitle_label)
 	main.add_child(HSeparator.new())
 
-	# The options scroll, so long lists like crafting don't run off the screen.
+	# A grid panel's tab strip stays put above the list.
+	grid_top = VBoxContainer.new()
+	main.add_child(grid_top)
+	# The options scroll, so long lists like crafting don't run off the screen. A grid panel's detail card
+	# (Craft's recipe and its Make button) sits beside the list instead, and stays in view while it scrolls.
+	grid_body = HBoxContainer.new()
+	grid_body.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	grid_body.add_theme_constant_override("separation", 16)
+	main.add_child(grid_body)
 	scroll = ScrollContainer.new()
 	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	scroll.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
 	# Moving the gamepad's focus down the list scrolls it along.
 	scroll.follow_focus = true
-	main.add_child(scroll)
+	grid_body.add_child(scroll)
 	rows_box = VBoxContainer.new()
 	rows_box.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	rows_box.add_theme_constant_override("separation", 8)
 	scroll.add_child(rows_box)
+	side_column = VBoxContainer.new()
+	side_column.custom_minimum_size = Vector2(SIDE_WIDTH, 0)
+	side_column.add_theme_constant_override("separation", 8)
+	side_column.visible = false
+	grid_body.add_child(side_column)
+	side_scroll = ScrollContainer.new()
+	side_scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	side_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	side_column.add_child(side_scroll)
+	side_box = VBoxContainer.new()
+	side_box.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	side_scroll.add_child(side_box)
+	side_foot = VBoxContainer.new()
+	side_column.add_child(side_foot)
 	main.add_child(_build_ledger_frame())
 	main.add_child(_build_book_frame())
 
@@ -260,6 +294,10 @@ func show_panel(tab: String, rows: Array) -> void:
 	subtitle_label.text = str(SUBTITLES.get(tab, ""))
 	active_tab = tab
 	_clear(rows_box)
+	_clear(grid_top)
+	_clear(side_box)
+	_clear(side_foot)
+	side_column.visible = false
 	_detail_button = null
 	_picked_action = ""
 	var book_row := {}
@@ -268,7 +306,7 @@ func show_panel(tab: String, rows: Array) -> void:
 			book_row = row
 	book.visible = not book_row.is_empty()
 	if book.visible:
-		scroll.visible = false
+		grid_body.visible = false
 		ledger.visible = false
 		prompt_bar.visible = true
 		hint_label.visible = false
@@ -281,7 +319,7 @@ func show_panel(tab: String, rows: Array) -> void:
 		if not is_ledger and row is Dictionary and row.has("tabs"):
 			_grid_tabs = row
 	var prompted := is_ledger or not _grid_tabs.is_empty()
-	scroll.visible = not is_ledger
+	grid_body.visible = not is_ledger
 	ledger.visible = is_ledger
 	prompt_bar.visible = prompted
 	hint_label.visible = not prompted
@@ -293,7 +331,23 @@ func show_panel(tab: String, rows: Array) -> void:
 		_build_ledger(tab, rows)
 		return
 	for row in rows:
-		rows_box.add_child(_build_row(row))
+		if row.has("tabs"):
+			grid_top.add_child(_build_tabs(row))
+		elif row.has("split") and not row["split"].get("detail", {}).is_empty():
+			# The grid scrolls on the left; its detail card stays on the right.
+			rows_box.add_child(_centred(_build_split_grid(row["split"])))
+			var card := _build_detail(row["split"]["detail"])
+			card.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+			card.custom_minimum_size.x = 0
+			side_box.add_child(card)
+			# The button leaves the card for the foot of the column, so it never scrolls out of view.
+			if _detail_button != null:
+				_detail_button.get_parent().remove_child(_detail_button)
+				side_foot.add_child(_detail_button)
+			side_scroll.scroll_vertical = 0
+			side_column.visible = true
+		else:
+			rows_box.add_child(_build_row(row))
 	# Highlight the first usable button so a gamepad can reach it.
 	call_deferred("_focus_first_button", keep_action)
 
@@ -312,10 +366,10 @@ func _focus_first_button(keep_action: String = "") -> void:
 	if jump != "" and _jump_to_detail(jump):
 		return
 	if keep_action != "":
-		var kept := _find_action_button(rows_box, keep_action)
+		var kept := _find_action_button(grid_body, keep_action)
 		# A button that can't be pressed any more (the last fish cooked) hands focus back to its recipe.
 		if kept == null and _picked_action != "":
-			kept = _find_action_button(rows_box, _picked_action)
+			kept = _find_action_button(grid_body, _picked_action)
 		if kept != null:
 			kept.grab_focus()
 			return
@@ -549,13 +603,17 @@ func _build_split(data: Dictionary) -> Control:
 	var holder := HBoxContainer.new()
 	holder.add_theme_constant_override("separation", 16)
 	holder.alignment = BoxContainer.ALIGNMENT_BEGIN
-	if data.get("figure", false):
-		holder.add_child(_build_figure(data["recipes"]))
-	else:
-		holder.add_child(_build_recipes({"recipes": data["recipes"], "columns": data.get("columns", 4)}))
+	holder.add_child(_build_split_grid(data))
 	if not data.get("detail", {}).is_empty():
 		holder.add_child(_build_detail(data["detail"]))
 	return holder
+
+
+# The tiles of a split: a body figure (Gear) or a grid of recipe tiles.
+func _build_split_grid(data: Dictionary) -> Control:
+	if data.get("figure", false):
+		return _build_figure(data["recipes"])
+	return _build_recipes({"recipes": data["recipes"], "columns": data.get("columns", 4)})
 
 
 # Tiles are 72 pixels with 6 between them: a 3-by-5 figure, then a row of tools.
@@ -946,6 +1004,7 @@ func _build_entry(row: Dictionary, index: int) -> Control:
 		chip.add_theme_font_size_override("font_size", 13)
 		chip.add_theme_color_override("font_color", _kind_color(str(status[1])))
 		line.add_child(chip)
+		entry.set_meta("chip", chip)
 	entry.focus_entered.connect(_pick_entry.bind(index))
 	entry.pressed.connect(_press_entry.bind(index))
 	if row.has("button2"):
@@ -966,6 +1025,9 @@ func _step_entry(event: InputEvent, index: int, entry: Button) -> void:
 
 # The status shown on an entry's line: its own, or what its button would do.
 func _entry_status(row: Dictionary) -> Array:
+	# An amount entry says what a press does: "Sell 3".
+	if row.has("amount_max") and bool(row.get("enabled", true)):
+		return ["%s %d" % [str(row["button"]), _amount(row)], "ok"]
 	if row.has("status"):
 		var kind := str(row.get("status_kind", ""))
 		if kind == "" and row.has("button"):
@@ -1014,7 +1076,70 @@ func _press_entry(index: int) -> void:
 		return
 	var row: Dictionary = _ledger_entries[index]
 	if str(row.get("action", "")) != "" and bool(row.get("enabled", true)):
-		_on_action_pressed(str(row["action"]))
+		_on_action_pressed(_amount_action(row))
+
+
+# --- Amount entries: left and right choose how many (Sell 3, Take 5), and the press does that many. ---
+# A row with amount_max (and amount_id, which the choice is kept under) is one. Left from 1 goes round to
+# all of them, and right from all back to 1. amount_values, when given, is what each count brings.
+
+func _amount(row: Dictionary) -> int:
+	return clampi(int(_amounts.get(str(row.get("amount_id", "")), 1)), 1, maxi(1, int(row["amount_max"])))
+
+
+# The row's action with the chosen count on the end ("sell_food:perch:3").
+func _amount_action(row: Dictionary) -> String:
+	if not row.has("amount_max"):
+		return str(row["action"])
+	return "%s:%d" % [str(row["action"]), _amount(row)]
+
+
+# Steps the focused amount entry's count, and redraws its status and detail page in place, so focus stays.
+func _step_amount(step: int) -> void:
+	if _ledger_pick >= _ledger_entries.size():
+		return
+	var row: Dictionary = _ledger_entries[_ledger_pick]
+	if not row.has("amount_max") or not bool(row.get("enabled", true)):
+		return
+	var top := maxi(1, int(row["amount_max"]))
+	var n := _amount(row) + step
+	if n < 1:
+		n = top
+	elif n > top:
+		n = 1
+	_amounts[str(row["amount_id"])] = n
+	var entries: Array = list_box.get_children().filter(func(c: Node) -> bool: return c is Button)
+	if _ledger_pick < entries.size() and entries[_ledger_pick].has_meta("chip"):
+		(entries[_ledger_pick].get_meta("chip") as Label).text = str(_entry_status(row)[0])
+	_show_detail()
+	_on_action_pressed("page_turn")
+
+
+# Left and right on an amount entry, from any device, with a repeat while held. Polled, so the stick
+# steps once per push rather than once per motion event.
+func _poll_amount(delta: float) -> void:
+	var focused := get_viewport().gui_get_focus_owner()
+	var on_amount: bool = ledger.visible and focused != null and list_box.is_ancestor_of(focused)
+	on_amount = on_amount and _ledger_pick < _ledger_entries.size() and _ledger_entries[_ledger_pick].has("amount_max")
+	if not on_amount:
+		_amount_hold = 0.0
+		return
+	var dir := 0
+	if Input.is_action_pressed("ui_left"):
+		dir = -1
+	elif Input.is_action_pressed("ui_right"):
+		dir = 1
+	if dir == 0:
+		_amount_hold = 0.0
+		return
+	if Input.is_action_just_pressed("ui_left") or Input.is_action_just_pressed("ui_right"):
+		_amount_hold = 0.0
+		_step_amount(dir)
+		return
+	_amount_hold += delta
+	if _amount_hold >= AMOUNT_REPEAT_DELAY:
+		_amount_hold -= AMOUNT_REPEAT
+		_step_amount(dir)
 
 
 # The focused entry in full: what it is, what it needs (have or short), and its button.
@@ -1060,7 +1185,25 @@ func _show_detail() -> void:
 		bottom.alignment = BoxContainer.ALIGNMENT_END
 		bottom.add_theme_constant_override("separation", 8)
 		detail_box.add_child(bottom)
-		if row.has("button2"):
+		if row.has("amount_max") and bool(row.get("enabled", true)):
+			# How many, with what they bring, then − and + for the mouse; left and right do the same.
+			var n := _amount(row)
+			var text := "%d of %d" % [n, int(row["amount_max"])]
+			var values: Array = row.get("amount_values", [])
+			if n <= values.size():
+				text += ", for %d %s" % [int(values[n - 1]), str(row.get("amount_unit", ""))]
+			detail_box.add_child(_detail_text(text, COL_ACCENT, 16))
+			detail_box.move_child(detail_box.get_child(-1), bottom.get_index())
+			bottom.add_child(_glyph("< >"))
+			for step in [-1, 1]:
+				var stepper := Button.new()
+				stepper.text = "-" if step < 0 else "+"
+				stepper.custom_minimum_size = Vector2(40, 38)
+				stepper.focus_mode = Control.FOCUS_NONE
+				_style_button(stepper, false)
+				stepper.pressed.connect(_step_amount.bind(step))
+				bottom.add_child(stepper)
+		elif row.has("button2"):
 			bottom.add_child(_glyph("< >"))
 			var less := Button.new()
 			less.text = str(row["button2"]).replace("−", "-")
@@ -1072,12 +1215,12 @@ func _show_detail() -> void:
 		else:
 			bottom.add_child(_device_glyph("Space", "A"))
 		var button := Button.new()
-		button.text = str(row["button"])
+		button.text = str(_entry_status(row)[0]) if row.has("amount_max") and bool(row.get("enabled", true)) else str(row["button"])
 		button.custom_minimum_size = Vector2(48 if row.has("button2") else 140, 38)
 		button.focus_mode = Control.FOCUS_NONE
 		button.disabled = not bool(row.get("enabled", true))
 		_style_button(button, false)
-		button.pressed.connect(_on_action_pressed.bind(str(row.get("action", ""))))
+		button.pressed.connect(_on_action_pressed.bind(_amount_action(row)))
 		bottom.add_child(button)
 
 
@@ -1199,6 +1342,7 @@ var _pointer_held := false
 func _process(delta: float) -> void:
 	if not panel.visible or scroll == null:
 		return
+	_poll_amount(delta)
 	# Left and right (keys, D-pad or the left stick) turn the diary's pages.
 	if book.visible:
 		if Input.is_action_just_pressed("move_left"):

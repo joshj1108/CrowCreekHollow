@@ -48,6 +48,8 @@ func _run() -> void:
 	await _section_cases()
 	await _craft_pad_cases()
 	await _cooking_pad_cases()
+	await _split_cases()
+	await _amount_cases()
 	await _diary_cases()
 	await _bag_cases()
 	await _small_panel_cases()
@@ -319,7 +321,7 @@ func _section_cases() -> void:
 		await _pad(JOY_BUTTON_RIGHT_SHOULDER)
 	_check("craft: RB steps round the sub-tabs back to the first", m.craft_tab == str(tabs[0]["id"]))
 	# Picking a recipe with A keeps focus on it.
-	var tiles := _focusables(m.action_bar.rows_box).filter(func(c: Control) -> bool: return str(c.get_meta("action", "")).begins_with("craft_pick:"))
+	var tiles := _focusables(m.action_bar.grid_body).filter(func(c: Control) -> bool: return str(c.get_meta("action", "")).begins_with("craft_pick:"))
 	if tiles.size() > 2:
 		var tile: Control = tiles[2]
 		var action := str(tile.get_meta("action"))
@@ -378,7 +380,7 @@ func _craft_pad_cases() -> void:
 	_check("craft pad: and back to the first", _focus() == first or str(_focus().get_meta("action", "")) == str(first.get_meta("action", "")) if is_instance_valid(first) else _focus_ok())
 	# Pick the first craftable recipe with A, then reach Make and press it.
 	var made := false
-	for tile in _focusables(m.action_bar.rows_box):
+	for tile in _focusables(m.action_bar.grid_body):
 		var action := str(tile.get_meta("action", ""))
 		if not action.begins_with("craft_pick:"):
 			continue
@@ -462,7 +464,7 @@ func _cooking_pad_cases() -> void:
 	# Keyboard: Space on a recipe jumps to its button too; a click only picks.
 	m.inventory["crops"] = 4
 	await _frames(3)
-	var tile := _focusables(m.action_bar.rows_box).filter(func(c: Control) -> bool: return str(c.get_meta("action", "")) == "craft_pick:cook:turnip_hash")
+	var tile := _focusables(m.action_bar.grid_body).filter(func(c: Control) -> bool: return str(c.get_meta("action", "")) == "craft_pick:cook:turnip_hash")
 	_check("cooking keys: Turnip Hash is in the grid", not tile.is_empty())
 	if not tile.is_empty():
 		tile[0].grab_focus()
@@ -470,10 +472,10 @@ func _cooking_pad_cases() -> void:
 		await _key(KEY_SPACE)
 		await _frames(3)
 		_check("cooking keys: Space picks a recipe and jumps to Cook", _focus_ok() and str(_focus().get_meta("action", "")) == "cook:turnip_hash")
-		var other := _focusables(m.action_bar.rows_box).filter(func(c: Control) -> bool: return str(c.get_meta("action", "")) == target)
+		var other := _focusables(m.action_bar.grid_body).filter(func(c: Control) -> bool: return str(c.get_meta("action", "")) == target)
 		m.inventory[Foods.group("any_fish")[0]] = 2
 		await _frames(3)
-		other = _focusables(m.action_bar.rows_box).filter(func(c: Control) -> bool: return str(c.get_meta("action", "")) == target)
+		other = _focusables(m.action_bar.grid_body).filter(func(c: Control) -> bool: return str(c.get_meta("action", "")) == target)
 		m.action_bar.scroll.ensure_control_visible(other[0])
 		await _frames(2)
 		await _click(other[0])
@@ -483,6 +485,137 @@ func _cooking_pad_cases() -> void:
 	m.action_bar.action_pressed.disconnect(record)
 	await _close_all()
 	await _handed_back("cooking")
+
+
+# --- Grid panels: the list scrolls, the picked recipe's card stays put -------------
+
+func _split_cases() -> void:
+	var ab: ActionBar = m.action_bar
+	await _open_from_wheel(2)
+	_check("split: Craft's card sits beside the list, outside its scroll", ab.side_column.visible and ab._detail_button != null and not ab.scroll.is_ancestor_of(ab._detail_button))
+	ab.scroll.scroll_vertical = 0
+	for i in 12:
+		await _pad(JOY_BUTTON_DPAD_DOWN)
+	_check("split: moving down the recipes scrolls the list", ab.scroll.scroll_vertical > 0)
+	var column := ab.side_column.get_global_rect()
+	var frame := ab.grid_body.get_global_rect()
+	var button := ab._detail_button.get_global_rect()
+	_check("split: the card's button stays in view while the list scrolls", column.encloses(button) and frame.encloses(button) and ab._detail_button.is_visible_in_tree())
+	var shown := ab.scroll.scroll_vertical
+	await _wheel(ab.scroll, MOUSE_BUTTON_WHEEL_UP)
+	_check("split: the mouse wheel scrolls the list", ab.scroll.scroll_vertical < shown)
+	# Every recipe, however long its text: its button is in view.
+	var all_in_view := true
+	var picks: Array = []
+	for tile in _focusables(ab.grid_body):
+		if str(tile.get_meta("action", "")).begins_with("craft_pick:"):
+			picks.append(str(tile.get_meta("action")).trim_prefix("craft_pick:"))
+	for pick in picks:
+		m.craft_selected = pick
+		await _frames(2)
+		if ab._detail_button != null and not ab.grid_body.get_global_rect().encloses(ab._detail_button.get_global_rect()):
+			all_in_view = false
+			print("   out of view: ", m.craft_selected)
+	_check("split: every recipe's button is in view", all_in_view and not picks.is_empty())
+	await _open_from_wheel(0)
+	_check("split: Skills has its card beside the list too", ab.side_column.visible and _focus_ok())
+	await _close_all()
+	await _handed_back("split")
+
+
+# --- Amounts: sell, store and take some, not only all -------------------------------
+
+func _amount_cases() -> void:
+	var fish: String = Foods.group("any_fish")[0]
+	var fish_id := str(Foods.by_held(fish)["id"])
+	for key in Foods.group("any_fish"):
+		m.inventory[key] = 0
+	m.inventory[fish] = 6
+	m._toggle_tab("Trade")
+	await _frames(3)
+	_check("stand: a ledger with an entry in focus", m.action_bar.ledger.visible and _focus_ok())
+	await _focus_action("sell_food:" + fish_id)
+	_check("stand: an entry starts at Sell 1", _chip() == "Sell 1")
+	await _pad(JOY_BUTTON_DPAD_RIGHT)
+	await _key(KEY_RIGHT)
+	_check("stand: right steps the amount up (pad and keys)", _chip() == "Sell 3" and _focus_ok())
+	await _axis(JOY_AXIS_LEFT_X, 0.9)
+	_check("stand: one push of the stick steps once", _chip() == "Sell 4")
+	await _key(KEY_LEFT)
+	_check("stand: left steps it down", _chip() == "Sell 3")
+	var money := m.money
+	var price := m.stall._sale_value(fish_id, 3)
+	await _pad(JOY_BUTTON_A)
+	await _frames(2)
+	_check("stand: A sells that many", int(m.inventory[fish]) == 3 and m.money == money + price)
+	_check("stand: focus stays on the entry", _focus_ok() and str(_focus().get_meta("action", "")) == "sell_food:" + fish_id)
+	_check("stand: the amount fits what's left", _chip() == "Sell 3")
+	await _key(KEY_RIGHT)
+	_check("stand: right from all goes round to 1", _chip() == "Sell 1")
+	await _key(KEY_LEFT)
+	_check("stand: left from 1 goes round to all", _chip() == "Sell 3")
+	# The mouse: - on the detail page, then the button.
+	await _click(_button_named(m.action_bar.detail_box, "-"))
+	_check("stand: the mouse's - steps it down", _chip() == "Sell 2")
+	await _click(_button_named(m.action_bar.detail_box, "Sell 2"))
+	_check("stand: a click on Sell 2 sells 2", int(m.inventory[fish]) == 1)
+	await _key(KEY_SPACE)
+	_check("stand: Space sells the last one", int(m.inventory[fish]) == 0)
+	await _pad(JOY_BUTTON_B)
+	await _handed_back("stand")
+
+	# The cellar: store 2 turnips of 6, then take 1 back.
+	m.cellar_built = true
+	m.cellar.clear()
+	m.inventory["crops"] = 6
+	m._toggle_tab("Cellar")
+	await _frames(3)
+	await _focus_action("cellar_store:crops")
+	await _pad(JOY_BUTTON_DPAD_RIGHT)
+	await _pad(JOY_BUTTON_A)
+	await _frames(2)
+	_check("cellar: storing 2 of 6 turnips", int(m.cellar.get("crops", 0)) == 2 and int(m.inventory["crops"]) == 4)
+	await _focus_action("cellar_take:crops")
+	await _key(KEY_ENTER)
+	await _frames(2)
+	_check("cellar: taking 1 back", int(m.cellar.get("crops", 0)) == 1 and int(m.inventory["crops"]) == 5)
+	await _pad(JOY_BUTTON_B)
+	await _handed_back("cellar amounts")
+
+	# The cooler: store 3 of 4 fish.
+	m.cooler.clear()
+	m.inventory[fish] = 4
+	m._toggle_tab("Cooler")
+	await _frames(3)
+	await _focus_action("cooler_store:" + fish)
+	for i in 2:
+		await _pad(JOY_BUTTON_DPAD_RIGHT)
+	await _pad(JOY_BUTTON_A)
+	await _frames(2)
+	_check("cooler: storing 3 of 4 fish", int(m.cooler.get(fish, 0)) == 3 and int(m.inventory[fish]) == 1)
+	await _pad(JOY_BUTTON_B)
+
+	# The firewood store: take 3.
+	m.firewood_store = 10
+	var wood := int(m.inventory["firewood"])
+	m._toggle_tab("Woodstore")
+	await _frames(3)
+	await _focus_action("wood_take")
+	for i in 2:
+		await _key(KEY_D)
+	await _key(KEY_SPACE)
+	await _frames(2)
+	_check("firewood: taking 3", m.firewood_store == 7 and int(m.inventory["firewood"]) == wood + 3)
+	await _pad(JOY_BUTTON_B)
+	await _handed_back("firewood amounts")
+
+
+# The focused ledger entry's status, such as "Sell 3".
+func _chip() -> String:
+	var f := _focus()
+	if f == null or not f.has_meta("chip"):
+		return ""
+	return (f.get_meta("chip") as Label).text
 
 
 # The detail card's Make (or Equip) button, when it can be pressed.

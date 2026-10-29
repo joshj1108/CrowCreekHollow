@@ -842,18 +842,23 @@ func _cooked_sell_rows() -> Array:
 	return rows
 
 
-# A Sell all row: the price the next one fetches, and how many more the lane takes today at full price.
+# A Sell row: the price the next one fetches, and how many more the lane takes today at full price. Left
+# and right choose how many to sell (amount_max), and the detail page gives what that many bring.
 func _sell_row(f: Dictionary, held: int) -> Dictionary:
 	var id := str(f["id"])
 	var price := m.stall._food_price(id)
 	var now := m.stall._price_now(id)
 	var left := m.stall._full_left(id)
+	var values: Array = []
+	for n in range(1, held + 1):
+		values.append(m.stall._sale_value(id, n))
 	return {
 		"name": "%s (%d each)" % [str(f["name"]), now] if now >= price else "%s (%d each, %d when wanted)" % [str(f["name"]), now, price],
-		"value": "%d held, %d all for %d" % [held, held, m.stall._sale_value(id, held)],
+		"value": "%d held" % held,
 		"about": "The lane takes %d more today at full price." % left if left > 0 else "The lane has had its fill: it pays less until it wants more.",
-		"button": "Sell all",
+		"button": "Sell",
 		"action": "sell_food:" + id,
+		"amount_max": held, "amount_id": "sell:" + id, "amount_values": values, "amount_unit": "coins",
 		"enabled": true,
 	}
 
@@ -962,6 +967,7 @@ func _achievement_rows() -> Array:
 
 func _trade_rows() -> Array:
 	var rows: Array = [
+		{"tab": "Farm stand"},
 		{"section": "Purse"},
 		{"name": "Coins", "value": str(m.money)},
 		{"section": "Sell from your pack"},
@@ -997,21 +1003,21 @@ func _cellar_rows() -> Array:
 		},
 		{"name": "In the cellar", "value": m.farm._cellar_text()},
 		{
-			"name": "Store crops that keep",
+			"name": "Store all crops that keep",
 			"value": "%d in pack" % in_pack,
-			"button": "Store",
+			"button": "Store all",
 			"action": "store_crops",
 			"enabled": in_pack > 0 and total < m.estate._cellar_cap(),
 		},
 		{
-			"name": "Take crops into your pack",
+			"name": "Take all crops into your pack",
 			"value": "%d free slots" % m.stall._pack_free(),
-			"button": "Take",
+			"button": "Take all",
 			"action": "take_crops",
 			"enabled": total > 0 and m.stall._pack_free() > 0,
 		},
 		{"note": "Turnips, potatoes, leeks, parsnips and garlic keep here. Nothing spoils in the cellar. Corn, pumpkins, greens and berries don't keep, so eat, cook or sell them."},
-	]
+	] + _amount_rows(m.farm._cellar_keys(), m.cellar, m.estate._cellar_cap() - total, "cellar")
 
 
 func _cooler_rows() -> Array:
@@ -1026,21 +1032,48 @@ func _cooler_rows() -> Array:
 		},
 		{"name": "In the cooler", "value": m.fishing._cooler_text()},
 		{
-			"name": "Store fish from your pack",
+			"name": "Store all fish from your pack",
 			"value": "%d in pack" % in_pack,
-			"button": "Store",
+			"button": "Store all",
 			"action": "store_fish",
 			"enabled": in_pack > 0 and total < m.COOLER_CAP,
 		},
 		{
-			"name": "Take fish into your pack",
+			"name": "Take all fish into your pack",
 			"value": "%d free slots" % m.stall._pack_free(),
-			"button": "Take",
+			"button": "Take all",
 			"action": "take_fish",
 			"enabled": total > 0 and m.stall._pack_free() > 0,
 		},
 		{"note": "Fish in your pack spoil overnight. Fish kept here do not. The best fish go in first."},
-	]
+	] + _amount_rows(m.fishing._fish_keys(), m.cooler, m.COOLER_CAP - total, "cooler")
+
+
+# One Store and one Take line per kind, each with an amount chosen by left and right (store is cellar or
+# cooler, held the kinds it keeps, kept what it holds now, room what it has left).
+func _amount_rows(keys: Array, kept: Dictionary, room: int, store: String) -> Array:
+	var rows: Array = []
+	var storing: Array = []
+	var taking: Array = []
+	for key in keys:
+		var name := str(Foods.by_held(key).get("name", key))
+		var in_pack := int(m.inventory[key])
+		var stored := int(kept.get(key, 0))
+		if in_pack > 0:
+			storing.append({"name": "Store %s" % name, "value": "%d in pack" % in_pack, "button": "Store",
+				"action": "%s_store:%s" % [store, key], "amount_max": mini(in_pack, maxi(room, 1)), "amount_id": "%s_store:%s" % [store, key],
+				"about": "Choose how many with left and right, then press to store them.", "enabled": room > 0})
+		if stored > 0:
+			taking.append({"name": "Take %s" % name, "value": "%d stored" % stored, "button": "Take",
+				"action": "%s_take:%s" % [store, key], "amount_max": stored, "amount_id": "%s_take:%s" % [store, key],
+				"about": "Choose how many with left and right, then press to take them. Only as many as your pack has room for come out.", "enabled": m.stall._pack_free() > 0})
+	if not storing.is_empty():
+		rows.append({"section": "Store some"})
+		rows.append_array(storing)
+	if not taking.is_empty():
+		rows.append({"section": "Take some"})
+		rows.append_array(taking)
+	return rows
 
 
 func _woodstore_rows() -> Array:
@@ -1048,8 +1081,11 @@ func _woodstore_rows() -> Array:
 		{"tab": "Firewood store"},
 		{"name": "Firewood in the store", "value": "%d of %d" % [m.firewood_store, m.WOODSTORE_CAP], "progress": float(m.firewood_store) / float(m.WOODSTORE_CAP)},
 		{"name": "Firewood in your pack", "value": str(int(m.inventory["firewood"]))},
-		{"name": "Take 5 firewood", "value": "into your pack", "button": "Take", "action": "wood_take:5", "enabled": m.firewood_store > 0},
-		{"name": "Store your firewood", "value": "all you carry, up to the store's room", "button": "Store", "action": "wood_store",
+		{"name": "Take firewood", "value": "into your pack", "button": "Take", "action": "wood_take", "enabled": m.firewood_store > 0,
+			"amount_max": maxi(1, m.firewood_store), "amount_id": "wood_take", "about": "Choose how many with left and right, then press to take them."},
+		{"name": "Store firewood", "value": "up to the store's room", "button": "Store", "action": "wood_store",
+			"amount_max": maxi(1, mini(int(m.inventory["firewood"]), m.WOODSTORE_CAP - m.firewood_store)), "amount_id": "wood_store",
+			"about": "Choose how many with left and right, then press to store them.",
 			"enabled": int(m.inventory["firewood"]) > 0 and m.firewood_store < m.WOODSTORE_CAP},
 		{"note": "Split wood at the chopping log: stand beside it, facing it, hold the axe, and press RT or click. Feed the hearth in the house with firewood from your pack."},
 	]

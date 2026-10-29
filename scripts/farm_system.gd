@@ -379,6 +379,29 @@ func _take_crops() -> void:
 	m._show_message("You take %d crops from the cellar." % taken)
 
 
+# Stores (or takes) amount of one crop, or all of it when amount is -1, up to the cellar's room or the pack's.
+func _move_crop(key: String, amount: int, storing: bool) -> void:
+	if not key in _cellar_keys():
+		return
+	var name := str(Foods.by_held(key).get("name", key)).to_lower()
+	var want := int(m.inventory[key]) if storing else int(m.cellar.get(key, 0))
+	if amount >= 0:
+		want = mini(want, amount)
+	var moved := 0
+	for i in want:
+		if storing and _cellar_total() >= m.estate._cellar_cap():
+			break
+		if not storing and not m.stall._pack_room(int(m.inventory[key]), 1):
+			break
+		m.inventory[key] += -1 if storing else 1
+		m.cellar[key] = int(m.cellar.get(key, 0)) + (1 if storing else -1)
+		moved += 1
+	if moved <= 0:
+		m._show_message("The cellar is full." if storing else "Your pack is full.")
+		return
+	m._show_message("You %s %d %s." % ["store" if storing else "take", moved, name])
+
+
 # What the cellar holds, as "12 turnip, 3 leek".
 func _cellar_text() -> String:
 	var parts: Array = []

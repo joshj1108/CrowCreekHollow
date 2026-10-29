@@ -3029,6 +3029,11 @@ func _pause_action(action_id: String) -> bool:
 	return true
 
 
+# The number an amount entry adds to its action ("sell_food:perch:3" is 3), or -1 for all.
+func _action_amount(action_id: String) -> int:
+	return int(action_id.get_slice(":", 2)) if action_id.get_slice_count(":") > 2 else -1
+
+
 func _is_wheel_section(section_name: String) -> bool:
 	for section in SectionWheel.SECTIONS:
 		if str(section["name"]) == section_name:
@@ -3200,8 +3205,15 @@ func _on_panel_action(action_id: String) -> void:
 	if action_id.begins_with("cook:"):
 		stall._make_food(action_id.trim_prefix("cook:"))
 		return
+	# "sell_food:<id>:<n>" sells n, "sell_food:<id>" all (an amount entry adds the number chosen).
 	if action_id.begins_with("sell_food:"):
-		stall._sell_food(action_id.trim_prefix("sell_food:"))
+		stall._sell_food(action_id.get_slice(":", 1), _action_amount(action_id))
+		return
+	if action_id.begins_with("cellar_store:") or action_id.begins_with("cellar_take:"):
+		farm._move_crop(action_id.get_slice(":", 1), _action_amount(action_id), action_id.begins_with("cellar_store:"))
+		return
+	if action_id.begins_with("cooler_store:") or action_id.begins_with("cooler_take:"):
+		fishing._move_fish(action_id.get_slice(":", 1), _action_amount(action_id), action_id.begins_with("cooler_store:"))
 		return
 		return
 	if action_id.begins_with("tool:"):
@@ -3219,8 +3231,8 @@ func _on_panel_action(action_id: String) -> void:
 	if action_id.begins_with("wood_take:"):
 		firewood._take_firewood(int(action_id.trim_prefix("wood_take:")))
 		return
-	if action_id == "wood_store":
-		firewood._store_firewood()
+	if action_id.begins_with("wood_store"):
+		firewood._store_firewood(int(action_id.get_slice(":", 1)) if action_id.contains(":") else -1)
 		return
 	if action_id == "build_furnace":
 		_build_furnace()
