@@ -32,6 +32,7 @@ var root: Control
 var panel: PanelContainer
 var slots: Array = []        # one Button per cell
 var toggle_button: Button
+var inventory_button: Button
 var focus_name: Label        # the highlighted slot's item, under the grid
 
 
@@ -109,7 +110,7 @@ func _ready() -> void:
 
 	var inventory_row := CenterContainer.new()
 	column.add_child(inventory_row)
-	var inventory_button := Button.new()
+	inventory_button = Button.new()
 	inventory_button.text = "Inventory"
 	inventory_button.custom_minimum_size = Vector2(110, 26)
 	inventory_button.add_theme_font_size_override("font_size", 13)
@@ -132,6 +133,9 @@ func _ready() -> void:
 
 	toggle_button = Button.new()
 	toggle_button.text = "Bag (Tab)"
+	# Out of the focus path, like the Menu button: with nothing open the game drops any focus, which would
+	# cancel a click on it half way through.
+	toggle_button.focus_mode = Control.FOCUS_NONE
 	toggle_button.custom_minimum_size = Vector2(150, 40)
 	toggle_button.add_theme_font_size_override("font_size", 16)
 	toggle_button.add_theme_color_override("font_color", COL_TEXT)
@@ -152,8 +156,15 @@ func _ready() -> void:
 func show_bag() -> void:
 	open = true
 	panel.visible = true
-	if not slots.is_empty():
-		(slots[0] as Button).grab_focus.call_deferred()
+	_first_target().grab_focus.call_deferred()
+
+
+# The first slot holding something, or the Inventory button when the pack is empty.
+func _first_target() -> Button:
+	for b in slots:
+		if not (b as Button).disabled:
+			return b
+	return inventory_button
 
 
 func hide_bag() -> void:
@@ -167,6 +178,7 @@ func hide_bag() -> void:
 # Fills the cells from the stacks given. Each stack is {label, usable, desc, tint}, where label reads
 # "Name xCount". Only the text and colour change, so the cell in focus keeps its focus while counts update.
 func set_items(items: Array) -> void:
+	var focused := get_viewport().gui_get_focus_owner() if is_inside_tree() else null
 	for i in slots.size():
 		var b := slots[i] as Button
 		var icon := b.get_meta("icon") as ActionBar.RecipeIcon
@@ -181,7 +193,7 @@ func set_items(items: Array) -> void:
 			icon.tint = Color(str(it.get("tint", DEFAULT_TINT)))
 			icon.queue_redraw()
 			b.tooltip_text = str(it.get("desc", ""))
-			b.disabled = false
+			ActionBar._set_enabled(b, true)
 			b.modulate = Color(1, 1, 1) if bool(it.get("usable", false)) else Color(0.78, 0.76, 0.72)
 			var tint := str(it.get("tint", DEFAULT_TINT))
 			# Flat slots take the item's tint on their edge; the skinned slots keep their frame.
@@ -195,9 +207,19 @@ func set_items(items: Array) -> void:
 			count_label.text = ""
 			b.set_meta("item_name", "")
 			b.tooltip_text = ""
-			b.disabled = true
+			# Empty slots are out of the D-pad's path.
+			ActionBar._set_enabled(b, false)
 			b.modulate = Color(1, 1, 1)
 			b.set_meta("tint", "")
+	# Using the last of something empties its slot: focus steps back to the last slot that still holds
+	# something, or to the Inventory button.
+	if open and focused is Button and slots.has(focused) and (focused as Button).disabled:
+		var target := _first_target()
+		for k in range(slots.find(focused), -1, -1):
+			if not (slots[k] as Button).disabled:
+				target = slots[k]
+				break
+		target.grab_focus()
 	# The slot in focus may now hold something else.
 	if is_inside_tree():
 		_name_slot(get_viewport().gui_get_focus_owner())

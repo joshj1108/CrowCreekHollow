@@ -2,8 +2,9 @@ class_name SectionWheel
 extends CanvasLayer
 
 ## The section wheel: the menus that used to have their own keys, arranged around a ring. Shift or a
-## click on the left stick opens it. The mouse hovers and clicks a section. On a controller the right
-## stick highlights one and A opens it. B or Esc closes the wheel. Choosing a section closes the wheel
+## click on the left stick opens it. The mouse hovers and clicks a section. On a controller the left
+## stick highlights one and A opens it; the D-pad, the arrow keys or WASD step round the ring (right and
+## down clockwise), and Enter, Space or A opens it. B or Esc closes the wheel. Choosing a section closes the wheel
 ## and shows that section alone, with no other sections in sight.
 
 signal section_chosen(section_name: String)
@@ -87,6 +88,23 @@ func _process(_delta: float) -> void:
 			ring.queue_redraw()
 	if Input.is_action_just_pressed("ui_accept"):
 		_choose(highlight)
+
+
+# The D-pad, arrows and WASD step the highlight round the ring. The stick's own motion is left to
+# _process, which points at a segment instead.
+func _unhandled_input(event: InputEvent) -> void:
+	if not open or event is InputEventJoypadMotion:
+		return
+	var step := 0
+	if event.is_action_pressed("ui_right", true) or event.is_action_pressed("ui_down", true):
+		step = 1
+	elif event.is_action_pressed("ui_left", true) or event.is_action_pressed("ui_up", true):
+		step = -1
+	if step == 0:
+		return
+	highlight = posmod(highlight + step, SECTIONS.size())
+	ring.queue_redraw()
+	get_viewport().set_input_as_handled()
 
 
 func _segment_at(v: Vector2) -> int:
@@ -175,7 +193,7 @@ func _draw_ring() -> void:
 		ring.draw_style_box(plaque, Rect2(c - box * 0.5, box).abs())
 	ring.draw_string(font, Vector2(c.x - text_w * 0.5, top + font.get_ascent(name_size)), name_text, HORIZONTAL_ALIGNMENT_CENTER, text_w, name_size, COL_ACCENT)
 	ring.draw_multiline_string(font, Vector2(c.x - text_w * 0.5, top + name_dim.y + 2.0 + font.get_ascent(13)), sub, HORIZONTAL_ALIGNMENT_CENTER, text_w, 13, -1, COL_MUTED)
-	var hint := "Mouse or left stick to choose   ·   A or click to open   ·   B or Esc to close"
+	var hint := "Mouse, left stick or arrows to choose   ·   A, Enter or click to open   ·   B or Esc to close"
 	var hint_width := font.get_string_size(hint, HORIZONTAL_ALIGNMENT_LEFT, -1, 14).x
 	ring.draw_string(font, Vector2(c.x - hint_width * 0.5, c.y + OUTER_R + 30.0), hint, HORIZONTAL_ALIGNMENT_LEFT, -1, 14, COL_MUTED)
 

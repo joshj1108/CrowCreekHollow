@@ -1296,6 +1296,7 @@ func _process(delta: float) -> void:
 	var hand_pressed := Input.is_action_just_pressed("use")
 	if (tool_pressed or hand_pressed) and open_tab == "" and not _bag_open() and not _wheel_open() and not _pointer_on_ui():
 		_tool_press = tool_pressed
+		world_presses += 1
 		if tool_pressed:
 			_play_use_anim()
 		_interact()
@@ -1644,10 +1645,13 @@ func _setup_input() -> void:
 	for i in 10:
 		_ensure_action("slot_%d" % (i + 1), [KEY_1 + i if i < 9 else KEY_0])
 	# Menus move focus and press buttons through the ui_ actions, so the gamepad needs them too.
-	_ensure_action("ui_up", [], [JOY_BUTTON_DPAD_UP], [[JOY_AXIS_LEFT_Y, -1.0]])
-	_ensure_action("ui_down", [], [JOY_BUTTON_DPAD_DOWN], [[JOY_AXIS_LEFT_Y, 1.0]])
-	_ensure_action("ui_left", [], [JOY_BUTTON_DPAD_LEFT], [[JOY_AXIS_LEFT_X, -1.0]])
-	_ensure_action("ui_right", [], [JOY_BUTTON_DPAD_RIGHT], [[JOY_AXIS_LEFT_X, 1.0]])
+	# WASD moves focus too, as it moves the farmer (the arrow keys are Godot's own).
+	_ensure_action("ui_up", [KEY_W], [JOY_BUTTON_DPAD_UP], [[JOY_AXIS_LEFT_Y, -1.0]])
+	_ensure_action("ui_down", [KEY_S], [JOY_BUTTON_DPAD_DOWN], [[JOY_AXIS_LEFT_Y, 1.0]])
+	_ensure_action("ui_left", [KEY_A], [JOY_BUTTON_DPAD_LEFT], [[JOY_AXIS_LEFT_X, -1.0]])
+	_ensure_action("ui_right", [KEY_D], [JOY_BUTTON_DPAD_RIGHT], [[JOY_AXIS_LEFT_X, 1.0]])
+	for nav in ["ui_up", "ui_down", "ui_left", "ui_right"]:
+		InputMap.action_set_deadzone(nav, 0.3)
 	_ensure_action("ui_accept", [], [JOY_BUTTON_A])
 	_ensure_action("ui_cancel", [], [JOY_BUTTON_B])
 	# Tab or Y opens the bag, which also holds the way into the Inventory.
@@ -2977,6 +2981,8 @@ func _press_back(open_settings: bool) -> void:
 		_close_wheel()
 	elif placing != "":
 		_cancel_placement()
+		if open_settings:
+			_open_pause()
 	elif open_tab != "" and _is_wheel_section(open_tab):
 		_close_panel()
 		wheel.show_wheel()
@@ -3735,6 +3741,7 @@ func _pointer_on_ui() -> bool:
 # Checks that the active slot holds the tool a target needs. Says what to select when it doesn't.
 # True while the current press came from RT or a left click, which are the only presses that work tools.
 var _tool_press := false
+var world_presses := 0   # hand and tool presses that reached the farm; tools/menu_test.gd checks none leak from a menu
 
 
 func _need_tool(id: String) -> bool:

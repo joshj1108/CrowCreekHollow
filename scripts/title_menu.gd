@@ -23,6 +23,7 @@ var settings_rows: Array = []   # the controls list, from main.gd
 var page := "title"             # the page showing, so B or Esc can go back from it
 var root_panel: Control
 var content: VBoxContainer
+var scroll: ScrollContainer
 var overwrite_armed := -1       # slot waiting for a second press in New Game
 # The name typed for a new game, handed to the game when it starts.
 static var pending_name := ""
@@ -143,9 +144,11 @@ func _ready() -> void:
 	box.add_child(spacer)
 
 	# The options sit in a scroll box, so a long list such as the controls stays on screen.
-	var scroll := ScrollContainer.new()
+	scroll = ScrollContainer.new()
 	scroll.custom_minimum_size = Vector2(440, 360)
 	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	# Moving focus down a long page (Settings) scrolls it along.
+	scroll.follow_focus = true
 	box.add_child(scroll)
 
 	content = VBoxContainer.new()
@@ -239,7 +242,18 @@ func _show_name(slot: int) -> void:
 
 
 # B or Esc goes back a page: from Controls to Settings, and from any other page to the title.
+# The Controls page has only its Back button to focus, so up and down scroll its list instead.
 func _unhandled_input(event: InputEvent) -> void:
+	if visible and page == "controls" and not event is InputEventJoypadMotion:
+		var step := 0
+		if event.is_action_pressed("ui_down", true):
+			step = 1
+		elif event.is_action_pressed("ui_up", true):
+			step = -1
+		if step != 0:
+			scroll.scroll_vertical += step * 60
+			get_viewport().set_input_as_handled()
+			return
 	if not visible or page == "title" or not event.is_action_pressed("ui_cancel"):
 		return
 	get_viewport().set_input_as_handled()
@@ -342,7 +356,8 @@ func _add_button(text: String, enabled: bool, on_press: Callable) -> void:
 func _make_button(text: String, enabled: bool, on_press: Callable, min_size: Vector2, font_size: int) -> Button:
 	var button := Button.new()
 	button.text = text
-	button.disabled = not enabled
+	# A disabled button (Continue or Load with no saves, an empty slot to load) is left out of the focus path.
+	ActionBar._set_enabled(button, enabled)
 	button.custom_minimum_size = min_size
 	button.add_theme_font_size_override("font_size", font_size)
 	button.add_theme_color_override("font_color", COL_TEXT)

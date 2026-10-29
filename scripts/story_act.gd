@@ -372,7 +372,7 @@ func _play_ending(id: String) -> void:
 
 
 func _keys() -> void:
-	if Input.is_action_just_pressed("use") or Input.is_action_just_pressed("tool_use"):
+	if Input.is_action_just_pressed("use") or Input.is_action_just_pressed("tool_use") or Input.is_action_just_pressed("ui_accept"):
 		screen.advance()
 
 

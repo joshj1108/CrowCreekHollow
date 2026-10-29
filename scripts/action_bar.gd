@@ -307,6 +307,9 @@ func _focus_first_button(keep_action: String = "") -> void:
 			kept.grab_focus()
 			return
 	var button := _first_enabled_button(rows_box)
+	# A panel with nothing to press (the stand with nothing to sell) focuses Close, so B and A still work.
+	if button == null and close_button.focus_mode != Control.FOCUS_NONE:
+		button = close_button
 	if button != null:
 		button.grab_focus()
 
@@ -314,7 +317,7 @@ func _focus_first_button(keep_action: String = "") -> void:
 func _find_action_button(node: Node, action_id: String) -> Button:
 	for child in node.get_children():
 		var button := child as Button
-		if button != null and not button.disabled and str(button.get_meta("action", "")) == action_id:
+		if button != null and _focusable(button) and str(button.get_meta("action", "")) == action_id:
 			return button
 		var found := _find_action_button(child, action_id)
 		if found != null:
@@ -325,12 +328,23 @@ func _find_action_button(node: Node, action_id: String) -> Button:
 func _first_enabled_button(node: Node) -> Button:
 	for child in node.get_children():
 		var button := child as Button
-		if button != null and not button.disabled:
+		if button != null and _focusable(button):
 			return button
 		var found := _first_enabled_button(child)
 		if found != null:
 			return found
 	return null
+
+
+# A button the D-pad can land on: shown, pressable and in the focus path (tab buttons are not).
+func _focusable(button: Button) -> bool:
+	return not button.disabled and button.focus_mode != Control.FOCUS_NONE and button.is_visible_in_tree()
+
+
+# A disabled button leaves the focus path, so the D-pad never stops on something that can't be pressed.
+static func _set_enabled(button: Button, enabled: bool) -> void:
+	button.disabled = not enabled
+	button.focus_mode = Control.FOCUS_ALL if enabled else Control.FOCUS_NONE
 
 
 func _build_row(data: Dictionary) -> Control:
@@ -426,8 +440,7 @@ func _build_card(data: Dictionary) -> Control:
 		var button := Button.new()
 		button.text = str(data["button"])
 		button.custom_minimum_size = Vector2(48 if data.has("button2") else 120, 34)
-		button.focus_mode = Control.FOCUS_ALL
-		button.disabled = not bool(data.get("enabled", true))
+		_set_enabled(button, bool(data.get("enabled", true)))
 		_style_button(button, false)
 		button.set_meta("action", str(data.get("action", "")))
 		button.pressed.connect(_on_action_pressed.bind(str(data.get("action", ""))))
@@ -457,7 +470,7 @@ func _build_tabs(data: Dictionary) -> Control:
 	var holder := HBoxContainer.new()
 	holder.add_theme_constant_override("separation", 6)
 	holder.alignment = BoxContainer.ALIGNMENT_CENTER
-	holder.add_child(_glyph("LB" if _pad_glyphs else "Q"))
+	holder.add_child(_device_glyph("Q", "LB"))
 	for tab in data["tabs"]:
 		var button := Button.new()
 		button.text = str(tab["name"])
@@ -469,7 +482,7 @@ func _build_tabs(data: Dictionary) -> Control:
 			button.add_theme_color_override("font_color", COL_ACCENT)
 		button.pressed.connect(_on_action_pressed.bind(str(tab.get("action", ""))))
 		holder.add_child(button)
-	holder.add_child(_glyph("RB" if _pad_glyphs else "E"))
+	holder.add_child(_device_glyph("E", "RB"))
 	return holder
 
 
@@ -597,6 +610,7 @@ func _build_recipe_tile(recipe: Dictionary, small: bool = false) -> Control:
 		tile.add_theme_stylebox_override("hover", _box(COL_BUTTON_HOVER, COL_ACCENT, 2, 8, 4))
 		tile.add_theme_stylebox_override("pressed", _box(COL_BUTTON_ACTIVE, COL_ACCENT, 2, 8, 4))
 		tile.add_theme_stylebox_override("focus", _box(base, COL_ACCENT, 2, 8, 4))
+	tile.set_meta("action", str(recipe.get("action", "")))
 	tile.pressed.connect(_on_action_pressed.bind(str(recipe.get("action", ""))))
 
 	# The picture and name sit inside the tile's frame, clear of its iron edge.
@@ -725,8 +739,7 @@ func _build_detail(recipe: Dictionary) -> Control:
 		var button := Button.new()
 		button.text = str(recipe.get("button", "Make"))
 		button.custom_minimum_size = Vector2(0, 40)
-		button.focus_mode = Control.FOCUS_ALL
-		button.disabled = not bool(recipe.get("enabled", false)) or str(recipe.get("action", "")) == ""
+		_set_enabled(button, bool(recipe.get("enabled", false)) and str(recipe.get("action", "")) != "")
 		_style_button(button, false)
 		button.pressed.connect(_on_action_pressed.bind(str(recipe.get("action", ""))))
 		block.add_child(button)
@@ -795,7 +808,7 @@ func _build_ledger(panel_name: String, rows: Array) -> void:
 
 	_clear(tab_strip)
 	tab_strip.visible = tabs.size() > 1
-	tab_strip.add_child(_glyph("LB" if _pad_glyphs else "Q"))
+	tab_strip.add_child(_device_glyph("Q", "LB"))
 	for i in tabs.size():
 		var tab_button := Button.new()
 		tab_button.text = str(tabs[i]["name"])
@@ -806,7 +819,7 @@ func _build_ledger(panel_name: String, rows: Array) -> void:
 			tab_button.add_theme_color_override("font_color", COL_ACCENT)
 		tab_button.pressed.connect(_open_ledger_tab.bind(i))
 		tab_strip.add_child(tab_button)
-	tab_strip.add_child(_glyph("RB" if _pad_glyphs else "E"))
+	tab_strip.add_child(_device_glyph("E", "RB"))
 
 	_clear(list_box)
 	_ledger_entries = []
@@ -823,16 +836,37 @@ func _build_ledger(panel_name: String, rows: Array) -> void:
 		else:
 			list_box.add_child(_build_entry(row, _ledger_entries.size()))
 			_ledger_entries.append(row)
+	# A tab with only notes (such as Folk before anyone is met) shows them as one entry, so something
+	# still takes focus and a gamepad can read them on the detail page.
+	if _ledger_entries.is_empty() and not notes.is_empty():
+		var only := {"name": str(notes[0]), "about": "
+
+".join(notes)}
+		list_box.add_child(_build_entry(only, 0))
+		_ledger_entries.append(only)
+		notes = []
 	# The tab's notes sit under its entries, small, instead of between them.
 	for text in notes:
 		var spaced := MarginContainer.new()
 		spaced.add_theme_constant_override("margin_top", 6)
 		spaced.add_child(_detail_text(str(text), COL_MUTED, 13))
 		list_box.add_child(spaced)
+	_wrap_entries()
 	_ledger_pick = clampi(_ledger_pick, 0, maxi(0, _ledger_entries.size() - 1))
 	_show_detail()
 	_refresh_prompts()
 	call_deferred("_focus_entry", _ledger_pick)
+
+
+# Down from the last entry goes to the first, and up from the first to the last.
+func _wrap_entries() -> void:
+	var entries: Array = list_box.get_children().filter(func(c: Node) -> bool: return c is Button)
+	if entries.size() < 2:
+		return
+	var first: Button = entries[0]
+	var last: Button = entries[-1]
+	first.focus_neighbor_top = first.get_path_to(last)
+	last.focus_neighbor_bottom = last.get_path_to(first)
 
 
 # One line: the name, then a coloured status on the right. The whole line takes focus.
@@ -995,7 +1029,7 @@ func _show_detail() -> void:
 			less.pressed.connect(_on_action_pressed.bind(str(row.get("action2", ""))))
 			bottom.add_child(less)
 		else:
-			bottom.add_child(_glyph("A" if _pad_glyphs else "Space"))
+			bottom.add_child(_device_glyph("Space", "A"))
 		var button := Button.new()
 		button.text = str(row["button"])
 		button.custom_minimum_size = Vector2(48 if row.has("button2") else 140, 38)
@@ -1041,6 +1075,23 @@ func _glyph(key_name: String) -> Control:
 	glyph.add_theme_color_override("font_color", COL_TEXT)
 	glyph.add_theme_stylebox_override("normal", _box(COL_BUTTON, COL_BORDER, 1, 4, 5))
 	return glyph
+
+
+# A glyph that names a keyboard key or a pad button, whichever was used last. It keeps both names, so a
+# change of device relabels it in place (_swap_glyphs) instead of rebuilding the panel.
+func _device_glyph(key_name: String, pad_name: String) -> Control:
+	var glyph := _glyph(pad_name if _pad_glyphs else key_name)
+	glyph.set_meta("names", [key_name, pad_name])
+	return glyph
+
+
+# Relabels every device glyph in the panel and redoes the footer. The panel isn't rebuilt, so the entry in
+# focus keeps its focus and the press that changed device still reaches it.
+func _swap_glyphs(node: Node) -> void:
+	for child in node.get_children():
+		if child is Label and child.has_meta("names"):
+			(child as Label).text = str(child.get_meta("names")[1 if _pad_glyphs else 0])
+		_swap_glyphs(child)
 
 
 # The footer's button prompts, in the glyphs of whichever device was used last.
@@ -1134,7 +1185,8 @@ func _input(event: InputEvent) -> void:
 	if (pad or event is InputEventKey) and pad != _pad_glyphs:
 		_pad_glyphs = pad
 		if panel.visible and prompt_bar.visible:
-			_rebuild()
+			_swap_glyphs(panel)
+			_refresh_prompts()
 	if not panel.visible or not prompt_bar.visible:
 		return
 	# The mouse wheel turns the diary's pages too.

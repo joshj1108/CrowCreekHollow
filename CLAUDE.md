@@ -18,6 +18,7 @@ Godot: `C:/Program Files (x86)/Steam/steamapps/common/Godot Engine/godot.windows
   See the top of the file for every option. Take one shot per thing being checked, and look at it only once.
 - Check balance with `tools/balance_sim.gd` (headless): it plays a new game for N days through the real game functions and prints coins, sanity, skills, homestead steps and milestones. Options at the top of the file:
   `godot --path . --headless -s tools/balance_sim.gd -- mode=engaged days=400 every=40 treks=3` (modes: engaged, ignore, earlybed; treks=N models the planned treks). A year takes a few minutes, so run the modes in parallel.
+- Check menus with `tools/menu_test.gd` (headless, slot 9; puts `settings.cfg` back): `godot --path . --headless -s tools/menu_test.gd`. It opens every menu by its own key or button and drives it with injected keys, Xbox buttons and sticks, and mouse clicks and wheel steps, printing PASS or FAIL per case (focus on open, every entry reachable, wrapping, nothing disabled in the focus path, B/Esc back one level, tabs, footer prompts per device, the clock paused, and no press leaking to the farm on close). Run it after adding a panel, tab or button.
 - Check saving with `tools/save_test.gd` (headless, slot 9): `godot --path . --headless -s tools/save_test.gd`. It prints PASS or FAIL for each case. Never test in slots 1-3: those are the user's real saves.
 - Compare SpriteCook variations on one preview image:
   `& .\tools\sheet.ps1 -Out art/style_tests/x/sheet.png -Scale 4 -Files a.png, b.png` (PowerShell tool).
