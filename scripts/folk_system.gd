@@ -572,9 +572,9 @@ func _in_scene() -> bool:
 	return dialogue != null and dialogue.in_scene()
 
 
-# While a scene is open: Space (or A) turns the page.
+# While a scene is open: Space, Enter, A or a click turns the page.
 func _scene_keys() -> void:
-	if Input.is_action_just_pressed("use") or Input.is_action_just_pressed("tool_use"):
+	if Input.is_action_just_pressed("use") or Input.is_action_just_pressed("tool_use") or Input.is_action_just_pressed("ui_accept"):
 		dialogue.advance()
 
 
