@@ -22,6 +22,12 @@ func _stat_value(stat: String) -> int:
 			return m.quests_done.size()
 		"edge_walked":
 			return 1 if m.trek.edge_done else 0
+		"bell_hung":
+			return 1 if m.projects._has_bell() else 0
+		"grove_walked":
+			return 1 if m.trek.grove_done else 0
+	if stat.begins_with("act_"):
+		return 1 if m.act._has(stat.trim_prefix("act_")) else 0
 	if stat.begins_with("level_"):
 		return _level(stat.trim_prefix("level_"))
 	return int(m.stats.get(stat, 0))

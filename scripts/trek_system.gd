@@ -482,6 +482,8 @@ func _route_open(id: String) -> bool:
 		return false
 	if id == "grove":
 		return m.projects.bell_day >= 0 and not grove_done
+	if id == "orchard" and m.act._davy_gone():   # Davy's night, and after it if he went in (StoryAct)
+		return false
 	return true
 
 
@@ -1415,6 +1417,7 @@ func _arrive() -> void:
 	m.materials["fiber"] += fiber
 	m.progression._grant_xp("Bushcrafting", xp)
 	var was_close := _wood_close()
+	var act_note := m.act._on_trek_arrived(route_id)   # the second year's beats at the orchard and the mill
 	_on_arrived()
 	m.play_sfx("chime", 0.03)
 	gifts.append("+%d crow feather%s" % [feathers, "" if feathers == 1 else "s"])
@@ -1427,7 +1430,10 @@ func _arrive() -> void:
 		home += " Behind you the wood draws back from the farm, and the crows leave the fence."
 	else:
 		home += " The farm feels further from the wood tonight: the field shadow falls back, and tonight's visitor will take half."
-	var arrive: String = r.get("arrive_after_grove", r["arrive"]) if grove_done else r["arrive"]
+	var arrive: String = r.get("arrive_after_grove", r["arrive"]) if grove_done and route_id != "grove" else r["arrive"]
+	if route_id == "grove":
+		arrive = m.act._grove_arrive(arrive)
+	arrive += act_note
 	_end("%s%s %s.%s%s" % [arrive, _grove_pages_text(), ", ".join(gifts), " Twice the pay, for walking by night." if night else "", home], true)
 
 
@@ -1454,13 +1460,14 @@ func _on_arrived() -> void:
 	if route_id == "grove":
 		grove_done = true
 		m.nights.shadow_steps = 0
+		m.act._on_grove(night)   # which ending the grove gives (StoryAct)
 	else:
 		m.nights.shadow_steps = maxi(0, m.nights.shadow_steps - TREK_PUSH)
 
 
 # At the grove, with all five of her pages from the wood, you hold them out to her.
 func _grove_pages_text() -> String:
-	if route_id != "grove" or m.mystery._count(m.mystery.TREK_PAGES) < m.mystery.TREK_PAGES.size():
+	if route_id != "grove" or m.mystery._count(m.mystery.TREK_PAGES) < m.mystery.TREK_PAGES.size() or m.act.endings.has("elias"):
 		return ""
 	return " You hold out her pages. She turns through them to the last and smiles at her own hand. \"Keep them. Someone will need to follow.\""
 

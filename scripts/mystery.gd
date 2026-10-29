@@ -7,7 +7,8 @@ extends RefCounted
 # something the player already does, so the story comes out of playing: the knocking, the figure in the
 # field, the crows, the house's walls, the cave, the Hollow. Pages are numbered, so the diary reads them in
 # order whatever order they were found in. Five more, from after she left, are in the hollow trees on treks.
-# Hanging the crow bell adds a last page in your own hand.
+# Hanging the crow bell adds a last page in your own hand; the second year (StoryAct) adds its own pages, and
+# each ending one in the Afterword.
 
 var m: MainGame
 
@@ -181,11 +182,17 @@ func _sections(is_new: Callable) -> Array:
 	if _count(TREK_PAGES) > 0:
 		sections.append({"name": "The wood", "heading": "Pages from the wood, %d of %d" % [_count(TREK_PAGES), TREK_PAGES.size()],
 			"pages": _book_pages(TREK_PAGES, is_new, "In a hollow tree somewhere.")})
+	var year: Array = m.act._year_pages(is_new)
+	if not year.is_empty():
+		sections.append({"name": "The second year", "heading": "The second year", "pages": year})
 	var last: Array = []
 	if found.has("bell"):
 		last.append({"title": EPILOGUE["title"], "text": EPILOGUE["text"], "new": is_new.call("rook_bell"), "hand": "yours"})
 	if found.has("grove"):
-		last.append({"title": GROVE_PAGE["title"], "text": _grove_text(), "new": is_new.call("rook_grove"), "hand": "yours"})
+		var page := {"title": GROVE_PAGE["title"], "text": _grove_text()}
+		page.merge(m.act._grove_page(), true)   # Elias came home instead (StoryAct)
+		last.append({"title": page["title"], "text": page["text"], "new": is_new.call("rook_grove"), "hand": "yours"})
+	last.append_array(m.act._afterword(is_new))   # each ending reached
 	if not last.is_empty():
 		sections.append({"name": "Afterword", "heading": "In your own hand", "pages": last})
 	return sections

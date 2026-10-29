@@ -399,6 +399,9 @@ func _pick() -> Dictionary:
 	# it sleeps and never comes again.
 	if (shadow_steps >= SHADOW_MAX and not m.trek.grove_done) or m.projects.bell_day == m.day:
 		return HOLLOW
+	# In the second year, a few nights after the orchard rises, it comes with Elias's knock (StoryAct).
+	if m.act._knock_tonight():
+		return m.act.KNOCK
 	var tier := _tier()
 	var options: Array = []
 	for v in VISITORS:
@@ -920,6 +923,8 @@ func _resolve(faced: bool, show := true, key := "") -> String:
 	last_visitor = str(v["id"])
 	seen[last_visitor] = int(seen.get(last_visitor, 0)) + 1
 	m.mystery._on_visitor(str(v["id"]), faced)
+	if v["id"] == "hollow":
+		m.act._on_hollow(faced, v)
 	m.tonight_shadow = Vector2i(-1, -1)
 	_show_visitor()
 	var text := str(v[key] if key != "" else (v["face"] if faced else v["ignore"]))

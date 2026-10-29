@@ -57,6 +57,8 @@ extends SceneTree
 #   folk=ID         a neighbour visits the farm today (mill, orchard, chapel or post) and you stand below them; use
 #                   with hour= 9 to 16 (wday=N sets the day, default 60). fscene=N plays their Nth friendship scene
 #                   (0-3) in the dialogue box, turned to page fpage=P; fsay shows today's line instead (fexpr=FACE)
+#   ending=ID       play an ending's sequence over the farm (bell, elias or hollow): epage=N shows line N (-1 the
+#                   title, past the last line the credits); use with hour= for the light behind it
 #   trek=N          set out on the mill trek and stand in clearing N (0-3 marked, 0-2 dark), below its event, with the walker
 #   tevent=ID       with trek, the clearing's event: tree, crows, flood, lights, cairn, fog or hollow (the day sets it otherwise)
 #   tdark           with trek, take the dark trail at the fork (trek=1 is then the dark clearing, 2 the mill)
@@ -360,6 +362,14 @@ func _initialize() -> void:
 			main.folk._say(who, str(opt.get("fexpr", "neutral")), str(main.folk._line(who)["t"]))
 		await process_frame
 		await process_frame
+	if opt.has("ending"):
+		# An ending's sequence (StoryAct), over the farm, at line epage.
+		main.act.meeting = "won"
+		main.act.davy = "home"
+		main.act._play_ending(str(opt["ending"]))
+		main.act.screen.jump(int(opt.get("epage", "0")))
+		for i in 4:
+			await process_frame
 	if opt.has("tab"):
 		if opt.has("page"):
 			main.action_bar.ledger_tabs[opt["tab"]] = int(opt["page"])

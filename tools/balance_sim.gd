@@ -207,6 +207,7 @@ func _play_day() -> String:
 	if mode == "engaged":
 		_pass(1.0, false)
 		_desk_game()
+		_davy()
 		_pass(2.0 - (m.current_hour - 20.0), false)
 		night = _face_night()
 		_pass(1.0, true)
@@ -964,10 +965,25 @@ func _trek() -> void:
 		m.materials["feathers"] += int(r["feathers"])
 		m.materials["fiber"] += int(r["fiber"])
 		# The route's own gifts (seeds, applewood and flax, lamp oil and storm oak, crow charms), from the game.
-		t.night = false
+		# The grove by night, once everything Elias's homecoming needs is in hand (engaged only, as a player
+		# who knows would): the sanity the wood takes is doubled, as by NIGHT_SANITY.
+		t.night = id == "grove" and mode == "engaged" and m.act._elias_ready(true)
+		if t.night:
+			m.sanity_sys._change_sanity(-float(r["sanity"]))
+		t.route_id = id
 		var before := m.money
 		t._gifts(1)
 		trek_log["trade_coins"] += m.money - before
+		# A hollow tree holds the next of Agnes's pages from the wood half the time while one waits on this route
+		# (TrekSystem.HOLLOW_PAGE), as Mystery._find_trek_page files it.
+		for i in int(r["hollows"]):
+			var pid := m.mystery._next_trek_page(id)
+			if pid != "" and hash([m.day, id, i, "page"]) % 2 == 0:
+				m.mystery.found[pid] = true
+				_mark("page " + pid)
+		var act_note := m.act._on_trek_arrived(id)   # the second year's beats at the orchard and the mill
+		if act_note != "":
+			_mark("act at " + id)
 		t._on_arrived()
 		trek_log[id] += 1
 		last_trek = id
@@ -1024,6 +1040,7 @@ func _route_trek(route: Dictionary) -> Dictionary:
 	var floods: int = evs.count("flood") if not t._hollows_dry() else 0
 	r["flood"] = floods
 	r["dogs"] = evs.count("dogs")
+	r["hollows"] = evs.count("hollow")
 	# With no rope to be had (Bushcrafting under 3, or no fiber), the farmer wades: warmth, not modelled.
 	var can_rope: bool = m.progression._level("Bushcrafting") >= int(t.ROPE["level"]) and (rope > 0 or int(m.materials["fiber"]) >= ROPE_FIBER)
 	r["rope"] = floods if can_rope else 0
@@ -1117,6 +1134,13 @@ func _ignore_night() -> String:
 	return id + "-"
 
 
+# Davy's night (StoryAct): engaged is out at 21:00 and finds him at the great tree; the others don't, and he is
+# lost by morning.
+func _davy() -> void:
+	if m.act.davy_day == m.day and m.act.davy == "":
+		m.act._on_scene({"act": "davy"})
+
+
 # --- Output -------------------------------------------------------------------------------
 
 func _track_sanity() -> void:
@@ -1160,6 +1184,10 @@ func _note_milestones() -> void:
 		_mark("tax billed")
 	if m.money >= 150:
 		_mark("150 coins held")
+	for id in m.act.beats:
+		_mark("act: " + str(id))
+	for id in m.act.endings:
+		_mark("ENDING: " + str(id))
 	for k in ["storm_oak", "flax", "bell_metal", "bell_frame", "bell_rope", "bell_clapper"]:
 		if int(m.materials[k]) > 0:
 			_mark("got " + k)
@@ -1223,6 +1251,10 @@ func _summary() -> void:
 		folk_log["visits"], folk_log["talks"], folk_log["gifts"], folk_log["loved"], f.requests_done.size(),
 		f._hearts("mill"), f._hearts("orchard"), f._hearts("chapel"), f._hearts("post")])
 	print("--- scenes seen (day): %s" % ", ".join(folk_log["scenes"]))
+	var a := m.act
+	print("--- second year: beats %s, meeting %s%s, Davy %s, Hollow left at the door %d; endings reached (day) %s" % [
+		JSON.stringify(a.beats), a.meeting if a.meeting != "" else "not held", " (there)" if a.meeting_there else "", a.davy if a.davy != "" else "-",
+		a.hollow_left, JSON.stringify(a.endings) if not a.endings.is_empty() else "none"])
 	var e := m.estate
 	print("--- crow charms made %d" % made_charms)
 	print("--- estate: extensions %s, furniture %s, paint %s, paper %s, deed %d/%d; fences %d; stand glut %s" % [

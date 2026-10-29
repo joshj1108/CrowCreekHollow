@@ -486,6 +486,44 @@ const STORY := [
 	{"id": "home", "title": "A Home Worth Keeping",
 		"story": "The house is not finished yet, but it could be. Restore it fully and it will hold against the dark.",
 		"text": "Restore the farmhouse fully.", "stat": "house_stage", "goal": 3, "reward": {"skill": "Cleaning", "xp": 60}},
+	# The second year (StoryAct): the town's letter in early summer, Elias's orchard, his knock, the meeting at
+	# the mill, Davy's night, then the bell and the grove. Their beats come on their own days and in their own
+	# order (each "act_" stat is 1 once its beat has happened), so a chapter done late still counts.
+	{"id": "act_letter", "title": "The Town Writes",
+		"story": "Agnes Rook's last page asks whoever comes next to hang her bell again. The town took the first one down, and the lane talks. By early summer the town will know what you mean to do, and it will write.",
+		"text": "Show the town's letter to a neighbour.",
+		"prompt": "The letter comes through the mail slot in early summer (from day 240). When a neighbour comes by the farm, stand beside them and press {hand}.",
+		"stat": "act_shown", "goal": 1, "reward": {"skill": "Bushcrafting", "xp": 60}},
+	{"id": "act_orchard", "title": "The Water Rises",
+		"story": "Davy says the water in Elias's orchard has come up a row since spring, and the dogs won't go near it. The man in the rows has stopped walking.",
+		"text": "Walk Davy to the drowned orchard.",
+		"prompt": "From midsummer (day 265), walk Davy Tull to the drowned orchard when he waits at the north gate.",
+		"stat": "act_orchard", "goal": 1, "reward": {"feathers": 6}},
+	{"id": "act_knock", "title": "His Knock",
+		"story": "The lantern on the branch was dry. Whatever walks in the Rookery Wood has learned something from the man who carried it, and it knows the way to his door.",
+		"text": "Face the Hollow when it knocks at the door.",
+		"prompt": "A few nights after the orchard, the Hollow comes to the door and knocks like Elias. Be at the door with your lantern when it comes, after 22:00. Left there, it comes back a few nights later.",
+		"stat": "act_knock", "goal": 1, "reward": {"skill": "Bushcrafting", "xp": 80}},
+	{"id": "act_meeting", "title": "The Meeting at the Mill",
+		"story": "The town voted Agnes Rook's bell down at the mill, thirty-one hands to four. A vote can be put again. It won't be heard on a bell alone: it wants Ruth's minute book of every name, and the vicar's register of every sale of this farm.",
+		"text": "Have the vote put again at the mill.",
+		"prompt": "From late summer (day 300), walk Old Maren to the mill once she has shown you Ruth's minute book and the vicar his register (their last scenes, in Quests, Folk). The town meets anyway on the night of the Harvest Moon, September 22, and without both it votes as it did.",
+		"stat": "act_meeting", "goal": 1, "reward": {"coins": 80}},
+	{"id": "act_davy", "title": "Keeping Company",
+		"story": "Davy Tull has been saying for months that someone should take a turn walking for the man in the rows, and that he could. Children say things.",
+		"text": "Find Davy before he goes under the great tree.",
+		"prompt": "In the second autumn (from October 5) Davy goes. That night he sits in the roots of the great tree from 20:00; find him before 01:00 and press {hand} beside him.",
+		"stat": "act_davy", "goal": 1, "reward": {"skill": "Bushcrafting", "xp": 80}},
+	{"id": "act_bell", "title": "The Second All Hallows",
+		"story": "Iron from the winter, a yoke of storm oak, a rope of summer flax and the old clapper. On All Hallows the bell goes up, whatever the town says, and the Hollow comes to it that night.",
+		"text": "Hang the crow bell on All Hallows.",
+		"prompt": "Buildings, The crow bell lists its parts. With all four, place the bell from Decor on October 31.",
+		"stat": "bell_hung", "goal": 1, "reward": {"feathers": 10}},
+	{"id": "act_grove", "title": "The Hollow's Grove",
+		"story": "The day after All Hallows a woman in a grey shawl waits at the north gate and asks to be walked to the Hollow's grove. She gives no name.",
+		"text": "Walk the woman in grey to the Hollow's grove.",
+		"prompt": "She waits at the north gate from the day after the bell is hung, until 22:00. By night the wood is harder, and some say the ring is only open in the dark.",
+		"stat": "grove_walked", "goal": 1, "reward": {"skill": "Bushcrafting", "xp": 200}},
 ]
 
 # Achievements are a tiered list toward 100% completion. Each one tracks a stat.
@@ -539,7 +577,7 @@ const ACHIEVEMENTS := [
 	{"id": "feast", "title": "Feast", "text": "Eat 50 meals.", "tier": 3, "stat": "eaten", "goal": 50, "reward": {"seeds": 5, "pumpkin_seeds": 2}},
 	{"id": "cleansed_five", "title": "Clean Conscience", "text": "Cleanse the house 5 times.", "tier": 3, "stat": "cleansed", "goal": 5, "reward": {"seeds": 5, "pumpkin_seeds": 2}},
 	{"id": "lasting", "title": "Lasting", "text": "Sleep in your bed 30 times.", "tier": 3, "stat": "slept", "goal": 30, "reward": {"seeds": 5, "pumpkin_seeds": 2}},
-	{"id": "story_end", "title": "Story Complete", "text": "Finish every story chapter.", "tier": 3, "stat": "story", "goal": 10, "reward": {"seeds": 5, "pumpkin_seeds": 2}},
+	{"id": "story_end", "title": "Story Complete", "text": "Finish every story chapter.", "tier": 3, "stat": "story", "goal": 17, "reward": {"seeds": 5, "pumpkin_seeds": 2}},
 ]
 
 const SKILLS := ["Farming", "Bushcrafting", "Carpentry", "Cleaning", "Fishing", "Cooking", "Combat", "Forestry", "Mining", "Smithing"]
@@ -922,6 +960,7 @@ var projects: FarmProjects
 var estate: EstateSystem
 var feel: GameFeel
 var mystery: Mystery
+var act: StoryAct
 var rewards: HomesteadRewards
 var ambience: AmbienceSystem
 var firewood: FirewoodSystem
@@ -965,6 +1004,7 @@ func _ready() -> void:
 	estate = EstateSystem.new(self)
 	feel = GameFeel.new(self)
 	mystery = Mystery.new(self)
+	act = StoryAct.new(self)
 	stall = StallSystem.new(self)
 	progression = ProgressionSystem.new(self)
 	saver = SaveSystem.new(self)
@@ -1106,6 +1146,7 @@ func _on_title_start(mode: String, slot: int) -> void:
 	forage._build()
 	trek._build()
 	folk._build()
+	act._build()
 	projects._build()
 	feel._build()
 	projects._stamp()
@@ -1170,7 +1211,7 @@ func _process(delta: float) -> void:
 		if layer != null:
 			layer.visible = not in_cave
 	# Any open menu pauses the day: the clock stops, foes stand still, and only the menu responds.
-	player.paused = open_tab != "" or _bag_open() or _wheel_open() or folk._in_scene()
+	player.paused = open_tab != "" or _bag_open() or _wheel_open() or folk._in_scene() or act.playing()
 	# The bag's corner button only shows when no section or wheel covers the farm.
 	if bag != null:
 		bag.toggle_button.visible = open_tab == "" and not _wheel_open()
@@ -1187,6 +1228,10 @@ func _process(delta: float) -> void:
 		# A walker's scene (FolkSystem) holds the day while its pages are turned.
 		if folk._in_scene() and open_tab == "":
 			folk._scene_keys()
+			return
+		# So does an ending sequence (StoryAct).
+		if act.playing():
+			act._keys()
 			return
 		_handle_keys()
 		_refresh_panel()
@@ -1230,6 +1275,7 @@ func _process(delta: float) -> void:
 	happenings._update()
 	forage._update()
 	trek._update(delta)
+	act._update()
 	if Engine.get_process_frames() % 30 == 0:
 		projects._check(true)
 		mystery._check()
@@ -5770,7 +5816,7 @@ func _end_day(base: String, leave_house: bool = true) -> void:
 	stall._recover()
 	_update_shadow_tile()
 	var happening_note := happenings._start_day(true) + folk._start_day(true)
-	var mail_note := desk._mail_day() + estate._mail_day()
+	var mail_note := desk._mail_day() + estate._mail_day() + act._morning()
 	_show_message("%s Your crops grew overnight.%s%s The morning is %s.%s" % [
 		base, spoil_note, upkeep_note, str(WEATHER_NAMES.get(weather_kind, "overcast")).to_lower(), event_note + happening_note + trek._morning_note() + mail_note])
 	if desk._tax_evicts():

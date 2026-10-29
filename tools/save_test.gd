@@ -414,6 +414,44 @@ func _run() -> void:
 	m.folk._from_save({})
 	m.trek.walked = {}
 
+	# Version 15: the second year's beats, the meeting, Davy's night, the Hollow's count and the endings reached
+	# round-trip; an old save with the bell hung has the act closed, and one past the grove has the bell's ending.
+	m.act.beats = {"letter": 240, "shown": 244, "orchard": 270, "knock": -1}
+	m.act.meeting = "won"
+	m.act.meeting_there = true
+	m.act.davy = "stopped"
+	m.act.davy_day = 371
+	m.act.knock_from = 276
+	m.act.hollow_left = 2
+	m.act.endings = {"hollow": 330}
+	m.act.pending = "hollow"
+	_save_on_day(13)
+	m.act._from_save({})
+	_check("second year and endings round-trip", _load() == 13 and int(m.act.beats.get("orchard", 0)) == 270
+		and m.act._has("knock") and not m.act._lived("knock") and m.act.meeting == "won" and m.act.meeting_there
+		and m.act.davy == "stopped" and m.act.davy_day == 371 and m.act.knock_from == 276 and m.act.hollow_left == 2
+		and int(m.act.endings.get("hollow", 0)) == 330 and m.act.pending == "hollow")
+	var v14 := _raw(path)
+	v14["save_version"] = 14
+	v14.erase("act")
+	v14["bell_day"] = 396
+	v14["trek_grove_done"] = true
+	_write_text(path, JSON.stringify(v14))
+	_check("version 14 save past the grove: act closed, the bell's ending reached", _load() == 13
+		and m.act._has("meeting") and not m.act._lived("letter") and m.act.meeting == "lost"
+		and m.act.endings.has("bell") and m.act.pending == "" and m.act._year_pages(func(_id: String) -> bool: return false).is_empty())
+	v14["bell_day"] = -1
+	v14["trek_grove_done"] = false
+	v14["day"] = 380
+	_write_text(path, JSON.stringify(v14))
+	_check("version 14 save at day 380 without the bell: the act plays from here", _load() == 380
+		and m.act.beats.is_empty() and m.act.endings.is_empty())
+	m.projects.bell_day = -1
+	m.trek.grove_done = false
+	m.act._from_save({})
+	m.act.beats = {}
+	m.act.endings = {}
+
 	# Saving in the cave puts you at the homestead on load.
 	var home := m._tile_center(m.HOMESTEAD_ARRIVE.x, m.HOMESTEAD_ARRIVE.y)
 	m.in_cave = true

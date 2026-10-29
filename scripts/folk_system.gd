@@ -379,6 +379,8 @@ func _can_visit(id: String) -> bool:
 	var f: Dictionary = FOLK[id]
 	if m.day < int(f["from"]) or (bool(f.get("edge", false)) and not m.trek.edge_done):
 		return false
+	if id == "orchard" and m.act._davy_gone():   # Davy's night, and after it if he went in (StoryAct)
+		return false
 	return true
 
 
@@ -413,6 +415,8 @@ func _pick(d: int) -> String:
 
 
 func _visiting() -> bool:
+	if visitor == "orchard" and m.act._davy_waiting():   # Davy at the great tree on his night (StoryAct)
+		return true
 	return visitor != "" and visit_day == m.day and spot.x >= 0 and not m.trek.active \
 		and m.current_hour >= VISIT_FROM and m.current_hour < VISIT_UNTIL
 
@@ -424,8 +428,13 @@ func _here(id: String) -> bool:
 
 # Where a visitor stands: the open tile nearest their place on the farm.
 func _spot(id: String) -> Vector2i:
+	return _spot_at(str(FOLK[id]["spot"]))
+
+
+# The open tile nearest a place on the farm: stand, pond, tree or door.
+func _spot_at(place: String) -> Vector2i:
 	var anchor := Vector2i(-1, -1)
-	match str(FOLK[id]["spot"]):
+	match place:
 		"stand":
 			anchor = m._world_tile(m.STALL_IX + 1, m.STALL_IY + m.STALL_TILES.y + 1)
 		"pond":
@@ -507,7 +516,10 @@ func _talk(id: String) -> Dictionary:
 	if first:
 		talk_day[id] = m.day
 		_add(id, TALK_POINTS)
-	var sc := _next_scene(id)
+	# The second year's beats come before a walker's own talk (StoryAct): the town's letter, Davy's night.
+	var sc := m.act._folk_scene(id)
+	if sc.is_empty():
+		sc = _next_scene(id)
 	if not sc.is_empty():
 		return {"kind": "scene", "scene": sc}
 	var req := _active_request(id)
@@ -568,6 +580,9 @@ func _scene_keys() -> void:
 
 # A scene has been seen to its end (the balance sim calls this too): its gift, and the Folk tab notes it.
 func _scene_done(id: String, sc: Dictionary) -> void:
+	if sc.has("act"):
+		m.act._on_scene(sc)
+		return
 	seen[str(sc["id"])] = m.day
 	var gift: Dictionary = sc.get("gift", {})
 	var got := _give_reward(gift)

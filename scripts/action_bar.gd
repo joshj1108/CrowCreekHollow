@@ -95,7 +95,7 @@ const INK_HANDS := {"agnes": Color("3d2414"), "yours": Color("22303e")}
 const LEATHER := Color("3b2417")
 # Each section keeps its ribbon colour, whichever tabs are showing.
 const RIBBONS := {"First day": Color("7a3a2c"), "The farm asks": Color("7a3a2c"), "Notes": Color("4f6b3a"),
-	"Agnes Rook": Color("6b4a6a"), "The wood": Color("3a5a7a"), "Afterword": Color("8a6a3a")}
+	"Agnes Rook": Color("6b4a6a"), "The wood": Color("3a5a7a"), "The second year": Color("5a4a5e"), "Afterword": Color("8a6a3a")}
 var book: HBoxContainer
 var book_spread_box: HBoxContainer
 var book_tabs: VBoxContainer

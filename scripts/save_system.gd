@@ -3,7 +3,7 @@ extends RefCounted
 
 # Bumped when a save's keys change shape. Saves from before the number was written count as 1.
 # _migrate lifts an older save one version at a time, so every old save still loads.
-const SAVE_VERSION := 14
+const SAVE_VERSION := 15
 # Keys a save must hold with the right type, or it isn't read: the loader would trip over anything else.
 const DICT_KEYS := ["inventory", "materials", "skill_xp", "stats", "equipment", "quests_done", "achievements_done",
 	"tool_tier", "trek_walked", "night_seen"]
@@ -100,6 +100,7 @@ func _save_game() -> void:
 		"sighting_seen": m.nights.sighting_seen,
 		"trek_works": m.trek.works.keys(),
 		"folk": m.folk._to_save(),
+		"act": m.act._to_save(),
 		"estate": m.estate._to_save(),
 		"stand_glut": m.stall.glut,
 		"rook_pages": m.mystery.found.keys(),
@@ -246,6 +247,7 @@ func _load_game() -> bool:
 	m.trek.edge_done = bool(data.get("trek_edge_done", false))
 	m.nights.sighting_seen = bool(data.get("sighting_seen", false))
 	m.folk._from_save(data.get("folk", {}))
+	m.act._from_save(data.get("act", {}))
 	m.trek.works.clear()
 	for id in data.get("trek_works", []):
 		if TrekSystem.WORKS.has(str(id)):
@@ -541,6 +543,19 @@ static func _migrate(data: Dictionary) -> Dictionary:
 			if bool(data.get("trek_edge_done", false)) and not "mill" in met:
 				met.append("mill")
 			data["folk"] = {"met": met}
+	if v < 15:
+		# Version 15 added the second year's story and the endings (StoryAct). A save that has hung the bell has
+		# the act closed quietly (no pages for beats it never saw), and one past the grove has reached the bell's
+		# ending, recorded without its sequence. Any other save plays the beats from where it is: each comes on
+		# its own day or the first morning after, so a save past those days isn't stuck.
+		if not data.has("act"):
+			var act := {}
+			if int(data.get("bell_day", -1)) >= 0 or bool(data.get("trek_grove_done", false)):
+				act["beats"] = {"letter": -1, "shown": -1, "orchard": -1, "knock": -1, "meeting": -1}
+				act["meeting"] = "lost"
+			if bool(data.get("trek_grove_done", false)):
+				act["endings"] = {"bell": int(data.get("day", 1))}
+			data["act"] = act
 	# A save from a newer build keeps its number; keys this build doesn't know are ignored.
 	data["save_version"] = maxi(v, SAVE_VERSION)
 	return data

@@ -247,7 +247,7 @@ func _craft_rows() -> Array:
 # gifts and requests. The current chapter comes first, and the detail page tells its story.
 func _quest_rows() -> Array:
 	var rows: Array = [{"tab": "Story"}]
-	rows.append_array(_quest_list(m.STORY, m.quests_done, "You have reached the end of the story for now. More chapters are coming."))
+	rows.append_array(_quest_list(m.STORY, m.quests_done, "Every chapter is done. The bell rings at dusk, and the farm goes on."))
 	rows.append_array(m.folk._rows())
 	return rows
 
