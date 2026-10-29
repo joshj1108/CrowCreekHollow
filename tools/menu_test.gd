@@ -24,6 +24,10 @@ var settings_backup := ""
 func _initialize() -> void:
 	if FileAccess.file_exists(SETTINGS):
 		settings_backup = FileAccess.get_file_as_string(SETTINGS)
+	# A script error stops the test's coroutine; fail instead of hanging.
+	create_timer(600.0).timeout.connect(func() -> void:
+		print("FAIL: the test stopped part way (a script error above?) and timed out")
+		quit(99))
 	m = load("res://scenes/main.tscn").instantiate()
 	root.add_child.call_deferred(m)
 	_run.call_deferred()
@@ -43,6 +47,7 @@ func _run() -> void:
 	await _wheel_cases()
 	await _section_cases()
 	await _craft_pad_cases()
+	await _cooking_pad_cases()
 	await _diary_cases()
 	await _bag_cases()
 	await _small_panel_cases()
@@ -322,7 +327,7 @@ func _section_cases() -> void:
 		await _frames(1)
 		await _pad(JOY_BUTTON_A)
 		await _frames(2)
-		_check("craft: picking a recipe keeps focus on it", _focus_ok() and str(_focus().get_meta("action", "")) == action)
+		_check("craft: picking a recipe moves focus to its button, or keeps it on the recipe", _focus_ok() and (str(_focus().get_meta("action", "")) == action or _focus() == _make_button()))
 	else:
 		_check("craft: recipe tiles carry their action", false)
 	await _pad(JOY_BUTTON_B)
@@ -381,7 +386,7 @@ func _craft_pad_cases() -> void:
 		await _frames(1)
 		await _pad(JOY_BUTTON_A)
 		await _frames(2)
-		_check("craft pad: A picks the recipe and keeps focus on it", _focus_ok() and str(_focus().get_meta("action", "")) == action)
+		_check("craft pad: A picks the recipe", _focus_ok() and m.craft_selected == action.trim_prefix("craft_pick:"))
 		var make := _make_button()
 		if make == null:
 			continue
@@ -389,7 +394,7 @@ func _craft_pad_cases() -> void:
 			if _focus() == make:
 				break
 			await _pad(JOY_BUTTON_DPAD_RIGHT)
-		_check("craft pad: the D-pad reaches Make", _focus() == make)
+		_check("craft pad: A jumps the highlight to Make", _focus() == make)
 		pressed.clear()
 		await _pad(JOY_BUTTON_A)
 		await _frames(2)
@@ -416,12 +421,74 @@ func _craft_pad_cases() -> void:
 	await _handed_back("craft pad")
 
 
+# Cooking a fish with only the D-pad and A: move to Grilled Fish, A picks it and jumps to Cook, A cooks.
+func _cooking_pad_cases() -> void:
+	for key in Foods.group("any_fish"):
+		m.inventory[key] = 0
+	m.inventory[Foods.group("any_fish")[0]] = 2
+	var pressed: Array = []
+	var record := func(action_id: String) -> void: pressed.append(action_id)
+	m.action_bar.action_pressed.connect(record)
+	await _open_from_wheel(2)
+	for i in m.CRAFT_TABS.size():
+		if m.craft_tab == "cooking":
+			break
+		await _pad(JOY_BUTTON_RIGHT_SHOULDER)
+	await _frames(2)
+	_check("cooking pad: RB reaches the Cooking tab with a recipe in focus", m.craft_tab == "cooking" and _focus_ok())
+	# Step right and down through the grid until Grilled Fish is in focus.
+	var target := "craft_pick:cook:fish_meal"
+	var found := false
+	for i in 12:
+		if str(_focus().get_meta("action", "")) == target:
+			found = true
+			break
+		await _pad(JOY_BUTTON_DPAD_RIGHT if i % 4 != 3 else JOY_BUTTON_DPAD_DOWN)
+	_check("cooking pad: the D-pad reaches Grilled Fish", found)
+	await _pad(JOY_BUTTON_A)
+	await _frames(3)
+	_check("cooking pad: A picks Grilled Fish", m.crafting._chosen_recipe(m.crafting._craft_recipes()).get("key", "") == "cook:fish_meal")
+	_check("cooking pad: A jumps the highlight to Cook", _focus_ok() and str(_focus().get_meta("action", "")) == "cook:fish_meal")
+	pressed.clear()
+	await _pad(JOY_BUTTON_A)
+	await _frames(2)
+	_check("cooking pad: A on Cook cooks it", pressed.has("cook:fish_meal"))
+	_check("cooking pad: focus stays on Cook while it can be pressed again", _focus_ok() and str(_focus().get_meta("action", "")) == "cook:fish_meal")
+	await _pad(JOY_BUTTON_A)
+	await _frames(2)
+	_check("cooking pad: with no fish left focus goes back to Grilled Fish", _focus_ok() and str(_focus().get_meta("action", "")) == target)
+	await _pad(JOY_BUTTON_DPAD_LEFT)
+	_check("cooking pad: the D-pad still moves after cooking", _focus_ok())
+	# Keyboard: Space on a recipe jumps to its button too; a click only picks.
+	m.inventory["crops"] = 4
+	await _frames(3)
+	var tile := _focusables(m.action_bar.rows_box).filter(func(c: Control) -> bool: return str(c.get_meta("action", "")) == "craft_pick:cook:turnip_hash")
+	_check("cooking keys: Turnip Hash is in the grid", not tile.is_empty())
+	if not tile.is_empty():
+		tile[0].grab_focus()
+		await _frames(1)
+		await _key(KEY_SPACE)
+		await _frames(3)
+		_check("cooking keys: Space picks a recipe and jumps to Cook", _focus_ok() and str(_focus().get_meta("action", "")) == "cook:turnip_hash")
+		var other := _focusables(m.action_bar.rows_box).filter(func(c: Control) -> bool: return str(c.get_meta("action", "")) == target)
+		m.inventory[Foods.group("any_fish")[0]] = 2
+		await _frames(3)
+		other = _focusables(m.action_bar.rows_box).filter(func(c: Control) -> bool: return str(c.get_meta("action", "")) == target)
+		m.action_bar.scroll.ensure_control_visible(other[0])
+		await _frames(2)
+		await _click(other[0])
+		await _frames(3)
+		var at := str(_focus().get_meta("action", "")) if _focus() != null else "nothing"
+		_check("cooking mouse: a click picks a recipe without jumping (focus on %s)" % at, m.craft_selected == "cook:fish_meal" and not at.begins_with("cook:"))
+	m.action_bar.action_pressed.disconnect(record)
+	await _close_all()
+	await _handed_back("cooking")
+
+
 # The detail card's Make (or Equip) button, when it can be pressed.
 func _make_button() -> Button:
-	for c in _focusables(m.action_bar.rows_box):
-		if c is Button and not c.has_meta("action") and c.get_parent() is VBoxContainer:
-			return c
-	return null
+	var b: Button = m.action_bar._detail_button
+	return b if is_instance_valid(b) and m.action_bar._focusable(b) else null
 
 
 # --- The diary ------------------------------------------------------------------

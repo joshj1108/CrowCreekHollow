@@ -81,6 +81,9 @@ var _ledger_tab_count := 0      # tabs in the open panel, ledger or a grid panel
 var _grid_tabs := {}            # a grid panel's {"tabs", "active"} row, stepped by LB/RB or Q/E
 var _pad_glyphs := false          # true once a gamepad was used last, so prompts show its buttons
 var _pointer_last := false        # true when the last press came from the mouse
+var _detail_button: Button        # the picked recipe's Make (Cook, Equip...) button in a grid panel
+var _picked_action := ""          # the picked tile's action, for focus to return to
+var _jump_key := ""               # a tile picked with A, Space or Enter: focus moves to its detail button
 
 # The diary is a book: a spread of two pages, with a tab marker down its right edge for each section.
 # A panel with a {"book": sections} row shows it; each section is {name, heading, pages}, and each page
@@ -257,6 +260,8 @@ func show_panel(tab: String, rows: Array) -> void:
 	subtitle_label.text = str(SUBTITLES.get(tab, ""))
 	active_tab = tab
 	_clear(rows_box)
+	_detail_button = null
+	_picked_action = ""
 	var book_row := {}
 	for row in rows:
 		if row is Dictionary and row.has("book"):
@@ -301,8 +306,16 @@ func hide_panel() -> void:
 
 
 func _focus_first_button(keep_action: String = "") -> void:
+	# A recipe picked with A goes straight to its button, when that can be pressed.
+	var jump := _jump_key
+	_jump_key = ""
+	if jump != "" and _jump_to_detail(jump):
+		return
 	if keep_action != "":
 		var kept := _find_action_button(rows_box, keep_action)
+		# A button that can't be pressed any more (the last fish cooked) hands focus back to its recipe.
+		if kept == null and _picked_action != "":
+			kept = _find_action_button(rows_box, _picked_action)
 		if kept != null:
 			kept.grab_focus()
 			return
@@ -611,7 +624,9 @@ func _build_recipe_tile(recipe: Dictionary, small: bool = false) -> Control:
 		tile.add_theme_stylebox_override("pressed", _box(COL_BUTTON_ACTIVE, COL_ACCENT, 2, 8, 4))
 		tile.add_theme_stylebox_override("focus", _box(base, COL_ACCENT, 2, 8, 4))
 	tile.set_meta("action", str(recipe.get("action", "")))
-	tile.pressed.connect(_on_action_pressed.bind(str(recipe.get("action", ""))))
+	if selected:
+		_picked_action = str(recipe.get("action", ""))
+	tile.pressed.connect(_pick_tile.bind(str(recipe.get("action", "")), selected))
 
 	# The picture and name sit inside the tile's frame, clear of its iron edge.
 	var box := VBoxContainer.new()
@@ -741,9 +756,35 @@ func _build_detail(recipe: Dictionary) -> Control:
 		button.custom_minimum_size = Vector2(0, 40)
 		_set_enabled(button, bool(recipe.get("enabled", false)) and str(recipe.get("action", "")) != "")
 		_style_button(button, false)
+		# Its action keeps focus on it when the panel rebuilds after a press, so it can be pressed again.
+		button.set_meta("action", str(recipe.get("action", "")))
+		button.set_meta("key", str(recipe.get("key", "")))
 		button.pressed.connect(_on_action_pressed.bind(str(recipe.get("action", ""))))
 		block.add_child(button)
+		_detail_button = button
 	return card
+
+
+# A tile is picked by its action ("craft_pick:<key>" and the like). With A, Space or Enter the highlight then
+# moves to the picked recipe's button (Make, Cook), so a second press makes it; a click only picks, as the
+# mouse can reach the button itself.
+func _pick_tile(action_id: String, selected: bool) -> void:
+	var key := action_id.substr(action_id.find(":") + 1)
+	if _pointer_last:
+		_on_action_pressed(action_id)
+	elif selected:
+		# Already picked, so the panel won't rebuild: move now.
+		_jump_to_detail(key)
+	else:
+		_jump_key = key
+		_on_action_pressed(action_id)
+
+
+func _jump_to_detail(key: String) -> bool:
+	if not is_instance_valid(_detail_button) or str(_detail_button.get_meta("key", "")) != key or not _focusable(_detail_button):
+		return false
+	_detail_button.grab_focus()
+	return true
 
 
 # --- The ledger layout --------------------------------------------------------
