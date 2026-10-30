@@ -190,6 +190,7 @@ const WARMTH_INDOORS := 25.0     # warmth regained per hour in a patched or rest
 const WARMTH_INDOORS_COLD := 10.0  # ... and in a decrepit or boarded one
 const NEED_HARM_HOURS := 2.0     # one HP lost every this many hours while a need is empty
 const POND_WATER := 40.0
+const BUCKET_SIZE := 8        # the bucket waters crops one at a time until the hose is on; the pond fills it
 const WELL_IX := FarmLayout.WELL_IX   # the top-left tile of the well's footprint
 const WELL_TILES := 2
 const WELL_CAPACITY := 40.0           # water in the tank when it refills each morning
@@ -197,7 +198,7 @@ const WELL_CAPACITY := 40.0           # water in the tank when it refills each m
 const CISTERN_COST := {"copper_bar": 40, "iron_bar": 4, "level": 5}   # Smithing level
 const CISTERN_CAPACITY := 64.0
 const DRINK_WELL := 35.0
-const WELL_REPAIR := {"wood": 4, "fiber": 3, "level": 2}
+const WELL_REPAIR := {"wood": 4, "fiber": 3, "level": 1}
 const HOSE_COST := {"fiber": 3, "resin": 2}
 const WATER_RAIN_KINDS := ["drizzle", "rain", "downpour"]   # rain waters every crop
 const SEASON_TEMP := {"Winter": 40.0, "Spring": 51.0, "Summer": 67.0, "Autumn": 54.0}
@@ -227,7 +228,7 @@ const STAGE_NAMES := ["Decrepit", "Boarded", "Patched", "Restored"]
 # is met (see _tip_ready).
 # Braces name controls and are filled in for a keyboard or a gamepad, see _fill_controls.
 const TIPS := [
-	{"id": "well", "title": "Watering", "text": "A crop only grows on a night after it was watered, and rain waters everything. The pump by the plots is seized: face the well and press {hand} to open it. Repair the pump once you reach Carpentry 2, then attach the hose. {tool:hose} to select the hose, face a crop, and press {tool} to water it."},
+	{"id": "well", "title": "Watering", "text": "A crop only grows on a night after it was watered, and rain waters everything. The pump by the plots is seized: face the well and press {hand} to open it. Until then, water from the bucket: {tool:hose} to select it, face a crop and press {tool}; face the pond and press {hand} to fill it again. Repairing the pump and attaching the hose saves the walk."},
 	{"id": "sleep", "title": "Sleeping", "text": "From 18:00, walk to the bed in the bedroom and press {hand} to save and end the day. Stay up past 03:00 and you collapse, which lowers your sanity limit."},
 	{"id": "repair", "title": "Repairing the farmhouse", "text": "Repair the house from the House section on the section wheel ({wheel}). Each stage restores it inside and out, and unlocks rooms and features."},
 	{"id": "quests", "title": "Quests", "text": "The Quests section, on the section wheel ({wheel}), lists what the farm asks of you. Press Details on a quest to read its story."},
@@ -278,7 +279,7 @@ const BARN_WALL := Color("8f3a2f")   # night darkness reduction once the house i
 
 # Lantern tiers. Each entry is the next thing to build, in order.
 const LANTERN_TIERS := [
-	{"name": "Tin Lantern", "radius": 2.5, "wood": 2, "fiber": 2, "resin": 0, "level": 2},
+	{"name": "Tin Lantern", "radius": 2.5, "wood": 2, "fiber": 2, "resin": 0, "level": 1},
 	{"name": "Brass Lantern", "radius": 4.0, "wood": 4, "fiber": 4, "resin": 2, "level": 4},
 	{"name": "Hollow Lantern", "radius": 6.0, "wood": 6, "fiber": 6, "resin": 4, "level": 6},
 ]
@@ -457,7 +458,7 @@ const STORY := [
 		"text": "Sleep in the bed before 03:00.", "stat": "slept", "goal": 1, "reward": {"skill": "Carpentry", "xp": 40}},
 	{"id": "light", "title": "Light the Way",
 		"story": "Last night something stood at the edge of the field and watched the house. The night here is longer than the day, and it is not empty. A lantern keeps the dark a little further off, and the people down the lane won't walk with anyone who hasn't one.",
-		"text": "Build a Tin Lantern.", "prompt": "Open Craft from the section wheel ({wheel}) and build a Tin Lantern in the Other tab: 2 wood and 2 fiber, at Bushcrafting 2.",
+		"text": "Build a Tin Lantern.", "prompt": "Open Craft from the section wheel ({wheel}) and build a Tin Lantern in the Other tab: 2 wood and 2 fiber.",
 		"stat": "lantern_tier", "goal": 1, "reward": {"seeds": 3}},
 	{"id": "edge", "title": "To the Wood's Edge",
 		"story": "Since Agnes Rook's bell came down, nobody from the lane crosses the Rookery Wood alone. Old Maren, from the last cottage, wants walking as far as its edge, by daylight. She has never asked anyone at this farm before.",
@@ -709,6 +710,7 @@ var warmth := 100.0
 var starve_timer := 0.0
 var well_repaired := false
 var hose_attached := false
+var bucket_water := BUCKET_SIZE   # not saved: a load starts with it full
 var well_water := 0.0
 var cistern_built := false
 var weather_kind := ""       # today's weather, rolled each morning: see WEATHER_WEIGHTS
@@ -4359,14 +4361,20 @@ func _stage_for(kind: String, days: int) -> int:
 
 
 # What the preserve recipes take as input. "crops" means turnips or pumpkins.
+# Until the hose is on, the pond also fills the bucket.
 func _drink_pond() -> void:
+	var fill := "" if hose_attached or bucket_water >= BUCKET_SIZE else " You fill the bucket (%d waterings)." % BUCKET_SIZE
+	if fill != "":
+		bucket_water = BUCKET_SIZE
 	if water >= 100.0:
-		_show_message("You're not thirsty.")
+		if fill != "":
+			play_sfx("water", 0.05)
+		_show_message(("You fill the bucket at the pond (%d waterings)." % BUCKET_SIZE) if fill != "" else "You're not thirsty.")
 		return
 	water = minf(100.0, water + POND_WATER)
 	play_sfx("drink", 0.05)
 	stats["drank"] += 1
-	_show_message("You drink from the pond. Cold and muddy, but it helps. Water %d/100" % water)
+	_show_message("You drink from the pond. Cold and muddy, but it helps. Water %d/100." % water + fill)
 
 
 # Needs are checked each hour. While one is empty, HP drains slowly. Sleeping in bed restores warmth.

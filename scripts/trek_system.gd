@@ -629,7 +629,7 @@ func _ask(id: String) -> void:
 		return
 	if m.lantern_tier <= 0:
 		m._show_message(_w("\"Not without a light.\" {W} won't go into the wood until you have a lantern.%s") % (
-			" (A Tin Lantern: Craft, Other tab, Bushcrafting 2.)" if id == "edge" else ""))
+			" (A Tin Lantern: Craft, Other tab, 2 wood and 2 fiber.)" if id == "edge" else ""))
 		return
 	var oil_note := ""
 	var short := EDGE_OIL - int(m.materials["lamp_oil"])

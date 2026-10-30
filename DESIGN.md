@@ -465,7 +465,7 @@ The house is drawn in four stages that match its repair level. **Decrepit** has 
 
 | Tier | Ring | Needs | Bushcrafting |
 |---|---|---|---|
-| Tin Lantern | 2.5 tiles | 2 wood, 2 fiber | 2 |
+| Tin Lantern | 2.5 tiles | 2 wood, 2 fiber | 1 |
 | Brass Lantern | 4 tiles | 4 wood, 4 fiber, 2 resin | 4 |
 | Hollow Lantern | 6 tiles, flickers | 6 wood, 6 fiber, 4 resin | 6 |
 
@@ -475,7 +475,8 @@ The house is drawn in four stages that match its repair level. **Decrepit** has 
 ## Well and watering
 
 - The **well** stands on the farm between plot one and the path, and starts seized. Stand beside it and press Space to open its panel.
-- **Repairing the pump** costs 4 wood, 3 fiber, and Carpentry 2, and gives 30 Carpentry XP. It fills the tank, which holds 40 water.
+- **The bucket** (from the start, until the hose is on): the hose slot waters the one crop you face from a bucket of 8 (`BUCKET_SIZE`). Facing the pond and pressing Space fills it (and drinks if thirsty). It is not saved: a load starts with it full.
+- **Repairing the pump** costs 4 wood, 3 fiber, and Carpentry 1, and gives 30 Carpentry XP. It fills the tank, which holds 40 water.
 - The tank refills each morning once the pump is working.
 - **Attaching the hose** costs 3 fiber and 2 resin, and needs a working pump. The hose reaches every plot on the farm, so no plot is out of range.
 - Once the hose is on, face a growing crop and press Space to water it. Each watering uses 1 water from the tank. A crop only needs one watering a day, and a second press that day says it's already watered.
@@ -613,7 +614,7 @@ Three endings (`StoryAct`), each decided by what the player did, each played as 
 ## Groves and treks
 
 **The walk to the wood's edge** (`edge` in `ROUTES`, October 2026): the first trek, in the first week, so the game's signature horror shows in its first hour. The morning of day 3 says Old Maren will come; from day 4 (`EDGE_DAY`) she waits at the gap in the trees **every** day until 15:00, until she has been walked (`edge_done`, saved from save version 12). She asks only for the wood's edge, by daylight: two short clearings (layouts 7 and 8 in `CLEARINGS`), about a minute's walk.
-- **Gates:** a lantern (a Tin Lantern, Bushcrafting 2: chapter 2 asks for it, and her refusal says where it is built) and no Bushcrafting. If you have fewer than 2 lamp oil she gives you enough (`EDGE_OIL`), so nobody is stuck without coins; the oil burns as on any trek, so the second flask is usually lit on the way. Asking her says what her nerve is and how to keep it (your light, the trail, a word).
+- **Gates:** a lantern (a Tin Lantern, no level needed: chapter 2 asks for it, and her refusal says where it is built) and no Bushcrafting. If you have fewer than 2 lamp oil she gives you enough (`EDGE_OIL`), so nobody is stuck without coins; the oil burns as on any trek, so the second flask is usually lit on the way. Asking her says what her nerve is and how to keep it (your light, the trail, a word).
 - **The walk:** the first clearing always has a **fallen tree** (cut through with the crude hatchet from the first day, or take the way round). The second has the stile at the top, drawn in code (`_draw_stile`), and **a glimpse of the tall one**: 6 seconds in, its red eyes show high in the trees and stay put for 7 seconds, then go (`_glimpse`); lifting the lantern at it (Space within 3 tiles) sends it off at no cost. It never moves or touches her. The wood is lighter there (`EDGE_GLOOM` 0.45). Her two words say who she is and point at the mill; at the stile she ends on the hook: the town met at the mill the night they voted Agnes Rook's bell down, she was there, and she'll want walking all the way in a week or so.
 - **After:** 10 coins, 2 fiber and 25 Bushcrafting XP (`_edge_pay`), the diary's note on the wood and chapter 3, and half an hour home. It does **not** count toward the dread or the walkers' standing, but it pushes the field shadow back a step and halves that night like any trek, and that night the first Hollow sighting comes (see Nights). Until she has been walked the mill route stays shut.
 - Check it with `tools/capture.gd`: `walker wedge` (day 4, below her), `trek=0 troute=edge` (the fallen tree) and `trek=1 troute=edge tall` (the eyes). The trailer (`tools/trailer.ps1`) has an `edge` shot and a `sighting` shot, and its walker shot is now Maren on day 4.

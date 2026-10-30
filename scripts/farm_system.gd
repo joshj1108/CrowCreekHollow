@@ -249,7 +249,7 @@ func _roll_harvest(base: float, miss: String, finish: Callable) -> void:
 # The hose's head (tool_tier "hose") sets how many crops one press reaches: see _spray_tiles.
 func _water_crop(tile: Vector2i) -> void:
 	if not m.well_repaired or not m.hose_attached:
-		m._show_message("Nothing comes out of the hose. Repair the pump and attach the hose from the Well.")
+		_water_from_bucket(tile)
 		return
 	if m.well_water < 1.0:
 		m._show_message("The tank is dry. It refills each morning.")
@@ -268,6 +268,24 @@ func _water_crop(tile: Vector2i) -> void:
 		return
 	m.play_sfx("water", 0.08)
 	m._show_message(("Watered. " if n == 1 else "Watered %d crops. " % n) + "The tank has %d left." % int(m.well_water))
+	m.queue_redraw()
+
+
+# Before the hose, the bucket waters the one crop you face; the pond fills it again.
+func _water_from_bucket(tile: Vector2i) -> void:
+	if not m.crops.has(tile) or int(m.crops[tile]["stage"]) >= m.MAX_STAGE:
+		return
+	if int(m.crops[tile].get("watered_day", 0)) == m.day:
+		m._show_message("Already watered today.")
+		return
+	if m.bucket_water < 1:
+		m._show_message(m._fill_controls("The bucket is empty. Face the pond and press {hand} to fill it."))
+		return
+	m.bucket_water -= 1
+	m.crops[tile]["watered_day"] = m.day
+	m.stats["watered"] += 1
+	m.play_sfx("water", 0.08)
+	m._show_message("Watered from the bucket. %d left. The pump and hose at the Well save the walk." % m.bucket_water)
 	m.queue_redraw()
 
 
