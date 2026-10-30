@@ -119,7 +119,7 @@ func update(delta: float) -> void:
 			continue
 		if not p.playing:
 			p.play(randf() * p.stream.get_length())
-		p.volume_db = float(LOOP_DB[name]) + linear_to_db(float(levels[name]))
+		p.volume_db = float(LOOP_DB[name]) + linear_to_db(float(levels[name])) + (m.music.bed_duck_db(name) if m.music != null else 0.0)
 	if not on or m.transitioning:
 		return
 	hush_left = maxf(0.0, hush_left - delta)

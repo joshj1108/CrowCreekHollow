@@ -309,6 +309,7 @@ func _initialize() -> void:
 		await process_frame
 	if opt.has("sound"):
 		print("ambience ", main.ambience.levels)
+		print(main.music.describe())
 	if opt.has("pages"):
 		for i in int(opt["pages"]):
 			main.mystery.found[main.mystery.PAGES[i]["id"]] = true
@@ -385,8 +386,7 @@ func _initialize() -> void:
 
 # Runs the recording's seconds, walking the path in walk= first. Frames are 1/30 s under --fixed-fps 30.
 func _hold(main, opt: Dictionary) -> void:
-	if main.music_player:
-		main.music_player.stop()
+	AudioServer.set_bus_mute(AudioServer.get_bus_index("Music"), true)
 	var left := int(float(opt["hold"]) * 30.0)
 	for leg in opt.get("walk", "").split(",", false):
 		var part: PackedStringArray = leg.split(":")

@@ -605,7 +605,7 @@ var save_slot := 1                  # which save slot this game reads and writes
 var save_name := ""                 # the name given to the save when the game was started
 var world_started := false         # false while the start screen is up
 var title_menu: TitleMenu
-var music_player: AudioStreamPlayer   # volumes and the rest of the settings are in GameSettings
+var music: MusicSystem   # volumes and the rest of the settings are in GameSettings
 var pause_armed := ""               # the Pause menu's quit button pressed once, waiting for a second press
 var sfx_streams: Dictionary = {}    # sound name -> AudioStreamOggVorbis
 var sfx_players: Array = []         # a small pool, so overlapping sounds can play together
@@ -966,10 +966,11 @@ func _ready() -> void:
 	GameSettings.load_settings()
 	GameSettings.apply(false)
 	_apply_display.call_deferred()
-	_start_music()
 	_load_sfx()
 	ambience = AmbienceSystem.new(self)
 	ambience.setup()
+	music = MusicSystem.new(self)
+	music.setup()
 	_build_map()
 	_generate_cave()
 	_find_pond_edges()
@@ -991,17 +992,6 @@ func _save_path() -> String:
 func _apply_display() -> void:
 	if get_tree().current_scene == self:
 		GameSettings.apply(true)
-
-
-func _start_music() -> void:
-	var stream := load("res://audio/dreary_loop.ogg") as AudioStreamOggVorbis
-	stream.loop = true
-	music_player = AudioStreamPlayer.new()
-	music_player.stream = stream
-	music_player.volume_db = -8.0
-	music_player.bus = "Music"   # the Music bus carries the volume setting, and is muted at 0
-	add_child(music_player)
-	music_player.play()
 
 
 # Sound effects are short clips in audio/sfx. A small pool plays them, so several can overlap.
@@ -1131,6 +1121,8 @@ func _process(delta: float) -> void:
 		_update_perf()
 	if ambience != null:
 		ambience.update(delta)
+	if music != null:
+		music.update(delta)
 	if not world_started:
 		return
 	# F4 maxes out the farmer for testing, in debug builds only (running from the editor or the command line).

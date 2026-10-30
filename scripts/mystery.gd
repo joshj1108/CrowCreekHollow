@@ -134,6 +134,7 @@ func _find(id: String, lead := "") -> void:
 	var p := _page(id)
 	m._diary_page("rook_" + id)
 	m.play_sfx("chime", 0.0)
+	m.music.sting("sting_bell" if id == "bell" else "sting_page", id == "bell")
 	if id == "bell":
 		m._show_message("The bell rings out over the field, and something under the great tree answers. A last page is in your diary.")
 		return
@@ -166,6 +167,7 @@ func _find_trek_page(id: String) -> void:
 	var p := _page(id)
 	m._diary_page("rook_" + id)
 	m.play_sfx("chime", 0.0)
+	m.music.sting("sting_page")
 	m._show_message("Inside, folded small and dry, a page in Agnes Rook's hand. It's in your diary: \"%s\" (%d of %d from the wood)." % [
 		p["title"], _count(TREK_PAGES), TREK_PAGES.size()])
 

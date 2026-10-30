@@ -145,6 +145,7 @@ func _check(force := false) -> void:
 	if earned.is_empty():
 		return
 	m.play_sfx("chime")
+	m.music.sting("sting_achievement")
 	# Several at once (an old save re-checking on load) share one message.
 	if earned.size() == 1:
 		m._show_message("Achievement: %s. %s" % [earned[0]["title"], earned[0]["text"]])
