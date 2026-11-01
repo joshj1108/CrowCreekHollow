@@ -650,7 +650,7 @@ func _play_crows() -> void:
 					m.ambience.night_event("crow")
 			"down":
 				open += 1
-				if _lit_by_you(c["tile"]) or _lit_by_lamp(c["tile"]):
+				if _lit_by_you(c["tile"]) or _lit_by_lamp(c["tile"]) or m.projects._guarded(c["tile"]):
 					_scare(c)
 				elif m.current_hour >= float(c["land"]) + CROW_PECK:
 					c["state"] = "pecked"
@@ -791,7 +791,8 @@ func _roll_raid() -> void:
 	rng.seed = hash([m.day, "raid"])
 	var kind: String = kinds[rng.randi() % kinds.size()]
 	var tile := _raid_place(kind)
-	var chance := RAID_CHANCE + (RAID_WEAR if m.wear >= m.WEAR_FOX else 0.0) + RAID_SHADOW * shadow_steps
+	var chance := RAID_CHANCE + (RAID_WEAR if m.wear >= m.WEAR_FOX else 0.0) + RAID_SHADOW * shadow_steps \
+		+ m.projects.RAID_FENCE * m.projects.broken.size()
 	if m.projects._lit(tile):
 		chance *= 0.5
 	if rng.randf() >= chance:
@@ -910,6 +911,8 @@ func _loss_mult() -> float:
 	var mult := (2.0 if m.sanity_sys._event_active("dread") else 1.0) * (0.5 if m.sanity_sys._event_active("ward") else 1.0)
 	mult *= 0.5 if charmed else 1.0
 	mult *= m.projects._night_mult()   # the crow bell
+	if str(visitor.get("id", "")) == "knock" and m.projects._shutters_barred():
+		mult *= m.projects.SHUTTER_KNOCK   # barred shutters
 	mult *= m.estate._night_mult()     # the second storey
 	mult *= m.trek._night_mult()       # walked someone today, the wood come close, or the Hollow asleep
 	mult *= _season_mult()
@@ -995,11 +998,11 @@ func _crows_left() -> String:
 		for pos in m.crops.keys():
 			if hit >= CROW_TIMES.size():
 				break
-			if int(m.crops[pos]["stage"]) > 0 and _peck(pos):
+			if int(m.crops[pos]["stage"]) > 0 and not m.projects._guarded(pos) and _peck(pos):
 				hit += 1
 	else:
 		for c in crow_at:
-			if str(c["state"]) in ["wait", "down"] and _peck(c["tile"]):
+			if str(c["state"]) in ["wait", "down"] and not m.projects._guarded(c["tile"]) and _peck(c["tile"]):
 				hit += 1
 		for c in crow_at:
 			if str(c["state"]) == "pecked" and m.crops.has(c["tile"]):

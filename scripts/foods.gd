@@ -62,6 +62,8 @@ const LIST := [
 	{"id": "sturgeon", "held": "sturgeon", "kind": "fish", "name": "White Sturgeon", "icon": "fish_t", "tint": "8a9098", "skill": "Fishing", "level": 6, "difficulty": 3, "price": 45, "verb": "Eat raw",
 		"desc": "Older than the farm, armoured in bony plates. It is rare, and only takes a line by day."},
 	# Forage from the farm's edges and the trek trails (see ForageSystem.FORAGE for the seasons).
+	{"id": "hare", "held": "hare", "kind": "game", "name": "Hare", "icon": "smoked", "tint": "8a7058", "skill": "Bushcrafting", "level": 2, "difficulty": 2, "price": 12,
+		"desc": "Caught in a snare at the wood's edge. Lean, dark meat that keeps a body going through the cold."},
 	{"id": "nettles", "held": "nettles", "kind": "forage", "name": "Stinging Nettles", "icon": "leafy", "tint": "5a8a3a", "skill": "Bushcrafting", "level": 1, "difficulty": 1, "price": 2,
 		"desc": "Young spring nettle tops, picked with a sleeve over your hand. Better in a soup than raw."},
 	{"id": "fiddleheads", "held": "fiddleheads", "kind": "forage", "name": "Fiddleheads", "icon": "fern", "tint": "7aa04a", "skill": "Bushcrafting", "level": 1, "difficulty": 1, "price": 3,

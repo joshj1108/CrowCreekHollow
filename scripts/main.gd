@@ -67,7 +67,8 @@ const QUILTS := [Color("6a5a4a"), Color("3e5a80"), Color("3f6b4a"), Color("8a2e3
 # Brush piles for bushcrafting, in inner coordinates. They grow back once a week, as a clean-up job.
 # Each one gives sticks and fiber. Brush and trees come back on a weekly cycle; rocks take a month.
 const BRUSH_SPOTS := FarmLayout.BRUSH_SPOTS
-const BRUSH_REGROW_DAYS := 7
+const BRUSH_REGROW_DAYS := 3   # brush comes back every few days, so Bushcrafting trains steadily
+const TREE_REGROW_DAYS := 7    # felled grove trees stand again once a week
 const ROCK_REGROW_DAYS := 14
 # Extra piles that appear once Bushcrafting reaches level 3.
 const THICKET_SPOTS := FarmLayout.THICKET_SPOTS
@@ -198,7 +199,7 @@ const WELL_CAPACITY := 40.0           # water in the tank when it refills each m
 const CISTERN_COST := {"copper_bar": 40, "iron_bar": 4, "level": 5}   # Smithing level
 const CISTERN_CAPACITY := 64.0
 const DRINK_WELL := 35.0
-const WELL_REPAIR := {"wood": 4, "fiber": 3, "level": 1}
+const WELL_REPAIR := {"wood": 6, "fiber": 4, "level": 2}
 const HOSE_COST := {"fiber": 3, "resin": 2}
 const WATER_RAIN_KINDS := ["drizzle", "rain", "downpour"]   # rain waters every crop
 const SEASON_TEMP := {"Winter": 40.0, "Spring": 51.0, "Summer": 67.0, "Autumn": 54.0}
@@ -279,7 +280,7 @@ const BARN_WALL := Color("8f3a2f")   # night darkness reduction once the house i
 
 # Lantern tiers. Each entry is the next thing to build, in order.
 const LANTERN_TIERS := [
-	{"name": "Tin Lantern", "radius": 2.5, "wood": 2, "fiber": 2, "resin": 0, "level": 1},
+	{"name": "Tin Lantern", "radius": 2.5, "wood": 4, "fiber": 3, "resin": 0, "level": 2},
 	{"name": "Brass Lantern", "radius": 4.0, "wood": 4, "fiber": 4, "resin": 2, "level": 4},
 	{"name": "Hollow Lantern", "radius": 6.0, "wood": 6, "fiber": 6, "resin": 4, "level": 6},
 ]
@@ -458,7 +459,7 @@ const STORY := [
 		"text": "Sleep in the bed before 03:00.", "stat": "slept", "goal": 1, "reward": {"skill": "Carpentry", "xp": 40}},
 	{"id": "light", "title": "Light the Way",
 		"story": "Last night something stood at the edge of the field and watched the house. The night here is longer than the day, and it is not empty. A lantern keeps the dark a little further off, and the people down the lane won't walk with anyone who hasn't one.",
-		"text": "Build a Tin Lantern.", "prompt": "Open Craft from the section wheel ({wheel}) and build a Tin Lantern in the Other tab: 2 wood and 2 fiber.",
+		"text": "Build a Tin Lantern.", "prompt": "Open Craft from the section wheel ({wheel}) and build a Tin Lantern in the Other tab: 4 wood and 3 fiber, at Bushcrafting 2.",
 		"stat": "lantern_tier", "goal": 1, "reward": {"seeds": 3}},
 	{"id": "edge", "title": "To the Wood's Edge",
 		"story": "Since Agnes Rook's bell came down, nobody from the lane crosses the Rookery Wood alone. Old Maren, from the last cottage, wants walking as far as its edge, by daylight. She has never asked anyone at this farm before.",
@@ -531,11 +532,13 @@ const STORY := [
 
 const SKILLS := ["Farming", "Bushcrafting", "Carpentry", "Cleaning", "Fishing", "Cooking", "Combat", "Forestry", "Mining", "Smithing"]
 const XP_PLANT := 5
-const XP_GATHER := 10
+const XP_GATHER := 15
+const XP_LANTERN := 25
+const XP_WHITTLE := 8           # Carpentry XP for crafting anything with a wooden part
 const XP_REPAIR := 30
 const XP_TIDY := 20
 const TIDY_CLEANING_BONUS := 3     # extra sanity from a tidy at Cleaning 2
-const XP_MEND := 15
+const XP_MEND := 20
 const MEND_WOOD := 1
 const MEND_FIBER := 1
 # Upkeep: the house wears a little each night. Mending, tidying, and repairs bring it down.
@@ -565,7 +568,7 @@ const GOAT_LEAVE_DAYS := 2    # unfed this many days in a row, and a goat wander
 const COOP_HOPPER_COST := {"wood": 4, "copper_bar": 4, "level": 3}
 const BARN_HOPPER_COST := {"wood": 6, "copper_bar": 6, "level": 7}
 const HOPPER_CAP := 30        # crops a hopper holds: a week and more for four hens, five days for three goats
-const MEND_DAILY_LIMIT := 2   # keeps Carpentry training to a few days per level
+const MEND_DAILY_LIMIT := 3   # keeps the house from being finished in a day
 const CLEANSE_LEVEL := 3      # Cleaning level needed to cleanse the house
 const CLEANSE_CROPS := 2      # crops offered per cleanse
 const CLEANSE_RELIEF := 5     # sanity limit restored per cleanse
@@ -1821,18 +1824,21 @@ func _respawn_brush() -> void:
 	queue_redraw()
 
 
-# Brush and trees grow back once a week, and rocks every two weeks.
+# Brush grows back every few days, trees once a week, and rocks every two weeks.
 func _regrow_wild() -> void:
 	if day - brush_day >= BRUSH_REGROW_DAYS:
-		_fill_brush()
+		_fill_brush(false)
 		brush_day = day
+	if day % TREE_REGROW_DAYS == 0:
+		grove_felled.clear()
+		_apply_grove()
 	if day - rock_day >= ROCK_REGROW_DAYS:
 		_fill_rocks(true)
 		rock_day = day
 	queue_redraw()
 
 
-func _fill_brush() -> void:
+func _fill_brush(trees := true) -> void:
 	brush.clear()
 	for spot in BRUSH_SPOTS:
 		if _is_open_grass(spot):
@@ -1841,8 +1847,9 @@ func _fill_brush() -> void:
 		for spot in THICKET_SPOTS:
 			if _is_open_grass(spot):
 				brush[_world_tile(spot.x, spot.y)] = true
-	grove_felled.clear()
-	_apply_grove()
+	if trees:
+		grove_felled.clear()
+		_apply_grove()
 
 
 func _build_world() -> void:
@@ -3243,6 +3250,9 @@ func _on_panel_action(action_id: String) -> void:
 	if action_id == "dev_unlock":
 		_dev_unlock_all()
 		return
+	if action_id.begins_with("dev_trek_"):
+		_dev_trek(action_id.trim_prefix("dev_trek_"))
+		return
 	if action_id == "repair_well":
 		_repair_well()
 		return
@@ -3822,7 +3832,7 @@ func _interact() -> void:
 		return
 	if not inside and trek._try_walker(tile):
 		return
-	if not inside and not in_cave and projects._try_use(tile):
+	if not inside and not in_cave and (projects._repair_fence(tile) or projects._try_use(tile)):
 		return
 
 	if inside:
@@ -5610,7 +5620,8 @@ func _advance_lantern() -> void:
 	materials["resin"] -= t["resin"]
 	lantern_tier += 1
 	_apply_lantern_radius()
-	_show_message("You build a %s. Its light reaches %.1f tiles." % [t["name"], t["radius"]])
+	progression._grant_xp("Bushcrafting", XP_LANTERN)
+	_show_message("You build a %s. Its light reaches %.1f tiles. +%d Bushcrafting XP" % [t["name"], t["radius"], XP_LANTERN])
 
 
 # Dev only (F4, or the button in Settings): every skill to DEV_LEVEL, plenty of coins, materials and seeds, every tool, lantern and
@@ -5645,6 +5656,29 @@ func _dev_trek_day() -> void:
 	_set_bounds()
 	queue_redraw()
 	_show_message("Dev: day %d.%s" % [day, trek._morning_note()])
+
+
+# Dev only (the Pause menu's trek rows): sets out on any route now, at the current hour, skipping its day,
+# level and bell gates, packed with enough for the walk. Nothing else changes.
+func _dev_trek(id: String) -> void:
+	if not TrekSystem.ROUTES.has(id):
+		return
+	_close_panel()
+	lantern_tier = maxi(lantern_tier, 1)
+	_apply_lantern_radius()
+	tool_tier["hatchet"] = maxi(int(tool_tier["hatchet"]), 1)
+	materials["lamp_oil"] = maxi(int(materials["lamp_oil"]), int(TrekSystem.ROUTES[id]["oil"]) + TrekSystem.NIGHT_OIL + 1)
+	materials["rope"] = maxi(int(materials["rope"]), 2)
+	inventory["trail_ration"] = maxi(int(inventory["trail_ration"]), 4)
+	trek._abort()
+	if in_cave:
+		in_cave = false
+		foes = []
+	if inside:
+		_leave_house()
+	trek._start(id)
+	_set_bounds()
+	queue_redraw()
 
 
 func _dev_unlock_all() -> void:

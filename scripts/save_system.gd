@@ -7,7 +7,7 @@ const SAVE_VERSION := 16
 # Keys a save must hold with the right type, or it isn't read: the loader would trip over anything else.
 const DICT_KEYS := ["inventory", "materials", "skill_xp", "stats", "equipment", "quests_done", "achievements_done",
 	"tool_tier", "trek_walked", "night_seen"]
-const ARRAY_KEYS := ["crops", "brush", "felled", "rocks", "cave_mined", "decor", "steps_done", "rook_pages",
+const ARRAY_KEYS := ["crops", "brush", "felled", "rocks", "cave_mined", "decor", "snared", "broken_fences", "steps_done", "rook_pages",
 	"desk_mail", "desk_orders", "tips_seen", "diary_new", "hen_ages", "goat_ages", "player_pos", "trek_works",
 	"night_blight"]
 # What version 8 cut along with the wider land. A save from before it keeps none of these keys.
@@ -90,6 +90,8 @@ func _save_game() -> void:
 		"shadow_steps": m.nights.shadow_steps,
 		"happening_done_day": m.happenings.done_day,
 		"decor": m.projects.decor.keys().map(func(t: Vector2i) -> Array: return [t.x, t.y, m.projects.decor[t]]),
+		"snared": m.projects.snared.keys().map(func(t: Vector2i) -> Array: return [t.x, t.y, m.projects.snared[t]]),
+		"broken_fences": m.projects.broken.keys().map(func(t: Vector2i) -> Array: return [t.x, t.y]),
 		"steps_done": m.projects.steps_done.keys(),
 		"bell_day": m.projects.bell_day,
 		"treks_done": m.trek.treks_done,
@@ -231,6 +233,12 @@ func _load_game() -> bool:
 	m.projects.decor.clear()
 	for d in data.get("decor", []):
 		m.projects.decor[Vector2i(int(d[0]), int(d[1]))] = str(d[2])
+	m.projects.snared.clear()
+	for d in data.get("snared", []):
+		m.projects.snared[Vector2i(int(d[0]), int(d[1]))] = str(d[2])
+	m.projects.broken.clear()
+	for d in data.get("broken_fences", []):
+		m.projects.broken[Vector2i(int(d[0]), int(d[1]))] = true
 	m.mystery.found.clear()
 	for id in data.get("rook_pages", []):
 		m.mystery.found[str(id)] = true

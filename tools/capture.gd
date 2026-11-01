@@ -44,7 +44,7 @@ extends SceneTree
 #                   up to N (0-2: the crows go up at 0, the shape stands at the field's far edge at 1, and goes at 2)
 #   happening=ID    jump to a day with this daily happening: pedlar, glint, branch, crow_gifts, mushrooms,
 #                   frenzy or neighbour (it is placed, and its morning note shown)
-#   decor=A,B       place decor in a row two tiles below the player: lamp, flowers, path, fence, bench, birdbath,
+#   decor=A,B       place decor in a row two tiles below the player (snare comes with a hare, broken is a torn fence): lamp, flowers, path, fence, bench, birdbath,
 #                   weathervane, sprinkler_big or bell
 #   estate          build every house extension and buy every piece of furniture (with paint=ID, paper=ID)
 #   feel=SOUND      play an action's sound with its burst (harvest, chop, tree_fall, hoe, ...) and pop up a gain
@@ -246,7 +246,12 @@ func _initialize() -> void:
 		for kind in opt["decor"].split(","):
 			while not main._spot_ok(at, Vector2i.ONE) and at.x < main.MAP_W - 2:
 				at.x += 1
+			if kind == "broken":   # a fence with its rail torn loose
+				kind = "fence"
+				main.projects.broken[at] = true
 			main.projects.decor[at] = kind
+			if kind == "snare":    # with a hare in it
+				main.projects.snared[at] = "hare"
 			at.x += 2
 		main.projects._stamp()
 	for i in int(opt["frames"]):

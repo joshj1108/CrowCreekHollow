@@ -60,6 +60,16 @@ func _pause_rows() -> Array:
 			"action": "dev_unlock",
 			"enabled": true,
 		})
+		for id in TrekSystem.ROUTES:
+			var r: Dictionary = TrekSystem.ROUTES[id]
+			rows.append({
+				"name": "Dev: trek to %s" % r["to"],
+				"status": "",
+				"value": "Starts %s's trek now, at this hour (by night from 18:00), whatever the day, level or bell. Packs a lantern, a hatchet, oil, rations and rope first." % r["short"],
+				"button": "Go",
+				"action": "dev_trek_" + str(id),
+				"enabled": true,
+			})
 	return rows
 
 

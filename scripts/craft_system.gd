@@ -254,7 +254,7 @@ func _craft_tool(kind: String) -> void:
 	m.tool_tier[kind] += 1
 	m.progression._grant_xp(str(tier["skill"]), 10)
 	m.play_sfx("craft")
-	m._show_message("You make a %s. +10 %s XP" % [tier["name"], tier["skill"]])
+	m._show_message("You make a %s. +10 %s XP" % [tier["name"], tier["skill"]] + _whittle(tier["cost"]))
 
 
 func _can_craft(id: String) -> bool:
@@ -281,4 +281,12 @@ func _craft_gear(id: String) -> void:
 	m.equipment[item["slot"]] = id
 	m.progression._grant_xp(str(item.get("skill", "Bushcrafting")), 10)
 	m.play_sfx("craft")
-	m._show_message("You fashion a %s and equip it. +10 %s XP" % [item["name"], item.get("skill", "Bushcrafting")])
+	m._show_message("You fashion a %s and equip it. +10 %s XP" % [item["name"], item.get("skill", "Bushcrafting")] + _whittle(cost))
+
+
+# Anything with a wooden part (wood or hardwood in its cost) also trains Carpentry. Returns the message's tail.
+func _whittle(cost: Dictionary) -> String:
+	if not cost.has("wood") and not cost.has("hardwood"):
+		return ""
+	m.progression._grant_xp("Carpentry", m.XP_WHITTLE)
+	return ", +%d Carpentry XP" % m.XP_WHITTLE

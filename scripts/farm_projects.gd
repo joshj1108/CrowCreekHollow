@@ -31,6 +31,14 @@ const DECOR := {
 		"desc": "A stone bowl on a pillar with a copper rim. The crows don't drink from it."},
 	"weathervane": {"name": "Weathervane", "cost": {"copper_bar": 8, "iron_bar": 2, "coins": 60}, "skill": "Smithing", "level": 5, "max": 1, "blocks": true,
 		"desc": "A copper cockerel on an iron post. It turns to face the field at night, whatever the wind."},
+	"torch": {"name": "Torch", "cost": {"sticks": 1, "fiber": 1, "resin": 1}, "skill": "Bushcrafting", "level": 2, "max": 12, "blocks": true, "xp": 5,
+		"desc": "Pitch-soaked fiber bound to a stick. It burns one night in a small ring of light: in it the dark doesn't wear on you, and a coop or barn it lights is raided less and the thing scared off. Burnt out by morning."},
+	"snare": {"name": "Snare", "cost": {"sticks": 2, "fiber": 2}, "skill": "Bushcrafting", "level": 2, "max": 4, "blocks": false, "xp": 5,
+		"desc": "A noose of twisted fiber on a bent stick. Check it each morning: a hare, a few feathers, or nothing. Space takes what it holds."},
+	"scarecrow": {"name": "Scarecrow", "cost": {"wood": 3, "sticks": 2, "fiber": 3}, "skill": "Carpentry", "level": 2, "max": 4, "blocks": true, "xp": 20,
+		"desc": "Old clothes on a cross of boards. At night the crows won't settle on crops within 4 tiles of it."},
+	"shutters": {"name": "Window shutters", "cost": {"wood": 6, "sticks": 2, "fiber": 2}, "skill": "Carpentry", "level": 3, "max": 1, "blocks": true, "xp": 30,
+		"desc": "Hung on a farmhouse wall. From 18:00, Space bars them for the night, and the knocking takes half as much from you."},
 	"bell": {"name": "Crow bell", "cost": {"bell_metal": 1, "bell_frame": 1, "bell_rope": 1, "bell_clapper": 1, "feathers": 20, "coins": 150}, "skill": "Carpentry", "level": 6, "max": 1, "blocks": true,
 		"desc": "Hung only on All Hallows, and the Hollow comes to it that night. While it stands, the field shadow can't reach the house, so the Hollow stops coming, and the night takes a quarter less from your sanity."},
 }
@@ -50,6 +58,21 @@ const BELL_MONTH := 9           # All Hallows, October 31st: the only day the be
 const BELL_DOM := 31
 const PART_XP := 40
 const LAMP_RADIUS := 3.0        # tiles of light around a lamp post
+const TORCH_RADIUS := 2.0       # a torch's smaller ring, for one night
+const LIGHT_RADIUS := {"lamp": LAMP_RADIUS, "torch": TORCH_RADIUS}
+const SCARECROW_REACH := 4.0    # crows won't settle on crops this close to a scarecrow
+const SHUTTER_KNOCK := 0.5      # what the knocking takes while the shutters are barred
+const XP_SNARE := 15            # Bushcrafting XP for taking a catch from a snare
+const XP_BAR := 10              # Carpentry XP for barring the shutters, once a night
+const XP_FENCE := 20            # Carpentry XP for mending a broken fence rail
+const FENCE_MEND := {"wood": 1, "sticks": 1}
+const RAID_FENCE := 0.03        # raid chance added for each broken fence rail
+# A snare's catch each morning, tried in order: hare, feathers, or something wrong; otherwise nothing.
+const SNARE_CATCHES := [
+	{"chance": 0.40, "id": "hare"},
+	{"chance": 0.15, "id": "feathers"},
+	{"chance": 0.07, "id": "wrong"},
+]
 const BELL_NIGHT_MULT := 0.75
 const STEP_COINS := 20          # paid for each homestead step done
 const REMOVE_SECONDS := 4.0     # time to press Space again to take something down
@@ -57,6 +80,9 @@ const REMOVE_SECONDS := 4.0     # time to press Space again to take something do
 var decor := {}                 # saved: world tile -> kind
 var steps_done := {}            # saved: step id -> true
 var bell_day := -1              # the day the bell was hung, so the Hollow comes to it that night
+var snared := {}                # saved: snare tile -> what it caught overnight
+var broken := {}                # saved: fence tiles (the farm's or yours) torn loose, until mended
+var barred_day := -1            # the evening the shutters were barred
 var layer: Node2D
 var lights := {}                # lamp tile -> PointLight2D
 var _remove_tile := Vector2i(-1, -1)
@@ -239,15 +265,19 @@ func _start_place(kind: String) -> void:
 func _fits(kind: String, t: Vector2i) -> bool:
 	if kind in SPRINKLERS:
 		return m._in_bounds(t) and m.map[t.y][t.x] == MainGame.Tile.SOIL and not m.crops.has(t) and not decor.has(t) and t != m._player_tile()
+	if kind == "shutters":
+		return m._in_bounds(t) and m.map[t.y][t.x] == MainGame.Tile.HOUSE and not decor.has(t)
 	return m._spot_ok(t, Vector2i.ONE)
 
 
 func _confirm(kind: String, t: Vector2i) -> void:
 	if not _fits(kind, t):
-		m._show_message("That spot isn't an empty plot tile." if kind in SPRINKLERS else "That spot isn't open grass.")
+		m._show_message("That spot isn't an empty plot tile." if kind in SPRINKLERS else ("Face the farmhouse wall." if kind == "shutters" else "That spot isn't open grass."))
 		return
 	_pay(kind, 1)
 	decor[t] = kind
+	if DECOR[kind].has("xp"):
+		m.progression._grant_xp(str(DECOR[kind]["skill"]), int(DECOR[kind]["xp"]))
 	if kind == "bell":
 		bell_day = m.day
 	_stamp()
@@ -271,6 +301,15 @@ func _try_use(t: Vector2i) -> bool:
 	if not decor.has(t):
 		return false
 	var kind: String = decor[t]
+	if kind == "snare" and snared.has(t):
+		_take_catch(t)
+		return true
+	if kind == "shutters" and m.current_hour >= 18.0 and barred_day != m.day:
+		barred_day = m.day
+		m.progression._grant_xp("Carpentry", XP_BAR)
+		m.play_sfx("door", 0.05)
+		m._show_message("You swing the shutters to and drop the bar. The knocking will take half as much tonight. +%d Carpentry XP" % XP_BAR)
+		return true
 	var now := Time.get_ticks_msec() / 1000.0
 	if _remove_tile != t or now > _remove_until:
 		_remove_tile = t
@@ -279,6 +318,7 @@ func _try_use(t: Vector2i) -> bool:
 		return true
 	_remove_tile = Vector2i(-1, -1)
 	decor.erase(t)
+	snared.erase(t)
 	_pay(kind, -1)
 	if kind == "path":
 		m.map[t.y][t.x] = MainGame.Tile.GRASS
@@ -294,16 +334,17 @@ func _stamp() -> void:
 		if decor[t] == "path":
 			m.map[t.y][t.x] = MainGame.Tile.PATH
 	for t in lights.keys():
-		if decor.get(t, "") != "lamp":
+		if not LIGHT_RADIUS.has(decor.get(t, "")):
 			(lights[t] as Node).queue_free()
 			lights.erase(t)
 	for t in decor:
-		if decor[t] == "lamp" and not lights.has(t):
+		if LIGHT_RADIUS.has(decor[t]) and not lights.has(t):
+			var torch: bool = decor[t] == "torch"
 			var light := PointLight2D.new()
 			light.texture = m._glow_texture()
-			light.color = Color("ffd27a")
-			light.texture_scale = LAMP_RADIUS * m.PX / 128.0
-			light.position = m._tile_center(t.x, t.y) + Vector2(0, -m.PX * 1.1)
+			light.color = Color("ff9a4a") if torch else Color("ffd27a")
+			light.texture_scale = float(LIGHT_RADIUS[decor[t]]) * m.PX / 128.0
+			light.position = m._tile_center(t.x, t.y) + Vector2(0, -m.PX * (0.7 if torch else 1.1))
 			light.enabled = false
 			m.add_child(light)
 			lights[t] = light
@@ -316,12 +357,27 @@ func _blocks(t: Vector2i) -> bool:
 	return decor.has(t) and bool(DECOR[decor[t]]["blocks"])
 
 
-# True when a tile is in a lamp post's light.
+# True when a tile is in a lamp post's or a torch's light.
 func _lit(t: Vector2i) -> bool:
 	for l in lights:
-		if Vector2(t - (l as Vector2i)).length() <= LAMP_RADIUS:
+		if Vector2(t - (l as Vector2i)).length() <= float(LIGHT_RADIUS.get(decor.get(l, "lamp"), LAMP_RADIUS)):
 			return true
 	return false
+
+
+# True when a scarecrow stands near enough to keep the crows off this crop.
+func _guarded(t: Vector2i) -> bool:
+	for d in decor:
+		if decor[d] == "scarecrow" and Vector2(t - (d as Vector2i)).length() <= SCARECROW_REACH:
+			return true
+	return false
+
+
+# The shutters barred this evening (the night runs past midnight, so last evening's bar holds until dawn).
+func _shutters_barred() -> bool:
+	if _count("shutters") == 0:
+		return false
+	return barred_day == m.day or (barred_day == m.day - 1 and m.current_hour < 6.0)
 
 
 # Each frame: lamps glow after dusk, and only out on the farm.
@@ -363,7 +419,115 @@ func _sprinkle() -> String:
 
 # The morning's lift from the flower beds.
 func _morning() -> String:
-	return _apples() + _flowers()
+	return _apples() + _flowers() + _burn_torches() + _check_snares() + _break_fences()
+
+
+# Torches burn one night and are gone by morning.
+func _burn_torches() -> String:
+	var n := 0
+	for t in decor.keys():
+		if decor[t] == "torch":
+			decor.erase(t)
+			n += 1
+	if n == 0:
+		return ""
+	_stamp()
+	return " Your torch%s burned out in the night." % ("" if n == 1 else "es")
+
+
+# Each empty snare may hold something by morning, fixed by the day and the spot.
+func _check_snares() -> String:
+	var caught := 0
+	for t in decor:
+		if decor[t] != "snare" or snared.has(t):
+			continue
+		var rng := RandomNumberGenerator.new()
+		rng.seed = hash([m.day, t, "snare"])
+		var roll := rng.randf()
+		for c in SNARE_CATCHES:
+			roll -= float(c["chance"])
+			if roll < 0.0:
+				snared[t] = str(c["id"])
+				caught += 1
+				break
+	return (" Something is in %d of your snares." % caught) if caught > 0 else ""
+
+
+func _take_catch(t: Vector2i) -> void:
+	var text := ""
+	match str(snared[t]):
+		"hare":
+			if not m.stall._pack_room(int(m.inventory["hare"]), 1):
+				m._show_message("A hare is in the snare, but your pack is full.")
+				return
+			m.inventory["hare"] += 1
+			text = "A hare, cold and stiff in the noose."
+		"feathers":
+			m.materials["feathers"] += 2
+			text = "No hare, but a crow fought the noose and left two feathers."
+		_:
+			m.materials["feathers"] += 1
+			m.sanity_sys._change_sanity(-3.0)
+			text = "The noose is drawn tight around a crow's skull, picked clean. -3 sanity."
+	snared.erase(t)
+	m.progression._grant_xp("Bushcrafting", XP_SNARE)
+	m.play_sfx("gather", 0.05)
+	m._show_message(text + " You reset the snare. +%d Bushcrafting XP" % XP_SNARE)
+	if layer != null:
+		layer.queue_redraw()
+
+
+# Storms, the wind and the creeping shadow tear fence rails loose, the farm's own and the ones you put up.
+func _break_fences() -> String:
+	var rng := RandomNumberGenerator.new()
+	rng.seed = hash([m.day, "fences"])
+	var n := 0
+	match str(m.weather_kind):
+		"downpour":
+			n = 2
+		"rain":
+			n = 1 if rng.randf() < 0.6 else 0
+		_:
+			n = 1 if rng.randf() < 0.15 else 0
+	if m.nights.shadow_steps >= 4:
+		n += 1
+	var whole: Array = []
+	for y in m.map.size():
+		for x in (m.map[y] as Array).size():
+			if m.map[y][x] == MainGame.Tile.FENCE and not broken.has(Vector2i(x, y)):
+				whole.append(Vector2i(x, y))
+	for t in decor:
+		if decor[t] == "fence" and not broken.has(t):
+			whole.append(t)
+	var done := 0
+	while done < n and not whole.is_empty():
+		broken[whole.pop_at(rng.randi() % whole.size())] = true
+		done += 1
+	if layer != null:
+		layer.queue_redraw()
+	if done == 0:
+		return ""
+	return " %d fence rail%s tore loose in the night. Mend them before something finds the gap." % [done, "" if done == 1 else "s"]
+
+
+# Space on a torn rail mends it.
+func _repair_fence(t: Vector2i) -> bool:
+	if not broken.has(t):
+		return false
+	for mat in FENCE_MEND:
+		if int(m.materials[mat]) < int(FENCE_MEND[mat]):
+			m._show_message("This rail is torn loose. Mending it takes %s." % _cost_list(FENCE_MEND))
+			return true
+	for mat in FENCE_MEND:
+		m.materials[mat] -= int(FENCE_MEND[mat])
+	broken.erase(t)
+	m.progression._grant_xp("Carpentry", XP_FENCE)
+	m.play_sfx("repair", 0.05)
+	var left := ("%d more torn loose." % broken.size()) if broken.size() > 0 else "The fences are whole."
+	m._show_message("You lash the rail back in place. %s +%d Carpentry XP" % [left, XP_FENCE])
+	if layer != null:
+		layer.queue_redraw()
+	return true
 
 
 # Each apple tree drops an apple every autumn morning.
@@ -501,6 +665,44 @@ func _draw() -> void:
 				var bird := PackedVector2Array([top + Vector2(-px * 0.4, 0), top + Vector2(px * 0.1, -px * 0.25), top + Vector2(px * 0.4, -px * 0.1), top + Vector2(px * 0.15, px * 0.1)])
 				layer.draw_colored_polygon(bird, Color("b8733a"))
 				layer.draw_polyline(bird + PackedVector2Array([bird[0]]), ink, 2.0)
+			"torch":
+				var foot := c + Vector2(0, px * 0.35)
+				layer.draw_line(foot, foot + Vector2(0, -px * 0.9), ink, 6.0)
+				layer.draw_line(foot, foot + Vector2(0, -px * 0.9), Color("6b4a30"), 3.0)
+				var tip := foot + Vector2(0, -px * 1.0)
+				layer.draw_circle(tip, 7.0, ink)
+				layer.draw_circle(tip, 5.5, Color(1.9, 1.1, 0.4))
+				layer.draw_circle(tip + Vector2(0, -3), 3.0, Color(2.0, 1.7, 0.9))
+			"snare":
+				var peg := c + Vector2(px * 0.2, px * 0.2)
+				layer.draw_line(peg, peg + Vector2(-px * 0.3, -px * 0.55), ink, 5.0)
+				layer.draw_line(peg, peg + Vector2(-px * 0.3, -px * 0.55), Color("7a5a38"), 2.0)
+				layer.draw_arc(c + Vector2(-px * 0.12, px * 0.05), px * 0.2, 0.0, TAU, 12, Color("c8b080"), 2.0)
+				if snared.has(t):
+					var catch_col := Color("8a7058") if snared[t] == "hare" else Color("1d1d22")
+					layer.draw_circle(c + Vector2(-px * 0.12, px * 0.05), px * 0.17, ink)
+					layer.draw_circle(c + Vector2(-px * 0.12, px * 0.05), px * 0.13, catch_col)
+			"scarecrow":
+				var foot := c + Vector2(0, px * 0.4)
+				layer.draw_line(foot, foot + Vector2(0, -px * 1.6), ink, 7.0)
+				layer.draw_line(foot, foot + Vector2(0, -px * 1.6), Color("6b4a30"), 4.0)
+				layer.draw_line(foot + Vector2(-px * 0.5, -px * 1.15), foot + Vector2(px * 0.5, -px * 1.15), ink, 7.0)
+				layer.draw_line(foot + Vector2(-px * 0.5, -px * 1.15), foot + Vector2(px * 0.5, -px * 1.15), Color("6b4a30"), 4.0)
+				var coat := Rect2(foot + Vector2(-px * 0.28, -px * 1.25), Vector2(px * 0.56, px * 0.6))
+				layer.draw_rect(coat.grow(2.0), ink)
+				layer.draw_rect(coat, Color("5a4a6a"))
+				layer.draw_circle(foot + Vector2(0, -px * 1.5), px * 0.2, ink)
+				layer.draw_circle(foot + Vector2(0, -px * 1.5), px * 0.16, Color("c8a868"))
+				layer.draw_rect(Rect2(foot + Vector2(-px * 0.3, -px * 1.72), Vector2(px * 0.6, px * 0.1)), Color("8a6a38"))
+			"shutters":
+				# A pair of plank shutters on the wall; barred tonight, a dark bar across them.
+				for side in [-1.0, 1.0]:
+					var leaf := Rect2(c + Vector2(px * 0.02 * side - (px * 0.34 if side < 0 else 0.0), -px * 0.4), Vector2(px * 0.32, px * 0.7))
+					layer.draw_rect(leaf.grow(2.0), ink)
+					layer.draw_rect(leaf, Color("4a6a4a"))
+					layer.draw_line(leaf.position + Vector2(leaf.size.x * 0.5, 2), leaf.position + Vector2(leaf.size.x * 0.5, leaf.size.y - 2), Color("3a5a3a"), 2.0)
+				if _shutters_barred():
+					layer.draw_rect(Rect2(c + Vector2(-px * 0.42, -px * 0.1), Vector2(px * 0.84, px * 0.12)), Color("3a2a1c"))
 			"bell":
 				# A tall post with a crossbar and an iron bell hanging under it.
 				var base := c + Vector2(0, px * 0.4)
@@ -515,3 +717,11 @@ func _draw() -> void:
 				layer.draw_colored_polygon(bell, Color("4a4a50"))
 				layer.draw_polyline(bell + PackedVector2Array([bell[0]]), ink, 2.0)
 				layer.draw_circle(b + Vector2(0, px * 0.5), 3.0, Color("2a2a30"))
+	# Torn fence rails: a dark gap with a splintered end, over the fence.
+	for t in broken:
+		var c := m._tile_center(t.x, t.y)
+		layer.draw_rect(Rect2(c + Vector2(-px * 0.3, -px * 0.3), Vector2(px * 0.6, px * 0.5)), Color(0.12, 0.09, 0.07, 0.75))
+		layer.draw_line(c + Vector2(-px * 0.45, -px * 0.15), c + Vector2(-px * 0.05, px * 0.1), ink, 5.0)
+		layer.draw_line(c + Vector2(-px * 0.45, -px * 0.15), c + Vector2(-px * 0.05, px * 0.1), Color("b89a6a"), 2.0)
+		layer.draw_line(c + Vector2(px * 0.1, -px * 0.25), c + Vector2(px * 0.4, px * 0.2), ink, 5.0)
+		layer.draw_line(c + Vector2(px * 0.1, -px * 0.25), c + Vector2(px * 0.4, px * 0.2), Color("b89a6a"), 2.0)
