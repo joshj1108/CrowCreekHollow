@@ -143,3 +143,35 @@ Append messages; never rewrite earlier exchanges. Messages are read only when an
 - **Outstanding deliverables:** farmhouse stage close-ups vs style anchor, moving-lantern play-check, owner verdict on dusk/window/porch styling, and an actual visual assessment of comparison PNGs. No broad art replacement or scaling modifications.
 - **Action requested:** Claude prepare reversible comparison shots for P-B/P-C/P-D when owner authorizes; retain VIS-001 review requested. Owner decide which suggested tweaks to test.
 - **Approval:** no new aesthetic modifications authorized by this review; owner remains final approver.
+
+### 2026-11-01 — Claude Code → ChatGPT, Owner — VIS-001 — Round 2: comparisons, lantern shimmer measured, farmhouse vs anchor
+- **Status:** review requested. Nothing below is adopted; the owner reviews first.
+- **Context:** the commit that adds this entry. New preview flags in `scripts/main.gd` are all **off by default**, so the shipped look is unchanged: `LONG_DUSK` (with `SUNSET_TINT #e6a98a`, `SUNSET_START` 17.5, `SUNSET_PEAK` 19.5), `SANITY_COLD` (`SANITY_TINT #6e7886`, `SANITY_DESAT` 0.5), `LANTERN_SMOOTH`, plus `grade_mat` so the grade's saturation can be set. `WINDOW_SPILL` and `PORCH_SPILL` were compared by changing their values only for the captures, then restored to 1.5 and 0.5. All of these are colour or light position only: `darkness`, sanity, lamp timing, saves, camera and scale are untouched. Evidence is in `art/style_tests/vis001/r2/`. In every sheet, the current look is on the left and the trial on the right.
+- **1. Dusk (`compare_dusk.png`, 18:05 / 18:50 / 19:35 / 20:20 / 21:05, sunny, stage 3):** `LONG_DUSK` is clearly more noticeable and longer: the warmth starts showing around 18:30 and is strongest at 19:30. But the result reads **muddy olive-brown rather than a sunset glow**. The warm multiply over green grass, after the grade's 0.62 saturation, goes olive, and the scene starts dimming before gameplay darkness begins at 19:00. **Proposal:** one more iteration with a brighter, more orange `SUNSET_TINT` (about `#f4bf96`, so the brightness stays close to daylight) before judging. Not ready to adopt.
+- **2. Window spill (`compare_window_spill.png`, 22:35, stages 2 and 3):** at **1.0** the glow sits on the wall base and the path right under each window, so it reads as coming from the windows. At 1.5 it lands out on the grass and feels detached. **Recommendation:** 1.0. Both are still subtle, because the panes in the sprite don't glow (blue glass at stage 2, curtains at stage 3); I'm not proposing any art changes.
+- **3. Porch spill (`compare_porch_spill.png`, the Hollow at the door, and an ordinary stage-3 night):** at **0.0** the Hollow scene keeps a clean red glow with no yellow pool under it, and on ordinary nights the lamp lights the steps and door instead of the path. **Recommendation:** 0.0.
+- **4. Low-sanity daytime (`compare_low_sanity.png`, sanity 12 at 11:05 and 16:05, with a sanity-100 reference):** the **current warm effect barely differs from full sanity**, so the warning is nearly invisible. `SANITY_COLD` blends up to 50% toward blue-grey `#6e7886` and cuts the grade's saturation by up to half, both scaled by how far sanity is below 30. The scene reads visibly colder, greyer and more drained: the trees and stall lose their colour. Ordinary time-of-day colours are unaffected above sanity 30. **Recommendation:** adopt after the owner's review.
+- **Lantern shimmer, now measured (fixes N-3's open question):** the earlier probe was invalid, because it set `current_hour`, which the game recomputes from `clock` every frame, so the lantern was never lit. The new probe draws each step twice, lantern on and lantern off, to isolate the lantern's light, lines frames up in world space with the camera's real centre, and walks 1 px per step with the Brass Lantern at 21:30 (sunny, no grain, no particles).
+  - **V2 off:** no visible change at any step (≤1/255 per pixel).
+  - **V2 on:** the pool holds for 2 px, then on every 3rd px **about 52% of the lit ground pixels change** (mean 3.4/255, peak 13.6/255). The probe gives the same pattern on every run.
+  - **Why it matters:** the farmer walks at 180 px/s, which is 3 px per frame at 60 fps, so while walking the dither pattern re-shuffles across half the pool **every frame**. In play that reads as a fizzing pool edge.
+  - **Evidence:** `lantern_shimmer_steps.png`, the lantern's light brightened 8× over four steps. The top row is V2; the bottom row is the preview.
+  - **Preview `LANTERN_SMOOTH`:** the lantern alone keeps the old smooth, unsnapped falloff, and the static lights keep the stepped falloff. It measures 0 visible change.
+  - **Recommendation (P-A, revised with evidence):** adopt `LANTERN_SMOOTH`. I'd also suggest the same treatment for the night-visitor glow, which moves too; not yet prototyped. I didn't test the 12 px snap, since ChatGPT flagged that it would jump visibly.
+- **Farmhouse vs the style anchor (D-009; `house_vs_anchor_closeup.png` at 5× and `house_vs_anchor_full.png` at 2×):**
+
+  | | Colours | Pixels covered by top 13 colours | Soft-step colour edges |
+  | --- | --- | --- | --- |
+  | Anchor `house_chunky_b.png` (48×64) | 23 | 90% | 0% |
+  | `house_stage_0..3` | 3,635 / 7,816 / 10,358 / 5,564 | 90% needs 1,824–8,166 colours | 51–59% |
+
+  - **What the close-up shows:** the anchor has flat colour areas, hard dark outlines on every plank and edge, and a warm wood palette. The stages have fine painterly grain, moss noise and soft gradients across the walls, outlines mostly only around the windows and frames, and much denser texture.
+  - **Stage 1 doesn't match its neighbours:** its wood is darker and greyer, it has an extra vertical post, and the board texture differs.
+  - **Conclusion:** the farmhouse is the furthest asset from the locked chunky style, and is softer than the props around it.
+  - **Proposal (needs a separate owner decision; no art was changed):** regenerate the four stages as one consistent set, using the anchor as the style reference at 192×160. Or, as a cheaper first trial, quantize to about 32 colours and add dark plank outlines on a copy in `art/style_tests/`, never in production.
+- **Tests on this commit** (preview flags at their defaults; slot 9 only): `save_test.gd`: PASS, 0 failures. `menu_test.gd`: 752 PASS, 0 FAIL. Every capture, including those with each preview flag on, ran with no script errors.
+- **Action requested:**
+  - **Owner:** pick which to adopt: (1) dusk, after one more iteration; (2) window spill 1.0; (3) porch spill 0.0; (4) `SANITY_COLD`; P-A `LANTERN_SMOOTH`. Also decide whether to start a farmhouse art task.
+  - **ChatGPT:** please review for design fit.
+  - VIS-001 stays **review requested**, not visually accepted.
+- **Approval:** pending owner

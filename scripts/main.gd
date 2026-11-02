@@ -684,6 +684,19 @@ const BAYER_4 := [0, 8, 2, 10, 12, 4, 14, 6, 3, 11, 1, 9, 15, 7, 13, 5]
 const ART_PX := float(SCALE)    # one art pixel in world units
 const WINDOW_SPILL := 1.5       # tiles the window lights sit below the windows, so the glow falls on the ground
 const PORCH_SPILL := 0.5        # the same for the porch lamp
+# VIS-001 previews, off until the owner reviews the comparisons. LONG_DUSK starts the sunset's colour at 17:30 and
+# holds it to 19:30 before the night tint takes over; SANITY_COLD turns low sanity's daytime gloom a cold, greyed
+# blue instead of dusk. Both are colour only: darkness, sanity and the lamps are unchanged.
+const LONG_DUSK := false
+const SUNSET_TINT := Color("e6a98a")
+const SUNSET_START := 17.5
+const SUNSET_PEAK := 19.5
+const SANITY_COLD := false
+# Preview: the lantern keeps the old smooth, unsnapped falloff, because the stepped dither re-shuffles under it as
+# you walk (VIS-001 shimmer test). Static lights keep the stepped falloff.
+const LANTERN_SMOOTH := false
+const SANITY_TINT := Color("6e7886")   # the cold blue-grey low sanity leans toward, at its deepest
+const SANITY_DESAT := 0.5              # the grade's saturation is cut by up to this share at the lowest sanity
 # The cave has no daylight at any hour: almost black, so only a lantern's ring shows the tunnels.
 const CAVE_TINT := Color("050508")
 
@@ -871,6 +884,7 @@ var saved_panel := ""
 var action_bar: ActionBar
 var minimap: Minimap
 var canvas_modulate: CanvasModulate
+var grade_mat: ShaderMaterial    # the colour grade, so low sanity can grey it (SANITY_COLD)
 var hud_panel: PanelContainer
 var hud_clock_panel: PanelContainer
 var hud_day_label: Label
@@ -1244,6 +1258,10 @@ func _process(delta: float) -> void:
 	var lamp_dark := darkness
 	darkness = clampf(darkness + sanity_sys._low_sanity_boost(), 0.0, 1.0)
 	canvas_modulate.color = _sky_tint(darkness)
+	if SANITY_COLD:
+		var gloom := sanity_sys._low_sanity_boost() / 0.25   # 0 at LOW_SANITY, 1 at none
+		canvas_modulate.color = _sky_tint(lamp_dark).lerp(SANITY_TINT, gloom * 0.5)
+		grade_mat.set_shader_parameter("saturation", 0.62 * (1.0 - SANITY_DESAT * gloom))
 	if in_cave:
 		canvas_modulate.color = trek._tint(darkness) if trek.active else CAVE_TINT
 	weather.night_tint = canvas_modulate.color if LIGHTING_V2 else Color.WHITE
@@ -1977,6 +1995,9 @@ func _light_snap(at: Vector2) -> Vector2:
 func _sky_tint(darkness: float) -> Color:
 	if not LIGHTING_V2:
 		return _light_tint().lerp(NIGHT_TINT, darkness)
+	if LONG_DUSK:
+		var warm := smoothstep(SUNSET_START, SUNSET_PEAK, current_hour)
+		return _light_tint().lerp(SUNSET_TINT, warm).lerp(NIGHT_TINT, darkness)
 	if darkness < DUSK_PEAK:
 		return _light_tint().lerp(DUSK_TINT, darkness / DUSK_PEAK)
 	return DUSK_TINT.lerp(NIGHT_TINT, (darkness - DUSK_PEAK) / (1.0 - DUSK_PEAK))
@@ -2070,6 +2091,7 @@ func _build_hud() -> void:
 	grade.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	grade.material = ShaderMaterial.new()
 	grade.material.shader = load("res://shaders/grade.gdshader")
+	grade_mat = grade.material
 	grade_layer.add_child(grade)
 
 	var layer := CanvasLayer.new()
@@ -5782,14 +5804,18 @@ func _apply_lantern_radius() -> void:
 	if lantern_tier == 0:
 		return
 	var radius: float = LANTERN_TIERS[lantern_tier - 1]["radius"]
-	_glow(lantern_light, radius * PX / 128.0)
+	if LANTERN_SMOOTH:
+		lantern_light.texture = _glow_texture()
+		lantern_light.texture_scale = radius * PX / 128.0
+	else:
+		_glow(lantern_light, radius * PX / 128.0)
 
 
 func _update_lantern(darkness: float) -> void:
 	# In the Rookery Wood the lantern burns lamp oil, and goes out without it.
 	lantern_light.enabled = lantern_tier > 0 and darkness > 0.05 and not (trek.active and not trek.lit)
 	# The lantern's pool steps across the art-pixel grid as you walk, rather than sliding under it.
-	if LIGHTING_V2:
+	if LIGHTING_V2 and not LANTERN_SMOOTH:
 		lantern_light.position = _light_snap(player.global_position) - player.global_position
 	var energy := LANTERN_ENERGY * ((TREK_LANTERN_BOOST if trek.active else CAVE_LANTERN_BOOST) if in_cave else 1.0)
 	if lantern_tier >= LANTERN_FLICKER_TIER:
