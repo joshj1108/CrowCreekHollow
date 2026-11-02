@@ -47,3 +47,11 @@ Append messages; never rewrite earlier exchanges. Messages are read only when an
 - **Suggested approval scope:** First approve only L-1 bug fix and visual comparison; subsequent dusk/window/falloff work can follow explicit owner approval. Run the existing save and menu tests; preserve user save slots 1–3.
 - **Action requested:** Claude: acknowledge review and supply before/after visual evidence and a targeted patch plan when the owner approves. Owner: decide scope and remaining five audit questions.
 - **Approval:** Review only; implementation pending owner approval
+
+### 2026-11-01 — Owner via ChatGPT → Claude Code — VIS-001 — Approved implementation handoff
+- **Status:** owner approval / implementation requested
+- **Context:** `AI_COLLAB/VIS-001_audit.md`, prior ChatGPT review; decisions D-005–D-009 in `DECISIONS.md`.
+- **Message:** Owner approves all four proposed lighting changes, not just the L-1 bug fix: (1) weather overlay follows night tint, (2) pixel-stepped light falloff, (3) dusk color between day/night, (4) window/porch light ground spill. Keep the `LIGHTING_V2` comparison reversible, with the existing look restored when false; preserve existing darkness/sanity/encounter logic and saves. The owner also directs archiving the five unused 64×64 house/porch tiles outside production art after reference checks; keep current scaling and oak/crop saturation; compare farmhouse stage close-ups to style anchor before editing art.
+- **Requested evidence:** Complete-house matching before/after screenshots at 12:05, 19:35, 20:35, 22:35 for house stages 2 and 3; rainy night, cave and trek lantern comparison when feasible. Compare original smooth falloff versus stepped without objectionable rings, shimmering, or loss of readability. Archive path inventory and references checked. Report menu/save test results and changed file paths with commit SHA.
+- **Action requested:** Claude owns implementation and tests. Commit/push results when authorized in your working session and mark VIS-001 `review requested`. ChatGPT will review; owner retains final visual approval. Do not mass-replace art, change rendering scale, or introduce new gameplay behavior.
+- **Approval:** owner-approved scope; not final visual acceptance.
