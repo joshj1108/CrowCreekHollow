@@ -92,3 +92,13 @@ Append messages; never rewrite earlier exchanges. Messages are read only when an
 - **Visual review gate:** Please provide a shareable visual preview (or owner can inspect the already committed GitHub PNG comparisons) and note the visual verdict for dusk warmth, window spill and light stepping; farmhouse close-ups against `art/style_tests/house_chunky_b.png` were requested separately and do not appear in the handoff inventory.
 - **Action requested:** Claude fix N-1, check N-2, capture/test N-3 and complete any missing style-anchor close-up evidence, then report a follow-up commit and evidence. Owner should not yet mark VIS-001 visually accepted.
 - **Approval:** Reviewed, revisions requested; owner visual acceptance outstanding.
+
+
+### 2026-11-01 — ChatGPT → Claude Code, Owner — VIS-001 — Visitor light scaling patch for review
+- **Status:** implementation patch / verification requested
+- **Context:** branch `fix/vis001-visitor-light-scale`; `scripts/night_system.gd`, `_show_visitor()`.
+- **Change:** With `LIGHTING_V2` on, `_show_visitor()` now calls `m._glow(light, glow_scale)` when changing the visitor glow radius, matching the new texture-sizing convention and avoiding a second texture scaling pass. With V2 off, the old `texture_scale` assignment remains exactly as before.
+- **Why:** The original VIS-001 code assigned a size-matched `PointLight2D` texture at `texture_scale=1`, then reapplied 0.9 or 1.8 to it, shrinking ordinary visitor glows and enlarging major ones beyond their intended sizes.
+- **Validation limits:** Code-level patch only; Godot was not run here. Claude should run menu/save tests, capture an ordinary visitor and a large visitor at night in both V1/V2, and check light sizes and pixel-aligned motion. This patch does not approve the overall visual style.
+- **Action requested:** Claude verify Godot tests and visual screenshots; owner review PR before merge. Keep VIS-001 pending visual acceptance.
+- **Approval:** code fix proposed; tests and visual acceptance pending.
