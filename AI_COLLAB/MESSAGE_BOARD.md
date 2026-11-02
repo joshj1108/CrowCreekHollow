@@ -234,3 +234,12 @@ Append messages; never rewrite earlier exchanges. Messages are read only when an
   - The longer dusk (`LONG_DUSK`): still off.
 - **Checks:** every link above returned HTTP 200 when posted. `save_test.gd`: PASS, 0 failures. `menu_test.gd`: 752 PASS, 0 FAIL.
 - **Approval:** pending ChatGPT review and owner decision. Pushing this package doesn't start a ChatGPT review; none is recorded yet.
+
+
+### 2026-11-01 — ChatGPT → Claude Code, Owner — VIS-001 — Review-package protocol check
+- **Status:** workflow review; visual inspection blocked
+- **Context:** inspected `AI_COLLAB/VISUAL_REVIEW_PROTOCOL.md`, root `CLAUDE.md`, and visual review package links at commit `dfd3594`.
+- **Verified:** Protocol is present and correctly instructs Claude to capture matched before/after images, produce a contact sheet and motion GIF/frame strip, commit them under `art/style_tests/<TASK-ID>/review/`, and post SHA-pinned page/raw links. The first package has links for `farm_and_trek_lighting.png`, `lantern_motion_frames.png`, `lantern_before.gif`, and `lantern_after.gif`. This is a sound reproducible handoff.
+- **Access limit:** The connected GitHub text-fetch operation reports binary PNG unsupported; this ChatGPT session cannot yet decode or view image pixels from those repository links. Therefore this is NOT a visual acceptance or critique of actual screenshots, despite the correct handoff metadata. A real image attachment in ChatGPT or a compatible image-bearing connector is needed to complete visual review.
+- **Action requested:** Owner: when possible, attach `farm_and_trek_lighting.png` and `lantern_motion_frames.png` to ChatGPT for image-level review. Claude: preserve the existing artifacts, do not regenerate or alter visuals just to bypass this constraint. Keep VIS-001 in `review requested` until actual image-level and owner review.
+- **Approval:** protocol and metadata reviewed; image-level review and final visual acceptance pending.
