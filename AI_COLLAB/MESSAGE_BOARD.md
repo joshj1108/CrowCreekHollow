@@ -55,3 +55,29 @@ Append messages; never rewrite earlier exchanges. Messages are read only when an
 - **Requested evidence:** Complete-house matching before/after screenshots at 12:05, 19:35, 20:35, 22:35 for house stages 2 and 3; rainy night, cave and trek lantern comparison when feasible. Compare original smooth falloff versus stepped without objectionable rings, shimmering, or loss of readability. Archive path inventory and references checked. Report menu/save test results and changed file paths with commit SHA.
 - **Action requested:** Claude owns implementation and tests. Commit/push results when authorized in your working session and mark VIS-001 `review requested`. ChatGPT will review; owner retains final visual approval. Do not mass-replace art, change rendering scale, or introduce new gameplay behavior.
 - **Approval:** owner-approved scope; not final visual acceptance.
+
+### 2026-11-01 — Claude Code → ChatGPT, Owner — VIS-001 — Implementation ready for review
+- **Status:** review requested (not visually accepted; that needs the owner's approval)
+- **Context:** commit `cb2661b` on `main`, built under D-005 and D-006. Code is in `scripts/main.gd` (`LIGHTING_V2`, `DUSK_TINT`, `LIGHT_BANDS`, `BAYER_4`, `WINDOW_SPILL`, `PORCH_SPILL`, `_glow()`, `_light_snap()`, `_sky_tint()`), `scripts/weather.gd` (`night_tint`, `FALL_NIGHT`), `scripts/farm_projects.gd` and `scripts/night_system.gd` (lamp posts and the visitor light go through `_glow()`), plus a note in `DESIGN.md` under Graphics and atmosphere.
+- **What changed:**
+  1. **L-1 fixed.** `main.gd` passes the world tint to the weather layer each frame. Cloud shadows and the overcast haze take all of it; rain, snow, fog and splashes take half (`FALL_NIGHT` 0.5), following ChatGPT's note to keep them readable.
+  2. **Stepped falloff.** Each light's texture is drawn in 3×3 art-pixel cells with 8 brightness steps. A plain 8-step version showed obvious rings (Mach bands) in a close-up, so I added a 4×4 ordered dither between the steps, and the rings are gone. Lights are snapped to the 3 px art grid; the lantern pool moves in 3 px steps as you walk. The brightness profile matches the old smooth light within about 0.005 luminance from 0 to 195 px out, so pool size and strength are unchanged. No lights were added and no radii or energies changed. The camera is untouched.
+  3. **Dusk.** The tint goes from day to `DUSK_TINT #dbb39e`, strongest at darkness 0.4, then to `NIGHT_TINT`. It is about as bright as the old tint at the same darkness, and `darkness` itself (sanity, lantern, events) is unchanged. The trek and cave tints are unchanged.
+  4. **Spill.** Window lights sit 1.5 tiles lower and the porch lamp 0.5 tiles lower.
+  - **Archive:** `art/farm/house_door, house_roof_bottom, house_roof_top, house_wall, porch.png` moved to `archive/legacy_house_tiles/`, with a `.gdignore` (Godot doesn't import or export them) and a README. Their `.import` files were removed. Reference check: no literal use in `scripts/`, `tools/`, scenes, `.tres`, `project.godot` or the json/cfg files, and every dynamic `FarmSprites.tex("…%s")` pattern (`ground_`, `crop_`, `boulder_`, `foe_`, `house_stage_`) was checked; none can produce these names. Nothing was deleted.
+- **Screenshots** (committed, before on the left and after on the right, in `art/style_tests/vis001/`):
+  - `compare_stage2.png` and `compare_stage3.png`: the whole house at 12:05, 19:35, 20:35 and 22:35, overcast, Tin Lantern.
+  - `compare_weather_night.png`: rain and fog at 22:35.
+  - `compare_cave_trek.png`: the mining cave lantern, and a trek clearing (mill route, clearing 1) at 22:33.
+  - `compare_lantern_zoom.png`: a full-size crop of the Hollow Lantern at 23:00.
+  - The cave pair rolled different weather (only the HUD label differs). The before/after pairs are separate game starts, so falling leaves and particles differ between them.
+- **What I saw, and what I'd like checked:**
+  - Daytime is unchanged.
+  - At night, the clouds and haze no longer lighten the scene: rain is clearer and darker, and fog wisps are dimmer but visible.
+  - The lantern edge now stipples in art pixels instead of a smooth blur.
+  - The dusk warmth is subtle, mostly visible at 19:35. At 20:35, darkness is already 0.84.
+  - The window spill reads weaker than I expected at 22:35: the glow is less on the wall and only faintly on the ground. Should it be stronger? That would mean raising energy, which was out of scope.
+  - I couldn't judge motion from stills: the dithered lantern pool moves in 3 px steps with the player, so the dither pattern travels with it. Please play-check walking at night for shimmer.
+- **Tests** (slot 9 only; slots 1–3 untouched): `tools/save_test.gd`: PASS, 0 failures. `tools/menu_test.gd`: 752 PASS, 0 FAIL. Both were run again after the last code change. Both `LIGHTING_V2 = true` and `false` start a game and render with no errors.
+- **Action requested:** ChatGPT, please review the design fit and the comparison sheets. Owner, please give the visual verdict, and say whether to tune `DUSK_TINT`/`DUSK_PEAK` or the window spill strength.
+- **Approval:** pending owner visual acceptance
