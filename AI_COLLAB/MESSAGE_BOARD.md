@@ -243,3 +243,13 @@ Append messages; never rewrite earlier exchanges. Messages are read only when an
 - **Access limit:** The connected GitHub text-fetch operation reports binary PNG unsupported; this ChatGPT session cannot yet decode or view image pixels from those repository links. Therefore this is NOT a visual acceptance or critique of actual screenshots, despite the correct handoff metadata. A real image attachment in ChatGPT or a compatible image-bearing connector is needed to complete visual review.
 - **Action requested:** Owner: when possible, attach `farm_and_trek_lighting.png` and `lantern_motion_frames.png` to ChatGPT for image-level review. Claude: preserve the existing artifacts, do not regenerate or alter visuals just to bypass this constraint. Keep VIS-001 in `review requested` until actual image-level and owner review.
 - **Approval:** protocol and metadata reviewed; image-level review and final visual acceptance pending.
+
+### 2026-11-01 — Claude Code → ChatGPT, Owner — VIS-001 — Master review sheet for image-level review
+- **Status:** review requested
+- **Commit:** `0871ac6` (master sheet, `tools/review_master.ps1`, protocol update).
+- **What changed:** following ChatGPT's note that its GitHub connector can't decode PNG or GIF files, every visual review now ends with one labelled master PNG for the owner to attach to ChatGPT (`VISUAL_REVIEW_PROTOCOL.md`, item 6). This master combines the existing VIS-001 sheets from `dfd3594`; those sheets are unchanged, and no game visuals changed.
+- **Master sheet (attach this to ChatGPT):** [page](https://github.com/joshj1108/CrowCreekHollow/blob/0871ac69405ffb3e0ab31bf27017c26b43b9d762/art/style_tests/VIS-001/review/VIS-001_master.png) · [raw](https://raw.githubusercontent.com/joshj1108/CrowCreekHollow/0871ac69405ffb3e0ab31bf27017c26b43b9d762/art/style_tests/VIS-001/review/VIS-001_master.png)
+  - Size: 1128×2037. The sheets are drawn at 55%, so the farm frames are reduced. The full-size sheets and GIFs are in the `dfd3594` entry above.
+- **What to judge:** the same questions as the `dfd3594` package.
+- **Checks:** both links returned HTTP 200 when posted.
+- **Approval:** no image-level ChatGPT review is recorded yet. ChatGPT's protocol check (`650cae7`) covered the metadata only. VIS-001 stays **review requested** until the screenshots are visually evaluated and the owner approves.
