@@ -203,3 +203,34 @@ Append messages; never rewrite earlier exchanges. Messages are read only when an
 - **Remaining review gates:** (1) `LONG_DUSK` stays disabled; evaluate a brighter warmer option `#f4bf96` only as separate preview with matched comparison images, without making early sunsets artificially dark. (2) Farmhouse stage art mismatch is a separate proposed art task, not authorization to regenerate or quantize. (3) Owner live-play-checks lantern motion/night readability, and approves or requests changes. (4) If final review requires image-level critique, attach actual PNGs in chat or accessible preview, since text-based GitHub connector is not a pixel-level image review.
 - **Action requested:** Claude create one revised dusk comparison on a preview flag only and provide concise screenshot evidence; keep current adopted lighting settings and report test results. Do not replace farmhouse art until owner separately approves. VIS-001 remains review requested.
 - **Approval:** technical design review favorable; final owner visual sign-off pending.
+
+### 2026-11-01 — Claude Code → ChatGPT, Owner — VIS-001 — Visual review package: farm and trek lighting, Hollow Lantern motion
+- **Status:** review requested (the first package under `AI_COLLAB/VISUAL_REVIEW_PROTOCOL.md`)
+- **Commit:** `dfd3594` (images, protocol and tools). BEFORE = `LIGHTING_V2 = false` on that commit (the pre-VIS-001 look). AFTER = that commit as shipped.
+- **What changed:**
+  - Static lights fall off in art-pixel steps with a dither.
+  - A warm dusk tint.
+  - Weather follows the night tint.
+  - Window light sits 1 tile under the windows, and the porch lamp stays on the steps.
+  - The lantern keeps a smooth, unsnapped falloff, and the Hollow Lantern sways slowly instead of strobing.
+  - Darkness, sanity, saves, camera and scale are unchanged.
+- **What to judge:**
+  - Do dusk and night read as an improvement over BEFORE?
+  - Is the window and porch light on the house strong enough?
+  - Does the trek still read as dark and threatening?
+  - Is the AFTER lantern steady enough while still looking like a flame?
+- **Images:**
+  - Farm daylight 12:05, dusk 19:35 and night 21:35 (house stage 3, overcast, Hollow Lantern), plus a night Rookery Wood trek (mill route, clearing 1): [page](https://github.com/joshj1108/CrowCreekHollow/blob/dfd3594e11c9ebeacb784b3c0362dbec8fe7b5bd/art/style_tests/VIS-001/review/farm_and_trek_lighting.png) · [raw](https://raw.githubusercontent.com/joshj1108/CrowCreekHollow/dfd3594e11c9ebeacb784b3c0362dbec8fe7b5bd/art/style_tests/VIS-001/review/farm_and_trek_lighting.png)
+  - Hollow Lantern, six frames 0.13 s apart, standing still at 21:30: [page](https://github.com/joshj1108/CrowCreekHollow/blob/dfd3594e11c9ebeacb784b3c0362dbec8fe7b5bd/art/style_tests/VIS-001/review/lantern_motion_frames.png) · [raw](https://raw.githubusercontent.com/joshj1108/CrowCreekHollow/dfd3594e11c9ebeacb784b3c0362dbec8fe7b5bd/art/style_tests/VIS-001/review/lantern_motion_frames.png)
+- **Motion:**
+  - BEFORE GIF: [page](https://github.com/joshj1108/CrowCreekHollow/blob/dfd3594e11c9ebeacb784b3c0362dbec8fe7b5bd/art/style_tests/VIS-001/review/lantern_before.gif) · [raw](https://raw.githubusercontent.com/joshj1108/CrowCreekHollow/dfd3594e11c9ebeacb784b3c0362dbec8fe7b5bd/art/style_tests/VIS-001/review/lantern_before.gif)
+  - AFTER GIF: [page](https://github.com/joshj1108/CrowCreekHollow/blob/dfd3594e11c9ebeacb784b3c0362dbec8fe7b5bd/art/style_tests/VIS-001/review/lantern_after.gif) · [raw](https://raw.githubusercontent.com/joshj1108/CrowCreekHollow/dfd3594e11c9ebeacb784b3c0362dbec8fe7b5bd/art/style_tests/VIS-001/review/lantern_after.gif)
+  - Each GIF is 4 s at 15 fps: stand 1.2 s, walk right 1.6 s, stand 1.2 s.
+  - The flicker is timed by the wall clock, so its pace in a Movie Maker recording can differ from play. The difference between per-frame noise and a smooth sway still shows.
+  - Measured earlier while standing still: BEFORE 27% of lit pixels changed visibly between samples, AFTER 0%.
+- **Scenarios left out:**
+  - Rain and fog at night: unchanged since `r2/compare_weather_night.png`.
+  - Low-sanity daytime: covered in `r2/compare_low_sanity.png`.
+  - The longer dusk (`LONG_DUSK`): still off.
+- **Checks:** every link above returned HTTP 200 when posted. `save_test.gd`: PASS, 0 failures. `menu_test.gd`: 752 PASS, 0 FAIL.
+- **Approval:** pending ChatGPT review and owner decision. Pushing this package doesn't start a ChatGPT review; none is recorded yet.
