@@ -1,0 +1,13 @@
+{
+  "_note": "ART-003 vertical-slice asset family (2026-11-02). Test art only. Props: create_image_pixflux, view 'low top-down', selective outline, detailed shading, highly detailed, color_image = concept_palette.png (32 colours hand-picked from art/reference/concept/). 1 generation each.",
+  "oak.png":          {"job_id": "cfd5f8c5-ebc0-46c9-9423-883fb8591e40", "asset_id": "0a732654-1f14-5b45-a4d2-2bfdd6ab3649", "size": "160x160", "seed": 301},
+  "fir.png":          {"job_id": "c30fedbf-7b29-445d-8d0a-ae3f336018c7", "asset_id": "596c7626-0268-5377-9d87-2352c9ac7ab8", "size": "48x96", "seed": 302},
+  "maple.png":        {"job_id": "77b01ad2-02e3-4957-8282-7340bea7a958", "asset_id": "49debcd9-f9e7-5556-8730-ae34d7fc59eb", "size": "64x80", "seed": 303},
+  "undergrowth.png":  {"job_id": "b95c97c9-01d1-4ee0-967c-3dbb23505d8e", "asset_id": "2e8c3a7a-f766-5d49-8dd4-973780d45067", "size": "48x32", "seed": 304},
+  "rocks.png":        {"job_id": "2e7ed04a-4681-4685-a04d-536b8178b7d0", "asset_id": "925ff3f3-4f26-59b6-85b7-09f8b48bc599", "size": "48x32", "seed": 305},
+  "fence.png":        {"job_id": "df9a2696-5548-43cd-9044-af22a8fe0d0c", "asset_id": "c3c8d0b5-92d1-5447-a58e-4b04b9c24847", "size": "64x32", "seed": 306},
+  "lantern_post.png": {"job_id": "a38ff424-6ec0-4803-b196-3ac49fe1e15f", "asset_id": "c72698ef-f6b3-5559-9f88-6719c690111e", "size": "32x48", "seed": 307},
+  "crops.png":        {"job_id": "1825819a-3d09-4f10-b881-f065659375bb", "asset_id": "7709fe48-036f-535b-9b88-0ded42aa90fa", "size": "48x32", "seed": 308},
+  "path_tileset.png": {"tool": "create_topdown_tileset (standard, round, boundary_amplitude 0.2)", "tileset_id": "b05af861-d1df-46bd-9e04-f54a67550590", "grass_base_tile_id": "9ed879f8-c512-481e-88ce-ced338139a6c", "note": "metadata labels grass 'upper'; the slice tool picks grass by colour"},
+  "soil_tileset.png": {"tool": "create_topdown_tileset (standard, square), chained from the path set's grass", "tileset_id": "332eec20-d3f4-4190-9baa-15831c506b59", "soil_base_tile_id": "68ddf057-82ed-4247-bfe1-ac4272aa6ff1"}
+}
