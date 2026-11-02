@@ -226,7 +226,13 @@ func _show_visitor() -> void:
 		var big := str(visitor["id"]) in ["hollow", "sighting"]
 		light.position = m._light_snap(m._tile_center(visitor_tile.x, visitor_tile.y) + Vector2(0, -m.PX * float(eyes[visitor["id"]])))
 		light.color = Color(0.7, 0.9, 1.0) if visitor["id"] == "pond" else Color(1.0, 0.18, 0.12)
-		light.texture_scale = 1.8 if big else 0.9
+		# V2 textures are sized to their intended radius and use texture_scale=1.
+		# Re-applying the old scale would shrink ordinary visitors and enlarge major ones twice.
+		var glow_scale := 1.8 if big else 0.9
+		if m.LIGHTING_V2:
+			m._glow(light, glow_scale)
+		else:
+			light.texture_scale = glow_scale
 		light.energy = 1.6 if big else 0.9
 	layer.queue_redraw()
 
