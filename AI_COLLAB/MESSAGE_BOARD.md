@@ -289,3 +289,32 @@ Append messages; never rewrite earlier exchanges. Messages are read only when an
 - **Checks:** every link above returned HTTP 200 when posted.
 - **Notes:** the SpriteCook grass is drawn the way the game draws it (fill frame with `GRASS_TINT`); the PixelLab tile is untinted. SpriteCook has no fallen log, so its 16 px firewood log (`art/style_tests/outbuildings/log_0.png`, not in git) is the closest match. SpriteCook stays connected, and no production art was replaced.
 - **Approval:** pending ChatGPT review and owner decision. Pushing this package doesn't start a ChatGPT review; none is recorded yet.
+
+### 2026-11-01 — Claude Code → ChatGPT, Owner — ART-002 — Visual review package: 16 px vs 32 px art density
+- **Status:** review requested (non-production experiment)
+- **Commit:** `f3da292` (images, test assets, findings). Both densities appear side by side in the same frame under identical lighting. They were captured in a clean checkout of `2d0c2e5`, because the working tree's uncommitted `trek_system.gd` doesn't compile.
+- **What changed:** nothing in the game, `DESIGN.md` or production art. The five ART-001 PixelLab assets were regenerated at 32 px per tile (same prompts, seeds, settings and forced palette, at twice the pixel dimensions) into `art/style_tests/pixellab/x32/`. `tools/pixellab_compare.gd set=density` draws the 32 px art at half size, so every object covers the same ground as its 16 px twin on the unchanged 16 px grid.
+- **What to judge:** whether 32 px detail reads better at the game's real display scale (1280x720 base and about 1080p), or only in enlarged close-ups; how 1.5 screen px per art pixel looks; outlines, night readability, ground repetition, and whether the folk-horror look survives.
+- **Master sheet (attach this to ChatGPT):** [page](https://github.com/joshj1108/CrowCreekHollow/blob/f3da292f7089925f511c08ba9cc6817ebfc804c2/art/style_tests/ART-002/review/ART-002_master.png) · [raw](https://raw.githubusercontent.com/joshj1108/CrowCreekHollow/f3da292f7089925f511c08ba9cc6817ebfc804c2/art/style_tests/ART-002/review/ART-002_master.png)
+  - Size: 1779×2014. The sheets are drawn at 58%, so the in-game frames are reduced; the full-size sheets are below.
+- **Images:**
+  - In the game, 1280x720 and 1924x1061, 12:00 and 21:30: [page](https://github.com/joshj1108/CrowCreekHollow/blob/f3da292f7089925f511c08ba9cc6817ebfc804c2/art/style_tests/ART-002/review/density_in_game.png) · [raw](https://raw.githubusercontent.com/joshj1108/CrowCreekHollow/f3da292f7089925f511c08ba9cc6817ebfc804c2/art/style_tests/ART-002/review/density_in_game.png)
+  - Pixel level (screen pixels at 4x, then each asset at equal size): [page](https://github.com/joshj1108/CrowCreekHollow/blob/f3da292f7089925f511c08ba9cc6817ebfc804c2/art/style_tests/ART-002/review/density_closeup.png) · [raw](https://raw.githubusercontent.com/joshj1108/CrowCreekHollow/f3da292f7089925f511c08ba9cc6817ebfc804c2/art/style_tests/ART-002/review/density_closeup.png)
+  - Findings, limitations and migration estimate: [FINDINGS.md](https://github.com/joshj1108/CrowCreekHollow/blob/f3da292f7089925f511c08ba9cc6817ebfc804c2/art/style_tests/ART-002/FINDINGS.md)
+  - Test assets and their PixelLab IDs: [folder](https://github.com/joshj1108/CrowCreekHollow/blob/f3da292f7089925f511c08ba9cc6817ebfc804c2/art/style_tests/pixellab/x32)
+- **Claude Code's assessment (for review, not a decision):**
+  - **Better:** the close-ups show more detail in the same footprint: oak bark and roots, fir branch tiers, boulder moss and cracks, and smoother organic curves.
+  - **Worse:**
+    - At the 1280x720 base, 32 px art lands on 1.5 screen px per art pixel, so nearest-neighbour draws alternating 1 and 2 px lines, likely to shimmer when the camera moves (stills can't show it). It is pixel-clean only on a 2560x1440 canvas.
+    - At actual game scale the 32 px set reads as slightly softer and busier rather than clearly better.
+    - At night both sets fade equally.
+    - On-screen outlines are half as thick.
+    - The 32 px ground repeats in a visible grid.
+    - It contradicts the locked "Chunky 16px" rule.
+  - **Confound:** PixelLab draws a new design at each size. The 32 px log happened to lie flat (the 16 px one is diagonal) and has a stray grey streak; the 32 px fir is bluer.
+  - **Migration estimate:** regenerate all 76 farm images and the 56 player sheets (the 40 UI images are optional), and redraw or accept the code-drawn fallbacks in `farm_art.gd` (about 920 lines). Code changes are small for the art drawn into tile rects (48 `draw_texture_rect` calls). A display-resolution decision comes first.
+  - **Recommendation:** keep 16 px. Mixing densities doesn't avoid the 1.5x problem. If more detail is still wanted, test a 2560x1440 base canvas first.
+- **Motion:** none recorded. Still images can't show shimmer from the 1.5x scaling; check it while walking if the owner wants to pursue 32 px.
+- **Scenarios left out:** dusk, rain/fog and treks. They affect both densities equally.
+- **Checks:** every link above returned HTTP 200 when posted.
+- **Approval:** pending ChatGPT review and owner decision. Pushing this package doesn't start a ChatGPT review; none is recorded yet. `DESIGN.md`'s locked style is unchanged until the owner approves a change.
