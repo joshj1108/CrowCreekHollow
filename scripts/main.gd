@@ -682,19 +682,19 @@ const DUSK_PEAK := 0.4          # the darkness at which the dusk colour is stron
 const LIGHT_BANDS := 8          # brightness steps in a light's falloff
 const BAYER_4 := [0, 8, 2, 10, 12, 4, 14, 6, 3, 11, 1, 9, 15, 7, 13, 5]
 const ART_PX := float(SCALE)    # one art pixel in world units
-const WINDOW_SPILL := 1.5       # tiles the window lights sit below the windows, so the glow falls on the ground
-const PORCH_SPILL := 0.5        # the same for the porch lamp
-# VIS-001 previews, off until the owner reviews the comparisons. LONG_DUSK starts the sunset's colour at 17:30 and
-# holds it to 19:30 before the night tint takes over; SANITY_COLD turns low sanity's daytime gloom a cold, greyed
-# blue instead of dusk. Both are colour only: darkness, sanity and the lamps are unchanged.
+const WINDOW_SPILL := 1.0       # tiles the window lights sit below the windows, so the glow falls under them
+const PORCH_SPILL := 0.0        # the same for the porch lamp: kept on the steps, clear of a visitor at the door
+# SANITY_COLD turns low sanity's daytime gloom a cold, greyed blue instead of dusk; LANTERN_SMOOTH keeps the old
+# smooth, unsnapped falloff on the lantern, because the stepped dither re-shuffles under it as you walk (static
+# lights keep the stepped falloff). Both owner-approved in VIS-001 review round 2. LONG_DUSK is still a preview:
+# it starts the sunset's colour at 17:30 and holds it to 19:30 before the night tint takes over. All three are
+# colour or falloff only: darkness, sanity and the lamps' timing are unchanged.
 const LONG_DUSK := false
 const SUNSET_TINT := Color("e6a98a")
 const SUNSET_START := 17.5
 const SUNSET_PEAK := 19.5
-const SANITY_COLD := false
-# Preview: the lantern keeps the old smooth, unsnapped falloff, because the stepped dither re-shuffles under it as
-# you walk (VIS-001 shimmer test). Static lights keep the stepped falloff.
-const LANTERN_SMOOTH := false
+const SANITY_COLD := true
+const LANTERN_SMOOTH := true
 const SANITY_TINT := Color("6e7886")   # the cold blue-grey low sanity leans toward, at its deepest
 const SANITY_DESAT := 0.5              # the grade's saturation is cut by up to this share at the lowest sanity
 # The cave has no daylight at any hour: almost black, so only a lantern's ring shows the tunnels.
@@ -1258,7 +1258,7 @@ func _process(delta: float) -> void:
 	var lamp_dark := darkness
 	darkness = clampf(darkness + sanity_sys._low_sanity_boost(), 0.0, 1.0)
 	canvas_modulate.color = _sky_tint(darkness)
-	if SANITY_COLD:
+	if LIGHTING_V2 and SANITY_COLD:
 		var gloom := sanity_sys._low_sanity_boost() / 0.25   # 0 at LOW_SANITY, 1 at none
 		canvas_modulate.color = _sky_tint(lamp_dark).lerp(SANITY_TINT, gloom * 0.5)
 		grade_mat.set_shader_parameter("saturation", 0.62 * (1.0 - SANITY_DESAT * gloom))
@@ -5820,7 +5820,11 @@ func _update_lantern(darkness: float) -> void:
 	var energy := LANTERN_ENERGY * ((TREK_LANTERN_BOOST if trek.active else CAVE_LANTERN_BOOST) if in_cave else 1.0)
 	if lantern_tier >= LANTERN_FLICKER_TIER:
 		var t := Time.get_ticks_msec() / 1000.0
-		lantern_light.energy = energy * (0.9 + 0.08 * sin(t * 9.0) + randf_range(-0.03, 0.03))
+		if LIGHTING_V2:
+			# A slow flame sway, two gentle waves and no per-frame noise, which strobed on the dark nights.
+			lantern_light.energy = energy * (0.92 + 0.03 * sin(t * 4.5) + 0.02 * sin(t * 1.7 + 1.0))
+		else:
+			lantern_light.energy = energy * (0.9 + 0.08 * sin(t * 9.0) + randf_range(-0.03, 0.03))
 	else:
 		lantern_light.energy = energy
 	# Lit windows glow once the house has glass, and the porch lamp once it is restored.
