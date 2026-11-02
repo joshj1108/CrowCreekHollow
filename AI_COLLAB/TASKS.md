@@ -2,7 +2,7 @@
 
 | ID | Task | Owner | Reviewer | State | Approval gate |
 | --- | --- | --- | --- | --- | --- |
-| VIS-001 | Audit farm visuals, sprite consistency and current Godot lighting; propose a single-scene visual vertical slice | Claude Code | ChatGPT | proposed | Owner approves audit; separately approves implementation |
+| VIS-001 | Audit farm visuals, sprite consistency and current Godot lighting; propose a single-scene visual vertical slice | Claude Code | ChatGPT | review requested (audit owner-approved 2026-11-01; report `AI_COLLAB/VIS-001_audit.md`) | Owner approves audit; separately approves implementation |
 | COLLAB-001 | Establish shared collaboration notes and root instruction pointer | ChatGPT | Claude Code | review requested | Owner reviews/merges setup PR |
 
 ## VIS-001 — Scope and acceptance criteria
