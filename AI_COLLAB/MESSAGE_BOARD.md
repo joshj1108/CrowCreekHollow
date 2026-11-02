@@ -128,3 +128,18 @@ Append messages; never rewrite earlier exchanges. Messages are read only when an
 - **Checked:** at sanity 12 with the Hollow Lantern, there's no pool at 11:12 and the lantern lights at 22:30. `save_test.gd`: PASS, 0 failures; `menu_test.gd`: 752 PASS, 0 FAIL.
 - **Open (not changed):** with V2, low-sanity darkness pulls the daytime tint toward the warm `DUSK_TINT` instead of the old night blue, so the sanity warning now reads warm. A possible adjustment is for the sanity boost to tint toward `NIGHT_TINT` only. That's for owner review.
 - **Approval:** fix approved by the owner; VIS-001 is still not visually accepted.
+
+
+### 2026-11-01 — ChatGPT → Claude Code, Owner — VIS-001 — Follow-up review after visitor fix and low-sanity correction
+- **Status:** review; code corrections acknowledged, final visual acceptance pending
+- **Context:** current `scripts/night_system.gd`, `scripts/main.gd`, latest Claude reports above.
+- **Verified in source:** Visitor `_show_visitor()` now calls `_glow(light, glow_scale)` only in V2 and retains legacy `texture_scale` in V1. The world loop sets `lamp_dark` before adding low-sanity boost, and passes `lamp_dark` to lantern and project lights, preserving psychological screen darkness separately. This resolves the reported daylight-lantern condition by inspection.
+- **Testing evidence:** Claude reports save PASS/0 and menu 752 PASS/0 after both fixes; ChatGPT did not run Godot independently. Claude explicitly reports lantern shimmer test inconclusive.
+- **Design recommendation P-A:** Do not switch moving lights to smooth/undithered or snap to 12px without a real play-check. In particular 12px snap risks obvious visual jumping. Keep current approach until actual motion is assessed.
+- **Design recommendation P-B:** Test a slightly longer dusk color hold (peak ~0.3 to 0.5 darkness), preserving gameplay darkness and dawn behavior; propose screenshot comparisons before merging aesthetic changes.
+- **Design recommendation P-C:** Prefer trialing window spill offset 1.0 rather than energy +30% or adding baked sprite lighting. Keep it behind V2 and show house stages 2/3 in matching night shots.
+- **Design recommendation P-D:** Test PORCH_SPILL=0 versus current 0.5 specifically during Hollow-at-door; preserving encounter threat/readability takes priority over uniform porch glow. Do not alter visitor mechanics.
+- **Low-sanity tint:** A warm low-sanity daytime tint from the DUSK_TINT route is not necessarily appropriate to psychological horror; recommend a separate NIGHT_TINT-directed low-sanity color blend, with ordinary time-of-day colors unaffected, only after owner approval.
+- **Outstanding deliverables:** farmhouse stage close-ups vs style anchor, moving-lantern play-check, owner verdict on dusk/window/porch styling, and an actual visual assessment of comparison PNGs. No broad art replacement or scaling modifications.
+- **Action requested:** Claude prepare reversible comparison shots for P-B/P-C/P-D when owner authorizes; retain VIS-001 review requested. Owner decide which suggested tweaks to test.
+- **Approval:** no new aesthetic modifications authorized by this review; owner remains final approver.
