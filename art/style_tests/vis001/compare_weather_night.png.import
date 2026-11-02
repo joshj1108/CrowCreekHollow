@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://8ckykmgckvor"
-path="res://.godot/imported/house_roof_top.png-d1998ff385c864e36682fd5824602bf6.ctex"
+uid="uid://dxlnqxnpsvjcu"
+path="res://.godot/imported/compare_weather_night.png-04d765040ce942621b157a4fc9108eff.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/farm/house_roof_top.png"
-dest_files=["res://.godot/imported/house_roof_top.png-d1998ff385c864e36682fd5824602bf6.ctex"]
+source_file="res://art/style_tests/vis001/compare_weather_night.png"
+dest_files=["res://.godot/imported/compare_weather_night.png-04d765040ce942621b157a4fc9108eff.ctex"]
 
 [params]
 

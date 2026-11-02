@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://d1trx7sk7jamo"
-path="res://.godot/imported/house_door.png-e52ffecc568871a352629df58216b6bb.ctex"
+uid="uid://duukcmd14awjy"
+path="res://.godot/imported/compare_lantern_zoom.png-9aaf8ffb1078dac2f8116418313290ca.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/farm/house_door.png"
-dest_files=["res://.godot/imported/house_door.png-e52ffecc568871a352629df58216b6bb.ctex"]
+source_file="res://art/style_tests/vis001/compare_lantern_zoom.png"
+dest_files=["res://.godot/imported/compare_lantern_zoom.png-9aaf8ffb1078dac2f8116418313290ca.ctex"]
 
 [params]
 

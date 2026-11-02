@@ -341,10 +341,9 @@ func _stamp() -> void:
 		if LIGHT_RADIUS.has(decor[t]) and not lights.has(t):
 			var torch: bool = decor[t] == "torch"
 			var light := PointLight2D.new()
-			light.texture = m._glow_texture()
 			light.color = Color("ff9a4a") if torch else Color("ffd27a")
-			light.texture_scale = float(LIGHT_RADIUS[decor[t]]) * m.PX / 128.0
 			light.position = m._tile_center(t.x, t.y) + Vector2(0, -m.PX * (0.7 if torch else 1.1))
+			m._glow(light, float(LIGHT_RADIUS[decor[t]]) * m.PX / 128.0)
 			light.enabled = false
 			m.add_child(light)
 			lights[t] = light

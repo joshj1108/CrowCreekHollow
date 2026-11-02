@@ -210,8 +210,7 @@ func _build() -> void:
 	m.add_child(marks)
 	m.move_child(marks, 0)   # straight after the farm's own drawing
 	light = PointLight2D.new()
-	light.texture = m._glow_texture()
-	light.texture_scale = 0.9
+	m._glow(light, 0.9)
 	light.energy = 0.9
 	light.enabled = false
 	m.add_child(light)
@@ -225,7 +224,7 @@ func _show_visitor() -> void:
 		# The glow sits at eye height, so the eyes and the outline around them show in the dark.
 		var eyes := {"field": 0.75, "first": 0.75, "knock": 0.75, "watcher": 1.2, "hollow": 1.4, "sighting": 1.4, "pond": 0.0}
 		var big := str(visitor["id"]) in ["hollow", "sighting"]
-		light.position = m._tile_center(visitor_tile.x, visitor_tile.y) + Vector2(0, -m.PX * float(eyes[visitor["id"]]))
+		light.position = m._light_snap(m._tile_center(visitor_tile.x, visitor_tile.y) + Vector2(0, -m.PX * float(eyes[visitor["id"]])))
 		light.color = Color(0.7, 0.9, 1.0) if visitor["id"] == "pond" else Color(1.0, 0.18, 0.12)
 		light.texture_scale = 1.8 if big else 0.9
 		light.energy = 1.6 if big else 0.9

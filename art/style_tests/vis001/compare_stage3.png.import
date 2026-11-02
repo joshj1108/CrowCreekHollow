@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://bk6qykwemvp54"
-path="res://.godot/imported/house_roof_bottom.png-e76170e55544b2ac88aa90c8006492da.ctex"
+uid="uid://benu22lmgt5fa"
+path="res://.godot/imported/compare_stage3.png-fcdda2bad37ce41d8225fa1eadd23b42.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/farm/house_roof_bottom.png"
-dest_files=["res://.godot/imported/house_roof_bottom.png-e76170e55544b2ac88aa90c8006492da.ctex"]
+source_file="res://art/style_tests/vis001/compare_stage3.png"
+dest_files=["res://.godot/imported/compare_stage3.png-fcdda2bad37ce41d8225fa1eadd23b42.ctex"]
 
 [params]
 

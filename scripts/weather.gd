@@ -36,6 +36,10 @@ var clouds: Array = []      # each: {"c": Vector2, "r": radius, "v": drift speed
 var active_drops := 0
 var snowing := false
 var cloud_alpha := 0.25
+# The world's tint (from main.gd with LIGHTING_V2), which this layer doesn't get on its own: the cloud shadows and
+# the haze darken with the night, and rain, snow and fog take part of it, so they stay readable in the dark.
+var night_tint := Color.WHITE
+const FALL_NIGHT := 0.5     # how much of the night tint the rain, snow and fog take
 var wash_rect: ColorRect
 var edge_rect: TextureRect
 var rain_canvas: Control
@@ -181,14 +185,16 @@ func _process(delta: float) -> void:
 				wp.x = -128.0 * float(w["s"])
 				wp.y = rng.randf_range(-40.0, size.y)
 			w["p"] = wp
+	wash_rect.modulate = Color(night_tint, 1.0)
 	rain_canvas.queue_redraw()
 
 
 func _draw_weather() -> void:
+	var fall := Color.WHITE.lerp(Color(night_tint, 1.0), FALL_NIGHT)
 	for c in clouds:
 		var centre: Vector2 = c["c"]
 		var r := float(c["r"])
-		var cloud := Color(0.18, 0.2, 0.24, cloud_alpha)
+		var cloud := Color(0.18, 0.2, 0.24, cloud_alpha) * Color(night_tint, 1.0)
 		# The SpriteCook cloud, darkened into a shadow passing over the land: its pale billows multiply to
 		# the shadow colour and its greyer undersides a little darker. Some are mirrored and some drawn larger.
 		if cloud_tex != null:
@@ -209,14 +215,14 @@ func _draw_weather() -> void:
 			var sc := float(w["s"])
 			var wp: Vector2 = w["p"]
 			rain_canvas.draw_texture_rect(fog_tex, Rect2(wp.snapped(Vector2(PIX, PIX)), fog_tex.get_size() * sc),
-				false, Color(1, 1, 1, float(w["a"])))
+				false, Color(1, 1, 1, float(w["a"])) * fall)
 	if drops_tex == null:
 		for i in active_drops:
 			var p: Vector2 = drops[i]["p"]
 			if snowing:
-				rain_canvas.draw_circle(p, 2.2, Color(0.95, 0.97, 1.0, 0.7))
+				rain_canvas.draw_circle(p, 2.2, Color(0.95, 0.97, 1.0, 0.7) * fall)
 			else:
-				rain_canvas.draw_line(p, p + Vector2(WIND * 0.05, 14.0), Color(0.75, 0.82, 0.9, 0.35), 1.0)
+				rain_canvas.draw_line(p, p + Vector2(WIND * 0.05, 14.0), Color(0.75, 0.82, 0.9, 0.35) * fall, 1.0)
 		return
 	for i in active_drops:
 		var d: Dictionary = drops[i]
@@ -225,17 +231,17 @@ func _draw_weather() -> void:
 			# The flake cells at 1x (a clump is a few pixels; a full flake is a near one); some clumps nearer, at 2x.
 			var sc := 2.0 if bool(d["near"]) and int(d["cell"]) == 2 else 1.0
 			var src := Rect2(int(d["cell"]) * CELL, 0, CELL, CELL)
-			rain_canvas.draw_texture_rect_region(drops_tex, Rect2(p, Vector2(CELL, CELL) * sc), src, Color(1, 1, 1, 0.85))
+			rain_canvas.draw_texture_rect_region(drops_tex, Rect2(p, Vector2(CELL, CELL) * sc), src, Color(1, 1, 1, 0.85) * fall)
 		else:
 			# A crisp streak one art pixel wide: a pale head over a fading tail.
 			var n := int(d["len"])
 			for k in n:
 				var a := 0.55 * (1.0 - float(k) / float(n))
-				rain_canvas.draw_rect(Rect2(p - Vector2(0, k * PIX), Vector2(PIX, PIX)), Color(0.72, 0.8, 0.9, a))
+				rain_canvas.draw_rect(Rect2(p - Vector2(0, k * PIX), Vector2(PIX, PIX)), Color(0.72, 0.8, 0.9, a) * fall)
 	for s in splashes:
 		# Frame 0 is a standing drop; a landing streak goes straight to the burst, ring and ripple.
 		var f := mini(3, 1 + int(float(s["t"]) * SPLASH_FPS))
 		var box := Vector2(CELL, CELL) * SPLASH_SCALE
 		var at: Vector2 = (s["p"] as Vector2) - Vector2(box.x * 0.5, box.y * 0.75)
 		rain_canvas.draw_texture_rect_region(splash_tex, Rect2(at.snapped(Vector2(2, 2)), box),
-			Rect2(f * CELL, 0, CELL, CELL), Color(1, 1, 1, 0.7))
+			Rect2(f * CELL, 0, CELL, CELL), Color(1, 1, 1, 0.7) * fall)

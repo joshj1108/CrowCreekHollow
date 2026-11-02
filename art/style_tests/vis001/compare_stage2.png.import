@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://ctifor3g1ek52"
-path="res://.godot/imported/porch.png-7a4a37d044e244847c610bf4fc7dabe7.ctex"
+uid="uid://bdb3v5u6ako1j"
+path="res://.godot/imported/compare_stage2.png-8455da162bf6af3f990e8251fc47c5d4.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/farm/porch.png"
-dest_files=["res://.godot/imported/porch.png-7a4a37d044e244847c610bf4fc7dabe7.ctex"]
+source_file="res://art/style_tests/vis001/compare_stage2.png"
+dest_files=["res://.godot/imported/compare_stage2.png-8455da162bf6af3f990e8251fc47c5d4.ctex"]
 
 [params]
 

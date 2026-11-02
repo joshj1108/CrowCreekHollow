@@ -673,6 +673,17 @@ const TILE_COLORS := {
 
 
 const NIGHT_TINT := Color("3a3f6e")
+# The VIS-001 lighting pass: the weather overlay follows the night tint, light falloff steps in art pixels, a warm
+# dusk sits between day and night, and the windows and porch lamp light the ground. False restores the old look.
+const LIGHTING_V2 := true
+# The dusk colour, about as bright as the old tint was at the same darkness, so only its warmth is new.
+const DUSK_TINT := Color("dbb39e")
+const DUSK_PEAK := 0.4          # the darkness at which the dusk colour is strongest
+const LIGHT_BANDS := 8          # brightness steps in a light's falloff
+const BAYER_4 := [0, 8, 2, 10, 12, 4, 14, 6, 3, 11, 1, 9, 15, 7, 13, 5]
+const ART_PX := float(SCALE)    # one art pixel in world units
+const WINDOW_SPILL := 1.5       # tiles the window lights sit below the windows, so the glow falls on the ground
+const PORCH_SPILL := 0.5        # the same for the porch lamp
 # The cave has no daylight at any hour: almost black, so only a lantern's ring shows the tunnels.
 const CAVE_TINT := Color("050508")
 
@@ -1230,9 +1241,10 @@ func _process(delta: float) -> void:
 	var darkness := smoothstep(DUSK_HOUR, DUSK_HOUR + 2.0, current_hour)
 	darkness *= 1.0 - sanity_sys._night_relief()
 	darkness = clampf(darkness + sanity_sys._low_sanity_boost(), 0.0, 1.0)
-	canvas_modulate.color = _light_tint().lerp(NIGHT_TINT, darkness)
+	canvas_modulate.color = _sky_tint(darkness)
 	if in_cave:
 		canvas_modulate.color = trek._tint(darkness) if trek.active else CAVE_TINT
+	weather.night_tint = canvas_modulate.color if LIGHTING_V2 else Color.WHITE
 	_update_lantern(1.0 if in_cave else darkness)
 	projects._update(darkness)
 	_update_cave_mouth_light(smoothstep(DUSK_HOUR, DUSK_HOUR + 2.0, current_hour))
@@ -1924,6 +1936,50 @@ func _glow_texture() -> GradientTexture2D:
 	return texture
 
 
+static var _stepped_glows := {}
+
+
+# Gives a light its falloff, as wide as the 256 px glow at this texture_scale. With LIGHTING_V2 the falloff is
+# drawn in art pixels and LIGHT_BANDS steps, and the light sits on the art-pixel grid, so its pool lines up with
+# the sprites. The texture is an even number of art pixels wide, so its cells land on the grid too.
+func _glow(light: PointLight2D, scale: float) -> void:
+	if not LIGHTING_V2:
+		if light.texture == null:
+			light.texture = _glow_texture()
+		light.texture_scale = scale
+		return
+	var size := maxi(2, roundi(256.0 * scale / (ART_PX * 2.0))) * 2 * int(ART_PX)
+	if not _stepped_glows.has(size):
+		var img := Image.create(size, size, false, Image.FORMAT_RGBA8)
+		var cells := size / int(ART_PX)
+		var half := cells * 0.5
+		for cy in cells:
+			for cx in cells:
+				var d := Vector2(cx + 0.5 - half, cy + 0.5 - half).length() / half
+				# An ordered (Bayer) dither between the steps, so the bands blend instead of drawing rings.
+				var dither: float = (BAYER_4[(cy % 4) * 4 + cx % 4] + 0.5) / 16.0
+				var v := floorf(clampf(1.0 - d, 0.0, 1.0) * LIGHT_BANDS + dither) / LIGHT_BANDS
+				img.fill_rect(Rect2i(cx * int(ART_PX), cy * int(ART_PX), int(ART_PX), int(ART_PX)), Color(v, v, v))
+		_stepped_glows[size] = ImageTexture.create_from_image(img)
+	light.texture = _stepped_glows[size]
+	light.texture_scale = 1.0
+	light.position = _light_snap(light.position)
+
+
+# A light's position on the art-pixel grid, with LIGHTING_V2.
+func _light_snap(at: Vector2) -> Vector2:
+	return at.snapped(Vector2(ART_PX, ART_PX)) if LIGHTING_V2 else at
+
+
+# The world's tint for this darkness: the weather's daylight, through dusk with LIGHTING_V2, to night.
+func _sky_tint(darkness: float) -> Color:
+	if not LIGHTING_V2:
+		return _light_tint().lerp(NIGHT_TINT, darkness)
+	if darkness < DUSK_PEAK:
+		return _light_tint().lerp(DUSK_TINT, darkness / DUSK_PEAK)
+	return DUSK_TINT.lerp(NIGHT_TINT, (darkness - DUSK_PEAK) / (1.0 - DUSK_PEAK))
+
+
 # One warm light for each window, and a lamp by the door. They come on at dusk once the house has glass.
 func _build_window_lights() -> void:
 	var house := Rect2(Vector2(_world_tile(HOUSE_IX, HOUSE_IY)) * PX, Vector2(HOUSE_W, HOUSE_H) * PX)
@@ -1936,29 +1992,29 @@ func _build_window_lights() -> void:
 	else:
 		for w in FarmArt.window_rects(house):
 			centres.append((w as Rect2).get_center())
-	var texture := _glow_texture()
+	# With LIGHTING_V2 the glows sit lower, so the light falls on the porch and the ground before the house.
+	var spill := Vector2(0, PX * WINDOW_SPILL) if LIGHTING_V2 else Vector2.ZERO
 	for c in centres:
 		var light := PointLight2D.new()
-		light.texture = texture
 		light.color = Color("ffc878")
-		light.texture_scale = 0.9
-		light.position = c
+		light.position = c + spill
+		_glow(light, 0.9)
 		light.enabled = false
 		add_child(light)
 		window_lights.append(light)
 	porch_light = PointLight2D.new()
-	porch_light.texture = texture
 	porch_light.color = Color("ffd27a")
-	porch_light.texture_scale = 0.6
 	porch_light.position = Vector2(_world_tile(HOUSE_DOOR_IX, HOUSE_DOOR_IY)) * PX + Vector2(PX * 0.5, PX * 0.5)
+	if LIGHTING_V2:
+		porch_light.position.y += PX * PORCH_SPILL
+	_glow(porch_light, 0.6)
 	porch_light.enabled = false
 	add_child(porch_light)
 	# Centred on the two exit tiles' south edge, so it spills up the steps into the cave.
 	cave_mouth_light = PointLight2D.new()
-	cave_mouth_light.texture = texture
 	cave_mouth_light.color = Color("c8d4e0")
-	cave_mouth_light.texture_scale = 1.4
 	cave_mouth_light.position = Vector2((CAVE_EXIT_TILE.x + 1) * PX, (CAVE_EXIT_TILE.y + 1) * PX)
+	_glow(cave_mouth_light, 1.4)
 	cave_mouth_light.enabled = false
 	add_child(cave_mouth_light)
 
@@ -1993,10 +2049,8 @@ func _draw_water_shimmer() -> void:
 
 func _build_lantern_light() -> void:
 	# A soft white-to-black radial gradient, tinted warm. Its size follows the lantern tier.
-	var texture := _glow_texture()
-
 	lantern_light = PointLight2D.new()
-	lantern_light.texture = texture
+	_glow(lantern_light, 1.0)
 	lantern_light.color = Color("ffd38a")
 	lantern_light.energy = LANTERN_ENERGY
 	lantern_light.enabled = false
@@ -4014,12 +4068,15 @@ func _build_crows() -> void:
 	glow.gradient = grad
 	for rp in roost_perches:
 		var light := PointLight2D.new()
-		light.texture = glow
 		light.color = Color(1.0, 0.2, 0.15)
 		light.energy = 0.8
-		light.texture_scale = 0.9
 		light.enabled = false
 		light.position = (rp["ground"] as Vector2) + Vector2(0, -float(rp["alt"]) - PX * 0.2)
+		if LIGHTING_V2:
+			_glow(light, 0.9 * glow.width / 256.0)
+		else:
+			light.texture = glow
+			light.texture_scale = 0.9
 		add_child(light)
 		roost_lights.append(light)
 
@@ -5391,10 +5448,9 @@ func _light_tint() -> Color:
 
 func _build_desk_light() -> void:
 	desk_light = PointLight2D.new()
-	desk_light.texture = _glow_texture()
 	desk_light.color = Color("ff2a2a")
-	desk_light.texture_scale = 0.45
 	desk_light.position = _tile_center(INT_ORIGIN.x + DESK_IX.x, INT_ORIGIN.y + DESK_IX.y) + Vector2(PX * 0.5, 0)   # between its two tiles
+	_glow(desk_light, 0.45)
 	desk_light.enabled = false
 	add_child(desk_light)
 
@@ -5724,12 +5780,15 @@ func _apply_lantern_radius() -> void:
 	if lantern_tier == 0:
 		return
 	var radius: float = LANTERN_TIERS[lantern_tier - 1]["radius"]
-	lantern_light.texture_scale = radius * PX / 128.0
+	_glow(lantern_light, radius * PX / 128.0)
 
 
 func _update_lantern(darkness: float) -> void:
 	# In the Rookery Wood the lantern burns lamp oil, and goes out without it.
 	lantern_light.enabled = lantern_tier > 0 and darkness > 0.05 and not (trek.active and not trek.lit)
+	# The lantern's pool steps across the art-pixel grid as you walk, rather than sliding under it.
+	if LIGHTING_V2:
+		lantern_light.position = _light_snap(player.global_position) - player.global_position
 	var energy := LANTERN_ENERGY * ((TREK_LANTERN_BOOST if trek.active else CAVE_LANTERN_BOOST) if in_cave else 1.0)
 	if lantern_tier >= LANTERN_FLICKER_TIER:
 		var t := Time.get_ticks_msec() / 1000.0

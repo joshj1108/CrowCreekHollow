@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://baqt7jw5h1r4a"
-path="res://.godot/imported/house_wall.png-99de3a33b4f50be7f113aba5f00af5d4.ctex"
+uid="uid://c8fre1ic7dhuc"
+path="res://.godot/imported/compare_cave_trek.png-2f95d643d9c5f41d94c23e47edaf523f.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/farm/house_wall.png"
-dest_files=["res://.godot/imported/house_wall.png-99de3a33b4f50be7f113aba5f00af5d4.ctex"]
+source_file="res://art/style_tests/vis001/compare_cave_trek.png"
+dest_files=["res://.godot/imported/compare_cave_trek.png-2f95d643d9c5f41d94c23e47edaf523f.ctex"]
 
 [params]
 
