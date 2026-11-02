@@ -1,0 +1,10 @@
+{
+  "_note": "ART-002 32 px-per-tile test assets (2026-11-01). Test art only, not used by the game. Same prompts, seeds, settings and forced palette (../src/palette_ref.png) as the 16 px set in ../pixellab-assets.json, at twice the pixel dimensions. 1 generation each.",
+  "fir_32.png":     {"tool": "create_image_pixflux", "job_id": "9f05a282-c613-485e-90b0-b6accc7f8ed3", "asset_id": "7f5c3018-ef31-5e0b-8709-eedfe0b9e6b6", "size": "64x96", "seed": 101},
+  "oak_32.png":     {"tool": "create_image_pixflux", "job_id": "6ccc3d83-cd41-48e9-bb60-589a30dbe102", "asset_id": "ea19e6ee-00f6-5be2-bcbb-27c8bad35efd", "size": "96x128", "seed": 102},
+  "boulder_32.png": {"tool": "create_image_pixflux", "job_id": "0ca8ee4c-c7b0-4ca9-ab71-ecf388366a7d", "asset_id": "512fbcb1-04f5-5d7b-9c6a-ce9f8f1860be", "size": "64x64", "seed": 103},
+  "log_32.png":     {"tool": "create_image_pixflux", "job_id": "ed06ecc6-d08a-45f0-bf03-2523d4eb9ec6", "asset_id": "1b3a4aa9-5a90-5a85-aef6-d0d608406a09", "size": "96x64", "seed": 104},
+  "forest_tileset_32.png": {"tool": "create_topdown_tileset (standard)", "tileset_id": "e199931c-e22b-41f8-836c-d16007796a39", "tile_size": 32, "metadata": "forest_tileset_32.json"},
+  "ground_moss_32.png": {"from": "forest_tileset_32.png", "rect": "0,96,32,32", "base_tile_id": "eec24cba-9232-4817-bc56-36d185cf3c27", "note": "metadata calls this 'upper'; terrain labels are swapped, as in the 16 px set"},
+  "ground_dirt_32.png": {"from": "forest_tileset_32.png", "rect": "64,32,32,32", "base_tile_id": "67ec6641-8467-4c48-a1dd-307e1b9b1c50"}
+}
