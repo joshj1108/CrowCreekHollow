@@ -318,3 +318,34 @@ Append messages; never rewrite earlier exchanges. Messages are read only when an
 - **Scenarios left out:** dusk, rain/fog and treks. They affect both densities equally.
 - **Checks:** every link above returned HTTP 200 when posted.
 - **Approval:** pending ChatGPT review and owner decision. Pushing this package doesn't start a ChatGPT review; none is recorded yet. `DESIGN.md`'s locked style is unchanged until the owner approves a change.
+
+### 2026-11-01 — Claude Code → ChatGPT, Owner — ART-001 + ART-002 — Review handoff
+- **Status:** review requested. Both are non-production experiments and are awaiting ChatGPT review and the owner's decision.
+- **Summary:**
+  - **ART-001:** five first-pass PixelLab assets (fir, twisted oak, mossy boulder, fallen log, forest-floor tile) compared with the closest SpriteCook art, in the game by day and night.
+  - **ART-002:** the same assets regenerated at 32 px per tile and compared with the 16 px versions at an identical world footprint, at 1280x720 and about 1080p, plus pixel-level close-ups and a migration estimate.
+  - **Claude Code's view:** PixelLab isn't a drop-in SpriteCook replacement at its cheap tier (missing outlines, weak at night, needs a re-roll or cleanup per asset). 32 px adds detail only in close-ups and lands on uneven 1.5x screen pixels at the 1280x720 base. Keep SpriteCook and 16 px for now.
+- **Files changed (all new, non-production):**
+  - `art/style_tests/pixellab/`: 16 px test assets, `pixellab-assets.json`, `src/palette_ref.png`, `src/forest_tileset.json`
+  - `art/style_tests/pixellab/x32/`: 32 px test assets, `pixellab-assets.json`, `forest_tileset_32.json`
+  - `art/style_tests/ART-001/review/` and `art/style_tests/ART-002/review/`: sheets and master PNGs
+  - `art/style_tests/ART-002/FINDINGS.md`
+  - `tools/pixellab_compare.gd` (test tool only)
+  - `AI_COLLAB/MESSAGE_BOARD.md`
+  - No game scripts, scenes, production art, `DESIGN.md` or `project.godot` changed.
+- **Flags and settings:** none in the game. The new tool takes `out=`, `hour=`, `weather=`, `frames=`, `size=WxH` and `set=density`. It adds a temporary patch to the farm for the screenshot only; nothing is saved (it starts a new game in slot 8, as `capture.gd` does).
+- **Tests:** `save_test.gd`, `menu_test.gd` and `balance_sim.gd` were not run, because no gameplay, save or menu code changed. The captures were made in a clean checkout of `HEAD`.
+- **Caveats and open issues:**
+  - The working tree's uncommitted `scripts/trek_system.gd` doesn't compile (line 1826: "Cannot infer the type of `t`"). It isn't part of this work and was left untouched.
+  - PixelLab draws a new design at each size, so some ART-002 differences are generator variance (the log's angle, the fir's colour, a stray grey streak on the 32 px log).
+  - Every PixelLab asset is a first attempt, not cherry-picked. PixelLab's style-image tools weren't tested.
+  - PixelLab's tileset metadata labels the two terrains the reverse of what is drawn.
+  - The SpriteCook comparison log (`art/style_tests/outbuildings/log_0.png`) isn't in git, and the comparison tool needs it.
+  - The 1440p capture was capped at 1924x1061 by the monitor.
+  - SpriteCook needs to be signed in again (`/mcp`). 18 PixelLab trial generations remain.
+- **Visual-review artifacts:**
+  - ART-002 master (attach to ChatGPT), commit `f3da292`: [page](https://github.com/joshj1108/CrowCreekHollow/blob/f3da292f7089925f511c08ba9cc6817ebfc804c2/art/style_tests/ART-002/review/ART-002_master.png) · [raw](https://raw.githubusercontent.com/joshj1108/CrowCreekHollow/f3da292f7089925f511c08ba9cc6817ebfc804c2/art/style_tests/ART-002/review/ART-002_master.png)
+  - ART-001 master (attach to ChatGPT), commit `e3bb50c`: [page](https://github.com/joshj1108/CrowCreekHollow/blob/e3bb50cf359483cbfea53d2dbbd84d5b0f01308b/art/style_tests/ART-001/review/ART-001_master.png) · [raw](https://raw.githubusercontent.com/joshj1108/CrowCreekHollow/e3bb50cf359483cbfea53d2dbbd84d5b0f01308b/art/style_tests/ART-001/review/ART-001_master.png)
+  - Full-size sheets and the findings are linked in the ART-001 and ART-002 entries above. Board posts: `2d0c2e5` and `039f226`.
+  - Motion: none; no GIFs or frame strips, because nothing moves. Shimmer from 1.5x scaling can only be judged in play.
+- **Approval:** no ChatGPT review is recorded yet for either task. The owner makes the final decision on the asset pipeline and on any change to the locked art style.
