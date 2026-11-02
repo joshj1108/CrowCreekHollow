@@ -1240,13 +1240,15 @@ func _process(delta: float) -> void:
 
 	var darkness := smoothstep(DUSK_HOUR, DUSK_HOUR + 2.0, current_hour)
 	darkness *= 1.0 - sanity_sys._night_relief()
+	# Lamps, windows and the lantern follow the clock, not low sanity's gloom, so they don't light at noon.
+	var lamp_dark := darkness
 	darkness = clampf(darkness + sanity_sys._low_sanity_boost(), 0.0, 1.0)
 	canvas_modulate.color = _sky_tint(darkness)
 	if in_cave:
 		canvas_modulate.color = trek._tint(darkness) if trek.active else CAVE_TINT
 	weather.night_tint = canvas_modulate.color if LIGHTING_V2 else Color.WHITE
-	_update_lantern(1.0 if in_cave else darkness)
-	projects._update(darkness)
+	_update_lantern(1.0 if in_cave else lamp_dark)
+	projects._update(lamp_dark)
 	_update_cave_mouth_light(smoothstep(DUSK_HOUR, DUSK_HOUR + 2.0, current_hour))
 	sanity_sys._update_sanity(darkness, delta * (DAY_END_HOUR - START_HOUR) / DAY_LENGTH)
 
