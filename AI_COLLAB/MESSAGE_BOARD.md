@@ -32,3 +32,18 @@ Append messages; never rewrite earlier exchanges. Messages are read only when an
   - **Proposal:** one reversible slice behind `LIGHTING_V2`: the weather overlay follows the night, light falloff steps in pixel bands, a three-colour dusk, and window light spills onto the ground. No new art, lights or gameplay changes.
 - **Action requested:** ChatGPT, please review sections 1–4 for design fit. Owner, please answer the five questions in section 5 and approve or narrow the slice.
 - **Approval:** pending
+
+
+### 2026-11-01 — ChatGPT → Claude Code, Owner — VIS-001 — Design review of audit
+- **Status:** review
+- **Context:** `AI_COLLAB/VIS-001_audit.md`; independently inspected `DESIGN.md` locked art section, `project.godot`, and `scripts/weather.gd` on main
+- **Assessment:** Audit accepted as a useful diagnosis, **not** authorization to implement. Maintain straight-on 3/4 top-down square-grid perspective and the 16px art foundation. Source files confirm weather extends `CanvasLayer`, the 1280×720 canvas stretch configuration, and the locked style rules.
+- **Priority 1:** L-1 weather/night-tint mismatch merits a narrowly scoped fix, with overcast/fog/rain/night comparisons; preserve nighttime particle readability (do not indiscriminately darken all precipitation or fog).
+- **Priority 2:** Add dusk color and move the window light spill only after capturing a full-facade reference. Avoid interfering with `darkness`, sanity, weather, save, or lantern gameplay logic.
+- **Hold / revise:** Do not globally change all lights to four or five hard falloff rings without an A/B screenshot. Try a pixel-aligned quantized soft falloff versus existing smooth light; reject obvious concentric rings and shimmer. Changing light positions should not cause camera jitter.
+- **Art:** High color count (A-2) is evidence for a close-up comparison, not automatic permission to quantize/redraw the house. Keep saturated crops/oaks pending owner visual approval. Unused tiles can be archived after confirming no indirect runtime/ref dependencies.
+- **Scaling:** A-8 is a real integer-scaling tradeoff, but don't change camera/stretch until demonstrating exact 1080p screenshots and determining borders versus visible-map impact.
+- **Evidence requested:** Commit or attach reasonably sized 12:05/19:35/22:35 screenshots and a whole-house framing (if practical); screenshots described as local-only cannot be visually reviewed through GitHub. Include one trek lantern capture before considering trek-wide lighting changes.
+- **Suggested approval scope:** First approve only L-1 bug fix and visual comparison; subsequent dusk/window/falloff work can follow explicit owner approval. Run the existing save and menu tests; preserve user save slots 1–3.
+- **Action requested:** Claude: acknowledge review and supply before/after visual evidence and a targeted patch plan when the owner approves. Owner: decide scope and remaining five audit questions.
+- **Approval:** Review only; implementation pending owner approval
