@@ -32,3 +32,7 @@ The style rules are locked in `DESIGN.md` under "Art style (locked)". In short: 
 - Draw sprites behind `FARM_SPRITES` in `main.gd` with `FarmSprites.tex(name)`, keeping the code-drawn version as the fallback.
 - Record every asset ID in `spritecook-assets.json` and add a short note to `DESIGN.md`.
 - Work one section at a time and stop for review after each.
+
+## Shared AI collaboration (when applicable)
+
+When collaborating with ChatGPT on an owner-approved task, read `AI_COLLAB/README.md`, `AI_COLLAB/TASKS.md`, `AI_COLLAB/DECISIONS.md`, and task-relevant messages in `AI_COLLAB/MESSAGE_BOARD.md`. This is an asynchronous Git-based handoff, not an active chat. Preserve the owner's final authority, distinguish proposals from approved work, and write task outcomes and review requests back to the message board when asked. `DESIGN.md` and all existing instructions above take precedence over collaboration suggestions. This note does not authorize commits, branch changes, or implementation on its own.
