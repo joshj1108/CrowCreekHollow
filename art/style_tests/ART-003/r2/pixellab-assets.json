@@ -1,0 +1,12 @@
+{
+  "_note": "ART-003 Round 2 assets (2026-11-02). Test art only. Shared palette ../src/concept_palette.png; 1 generation each.",
+  "oak_a.png":          {"tool": "create_image_pixflux img2img (init oak_init.png, strength 220)", "job_id": "6a5b49ff-912a-4049-b705-9c0982c36c5e", "asset_id": "0bd6282d-7cb8-5af3-b20c-27850032dbb6", "size": "192x144", "seed": 311},
+  "oak_b.png":          {"tool": "create_image_pixflux", "job_id": "8711e733-bd89-4974-9774-3bd83bca5b2b", "asset_id": "b7e1b6af-b77e-51a1-934f-c91428e59cb0", "size": "192x144", "seed": 312},
+  "oak_init.png":       {"from": "art/reference/concept/02_autumn_homestead.webp, crop 500,0 580x420, Lanczos to 192x144"},
+  "stone_ring.png":     {"tool": "create_image_pixflux", "job_id": "97e091a6-6833-49a1-9b82-97a8dabde769", "asset_id": "b01e5818-9080-50de-99c5-dcf644aeae17", "size": "160x64", "seed": 313},
+  "litter_tileset.png": {"tool": "create_topdown_tileset (standard, round, amplitude 0.25), chained from grass 9ed879f8", "tileset_id": "635b36ab-53c8-4496-afe8-13a7d3e823d6"},
+  "cobble_tileset.png": {"tool": "create_topdown_tileset (standard, round, amplitude 0.2), chained from grass 9ed879f8", "tileset_id": "758d649b-1724-4b61-907f-5a4ea3010534"},
+  "decals.png":         {"tool": "create_image_pixflux", "job_id": "3771905c-f97c-4a62-ac91-9a12d20da548", "asset_id": "39bf70aa-c7a1-5504-99cb-5fa919f39507", "size": "128x48", "seed": 314},
+  "garden_bed.png":     {"tool": "create_image_pixflux", "job_id": "710b371c-898c-4505-9ae7-e9e68f665103", "asset_id": "a3482e09-9963-5b36-a3c6-22f3367e5547", "size": "96x48", "seed": 315},
+  "crops.png":          {"tool": "create_image_pixflux", "job_id": "7d9b3b09-9d4f-4264-a1c2-fb43dfbdc53f", "asset_id": "2167560d-335f-5050-b376-212a3ddc781e", "size": "128x32", "seed": 316}
+}
