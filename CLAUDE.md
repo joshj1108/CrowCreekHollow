@@ -43,6 +43,7 @@ When a task changes how the game looks (art, lighting, shaders, atmosphere, weat
 
 - Take matching BEFORE and AFTER captures with `tools/capture.gd`, only of the scenarios the change affects (day, dusk, night, rain or fog, a trek).
 - Build a labelled sheet with `tools/review_sheet.ps1`, and for anything that moves, a GIF and frame strip with `tools/review_motion.ps1`.
+- Finish every package with one master PNG, `<TASK-ID>_master.png`, made with `tools/review_master.ps1`. The owner attaches it to ChatGPT, whose GitHub connector can't decode images. It must fit within 2048 px; if the sheets drop below about 50%, split them into a second master.
 - Save them in `art/style_tests/<TASK-ID>/review/`, never in production art.
 - Commit and push only when the owner authorizes it, then post SHA-pinned GitHub page and raw links on the message board.
 

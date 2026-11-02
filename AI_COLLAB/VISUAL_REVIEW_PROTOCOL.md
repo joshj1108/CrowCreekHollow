@@ -34,6 +34,13 @@ It also applies to a fix that changes how any of these look. It doesn't apply to
    - Say plainly when still images can't show an effect, and what a reviewer should look for in play.
    - Movie Maker records at exactly 30 fps of game time, but anything timed by the wall clock (`Time.get_ticks_msec()`) runs at the machine's real speed. So a flicker or sway can play at a different pace in the clip than in play. Note that whenever it applies.
 5. **Measurements where they help**, such as a brightness profile or how much of the lit ground changes from frame to frame, stated as measurements and not as visual judgements.
+6. **One master PNG, made last**, named `<TASK-ID>_master.png` and built with `tools/review_master.ps1`. This is the file the owner attaches to ChatGPT. ChatGPT's GitHub connector can read text but can't decode PNG or GIF files, so the master is how the actual images reach it.
+   - It combines every contact sheet and motion frame grid in the package.
+   - Its header names the task, commit, date, what changed, what to judge, the contents, and what still images can't show.
+   - It's fitted within 2048 px on its long side, because ChatGPT shrinks bigger images before it looks at them. The tool prints the scale it drew the sheets at.
+   - If that scale falls below about 50%, split the sheets across `<TASK-ID>_master.png` and `<TASK-ID>_master_2.png`, so pixel detail survives.
+   - GIFs can't go in a PNG. The master shows motion as frame grids and says so. The GIFs stay linked on the board for anyone viewing them on GitHub.
+   - The commit SHA isn't known until the package is committed. Build the master with `-Commit` set to the previous commit, or leave out `-Commit` (it then reads "not committed yet"). The board entry gives the SHA that contains it.
 
 ## Where the images go
 
@@ -64,6 +71,7 @@ It also applies to a fix that changes how any of these look. It doesn't apply to
 - **Commit:** `<SHA>` (images); BEFORE = <previous commit or flag off>; AFTER = <commit or flag on>
 - **What changed:** <one or two sentences>
 - **What to judge:** <specific questions>
+- **Master sheet (attach this to ChatGPT):** [page](https://github.com/joshj1108/CrowCreekHollow/blob/<SHA>/art/style_tests/<TASK-ID>/review/<TASK-ID>_master.png) · [raw](https://raw.githubusercontent.com/joshj1108/CrowCreekHollow/<SHA>/art/style_tests/<TASK-ID>/review/<TASK-ID>_master.png)
 - **Images:**
   - <sheet name>: [page](https://github.com/joshj1108/CrowCreekHollow/blob/<SHA>/<path>) · [raw](https://raw.githubusercontent.com/joshj1108/CrowCreekHollow/<SHA>/<path>)
 - **Motion:** <GIF and frame-strip links, or "still images can't show <effect>; check <what> in play">
@@ -76,6 +84,8 @@ It also applies to a fix that changes how any of these look. It doesn't apply to
 - **Pushing a package doesn't start a ChatGPT review.** ChatGPT sees it only when the owner asks it to read the repository.
 - Never write or suggest that ChatGPT has reviewed, seen or approved an image until its review is recorded on the message board in its own entry, and quote that entry when referring to it.
 - If ChatGPT reports it couldn't open or render an image, record that, and don't count text-only review as a visual review.
+  - Through the GitHub connector, ChatGPT can check the protocol, links and metadata, but not the pixels. That isn't a visual review.
+  - A visual review means ChatGPT looked at the attached master PNG, and its entry on the board says so.
 - ChatGPT's review is advice. The owner gives final visual acceptance, as in `AI_COLLAB/README.md` and `DECISIONS.md`. A task stays `review requested` until the owner accepts it.
 
 ## Keeping this protocol current
