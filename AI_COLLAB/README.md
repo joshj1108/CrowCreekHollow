@@ -25,3 +25,4 @@ This folder is a version-controlled handoff system, not a live chat or autonomou
 - Identify facts observed in code versus proposals. Link commits and screenshots where available.
 - No gameplay changes or mass sprite replacement without owner approval.
 - The GitHub branch/commit workflow for a specific session must be authorized by the owner; avoid silently pushing to `main`.
+- Graphics work (art, lighting, shaders, atmosphere, weather, UI, trek visuals) is handed over as images, following `VISUAL_REVIEW_PROTOCOL.md`. A pushed package does not start or imply a ChatGPT review.

@@ -36,3 +36,14 @@ The style rules are locked in `DESIGN.md` under "Art style (locked)". In short: 
 ## Shared AI collaboration (when applicable)
 
 When collaborating with ChatGPT on an owner-approved task, read `AI_COLLAB/README.md`, `AI_COLLAB/TASKS.md`, `AI_COLLAB/DECISIONS.md`, and task-relevant messages in `AI_COLLAB/MESSAGE_BOARD.md`. This is an asynchronous Git-based handoff, not an active chat. Preserve the owner's final authority, distinguish proposals from approved work, and write task outcomes and review requests back to the message board when asked. `DESIGN.md` and all existing instructions above take precedence over collaboration suggestions. This note does not authorize commits, branch changes, or implementation on its own.
+
+## Visual reviews
+
+When a task changes how the game looks (art, lighting, shaders, atmosphere, weather, UI or the trek's visuals), follow `AI_COLLAB/VISUAL_REVIEW_PROTOCOL.md` when the task is finished:
+
+- Take matching BEFORE and AFTER captures with `tools/capture.gd`, only of the scenarios the change affects (day, dusk, night, rain or fog, a trek).
+- Build a labelled sheet with `tools/review_sheet.ps1`, and for anything that moves, a GIF and frame strip with `tools/review_motion.ps1`.
+- Save them in `art/style_tests/<TASK-ID>/review/`, never in production art.
+- Commit and push only when the owner authorizes it, then post SHA-pinned GitHub page and raw links on the message board.
+
+Never adjust the game to flatter a screenshot. Never say ChatGPT has reviewed an image until its review is recorded on the board.

@@ -5805,7 +5805,8 @@ func _apply_lantern_radius() -> void:
 		return
 	var radius: float = LANTERN_TIERS[lantern_tier - 1]["radius"]
 	if LANTERN_SMOOTH:
-		lantern_light.texture = _glow_texture()
+		if not lantern_light.texture is GradientTexture2D:   # swapping one not yet drawn makes Godot complain
+			lantern_light.texture = _glow_texture()
 		lantern_light.texture_scale = radius * PX / 128.0
 	else:
 		_glow(lantern_light, radius * PX / 128.0)
