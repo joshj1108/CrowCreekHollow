@@ -1,0 +1,11 @@
+{
+  "_note": "ART-001 PixelLab evaluation assets (2026-11-01). Test art only, not used by the game. Props: create_image_pixflux with view 'low top-down', single color black outline, basic shading, medium detail, and color_image = src/palette_ref.png (house_chunky_b + tree_fir_0 + boulder_0). Each cost 1 generation on the trial plan.",
+  "fir_a.png":      {"tool": "create_image_pixflux", "job_id": "9932b9f2-236c-487f-b0aa-fca2510eeaae", "asset_id": "262bc5ef-0d28-51ca-bf25-0396cdc40414", "size": "32x48", "seed": 101},
+  "oak_a.png":      {"tool": "create_image_pixflux", "job_id": "2108a5e6-9b38-4872-9c1c-d43dc2d351e9", "asset_id": "3e9caafe-205b-5875-9afd-eaa76ab1b22d", "size": "48x64", "seed": 102},
+  "boulder_a.png":  {"tool": "create_image_pixflux", "job_id": "3b961d6c-5e95-49c3-8d17-4f16ffedb1d1", "asset_id": "47726e01-accf-575c-b4f1-126b09b7baed", "size": "32x32", "seed": 103},
+  "log_a.png":      {"tool": "create_image_pixflux", "job_id": "309f3e78-fd1d-4869-92ee-fc6c920ee6d1", "asset_id": "21358fbc-619e-5735-bc9d-365574bea037", "size": "48x32", "seed": 104},
+  "ground_a.png":   {"tool": "create_image_pixen", "job_id": "3d0600aa-eea5-46fc-83f4-3175cb50e0b6", "asset_id": "8b38a89a-8337-5052-8da0-28319a621f03", "size": "16x16", "seed": 105, "status": "rejected: drawn as a framed icon, not a texture"},
+  "forest_tileset.png": {"tool": "create_topdown_tileset (standard)", "tileset_id": "c91824ec-ead5-4050-aa44-744cf4efeda1", "tile_size": 16, "metadata": "src/forest_tileset.json"},
+  "ground_moss.png": {"from": "forest_tileset.png", "rect": "0,48,16,16", "base_tile_id": "95bbbfad-cd5f-4078-ad0d-83b8e8cf9dca", "note": "the metadata labels this corner set 'upper' and the dirt 'lower', the reverse of what is drawn"},
+  "ground_dirt.png": {"from": "forest_tileset.png", "rect": "32,16,16,16", "base_tile_id": "4af2762f-c0e4-4b91-aec2-055c01a277ca"}
+}
