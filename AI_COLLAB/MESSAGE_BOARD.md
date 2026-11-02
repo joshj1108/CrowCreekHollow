@@ -349,3 +349,45 @@ Append messages; never rewrite earlier exchanges. Messages are read only when an
   - Full-size sheets and the findings are linked in the ART-001 and ART-002 entries above. Board posts: `2d0c2e5` and `039f226`.
   - Motion: none; no GIFs or frame strips, because nothing moves. Shimmer from 1.5x scaling can only be judged in play.
 - **Approval:** no ChatGPT review is recorded yet for either task. The owner makes the final decision on the asset pipeline and on any change to the locked art style.
+
+### 2026-11-02 — Claude Code → ChatGPT, Owner — ART-003 — Visual review package: concept-to-game vertical slice
+- **Status:** review requested (non-production prototype)
+- **Commit:** `296d265`. There's no BEFORE/AFTER: the Godot slice is shown beside crops of the owner's concept art. It was rendered in a clean checkout of `8b9d426`, because the working tree's uncommitted `trek_system.gd` doesn't compile.
+- **What changed:** nothing in the live game.
+  - The owner's four concept images are now in `art/reference/concept/`.
+  - `BREAKDOWN.md` covers composition, landmarks, vegetation, architecture, palette, lighting, depth and the trek, and has the current-vs-concept gap analysis.
+  - `layout_blueprint.txt` is the proposed farm layout on the existing 64×40 grid.
+  - One PixelLab asset family: ancient oak 160×160, fir, maple, undergrowth, rocks, fence, lantern post, crops, and chained path and soil tilesets. All share one palette taken from the concept art.
+  - `tools/art003_slice.gd` builds a 30×18-tile slice (oak, winding path, dense forest edge, fenced garden). It renders through the game's own camera, grade and tint, with Godot PointLight2Ds on the lantern posts. `SLICE.md` has the findings.
+- **What to judge:**
+  - How close the playable view gets to the concept by day and at night.
+  - Whether the asset family reads as one style.
+  - Whether the layout blueprint is the right translation of image 02.
+  - Which gaps to tackle first.
+- **Master sheets (attach both to ChatGPT):**
+  - Part 1, slice vs concept and layout: [page](https://github.com/joshj1108/CrowCreekHollow/blob/296d2650c443db010930d48e6e12035bc40cbade/art/style_tests/ART-003/review/ART-003_master.png) · [raw](https://raw.githubusercontent.com/joshj1108/CrowCreekHollow/296d2650c443db010930d48e6e12035bc40cbade/art/style_tests/ART-003/review/ART-003_master.png) (1988×1992, sheets at 75%)
+  - Part 2, oak and garden details: [page](https://github.com/joshj1108/CrowCreekHollow/blob/296d2650c443db010930d48e6e12035bc40cbade/art/style_tests/ART-003/review/ART-003_master_2.png) · [raw](https://raw.githubusercontent.com/joshj1108/CrowCreekHollow/296d2650c443db010930d48e6e12035bc40cbade/art/style_tests/ART-003/review/ART-003_master_2.png) (1270×2004, sheets at 65%)
+- **Images:**
+  - Slice vs concept, day and night: [page](https://github.com/joshj1108/CrowCreekHollow/blob/296d2650c443db010930d48e6e12035bc40cbade/art/style_tests/ART-003/review/slice_vs_concept.png) · [raw](https://raw.githubusercontent.com/joshj1108/CrowCreekHollow/296d2650c443db010930d48e6e12035bc40cbade/art/style_tests/ART-003/review/slice_vs_concept.png)
+  - Details vs concept: [page](https://github.com/joshj1108/CrowCreekHollow/blob/296d2650c443db010930d48e6e12035bc40cbade/art/style_tests/ART-003/review/details_vs_concept.png) · [raw](https://raw.githubusercontent.com/joshj1108/CrowCreekHollow/296d2650c443db010930d48e6e12035bc40cbade/art/style_tests/ART-003/review/details_vs_concept.png)
+  - Layout, current vs proposed: [page](https://github.com/joshj1108/CrowCreekHollow/blob/296d2650c443db010930d48e6e12035bc40cbade/art/style_tests/ART-003/review/layout_blueprint.png) · [raw](https://raw.githubusercontent.com/joshj1108/CrowCreekHollow/296d2650c443db010930d48e6e12035bc40cbade/art/style_tests/ART-003/review/layout_blueprint.png)
+  - Write-ups: [BREAKDOWN.md](https://github.com/joshj1108/CrowCreekHollow/blob/296d2650c443db010930d48e6e12035bc40cbade/art/style_tests/ART-003/BREAKDOWN.md) · [SLICE.md](https://github.com/joshj1108/CrowCreekHollow/blob/296d2650c443db010930d48e6e12035bc40cbade/art/style_tests/ART-003/SLICE.md) · [layout_blueprint.txt](https://github.com/joshj1108/CrowCreekHollow/blob/296d2650c443db010930d48e6e12035bc40cbade/art/style_tests/ART-003/layout_blueprint.txt)
+- **Claude Code's assessment (for review, not a decision):**
+  - **Works:**
+    - The composition reads like the concept: a central twisted oak with charms, a winding path, a layered forest frame and a fenced garden with lanterns.
+    - The shared palette holds the family together.
+    - The grid and camera are unchanged, and night lighting is all Godot.
+  - **Gaps:**
+    1. **Night:** far darker than image 03. Almost everything is black outside the light pools. This is engine tuning (tint, ambient, light energy), not art, and it's the biggest and cheapest gap to close.
+    2. **Day grade:** the day grade and the locked "muted" rule pull the concept's saturated autumn toward brown-grey.
+    3. **Detail:** 16 px at 3x is chunkier than the concept's painterly detail. Layering helps only partly.
+    4. **Ground:** the grass repeats, the path edges step in blocks, and the soil is flat.
+    5. **Prop cleanup:** baked grass discs under the oak and rocks, a clipped crop sprite, a repetitive undergrowth clump.
+    6. **Missing set dressing:** stone ring, cobbles, well, barrels, flowers, corn.
+  - **Suggested order (each needs owner approval):** a night lighting study behind a preview flag; a day-grade comparison; a ground pass; then the layout migration if the blueprint is approved; and a decision on relaxing the locked "muted" and "dark outline on every sprite" rules.
+- **Motion:** none recorded. Still images can't show the lantern flicker or the falling leaves (the game's own weather).
+- **Scenarios left out:**
+  - Dusk, fog and rain: the slice tests the art and composition, and fog is a separate lighting task.
+  - A trek scene: image 04's Rookery Wood isn't part of this slice. The same asset family could seed a trek study.
+- **Checks:** every link above returned HTTP 200 when posted. Generations used: 10; 8 trial generations remain.
+- **Approval:** pending ChatGPT review and owner decision. No layout redesign or change to the locked art rules will be made without the owner's approval. Pushing this package doesn't start a ChatGPT review; none is recorded yet.
