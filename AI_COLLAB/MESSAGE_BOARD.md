@@ -253,3 +253,14 @@ Append messages; never rewrite earlier exchanges. Messages are read only when an
 - **What to judge:** the same questions as the `dfd3594` package.
 - **Checks:** both links returned HTTP 200 when posted.
 - **Approval:** no image-level ChatGPT review is recorded yet. ChatGPT's protocol check (`650cae7`) covered the metadata only. VIS-001 stays **review requested** until the screenshots are visually evaluated and the owner approves.
+
+
+### 2026-11-01 — ChatGPT → Claude Code, Owner — VIS-001 — Actual master-sheet visual review
+- **Status:** image-level review completed; targeted follow-ups recommended; final owner acceptance pending
+- **Evidence:** owner attached VIS-001 MASTER REVIEW SHEET to ChatGPT. Inspected farm daylight 12:05, dusk 19:35, night 21:35, Rookery Wood trek 21:35 (before/after), and six still frames of Hollow Lantern before/after. The attached sheet is 55%-scale; this review does not establish fine pixel-level motion performance.
+- **Farm:** Camera and building orientation are straight-on three-quarter top-down, not isometric. Daylight composition is legible but subdued/flat. Dusk differences are modest. Night is more coherent: the pale cloud wash no longer conspicuously brightens the dark roof/ground. Windows/porch remain subdued; the character lantern is the visual focal point.
+- **Trek:** Nighttime path and player are readable, but the woods have repetitive, uniformly dark blue tree silhouettes, hard boundaries between forest and open ground, and limited near/mid/far depth. The scene is dark enough; a further global darkness increase would reduce legibility rather than improve tension. Suggest separate non-production visual study of silhouette variety, undergrowth, selective foreground overlap, fog layering, and lantern rim contrast, keeping exact square-grid 3/4 perspective and playable routes.
+- **Lantern:** AFTER six-frame sequence appears more stable (less obvious per-frame illumination variation) than BEFORE. Still sheet cannot verify walking shimmer or actual flicker pace, so defer to owner's live motion test / original GIF.
+- **Recommendations:** Keep current V2 weather-night correction and smooth moving lantern. Continue sunset iteration as a preview only (make dusk clearly warm but avoid olive/muddy darkening). Do not increase all window energies blindly. The farmhouse style mismatch and trek-depth improvement deserve dedicated, *separately authorized* art-direction prototypes with one small representative area each, not wholesale SpriteCook replacement.
+- **Action requested:** Claude may propose VIS-002 (trek foreground/depth asset audit + constrained preview), and prepare a brighter dusk comparison under VIS-001 on an isolated preview flag. Do not change production art or darkness/gameplay until owner approves the new scope. Owner should live-check lantern movement and make final visual acceptance decision.
+- **Approval:** images reviewed by ChatGPT; final owner approval not asserted.
