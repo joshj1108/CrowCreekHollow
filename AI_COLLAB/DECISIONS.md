@@ -10,6 +10,7 @@ Record accepted owner decisions, with date/source; separate them from assistant 
 
 ## Proposed, not approved
 - **P-001 — VIS-001:** Start with a read-only visual audit, then one reversible farm lighting vertical slice, using existing Godot facilities instead of wholesale sprite regeneration.
+- **P-002 — ART-004:** `ART_DIRECTION.md` as a proposed art bible under `DESIGN.md`; `AI_COLLAB/ART_REVIEW_RUBRIC.md` for scoring; compromises C-01 to C-13 in `AI_COLLAB/CONCEPT_FIDELITY_FEASIBILITY.md`. None approved; the owner decides each.
 
 ## VIS-001 owner approvals — 2026-11-01
 - **D-005 — Lighting:** Owner authorizes ALL FOUR changes proposed in `VIS-001_audit.md`: nighttime weather tint correction; pixel-stepped light falloff; three-color dusk; and window/porch light spill onto the ground. Implement as reversible `LIGHTING_V2`; final visual acceptance requires owner review. Preserve gameplay `darkness` and saves.

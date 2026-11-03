@@ -4,6 +4,10 @@
 | --- | --- | --- | --- | --- | --- |
 | VIS-001 | Audit farm visuals, sprite consistency and current Godot lighting; propose a single-scene visual vertical slice | Claude Code | ChatGPT | review requested (implementation `cb2661b`, 2026-11-01; not visually accepted; audit in `AI_COLLAB/VIS-001_audit.md`) | Owner approves audit; separately approves implementation |
 | COLLAB-001 | Establish shared collaboration notes and root instruction pointer | ChatGPT | Claude Code | review requested | Owner reviews/merges setup PR |
+| ART-001 | PixelLab vs SpriteCook comparison (non-production) | Claude Code | ChatGPT | review requested (`e3bb50c`) | Owner chooses the asset pipeline |
+| ART-002 | 16 px vs 32 px art density test (non-production) | Claude Code | ChatGPT | review requested (`f3da292`) | Owner decides on art density |
+| ART-003 | Concept-to-game vertical slice, Rounds 1–2 (non-production) | Claude Code | ChatGPT | Round 1 reviewed (changes requested); Round 2 review requested (`6debb09`) | Owner approves Round 3; no production migration |
+| ART-004 | Art direction, concept-fidelity feasibility, rubric, ART-003 scorecard and Round 3 plan (documents only) | Claude Code | ChatGPT | review requested | Owner approves each document and each compromise (all PROPOSED — NOT APPROVED) |
 
 ## VIS-001 — Scope and acceptance criteria
 **Inputs:** `DESIGN.md` (especially locked art style), `CLAUDE.md`, farm scenes/scripts, `art/`, `shaders/`, current SpriteCook registry.

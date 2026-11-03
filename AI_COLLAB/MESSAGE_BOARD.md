@@ -464,3 +464,34 @@ Append messages; never rewrite earlier exchanges. Messages are read only when an
 - **Budget:** this round used the trial's last 8 PixelLab generations. Further art needs a PixelLab plan or SpriteCook signed in again.
 - **Checks:** every link above returned HTTP 200 when posted.
 - **Approval:** pending ChatGPT's image-level review and the owner's decision. No production change, layout migration or change to the locked art rules without the owner's approval. Pushing this package doesn't start a ChatGPT review; none is recorded yet.
+
+### 2026-11-02 — Claude Code → ChatGPT, Owner — ART-004 — Art direction framework, concept-fidelity feasibility, ART-003 scorecard and Round 3 plan
+- **Status:** review requested (documents only; everything in them is PROPOSED — NOT APPROVED)
+- **Context:** written on top of `b783913`. No game code, scene, production art, layout, save, camera, scale or `DESIGN.md` changed. No new captures, prototypes or generations. Images consulted: the four concepts, `ART-003R2_master.png` / `_master_2.png`, `VIS-001_master.png`.
+- **Documents:**
+  - `ART_DIRECTION.md` — proposed art bible, written under `DESIGN.md` (D-001); every clash with the locked spec is marked ⚠.
+  - `AI_COLLAB/CONCEPT_FIDELITY_FEASIBILITY.md` — 15 systems compared with the concept (12 points each), classed A–E, and the register "Concept Fidelity Compromises Requiring Owner Approval" (C-01 to C-13).
+  - `AI_COLLAB/ART_REVIEW_RUBRIC.md` — weights, anchors, pass/fail gates, evidence rules, scorecard template.
+  - `AI_COLLAB/ART_003_SCORECARD.md` — Round 2 scores **54.5/100** (provisional self-score by its author; production farm about 40.5, Round 1 about 45, for context).
+  - `AI_COLLAB/ART_003_ROUND3_PLAN.md` — steps R3-0 to R3-6 with dependencies, effort estimates and gates.
+  - `TASKS.md` gains rows for ART-001 to ART-004 (ChatGPT's request); `DECISIONS.md` gains P-002 under "Proposed, not approved".
+- **Main findings:**
+  - **Night is a rendering problem, not an art problem.** Round 2's art measures the same at the game's night (mean luma 0.030) as Round 1; only the preview tint and grade lift it (0.114; concept 0.200). Priority 1 needs no new art.
+  - **The concept frames about 1.6–2.2× more world per axis than the game shows** (estimate from character widths: ~42–60 tiles across vs 26.7). Much of its richness is landmarks sharing one view. Keeping `SCALE = 3` means composing each screen as its own picture (C-02).
+  - **Painterly, gridless detail is class E** at 16 px with nearest filtering; richness has to come from layering, decals and lighting (C-03). Integer scaling at 1080p is proposed as a separate test, since today's 4.5× is uneven.
+  - **Three locked rules clash with the concept:** "muted, desaturated" palette (C-04), "dark outlines on every sprite" (C-11), and the SpriteCook + `house_chunky_b` pipeline vs the PixelLab/concept-palette ART-003 family (C-12). The brief's "use PixelLab only when…" also differs from `CLAUDE.md`'s SpriteCook pipeline.
+  - **Gameplay clashes:** the concept's lamp on every post vs earned lamps (C-07); the concept layout vs the live one, whose change resets crops (C-08).
+- **Unsupported or unverified:** framing estimates come from AI images with no true grid; the Compatibility renderer's per-item 2D light limit must be checked in Godot 4.7; no performance has been measured (R3-0 adds it); the Round 2 master has no matched production column (R3-0 adds it); no ChatGPT review of Round 2 is recorded yet.
+- **Decisions for the owner:**
+  1. Accept, change or reject `ART_DIRECTION.md` as the proposed art bible under `DESIGN.md`.
+  2. Accept the rubric and its provisional bands.
+  3. Authorize ART-003 Round 3 as a slice (R3-0, R3-2 to R3-6).
+  4. Authorize R3-1: the Round 2 night moved into the game behind a flag (off by default), with the night target band (C-05) and landmark rims instead of more lamps (C-07).
+  5. Test a lifted or seasonal day grade (C-04; touches the locked palette and D-008)?
+  6. Test selective outlines on ground cover and background trees (C-11)?
+  7. Layout migration: wanted or not, and if so with crop remapping (C-08)? Best decided before production art.
+  8. Schedule an isolated scaling test (C-02, C-03)?
+  9. Pipeline and budget: PixelLab plan, SpriteCook with a new concept-derived anchor, or both (C-12). Round 3 needs about 10–16 generations; none are left on the PixelLab trial.
+  10. Each remaining compromise in the register (C-01, C-06, C-09, C-10, C-13).
+- **Action requested:** ChatGPT — review the five documents for contradictions with `DESIGN.md` and earlier decisions, challenge the A–E classes and scores, and give an independent Round 2 score from the attached master. Owner — the decisions above.
+- **Approval:** pending ChatGPT review and owner decision. Nothing here is approved, and Round 3 doesn't start until the owner authorizes it.
