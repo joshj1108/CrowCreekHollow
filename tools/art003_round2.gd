@@ -109,17 +109,8 @@ func _initialize() -> void:
 	for c in main.get_children():
 		if c is CanvasLayer and c.layer != 0:
 			c.visible = false
-	if night and opt["night"] == "preview":
-		var late := Node.new()
-		var gd := GDScript.new()
-		gd.source_code = LATE_SCRIPT
-		gd.reload()
-		late.set_script(gd)
-		late.set("main", main)
-		late.set("tint", PREVIEW_NIGHT_TINT)
-		late.set("grade", PREVIEW_NIGHT_GRADE)
-		late.process_priority = 1000   # after the game sets its own tint each frame
-		root.add_child(late)
+	if night:
+		_night(main, opt)
 
 	px = main.PX
 	origin = main.player.position - PLAYER * px
@@ -256,9 +247,9 @@ func _initialize() -> void:
 	# Atmosphere: shade deepening the forest's interior, and a thin haze over the far rows. Both sit over the
 	# back of the forest but under everything from the clearing's edge forward.
 	var shade := Sprite2D.new()
-	shade.texture = _edge_layer(Color(0.02, 0.03, 0.05), 0.55 if night else 0.32, 0.5, 9)
+	shade.texture = _edge_layer(Color(0.02, 0.03, 0.05), _shade_strength(night), 0.5, 9)
 	var haze := Sprite2D.new()
-	haze.texture = _edge_layer(Color(0.72, 0.78, 0.86) if night else Color(0.86, 0.82, 0.74), 0.22 if night else 0.14, 0.9, 21)
+	haze.texture = _edge_layer(Color(0.72, 0.78, 0.86) if night else Color(0.86, 0.82, 0.74), _haze_strength(night), 0.9, 21)
 	for i in 2:
 		var layer: Sprite2D = [shade, haze][i]
 		layer.centered = false
@@ -277,6 +268,37 @@ func _initialize() -> void:
 			light.position = origin + Vector2(l.x * px - px * 0.5, (l.y - 1.75) * px)
 			main.add_child(light)
 
+	await _finish(main, opt)
+
+
+# The night as drawn in the shot: the preview by default, or the game's own with night=game.
+# A node that runs after the game sets the tint each frame overrides it (Round 3 replaces this).
+func _night(main, opt: Dictionary) -> void:
+	if opt["night"] != "preview":
+		return
+	var late := Node.new()
+	var gd := GDScript.new()
+	gd.source_code = LATE_SCRIPT
+	gd.reload()
+	late.set_script(gd)
+	late.set("main", main)
+	late.set("tint", PREVIEW_NIGHT_TINT)
+	late.set("grade", PREVIEW_NIGHT_GRADE)
+	late.process_priority = 1000   # after the game sets its own tint each frame
+	root.add_child(late)
+
+
+# How strongly the forest interior is shaded, and how thick the haze over the far rows is (Round 3 tunes them).
+func _shade_strength(night: bool) -> float:
+	return 0.55 if night else 0.32
+
+
+func _haze_strength(night: bool) -> float:
+	return 0.22 if night else 0.14
+
+
+# Runs the warm-up frames, saves the shot and quits (Round 3 adds measurements and recording).
+func _finish(main, opt: Dictionary) -> void:
 	for i in int(opt["frames"]):
 		await process_frame
 	var img := root.get_texture().get_image()

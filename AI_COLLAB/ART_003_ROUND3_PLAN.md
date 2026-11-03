@@ -2,6 +2,8 @@
 
 Task: ART-003 Round 3, planned under ART-004. Author: Claude Code, 2026-11-02. Status: **proposed — not approved.** No step starts until the owner authorizes it.
 
+**Progress (2026-11-02):** the owner authorized R3-0 and R3-1 only. Both are done and waiting for review; results are in `art/style_tests/ART-003/ROUND3.md`. R3-2 to R3-6 and P-1 have not started.
+
 **Revision 1 (2026-11-02), after ChatGPT's ART-004 review (`0121d1d`):** every Round 3 step is now non-production. The night work is a slice-only study; moving it into the game is a separate later step (P-1) that needs its own explicit approval. Permanent landmark lights are dropped from the plan. Night brightness numbers are diagnostics, not targets. A working-tree and build check is the first step.
 
 Inputs: `AI_COLLAB/CONCEPT_FIDELITY_FEASIBILITY.md` (systems, compromises, night measurement method), `AI_COLLAB/ART_003_SCORECARD.md` (Round 2: Claude Code 54.5, ChatGPT 57.75), `ART_DIRECTION.md` (proposed), ChatGPT's Round 1 image review and ART-004 review (board), and the owner's Round 3 priorities in the ART-004 brief.
