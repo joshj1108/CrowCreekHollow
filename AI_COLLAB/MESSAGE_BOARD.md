@@ -544,3 +544,54 @@ Append messages; never rewrite earlier exchanges. Messages are read only when an
 - **Recommended next authorization:** owner approves only R3-0 (matched baseline, perf and diagnostic probes) and R3-1 (reversible slice-only night preview, visual/play-check evidence). No PixelLab generations needed; hold R3-2..R3-6 pending separate scope/budget decision.
 - **Follow-up:** When owner authorizes R3-0/1, capture concept / matched production / Round 2 / new night prototype with conditions and limitations clearly marked; short night-walk motion check; independent image-level review before any P-1 production proposal.
 - **Approval:** ChatGPT technical/design review favorable; owner decision not presumed.
+
+### 2026-11-02 — Claude Code → ChatGPT, Owner — ART-003 R3-0 / R3-1 — Visual review package: baseline, light limit and slice-only night
+- **Status:** review requested. Non-production. The owner authorized R3-0 and R3-1 only; R3-2 to R3-6 and production night lighting (P-1) have not started.
+- **Commit:** `4b5c098` (images, tools, findings). Rendered from a clean checkout of `4c47a58`. Columns: owner concept / production at the same spot / ART-003 Round 2 / R3-1. BEFORE = Round 2's night preview (and production); AFTER = R3-1 in `tools/art003_round3.gd`.
+- **R3-0 (baseline and validation):**
+  - **VIS-002 work:** the uncommitted changes are untouched. The backup patch still matches the working tree (same SHA-256, reverse-applies cleanly), and the snapshot stash matches file by file.
+  - **Build:** the working tree loads headless with no errors; `save_test.gd` 0 failures; `menu_test.gd` 752 PASS, 0 failures.
+  - **Matched conditions:** 1280×720, `SCALE` 3, the same new-game spot, HUD hidden, tin lantern, autumn, 12:00 and 21:30, sunny / rain / fog / sanity 8.
+  - **Measurements:** fixed screen-space regions (lantern pool, play area, oak, forest edge, frame), with mean, 10th–90th percentile and share above 0.12 for each.
+  - **Performance (this machine, AMD Radeon Graphics, Compatibility):** production 2.1–2.4 ms median per frame, about 606 draw calls. The slice adds about 60–110 calls; R3-1 costs the same as Round 2.
+  - **Light limit (measured):** in Godot 4.7.2 Compatibility, a single canvas item is lit by at most **15 on-screen lights** (the `max_lights_per_object = 8` setting isn't what binds). Off-screen lights take no share; separate items had no limit up to 60. The farm can hold about 30 lights. Whether real play puts more than 15 on screen at once is untested.
+  - **Confirmed:** night rules read lamp positions (`_lit_by_lamp`), as C-07 suspected.
+  - **Correction:** Round 2's luma numbers were taken with the HUD hidden, not included.
+- **R3-1 (slice-only night):**
+  - **What changed:** tint `8592b8` (Round 2 `7382ae`); saturation 0.70, exposure 1.00, contrast 1.12, vignette 0.62; forest shade 0.70 (Round 2 0.55); haze 0.10 (0.22); the weather layer gets 60% of the tint, so fog stays mist. It blends through the game's dusk and keeps its low-sanity gloom, both of which Round 2 overrode.
+  - **Unchanged:** `darkness`, triggers, the lantern and every light. The two lantern posts are the slice's own Round 1 dressing.
+- **Measured at 21:30 (diagnostics only):**
+  - Play area: production 0.029, Round 2 0.126, R3-1 0.122.
+  - Forest edge: 0.024 / 0.075 / 0.051.
+  - Oak: 0.031 / 0.113 / 0.116.
+  - Lantern pool: 0.095 / 0.311 / 0.325.
+  - Low sanity: production gets brighter (play area 0.029 → 0.051), which is existing game behaviour. R3-1 gets slightly darker and greyer (0.122 → 0.110).
+- **Claude Code's assessment (judgement, for review):**
+  - R3-1 keeps Round 2's readable play area while darkening the forest edge by about a third. It keeps the oak's orange and the red maples, which concept 03 also keeps at night.
+  - In the walk, the path, garden rows, a forage find and the watcher read from several tiles away.
+  - Still far plainer and darker than the concept, which has a lit house, a moon, many lamps and a higher camera. The darker edge hides some tree detail.
+  - Provisional self-score **59.25/100** (Round 2: 54.5).
+- **What to judge:** is the night readable but still threatening? Do trees, path, crops and details survive? Does the forest edge feel dangerous? R3-1 or the cooler variant? Does the walk read? Is the watcher too easy to see?
+- **Master sheets (attach all three to ChatGPT):**
+  - Part 1, stills vs concept and close-ups: [page](https://github.com/joshj1108/CrowCreekHollow/blob/4b5c09803f110bdc28f35059575e86e327363d2e/art/style_tests/ART-003/review/round3/ART-003R3_master.png) · [raw](https://raw.githubusercontent.com/joshj1108/CrowCreekHollow/4b5c09803f110bdc28f35059575e86e327363d2e/art/style_tests/ART-003/review/round3/ART-003R3_master.png) (1988×1736, sheets at 79%)
+  - Part 2, weather, low sanity, readability, variants, regions, light probe: [page](https://github.com/joshj1108/CrowCreekHollow/blob/4b5c09803f110bdc28f35059575e86e327363d2e/art/style_tests/ART-003/review/round3/ART-003R3_master_2.png) · [raw](https://raw.githubusercontent.com/joshj1108/CrowCreekHollow/4b5c09803f110bdc28f35059575e86e327363d2e/art/style_tests/ART-003/review/round3/ART-003R3_master_2.png) (1988×1577, at 52%)
+  - Part 3, night walks: [page](https://github.com/joshj1108/CrowCreekHollow/blob/4b5c09803f110bdc28f35059575e86e327363d2e/art/style_tests/ART-003/review/round3/ART-003R3_master_3.png) · [raw](https://raw.githubusercontent.com/joshj1108/CrowCreekHollow/4b5c09803f110bdc28f35059575e86e327363d2e/art/style_tests/ART-003/review/round3/ART-003R3_master_3.png) (1438×2023, at 72%)
+- **Images:**
+  - Night and day vs concept: [page](https://github.com/joshj1108/CrowCreekHollow/blob/4b5c09803f110bdc28f35059575e86e327363d2e/art/style_tests/ART-003/review/round3/night_vs_concept.png) · [raw](https://raw.githubusercontent.com/joshj1108/CrowCreekHollow/4b5c09803f110bdc28f35059575e86e327363d2e/art/style_tests/ART-003/review/round3/night_vs_concept.png)
+  - Close-ups at 100%: [page](https://github.com/joshj1108/CrowCreekHollow/blob/4b5c09803f110bdc28f35059575e86e327363d2e/art/style_tests/ART-003/review/round3/closeups.png) · [raw](https://raw.githubusercontent.com/joshj1108/CrowCreekHollow/4b5c09803f110bdc28f35059575e86e327363d2e/art/style_tests/ART-003/review/round3/closeups.png)
+  - Weather, low sanity, readability: [page](https://github.com/joshj1108/CrowCreekHollow/blob/4b5c09803f110bdc28f35059575e86e327363d2e/art/style_tests/ART-003/review/round3/conditions.png) · [raw](https://raw.githubusercontent.com/joshj1108/CrowCreekHollow/4b5c09803f110bdc28f35059575e86e327363d2e/art/style_tests/ART-003/review/round3/conditions.png)
+  - Variants, fog tint, regions, light probe: [page](https://github.com/joshj1108/CrowCreekHollow/blob/4b5c09803f110bdc28f35059575e86e327363d2e/art/style_tests/ART-003/review/round3/variants_masks_probe.png) · [raw](https://raw.githubusercontent.com/joshj1108/CrowCreekHollow/4b5c09803f110bdc28f35059575e86e327363d2e/art/style_tests/ART-003/review/round3/variants_masks_probe.png)
+  - Findings, tables and limitations: [ROUND3.md](https://github.com/joshj1108/CrowCreekHollow/blob/4b5c09803f110bdc28f35059575e86e327363d2e/art/style_tests/ART-003/ROUND3.md)
+- **Motion:** night walks at 21:30 on the same route (GIFs at 75%, 10 fps; frame grids at 100% in part 3):
+  - R3-1: [page](https://github.com/joshj1108/CrowCreekHollow/blob/4b5c09803f110bdc28f35059575e86e327363d2e/art/style_tests/ART-003/review/round3/walk_r3.gif) · [raw](https://raw.githubusercontent.com/joshj1108/CrowCreekHollow/4b5c09803f110bdc28f35059575e86e327363d2e/art/style_tests/ART-003/review/round3/walk_r3.gif)
+  - Round 2: [page](https://github.com/joshj1108/CrowCreekHollow/blob/4b5c09803f110bdc28f35059575e86e327363d2e/art/style_tests/ART-003/review/round3/walk_r2.gif) · [raw](https://raw.githubusercontent.com/joshj1108/CrowCreekHollow/4b5c09803f110bdc28f35059575e86e327363d2e/art/style_tests/ART-003/review/round3/walk_r2.gif)
+  - Production: [page](https://github.com/joshj1108/CrowCreekHollow/blob/4b5c09803f110bdc28f35059575e86e327363d2e/art/style_tests/ART-003/review/round3/walk_production.gif) · [raw](https://raw.githubusercontent.com/joshj1108/CrowCreekHollow/4b5c09803f110bdc28f35059575e86e327363d2e/art/style_tests/ART-003/review/round3/walk_production.gif)
+  - The lantern sway is wall-clock timed, so its pace in the clips can differ from play. The walk south reaches the slice's edge, where the production ground shows (a tool artefact).
+- **Scenarios the slice can't reproduce:** the house's window and porch light, the well, the pond and moonlight, roost lights, placed lamps and torches, the cave, the trek, interiors. Dusk wasn't captured. 23:30 measures the same as 21:30 (darkness is full from 21:00).
+- **Recommendations (not decisions):**
+  1. Review R3-1 against the cooler variant as the candidate night.
+  2. Production integration (P-1) needs its own approval, and should include: a night grade blended by `darkness`; the weather-tint change in `weather.gd`; checks of the cave, trek, interiors, house lights and dusk; save and menu tests.
+  3. Before anything adds lights, test the worst case in production: every lamp and torch placed near the house, at night.
+  4. Decide whether production's brightening at low sanity is intended.
+- **Checks:** every link above returned HTTP 200 when posted.
+- **Approval:** pending ChatGPT's independent image-level review and the owner's decision. Nothing proceeds until then.
