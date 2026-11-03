@@ -93,4 +93,24 @@ ChatGPT's conclusions, as relayed by the owner: R3-1 is the best night direction
 
 ## R3 slice, R3-2 to R3-5 (added 2026-11-02)
 
-Claude Code's provisional self-score for the refined slice under the locked R3-1 night: **62.5 / 100** (fidelity 6, richness 6, lighting 6, consistency 6, readability 7.5, technical 7). Evidence and limits are in `art/style_tests/ART-003/ROUND3S.md`. No ChatGPT score for this pass is recorded yet.
+Claude Code's provisional self-score for the refined slice under the locked R3-1 night: **62.5 / 100** (fidelity 6, richness 6, lighting 6, consistency 6, readability 7.5, technical 7). Evidence and limits are in `art/style_tests/ART-003/ROUND3S.md`. ChatGPT's independent score, from its four-sheet image review (board, commit `a3c47bb`): **63.0 / 100**. Kept separate, not averaged.
+
+| Dimension | Weight | Claude Code (self) | ChatGPT |
+| --- | --- | --- | --- |
+| Concept fidelity | 25% | 6 | 6.0 |
+| Environmental richness | 20% | 6 | 6.0 |
+| Lighting and atmosphere | 20% | 6 | 6.5 |
+| Asset consistency | 15% | 6 | 6.0 |
+| Gameplay readability | 10% | 7.5 | 7.5 |
+| Technical quality | 10% | 7 | 6.5 |
+| **Total** | | **62.5** | **63.0** |
+
+ChatGPT's conclusions, in short:
+- Prefer oak D's structure, but its canopy is too sparse: plan a targeted foliage edit, not a reroll.
+- Litter and grass detail are too evenly spread.
+- The garden is now limited by composition and scale.
+- The straight shade boundary must be fixed before visual approval.
+- R3-1 stays the night baseline.
+- Small forage and dark crops need more contrast.
+
+Next step: a wider homestead composition plan (`AI_COLLAB/ART_003_WIDE_HOMESTEAD_PLAN.md`).
