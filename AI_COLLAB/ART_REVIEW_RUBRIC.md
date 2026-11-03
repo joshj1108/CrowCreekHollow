@@ -37,7 +37,7 @@ Per dimension, what pulls a score down:
 
 - **Concept fidelity:** wrong silhouette or proportions on hero assets; wrong palette family; missing landmarks or storytelling detail the concept shows; a composition that reads as objects on empty ground.
 - **Environmental richness:** visible tile repetition; bare grass at bases of objects; missing layers (canopy, understorey, ground cover, litter); flat paths and plots.
-- **Lighting and atmosphere:** night mean luma far from the target band; lights without warm rims; no depth falloff at forest edges; a day grade that hides the concept's warmth (or overshoots it).
+- **Lighting and atmosphere:** a night that fails the visual and play checks (play area unreadable, or so bright it stops being threatening); lights without warm rims; no depth falloff at forest edges; a day grade that hides the concept's warmth (or overshoots it). Brightness measurements inform this score; they don't set it.
 - **Asset consistency:** mixed outline styles; mixed pixel scales; assets from different generators that read as different games; one asset noticeably more or less detailed than its neighbours.
 - **Gameplay readability:** the farmer, path or interactables lost against the ground; foreground hiding the player; night too dark to see where to walk.
 - **Technical quality:** clipped canvas edges; baked grass discs or backgrounds; seams; uneven pixel sizes; jitter or shimmer in motion; unmeasured performance claims.
@@ -55,11 +55,14 @@ These bands are a starting point. The owner can move them after a few rounds. A 
 
 ## Acceptance gates (pass/fail, independent of the score)
 
-A candidate can't be recommended for production unless every gate passes:
+A candidate can't be recommended for production unless every gate passes. Gate 2 depends on what kind of task it is.
 
 1. **Rules.** Square 16 px grid, current camera and scale, and straight-on 3/4 view unchanged — or an owner-approved change to them is cited.
-2. **Gameplay and saves.** No change to mechanics, collisions, movement, `darkness`, triggers or the save — or the owner-approved change is cited. Slots 1–3 untouched.
-3. **Tests.** When code changed: `save_test.gd` and `menu_test.gd` pass; `balance_sim.gd` when anything timed or placed changed.
+2. **Gameplay and saves.**
+   - **Art-only tasks** (art, lighting, grade, atmosphere, composition, UI skin): no change to mechanics, collisions, movement, `darkness`, triggers, placement rules, progression or the save. An art-only task that turns out to need one stops and asks; it doesn't make the change.
+   - **Tasks that include an explicitly approved gameplay change** (for example a layout migration or new landmark lights the owner has approved): the change is allowed only within the approval, which is cited by its `DECISIONS.md` entry or board entry. It must be behind a flag or otherwise reversible where practical, and tested on its own (gate 3) separately from the visual review. Its save effects are stated, and migrations are tested in slot 9 only.
+   - Either way, slots 1–3 are never touched.
+3. **Tests.** When code changed: `save_test.gd` and `menu_test.gd` pass on the working tree actually being shipped. For an approved gameplay change: also `balance_sim.gd` when anything timed, placed or progressed changed, and a save-migration case in `save_test.gd` when the save or layout changed. Visual approval doesn't stand in for these, and passing tests don't stand in for visual approval.
 4. **Evidence.** A master PNG per `VISUAL_REVIEW_PROTOCOL.md`, with the columns below.
 5. **Compromises.** Every visible departure from the concept is either fixed or listed in the compromise register (`CONCEPT_FIDELITY_FEASIBILITY.md`) with its status.
 6. **Approval.** ChatGPT's review is recorded on the board (advice), and the owner has approved. Until then the state is *review requested*.
@@ -75,7 +78,9 @@ A candidate can't be recommended for production unless every gate passes:
 
 **Settings to state.** Viewport and stretch; source dimensions and on-screen dimensions of new assets; grade and tint values used; light count and energies when lighting changed; the commit or flag for BEFORE and AFTER.
 
-**Measurements.** Where they help: mean luma and share of pixels above 0.12 (the ART-003 method) for night; frame time and draw calls for density and lighting changes. Label them as measurements with their method.
+**Measurements.** Where they help: region luma readings for night, using matched captures and fixed masks (`CONCEPT_FIDELITY_FEASIBILITY.md`, "Night measurement method"); frame time and draw calls for density and lighting changes. Label them as measurements with their method. They are diagnostics: no number is an acceptance criterion on its own, and a change that improves a number but fails the visual or play checks fails.
+
+**Play checks.** For lighting and density changes, test readability with the farmer moving (walk the path, find items and threats outside the lantern pool), not only in stills, and include a short motion clip.
 
 **Honesty rules.**
 - Say "matched" only when framing, scale and conditions match. Otherwise list the differences as limitations.

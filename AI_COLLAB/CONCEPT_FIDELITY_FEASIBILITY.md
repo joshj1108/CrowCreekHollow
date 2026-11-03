@@ -2,6 +2,14 @@
 
 Task: ART-004 (proposed). Author: Claude Code, 2026-11-02. Status: **proposal for ChatGPT review and the owner's decision.** Nothing here is approved, and no game file, production asset, layout or locked rule was changed to write it.
 
+**Revision 1 (2026-11-02), after ChatGPT's ART-004 review (board, commit `0121d1d`):**
+- Painterly fidelity is no longer classed E. Exact reproduction and perceptual approximation are separated, and untested alternatives are marked *uncertain* (system 3, C-03).
+- Night brightness numbers are now diagnostic measurements, not acceptance targets, with a stated capture and measurement method and a required visual and play-test check (system 11, "Night measurement method").
+- The first night experiment is slice-only; production integration needs its own approval (system 11).
+- Extra permanent landmark lights (oak, well, pond) are no longer recommended; they are an option that must first be checked against earned lamps and the horror progression (system 11, C-07).
+- Field-of-view figures are labelled as uncalibrated estimates; scaling options are research options that need their own approved test plan (system 2, C-02).
+- A working-tree and build check is now a prerequisite for any implementation ("Before any implementation").
+
 This compares the owner's four approved concept images (`art/reference/concept/01`–`04`) with what the Godot game actually renders, system by system, and says what it would take to close each gap. It sits under `DESIGN.md` (D-001): where they disagree, `DESIGN.md` and the owner's recorded decisions win until the owner changes them.
 
 Related documents:
@@ -26,7 +34,7 @@ Related documents:
 - **D** — conflicts with an approved gameplay, camera, scaling or asset rule.
 - **E** — not reliably achievable in the current implementation without a substantial redesign.
 
-A system can carry more than one class (for example "A technically, D by rule").
+A system can carry more than one class (for example "A technically, D by rule"). A class followed by **(uncertain)** means the route looks feasible but hasn't been tested; it is a hypothesis, not a finding. E is used only where a specific engine or rule limit has been identified *and* the alternatives have been tried or ruled out with evidence. At present nothing in this document meets that bar.
 
 **Evidence used.** No new captures or prototypes were made for this document (the brief rules them out). Images consulted:
 - Concepts: `01_overview.webp`, `02_autumn_homestead.webp`, `03_night_homestead.webp` (via the Round 2 master), `04_rookery_escort.webp`.
@@ -64,8 +72,8 @@ A system can carry more than one class (for example "A technically, D by rule").
 | # | System | Class | Main cause of the gap | Owner approval needed? |
 | --- | --- | --- | --- | --- |
 | 1 | Camera angle and composition | D (angle), B (composition) | Camera rule; concept is oblique and shows ~2× more world | Yes for any camera change; no for composing within it |
-| 2 | World and tile resolution | D | 16 px grid at 3× vs a much wider concept frame | Yes |
-| 3 | Pixel density and display scaling | D / E (painterly finish) | Locked 16 px, 1280×720 canvas, uneven 1080p stretch | Yes |
+| 2 | World and tile resolution | D | 16 px grid at 3× vs an apparently wider concept frame (uncalibrated estimate) | Yes, and a separate test plan |
+| 3 | Pixel density and display scaling | D (exact reproduction); B/C (uncertain) for perceptual approximation | Locked 16 px, 1280×720 canvas, uneven 1080p stretch | Yes for any scale change |
 | 4 | Asset detail and texture fidelity | B / C | Asset quality and clustering more than resolution | For production use |
 | 5 | Ancient oak and major trees | B | Art (canvas, details) and composition | For production use |
 | 6 | Farmhouse and architecture | C (redraw), B (dressing) | Art; D-009 gate | Yes (D-009) |
@@ -73,7 +81,7 @@ A system can carry more than one class (for example "A technically, D by rule").
 | 8 | Ground, paths and transitions | B (decor layer), D (grid paths) | Tile art variety; path shape is in the layout | Yes if the grid changes |
 | 9 | Vegetation layers and density | B / C | Missing assets; composition | For production use |
 | 10 | Day saturation and grade | A technically, D by rule | Grade values and the locked "muted" rule | Yes |
-| 11 | Night ambient and lanterns | A / B (ambient), D (light count) | Rendering values; lamps are earned in play | Yes |
+| 11 | Night ambient and lanterns | A / B (ambient, slice-tested only), D (light count) | Rendering values; lamps are earned in play | Not for a slice study; yes for production and for any new permanent light |
 | 12 | Shadows, fog, weather, depth | B (fog/haze), C (cast shadows) | Rendering and composition | Yes for occluders |
 | 13 | Characters | A / B | Mostly matches; concept costume differs | For production use |
 | 14 | UI | B | Different frame style; concept UI is an example | Yes for a restyle |
@@ -101,10 +109,11 @@ A system can carry more than one class (for example "A technically, D by rule").
 
 1. **Concept target.** Image 01's footer states "16×16 tiles, 16×32 characters". The farmer in 01 is about 25 screen px wide on a 1536 px image.
 2. **Current game.** [Observed] 16×16 tiles, 16×32 farmer, 3 screen px per art px at the base canvas.
-3. **Difference.** [Estimate, from the farmer's width in 01: ≈1.6 screen px per art px] The concept frame is about 960 art px, or **about 60 tiles wide**, against the game's 26.7. In 04 the farmer is about 40 px wide on 1672 px, giving ≈2.5 px per art px and about 42 tiles. So the concept shows roughly **1.6× to 2.2× more world per axis** than the game does, at the same nominal tile size.
+3. **Difference.** [Estimate — apparent field of view, **not calibrated world geometry**] Taking the farmer's on-image width as 16 art px: in 01 the farmer is about 25 px wide on a 1536 px image (≈1.6 px per art px, so a frame about 60 tiles wide); in 04 about 40 px on 1672 px (≈2.5 px per art px, about 42 tiles). The game shows 26.7. So the concept *appears* to frame roughly 1.6× to 2.2× more world per axis.
+   - **Why this is only indicative:** the concept images are painted mockups with no pixel grid and no consistent scale; characters may be drawn larger or smaller than 16 art px; the oblique camera foreshortens depth, so a horizontal estimate says little about the vertical; and the two images disagree with each other by about 40%. These numbers must not be used to size the world, set a camera zoom or choose a canvas. A real comparison needs a calibrated test inside Godot (option c below), under its own approved plan.
 4. **Root cause.** The game's 3× world scale on a 1280×720 canvas. The tile size itself matches.
 5. **Type.** Technical (scale), with a large compositional effect: half the concept's richness is that so many landmarks share one view.
-6. **Ways to close it.**
+6. **Ways to close it.** b and c are **research options only**, not proposals to change the game; neither is a pending decision. Running either, even as an experiment, needs a separate test plan approved by the owner (D-007; this task's brief).
    - a. Keep 3×. Make each screen-sized area a complete composition (system 1a).
    - b. A 2× world scale (`SCALE = 2`): about 40×22.5 tiles in view. This is a camera/zoom change: it shows more of the farm at once (a gameplay change to what the player can see, including night threats) and makes every sprite two-thirds the size on screen.
    - c. A larger base canvas (for example 1920×1080 at 3×): about 40×22.5 tiles at 1080p, 3 px per art px, pixel-clean. It changes how much is visible in the same way as b, and every UI layout at the 1280×720 base would need checking.
@@ -112,26 +121,32 @@ A system can carry more than one class (for example "A technically, D by rule").
 8. **Performance.** b, c draw about 2.25× as many tiles and props per frame [Estimate, by area]. Likely fine on desktop; unmeasured.
 9. **Risks.** b, c change what the player sees in the dark and how far threats are visible; sanity and the night's horror are tuned around the current view. Saves are unaffected.
 10. **Compromise.** Under a, the game shows about a quarter to a half of the area the concept frames. See C-02.
-11. **Recommendation.** a now. If the owner wants the concept's wide framing, run c as an isolated test (no game-wide change) with matched captures, as ART-002 already suggested for density.
-12. **Approval.** b and c need approval, and a test plan, before any experiment (D-007 and this task's brief forbid game-wide resolution experiments without one).
+11. **Recommendation.** a now. Whether wide framing matters enough to research is the owner's call; if it does, the first step is writing a test plan (isolated build or slice, matched captures, what is measured, how it is rolled back), not running a test.
+12. **Approval.** b and c need an approved test plan before any experiment, and a separate approval before any change to the game (D-007).
 
 ## 3. Pixel density and display scaling
 
 1. **Concept target.** Painterly pixel art: soft clusters, dense micro-detail (leaf by leaf, individual stones), on no consistent pixel grid.
 2. **Current game.** [Observed] Chunky 16 px art at exactly 3× at 1280×720. At 1920×1080 the `canvas_items` stretch makes it 4.5 screen px per art px, so columns alternate 4 and 5 px (ART-002 FINDINGS).
-3. **Difference.** The concept has roughly 3–4× more visible detail per screen area [Estimate: from the ~1.6 vs 3 px per art pixel ratio squared]. Its pixels are not all the same size.
+3. **Difference.** The concept appears to carry more visible detail per screen area [Estimate, uncalibrated: the ≈1.6–2.5 vs 3 screen px per art px ratio from system 2 suggests roughly 1.5–3.5× more art pixels per area]. Its pixels are not all the same size.
 4. **Root cause.** The locked "chunky 16 px, one art pixel is three screen pixels" rule, and the concept's own lack of a grid.
 5. **Type.** Technical and artistic.
-6. **Ways to close it.**
-   - a. Stay at 16 px; raise *perceived* richness with better clustering, more layered props, decals and lighting. ChatGPT's Round 1 review says the gap is "a composition/shape/lighting problem before a blanket 32px conversion".
-   - b. 32 px source art for a few hero props on a 2560×1440 base canvas, so 32 px lands on exactly 3 px (ART-002's prerequisite test).
-   - c. Integer-scaled viewport (`stretch/scale_mode = integer`) so 1080p shows a clean 4× or 3× with borders, removing the 4.5× unevenness without new art.
-7. **Cost.** a: art and composition time. b: a canvas test, then a full art redo if adopted (ART-002: 76 farm PNGs, 56 player sheets). c: a settings test and a UI check.
-8. **Performance.** a: more draw calls for decals and props [Estimate: low]. b: 4× texture memory per asset, more fill [Estimate: fine on desktop]. c: none.
-9. **Risks.** b contradicts the locked style and doubles asset cost. c changes the visible area at 1080p (D-007).
-10. **Compromise.** A painterly, gridless finish is **E**: it can't be reproduced in a nearest-filtered pixel game without abandoning the pixel grid. See C-03.
-11. **Recommendation.** a. Propose c as a separate scaling test because the current 4.5× is a fidelity loss of its own. Keep b parked unless a hero prop fails at 16 px after a fair try.
-12. **Approval.** b and c: yes (D-007, locked rule). a: no.
+
+   **Exact reproduction vs perceptual approximation.**
+   - *Exact reproduction* means matching the concept's image-space micro-detail pixel for pixel: soft, gridless gradients, sub-tile leaves and stones, mixed pixel sizes. With nearest filtering on a fixed 16 px grid at 3×, the game cannot show detail smaller than one art pixel or pixels of mixed sizes. That is a direct consequence of the locked rule and the filter, so exact reproduction is class **D** (it conflicts with the locked pixel scale), not a question of effort.
+   - *Perceptual approximation* means that at normal play distance a viewer reads the same richness: dense litter, layered foliage, mossy materials, soft light. That is what matters to the player, and it has **not been tested** with art made for the purpose. Round 2 moved toward it at 16 px (litter, decals, layered forest), but its assets were first-pass. So it is classed **B/C (uncertain)**: plausible, unproven.
+   - Earlier drafts classed the painterly finish E. That overstated it: no isolated test of the alternatives below has been run.
+6. **Ways to close it** (all uncertain until tested).
+   - a. Stay at 16 px; raise *perceived* richness with better clustering, more layered props, decals and lighting. ChatGPT's Round 1 review says the gap is "a composition/shape/lighting problem before a blanket 32px conversion". Untested at production quality.
+   - b. Layered 16 px art: several overlapping sprites per object (canopy masses, separate leaf clumps, moss caps, litter over bases) so fine structure comes from layering rather than resolution. Untested.
+   - c. 32 px source art for a few hero props on a 2560×1440 base canvas, so 32 px lands on exactly 3 px (ART-002's prerequisite test). Needs an approved test plan (scale change).
+   - d. Integer-scaled viewport (`stretch/scale_mode = integer`) so 1080p shows a clean 4× or 3× with borders, removing the 4.5× unevenness without new art. Needs an approved test plan (D-007).
+7. **Cost.** a, b: art and composition time. c: a canvas test, then a full art redo if adopted (ART-002: 76 farm PNGs, 56 player sheets). d: a settings test and a UI check.
+8. **Performance.** a, b: more draw calls for decals, layers and props [Estimate: low]. c: 4× texture memory per asset, more fill [Estimate: fine on desktop]. d: none.
+9. **Risks.** c contradicts the locked style and doubles asset cost. d changes the visible area at 1080p (D-007).
+10. **Compromise.** Exact reproduction is given up (D). How much of the *perceived* richness 16 px can recover is an open question until a and b are tried in the slice. See C-03.
+11. **Recommendation.** Test a and b in the slice first: they need no rule change. Treat c and d as research options; if the owner wants them, write a test plan for approval. Keep c parked unless a hero prop fails at 16 px after a fair try.
+12. **Approval.** c and d: an approved test plan, then a decision (D-007, locked rule). a and b in the slice: no.
 
 ## 4. Asset detail and texture fidelity
 
@@ -257,20 +272,43 @@ A system can carry more than one class (for example "A technically, D by rule").
 
 1. **Concept target.** Image 03: the whole scene drops to blue-grey but stays readable; warm light survives only at sources (windows, a lantern on every post, the cave mouth, the farmer's lantern), moonlight on water, an orange rim on the oak, a red glow at the edge for the Hollow. Image 01: "Unsettling and oppressive by night".
 2. **Current game.** [Observed] `NIGHT_TINT` `3a3f6e` with the VIS-001 stepped lights. Round 2 preview: sky tint `7382ae` and a softer grade, set only in the slice tool.
-3. **Difference.** [Measured, ROUND2.md, 1280×720] mean luma: concept 03 crop 0.200; Round 1 night 0.030; Round 2 art at game night 0.030; Round 2 preview 0.114. Pixels above luma 0.12: 69% / 5% / 4% / 31%. Forest-edge columns in the preview: 0.058.
-4. **Root cause.** Rendering values (tint, grade) — not art. Round 2 proved new art does nothing at game night (0.030 either way). Separately, the concept's *number* of lights is far above the game's: placed lamps are earned through homestead projects.
-5. **Type.** Technical (A/B) for ambient; gameplay (D) for the number of lights.
+3. **Difference.** [Measured, ROUND2.md, 1280×720, whole frame of the slice capture including the HUD; one frame per render] mean luma: concept 03 crop 0.200; Round 1 night 0.030; Round 2 art at game night 0.030; Round 2 preview 0.114. Pixels above luma 0.12: 69% / 5% / 4% / 31%. Forest-edge columns in the preview: 0.058.
+   - **Caveat:** these are diagnostic readings of single, unmatched frames. The concept crop and the slice show different scenes with different numbers and positions of lights; the game frames include the HUD; the lantern pool alone moves the mean. They show the *direction and rough size* of the gap, not a target to hit.
+4. **Root cause.** Rendering values (tint, grade) — not art. Round 2 showed new art doesn't change the game-night reading (0.030 either way). Separately, the concept's *number* of lights is far above the game's: placed lamps are earned through homestead projects.
+5. **Type.** Technical (A/B) for ambient, but only demonstrated in the slice so far; gameplay (D) for the number of lights.
 6. **Ways to close it.**
-   - a. Port the preview into the game behind a flag: night tint and night grade in `_sky_tint()` / `NIGHT_TINT`, leaving `darkness` (sanity, lamps, events) untouched.
-   - b. Add a moon rim: a faint, large, cool light or a water shader for moonlight on the pond.
-   - c. Landmark rims: a low-energy warm light at the oak and well, so landmarks hold at night without more lamp posts.
-   - d. More lamp posts from the start, as in 03 (changes the homestead project ladder).
-7. **Cost.** a: small code, plus captures across farm, cave, trek, rain and low sanity [Estimate: 1 day]. b, c: small. d: design work.
-8. **Performance.** a: none. b, c: 2–4 more lights. [To verify] The Compatibility renderer limits how many 2D lights can touch one canvas item, and much of the farm is drawn by `main.gd`'s own `_draw` onto few canvas items. Before adding lights, check the limit and its project setting in Godot 4.7 and count the lights that can overlap the farm at once (lantern, windows, porch, lamps, visitors).
-9. **Risks.** A brighter night can weaken the horror. The preview kept forest edges dark (0.058) on purpose. The trek has its own tint built on the same values; the cave and interiors must not brighten.
-10. **Compromise.** The preview is still darker than the concept (0.114 vs 0.200). Matching 0.200 would need the concept's many lights, which conflicts with earned lamps. See C-05 and C-07.
-11. **Recommendation.** a + c in Round 3, aiming at mean luma 0.11–0.15 on the farm with forest edges under 0.07, keeping lamps earned. This is the brief's priority 1 and is pure rendering, so no new art.
-12. **Approval.** Yes: it changes production lighting outside D-005's four approved items.
+   - a. **Slice study first:** tune the night tint and grade in the slice tool only (as Round 2's preview does), check it against the method below, and present it for review. No game file changes.
+   - b. **Production integration, later and separately:** move the accepted treatment into `_sky_tint()` / `NIGHT_TINT` and the night grade behind a flag, leaving `darkness` (sanity, lamps, events) untouched. Needs its own owner approval after a is reviewed.
+   - c. Moonlight on the pond, as a water shader or a light, *tested in the slice*.
+   - d. Landmark lights at the oak or well. **Not recommended at present.** A permanent light adds a safe, warm spot the player didn't earn, which works against earned lamps (DESIGN.md, Homestead projects) and the night's rising threat. Before even a slice test, check: which lamps the player has by which day; whether any night rule reads light or lamp positions (visitors, sanity relief, the field shadow); and how a landmark light changes early nights versus late ones. Consider non-light alternatives first: value contrast in the art, a cool moon rim from the ambient, emissive fungus or charms that read as eerie rather than safe.
+   - e. More lamp posts from the start, as in 03 (changes the homestead project ladder). Gameplay change.
+7. **Cost.** a: the slice tool already does it; captures across scenarios [Estimate: half a day]. b: small code plus a full scenario sweep [Estimate: 1 day]. c: small. d: design check first. e: design work.
+8. **Performance.** a, b: none. c, d: one to a few more lights each. [To verify] The Compatibility renderer limits how many 2D lights can touch one canvas item, and much of the farm is drawn by `main.gd`'s own `_draw` onto few canvas items. Before adding lights, check the limit and its project setting in Godot 4.7 and count the lights that can overlap the farm at once (lantern, windows, porch, lamps, visitors).
+9. **Risks.** A brighter night can weaken the horror. The preview kept forest edges dark on purpose. The trek has its own tint built on the same values; the cave and interiors must not brighten. Extra permanent lights undercut earned lamps (d).
+10. **Compromise.** The preview reads darker than the concept. Matching the concept's brightness would need its many lights, which conflicts with earned lamps. See C-05 and C-07.
+11. **Recommendation.** a in Round 3 (slice only), judged visually and by the play checks below, with the luma readings as supporting diagnostics. c in the slice if it doesn't add a safe zone. b only after a is reviewed and the owner approves integration. d and e not without the owner's explicit approval and the compatibility check above. This is the brief's priority 1 and is pure rendering, so no new art.
+12. **Approval.** a and c in the slice: within Round 3's authorization. b: separate explicit owner approval (outside D-005's four approved items). d, e: explicit owner approval after the compatibility check.
+
+### Night measurement method (diagnostic, not an acceptance test)
+
+Numbers support the visual review; they never pass or fail a night on their own. Optimising a frame's average brightness is not the goal.
+
+- **Matched capture.** Same slice, tile, player position, hour (21:30, and 23:30), weather, season, lantern tier, house stage and placed lamps in every render compared. Capture at 1280×720, HUD hidden or masked. Record the commit, flag and tint/grade values.
+- **Regions, measured separately** (fixed masks drawn once on the slice and reused every round):
+  1. *Lantern pool* — a circle of the lantern's radius around the farmer.
+  2. *Play area* — walkable tiles outside the lantern pool (path, open ground, garden).
+  3. *Landmark* — the oak's sprite bounds.
+  4. *Forest edge* — non-walkable border tiles.
+  5. *Whole frame* — for continuity with Round 2's numbers only.
+- **Measures per region.** Mean luma (Rec. 709 weights, after the grade); 10th and 90th percentile luma; share of pixels above 0.12. Report the concept only as a *reference reading* of a crop with similar content (oak, path, garden, forest edge) and say what differs (lights, camera, scale).
+- **Expected relationships, provisional** (to be revisited after the first visual review): play area clearly above Round 1's game night; forest edge darker than the play area; lantern pool clearly brightest; landmark legible against the forest. Earlier figures (play-area mean about 0.11–0.15, forest edge under about 0.07) are a starting point to compare against, not targets.
+- **Visual assessment (required).** Concept / Round 2 / proposal side by side at game scale, judged for mood (still threatening?), depth, warm points and colour, by ChatGPT and the owner.
+- **Gameplay readability checks (required, in the slice with the farmer moving):**
+  - Walk the path from one edge of the slice to the other without the lantern pool and without leaving the path.
+  - Pick out the garden rows, a forage item and a dropped item outside the lantern pool.
+  - See a night visitor or the field shadow at the forest edge, and judge whether it still startles.
+  - Confirm low sanity still reads colder than a normal night, and the cave and trek don't brighten.
+  - Record a short motion clip (`review_motion.ps1`) for the walk.
 
 ## 12. Shadows, fog, weather and atmospheric depth
 
@@ -353,25 +391,25 @@ Every entry is **PROPOSED — NOT APPROVED** until the owner approves it, and is
 - **Status:** PROPOSED — NOT APPROVED.
 
 ### C-02 — Less world per screen than the concept frames
-- **Concept:** about 42–60 tiles across in one frame [Estimate].
+- **Concept:** appears to frame about 42–60 tiles across [Estimate from character widths; uncalibrated, not world geometry].
 - **Game would show:** about 26.7×15 tiles at the base canvas.
 - **Why hard:** `SCALE = 3` at 1280×720; a wider view changes what the player sees (D-007).
 - **Quality lost:** several landmarks sharing a view; the "whole homestead" feeling in play.
 - **Constraint:** D-007, locked 3× rule.
-- **Alternatives:** compose each screen as a vignette; an isolated 1920×1080-at-3× test; a 2× scale test.
-- **Effort and risk:** low / moderate test / moderate test; the gameplay risk is night visibility.
-- **Recommendation:** compose for 3× now; authorize an isolated canvas test only if wide framing matters to the owner.
+- **Alternatives:** compose each screen as a vignette. Research options only, each needing an approved test plan before any experiment: a 1920×1080 base at 3×; a 2× scale; integer scaling.
+- **Effort and risk:** low / moderate per test; the gameplay risk is night visibility.
+- **Recommendation:** compose for 3× now. If wide framing matters to the owner, the next step is a test plan for approval, not a test.
 - **Status:** PROPOSED — NOT APPROVED.
 
 ### C-03 — Chunky 16 px clusters instead of painterly micro-detail
 - **Concept:** painterly, gridless detail: individual leaves, stones, shingles.
 - **Game would show:** 16 px art at 3×; detail carried by clusters, layering and decals.
-- **Why hard:** the locked 16 px rule; a nearest-filtered pixel game can't show a gridless painting (E).
-- **Quality lost:** fine texture; soft gradients; some silhouette nuance on the oak and trees.
+- **Why hard:** exact reproduction of gridless, sub-pixel detail conflicts with the locked 16 px rule and nearest filtering (D). Whether a *perceptual* approximation can get close is untested (uncertain), not impossible.
+- **Quality lost:** certainly the concept's exact image-space micro-detail and mixed pixel sizes. Possibly some fine texture and silhouette nuance at play distance — unknown until layered 16 px art is tried.
 - **Constraint:** locked art style; display scale (ART-002).
-- **Alternatives:** better 16 px art and layering; 32 px hero art on a 2560×1440 canvas test; integer scaling to remove the 4.5× unevenness at 1080p.
+- **Alternatives:** better 16 px clusters and layering, tested in the slice (uncertain); 32 px hero art on a 2560×1440 canvas (research option, needs a test plan); integer scaling to remove the 4.5× unevenness at 1080p (research option, needs a test plan).
 - **Effort and risk:** low–moderate / high / low.
-- **Recommendation:** stay at 16 px; test integer scaling separately.
+- **Recommendation:** accept that exact reproduction isn't the goal; test layered 16 px approximation in the slice before deciding how much is lost.
 - **Status:** PROPOSED — NOT APPROVED.
 
 ### C-04 — Daytime colour under the "muted, desaturated" rule
@@ -386,14 +424,14 @@ Every entry is **PROPOSED — NOT APPROVED** until the owner approves it, and is
 - **Status:** PROPOSED — NOT APPROVED.
 
 ### C-05 — Night darker than the concept
-- **Concept:** readable blue-grey night, mean luma 0.200 [Measured, crop of 03].
-- **Game would show:** Round 2 preview levels, mean luma about 0.11–0.15, forest edges under 0.07.
+- **Concept:** readable blue-grey night (a whole-crop diagnostic reading of 03 gave mean luma 0.200; unmatched to any game frame).
+- **Game would show:** something like the Round 2 preview, which reads darker than the concept. Its exact level is to be settled visually and by play checks, with region measurements as diagnostics (system 11, "Night measurement method").
 - **Why hard:** the concept is lit by many more lights; brighter ambient alone washes out the horror.
 - **Quality lost:** some mid-ground visibility at night.
 - **Constraint:** horror tone (DESIGN.md Pillars, Sanity), earned lamps.
-- **Alternatives:** match 0.200 with ambient only (risks flat, unthreatening nights); match it with more lamps (C-07); stop at the preview level.
+- **Alternatives:** brighten with ambient only (risks flat, unthreatening nights); add lamps (C-07); stay near the preview.
 - **Effort and risk:** low effort; tone risk either way.
-- **Recommendation:** the preview level, with landmark rims and moonlight to recover the concept's points of interest.
+- **Recommendation:** stay near the preview in a slice study; recover points of interest with value contrast and moonlight before considering any new light.
 - **Status:** PROPOSED — NOT APPROVED.
 
 ### C-06 — House dressing before (or instead of) a house redraw
@@ -413,9 +451,9 @@ Every entry is **PROPOSED — NOT APPROVED** until the owner approves it, and is
 - **Why hard:** lamps are part of the homestead project ladder and of how the night gets safer.
 - **Quality lost:** early-game nights have fewer warm points than image 03.
 - **Constraint:** gameplay progression (DESIGN.md, Homestead projects).
-- **Alternatives:** keep earned lamps; give a few fixed lights at landmarks (oak, well) from the start; start with more lamps (changes progression).
-- **Effort and risk:** low; progression risk for the third option.
-- **Recommendation:** earned lamps plus faint landmark lights.
+- **Alternatives:** keep earned lamps; fixed lights at landmarks (oak, well, pond) from the start; start with more lamps (changes progression).
+- **Effort and risk:** low effort; the second and third options carry progression and horror risk: an unearned warm spot is a safe zone the night's threat has to work around.
+- **Recommendation:** keep earned lamps only. No permanent landmark lights unless the owner explicitly approves them after a compatibility check (lamp progression by day, night rules that read lights or lamp positions, early vs late nights). Try non-light ways to keep landmarks legible first.
 - **Status:** PROPOSED — NOT APPROVED.
 
 ### C-08 — Keeping the current farm layout
@@ -499,8 +537,19 @@ Contradictions found (the owner decides each; none is resolved here):
 7. **Root-level art bible.** A new `ART_DIRECTION.md` could compete with `DESIGN.md` as source of truth (D-001). It is written as subordinate and proposed until the owner says otherwise.
 
 Assumptions and unsupported claims to flag:
-- Framing and pixel-size estimates come from character widths in AI images that have no true grid.
+- Framing and pixel-size estimates come from character widths in AI images that have no true grid. They are apparent field of view, not calibrated geometry.
+- Night luma figures are single-frame, unmatched diagnostics.
+- "Perceptual approximation at 16 px" is untested either way.
 - The Compatibility renderer's per-item 2D light limit is from general Godot knowledge and must be checked in 4.7 before relying on it.
 - Performance statements are estimates; nothing was profiled.
-- Round 2 directions (oak A, the night preview) are the owner's stated preferences in this task's brief; no ChatGPT review of Round 2 is recorded on the board yet.
+- Round 2 directions (oak A, the night preview) are the owner's stated preferences in this task's brief. ChatGPT reviewed the Round 2 master sheets at image level when the owner attached them in conversation; its independent score (57.75/100) is recorded on the board in its ART-004 entry (commit `0121d1d`).
 - The concept's species and plant names (huckleberry, vine maple, sword fern) are read from the images, not stated by the owner.
+
+## Before any implementation
+
+Checked 2026-11-02 on `main` at `0121d1d` plus the uncommitted working tree:
+
+- **Uncommitted work present:** `scripts/trek_system.gd` (+127 lines, the VIS-002 trek work, including the earlier one-line type fix at the `var t: Vector2i` loop), `scripts/main.gd` (+28/−10), `shaders/grade.gdshader` (+3), `project.godot`, `scenes/main.tscn`, and `.uid`/`.import` churn. None of it belongs to ART-004, and none of it was changed.
+- **Protected, without touching the working tree:** a snapshot stash entry (`ART-004 snapshot: uncommitted VIS-002 trek/lighting work`, made with `git stash create` + `git stash store`, so the files stay as they are) and a patch file, `builds/wip_backup/2026-11-02_working_tree.patch` (gitignored; SHA-256 `f52e5ae0…2f45e72f`).
+- **Build status of the working tree:** Godot loads it headless with no script or parse errors. `tools/save_test.gd`: 0 failures. `tools/menu_test.gd`: 752 PASS lines, 0 failures. Logs in `builds/wip_backup/`. `balance_sim.gd` and visual captures were not run.
+- **Rule for future implementation:** re-run this check first. Production changes must not be built on top of, mixed into, or discard the uncommitted VIS-002 work; whoever owns it decides whether to commit it first. A slice tool that is rendered from a clean checkout (as Rounds 1–2 were) must say which commit it used.

@@ -70,8 +70,8 @@ Proposed craft rules (no conflict):
 - **Engine-driven.** All light comes from Godot: `CanvasModulate` ambient, `PointLight2D` sources, the full-screen grade. Art is drawn unlit; nothing bakes a glow into a sprite except emissive bits (window panes, lantern glass).
 - **Day:** soft overhead light; trees, rocks and brush cast soft ground shadows (existing).
 - **Dusk:** the warm three-colour dusk from VIS-001 (`DUSK_TINT`).
-- **Night target (proposed, C-05):** readable blue-grey like the ART-003 Round 2 preview: farm mean luma about 0.11–0.15 at 1280×720, forest edges under about 0.07, the concept at 0.200 as the ceiling. Gameplay `darkness` (sanity, lamps, events) is never changed for looks.
-- **Warm points:** windows, porch, lamps the player builds, the cave mouth, the lantern. Landmarks may get a faint warm rim (oak, well) so they hold at night without more lamp posts (C-07).
+- **Night direction (proposed, C-05):** readable blue-grey like the ART-003 Round 2 preview: the play area legible, the forest edge darker, the lantern pool brightest, and the night still threatening. It is judged by eye and by play checks; brightness measurements are diagnostics that support the judgement (`AI_COLLAB/CONCEPT_FIDELITY_FEASIBILITY.md`, "Night measurement method"), never a pass mark. Gameplay `darkness` (sanity, lamps, events) is never changed for looks.
+- **Warm points:** windows, porch, lamps the player builds, the cave mouth, the lantern. Warm light is earned: no permanent landmark lights without the owner's explicit approval (C-07). Landmarks hold at night through value contrast and the cool ambient first.
 - **Lights land on the art grid** (stepped falloff, VIS-001); the moving lantern keeps its smooth falloff.
 - **The Hollow** owns red. Nothing friendly glows red.
 
