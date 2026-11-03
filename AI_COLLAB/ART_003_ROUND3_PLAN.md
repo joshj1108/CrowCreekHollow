@@ -2,7 +2,10 @@
 
 Task: ART-003 Round 3, planned under ART-004. Author: Claude Code, 2026-11-02. Status: **proposed — not approved.** No step starts until the owner authorizes it.
 
-**Progress (2026-11-02):** the owner authorized R3-0 and R3-1 only. Both are done and waiting for review; results are in `art/style_tests/ART-003/ROUND3.md`. R3-2 to R3-6 and P-1 have not started.
+**Progress (2026-11-02):**
+- R3-0 and R3-1 are done (`art/style_tests/ART-003/ROUND3.md`). After ChatGPT's review the owner accepted the R3-1 night as the locked slice baseline.
+- The owner then authorized R3-2 to R3-5 as prototype work. They are done and waiting for review (`art/style_tests/ART-003/ROUND3S.md`).
+- P-1 is not approved and has not started.
 
 **Revision 1 (2026-11-02), after ChatGPT's ART-004 review (`0121d1d`):** every Round 3 step is now non-production. The night work is a slice-only study; moving it into the game is a separate later step (P-1) that needs its own explicit approval. Permanent landmark lights are dropped from the plan. Night brightness numbers are diagnostics, not targets. A working-tree and build check is the first step.
 

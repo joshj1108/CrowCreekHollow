@@ -1,0 +1,18 @@
+{
+  "_note": "ART-003 Round 3, R3-2 to R3-5 assets (2026-11-02). Test art only, non-production. Props: create_image_pixflux, view 'low top-down', selective outline, detailed shading, highly detailed, color_image = ../src/concept_palette.png. Tilesets: create_topdown_tileset standard, round, 16 px, chained from the Round 1 grass (9ed879f8) and path (75c383ec) base tiles. 13 generations in all (PixelLab Tier 2 subscription).",
+  "oak_d.png": {"tool": "create_image_pixflux img2img (init oak_init192.png = r2/oak_a.png on a 192x192 canvas, strength 200)", "job_id": "ad068e4b-6e0e-4437-99f6-b640932c5d89", "asset_id": "d11eafc8-ae1c-5dd1-9c45-b016c05f3c8e", "size": "192x192", "seed": 322, "status": "chosen"},
+  "oak_c.png": {"tool": "as oak_d, strength 260", "job_id": "28b8e768-466d-4838-ac1c-f98fe94d686f", "asset_id": "a03012cf-a436-5933-be29-076b26fb13df", "size": "192x192", "seed": 321, "status": "rejected: the crown is still cut flat where the init's canvas ended"},
+  "oak_e.png": {"tool": "create_image_pixflux img2img (init oak_d.png, strength 230), asking for a denser crown", "job_id": "262689bf-57cc-4093-b6da-63db2ffe6a7a", "asset_id": "1454cee4-f9b8-50d1-9da6-d4cbe0844bfb", "size": "192x192", "seed": 329, "status": "rejected: no denser than oak_d"},
+  "oak_init192.png": {"from": "r2/oak_a.png placed at the bottom of a transparent 192x192 canvas"},
+  "oak_details.png": {"job_id": "c711947e-ebfe-42f8-9ea9-96831100a6c0", "asset_id": "363406aa-5b70-5a41-aa49-36f6dee8bf7f", "size": "96x32", "seed": 323, "status": "the two charms are used; the 'fungus' came out as mushrooms and is unused"},
+  "fungus.png": {"from": "hand-pixelled shelf fungus, three brackets, 32x6 (no generation)"},
+  "boulders.png": {"job_id": "b49cefdf-5564-42b8-9310-81528838d8dd", "asset_id": "c0b0e249-25b8-52bf-a00a-3f893422c6a6", "size": "128x32", "seed": 324},
+  "groundcover.png": {"job_id": "6a655787-81c7-42a2-9e90-e5c54a49a796", "asset_id": "0d00d385-26a6-51eb-8f1d-31ba48a64f7e", "size": "128x32", "seed": 325},
+  "debris.png": {"job_id": "542d6f38-e719-449b-b0eb-f7b571deb998", "asset_id": "fddc70e7-2a32-5e05-bb2b-9769a9cb05ae", "size": "128x48", "seed": 326, "status": "unused: the log lies diagonally and the root and stump stand on baked grass discs"},
+  "log.png": {"job_id": "13f9a9f9-0380-43c5-a093-bd4e25d705a3", "asset_id": "8ddf1f0e-65b7-5be4-8348-e3fb5a52a31b", "size": "64x32", "seed": 330},
+  "crops_b.png": {"job_id": "877a937b-8eb1-41ae-a1c2-93b9bd2493a9", "asset_id": "98ebd781-3aab-5c7a-84a3-c32ca61762d1", "size": "128x32", "seed": 327, "cleaned": "crops_b_clean.png: the baked soil strip (rows 24-27) cut off"},
+  "garden_props.png": {"job_id": "69607a80-984c-4b27-914f-ce7aa42bdc33", "asset_id": "b571f0bb-9c20-5826-be26-84e4afc3e4a1", "size": "128x48", "seed": 328, "cleaned": "garden_props_clean.png: the baked cream ground discs (c8b89a, 8a867a) removed"},
+  "grassvar_tileset.png": {"tool": "create_topdown_tileset, grass (9ed879f8) -> darker mossy grass, amplitude 0.3, seed 31", "tileset_id": "2ddbbc09-a043-42b1-8675-8d947c1be94e", "upper_base_tile_id": "a8a87cad-e692-44a4-aa8c-894a2e3b1e77"},
+  "path2_tileset.png": {"tool": "create_topdown_tileset, grass (9ed879f8) -> path (75c383ec), amplitude 0.3, seed 7: a second set of path edges with the same fills", "tileset_id": "06237db0-839a-4193-a703-65a0fb607e9c"},
+  "wear_tileset.png": {"tool": "create_topdown_tileset, path (75c383ec) -> worn earth with stones and roots, amplitude 0.25, seed 13", "tileset_id": "f2c8b00e-3121-4281-a058-e5018be86bf1", "upper_base_tile_id": "5e9dc430-2944-44ef-ad9e-84e2c831cca5"}
+}

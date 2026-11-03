@@ -6,7 +6,7 @@
 | COLLAB-001 | Establish shared collaboration notes and root instruction pointer | ChatGPT | Claude Code | review requested | Owner reviews/merges setup PR |
 | ART-001 | PixelLab vs SpriteCook comparison (non-production) | Claude Code | ChatGPT | review requested (`e3bb50c`) | Owner chooses the asset pipeline |
 | ART-002 | 16 px vs 32 px art density test (non-production) | Claude Code | ChatGPT | review requested (`f3da292`) | Owner decides on art density |
-| ART-003 | Concept-to-game vertical slice, Rounds 1–2 (non-production) | Claude Code | ChatGPT | Round 1 reviewed (changes requested); Round 2 reviewed (ChatGPT 57.75); R3-0 and R3-1 review requested (owner authorized only these two) | Owner approves Round 3; no production migration |
+| ART-003 | Concept-to-game vertical slice, Rounds 1–2 (non-production) | Claude Code | ChatGPT | Round 1 reviewed (changes requested); Round 2 reviewed (ChatGPT 57.75); R3-1 accepted as the slice's night baseline (ChatGPT 61.5); R3-2 to R3-5 (slice only) review requested; P-1 not approved | Owner approves Round 3; no production migration |
 | ART-004 | Art direction, concept-fidelity feasibility, rubric, ART-003 scorecard and Round 3 plan (documents only) | Claude Code | ChatGPT | review requested | Owner approves each document and each compromise (all PROPOSED — NOT APPROVED) |
 
 ## VIS-001 — Scope and acceptance criteria

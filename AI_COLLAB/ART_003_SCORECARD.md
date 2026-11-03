@@ -75,4 +75,22 @@ Next: `ART_003_ROUND3_PLAN.md`.
 
 ## R3-1 night experiment (added 2026-11-02)
 
-Claude Code's provisional self-score for ART-003 R3-1 (Round 2's art under the refined slice-only night): **59.25 / 100** (fidelity 5.5, richness 5, lighting 6, consistency 6, readability 7.5, technical 7). Evidence and limits are in `art/style_tests/ART-003/ROUND3.md`. No ChatGPT score for R3-1 is recorded yet. The art is unchanged from Round 2, so only lighting, readability and technical quality moved.
+Claude Code's provisional self-score for ART-003 R3-1 (Round 2's art under the refined slice-only night): **59.25 / 100** (fidelity 5.5, richness 5, lighting 6, consistency 6, readability 7.5, technical 7). Evidence and limits are in `art/style_tests/ART-003/ROUND3.md`. The art is unchanged from Round 2, so only lighting, readability and technical quality moved.
+
+ChatGPT's independent R3-1 score, from its image-level review of the three R3 master sheets, as relayed by the owner on 2026-11-02 (the review is not yet a separate board entry): **61.5 / 100**. Kept separate, not averaged.
+
+| Dimension | Weight | Claude Code (self) | ChatGPT |
+| --- | --- | --- | --- |
+| Concept fidelity | 25% | 5.5 | 6.0 |
+| Environmental richness | 20% | 5 | 5.0 |
+| Lighting and atmosphere | 20% | 6 | 6.5 |
+| Asset consistency | 15% | 6 | 6.0 |
+| Gameplay readability | 10% | 7.5 | 7.5 |
+| Technical quality | 10% | 7 | 7.0 |
+| **Total** | | **59.25** | **61.5** |
+
+ChatGPT's conclusions, as relayed by the owner: R3-1 is the best night direction so far, preferred over production and Round 2, and the chosen variant over the cooler one. It is the non-production night baseline for the slice. The remaining gap to the concept is mainly art, composition and detail, not the night tint. P-1 (production integration) is not approved.
+
+## R3 slice, R3-2 to R3-5 (added 2026-11-02)
+
+Claude Code's provisional self-score for the refined slice under the locked R3-1 night: **62.5 / 100** (fidelity 6, richness 6, lighting 6, consistency 6, readability 7.5, technical 7). Evidence and limits are in `art/style_tests/ART-003/ROUND3S.md`. No ChatGPT score for this pass is recorded yet.

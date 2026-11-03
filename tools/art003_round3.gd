@@ -57,6 +57,9 @@ func _process(_d):
 """
 
 var o3 := {}   # this run's options
+# The oak the regions are measured against: Round 2's by default (a later slice sets its own).
+var oak_file := ""
+var oak_base := Vector2(9.4, 10.9)   # its centre and base, in slice tiles
 
 
 func _opts() -> Dictionary:
@@ -121,11 +124,11 @@ func _night(main, opt: Dictionary) -> void:
 
 
 func _shade_strength(night: bool) -> float:
-	return float(o3.get("shade", R3_SHADE)) if night and o3["mode"] == "r3" else super._shade_strength(night)
+	return float(o3.get("shade", R3_SHADE)) if night and o3["mode"] != "r2" else super._shade_strength(night)
 
 
 func _haze_strength(night: bool) -> float:
-	return float(o3.get("haze", R3_HAZE)) if night and o3["mode"] == "r3" else super._haze_strength(night)
+	return float(o3.get("haze", R3_HAZE)) if night and o3["mode"] != "r2" else super._haze_strength(night)
 
 
 # Slice tile (x, y) to the farm's world tile under it.
@@ -218,9 +221,9 @@ func _measure(main, img: Image, mask_path: String) -> Dictionary:
 	if main.lantern_tier > 0 and main.lantern_light.enabled:
 		pool_r = float(main.LANTERN_TIERS[main.lantern_tier - 1]["radius"]) * px
 	var lantern_at: Vector2 = main.lantern_light.global_position
-	var oak := Image.load_from_file(ProjectSettings.globalize_path(R2 + "oak_%s.png" % o3["oak"]))
+	var oak := Image.load_from_file(ProjectSettings.globalize_path(oak_file if oak_file != "" else R2 + "oak_%s.png" % o3["oak"]))
 	var S: float = main.SCALE
-	var oak_pos := origin + Vector2(9.4 * px - oak.get_width() * S / 2.0, 10.9 * px - oak.get_height() * S)
+	var oak_pos := origin + Vector2(oak_base.x * px - oak.get_width() * S / 2.0, oak_base.y * px - oak.get_height() * S)
 	var names := ["lantern_pool", "oak", "forest_edge", "play_area", "frame"]
 	var lumas := {}
 	for n in names:
