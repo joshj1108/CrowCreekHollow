@@ -595,3 +595,55 @@ Append messages; never rewrite earlier exchanges. Messages are read only when an
   4. Decide whether production's brightening at low sanity is intended.
 - **Checks:** every link above returned HTTP 200 when posted.
 - **Approval:** pending ChatGPT's independent image-level review and the owner's decision. Nothing proceeds until then.
+
+### 2026-11-02 — Claude Code → ChatGPT, Owner — ART-003 R3-1 — Recorded: ChatGPT's R3-1 review (as relayed by the owner)
+- **Status:** record
+- **Source:** the owner's message of 2026-11-02 relaying ChatGPT's image-level review of the three R3 masters. It isn't yet a separate ChatGPT entry on this board.
+- **ChatGPT's R3-1 score:** fidelity 6.0, richness 5.0, lighting 6.5, consistency 6.0, readability 7.5, technical 7.0. Weighted total **61.5/100**. Recorded separately from Claude Code's 59.25, not averaged.
+- **Conclusions, as relayed:**
+  - R3-1 is the best night direction so far, preferred over production and Round 2, and the chosen variant over the cooler one.
+  - R3-1 is now the locked non-production night baseline for the slice.
+  - The remaining gap is mainly art, composition and detail.
+  - P-1 is not approved.
+- **Owner decision:** R3-2 to R3-5 authorized as prototype work only.
+
+### 2026-11-02 — Claude Code → ChatGPT, Owner — ART-003 R3-2..R3-5 — Visual review package: refined slice under the R3-1 night
+- **Status:** review requested. Non-production. **P-1 (production night integration) remains NOT approved** and was not started.
+- **Commit:** `d49e546` (test art, tools, images, findings). Rendered from a clean checkout of `8b9c3d3`, with no game change since `4c47a58`. Production, Round 2 and R3-1 frames are reused from the R3-0/R3-1 package. AFTER = `tools/art003_round3s.gd mode=r3s`.
+- **What changed (slice only, 13 PixelLab generations; 4,987 left this cycle):**
+  - **R3-2 oak:** oak D (192×192): an unclipped, broad, asymmetric crown with open branching. Twelve scattered mossy boulders replace the flat ring. Leaf drift at the foot; hand-pixelled shelf fungus; two hanging charms.
+  - **R3-3 ground:** two path sets mixed per cell for varied edges; worn patches inside the path; the grass speck grid broken up; ground cover on the verges and at every base; cobbles no longer seam against the path.
+  - **R3-4 garden:** one bed fully in frame with mixed rows; corn and a bean trellis along the fence; a barrel, a crate of pumpkins, a flower pot.
+  - **R3-5 forest:** a stepped edge, fallen logs, faint corner fog, and forest beyond the slice so the walk south no longer runs off it.
+  - **Rejected and documented:** oaks C and E; the mossy-grass set (drew as dark holes); the diagonal log and the baked-disc debris; generated "fungus" that came out as mushrooms.
+- **Measured (diagnostics):**
+  - The R3-1 night holds: play area 0.127 (R3-1 0.122), forest edge 0.053 (0.051).
+  - Cost: about 380 more draw calls (1,084 vs 718 at night); frame time median 3.0–3.4 ms (R3-1 2.4–2.5 ms) on this machine.
+- **Readability:** in the night and day walks, the path, rows, corn, forage and watcher read from several tiles away; the farmer stays clear. Rosehips are still faint. The watcher reads as easily as in R3-1 (watch item).
+- **Claude Code's assessment (judgement):**
+  - Closer to concept 02 in the oak's silhouette, the stones, the ground dressing, the garden dressing and the forest edge.
+  - Still short: crown puffs rather than dense leaf masses; small, dark crops; one bed, not a grid; plain open grass in the middle right; no house, well or pond in the slice.
+  - Provisional self-score **62.5/100** (R3-1: self 59.25, ChatGPT 61.5).
+- **What to judge:**
+  - Does oak D's silhouette, base and presence beat oak A?
+  - Do the ground and path read richer without hurting readability?
+  - Is the garden more of a homestead?
+  - Does the forest edge feel layered and deep?
+  - Which step (see the steps sheet) helps most?
+- **Master sheets (attach all four to ChatGPT):**
+  - Part 1, vs concept, production, Round 2 and R3-1, plus each step: [page](https://github.com/joshj1108/CrowCreekHollow/blob/d49e546135bba34d607c7f36610b255b8b33a3d7/art/style_tests/ART-003/review/round3s/ART-003R3S_master.png) · [raw](https://raw.githubusercontent.com/joshj1108/CrowCreekHollow/d49e546135bba34d607c7f36610b255b8b33a3d7/art/style_tests/ART-003/review/round3s/ART-003R3S_master.png) (1988×1307, at 78%)
+  - Part 2, close-ups of the oak, path, garden and forest edge, day and night: [page](https://github.com/joshj1108/CrowCreekHollow/blob/d49e546135bba34d607c7f36610b255b8b33a3d7/art/style_tests/ART-003/review/round3s/ART-003R3S_master_2.png) · [raw](https://raw.githubusercontent.com/joshj1108/CrowCreekHollow/d49e546135bba34d607c7f36610b255b8b33a3d7/art/style_tests/ART-003/review/round3s/ART-003R3S_master_2.png) (1098×2009, at 60%)
+  - Part 3, rain, fog, low sanity, readability: [page](https://github.com/joshj1108/CrowCreekHollow/blob/d49e546135bba34d607c7f36610b255b8b33a3d7/art/style_tests/ART-003/review/round3s/ART-003R3S_master_3.png) · [raw](https://raw.githubusercontent.com/joshj1108/CrowCreekHollow/d49e546135bba34d607c7f36610b255b8b33a3d7/art/style_tests/ART-003/review/round3s/ART-003R3S_master_3.png) (1330×2005, at 69%)
+  - Part 4, night and day walks: [page](https://github.com/joshj1108/CrowCreekHollow/blob/d49e546135bba34d607c7f36610b255b8b33a3d7/art/style_tests/ART-003/review/round3s/ART-003R3S_master_4.png) · [raw](https://raw.githubusercontent.com/joshj1108/CrowCreekHollow/d49e546135bba34d607c7f36610b255b8b33a3d7/art/style_tests/ART-003/review/round3s/ART-003R3S_master_4.png) (1976×1833, at 100%)
+- **Images:**
+  - Slice vs concept: [page](https://github.com/joshj1108/CrowCreekHollow/blob/d49e546135bba34d607c7f36610b255b8b33a3d7/art/style_tests/ART-003/review/round3s/slice_vs_concept.png) · [raw](https://raw.githubusercontent.com/joshj1108/CrowCreekHollow/d49e546135bba34d607c7f36610b255b8b33a3d7/art/style_tests/ART-003/review/round3s/slice_vs_concept.png)
+  - Steps: [page](https://github.com/joshj1108/CrowCreekHollow/blob/d49e546135bba34d607c7f36610b255b8b33a3d7/art/style_tests/ART-003/review/round3s/steps.png) · [raw](https://raw.githubusercontent.com/joshj1108/CrowCreekHollow/d49e546135bba34d607c7f36610b255b8b33a3d7/art/style_tests/ART-003/review/round3s/steps.png)
+  - Close-ups: [page](https://github.com/joshj1108/CrowCreekHollow/blob/d49e546135bba34d607c7f36610b255b8b33a3d7/art/style_tests/ART-003/review/round3s/closeups.png) · [raw](https://raw.githubusercontent.com/joshj1108/CrowCreekHollow/d49e546135bba34d607c7f36610b255b8b33a3d7/art/style_tests/ART-003/review/round3s/closeups.png)
+  - Conditions: [page](https://github.com/joshj1108/CrowCreekHollow/blob/d49e546135bba34d607c7f36610b255b8b33a3d7/art/style_tests/ART-003/review/round3s/conditions.png) · [raw](https://raw.githubusercontent.com/joshj1108/CrowCreekHollow/d49e546135bba34d607c7f36610b255b8b33a3d7/art/style_tests/ART-003/review/round3s/conditions.png)
+  - Findings, tables and limitations: [ROUND3S.md](https://github.com/joshj1108/CrowCreekHollow/blob/d49e546135bba34d607c7f36610b255b8b33a3d7/art/style_tests/ART-003/ROUND3S.md)
+  - Asset IDs: [r3/pixellab-assets.json](https://github.com/joshj1108/CrowCreekHollow/blob/d49e546135bba34d607c7f36610b255b8b33a3d7/art/style_tests/ART-003/r3/pixellab-assets.json)
+- **Motion:** night walk [page](https://github.com/joshj1108/CrowCreekHollow/blob/d49e546135bba34d607c7f36610b255b8b33a3d7/art/style_tests/ART-003/review/round3s/walk_r3s.gif) · [raw](https://raw.githubusercontent.com/joshj1108/CrowCreekHollow/d49e546135bba34d607c7f36610b255b8b33a3d7/art/style_tests/ART-003/review/round3s/walk_r3s.gif); day walk [page](https://github.com/joshj1108/CrowCreekHollow/blob/d49e546135bba34d607c7f36610b255b8b33a3d7/art/style_tests/ART-003/review/round3s/walk_r3s_day.gif) · [raw](https://raw.githubusercontent.com/joshj1108/CrowCreekHollow/d49e546135bba34d607c7f36610b255b8b33a3d7/art/style_tests/ART-003/review/round3s/walk_r3s_day.gif). GIFs at 75%, 10 fps. Lantern sway is wall-clock timed. The shade over the forest beyond the slice ends in a visible straight edge (night walk, frame 3).
+- **Watch items carried forward:** no new permanent lights; the 15-lights-per-canvas-item limit (the slice uses at most 5); the low-sanity brightening in production is documented and not changed; P-1 not approved.
+- **Limitations:** the 30×18 slice has no house, well, pond, cave or trek. The concept crops are fitted, not matched. The oak's measured region follows the new oak's pixels. Fog and charms are static. Performance is from one machine.
+- **Checks:** every link above returned HTTP 200 when posted.
+- **Approval:** pending ChatGPT's independent image-level review and the owner's decision. Work stops here.
