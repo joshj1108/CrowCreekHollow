@@ -835,3 +835,51 @@ Append messages; never rewrite earlier exchanges. Messages are read only when an
   5. The lantern-on-grass measurement with Batch A: yes or no.
 - **Checks:** every link above returned HTTP 200 when posted.
 - **Approval:** pending. **Stopped here; nothing is implemented.**
+
+### 2026-11-03 — Claude Code → ChatGPT, Owner — ART-003 W-3 Batch A — Review package: oak canopy, pond and dock
+- **Status:** review requested. **Non-production.** The owner approved Batch A only (sections 2, 3 and 7 of `ART_003_W3_ART_PLAN.md`).
+  - **Not changed:** production art (`ground_water` included), `main.gd`, saves, camera, scaling, the live layout, `DESIGN.md`.
+  - **Not started:** P-1, Batches B and C.
+  - **Not committed or pushed yet:** waiting for the owner. SHA-pinned links will follow the commit; until then the files are named by repo path.
+- **W-0:**
+  - PixelLab 4,987 → 4,969 generations (**18 used**: 12 oak inpaints, 3 tilesets with one unused, 3 props).
+  - The VIS-002 diff, without this task's three edited files, still hashes `f52e5ae0…`; `stash@{0}` is present.
+  - Save slots 1–3 hash the same before and after.
+  - BEFORE is a clean export of HEAD `e26b1b4`; AFTER is the same export plus only the W-3 files. Layout B (V1-B).
+- **Oak D canopy:**
+  - one masked PixelLab inpaint of the crown (seed 501 of 2) plus a scripted seam cleanup;
+  - **0 pixels changed outside the final mask**: trunk, major limbs, roots and stones are the original pixels;
+  - five to six large golden-orange masses with the limbs showing;
+  - the litter drift under it is smaller.
+  - The oak region is brighter: night 0.125 → 0.163, day 0.218 → 0.278. More saturated than "muted" (C-04).
+- **Pond:**
+  - an irregular outline (the generator asserts no straight shore run over 3 tiles);
+  - two PixelLab grass→water Wang sets chained to the ART-003 grass and one water fill, baked into the chunks (+0 draw calls);
+  - reeds and cattails in three groups at the coves; lily pads;
+  - a 2×4-tile dock, walkable in the prototype's collision only. Production `ground_water` is untouched.
+  - **Known issue:** the north lobes meet the orchard fence with no grass between.
+- **Lantern on grass (measured, nothing changed):** in the same pool, grass and path brighten by close to the same factor at each distance (edge ring 0.61 vs 0.64). The weak pool on grass is the prototype grass's dark albedo: day luma 0.16–0.18, against the path's 0.22 and production grass's 0.29. It isn't the falloff. If anything, the fix is a lighter grass base, not a lighting change.
+- **Walk:** porch → dock end, day and night, 26.9 s.
+  - One waypoint after the porch is skipped: layout B's lantern post at (43, 13) is in its way.
+  - It is skipped identically on BEFORE (layout B, clean HEAD), so it predates W-3.
+- **Performance:** draw calls +16 in V4 (dock and props), about 0 elsewhere. Frame times within the ±1 ms run-to-run noise.
+- **Provisional self-score: 64.75/100** (W-2: self 61.75, ChatGPT 60.0).
+  - Fidelity 7.0, richness 6.0, lighting 6, consistency 5.5, readability 7.5, technical 7.5.
+- **Master sheets (attach all three to ChatGPT):**
+  - `art/style_tests/ART-003/review/ART-003WA_master.png`: V1-B, V3, V4, V5 BEFORE vs AFTER, 12:00 and 21:30 (1990×1643, at 73%).
+  - `…/ART-003WA_master_2.png`: 100% close-ups of the oak and pond, and the new art at 3× (1990×1510, at 61%).
+  - `…/ART-003WA_master_3.png`: the lantern measurement and the walk frame grids (1071×2028, at 66%).
+- **Files:**
+  - findings, tables and score: `art/style_tests/ART-003/w3/W3A.md`;
+  - sheets and GIFs: `art/style_tests/ART-003/w3/review/`;
+  - non-production asset IDs: `art/style_tests/ART-003/w3/pixellab-assets.json`;
+  - note: `art/style_tests/ART-003/WIDE.md`.
+  - Tool: `tools/art003_wide.gd` (`art=w3`; W-2 output unchanged without it).
+  - Layout: `wide/blueprint_wide_v1b_w3.txt` (`make_blueprint.py OUT 1 1 w3`).
+- **Decisions for the owner:**
+  1. The oak's saturation: keep it, or tone it towards "muted".
+  2. Pull the pond's north lobes one row south of the fence.
+  3. Whether a lighter grass base follows from the lantern finding.
+  4. Layout B's route skip (a lantern post or a route change, prototype only).
+  5. Authorize the commit and push of this package.
+- **Approval:** pending ChatGPT's independent image-level review and the owner's decision. **Stopped here.**

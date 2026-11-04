@@ -11,6 +11,11 @@ extends "res://tools/art003_round3s.gd"
 #   layout=b                  the V1 framing variant (blueprint_wide_v1b.txt: house one row lower, oak one tile east)
 #   visitor=ID@X,Y            tonight's visitor on inner tile X,Y
 #   walk=route hold=S         record the walking route (ROUTE) under --write-movie --fixed-fps 30
+#   art=w3                    ART-003 W-3 Batch A (layout b only): oak D's fuller canopy (w3/oak/oak_w3.png), a smaller
+#                             litter drift under it, and the irregular pond (blueprint_wide_v1b_w3.txt) drawn with the
+#                             PixelLab grass->water sets, shore props and a walkable dock, in place of ground_water
+#   probe                     with measure: also measure the tin lantern's pool circle round the farmer by day too,
+#                             and save <out>_probe.png marking its pixels by ground (green grass, brown path, blue water)
 #
 # How it is built:
 # - Ground: Round 1-3's PixelLab Wang sets on the game's dual grid (a tile on every corner where four map tiles
@@ -37,7 +42,10 @@ const ROUTE := [Vector2(45.5, 12.5), Vector2(44.0, 14.0), Vector2(41.0, 15.0), V
 	Vector2(36.5, 17.8), Vector2(38.8, 20.0), Vector2(40.2, 23.6), Vector2(43.5, 24.2), Vector2(51.0, 24.2),
 	Vector2(51.0, 29.0), Vector2(51.0, 31.2), Vector2(50.0, 33.8), Vector2(36.0, 34.2), Vector2(22.0, 34.2),
 	Vector2(19.3, 32.0), Vector2(17.0, 31.5)]
-const BLOCKS := "TOHDXWBrLd~o"   # codes the farmer can't walk on
+# W-3's route ends on the new dock instead: along the road to its end, onto the bank and up the dock.
+const ROUTE_W3_END := [Vector2(17.0, 34.6), Vector2(14.0, 34.6), Vector2(14.0, 30.7)]
+const BLOCKS := "TOHDXWBrLd~o"   # codes the farmer can't walk on (K, the W-3 dock over water, is walkable)
+const W3 := "res://art/style_tests/ART-003/w3/"
 
 var grid: Array = []          # rows of single-character codes
 var inner_origin := Vector2.ZERO
@@ -57,6 +65,20 @@ func _code(x: int, y: int) -> String:
 	return grid[y][x]
 
 
+func _w3() -> bool:
+	return o3.get("art", "") == "w3"
+
+
+# The ground material under a map code: g grass, p path (paths, the garden floor, the porch, the dock's land end,
+# round the well), w water (the pond, and the W-3 dock's tiles, which stand over water).
+func _mat(c: String) -> String:
+	if "PwSgRkcW".contains(c):
+		return "p"
+	if c == "~" or c == "K":
+		return "w"
+	return "g"
+
+
 func _view() -> Vector2:
 	if o3.has("at"):
 		var xy := str(o3["at"]).split(",")
@@ -73,6 +95,8 @@ func _initialize() -> void:
 		super._initialize()
 		return
 	var file := WIDE + ("blueprint_wide_v1b.txt" if o3.get("layout", "") == "b" else "blueprint_wide.txt")
+	if _w3():
+		file = WIDE + "blueprint_wide_v1b_w3.txt"
 	for line in FileAccess.get_file_as_string(file).split("\n", false):
 		grid.append(line)
 	var opt := o3
@@ -175,6 +199,15 @@ func _build(main, night: bool) -> void:
 		im.convert(Image.FORMAT_RGBA8)
 	var water := Image.load_from_file(ProjectSettings.globalize_path("res://art/farm/ground_water.png"))
 	water.convert(Image.FORMAT_RGBA8)
+	# W-3: two PixelLab grass->water sets chained to the same grass and water base tiles (brown and dark mud banks),
+	# chosen in stretches by a slow noise so a whole run of shore uses one bank, not a patchwork.
+	var water_a := _wang_set(W3 + "pond/water_tileset", grass_ref) if _w3() else []
+	var water_b := _wang_set(W3 + "pond/water2_tileset", grass_ref) if _w3() else []
+	var iwa: Image = (water_a[0] as ImageTexture).get_image() if _w3() else null
+	var iwb: Image = (water_b[0] as ImageTexture).get_image() if _w3() else null
+	var bnoise := FastNoiseLite.new()
+	bnoise.seed = 61
+	bnoise.frequency = 0.12
 	# The grass fill, plain and with its repeating speck painted out (as R3-3), in four mirrorings each.
 	var plain := _region(ia, path_a[1]["0000"])
 	var calm := plain.duplicate() as Image
@@ -200,13 +233,7 @@ func _build(main, night: bool) -> void:
 	for y in range(-MARGIN, GH + MARGIN):
 		var row := []
 		for x in range(-MARGIN, GW + MARGIN):
-			var c := _code(x, y)
-			var m := "g"
-			if "PwSgRkcW".contains(c):
-				m = "p"
-			elif c == "~":
-				m = "w"
-			row.append(m)
+			row.append(_mat(_code(x, y)))
 		mat.append(row)
 	var M := func(x: int, y: int) -> String:
 		if x < -MARGIN or y < -MARGIN or x >= GW + MARGIN or y >= GH + MARGIN:
@@ -228,7 +255,7 @@ func _build(main, night: bool) -> void:
 						open = false
 			if ring and (_code(x, y) == "c" or _code(x, y) == "W" or wnoise.get_noise_2d(x, y) > 0.35):
 				stone[Vector2i(x, y)] = true
-			elif open and ((_near(x, y, "rB", 2) and lnoise.get_noise_2d(x, y) > 0.15) or (_near(x, y, "To", 1) and lnoise.get_noise_2d(x, y) > 0.38)):
+			elif open and ((_near(x, y, "rB", 1 if _w3() else 2) and lnoise.get_noise_2d(x, y) > (0.3 if _w3() else 0.15)) or (_near(x, y, "To", 1) and lnoise.get_noise_2d(x, y) > 0.38)):
 				leaves[Vector2i(x, y)] = true
 
 	var x0 := -MARGIN
@@ -287,9 +314,22 @@ func _build(main, night: bool) -> void:
 				put.call(il, Rect2i(litter[1][lkey]), mx, my, true)
 			# Water: the production dual-grid set, laid over the ground (transparent where not water).
 			var mask := 0
+			var wkey := ""
 			for i in 4:
 				if M.call(cells[i].x, cells[i].y) == "w":
 					mask |= [1, 2, 4, 8][i]
+				wkey += "1" if M.call(cells[i].x, cells[i].y) == "w" else "0"
+			if _w3():
+				# W-3: the PixelLab tiles are opaque (grass, bank and water in one), so they replace the corner's
+				# ground; the layout keeps paths a tile clear of the water, so no corner needs path and water at once.
+				if wkey != "0000":
+					var use_wb := bnoise.get_noise_2d(vx, vy) > 0.0
+					if wkey == "1111":
+						var fill := _region(iwa, water_a[1]["1111"])
+						put.call(flipped.call(fill, h >> 2), Rect2i(0, 0, 16, 16), mx, my, false)
+					else:
+						put.call(iwb if use_wb else iwa, Rect2i((water_b if use_wb else water_a)[1][wkey]), mx, my, false)
+				continue
 			var frame: int = main.DUAL_FRAME_BY_MASK[mask]
 			if frame >= 0:
 				put.call(water, Rect2i((frame % 4) * 16, (frame / 4) * 16, 16, 16), mx, my, true)
@@ -377,6 +417,8 @@ func _build(main, night: bool) -> void:
 				add.call(under, x + 0.5, y + 0.9, h & 2 == 2, tint)
 	# The oak, its boulders, fungus and charms.
 	var oak := _r3("oak_d.png")
+	if _w3():
+		oak = ImageTexture.create_from_image(Image.load_from_file(ProjectSettings.globalize_path(W3 + "oak/oak_w3.png")))
 	oak_image = oak.get_image()
 	var bx := 0.0
 	var by := 0.0
@@ -517,6 +559,26 @@ func _build(main, night: bool) -> void:
 	var log := _r3("log.png")
 	for p in [Vector2(23.0, 5.0), Vector2(4.5, 19.0), Vector2(58.5, 32.0), Vector2(33.0, 36.3)]:
 		add.call(log, p.x, p.y, int(p.x) % 2 == 0, Color.WHITE)
+	# W-3: the dock on its 2x4 K tiles, lying flat under anyone on it, and the shore props: reeds and cattails in
+	# three groups at the coves (north, south-west, by the dock), lily pads on the water, a rock at the east point.
+	if _w3():
+		var dock := ImageTexture.create_from_image(Image.load_from_file(ProjectSettings.globalize_path(W3 + "pond/dock.png")))
+		var kx := 99
+		var ky := 99
+		for y in GH:
+			for x in GW:
+				if _code(x, y) == "K":
+					kx = mini(kx, x)
+					ky = mini(ky, y)
+		add.call(dock, kx + 1.0, ky + 4.0, false, Color.WHITE)
+		(sorted[sorted.size() - 1] as Array)[1] = ky - 1.0   # lie flat: under the farmer standing on it
+		var shore := _strip(W3 + "pond/shore_strip.png", 12)   # reeds, cattails, cattails, lily pads, rock, mossy rock, rushes
+		for e in [[1, 9.7, 28.9], [0, 10.5, 29.0], [6, 11.3, 28.8], [2, 9.4, 34.9], [0, 10.3, 35.0], [1, 11.2, 34.8],
+				[6, 8.6, 35.3], [1, 15.6, 33.9], [6, 16.4, 33.5], [5, 17.0, 32.2], [4, 2.6, 32.6]]:
+			add.call(shore[int(e[0]) % shore.size()], e[1], e[2], int(e[1] * 10.0) % 2 == 0, Color.WHITE)
+		for e in [[6.5, 31.6], [9.4, 30.9], [11.6, 32.7], [5.0, 33.7], [7.8, 29.9]]:
+			add.call(shore[3], e[0], e[1], int(e[0] * 10.0) % 2 == 0, Color.WHITE)
+			(sorted[sorted.size() - 1] as Array)[1] = e[1] - 2.0   # flat on the water
 	var fog := load("res://art/farm/weather_fog.png") as Texture2D
 	for p in [Vector2(2.0, 4.0), Vector2(57.0, 3.0), Vector2(1.0, 30.0), Vector2(55.0, 35.0), Vector2(26.0, 2.0)]:
 		var s := Sprite2D.new()
@@ -611,7 +673,8 @@ func _walk(main) -> void:
 		main.message_label.text = ""
 		await process_frame
 	var held := {}
-	for target in ROUTE:
+	var route: Array = ROUTE.slice(0, 15) + ROUTE_W3_END if _w3() else ROUTE
+	for target in route:
 		var stuck := 0
 		var best := 1e9
 		while true:
@@ -670,6 +733,13 @@ func _measure(main, img: Image, mask_path: String) -> Dictionary:
 	for nm in names:
 		lumas[nm] = PackedFloat32Array()
 	var mask := Image.create(img.get_width(), img.get_height(), false, Image.FORMAT_RGBA8) if mask_path != "" else null
+	# The probe: the tin lantern's pool circle round the lantern, measured by day as well as by night, split by the
+	# ground under each pixel (from this layout) and by ring (0-1, 1-2, 2-2.5 tiles out). The farmer's own sprite box
+	# is left out. Production frames are measured over the same pixels, split by the prototype's ground.
+	var probe_r := float(main.LANTERN_TIERS[0]["radius"]) * px if o3.has("probe") else 0.0
+	var probe_img := Image.create(img.get_width(), img.get_height(), false, Image.FORMAT_RGBA8) if probe_r > 0.0 else null
+	var feet: Vector2 = main.player.global_position
+	var probe := {}
 	var colours := {"lantern_pool": Color(1, 0.75, 0.2), "oak": Color(0.9, 0.3, 0.9), "house": Color(0.95, 0.95, 0.4),
 		"forest_edge": Color(0.2, 0.5, 1), "play_area": Color(0.3, 0.9, 0.3)}
 	for y in img.get_height():
@@ -691,10 +761,25 @@ func _measure(main, img: Image, mask_path: String) -> Dictionary:
 				region = "forest_edge"
 			lumas[region].append(l)
 			lumas["frame"].append(l)
+			if probe_r > 0.0 and w.distance_to(lantern_at) < probe_r:
+				var off: Vector2 = (w - feet) / px
+				if absf(off.x) > 0.5 or off.y < -1.6 or off.y > 0.3:
+					var g := _mat(_code(floori(t.x), floori(t.y)))
+					var ring := mini(int(w.distance_to(lantern_at) / px), 2)
+					for k in ["probe_" + g, "probe_%s_ring%d" % [g, ring]]:
+						if not probe.has(k):
+							probe[k] = PackedFloat32Array()
+						probe[k].append(l)
+					probe_img.set_pixel(x, y, {"g": Color(0.3, 0.8, 0.3), "p": Color(0.6, 0.4, 0.2), "w": Color(0.2, 0.4, 0.9)}[g])
 			if mask:
 				mask.set_pixel(x, y, c.lerp(colours[region], 0.45))
 	if mask:
 		mask.save_png(mask_path)
+	if probe_img:
+		probe_img.save_png(ProjectSettings.globalize_path("res://" + str(o3["out"])).get_basename() + "_probe.png")
+		for k in probe:
+			lumas[k] = probe[k]
+		names = names + probe.keys()
 	var out := {}
 	for nm in names:
 		var a: PackedFloat32Array = lumas[nm]

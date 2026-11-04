@@ -1,13 +1,17 @@
 # ART-003 wider homestead: writes blueprint_wide.txt, the proposed non-production layout on the live 64x40 inner grid.
 # Codes (as tools/farm_grid.txt where they exist): . grass  T forest  O roof  H wall  D door  R porch  d house dressing
 # b/B oak base (walkable top row / blocking)  r boulders round the oak  W well  c cobbles  P path  X fence  g gate
-# S garden bed  w garden walkway  o orchard tree  ~ water  k dock  L lantern post (stand-in for an earned lamp)
+# S garden bed  w garden walkway  o orchard tree  ~ water  k dock  K dock over water (W-3 pond)  L lantern post
+# (stand-in for an earned lamp)
 import sys
 W, H = 64, 40
 # Optional V1 framing variant: python3 make_blueprint.py OUT HOUSE_DY OAK_DX (default blueprint_wide.txt 0 0).
+# A fourth argument, w3, gives ART-003 W-3's irregular pond with a dock instead of W-1's ellipse:
+#   python3 make_blueprint.py blueprint_wide_v1b_w3.txt 1 1 w3
 OUT = sys.argv[1] if len(sys.argv) > 1 else 'blueprint_wide.txt'
 HD = int(sys.argv[2]) if len(sys.argv) > 2 else 0
 OD = int(sys.argv[3]) if len(sys.argv) > 3 else 0
+W3 = len(sys.argv) > 4 and sys.argv[4] == 'w3'
 g = [['.'] * W for _ in range(H)]
 
 def put(x, y, c):
@@ -38,11 +42,41 @@ for (x0, y0, x1, y1) in [(2, 2, 5, 9), (58, 2, 61, 6), (2, 14, 4, 18), (59, 31, 
     rect(x0, y0, x1, y1, 'T')
 
 # Pond (south-west) with a dock.
-for y in range(29, 37):
-    for x in range(3, 18):
-        if ((x - 10) / 7.2) ** 2 + ((y - 32.6) / 3.6) ** 2 <= 1.0:
-            put(x, y, '~')
-rect(15, 31, 18, 31, 'k')
+if not W3:
+    for y in range(29, 37):
+        for x in range(3, 18):
+            if ((x - 10) / 7.2) ** 2 + ((y - 32.6) / 3.6) ** 2 <= 1.0:
+                put(x, y, '~')
+    rect(15, 31, 18, 31, 'k')
+else:
+    # W-3: water spans per row, stepped so no shore runs straight for more than 3 tiles: two coves on the north
+    # shore, a point at the north-east, a lobe running south-west, and a notch where the dock (2 x 4 tiles, K, water
+    # underneath, walkable) meets the road's end at row 34.
+    SPANS = {28: [(7, 9), (12, 14)], 29: [(5, 15)], 30: [(3, 15)], 31: [(3, 16)], 32: [(2, 16)],
+             33: [(3, 11), (13, 14)], 34: [(4, 8)], 35: [(5, 7)]}
+    for y, spans in SPANS.items():
+        for (x0, x1) in spans:
+            for x in range(x0, x1 + 1):
+                if g[y][x] == '.':
+                    put(x, y, '~')
+    rect(13, 30, 14, 33, 'K')
+    # Check: no straight shore run longer than 3 tiles, along rows or columns.
+    wet = lambda x, y: 0 <= x < W and 0 <= y < H and g[y][x] in '~K'
+    worst = 0
+    for y in range(H):
+        for side in (-1, 1):
+            run = 0
+            for x in range(W + 1):
+                run = run + 1 if x < W and wet(x, y) and not wet(x, y + side) else 0
+                worst = max(worst, run)
+    for x in range(W):
+        for side in (-1, 1):
+            run = 0
+            for y in range(H + 1):
+                run = run + 1 if y < H and wet(x, y) and not wet(x + side, y) else 0
+                worst = max(worst, run)
+    assert worst <= 3, 'pond shore has a straight run of %d tiles' % worst
+    print('pond: longest straight shore run %d tiles' % worst, file=sys.stderr)
 
 def line(pts, w=2):
     for (ax, ay), (bx, by) in zip(pts, pts[1:]):
@@ -61,7 +95,8 @@ line([(36, 16), (33, 16.5), (30.5 + OD, 16)])
 line([(38, 18), (38.5, 21), (40, 23.5), (41, 23.5)])
 line([(35.5, 17.5), (30, 19), (25, 20.5), (22, 21.5)])
 line([(19, 27.5), (18.5, 29.5), (18.5, 30.5)])
-line([(39, 24.5), (36, 28), (33, 31), (29, 33.5), (22, 34), (2, 34.5)])
+# (W-3: the road ends at the dock instead of running on into the forest.)
+line([(39, 24.5), (36, 28), (33, 31), (29, 33.5), (22, 34), (12 if W3 else 2, 34.5)])
 line([(51, 30), (51, 32.5), (48, 34), (36, 34), (29, 33.5)])
 line([(48, 34), (60, 34.5)])
 

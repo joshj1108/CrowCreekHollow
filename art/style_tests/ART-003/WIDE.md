@@ -151,3 +151,9 @@ Each cell: mean luma (share of pixels above 0.12).
 3. Whether the production house stays as the comparison house, or a prototype-family house is planned (W-3).
 4. Dressing for V3 and the road (stones, a cart, a scarecrow, a lamp-post stand-in) in W-4, so the spaces between vignettes don't feel empty.
 5. Whether the lantern's weakness on grass should be part of any later P-1 proposal.
+
+## W-3 Batch A: oak canopy, pond and dock (added 2026-11-03)
+Non-production; the owner approved Batch A only (sections 2, 3 and 7 of `AI_COLLAB/ART_003_W3_ART_PLAN.md`). Run with `tools/art003_wide.gd layout=b art=w3`; without `art=w3` the tool draws W-2 exactly as before. Art, scripts and asset IDs are in `w3/` (`w3/pixellab-assets.json`, a non-production list; nothing goes into `spritecook-assets.json`). Findings, tables and the self-score: `w3/W3A.md`.
+- **Oak:** `w3/oak/oak_w3.png`, one masked PixelLab inpaint of the crown plus scripted seam cleanup; 0 pixels differ from `r3/oak_d.png` outside `w3/oak/mask_final.png` (trunk, major limbs, roots, stones). The litter drift under it is smaller (placement only).
+- **Pond:** `blueprint_wide_v1b_w3.txt` (`make_blueprint.py OUT 1 1 w3`), irregular, no straight shore run over 3 tiles; two PixelLab grass→water sets chained to the ART-003 grass and one water fill; shore props; a 2×4-tile dock, walkable in the prototype's collision only. Production `ground_water` is untouched.
+- **Lantern on grass:** measured only; nothing changed (see `w3/W3A.md`).
