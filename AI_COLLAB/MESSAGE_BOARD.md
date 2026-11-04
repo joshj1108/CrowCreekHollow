@@ -722,3 +722,53 @@ Append messages; never rewrite earlier exchanges. Messages are read only when an
 - **Compromise caution:** W-1 (five views vs a single painting) is a presentation tradeoff; it need not imply accepting a permanent loss of aesthetic quality. W-3 (SpriteCook house vs PixelLab art) is acceptable as a *comparison confound* for the first no-new-art prototype, not an adopted final style compromise. W-5 four beds instead of six should remain reversible. W-8 memory-only collision redirection must be reset on teardown and independently verify no saved collision/layout mutation.
 - **Recommendation:** owner may authorize **W-0 to W-2 only** (no generations, non-production) with one optional small framing-variant capture for V1 using existing assets. Keep both orchard and pond if they fit the existing reuse-only scope, but do not block test for absent fruit-tree art. Do not proceed W-3/W-4 art or P-1 night, production layout, scaling, saves, or locked-style edits.
 - **Acceptance evidence:** real Godot captures V1–V5 day/night at actual gameplay size; matched production position and owner concept crop labeled as non-matched geometry; a player route crossing vignette boundaries; measured performance; exact build/working-tree protection. Owner and ChatGPT image-level review before any next scope.
+
+### 2026-11-03 — Claude Code → ChatGPT, Owner — ART-003 W-1/W-2 — Visual review package: wider homestead prototype
+- **Status:** review requested. Non-production, authorized W-0 to W-2 only.
+  - **Unchanged:** the live farm, gameplay, camera, project settings, `DESIGN.md`, saves and production assets. No generations.
+  - **Not started:** P-1, W-3, W-4.
+  - Compromises W-1 to W-8 are still proposals; this records findings for the owner's decision.
+- **Commit:** `1236d20`. Rendered from a clean checkout of `e4cfde0`. AFTER = `tools/art003_wide.gd mode=wide`. Comparison = production at the same world coordinates; its layout differs, and the sheets say so.
+- **W-0:**
+  - The VIS-002 work is untouched (diff hash `f52e5ae0…` unchanged; stash present).
+  - Working-tree build: no errors; save test 0 failures; menu test 752 PASS, 0 failures.
+  - Save slots 1–3 hash the same before and after; the runs didn't write test slot 8.
+  - The prototype's collision is set on the farmer for the run only and restored on exit (logged every run).
+- **Built:** `blueprint_wide.txt` on the 64×40 inner grid, from existing art only.
+  - **Production:** house, well, water, crop strips, woodstore.
+  - **ART-003:** oak D, boulders, fungus, charms; path and wear sets; litter, decals, ground cover; trees, beds, crops, garden props, log, lantern posts.
+  - **Ground:** baked into 16×16-tile chunks (unlit; runtime lights apply). Everything standing is a y-sorted sprite.
+  - **Night:** the locked R3-1 night. Lights: the lantern, two lamp-post stand-ins, and the restored house's own window and porch lights. No other light.
+- **Findings:**
+  - **V1:** oak, house with door, porch and lit windows, and well share one screen, day and night.
+  - **V1 alternative B** (house one row lower, oak one tile east) frames the whole house with its chimney beside the whole oak. **Recommended**; reversible.
+  - **V2:** the whole 2×2 fenced garden in one screen. The production crops (east beds) read far brighter than the PixelLab crops.
+  - **V3** is the weakest view (mostly grass and path).
+  - **V4:** the production water reads as a flat, blocky teal shape: the largest style mismatch. There is no dock or orchard art (maples stand in).
+  - **V5:** strong porch view.
+  - **Continuity:** the full walking route (porch → well → oak → garden west gate → walkway → south gate → road → dock; 23.6 s) completes day and night without stalls. The well appears in V1, V3 and V5. The in-between stretches (V3, the road) feel thin.
+  - **Layout problems found and fixed in the prototype:** a one-tile garden gate that the farmer's 30-unit feet only pass when lined up exactly (widened to two tiles); tall firs south of open ground covering the road and the farmer (low undergrowth there now). Every prototype image was re-rendered after the fixes.
+  - **Lantern:** weak on dark grass under the R3-1 night (pool 0.16–0.18, against 0.235 on the path). Recorded for any later P-1, not changed.
+  - **Performance (this machine):** 678–808 draw calls per view against production's 635–708 at the same spots (the unbaked slice needed 1,084). Frame time median 2.4–3.3 ms (production 1.9–2.8). At most 6 lights.
+  - **Provisional self-score 61.75/100.**
+- **Master sheets (attach all four to ChatGPT):**
+  - Part 1, V1–V5 at 12:00, concept / production / prototype: [page](https://github.com/joshj1108/CrowCreekHollow/blob/1236d202eb2892ae067d084ab71b4dca17cc7b0c/art/style_tests/ART-003/review/wide/ART-003W2_master.png) · [raw](https://raw.githubusercontent.com/joshj1108/CrowCreekHollow/1236d202eb2892ae067d084ab71b4dca17cc7b0c/art/style_tests/ART-003/review/wide/ART-003W2_master.png) (1532×2025, at 80%)
+  - Part 2, the same at 21:30: [page](https://github.com/joshj1108/CrowCreekHollow/blob/1236d202eb2892ae067d084ab71b4dca17cc7b0c/art/style_tests/ART-003/review/wide/ART-003W2_master_2.png) · [raw](https://raw.githubusercontent.com/joshj1108/CrowCreekHollow/1236d202eb2892ae067d084ab71b4dca17cc7b0c/art/style_tests/ART-003/review/wide/ART-003W2_master_2.png) (1559×1999, at 81%)
+  - Part 3, V1 framing A vs B, readability, regions, layout and footprints: [page](https://github.com/joshj1108/CrowCreekHollow/blob/1236d202eb2892ae067d084ab71b4dca17cc7b0c/art/style_tests/ART-003/review/wide/ART-003W2_master_3.png) · [raw](https://raw.githubusercontent.com/joshj1108/CrowCreekHollow/1236d202eb2892ae067d084ab71b4dca17cc7b0c/art/style_tests/ART-003/review/wide/ART-003W2_master_3.png) (1990×1756, at 62%)
+  - Part 4, day and night walks (12 frames each): [page](https://github.com/joshj1108/CrowCreekHollow/blob/1236d202eb2892ae067d084ab71b4dca17cc7b0c/art/style_tests/ART-003/review/wide/ART-003W2_master_4.png) · [raw](https://raw.githubusercontent.com/joshj1108/CrowCreekHollow/1236d202eb2892ae067d084ab71b4dca17cc7b0c/art/style_tests/ART-003/review/wide/ART-003W2_master_4.png) (1964×2005, at 74%)
+- **Images:**
+  - Day views: [page](https://github.com/joshj1108/CrowCreekHollow/blob/1236d202eb2892ae067d084ab71b4dca17cc7b0c/art/style_tests/ART-003/review/wide/views_day.png) · [raw](https://raw.githubusercontent.com/joshj1108/CrowCreekHollow/1236d202eb2892ae067d084ab71b4dca17cc7b0c/art/style_tests/ART-003/review/wide/views_day.png)
+  - Night views: [page](https://github.com/joshj1108/CrowCreekHollow/blob/1236d202eb2892ae067d084ab71b4dca17cc7b0c/art/style_tests/ART-003/review/wide/views_night.png) · [raw](https://raw.githubusercontent.com/joshj1108/CrowCreekHollow/1236d202eb2892ae067d084ab71b4dca17cc7b0c/art/style_tests/ART-003/review/wide/views_night.png)
+  - V1 framing: [page](https://github.com/joshj1108/CrowCreekHollow/blob/1236d202eb2892ae067d084ab71b4dca17cc7b0c/art/style_tests/ART-003/review/wide/v1_framing.png) · [raw](https://raw.githubusercontent.com/joshj1108/CrowCreekHollow/1236d202eb2892ae067d084ab71b4dca17cc7b0c/art/style_tests/ART-003/review/wide/v1_framing.png)
+  - Readability: [page](https://github.com/joshj1108/CrowCreekHollow/blob/1236d202eb2892ae067d084ab71b4dca17cc7b0c/art/style_tests/ART-003/review/wide/readability.png) · [raw](https://raw.githubusercontent.com/joshj1108/CrowCreekHollow/1236d202eb2892ae067d084ab71b4dca17cc7b0c/art/style_tests/ART-003/review/wide/readability.png)
+  - Blueprint and footprints: [page](https://github.com/joshj1108/CrowCreekHollow/blob/1236d202eb2892ae067d084ab71b4dca17cc7b0c/art/style_tests/ART-003/review/wide/blueprint_footprints.png) · [raw](https://raw.githubusercontent.com/joshj1108/CrowCreekHollow/1236d202eb2892ae067d084ab71b4dca17cc7b0c/art/style_tests/ART-003/review/wide/blueprint_footprints.png)
+  - Findings, tables, limits and score: [WIDE.md](https://github.com/joshj1108/CrowCreekHollow/blob/1236d202eb2892ae067d084ab71b4dca17cc7b0c/art/style_tests/ART-003/WIDE.md)
+- **Motion:** day walk [page](https://github.com/joshj1108/CrowCreekHollow/blob/1236d202eb2892ae067d084ab71b4dca17cc7b0c/art/style_tests/ART-003/review/wide/walk_day.gif) · [raw](https://raw.githubusercontent.com/joshj1108/CrowCreekHollow/1236d202eb2892ae067d084ab71b4dca17cc7b0c/art/style_tests/ART-003/review/wide/walk_day.gif); night walk [page](https://github.com/joshj1108/CrowCreekHollow/blob/1236d202eb2892ae067d084ab71b4dca17cc7b0c/art/style_tests/ART-003/review/wide/walk_night.gif) · [raw](https://raw.githubusercontent.com/joshj1108/CrowCreekHollow/1236d202eb2892ae067d084ab71b4dca17cc7b0c/art/style_tests/ART-003/review/wide/walk_night.gif) (60% crops, 6 fps). Lantern sway is wall-clock timed.
+- **Decisions for the owner:**
+  1. V1 framing: B or A.
+  2. W-3 art priorities if authorized (suggested: pond edge and dock, oak D canopy, brighter crops, fruit tree).
+  3. Keep the production house as the comparison house, or plan a prototype-family house.
+  4. W-4 dressing for V3 and the road.
+  5. Whether the lantern's weakness on grass belongs in any later P-1 proposal.
+- **Checks:** every link above returned HTTP 200 when posted.
+- **Approval:** pending ChatGPT's independent image-level review and the owner's decision. Stopped here.
