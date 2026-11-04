@@ -14,6 +14,13 @@ extends "res://tools/art003_round3s.gd"
 #   art=w3                    ART-003 W-3 Batch A (layout b only): oak D's fuller canopy (w3/oak/oak_w3.png), a smaller
 #                             litter drift under it, and the irregular pond (blueprint_wide_v1b_w3.txt) drawn with the
 #                             PixelLab grass->water sets, shore props and a walkable dock, in place of ground_water
+#   art=w3b                   ART-003 W-3 Batch B (layout b only), on top of art=w3: the pond's north shore one row south
+#                             and the porch lantern post moved off the route (blueprint_wide_v1b_w3b.txt), the Restored
+#                             house alternative (w3b/house/house_w3b.png), the refitted beds with every row planted
+#                             (w3b/garden), north-south fence rails, a stone cross walk in the garden, porch pumpkins
+#   house=prod                with art=w3b: keep the production house_stage_3 instead of the alternative
+#   grass=1 | grass=2         a lighter prototype grass (albedo x1.15 or x1.30 on grass-coloured ground pixels, baked);
+#                             lighting and the night grade are unchanged
 #   probe                     with measure: also measure the tin lantern's pool circle round the farmer by day too,
 #                             and save <out>_probe.png marking its pixels by ground (green grass, brown path, blue water)
 #
@@ -46,6 +53,8 @@ const ROUTE := [Vector2(45.5, 12.5), Vector2(44.0, 14.0), Vector2(41.0, 15.0), V
 const ROUTE_W3_END := [Vector2(17.0, 34.6), Vector2(14.0, 34.6), Vector2(14.0, 30.7)]
 const BLOCKS := "TOHDXWBrLd~o"   # codes the farmer can't walk on (K, the W-3 dock over water, is walkable)
 const W3 := "res://art/style_tests/ART-003/w3/"
+const W3B := "res://art/style_tests/ART-003/w3b/"
+const GRASS_LIFT := {"1": 1.15, "2": 1.30}
 
 var grid: Array = []          # rows of single-character codes
 var inner_origin := Vector2.ZERO
@@ -66,7 +75,11 @@ func _code(x: int, y: int) -> String:
 
 
 func _w3() -> bool:
-	return o3.get("art", "") == "w3"
+	return o3.get("art", "") == "w3" or _w3b()
+
+
+func _w3b() -> bool:
+	return o3.get("art", "") == "w3b"
 
 
 # The ground material under a map code: g grass, p path (paths, the garden floor, the porch, the dock's land end,
@@ -96,7 +109,7 @@ func _initialize() -> void:
 		return
 	var file := WIDE + ("blueprint_wide_v1b.txt" if o3.get("layout", "") == "b" else "blueprint_wide.txt")
 	if _w3():
-		file = WIDE + "blueprint_wide_v1b_w3.txt"
+		file = WIDE + ("blueprint_wide_v1b_w3b.txt" if _w3b() else "blueprint_wide_v1b_w3.txt")
 	for line in FileAccess.get_file_as_string(file).split("\n", false):
 		grid.append(line)
 	var opt := o3
@@ -168,6 +181,15 @@ func _near(x: int, y: int, codes: String, r: int) -> bool:
 func _region(img: Image, r: Rect2) -> Image:
 	var out := img.get_region(Rect2i(r))
 	out.convert(Image.FORMAT_RGBA8)
+	return out
+
+
+# Fixed-width cells of a strip, left to right (the W-3B crops: eight 16x32 cells).
+func _cells(path: String, w: int) -> Array:
+	var img := Image.load_from_file(ProjectSettings.globalize_path(path))
+	var out := []
+	for k in img.get_width() / w:
+		out.append(ImageTexture.create_from_image(img.get_region(Rect2i(k * w, 0, w, img.get_height()))))
 	return out
 
 
@@ -253,7 +275,8 @@ func _build(main, night: bool) -> void:
 						ring = false
 					if M.call(x + dx, y + dy) != "g":
 						open = false
-			if ring and (_code(x, y) == "c" or _code(x, y) == "W" or wnoise.get_noise_2d(x, y) > 0.35):
+			var walk := _w3b() and _code(x, y) == "w" and (x == 51 or y == 24)   # W-3B: the garden's stone cross walk
+			if ring and (_code(x, y) == "c" or _code(x, y) == "W" or walk or wnoise.get_noise_2d(x, y) > 0.35):
 				stone[Vector2i(x, y)] = true
 			elif open and ((_near(x, y, "rB", 1 if _w3() else 2) and lnoise.get_noise_2d(x, y) > (0.3 if _w3() else 0.15)) or (_near(x, y, "To", 1) and lnoise.get_noise_2d(x, y) > 0.38)):
 				leaves[Vector2i(x, y)] = true
@@ -354,6 +377,18 @@ func _build(main, night: bool) -> void:
 				var di: Image = t.get_image()
 				di.convert(Image.FORMAT_RGBA8)
 				put.call(di, Rect2i(Vector2i.ZERO, di.get_size()), (x - x0) * 16 + 2 + (h >> 4) % 10, (y - y0) * 16 + 2 + (h >> 8) % 10, true)
+
+	# W-3B: a lighter grass, as a comparison: grass-coloured ground pixels (greener than red, clearly not blue) are
+	# brightened by one factor, before the forest's shade. Paths, soil, bark, water and litter keep their colours.
+	var lift: float = GRASS_LIFT.get(str(o3.get("grass", "")), 1.0)
+	if lift != 1.0:
+		for im in chunks:
+			var ci: Image = im
+			for yy in ci.get_height():
+				for xx in ci.get_width():
+					var c := ci.get_pixel(xx, yy)
+					if c.a > 0.0 and c.g >= c.r * 0.92 and c.g > c.b * 1.25:
+						ci.set_pixel(xx, yy, Color(minf(c.r * lift, 1.0), minf(c.g * lift, 1.0), minf(c.b * lift, 1.0), c.a))
 
 	# The forest's shade, as an albedo darkening by depth (the same strength as R3-1's forest shade).
 	for y in range(y0, GH + MARGIN):
@@ -460,6 +495,8 @@ func _build(main, night: bool) -> void:
 
 	# The farmhouse: the production restored sprite, centred on the door, standing on the porch row.
 	house_tex = load("res://art/farm/house_stage_3.png")
+	if _w3b() and o3.get("house", "") != "prod":
+		house_tex = ImageTexture.create_from_image(Image.load_from_file(ProjectSettings.globalize_path(W3B + "house/house_w3b.png")))
 	var dx := 0.0
 	var dy := 0.0
 	for y in GH:
@@ -478,6 +515,10 @@ func _build(main, night: bool) -> void:
 			if _code(x, y) == "d":
 				add.call(dressing[i % dressing.size()], x + 0.5, y + 1.0, i % 2 == 1, Color.WHITE)
 				i += 1
+	if _w3b():   # pumpkins either side of the porch steps, beside the dressing (art only; the tiles stay walkable)
+		var pk: Texture2D = _strip(R3 + "crops_b_clean.png", 20)[-1]
+		for p in [Vector2(dx - 2.3, dy + 0.95), Vector2(dx - 1.8, dy + 1.05), Vector2(dx + 2.4, dy + 1.0)]:
+			add.call(pk, p.x, p.y, int(p.x * 10.0) % 2 == 0, Color.WHITE)
 	# The well: the production sprite on its 2x2 footprint.
 	for y in GH:
 		for x in GW:
@@ -497,6 +538,16 @@ func _build(main, night: bool) -> void:
 			post_x = xx
 			break
 	var post := ImageTexture.create_from_image(fence_img.get_region(Rect2i(maxi(post_x - 1, 0), 0, 6, fence_img.get_height())))
+	# W-3B: a north-south run gets a rail too: the top rail (rows 10..13 of the strip) turned on end, running from this
+	# post's rail height up to the post one tile north, so the run reads as a fence instead of a row of posts.
+	var ns_img := Image.create(6, fence_img.get_height() + 16, false, Image.FORMAT_RGBA8)
+	ns_img.blit_rect(fence_img, Rect2i(maxi(post_x - 1, 0), 0, 6, fence_img.get_height()), Vector2i(0, 16))
+	for yy in range(10, 30):   # the north post's top rail (row 10) down to this post's (row 26)
+		for k in 4:
+			var c := fence_img.get_pixel(post_x + 5 + yy % 12, 10 + k)
+			if c.a > 0.5 and ns_img.get_pixel(1 + k, yy).a < 0.5:
+				ns_img.set_pixel(1 + k, yy, c)
+	var post_ns := ImageTexture.create_from_image(ns_img)
 	var rail := []
 	for k in 4:
 		rail.append(ImageTexture.create_from_image(fence_img.get_region(Rect2i(k * 16, 0, 16, fence_img.get_height()))))
@@ -506,6 +557,8 @@ func _build(main, night: bool) -> void:
 				continue
 			if _code(x - 1, y) == "X" or _code(x + 1, y) == "X" or _code(x - 1, y) == "g" or _code(x + 1, y) == "g":
 				add.call(rail[x % 4], x + 0.5, y + 1.0, false, Color.WHITE)
+			elif _w3b() and _code(x, y - 1) == "X":
+				add.call(post_ns, x + 0.5, y + 1.0, false, Color.WHITE)
 			else:
 				add.call(post, x + 0.5, y + 1.0, false, Color.WHITE)
 
@@ -518,6 +571,8 @@ func _build(main, night: bool) -> void:
 	for kind in ["pumpkin", "turnip", "corn"]:
 		var strip := load("res://art/farm/crop_%s.png" % kind) as Texture2D
 		prod.append(ImageTexture.create_from_image(strip.get_image().get_region(Rect2i(48, 0, 16, 16))))
+	var bed_b := ImageTexture.create_from_image(Image.load_from_file(ProjectSettings.globalize_path(W3B + "garden/bed_w3b.png"))) if _w3b() else null
+	var crops_b := _cells(W3B + "garden/crops_w3b.png", 16) if _w3b() else []   # corn pumpkin beans cabbage kale squash turnip sunflower
 	var beds := []
 	for y in GH:
 		for x in GW:
@@ -533,6 +588,21 @@ func _build(main, night: bool) -> void:
 			hgt += 1
 		var cx: float = b.x + w / 2.0
 		var base: float = b.y + hgt - 0.5
+		if _w3b():
+			# W-3B: the bed refitted to all 7x4 tiles, flat under its crops; every column of its three furrows planted,
+			# the tall crops in the north row so they hide neither the rows behind nor the farmer on the walk.
+			add.call(bed_b, cx, b.y + hgt, false, Color.WHITE)
+			(sorted[sorted.size() - 1] as Array)[1] = b.y - 1.0
+			var plan: Array = [[[0], [0, 7], [1]], [[2], [3], [3, 6]], [[7, 0], [6], [1, 5]], [[2], [5], [6, 3]]][bi % 4]
+			for r in 3:
+				var ry: float = b.y + [1.55, 2.55, 3.3][r]
+				for k in w:
+					var kinds: Array = plan[r]
+					var t: Texture2D = crops_b[kinds[(k + r) % kinds.size()]]
+					var j := _hash(b.x + k, b.y + r, 7)
+					add.call(t, b.x + k + 0.5 + ((j % 5) - 2) * 0.04, ry, j % 2 == 0, Color.WHITE)
+			bi += 1
+			continue
 		add.call(bed, cx, base, false, Color.WHITE)
 		(sorted[sorted.size() - 1] as Array)[1] = base - 2.0   # lie flat: under the crops and anyone in the bed
 		var rows: Array = [[plants[0], more[0]], [plants[2], more[3]], [plants[1], more[1]]] if b.x < 50 else [[prod[0]], [prod[1]], [prod[2]]]
@@ -573,7 +643,8 @@ func _build(main, night: bool) -> void:
 		add.call(dock, kx + 1.0, ky + 4.0, false, Color.WHITE)
 		(sorted[sorted.size() - 1] as Array)[1] = ky - 1.0   # lie flat: under the farmer standing on it
 		var shore := _strip(W3 + "pond/shore_strip.png", 12)   # reeds, cattails, cattails, lily pads, rock, mossy rock, rushes
-		for e in [[1, 9.7, 28.9], [0, 10.5, 29.0], [6, 11.3, 28.8], [2, 9.4, 34.9], [0, 10.3, 35.0], [1, 11.2, 34.8],
+		var north := 1.0 if _w3b() else 0.0   # W-3B: the north cove sits a row further south
+		for e in [[1, 9.7, 28.9 + north], [0, 10.5, 29.0 + north], [6, 11.3, 28.8 + north], [2, 9.4, 34.9], [0, 10.3, 35.0], [1, 11.2, 34.8],
 				[6, 8.6, 35.3], [1, 15.6, 33.9], [6, 16.4, 33.5], [5, 17.0, 32.2], [4, 2.6, 32.6]]:
 			add.call(shore[int(e[0]) % shore.size()], e[1], e[2], int(e[1] * 10.0) % 2 == 0, Color.WHITE)
 		for e in [[6.5, 31.6], [9.4, 30.9], [11.6, 32.7], [5.0, 33.7], [7.8, 29.9]]:

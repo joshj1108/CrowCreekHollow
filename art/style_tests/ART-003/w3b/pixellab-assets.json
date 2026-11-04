@@ -1,0 +1,9 @@
+{
+  "_note": "ART-003 W-3 Batch B (2026-11-03). NON-PRODUCTION test art; not in spritecook-assets.json. PixelLab balance 4,969 -> 4,964 generations: 5 used of the owner's 12-credit cap. All create_image_pixflux (1 generation each); no Pro Flash (6 at 192x160) or inpaint_image (10) was used. Forced palette = art/style_tests/ART-003/src/concept_palette.png where marked.",
+  "house/gen_a_s250p.png": {"job_id": "f9112ee0-e384-4ba5-ab2e-f7f490ee2a1f", "asset_id": "1d892346-e870-501f-b797-bb04cb85c3dc", "size": "192x160", "seed": 701, "init": "house/init.png", "init_image_strength": 250, "palette": "concept", "cost": 1},
+  "house/gen_b_s250.png":  {"job_id": "a8ae2a55-50bb-4233-bd52-aac082e7871e", "asset_id": "9e7b546f-5afd-5b32-b59c-bcc62c86b59b", "size": "192x160", "seed": 701, "init": "house/init.png", "init_image_strength": 250, "palette": "free", "cost": 1},
+  "house/gen_c_s170p.png": {"job_id": "c2685186-4be0-472e-9d9f-fe9eda1b8b2f", "asset_id": "aa0eaf11-facf-5bee-ae01-8e467b7b49d7", "size": "192x160", "seed": 701, "init": "house/init.png", "init_image_strength": 170, "palette": "concept", "cost": 1, "chosen": "registered by hand into house/house_w3b.png (house/register.py)"},
+  "house/gen_d_s170.png":  {"job_id": "68b0d1a9-6843-4bff-896d-1e48a4a02b52", "asset_id": "eada73c2-3888-5c8d-bce5-00d9b26394fa", "size": "192x160", "seed": 701, "init": "house/init.png", "init_image_strength": 170, "palette": "free", "cost": 1},
+  "garden/crops_gen.png":  {"job_id": "be22a16f-e7c5-4521-8c5d-8bf1839f0da0", "asset_id": "f79caf42-55c3-5f00-abd1-1b829b88d547", "size": "128x32", "seed": 711, "palette": "concept", "cost": 1, "sliced": "garden/crops_w3b.png (garden/slice_crops.py)"},
+  "garden/bed_w3b.png":    {"tool": "none: garden/make_bed.py refits r2/garden_bed.png (no resampling)", "cost": 0}
+}

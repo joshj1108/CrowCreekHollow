@@ -157,3 +157,9 @@ Non-production; the owner approved Batch A only (sections 2, 3 and 7 of `AI_COLL
 - **Oak:** `w3/oak/oak_w3.png`, one masked PixelLab inpaint of the crown plus scripted seam cleanup; 0 pixels differ from `r3/oak_d.png` outside `w3/oak/mask_final.png` (trunk, major limbs, roots, stones). The litter drift under it is smaller (placement only).
 - **Pond:** `blueprint_wide_v1b_w3.txt` (`make_blueprint.py OUT 1 1 w3`), irregular, no straight shore run over 3 tiles; two PixelLab grass→water sets chained to the ART-003 grass and one water fill; shore props; a 2×4-tile dock, walkable in the prototype's collision only. Production `ground_water` is untouched.
 - **Lantern on grass:** measured only; nothing changed (see `w3/W3A.md`).
+
+## W-3 Batch B: Restored house alternative, garden, Batch A follow-ups (added 2026-11-03)
+Non-production; approved by the owner after ChatGPT's Batch A image review. Run with `tools/art003_wide.gd layout=b art=w3b` (`house=prod` for the production house, `grass=1|2` for a lighter grass); without `art=w3b` the tool draws Batch A and W-2 exactly as before. Art, scripts and asset IDs are in `w3b/` (`w3b/pixellab-assets.json`, a non-production list). Findings, tables and the self-score: `w3b/W3B.md`.
+- **Layout:** `blueprint_wide_v1b_w3b.txt` (`make_blueprint.py OUT 1 1 w3b`): the pond's north coves one row south (grass under the orchard fence), and the porch lantern post moved from (43, 13) to (47, 13), off the walking route.
+- **House:** `w3b/house/house_w3b.png`, a PixelLab img2img of a hand-fitted concept init, registered by hand to the locked door, windows and wall line (11.1% of pixels edited). Prototype candidate only; stages 0–2 not made.
+- **Garden:** the R2 bed refitted to the 7×4 beds (`w3b/garden/bed_w3b.png`), a new 16×32 crop strip (`w3b/garden/crops_w3b.png`) planted in every furrow, north–south fence rails, a stone cross walk. Gates, walkways and collision unchanged.

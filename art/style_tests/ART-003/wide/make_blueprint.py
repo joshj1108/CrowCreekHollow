@@ -8,10 +8,14 @@ W, H = 64, 40
 # Optional V1 framing variant: python3 make_blueprint.py OUT HOUSE_DY OAK_DX (default blueprint_wide.txt 0 0).
 # A fourth argument, w3, gives ART-003 W-3's irregular pond with a dock instead of W-1's ellipse:
 #   python3 make_blueprint.py blueprint_wide_v1b_w3.txt 1 1 w3
+# w3b is W-3 Batch B's follow-up to Batch A: the pond's north shore one row further south (a grass row under the
+# orchard fence), and the porch lantern post moved east off the walking route:
+#   python3 make_blueprint.py blueprint_wide_v1b_w3b.txt 1 1 w3b
 OUT = sys.argv[1] if len(sys.argv) > 1 else 'blueprint_wide.txt'
 HD = int(sys.argv[2]) if len(sys.argv) > 2 else 0
 OD = int(sys.argv[3]) if len(sys.argv) > 3 else 0
-W3 = len(sys.argv) > 4 and sys.argv[4] == 'w3'
+W3B = len(sys.argv) > 4 and sys.argv[4] == 'w3b'
+W3 = len(sys.argv) > 4 and sys.argv[4] in ('w3', 'w3b')
 g = [['.'] * W for _ in range(H)]
 
 def put(x, y, c):
@@ -54,6 +58,8 @@ else:
     # underneath, walkable) meets the road's end at row 34.
     SPANS = {28: [(7, 9), (12, 14)], 29: [(5, 15)], 30: [(3, 15)], 31: [(3, 16)], 32: [(2, 16)],
              33: [(3, 11), (13, 14)], 34: [(4, 8)], 35: [(5, 7)]}
+    if W3B:   # the north coves one row south, so row 28 stays grass under the fence (row 27)
+        SPANS.update({28: [], 29: [(7, 9), (12, 14)], 30: [(4, 15)]})
     for y, spans in SPANS.items():
         for (x0, x1) in spans:
             for x in range(x0, x1 + 1):
@@ -131,7 +137,7 @@ for (x, y) in [(39, 9), (39, 10), (51, 9), (51, 10), (41, 11), (42, 11), (48, 11
     put(x, y + HD, 'd')
 
 # Lantern posts: stand-ins for lamps the player builds (no new permanent lights).
-for (x, y) in [(43, 12 + HD), (41, 22)]:
+for (x, y) in [(47 if W3B else 43, 12 + HD), (41, 22)]:   # (43, 13) stood on the porch-to-well leg
     put(x, y, 'L')
 
 open(OUT, 'w').write('\n'.join(''.join(r) for r in g) + '\n')
