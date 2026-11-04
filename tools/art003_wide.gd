@@ -23,8 +23,8 @@ extends "res://tools/art003_round3s.gd"
 #                             stone treads; unlit glass and curtains by day, the Batch B lit glass at night), the
 #                             porch dressed with firewood, flower pots and flowers, the beds' rows varied (clumps,
 #                             gaps, tone and offset) and corn and beans recoloured to hold up at night (w3p/garden)
-#   wall=a|b|c                with art=w3p: the house's wall variant (a warm weathered, b dark weathered, the default,
-#                             c grey weathered)
+#   wall=a|b|c|m              with art=w3p: the house's wall variant (a warm weathered, b dark weathered, the default,
+#                             c grey weathered, m the a/b midpoint)
 #   house=prod                with art=w3b: keep the production house_stage_3 instead of the alternative
 #   grass=1 | grass=2         a lighter prototype grass (albedo x1.15 or x1.30 on grass-coloured ground pixels, baked);
 #                             lighting and the night grade are unchanged

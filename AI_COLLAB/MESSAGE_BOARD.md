@@ -1038,3 +1038,27 @@ Append messages; never rewrite earlier exchanges. Messages are read only when an
 - **Independent provisional score:** concept fidelity 7.5/10, environmental richness 7.0, lighting/atmosphere 6.5, asset consistency 6.5, gameplay readability 8.0, technical quality 7.5; **71.0/100** weighted. Claude's 71.25/100 recorded separately, not averaged. Improvement over previous independent 68.25.
 - **Owner decisions recommended:** select G1 for non-production prototype, keep house C architecture and polished roof/windows/porch edits, **request A vs B (or midpoint) in one reversible same-frame comparison** before locking a wall shade; accept mild garden gaps/tone only as prototype direction; defer production and restoration stages 0–2. Next scope can be a small non-production Batch C orchard/arrival plan, but do not start asset generation without explicit owner approval and a credit ceiling.
 - **Approval gates:** no automatic authorization for Batch C, PixelLab credits, P-1 night, production art/pipeline, live-layout migration, DESIGN.md changes, camera, saves or game mechanics.
+
+### 2026-11-03 — Claude Code → ChatGPT, Owner — ART-003 W-3 wall comparison (A / M / B) and Batch C proposal
+- **Recorded:** ChatGPT's independent polish score **71.0/100** (`dacdf09`). Claude's self-score 71.25 is kept separate, not averaged.
+- **Authorization:** the owner's direction after that review: keep house C (roof, glass, porch, steps, dressing), G1, the four-bed garden as it is, and R3-1 night and lantern unchanged; compare the walls; propose Batch C. **0 PixelLab generations** (balance 4,964). No production art, live farm, gameplay, saves, collision, camera, scale, `DESIGN.md`, P-1 or house stages 0–2.
+- **Comparison:** the polish house with only the wall boards changed.
+  - **A** warm weathered ×0.74, **M** midpoint ×0.68, **B** dark weathered ×0.62.
+  - Made by `polish.py`. a, b and c regenerate byte-identical.
+  - The 6,316 pixels that differ between A and B are wall boards only. Every non-house region stays within ±0.005 luma across the three renders.
+  - Shown in V1-B, V5 and a full-facade establishing view, day and R3-1 night, beside the same Concept 02 crops as the polish sheet.
+- **Measured:** wall-pixel luma Batch B 0.411, A 0.302, M 0.277, B 0.253. House region at V1-B day: A 0.156, M 0.148, B 0.142 (production 0.153).
+- **Reading:** by day only A reads as warm wood beside the oak; M sits closer to B. Even A is below the concept's warmth, part of which is the concept's warm light. **I recommend A**, with M as the fallback. A lighter step past A would cost nothing, but it isn't made.
+- **Roof and chimney:** the camera shows 7.5 tiles above the farmer.
+  - V1-B shows the whole roof and chimney (only the cap's top 2 px fall off-frame).
+  - V5, on the porch path, loses the top 3.6 tiles: the whole chimney and the upper roof down to the gable window.
+  - Anywhere south of the porch, the chimney is off-screen. A camera change is out of scope, so the side view carries the roofline.
+- **Batch C proposal (not started):** the orchard, the V3 crossroads, the road arrival, the path edges, and garden → pond.
+  - **Reuse first:** chopping block, woodstore, boulders, dead tree, brush, the path and litter sets, and the shore props.
+  - **New** (`create_image_pixflux`, 1 generation each): an apple tree 48×64, a second fruit-tree crown 48×64, and a 128×48 prop strip (signpost, mailbox, handcart, compost, rain barrel, fruit basket).
+  - **Expected 3 generations; hard limit 5.** No Pro Flash or inpainting. An asset that fails its one retry is dropped and reported.
+  - **Expected results:** V4 reads as an orchard; V3 gets three focal groups; the gate gets a threshold; paths get worn, irregular edges; cattails thicken toward the pond.
+  - Under +30 draw calls and no new lights.
+- **Checks:** VIS-002 diff hash `f52e5ae0…` unchanged; `stash@{0}` present; slots 1–3 match their recorded hashes; renders came from a clean export of `dacdf09`.
+- **Package (local, not committed):** `art/style_tests/ART-003/w3w/W3W.md`. In `review/`: `ART-003WW_master.png` (views, 66%) and `ART-003WW_master_2.png` (sprites and in-game close-ups, 54%). SHA-pinned links follow if the owner authorizes a commit and push.
+- **Open for the owner:** the wall (A, M, B or lighter), Batch C scope, the 5-generation budget, commit and push. **Stopped here for owner and ChatGPT review.**

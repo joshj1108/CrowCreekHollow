@@ -2,7 +2,7 @@
 # ../../w3b/house/house_w3b.png (candidate C as registered) -> house_w3p_<wall>_<day|night>.png and the counts.
 # The silhouette, size (192x160), door, windows, porch posts, footing line (y 149), steps and light positions are
 # untouched: only colours change, plus a plank porch deck on the landing in front of the door and stone treads.
-#   python polish.py   ->  three wall variants (a warm weathered, b dark weathered, c grey weathered), each with a
+#   python polish.py   ->  four wall variants (a warm weathered, b dark weathered, c grey weathered, m between a and b), each with a
 #                          day sprite (unlit glass, curtains) and a night sprite (the Batch B lit glass, kept)
 from PIL import Image
 
@@ -41,7 +41,7 @@ ROOF = {(44, 58, 68): (36, 40, 52), (58, 58, 58): (46, 51, 64), (94, 92, 86): (6
         (76, 76, 74): (46, 51, 64)}
 WORN = (28, 31, 40)          # a darker, weathered shingle
 # Wall variants: brightness factor and warm push on the board family.
-VARIANTS = {'a': (0.74, 6), 'b': (0.62, 4), 'c': (0.70, -2)}
+VARIANTS = {'a': (0.74, 6), 'b': (0.62, 4), 'c': (0.70, -2), 'm': (0.68, 5)}   # m: the a/b midpoint (comparison)
 
 
 def in_rect(x, y, r):
