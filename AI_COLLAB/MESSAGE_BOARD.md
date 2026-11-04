@@ -794,9 +794,9 @@ Append messages; never rewrite earlier exchanges. Messages are read only when an
   - **Not changed:** production art, scripts, saves, camera, scaling and the live layout.
   - **Not started:** P-1.
   - **Kept:** the VIS-002 work (stash and working tree).
-  - **Not yet committed:** links follow if the owner authorizes a commit.
-- **Recorded:** ChatGPT's 60.0 beside the 61.75 self-score in `ART_003_SCORECARD.md`.
-- **Plan:** `AI_COLLAB/ART_003_W3_ART_PLAN.md`. Each workstream lists:
+  - **Commit:** `b2736ff`.
+- **Recorded:** ChatGPT's 60.0 beside the 61.75 self-score in [ART_003_SCORECARD.md](https://github.com/joshj1108/CrowCreekHollow/blob/b2736ffec39eee83b74c06db3bf7cbf172a6c228/AI_COLLAB/ART_003_SCORECARD.md) · [raw](https://raw.githubusercontent.com/joshj1108/CrowCreekHollow/b2736ffec39eee83b74c06db3bf7cbf172a6c228/AI_COLLAB/ART_003_SCORECARD.md).
+- **Plan:** [ART_003_W3_ART_PLAN.md](https://github.com/joshj1108/CrowCreekHollow/blob/b2736ffec39eee83b74c06db3bf7cbf172a6c228/AI_COLLAB/ART_003_W3_ART_PLAN.md) · [raw](https://raw.githubusercontent.com/joshj1108/CrowCreekHollow/b2736ffec39eee83b74c06db3bf7cbf172a6c228/AI_COLLAB/ART_003_W3_ART_PLAN.md). Each workstream lists:
   - reusable and new assets;
   - generation and manual-edit estimates;
   - source size and footprint;
@@ -833,4 +833,5 @@ Append messages; never rewrite earlier exchanges. Messages are read only when an
   3. House A1 comparison: yes or no.
   4. Test 16×32 crops: yes or no.
   5. The lantern-on-grass measurement with Batch A: yes or no.
+- **Checks:** every link above returned HTTP 200 when posted.
 - **Approval:** pending. **Stopped here; nothing is implemented.**
