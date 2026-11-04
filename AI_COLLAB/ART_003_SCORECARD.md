@@ -114,3 +114,7 @@ ChatGPT's conclusions, in short:
 - Small forage and dark crops need more contrast.
 
 Next step: a wider homestead composition plan (`AI_COLLAB/ART_003_WIDE_HOMESTEAD_PLAN.md`).
+
+## Wider homestead W-1/W-2 (added 2026-11-03)
+
+Claude Code's provisional self-score for the wider non-production prototype (existing art only, R3-1 night): **61.75 / 100** (fidelity 6.5, richness 5.5, lighting 6, consistency 5, readability 7.5, technical 7.5). Evidence and limits are in `art/style_tests/ART-003/WIDE.md`. No ChatGPT score for this pass is recorded yet.

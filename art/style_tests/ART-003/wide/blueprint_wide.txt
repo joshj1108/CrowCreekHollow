@@ -28,7 +28,7 @@ TT....X..............X...............PPP..XwSSSSSSSwSSSSSSSwX.TT
 TTTT..XXXXXXXXXXXXggXX..............PPP...XwSSSSSSSwSSSSSSSwX.TT
 TTTT..............PPP..............PPP....XwSSSSSSSwSSSSSSSwX.TT
 TT................PP..............PPPP....XwwwwwwwwwwwwwwwwwXTTT
-TTT...~~~~~~~~~...PP.............PPP......XXXXXXXXXgXXXXXXXXXTTT
+TTT...~~~~~~~~~...PP.............PPP......XXXXXXXXggXXXXXXXXXTTT
 TTT.~~~~~~~~~~~kkkkP...........PPPP................PP......TTTTT
 TT.~~~~~~~~~~~~~~~...........PPPPPP...............PPP......TTTTT
 TTT~~~~~~~~~~~~~~~....PPPPPPPPPPPPPPP...........PPPPP......TTTTT

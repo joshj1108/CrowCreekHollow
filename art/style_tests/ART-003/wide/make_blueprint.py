@@ -2,7 +2,12 @@
 # Codes (as tools/farm_grid.txt where they exist): . grass  T forest  O roof  H wall  D door  R porch  d house dressing
 # b/B oak base (walkable top row / blocking)  r boulders round the oak  W well  c cobbles  P path  X fence  g gate
 # S garden bed  w garden walkway  o orchard tree  ~ water  k dock  L lantern post (stand-in for an earned lamp)
+import sys
 W, H = 64, 40
+# Optional V1 framing variant: python3 make_blueprint.py OUT HOUSE_DY OAK_DX (default blueprint_wide.txt 0 0).
+OUT = sys.argv[1] if len(sys.argv) > 1 else 'blueprint_wide.txt'
+HD = int(sys.argv[2]) if len(sys.argv) > 2 else 0
+OD = int(sys.argv[3]) if len(sys.argv) > 3 else 0
 g = [['.'] * W for _ in range(H)]
 
 def put(x, y, c):
@@ -51,8 +56,8 @@ def line(pts, w=2):
                         put(int(x) + dx, int(y) + dy, 'P')
 
 # Paths: porch to well, well to the oak, the garden gate, the orchard, the pond and the road along the bottom.
-line([(44.5, 11), (44, 13), (41, 14.5), (39.5, 15)])
-line([(36, 16), (33, 16.5), (30.5, 16)])
+line([(44.5, 11 + HD), (44, 13 + HD), (41, 14.5), (39.5, 15)])
+line([(36, 16), (33, 16.5), (30.5 + OD, 16)])
 line([(38, 18), (38.5, 21), (40, 23.5), (41, 23.5)])
 line([(35.5, 17.5), (30, 19), (25, 20.5), (22, 21.5)])
 line([(19, 27.5), (18.5, 29.5), (18.5, 30.5)])
@@ -71,12 +76,12 @@ rect(42, 18, 60, 18, 'X'); rect(42, 30, 60, 30, 'X'); rect(42, 18, 42, 30, 'X');
 rect(43, 19, 59, 29, 'w')
 for (x0, y0) in [(44, 20), (52, 20), (44, 25), (52, 25)]:
     rect(x0, y0, x0 + 6, y0 + 3, 'S')
-put(42, 23, 'g'); put(42, 24, 'g'); put(51, 30, 'g')
+put(42, 23, "g"); put(42, 24, "g"); put(51, 30, "g"); put(50, 30, "g")
 
 # The oak: its 3 x 3 base (top row walkable) inside scattered boulders, in front of the house's west side.
 for (x, y) in [(26, 11), (25, 13), (26, 15), (29, 16), (33, 15), (35, 13), (34, 11), (27, 9), (33, 9)]:
-    put(x, y, 'r')
-rect(29, 11, 31, 11, 'b'); rect(29, 12, 31, 13, 'B')
+    put(x + OD, y, 'r')
+rect(29 + OD, 11, 31 + OD, 11, 'b'); rect(29 + OD, 12, 31 + OD, 13, 'B')
 
 # The well on a cobbled ring where the paths meet.
 for y in range(14, 19):
@@ -86,13 +91,13 @@ for y in range(14, 19):
 rect(37, 15, 38, 16, 'W')
 
 # The farmhouse: the live footprint (11 wide; 5 roof rows, 2 wall rows, door in the middle), porch below.
-rect(40, 4, 50, 8, 'O'); rect(40, 9, 50, 10, 'H'); put(45, 10, 'D'); put(45, 11, 'R')
+rect(40, 4 + HD, 50, 8 + HD, 'O'); rect(40, 9 + HD, 50, 10 + HD, 'H'); put(45, 10 + HD, 'D'); put(45, 11 + HD, 'R')
 for (x, y) in [(39, 9), (39, 10), (51, 9), (51, 10), (41, 11), (42, 11), (48, 11), (49, 11), (52, 8)]:
-    put(x, y, 'd')
+    put(x, y + HD, 'd')
 
 # Lantern posts: stand-ins for lamps the player builds (no new permanent lights).
-for (x, y) in [(43, 12), (41, 22)]:
+for (x, y) in [(43, 12 + HD), (41, 22)]:
     put(x, y, 'L')
 
-open('blueprint_wide.txt', 'w').write('\n'.join(''.join(r) for r in g) + '\n')
+open(OUT, 'w').write('\n'.join(''.join(r) for r in g) + '\n')
 print('\n'.join(''.join(r) for r in g))
