@@ -101,7 +101,7 @@ A system can carry more than one class (for example "A technically, D by rule").
 7. **Cost.** a: low to moderate, mostly layout and art direction. b: moderate (one painted or composited scene per use). c: a rebuild of the game's visual foundation.
 8. **Performance.** a, b: none measurable [Estimate]. c: unknown.
 9. **Risks.** a: none to saves if done with decor only; layout moves carry the crop reset (system 7). c: very high.
-10. **Compromise.** Under a, the game never shows the concept's oblique ground plane. See register C-01.
+10. **Compromise.** Under a, the game never shows the concept's oblique ground plane. See register C-01. The follow camera also hides the house's upper roof and chimney from the porch and the yard; see C-14.
 11. **Recommendation.** a for gameplay, plus b where a single beauty shot is wanted.
 12. **Approval.** a: no (it is composition within the current rules), except where it needs layout changes. b: yes (new presentation scope). c: yes, and not recommended.
 
@@ -521,6 +521,18 @@ Every entry is **PROPOSED — NOT APPROVED** until the owner approves it, and is
 - **Effort and risk:** moderate; separate task.
 - **Recommendation:** a separate trek study after the farm set settles.
 - **Status:** PROPOSED — NOT APPROVED.
+
+### C-14 — Upper roof and chimney off-frame from the porch and south of the house
+- **Added:** 2026-11-03, from the ART-003 W-3 wall comparison (`art/style_tests/ART-003/w3w/W3W.md`, "Roof and chimney in normal play", commit `5ccbdf6`). [Measured in the prototype, layout b.]
+- **Concept:** Concept 02 shows the whole farmhouse, roof and chimney smoke from the front, in one frame.
+- **Game would show:** the camera follows the farmer and shows 7.5 tiles above them. From V1-B (beside the house) the whole roof and chimney show, bar the cap's top 2 px. From V5 (the porch path) the top 3.6 tiles are off-frame: the chimney and the upper roof down to the gable window. From anywhere south of the porch (well, garden, road) the chimney is off-screen.
+- **Why hard:** the farmer-centred camera, `SCALE = 3` and the 1280×720 canvas (D-004, D-007; C-02). The house sprite is tall, and its front is approached from the south.
+- **Quality lost:** the full-facade view of the house from the front; the chimney as a cue while the player is in the yard.
+- **Constraint:** camera and scaling rules; no camera change is approved.
+- **Alternatives:** keep the camera and let the side view (V1-B) and the side silhouette carry the roofline; a camera look-ahead or offset near the house; a shorter house sprite. The last two change the camera or the locked house footprint and would each need their own approval and test plan.
+- **Effort and risk:** none for keeping it; the others are camera or art changes with readability and sorting risk.
+- **Recommendation:** keep the camera. Treat the side silhouette and chimney as the house's identity cues.
+- **Status:** PROPOSED — NOT APPROVED. Recorded as a documented framing limit. It is not an authorization for any camera change.
 
 ---
 

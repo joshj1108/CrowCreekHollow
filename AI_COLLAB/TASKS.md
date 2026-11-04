@@ -6,8 +6,20 @@
 | COLLAB-001 | Establish shared collaboration notes and root instruction pointer | ChatGPT | Claude Code | review requested | Owner reviews/merges setup PR |
 | ART-001 | PixelLab vs SpriteCook comparison (non-production) | Claude Code | ChatGPT | review requested (`e3bb50c`) | Owner chooses the asset pipeline |
 | ART-002 | 16 px vs 32 px art density test (non-production) | Claude Code | ChatGPT | review requested (`f3da292`) | Owner decides on art density |
-| ART-003 | Concept-to-game vertical slice, Rounds 1–2 (non-production) | Claude Code | ChatGPT | Round 1 reviewed (changes requested); Round 2 reviewed (ChatGPT 57.75); R3-1 accepted as the slice's night baseline (ChatGPT 61.5); R3-2 to R3-5 reviewed (ChatGPT 63.0); wider prototype W-1/W-2 reviewed (ChatGPT 60.0); W-3/W-4 art plan proposed (`ART_003_W3_ART_PLAN.md`), approval pending; P-1 not approved | Owner approves Round 3; no production migration |
+| ART-003 | Concept-to-game vertical slice and wider homestead prototype (non-production) | Claude Code | ChatGPT | Round 1 reviewed (changes requested); Round 2 reviewed (ChatGPT 57.75); R3-1 accepted as the slice's night baseline (ChatGPT 61.5); R3-2 to R3-5 reviewed (ChatGPT 63.0); wider prototype W-1/W-2 reviewed (ChatGPT 60.0); W-3 Batch A reviewed (ChatGPT 64.25); W-3 Batch B reviewed (ChatGPT 68.25); W-3 polish reviewed (ChatGPT 71.0); W-3 wall comparison text-reviewed, wall A provisionally preferred, image review of both masters pending; Batch C proposed, not approved; P-1 not approved. History below | Owner approves each batch and its credit limit; no production migration |
 | ART-004 | Art direction, concept-fidelity feasibility, rubric, ART-003 scorecard and Round 3 plan (documents only) | Claude Code | ChatGPT | review requested | Owner approves each document and each compromise (all PROPOSED — NOT APPROVED) |
+
+## ART-003 — W-3 history (all non-production, prototype only)
+| Step | Commit | What it did | PixelLab | ChatGPT review |
+| --- | --- | --- | --- | --- |
+| W-3/W-4 art plan | `b2736ff` | Ranked plan: oak, pond, house, garden, orchard, arrival (`ART_003_W3_ART_PLAN.md`) | 0 | No separate score; each batch then authorized on its own |
+| W-3 Batch A | `1a55ce9` | Oak canopy, pond shoreline and dock | 18 (forecast 4–8; two inpaints cost 12) | 64.25 (`f8c51f9`); oak and pond endorsed as candidates; shore buffer and route fix asked for |
+| W-3 Batch B | `658fab8` | Restored-house candidates A–C, four-bed garden, grass G0–G2, Batch A follow-ups | 5 of a 12 cap | 68.25 (`77aa098`); house C and G1 preferred as prototype baselines |
+| W-3 polish | `d88f210` | House C paint-over (roof, glass, porch, walls a/b/c), garden variation, G1 check | 0 | 71.0 (`dacdf09`); wall b too dark by day, compare a with b or a midpoint |
+| W-3 wall comparison | `5ccbdf6` | Walls A/M/B in V1-B, V5 and an establishing view, day and R3-1 night; roof/chimney framing check; Batch C proposal | 0 | Text review: A provisionally preferred; final choice waits for image review of both masters |
+| W-3 Batch C | — | Orchard fruit trees, V3 crossroads, road arrival, worn paths, garden → pond (proposed in `art/style_tests/ART-003/w3w/W3W.md`) | Proposed: 3 expected, 5 hard limit, `create_image_pixflux` only | Scope and budget judged reasonable for the owner to consider. **Not approved; nothing generated or placed** |
+
+**Still unapproved:** Batch C, production integration of any ART-003 art, P-1 night lighting, farmhouse stages 0–2, gameplay changes, and any camera change (the roof/chimney framing limit is register entry C-14 in `CONCEPT_FIDELITY_FEASIBILITY.md`). Review masters stay where they were committed, under `art/style_tests/ART-003/*/review/`.
 
 ## VIS-001 — Scope and acceptance criteria
 **Inputs:** `DESIGN.md` (especially locked art style), `CLAUDE.md`, farm scenes/scripts, `art/`, `shaders/`, current SpriteCook registry.
