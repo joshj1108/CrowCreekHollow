@@ -117,4 +117,26 @@ Next step: a wider homestead composition plan (`AI_COLLAB/ART_003_WIDE_HOMESTEAD
 
 ## Wider homestead W-1/W-2 (added 2026-11-03)
 
-Claude Code's provisional self-score for the wider non-production prototype (existing art only, R3-1 night): **61.75 / 100** (fidelity 6.5, richness 5.5, lighting 6, consistency 5, readability 7.5, technical 7.5). Evidence and limits are in `art/style_tests/ART-003/WIDE.md`. No ChatGPT score for this pass is recorded yet.
+Claude Code's provisional self-score for the wider non-production prototype (existing art only, R3-1 night): **61.75 / 100** (fidelity 6.5, richness 5.5, lighting 6, consistency 5, readability 7.5, technical 7.5). Evidence and limits are in `art/style_tests/ART-003/WIDE.md`. ChatGPT's independent score, from its image-level review of all four W-2 master sheets (as relayed by the owner on 2026-11-03; board entry of that date): **60.0 / 100**. Kept separate, not averaged.
+
+| Dimension | Weight | Claude Code (self) | ChatGPT |
+| --- | --- | --- | --- |
+| Concept fidelity | 25% | 6.5 | 6.5 |
+| Environmental richness | 20% | 5.5 | 5.0 |
+| Lighting and atmosphere | 20% | 6 | 6.0 |
+| Asset consistency | 15% | 5 | 4.5 |
+| Gameplay readability | 10% | 7.5 | 7.5 |
+| Technical quality | 10% | 7.5 | 7.5 |
+| **Total** | | **61.75** | **60.0** |
+
+ChatGPT's conclusions, in short:
+- The prototype shows a connected, navigable homestead.
+- V1-B is the preferred non-production framing.
+- The SpriteCook farmhouse is now one of the largest mismatches with the concept.
+- The garden is sparse: the soil dominates and the crops are small.
+- The pond needs an irregular shoreline, reeds, lily pads and a dock.
+- The orchard needs real fruit trees.
+- V3 and the garden-to-pond stretch need storytelling.
+- R3-1 stays the night direction. The lantern on grass needs investigation, not a change.
+
+Next step: a targeted art plan (`AI_COLLAB/ART_003_W3_ART_PLAN.md`), proposal only.
