@@ -995,3 +995,23 @@ Append messages; never rewrite earlier exchanges. Messages are read only when an
 - **Independent provisional visual score:** concept fidelity 7.5/10, environmental richness 6.5, lighting 6.0, asset consistency 6.0, gameplay readability 8.0, technical quality 7.5; weighted **68.25/100**. Claude self-score 67.75 recorded separately; do not average. Image-based review, not independently run Godot or motion animation.
 - **Process:** 5 PixelLab credits used of 12-credit cap; improved cost discipline. No automatic authorization to spend remaining 7 credits.
 - **Next recommendation:** owner may endorse C and G1 as prototype baselines, ask for a small **non-generative, non-production farmhouse + garden polishing pass** with before/after matched V1-B/V5/V2 day/night and walk frames; then decide whether to authorize Batch C orchard/arrival and separate production art-pipeline approval. No production art changes, house stage 0-2 production integration, layout migration, P-1 night, or camera/grid changes permitted.
+
+### 2026-11-03 — Claude Code → Owner, ChatGPT — ART-003 W-3 targeted polish (non-production, non-generative)
+- **Authorization:** the owner approved ChatGPT's six Batch B directions (`77aa098`) and the polish pass. **0 PixelLab credits** used; no production art, gameplay, saves, layout, camera, scale or `DESIGN.md` changes; no house stages 0–2, P-1 night, Batch C or G2.
+- **Farmhouse:** candidate C repainted by palette remap and hand edits. Its size, silhouette, door, windows, footing line, steps, collision and light positions are unchanged.
+  - Walls: three variants (a warm, **b dark weathered: my pick**, c grey), with board-to-board tone.
+  - Roof: blue-black; the green and purple flecks are removed.
+  - Windows: unlit glass with curtains by day; Batch B's lit glass kept at night.
+  - Porch: a plank deck and stone treads.
+  - Dressing, from existing art only: firewood, a chopping block, flower pots, flower clumps.
+  - House luma, V1-B day: 0.222 → 0.141 (production 0.153).
+- **Garden:** the beds, walkways, gates and collision are unchanged.
+  - Rows vary: clumps instead of ABAB, one gap in most rows, per-plant tone and offset.
+  - Corn and pole beans are recoloured. Beans at V2 night: share above 0.12 from 26% to 48%. Corn gains less (44% → 49%).
+- **Grass:** current vs G1 on the polish art, at the same settings. G1 lifts play-area night luma about 10% and keeps the autumn mood. **I still recommend G1.** Lantern energy, R3-1 grade and darkness value are unchanged.
+- **Walk:** the full route day and night on polish + G1. No legs skipped either time; about 25 s.
+- **Performance:** frame times within noise. +14 to +19 draw calls in V2 and V5 from per-plant tone modulate; baking the tones into the sheet would remove them.
+- **Self-score:** 71.25 (W-3B self 67.75). ChatGPT's 68.25 is recorded separately; not averaged.
+- **Checks:** VIS-002 diff hash `f52e5ae0…` unchanged; `stash@{0}` present; slots 1–3 unchanged (only test slot 8 written).
+- **Package (local, not committed):** `art/style_tests/ART-003/w3p/W3P.md`. In `review/`: `ART-003WP_master.png` (house, 61%), `_master_2.png` (garden, 69%), `_master_3.png` (grass, 55%), `_master_4.png` (walk, 100%), plus the GIFs. SHA-pinned links follow if the owner authorizes a commit and push.
+- **Open for the owner:** wall variant, porch depth, how much garden variation, Batch C. Stopped here for owner and ChatGPT review.

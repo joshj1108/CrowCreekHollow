@@ -18,6 +18,13 @@ extends "res://tools/art003_round3s.gd"
 #                             and the porch lantern post moved off the route (blueprint_wide_v1b_w3b.txt), the Restored
 #                             house alternative (w3b/house/house_w3b.png), the refitted beds with every row planted
 #                             (w3b/garden), north-south fence rails, a stone cross walk in the garden, porch pumpkins
+#   art=w3p                   ART-003 W-3 polish (layout b only), on top of art=w3b, no new generation: the Restored
+#                             house repainted (w3p/house: darker weathered walls, blue-black roof, a plank porch deck,
+#                             stone treads; unlit glass and curtains by day, the Batch B lit glass at night), the
+#                             porch dressed with firewood, flower pots and flowers, the beds' rows varied (clumps,
+#                             gaps, tone and offset) and corn and beans recoloured to hold up at night (w3p/garden)
+#   wall=a|b|c                with art=w3p: the house's wall variant (a warm weathered, b dark weathered, the default,
+#                             c grey weathered)
 #   house=prod                with art=w3b: keep the production house_stage_3 instead of the alternative
 #   grass=1 | grass=2         a lighter prototype grass (albedo x1.15 or x1.30 on grass-coloured ground pixels, baked);
 #                             lighting and the night grade are unchanged
@@ -54,6 +61,7 @@ const ROUTE_W3_END := [Vector2(17.0, 34.6), Vector2(14.0, 34.6), Vector2(14.0, 3
 const BLOCKS := "TOHDXWBrLd~o"   # codes the farmer can't walk on (K, the W-3 dock over water, is walkable)
 const W3 := "res://art/style_tests/ART-003/w3/"
 const W3B := "res://art/style_tests/ART-003/w3b/"
+const W3P := "res://art/style_tests/ART-003/w3p/"
 const GRASS_LIFT := {"1": 1.15, "2": 1.30}
 
 var grid: Array = []          # rows of single-character codes
@@ -79,7 +87,11 @@ func _w3() -> bool:
 
 
 func _w3b() -> bool:
-	return o3.get("art", "") == "w3b"
+	return o3.get("art", "") == "w3b" or _w3p()
+
+
+func _w3p() -> bool:
+	return o3.get("art", "") == "w3p"
 
 
 # The ground material under a map code: g grass, p path (paths, the garden floor, the porch, the dock's land end,
@@ -497,6 +509,9 @@ func _build(main, night: bool) -> void:
 	house_tex = load("res://art/farm/house_stage_3.png")
 	if _w3b() and o3.get("house", "") != "prod":
 		house_tex = ImageTexture.create_from_image(Image.load_from_file(ProjectSettings.globalize_path(W3B + "house/house_w3b.png")))
+		if _w3p():   # the same sprite repainted: day glass unlit, night glass lit as Batch B's
+			var hp := W3P + "house/house_w3p_%s_%s.png" % [o3.get("wall", "b"), "night" if night else "day"]
+			house_tex = ImageTexture.create_from_image(Image.load_from_file(ProjectSettings.globalize_path(hp)))
 	var dx := 0.0
 	var dy := 0.0
 	for y in GH:
@@ -509,12 +524,19 @@ func _build(main, night: bool) -> void:
 	# Its dressing: firewood, a barrel, a flower pot, a crate.
 	var kit := _strip(R3 + "garden_props_clean.png", 30)   # corn, trellis, barrel, crate, flower pot
 	var dressing := [load("res://art/farm/woodstore.png"), kit[2], kit[4], kit[3]]
+	if _w3p():   # W-3 polish: firewood against both wings, a chopping block, flower pots and barrels at the front
+		var wood: Texture2D = load("res://art/farm/woodstore.png")   # the same d tiles, in reading order
+		dressing = [kit[2], wood, wood, load("res://art/farm/chopping_log.png"), kit[3], kit[2], kit[4], kit[4], kit[2]]
 	i = 0
 	for y in GH:
 		for x in GW:
 			if _code(x, y) == "d":
 				add.call(dressing[i % dressing.size()], x + 0.5, y + 1.0, i % 2 == 1, Color.WHITE)
 				i += 1
+	if _w3p():   # flower clumps along the front of the footing
+		var flowers := _strip(R3 + "groundcover.png", 6)
+		for f in [[40.6, 7], [43.3, 6], [47.7, 7], [50.4, 6], [39.6, 7]]:
+			add.call(flowers[f[1] % flowers.size()], f[0], dy + 0.15, int(f[0] * 10.0) % 2 == 0, Color.WHITE)
 	if _w3b():   # pumpkins either side of the porch steps, beside the dressing (art only; the tiles stay walkable)
 		var pk: Texture2D = _strip(R3 + "crops_b_clean.png", 20)[-1]
 		for p in [Vector2(dx - 2.3, dy + 0.95), Vector2(dx - 1.8, dy + 1.05), Vector2(dx + 2.4, dy + 1.0)]:
@@ -572,7 +594,7 @@ func _build(main, night: bool) -> void:
 		var strip := load("res://art/farm/crop_%s.png" % kind) as Texture2D
 		prod.append(ImageTexture.create_from_image(strip.get_image().get_region(Rect2i(48, 0, 16, 16))))
 	var bed_b := ImageTexture.create_from_image(Image.load_from_file(ProjectSettings.globalize_path(W3B + "garden/bed_w3b.png"))) if _w3b() else null
-	var crops_b := _cells(W3B + "garden/crops_w3b.png", 16) if _w3b() else []   # corn pumpkin beans cabbage kale squash turnip sunflower
+	var crops_b := _cells((W3P + "garden/crops_w3p.png") if _w3p() else (W3B + "garden/crops_w3b.png"), 16) if _w3b() else []   # corn pumpkin beans cabbage kale squash turnip sunflower
 	var beds := []
 	for y in GH:
 		for x in GW:
@@ -596,11 +618,26 @@ func _build(main, night: bool) -> void:
 			var plan: Array = [[[0], [0, 7], [1]], [[2], [3], [3, 6]], [[7, 0], [6], [1, 5]], [[2], [5], [6, 3]]][bi % 4]
 			for r in 3:
 				var ry: float = b.y + [1.55, 2.55, 3.3][r]
+				var gap := -1
+				if _w3p():   # W-3 polish: one plant missing in most rows (picked or failed), never at a row's end
+					gap = 1 + _hash(b.x, b.y + r, 11) % (w + 1)
+					if gap >= w - 1:
+						gap = -1
 				for k in w:
 					var kinds: Array = plan[r]
 					var t: Texture2D = crops_b[kinds[(k + r) % kinds.size()]]
 					var j := _hash(b.x + k, b.y + r, 7)
-					add.call(t, b.x + k + 0.5 + ((j % 5) - 2) * 0.04, ry, j % 2 == 0, Color.WHITE)
+					if not _w3p():
+						add.call(t, b.x + k + 0.5 + ((j % 5) - 2) * 0.04, ry, j % 2 == 0, Color.WHITE)
+						continue
+					if k == gap:
+						continue
+					# Mixed rows grow in clumps of two or three (AABBB) instead of alternating; each plant sits a
+					# little off the line and takes one of three tones, so a row reads planted, not stamped.
+					t = crops_b[kinds[((k + bi * 2) / 3 + r) % kinds.size()]] if kinds.size() > 1 else t
+					var v: float = [1.0, 0.9, 1.07][j % 3]
+					add.call(t, b.x + k + 0.5 + ((j % 7) - 3) * 0.05, ry + ((j / 7) % 3 - 1) * 0.08, j % 2 == 0,
+						Color(v, v, v))
 			bi += 1
 			continue
 		add.call(bed, cx, base, false, Color.WHITE)
