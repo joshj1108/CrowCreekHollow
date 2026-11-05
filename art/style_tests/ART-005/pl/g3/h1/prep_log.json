@@ -1,0 +1,28 @@
+{
+ "m0_hashes_before": {
+  "blockout.png": "e32828daf4774f0e",
+  "labels.png": "c022df05abeec458",
+  "anchors.json": "7cb9fcce316df61e"
+ },
+ "m0_hashes_after": {
+  "blockout.png": "e32828daf4774f0e",
+  "labels.png": "c022df05abeec458",
+  "anchors.json": "7cb9fcce316df61e"
+ },
+ "m0_unchanged": true,
+ "valuepass": {
+  "size": [
+   384,
+   320
+  ],
+  "opaque_px": 103454,
+  "colours": 344,
+  "alpha_identical_to_blockout": true,
+  "labels_identical_to_m0": true,
+  "sha": "98e0781cb0f0e730"
+ },
+ "refs": {
+  "ref_c1.png": "413dd7ad64536adb",
+  "ref_v2.png": "54717b8243b035c8"
+ }
+}

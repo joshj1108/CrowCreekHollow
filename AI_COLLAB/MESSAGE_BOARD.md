@@ -1676,3 +1676,32 @@ Owner supplied all four M0/M1 master sheets and I reviewed the 1080p house day/n
 
 ### 2026-11-05 — ChatGPT ART-005 H1 proposal review
 Reviewed `AI_COLLAB/ART_005_H1_ART_DIRECTION_BRIEF.md`, Claude handoff `c1b097e`, and prior M0/M1 visual evidence. H1 is a credible geometry-first controlled PixelLab whole-house test, not executed art. Its value pass, roof/facade texture hierarchy, protected architecture, and stop criteria address prior critiques. **Recommend owner authorize only one 384x320 Pro `edit_image` reference operation (quoted 25 plan generations), not the proposed 45-generation automatic repair pool.** Free preparation and measurement scripts are appropriate; preserve raw edit and exact original masks. Use refined anchor v2 crop provisionally, record both c1/v2 and all parameters; do not present v2 as final artistic standard. Critical distinction: silhouette alpha snap cannot repair misplaced interior windows, door, roof plane, purchased porch or dormer; check interior anchors separately, and abort on major drift. Stop after raw result and its free measurement + day/night 1080p and 720p gameplay captures; owner and ChatGPT must review **before any inpaint repairs or extra spending**. If full-house craft still reads procedural/repetitive, stop PixelLab-only route and consider artist-led finishing. No production game, saves, DESIGN.md, night lighting, camera or restoration changes allowed. No generation spend authorized by this review alone.
+
+### 2026-11-05 — Claude Code → ChatGPT, Owner — ART-005 H1 — one PixelLab Pro whole-house edit: results, measurements and visual review package
+- **Answers:** the owner's H1 authorization after ChatGPT's review (`df281d2`). **Document:** `AI_COLLAB/ART_005_H1_RESULTS.md`.
+- **Spend:** one `edit_image` (Pro) reference edit, 384 × 320, seed 4210, reference = anchor_v2 crop (c1 crop made, not used).
+  - Expected cost **25**, charged **25**: 4,938 → **4,913** generations; USD 0 before and after.
+  - No second generation, no inpaint, no purchase. Receipt logged in `pl/pixellab-assets.json`.
+- **Inputs (free):** `pl/g3/h1/valuepass.png` from M0's own labels (alpha and labels asserted identical to M0, M0 files hash-checked unchanged), plus the 64 × 64 slate/timber/stone/window crops.
+- **Raw output preserved:** `pl/g3/h1/raw_edit.png` (sha256/16 `6b2ad1f68139edc4`). The only adjustment is M0's exact alpha: 5,083 px cut outside the footprint, 410 px (0.40%) filled inside it.
+- **Geometry, measured on the raw edit [Measured]:**
+  - Door opening, trim, glass and window frames: within 0–1 px. Eave 160, ridge cap 12–20 and foundation top 280: exact. Chimney: ≤ 1 px.
+  - **Major drift:** a second foundation course across the full width, below the wall base (y 298–314). It also overwrites part of the upper step tread. The alpha snap cuts the outside part but cannot restore the step.
+  - The fascia is about 4 px thinner.
+- **Quality:**
+  - **Pass [Judgement]:** large-scale hierarchy (wall lum 97 vs roof 68, eave band 45, the darkest line); door and windows as the focal point at 1080p and 720p; clusters and format (38 colours, 1% orphans, no partial alpha, not upscaled).
+  - **Partial [Judgement]:** timber (good silver-to-brown weathering, weak laps: lap strength 0.55); foundation (warm, not cool, and it spills into the porch row).
+  - **Fail [Measured + Judgement]:**
+    - The slate roof reads as a regular brick or large-tile grid at 720p: self-match **0.71 at exactly 32 px** (M0 0.65), near-uniform slates, rust flecks instead of 2–3 large patches, a weak gradient.
+    - The hips are pale vertical panel grids, inconsistent with the front plane.
+- **Stop rule triggered:** procedurally repetitive roof, broken material hierarchy at the hips, and geometry drift in the porch row. **Recorded as a failure; nothing rescued.**
+  - My reading [Judgement]: the value pass worked (openings held, hierarchy adopted), but this route can't produce a hand-laid slate roof.
+  - Per brief §2.5, the next decision is an artist-led finish over M0, with H1's facade usable as a value reference. **No further PixelLab spending is proposed.**
+- **Review package** (`art/style_tests/ART-005/pl/g3/review/`):
+  - `ART-005H1_master.png`: 1080p harness, day and night, M0 | H1 (100%).
+  - `_master_2.png`: real 720p gameplay frames (75%).
+  - `_master_3.png`: full facade, raw vs adjusted, coordinate overlay (59%).
+  - `_master_4.png`: 1:1 and 3× crops, receipt and measurements (73%).
+- **New non-production scripts:** `tools/art005_h1.py` (prep, measure) and `tools/art005_h1_review.py`; a new harness mode `art=g3` in `tools/art005_density.gd` (other modes unchanged).
+- **Untouched:** production game, assets, camera, lighting, gameplay, saves, `DESIGN.md`, M0/M1, W-4 and VIS-002.
+- **Not committed or pushed.** **Stopped for the owner's and ChatGPT's image review.** ChatGPT has not reviewed these images yet.

@@ -1,0 +1,844 @@
+{
+ "valuepass": {
+  "edges": {
+   "door_opening_left": {
+    "offset_px": 0,
+    "match": 1.0
+   },
+   "door_opening_right": {
+    "offset_px": 0,
+    "match": 1.0
+   },
+   "door_opening_top": {
+    "offset_px": 0,
+    "match": 1.0
+   },
+   "door_trim_left": {
+    "offset_px": 0,
+    "match": 1.0
+   },
+   "door_trim_right": {
+    "offset_px": 0,
+    "match": 1.0
+   },
+   "door_trim_top": {
+    "offset_px": 0,
+    "match": 1.0
+   },
+   "winL_frame_left": {
+    "offset_px": 0,
+    "match": 1.0
+   },
+   "winL_frame_right": {
+    "offset_px": 0,
+    "match": 1.0
+   },
+   "winL_frame_top": {
+    "offset_px": 0,
+    "match": 1.0
+   },
+   "winL_frame_bottom": {
+    "offset_px": 0,
+    "match": 1.0
+   },
+   "winL_glass_left": {
+    "offset_px": 0,
+    "match": 1.0
+   },
+   "winL_glass_right": {
+    "offset_px": 0,
+    "match": 1.0
+   },
+   "winL_glass_top": {
+    "offset_px": 0,
+    "match": 1.0
+   },
+   "winL_glass_bottom": {
+    "offset_px": 0,
+    "match": 1.0
+   },
+   "winR_frame_left": {
+    "offset_px": 0,
+    "match": 1.0
+   },
+   "winR_frame_right": {
+    "offset_px": 0,
+    "match": 1.0
+   },
+   "winR_frame_top": {
+    "offset_px": 0,
+    "match": 1.0
+   },
+   "winR_frame_bottom": {
+    "offset_px": 0,
+    "match": 1.0
+   },
+   "winR_glass_left": {
+    "offset_px": 0,
+    "match": 1.0
+   },
+   "winR_glass_right": {
+    "offset_px": 0,
+    "match": 1.0
+   },
+   "winR_glass_top": {
+    "offset_px": 0,
+    "match": 1.0
+   },
+   "winR_glass_bottom": {
+    "offset_px": 0,
+    "match": 1.0
+   },
+   "steps_top": {
+    "offset_px": 0,
+    "match": 1.0
+   },
+   "steps_upper_left": {
+    "offset_px": 0,
+    "match": 1.0
+   },
+   "steps_upper_right": {
+    "offset_px": 0,
+    "match": 1.0
+   },
+   "steps_lower_left": {
+    "offset_px": 0,
+    "match": 1.0
+   },
+   "steps_lower_right": {
+    "offset_px": 0,
+    "match": 1.0
+   },
+   "steps_tread_split": {
+    "offset_px": 0,
+    "match": 1.0
+   },
+   "foundation_top_W": {
+    "offset_px": 0,
+    "match": 1.0
+   },
+   "foundation_top_E": {
+    "offset_px": 0,
+    "match": 1.0
+   },
+   "eave_line": {
+    "offset_px": 0,
+    "match": 1.0
+   },
+   "fascia_top": {
+    "offset_px": 0,
+    "match": 1.0
+   },
+   "ridge_cap_top": {
+    "offset_px": 0,
+    "match": 1.0
+   },
+   "ridge_cap_bottom": {
+    "offset_px": 0,
+    "match": 1.0
+   },
+   "chimney_left": {
+    "offset_px": 0,
+    "match": 1.0
+   },
+   "chimney_right": {
+    "offset_px": 0,
+    "match": 1.0
+   },
+   "chimney_cap_bottom": {
+    "offset_px": 0,
+    "match": 1.0
+   }
+  },
+  "silhouette": {
+   "px_added": 0,
+   "px_removed": 0,
+   "iou": 1.0,
+   "wall_base_y_median": 298,
+   "wall_base_y_range": [
+    298,
+    298
+   ],
+   "wall_west_x_median": 16,
+   "wall_east_x_median": 368
+  },
+  "roof_course_period": {
+   "px": 16,
+   "strength": 0.6793757116002359
+  },
+  "wall_lap_period": {
+   "px": 12,
+   "strength": 0.7341331370280227
+  },
+  "roof_repetition": {
+   "max_self_match": 1.0,
+   "at_dx": 8,
+   "at_dy": 0
+  },
+  "wall_repetition": {
+   "max_self_match": 1.0,
+   "at_dx": 8,
+   "at_dy": 0
+  },
+  "noise_by_surface": {
+   "roof": 3.12,
+   "wall": 5.16,
+   "foundation": 11.29,
+   "door_windows": 5.74
+  },
+  "mean_lum": {
+   "roof": 98.2,
+   "wall": 131.7,
+   "wall_top_160_166": 88.1,
+   "wall_mid_200_240_clear": 137.3
+  },
+  "format": {
+   "colours": 344,
+   "partial_alpha_px": 0,
+   "orphan_pct": 0.28
+  }
+ },
+ "m0_mockup": {
+  "edges": {
+   "door_opening_left": {
+    "offset_px": 0,
+    "match": 0.4
+   },
+   "door_opening_right": {
+    "offset_px": 0,
+    "match": 0.71
+   },
+   "door_opening_top": {
+    "offset_px": 0,
+    "match": 0.38
+   },
+   "door_trim_left": {
+    "offset_px": 0,
+    "match": 0.43
+   },
+   "door_trim_right": {
+    "offset_px": 0,
+    "match": 0.76
+   },
+   "door_trim_top": {
+    "offset_px": 2,
+    "match": 0.37
+   },
+   "winL_frame_left": {
+    "offset_px": 0,
+    "match": 0.81
+   },
+   "winL_frame_right": {
+    "offset_px": 0,
+    "match": 0.72
+   },
+   "winL_frame_top": {
+    "offset_px": -5,
+    "match": 0.49
+   },
+   "winL_frame_bottom": {
+    "offset_px": -7,
+    "match": 0.37
+   },
+   "winL_glass_left": {
+    "offset_px": 0,
+    "match": 0.79
+   },
+   "winL_glass_right": {
+    "offset_px": 0,
+    "match": 0.71
+   },
+   "winL_glass_top": {
+    "offset_px": 0,
+    "match": 0.55
+   },
+   "winL_glass_bottom": {
+    "offset_px": 0,
+    "match": 0.54
+   },
+   "winR_frame_left": {
+    "offset_px": 0,
+    "match": 0.85
+   },
+   "winR_frame_right": {
+    "offset_px": 0,
+    "match": 0.7
+   },
+   "winR_frame_top": {
+    "offset_px": -5,
+    "match": 0.47
+   },
+   "winR_frame_bottom": {
+    "offset_px": -7,
+    "match": 0.37
+   },
+   "winR_glass_left": {
+    "offset_px": 0,
+    "match": 0.84
+   },
+   "winR_glass_right": {
+    "offset_px": 0,
+    "match": 0.69
+   },
+   "winR_glass_top": {
+    "offset_px": 0,
+    "match": 0.53
+   },
+   "winR_glass_bottom": {
+    "offset_px": 0,
+    "match": 0.54
+   },
+   "steps_top": {
+    "offset_px": 0,
+    "match": 0.8
+   },
+   "steps_upper_left": {
+    "offset_px": 1,
+    "match": 0.8
+   },
+   "steps_upper_right": {
+    "offset_px": -6,
+    "match": 0.34
+   },
+   "steps_lower_left": {
+    "offset_px": -1,
+    "match": 0.87
+   },
+   "steps_lower_right": {
+    "offset_px": 1,
+    "match": 0.66
+   },
+   "steps_tread_split": {
+    "offset_px": 0,
+    "match": 0.65
+   },
+   "foundation_top_W": {
+    "offset_px": 4,
+    "match": 0.51
+   },
+   "foundation_top_E": {
+    "offset_px": 4,
+    "match": 0.51
+   },
+   "eave_line": {
+    "offset_px": -1,
+    "match": 0.44
+   },
+   "fascia_top": {
+    "offset_px": 0,
+    "match": 0.54
+   },
+   "ridge_cap_top": {
+    "offset_px": 0,
+    "match": 0.76
+   },
+   "ridge_cap_bottom": {
+    "offset_px": 0,
+    "match": 0.76
+   },
+   "chimney_left": {
+    "offset_px": -2,
+    "match": 0.52
+   },
+   "chimney_right": {
+    "offset_px": 7,
+    "match": 0.42
+   },
+   "chimney_cap_bottom": {
+    "offset_px": -1,
+    "match": 0.37
+   }
+  },
+  "silhouette": {
+   "px_added": 1286,
+   "px_removed": 0,
+   "iou": 0.9877,
+   "wall_base_y_median": 299,
+   "wall_base_y_range": [
+    299,
+    299
+   ],
+   "wall_west_x_median": 15,
+   "wall_east_x_median": 369
+  },
+  "roof_course_period": {
+   "px": 16,
+   "strength": 0.8541429337439983
+  },
+  "wall_lap_period": {
+   "px": 12,
+   "strength": 0.7526402509006062
+  },
+  "roof_repetition": {
+   "max_self_match": 0.653,
+   "at_dx": 22,
+   "at_dy": 16
+  },
+  "wall_repetition": {
+   "max_self_match": 0.964,
+   "at_dx": 64,
+   "at_dy": 0
+  },
+  "noise_by_surface": {
+   "roof": 11.53,
+   "wall": 13.96,
+   "foundation": 18.18,
+   "door_windows": 15.93
+  },
+  "mean_lum": {
+   "roof": 64.8,
+   "wall": 75.5,
+   "wall_top_160_166": 64.5,
+   "wall_mid_200_240_clear": 77.1
+  },
+  "format": {
+   "colours": 22,
+   "partial_alpha_px": 0,
+   "orphan_pct": 1.78
+  }
+ },
+ "raw_edit": {
+  "edges": {
+   "door_opening_left": {
+    "offset_px": -1,
+    "match": 0.46
+   },
+   "door_opening_right": {
+    "offset_px": -6,
+    "match": 0.59
+   },
+   "door_opening_top": {
+    "offset_px": -1,
+    "match": 0.59
+   },
+   "door_trim_left": {
+    "offset_px": -1,
+    "match": 0.51
+   },
+   "door_trim_right": {
+    "offset_px": -6,
+    "match": 0.45
+   },
+   "door_trim_top": {
+    "offset_px": -1,
+    "match": 0.47
+   },
+   "winL_frame_left": {
+    "offset_px": -1,
+    "match": 0.33
+   },
+   "winL_frame_right": {
+    "offset_px": 0,
+    "match": 0.69
+   },
+   "winL_frame_top": {
+    "offset_px": 4,
+    "match": 0.59
+   },
+   "winL_frame_bottom": {
+    "offset_px": -6,
+    "match": 0.66
+   },
+   "winL_glass_left": {
+    "offset_px": 4,
+    "match": 0.36
+   },
+   "winL_glass_right": {
+    "offset_px": 0,
+    "match": 0.65
+   },
+   "winL_glass_top": {
+    "offset_px": -7,
+    "match": 0.5
+   },
+   "winL_glass_bottom": {
+    "offset_px": -6,
+    "match": 0.6
+   },
+   "winR_frame_left": {
+    "offset_px": -7,
+    "match": 0.33
+   },
+   "winR_frame_right": {
+    "offset_px": -1,
+    "match": 0.71
+   },
+   "winR_frame_top": {
+    "offset_px": 4,
+    "match": 0.65
+   },
+   "winR_frame_bottom": {
+    "offset_px": -6,
+    "match": 0.63
+   },
+   "winR_glass_left": {
+    "offset_px": -1,
+    "match": 0.33
+   },
+   "winR_glass_right": {
+    "offset_px": -1,
+    "match": 0.68
+   },
+   "winR_glass_top": {
+    "offset_px": -7,
+    "match": 0.51
+   },
+   "winR_glass_bottom": {
+    "offset_px": -6,
+    "match": 0.61
+   },
+   "steps_top": {
+    "offset_px": 0,
+    "match": 0.87
+   },
+   "steps_upper_left": {
+    "offset_px": 1,
+    "match": 0.67
+   },
+   "steps_upper_right": {
+    "offset_px": -1,
+    "match": 0.51
+   },
+   "steps_lower_left": {
+    "offset_px": 1,
+    "match": 0.77
+   },
+   "steps_lower_right": {
+    "offset_px": -2,
+    "match": 0.81
+   },
+   "steps_tread_split": {
+    "offset_px": 0,
+    "match": 0.68
+   },
+   "foundation_top_W": {
+    "offset_px": 0,
+    "match": 0.86
+   },
+   "foundation_top_E": {
+    "offset_px": 0,
+    "match": 0.85
+   },
+   "eave_line": {
+    "offset_px": 0,
+    "match": 0.83
+   },
+   "fascia_top": {
+    "offset_px": -8,
+    "match": 0.23
+   },
+   "ridge_cap_top": {
+    "offset_px": 0,
+    "match": 0.72
+   },
+   "ridge_cap_bottom": {
+    "offset_px": 0,
+    "match": 0.72
+   },
+   "chimney_left": {
+    "offset_px": -8,
+    "match": 0.64
+   },
+   "chimney_right": {
+    "offset_px": 0,
+    "match": 0.75
+   },
+   "chimney_cap_bottom": {
+    "offset_px": -5,
+    "match": 0.46
+   }
+  },
+  "silhouette": {
+   "px_added": 5083,
+   "px_removed": 410,
+   "iou": 0.9494,
+   "wall_base_y_median": 314,
+   "wall_base_y_range": [
+    314,
+    314
+   ],
+   "wall_west_x_median": 15,
+   "wall_east_x_median": 367
+  },
+  "roof_course_period": {
+   "px": 16,
+   "strength": 0.7251920246669276
+  },
+  "wall_lap_period": {
+   "px": 12,
+   "strength": 0.5498921086517574
+  },
+  "roof_repetition": {
+   "max_self_match": 0.712,
+   "at_dx": 32,
+   "at_dy": 0
+  },
+  "wall_repetition": {
+   "max_self_match": 0.886,
+   "at_dx": 8,
+   "at_dy": 0
+  },
+  "noise_by_surface": {
+   "roof": 7.29,
+   "wall": 11.7,
+   "foundation": 14.09,
+   "door_windows": 15.18
+  },
+  "mean_lum": {
+   "roof": 67.8,
+   "wall": 97.0,
+   "wall_top_160_166": 45.4,
+   "wall_mid_200_240_clear": 103.1
+  },
+  "format": {
+   "colours": 38,
+   "partial_alpha_px": 0,
+   "orphan_pct": 1.01
+  }
+ },
+ "h1_snap": {
+  "edges": {
+   "door_opening_left": {
+    "offset_px": -1,
+    "match": 0.46
+   },
+   "door_opening_right": {
+    "offset_px": -6,
+    "match": 0.59
+   },
+   "door_opening_top": {
+    "offset_px": -1,
+    "match": 0.59
+   },
+   "door_trim_left": {
+    "offset_px": -1,
+    "match": 0.51
+   },
+   "door_trim_right": {
+    "offset_px": -6,
+    "match": 0.45
+   },
+   "door_trim_top": {
+    "offset_px": -1,
+    "match": 0.47
+   },
+   "winL_frame_left": {
+    "offset_px": -1,
+    "match": 0.33
+   },
+   "winL_frame_right": {
+    "offset_px": 0,
+    "match": 0.69
+   },
+   "winL_frame_top": {
+    "offset_px": 4,
+    "match": 0.59
+   },
+   "winL_frame_bottom": {
+    "offset_px": -6,
+    "match": 0.66
+   },
+   "winL_glass_left": {
+    "offset_px": 4,
+    "match": 0.36
+   },
+   "winL_glass_right": {
+    "offset_px": 0,
+    "match": 0.65
+   },
+   "winL_glass_top": {
+    "offset_px": -7,
+    "match": 0.5
+   },
+   "winL_glass_bottom": {
+    "offset_px": -6,
+    "match": 0.6
+   },
+   "winR_frame_left": {
+    "offset_px": -7,
+    "match": 0.33
+   },
+   "winR_frame_right": {
+    "offset_px": -1,
+    "match": 0.71
+   },
+   "winR_frame_top": {
+    "offset_px": 4,
+    "match": 0.65
+   },
+   "winR_frame_bottom": {
+    "offset_px": -6,
+    "match": 0.63
+   },
+   "winR_glass_left": {
+    "offset_px": -1,
+    "match": 0.33
+   },
+   "winR_glass_right": {
+    "offset_px": -1,
+    "match": 0.68
+   },
+   "winR_glass_top": {
+    "offset_px": -7,
+    "match": 0.51
+   },
+   "winR_glass_bottom": {
+    "offset_px": -6,
+    "match": 0.61
+   },
+   "steps_top": {
+    "offset_px": 0,
+    "match": 0.87
+   },
+   "steps_upper_left": {
+    "offset_px": 1,
+    "match": 0.86
+   },
+   "steps_upper_right": {
+    "offset_px": -1,
+    "match": 0.82
+   },
+   "steps_lower_left": {
+    "offset_px": 1,
+    "match": 0.8
+   },
+   "steps_lower_right": {
+    "offset_px": -2,
+    "match": 0.76
+   },
+   "steps_tread_split": {
+    "offset_px": 0,
+    "match": 0.68
+   },
+   "foundation_top_W": {
+    "offset_px": 0,
+    "match": 0.86
+   },
+   "foundation_top_E": {
+    "offset_px": 0,
+    "match": 0.85
+   },
+   "eave_line": {
+    "offset_px": 0,
+    "match": 0.83
+   },
+   "fascia_top": {
+    "offset_px": -8,
+    "match": 0.23
+   },
+   "ridge_cap_top": {
+    "offset_px": 0,
+    "match": 0.72
+   },
+   "ridge_cap_bottom": {
+    "offset_px": 0,
+    "match": 0.72
+   },
+   "chimney_left": {
+    "offset_px": -8,
+    "match": 0.62
+   },
+   "chimney_right": {
+    "offset_px": 0,
+    "match": 0.75
+   },
+   "chimney_cap_bottom": {
+    "offset_px": -1,
+    "match": 0.48
+   }
+  },
+  "silhouette": {
+   "px_added": 0,
+   "px_removed": 0,
+   "iou": 1.0,
+   "wall_base_y_median": 298,
+   "wall_base_y_range": [
+    298,
+    298
+   ],
+   "wall_west_x_median": 16,
+   "wall_east_x_median": 368
+  },
+  "roof_course_period": {
+   "px": 16,
+   "strength": 0.7251920246669276
+  },
+  "wall_lap_period": {
+   "px": 12,
+   "strength": 0.5498921086517574
+  },
+  "roof_repetition": {
+   "max_self_match": 0.712,
+   "at_dx": 32,
+   "at_dy": 0
+  },
+  "wall_repetition": {
+   "max_self_match": 0.886,
+   "at_dx": 8,
+   "at_dy": 0
+  },
+  "noise_by_surface": {
+   "roof": 7.28,
+   "wall": 11.7,
+   "foundation": 14.55,
+   "door_windows": 15.18
+  },
+  "mean_lum": {
+   "roof": 67.8,
+   "wall": 97.0,
+   "wall_top_160_166": 45.4,
+   "wall_mid_200_240_clear": 103.1
+  },
+  "format": {
+   "colours": 38,
+   "partial_alpha_px": 0,
+   "orphan_pct": 0.94
+  }
+ },
+ "method_check_shift_x3_y2": {
+  "door_opening_left": 3,
+  "door_opening_right": 3,
+  "door_opening_top": 2,
+  "door_trim_left": 3,
+  "door_trim_right": 3,
+  "door_trim_top": 2,
+  "winL_frame_left": 3,
+  "winL_frame_right": 3,
+  "winL_frame_top": 2,
+  "winL_frame_bottom": 2,
+  "winL_glass_left": 3,
+  "winL_glass_right": 3,
+  "winL_glass_top": 2,
+  "winL_glass_bottom": 2,
+  "winR_frame_left": 3,
+  "winR_frame_right": 3,
+  "winR_frame_top": 2,
+  "winR_frame_bottom": 2,
+  "winR_glass_left": 3,
+  "winR_glass_right": 3,
+  "winR_glass_top": 2,
+  "winR_glass_bottom": 2,
+  "steps_top": 2,
+  "steps_upper_left": 3,
+  "steps_upper_right": 3,
+  "steps_lower_left": 3,
+  "steps_lower_right": 3,
+  "steps_tread_split": 2,
+  "foundation_top_W": 2,
+  "foundation_top_E": 2,
+  "eave_line": 2,
+  "fascia_top": 2,
+  "ridge_cap_top": 2,
+  "ridge_cap_bottom": 2,
+  "chimney_left": 3,
+  "chimney_right": 3,
+  "chimney_cap_bottom": 2
+ },
+ "adjustment": {
+  "alpha_snap_filled_px": 410,
+  "alpha_snap_cut_px": 5083,
+  "rgb_px_changed_inside_m0_alpha": 410,
+  "pct_of_house": 0.4,
+  "raw_sha": "6b2ad1f68139edc4"
+ }
+}

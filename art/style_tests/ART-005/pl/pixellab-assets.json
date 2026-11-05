@@ -18,7 +18,8 @@
     "get_pro_flash_capabilities (create 160x192 -> 6; inpaint 160x192 -> 6)",
     "get_upload_url",
     "pixelart_workbench lint + repair (board c1: no change)",
-    "wait_for_jobs, get_image"
+    "wait_for_jobs, get_image",
+    "H1: get_balance x2, get_upload_url, wait_for_jobs x2, download"
   ],
   "jobs": [
     {
@@ -74,6 +75,35 @@
         "pl/house/house_section_inpaint1.png"
       ],
       "prompt": "Straight-on front view, no diagonal perspective: the horizontal timber clapboard wall continues to the right edge behind the porch, in deeper shade under the porch roof (same planks, one ramp step darker). One square wooden porch post standing in front of it, lit on its left side. At the bottom, the porch deck seen face-on as a level front edge: a thick horizontal fascia plank and the deck top as a narrow band of horizontal boards, one step high, with a fieldstone step centred below it. Every line level, matching the rest of the image exactly."
+    },
+    {
+      "phase": "H1 whole-house edit (ART-005 H1, owner authorization of 2026-11-05)",
+      "tool": "edit_image (Pro), reference mode",
+      "job_id": "7b583538-f90b-43d8-9ed0-bdb3dbefe71a",
+      "asset_id": "18d7ca65-b776-5c12-a147-e6c0e2e6110f",
+      "input": "g3/h1/valuepass.png (uploaded as upload:5af07e27-eb77-4242-b914-40d3d4c8f5cd)",
+      "reference": "g3/h1/ref_v2.png (64 x 64 from g2/m1/anchor_v2.png: slate | timber / stone | window), inline base64",
+      "reference_not_used": "g3/h1/ref_c1.png (same cells from pl/anchors/board_c1.png), made for the record",
+      "width": 384,
+      "height": 320,
+      "seed": 4210,
+      "transparent": "auto (input has transparency)",
+      "expected_generations": 25,
+      "charged_generations": 25,
+      "balance_before": {
+        "generations_remaining": 4938,
+        "credits_usd": 0.0
+      },
+      "balance_after": {
+        "generations_remaining": 4913,
+        "credits_usd": 0.0
+      },
+      "cap": 25,
+      "duration_s": 112,
+      "outputs": [
+        "g3/h1/raw_edit.png (unchanged, sha256/16 6b2ad1f68139edc4)"
+      ],
+      "prompt": "Render this farmhouse as finished premium 32 px pixel art in the reference's materials. Keep every edge, line, opening and the silhouette exactly where they are. Straight-on 3/4 top-down view, light from upper left, muted autumn palette, dark selective outlines. Hipped slate roof with 16 px courses, staggered slates of varied width, a shadow lip under each course, lighter near the ridge and darker toward the eave, lit west hip, shaded east hip, a few large soft moss patches, no speckle. Horizontal 12 px lap siding, silver-grey under the eave and warmer brown below, long sparse grain. Deep shadow under the eave. Irregular stone foundation, matching stone chimney with a cap. Clean thick timber trim on the door and windows, dark glass with small glints. No porch, no dormer, nothing added."
     }
   ],
   "free_cleanup": {
