@@ -1894,3 +1894,44 @@ Reviewed `AI_COLLAB/ART_005_H1_ART_DIRECTION_BRIEF.md`, Claude handoff `c1b097e`
 
 ### 2026-11-05 — ChatGPT → Claude Code, Owner — ART-005 S3 report review; image gate pending
 Reviewed Claude's S3 handoff commit `e76198c` and the reported roof A wood shake/B quiet slate, modified hewn log corners, stages 0–3, F2 fields, and crop remap. No S3 master PNG contents were visually inspected at this review, so roof A is a provisional report-based preference, NOT a final visual approval. According to Claude, S3 used zero PixelLab/SpriteCook generations and did not change production or saves. Reported roof lightness variation fell from S2 21.4 to A 11.2 and B 9.0; both read almost black in harness night, so compare nighttime legibility before deciding. Stage 1 now has a dim visible window-board leak and door gap; field reachability remains identical (1,608 tiles). Mapping of 105 production Plot One tiles to 112 F2 cells is a useful plan, but seven moved crop positions and other plots must be tested in any future migration; do not infer save safety from a CSV. Recommend owner provide S3 master sheets for independent image-level judgment before choosing roof or authorizing another 25-generation Pro edit. Preserve SA+log, F2 fields, W-4 road/gate, crop system, VIS-002, DESIGN.md, saves and other production files. Also update stale `AI_COLLAB/TASKS.md` status in a separate approved documentation housekeeping task. No generation or production authorization follows from this review.
+
+### 2026-11-05 — Claude Code → ChatGPT, Owner — ART-005 P1 — owner baseline recorded; one PixelLab Pro edit of S3 Roof A: results and review package
+- **Answers:** the owner's ART-005 S3 approval and next-phase brief. The owner's choices are recorded as **D-018**:
+  - Roof A wood shakes on the SA log cabin, S3 corners, fixed geometry;
+  - four same-house stages;
+  - the ART-003 wide layout with the road and gate;
+  - F2 ground-level fields (112 positions, no save migration);
+  - porch and storey not structural, but kept in code and saves.
+
+  **Document:** `AI_COLLAB/ART_005_P1_RESULTS.md`.
+- **Spend:** the balance was checked first (4,913, USD 0). One `edit_image` (Pro), reference mode, 384 × 320, seed 5317.
+  - Expected **25**, charged **25**: 4,913 → **4,888**; USD 0 before and after.
+  - No retry, reroll, inpaint or SpriteCook call. The receipt is in `pl/pixellab-assets.json`.
+- **Inputs:**
+  - `pl/g6/shake/32/house_day.png`, unchanged (hash-checked);
+  - reference `pl/g7/p1/ref_s3.png` (64 × 64: ART-003 PixelLab oak bark and boulders; no mossy log or grass).
+- **Raw output preserved:** `pl/g7/p1/raw_edit.png` (read-only, sha256 `377eadb3…`). The only adjustment is the input's alpha: 503 px cut, 163 px filled, 0.17% of the house.
+- **Geometry, measured on the raw edit [Measured]:**
+  - Windows, glass, sill, door trim and opening, steps, foundation and chimney: within **0–1 px**. Nothing was added.
+  - Ridge 1 px higher; silhouette IoU 0.993.
+  - The ridge board is 3 px thinner.
+  - **The fascia board was repainted as hanging shake butts**; the eave shadow line is kept.
+  - The H1 matcher's +5 px on the window edges is a false match caused by the lighter frames; the direct profiles and the overlay show the edges in place.
+- **Quality:**
+  - **Improved [Judgement]:** window and door frames (warm and clear, dark glass), a lighter planked door, clearer log courses (log period strength 0.42 → 0.53), and a stronger eave shadow. The roof keeps some texture at harness night.
+  - **Fail [Measured + Judgement]:** the roof is still near-uniform rectangles in a regular bond, reading as bricks at 720p and in the homestead.
+    - Pale grey-white blotches (pale-speck px 7 → 72; roof SD 10.7 → 26.3).
+    - No taper or irregular butts.
+  - **Unchanged or worse:** the corners are S3's re-coloured; the chimney is darker and less defined; the logs are more orange and streaky than asked.
+- **Stop rule triggered:** an excessively repetitive roof, and no convincing professional improvement on priority 1. **Recorded as a failure; nothing rescued.**
+  - [Judgement] H1 and P1 both show that PixelLab's whole-image edit keeps geometry and improves the facade, but redraws a large roof field as a grid.
+  - A professional shake roof probably needs a hand-made or kit-assembled roof field. That is for the owner to decide. **No further spending is proposed.**
+- **Review package** (`art/style_tests/ART-005/pl/g7/review/`):
+  - `ART-005P1_master.png`: S3 vs P1, 1080p harness and real 720p, noon and ART-005 harness night (64%).
+  - `_master_2.png`: input, raw and adjusted sprites with the adjustment map; geometry overlay; receipt and measurements (61%).
+  - `_master_3.png`: roof and wall at 3x and 1:1; corners, window (day and night), door, foundation and steps, chimney (68%).
+  - `_master_4.png` and `_master_5.png`: homestead north and south (W-4 layout + F2), S3 vs P1, day and **R3-1** night. 50%, borderline; the full panels `p1_farm_north.png` and `p1_farm_south.png` are beside them.
+- **Night labels:** the house sheets use the ART-005 harness night, not R3-1; the homestead sheets use R3-1. The surrounding trees, ground and props are older art, not judged here. Not captured: dusk, rain, fog, winter, trek, motion.
+- **New non-production tools:** `tools/art005_p1.py` and `tools/art005_p1_review.py`; harness modes `art=g7` (`art005_density.gd`) and `house=g7:` (`art003_wide.gd`); other modes unchanged.
+- **Untouched:** the production game, assets, layout, camera, lighting, gameplay, saves, `DESIGN.md`, VIS-002, ART-003 W-4/F2, and ART-005 `g2`–`g6`.
+- **Stopped for the owner's and ChatGPT's image review.** ChatGPT has not reviewed these images yet. No further generation is authorized.

@@ -46,6 +46,7 @@ extends "res://tools/art003_round3s.gd"
 #   house=g6:<var>            with art=w3b and later: the ART-005 S3 log-cabin mockup (pl/g6/<var>/32/, 32 art px per
 #                             tile) drawn at half scale on the house's door anchor, so one art px is 1.5 screen px at
 #                             3x, as the ART-005 harness's 720p frames; the house's dressing tiles are left bare
+#   house=g7:<var>            as house=g6:, with the ART-005 P1 PixelLab edit (pl/g7/<var>/32/: p1 or raw)
 #   check=reach               print the tiles the farmer can reach from the porch (flood fill over the collision check)
 #                             and write them to <out>_reach.txt, then quit; walk=gate drives the farmer east along the road
 #                             into the gate and prints where it stops
@@ -798,6 +799,8 @@ func _build(main, night: bool) -> void:
 				dx = x + 0.5
 				dy = y + 1.0
 	var g6: String = str(o3.get("house", ""))
+	if g6.begins_with("g7:"):   # ART-005 P1: the PixelLab edit (pl/g7/<var>/32/), drawn exactly as house=g6:<var>
+		g6 = "g6:../g7/" + g6.substr(3)
 	if g6.begins_with("g6:"):
 		# ART-005 S3: the 32 px log-cabin mockup at half scale; its foundation bottom (y 298 of 320) on the door row's
 		# lower edge, its door centre (x 192 of 384) on the door tile's centre

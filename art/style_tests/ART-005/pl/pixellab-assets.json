@@ -19,7 +19,15 @@
     "get_upload_url",
     "pixelart_workbench lint + repair (board c1: no change)",
     "wait_for_jobs, get_image",
-    "H1: get_balance x2, get_upload_url, wait_for_jobs x2, download"
+    "H1: get_balance x2, get_upload_url, wait_for_jobs x2, download",
+    {
+      "phase": "P1",
+      "calls": [
+        "get_balance x2 (before 4,913 / after 4,888, USD 0)",
+        "get_upload_url",
+        "wait_for_jobs x2"
+      ]
+    }
   ],
   "jobs": [
     {
@@ -104,6 +112,35 @@
         "g3/h1/raw_edit.png (unchanged, sha256/16 6b2ad1f68139edc4)"
       ],
       "prompt": "Render this farmhouse as finished premium 32 px pixel art in the reference's materials. Keep every edge, line, opening and the silhouette exactly where they are. Straight-on 3/4 top-down view, light from upper left, muted autumn palette, dark selective outlines. Hipped slate roof with 16 px courses, staggered slates of varied width, a shadow lip under each course, lighter near the ridge and darker toward the eave, lit west hip, shaded east hip, a few large soft moss patches, no speckle. Horizontal 12 px lap siding, silver-grey under the eave and warmer brown below, long sparse grain. Deep shadow under the eave. Irregular stone foundation, matching stone chimney with a cap. Clean thick timber trim on the door and windows, dark glass with small glints. No porch, no dormer, nothing added."
+    },
+    {
+      "phase": "P1 S3 roof A finish test (ART-005 P1, owner authorization of 2026-11-05: one Pro edit_image, hard limit 25)",
+      "tool": "edit_image (Pro), reference mode",
+      "job_id": "0ceb4ff0-69be-461b-8575-787e6f135ff7",
+      "asset_id": "2286075d-3e02-5fa9-8a54-e20e01dbe4c5",
+      "input": "g6/shake/32/house_day.png (sha256 474073e4df267aed..., uploaded as upload:d7512b18-0795-4aef-9efa-c3bad4fcc576)",
+      "reference": "g7/p1/ref_s3.png (64 x 64: ART-003 r3/oak_c.png bark x2, r3/boulders.png stones; sha256 bbb5f10d76547b63...), upload:d6f29d96-9422-4066-a1ee-54769b2df406",
+      "width": 384,
+      "height": 320,
+      "seed": 5317,
+      "transparent": "auto (input has transparency)",
+      "expected_generations": 25,
+      "charged_generations": 25,
+      "balance_before": {
+        "generations_remaining": 4913,
+        "credits_usd": 0.0
+      },
+      "balance_after": {
+        "generations_remaining": 4888,
+        "credits_usd": 0.0
+      },
+      "cap": 25,
+      "duration_s": 79,
+      "outputs": [
+        "g7/p1/raw_edit.png (unchanged, read-only, sha256 377eadb3ffb14f50b7523e28b355703c9f02e6c38631d85a8fc28e303c032e1e)"
+      ],
+      "result": "stop rule triggered (roof grid and pale blotches); no further generation",
+      "prompt": "Repaint this log cabin as finished, professional hand-crafted 32 px pixel art, using the reference only for its wood and stone rendering. Keep every edge, opening and the silhouette exactly where they are: same side-gable roofline, chimney, centred door, two windows, steps, stone foundation. Straight-on 3/4 top-down view, light from upper left, muted autumn palette, dark selective outlines. Roof: dark hand-split wood shakes, each one individually varied in width and tone, tapered with slightly irregular butts and a thin shadow under each course, staggered joints, no brick or tile grid; a little lighter toward the ridge, a few soft silvered weathered patches, only small restrained moss near the eave. Walls: stacked horizontal hand-hewn logs with adze-flattened faces, warm honey-brown, dark chinking seams, restrained long grain. Corners: squared interlocking dovetail timber ends, each different. Clear wooden window and door frames, dark glass with small glints, planked door. Strong shadow under the eave and contact shadow at the foundation. Warm wood clearly separate from the darker roof. Nothing added: no porch, no second story, no extra windows or gables."
     }
   ],
   "free_cleanup": {

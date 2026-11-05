@@ -1,0 +1,694 @@
+{
+ "input_s3_shake": {
+  "edges": {
+   "door_opening_left": {
+    "offset_px": 0,
+    "match": 1.0
+   },
+   "door_opening_right": {
+    "offset_px": 0,
+    "match": 1.0
+   },
+   "door_opening_top": {
+    "offset_px": 0,
+    "match": 1.0
+   },
+   "door_trim_left": {
+    "offset_px": 0,
+    "match": 1.0
+   },
+   "door_trim_right": {
+    "offset_px": 0,
+    "match": 1.0
+   },
+   "door_trim_top": {
+    "offset_px": 0,
+    "match": 1.0
+   },
+   "winL_frame_left": {
+    "offset_px": 0,
+    "match": 1.0
+   },
+   "winL_frame_right": {
+    "offset_px": 0,
+    "match": 1.0
+   },
+   "winL_frame_top": {
+    "offset_px": 0,
+    "match": 1.0
+   },
+   "winL_frame_bottom": {
+    "offset_px": 0,
+    "match": 1.0
+   },
+   "winL_glass_left": {
+    "offset_px": 0,
+    "match": 1.0
+   },
+   "winL_glass_right": {
+    "offset_px": 0,
+    "match": 1.0
+   },
+   "winL_glass_top": {
+    "offset_px": 0,
+    "match": 1.0
+   },
+   "winL_glass_bottom": {
+    "offset_px": 0,
+    "match": 1.0
+   },
+   "winR_frame_left": {
+    "offset_px": 0,
+    "match": 1.0
+   },
+   "winR_frame_right": {
+    "offset_px": 0,
+    "match": 1.0
+   },
+   "winR_frame_top": {
+    "offset_px": 0,
+    "match": 1.0
+   },
+   "winR_frame_bottom": {
+    "offset_px": 0,
+    "match": 1.0
+   },
+   "winR_glass_left": {
+    "offset_px": 0,
+    "match": 1.0
+   },
+   "winR_glass_right": {
+    "offset_px": 0,
+    "match": 1.0
+   },
+   "winR_glass_top": {
+    "offset_px": 0,
+    "match": 1.0
+   },
+   "winR_glass_bottom": {
+    "offset_px": 0,
+    "match": 1.0
+   },
+   "steps_top": {
+    "offset_px": 0,
+    "match": 1.0
+   },
+   "steps_upper_left": {
+    "offset_px": 0,
+    "match": 1.0
+   },
+   "steps_upper_right": {
+    "offset_px": 0,
+    "match": 1.0
+   },
+   "steps_lower_left": {
+    "offset_px": 0,
+    "match": 1.0
+   },
+   "steps_lower_right": {
+    "offset_px": 0,
+    "match": 1.0
+   },
+   "steps_tread_split": {
+    "offset_px": 0,
+    "match": 1.0
+   },
+   "foundation_top_W": {
+    "offset_px": 0,
+    "match": 1.0
+   },
+   "foundation_top_E": {
+    "offset_px": 0,
+    "match": 1.0
+   },
+   "ridge_top": {
+    "offset_px": 0,
+    "match": 1.0
+   },
+   "ridge_board_bottom": {
+    "offset_px": 0,
+    "match": 1.0
+   },
+   "fascia_top": {
+    "offset_px": 0,
+    "match": 1.0
+   },
+   "eave_shadow_top": {
+    "offset_px": 0,
+    "match": 1.0
+   },
+   "wall_top": {
+    "offset_px": 0,
+    "match": 1.0
+   },
+   "chimney_left": {
+    "offset_px": 0,
+    "match": 1.0
+   },
+   "chimney_right": {
+    "offset_px": 0,
+    "match": 1.0
+   },
+   "chimney_top": {
+    "offset_px": 0,
+    "match": 1.0
+   }
+  },
+  "silhouette": {
+   "px_added": 0,
+   "px_removed": 0,
+   "iou": 1.0,
+   "roofline_top_shift_px": {
+    "0": 384
+   }
+  },
+  "glass_bbox": {
+   "west": [
+    80,
+    112,
+    208,
+    240
+   ],
+   "east": [
+    270,
+    302,
+    208,
+    240
+   ]
+  },
+  "roof": {
+   "mean_luma": 46.3,
+   "luma_sd": 10.7,
+   "colours": 15,
+   "pale_specks_px": 7,
+   "noise": 5.07,
+   "course_period": {
+    "px": 9,
+    "strength": 0.81
+   },
+   "self_match": {
+    "max": 0.525,
+    "dx": 56,
+    "dy": 0
+   }
+  },
+  "wall": {
+   "mean_luma": 91.3,
+   "luma_sd": 33.4,
+   "noise": 12.72,
+   "log_period": {
+    "px": 15,
+    "strength": 0.424
+   }
+  },
+  "wall_minus_roof_luma": 45.0,
+  "eave_shadow_155_160_luma": 21.3,
+  "format": {
+   "colours": 88,
+   "partial_alpha_px": 0,
+   "orphan_pct": 0.59
+  }
+ },
+ "raw_edit": {
+  "edges": {
+   "door_opening_left": {
+    "offset_px": 0,
+    "match": 0.59
+   },
+   "door_opening_right": {
+    "offset_px": 0,
+    "match": 0.83
+   },
+   "door_opening_top": {
+    "offset_px": 0,
+    "match": 0.86
+   },
+   "door_trim_left": {
+    "offset_px": 0,
+    "match": 0.71
+   },
+   "door_trim_right": {
+    "offset_px": 0,
+    "match": 0.91
+   },
+   "door_trim_top": {
+    "offset_px": 0,
+    "match": 0.87
+   },
+   "winL_frame_left": {
+    "offset_px": 0,
+    "match": 0.78
+   },
+   "winL_frame_right": {
+    "offset_px": 5,
+    "match": 0.61
+   },
+   "winL_frame_top": {
+    "offset_px": 0,
+    "match": 0.66
+   },
+   "winL_frame_bottom": {
+    "offset_px": 0,
+    "match": 0.73
+   },
+   "winL_glass_left": {
+    "offset_px": 0,
+    "match": 0.75
+   },
+   "winL_glass_right": {
+    "offset_px": 5,
+    "match": 0.64
+   },
+   "winL_glass_top": {
+    "offset_px": 0,
+    "match": 0.62
+   },
+   "winL_glass_bottom": {
+    "offset_px": 5,
+    "match": 0.67
+   },
+   "winR_frame_left": {
+    "offset_px": 0,
+    "match": 0.78
+   },
+   "winR_frame_right": {
+    "offset_px": 5,
+    "match": 0.6
+   },
+   "winR_frame_top": {
+    "offset_px": 0,
+    "match": 0.7
+   },
+   "winR_frame_bottom": {
+    "offset_px": 0,
+    "match": 0.73
+   },
+   "winR_glass_left": {
+    "offset_px": 0,
+    "match": 0.75
+   },
+   "winR_glass_right": {
+    "offset_px": 5,
+    "match": 0.63
+   },
+   "winR_glass_top": {
+    "offset_px": 0,
+    "match": 0.67
+   },
+   "winR_glass_bottom": {
+    "offset_px": 5,
+    "match": 0.67
+   },
+   "steps_top": {
+    "offset_px": 0,
+    "match": 0.99
+   },
+   "steps_upper_left": {
+    "offset_px": 0,
+    "match": 0.9
+   },
+   "steps_upper_right": {
+    "offset_px": 0,
+    "match": 0.98
+   },
+   "steps_lower_left": {
+    "offset_px": 0,
+    "match": 0.99
+   },
+   "steps_lower_right": {
+    "offset_px": 0,
+    "match": 0.73
+   },
+   "steps_tread_split": {
+    "offset_px": 0,
+    "match": 0.99
+   },
+   "foundation_top_W": {
+    "offset_px": 0,
+    "match": 0.97
+   },
+   "foundation_top_E": {
+    "offset_px": 0,
+    "match": 0.97
+   },
+   "ridge_top": {
+    "offset_px": -6,
+    "match": 0.75
+   },
+   "ridge_board_bottom": {
+    "offset_px": -6,
+    "match": 0.57
+   },
+   "fascia_top": {
+    "offset_px": 0,
+    "match": 0.43
+   },
+   "eave_shadow_top": {
+    "offset_px": 1,
+    "match": 0.61
+   },
+   "wall_top": {
+    "offset_px": 8,
+    "match": 0.48
+   },
+   "chimney_left": {
+    "offset_px": 0,
+    "match": 0.88
+   },
+   "chimney_right": {
+    "offset_px": 0,
+    "match": 0.68
+   },
+   "chimney_top": {
+    "offset_px": -1,
+    "match": 0.86
+   }
+  },
+  "silhouette": {
+   "px_added": 503,
+   "px_removed": 163,
+   "iou": 0.9933,
+   "roofline_top_shift_px": {
+    "-35": 2,
+    "-4": 1,
+    "-2": 2,
+    "-1": 315,
+    "0": 64
+   }
+  },
+  "glass_bbox": {
+   "west": [
+    80,
+    112,
+    209,
+    240
+   ],
+   "east": [
+    270,
+    301,
+    209,
+    240
+   ]
+  },
+  "roof": {
+   "mean_luma": 56.7,
+   "luma_sd": 26.3,
+   "colours": 17,
+   "pale_specks_px": 72,
+   "noise": 10.62,
+   "course_period": {
+    "px": 9,
+    "strength": 0.662
+   },
+   "self_match": {
+    "max": 0.551,
+    "dx": 15,
+    "dy": 0
+   }
+  },
+  "wall": {
+   "mean_luma": 100.9,
+   "luma_sd": 45.0,
+   "noise": 17.33,
+   "log_period": {
+    "px": 15,
+    "strength": 0.526
+   }
+  },
+  "wall_minus_roof_luma": 44.2,
+  "eave_shadow_155_160_luma": 22.9,
+  "format": {
+   "colours": 25,
+   "partial_alpha_px": 0,
+   "orphan_pct": 1.54
+  }
+ },
+ "p1_snap": {
+  "edges": {
+   "door_opening_left": {
+    "offset_px": 0,
+    "match": 0.59
+   },
+   "door_opening_right": {
+    "offset_px": 0,
+    "match": 0.83
+   },
+   "door_opening_top": {
+    "offset_px": 0,
+    "match": 0.86
+   },
+   "door_trim_left": {
+    "offset_px": 0,
+    "match": 0.71
+   },
+   "door_trim_right": {
+    "offset_px": 0,
+    "match": 0.91
+   },
+   "door_trim_top": {
+    "offset_px": 0,
+    "match": 0.87
+   },
+   "winL_frame_left": {
+    "offset_px": 0,
+    "match": 0.78
+   },
+   "winL_frame_right": {
+    "offset_px": 5,
+    "match": 0.61
+   },
+   "winL_frame_top": {
+    "offset_px": 0,
+    "match": 0.66
+   },
+   "winL_frame_bottom": {
+    "offset_px": 0,
+    "match": 0.73
+   },
+   "winL_glass_left": {
+    "offset_px": 0,
+    "match": 0.75
+   },
+   "winL_glass_right": {
+    "offset_px": 5,
+    "match": 0.64
+   },
+   "winL_glass_top": {
+    "offset_px": 0,
+    "match": 0.62
+   },
+   "winL_glass_bottom": {
+    "offset_px": 5,
+    "match": 0.67
+   },
+   "winR_frame_left": {
+    "offset_px": 0,
+    "match": 0.78
+   },
+   "winR_frame_right": {
+    "offset_px": 5,
+    "match": 0.6
+   },
+   "winR_frame_top": {
+    "offset_px": 0,
+    "match": 0.7
+   },
+   "winR_frame_bottom": {
+    "offset_px": 0,
+    "match": 0.73
+   },
+   "winR_glass_left": {
+    "offset_px": 0,
+    "match": 0.75
+   },
+   "winR_glass_right": {
+    "offset_px": 5,
+    "match": 0.63
+   },
+   "winR_glass_top": {
+    "offset_px": 0,
+    "match": 0.67
+   },
+   "winR_glass_bottom": {
+    "offset_px": 5,
+    "match": 0.67
+   },
+   "steps_top": {
+    "offset_px": 0,
+    "match": 0.99
+   },
+   "steps_upper_left": {
+    "offset_px": 0,
+    "match": 0.96
+   },
+   "steps_upper_right": {
+    "offset_px": 0,
+    "match": 0.98
+   },
+   "steps_lower_left": {
+    "offset_px": 0,
+    "match": 0.99
+   },
+   "steps_lower_right": {
+    "offset_px": 0,
+    "match": 0.73
+   },
+   "steps_tread_split": {
+    "offset_px": 0,
+    "match": 0.99
+   },
+   "foundation_top_W": {
+    "offset_px": 0,
+    "match": 0.97
+   },
+   "foundation_top_E": {
+    "offset_px": 0,
+    "match": 0.97
+   },
+   "ridge_top": {
+    "offset_px": -6,
+    "match": 0.75
+   },
+   "ridge_board_bottom": {
+    "offset_px": -6,
+    "match": 0.57
+   },
+   "fascia_top": {
+    "offset_px": 0,
+    "match": 0.43
+   },
+   "eave_shadow_top": {
+    "offset_px": 1,
+    "match": 0.61
+   },
+   "wall_top": {
+    "offset_px": 8,
+    "match": 0.48
+   },
+   "chimney_left": {
+    "offset_px": 0,
+    "match": 0.9
+   },
+   "chimney_right": {
+    "offset_px": 0,
+    "match": 0.68
+   },
+   "chimney_top": {
+    "offset_px": -1,
+    "match": 0.86
+   }
+  },
+  "silhouette": {
+   "px_added": 0,
+   "px_removed": 0,
+   "iou": 1.0,
+   "roofline_top_shift_px": {
+    "0": 384
+   }
+  },
+  "glass_bbox": {
+   "west": [
+    80,
+    112,
+    209,
+    240
+   ],
+   "east": [
+    270,
+    301,
+    209,
+    240
+   ]
+  },
+  "roof": {
+   "mean_luma": 56.7,
+   "luma_sd": 26.3,
+   "colours": 17,
+   "pale_specks_px": 72,
+   "noise": 10.62,
+   "course_period": {
+    "px": 9,
+    "strength": 0.662
+   },
+   "self_match": {
+    "max": 0.551,
+    "dx": 15,
+    "dy": 0
+   }
+  },
+  "wall": {
+   "mean_luma": 100.9,
+   "luma_sd": 45.0,
+   "noise": 17.33,
+   "log_period": {
+    "px": 15,
+    "strength": 0.526
+   }
+  },
+  "wall_minus_roof_luma": 44.2,
+  "eave_shadow_155_160_luma": 22.9,
+  "format": {
+   "colours": 25,
+   "partial_alpha_px": 0,
+   "orphan_pct": 1.54
+  }
+ },
+ "method_check_shift_x3_y2": {
+  "door_opening_left": 3,
+  "door_opening_right": 3,
+  "door_opening_top": 2,
+  "door_trim_left": 3,
+  "door_trim_right": 3,
+  "door_trim_top": 2,
+  "winL_frame_left": 3,
+  "winL_frame_right": 3,
+  "winL_frame_top": 2,
+  "winL_frame_bottom": 2,
+  "winL_glass_left": 3,
+  "winL_glass_right": 3,
+  "winL_glass_top": 2,
+  "winL_glass_bottom": 2,
+  "winR_frame_left": 3,
+  "winR_frame_right": 3,
+  "winR_frame_top": 2,
+  "winR_frame_bottom": 2,
+  "winR_glass_left": 3,
+  "winR_glass_right": 3,
+  "winR_glass_top": 2,
+  "winR_glass_bottom": 2,
+  "steps_top": 2,
+  "steps_upper_left": 3,
+  "steps_upper_right": 3,
+  "steps_lower_left": 3,
+  "steps_lower_right": 3,
+  "steps_tread_split": 2,
+  "foundation_top_W": 2,
+  "foundation_top_E": 2,
+  "ridge_top": 2,
+  "ridge_board_bottom": 2,
+  "fascia_top": 2,
+  "eave_shadow_top": 2,
+  "wall_top": 2,
+  "chimney_left": 3,
+  "chimney_right": 3,
+  "chimney_top": 2
+ },
+ "adjustment": {
+  "alpha_snap_filled_px": 163,
+  "alpha_snap_cut_px": 503,
+  "rgb_px_changed_inside_input_alpha": 163,
+  "pct_of_house": 0.166,
+  "night_glass_px_from_s3_night": 1828
+ },
+ "hashes_before": {
+  "input_day": "474073e4df267aeda1ce2b6b23fe243370330389b4ab971681a1222a481c997d",
+  "input_night": "49fcedaa5adbd273ae8a0e221219056a2777f44518f0d489d4b7dbebe5642697",
+  "raw_edit": "377eadb3ffb14f50b7523e28b355703c9f02e6c38631d85a8fc28e303c032e1e"
+ },
+ "hashes_after": {
+  "input_day": "474073e4df267aeda1ce2b6b23fe243370330389b4ab971681a1222a481c997d",
+  "input_night": "49fcedaa5adbd273ae8a0e221219056a2777f44518f0d489d4b7dbebe5642697",
+  "raw_edit": "377eadb3ffb14f50b7523e28b355703c9f02e6c38631d85a8fc28e303c032e1e"
+ },
+ "inputs_and_raw_unchanged": true
+}

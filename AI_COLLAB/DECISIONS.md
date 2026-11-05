@@ -37,3 +37,22 @@ Still unapproved: production integration, the live layout, saves, camera, scalin
 - **D-016 — Layout and fields:** keep the ART-003 wider homestead (house and oak, well and crossroads, orchard, pond and dock, forest, paths, the road and the gate). Replace the raised garden boxes with small ground-level tilled fields in the same area; planning and non-production mockups only, no farming-system or live-layout change.
 - **Next authorized task (2026-11-05):** a non-production design comparison (ART-005 S2) with no PixelLab spending, no purchases, no production, gameplay, save, camera, night-lighting or `DESIGN.md` change; commit the non-production work; stop for owner and ChatGPT image review.
 - **D-017 — S2 accepted as the preferred non-production direction (2026-11-05, after ChatGPT's S2 review `6146d5b`):** SA simple side-gable farmhouse, rustic hand-hewn log exterior, four fixed-structure restoration stages, small ground-level fields in place of raised boxes, and the ART-003 W-4 homestead layout with the road and closed gate. Not final art and not authorization for production changes. **Next authorized task (ART-005 S3):** zero-generation roof material mockups (dark wood shakes vs dark blue-grey slate) with revised interlocking log corners; the stage 0 roof holes and the stage 1 night sign of habitation fixed in the schematics; minor field polish (furrows, soil edges) keeping lanes, fences, gates and collision; an updated production-feasibility plan. Zero PixelLab generations, zero paid SpriteCook calls; no production art, layout, gameplay, save, camera, lighting or `DESIGN.md` change; no upgrade removed; VIS-002 and earlier ART-003/ART-005 assets preserved.
+- **D-018 — S3 owner approval and P1 authorization (2026-11-05, after the owner's review of the S3 masters, `e76198c`):** the approved **non-production visual baseline** is:
+  - the SA simplified side-gable farmhouse with **Roof A, dark hand-laid wood shakes** (chosen over S2 slate and S3 quiet slate);
+  - rustic horizontal hand-hewn logs and the S3 interlocking squared timber corners;
+  - the existing stone foundation and chimney;
+  - fixed central door and window positions, and the existing footprint and collision;
+  - no structural change between stages.
+
+  The S3 art is a structural and stylistic reference, not final art.
+  - **Four stages, same house:** 0 Decrepit, 1 Boarded/Stabilized (with a subtle night sign of habitation), 2 Patched/Repaired, 3 Restored (warm night windows, flower boxes, firewood). Roofline, openings, footprint and collision are identical in all four. No production stage assets yet.
+  - **Layout:** keep the ART-003 wider homestead with the road and the closed gate. No live-farm replacement, boundary-collision change or travel through the gate.
+  - **Fields:** the ART-005 S3 **F2** ground-level fields are the preferred non-production farming-area baseline. They keep 112 plantable positions. The 105 → 112 crop map is a planning artifact only. **No save migration is authorized.**
+  - **Porch and second storey:** they do not change the silhouette in the new direction. Their code, purchase ids, benefits, achievements and save data are kept, and the documented retirement and re-dressing plan stands. Gameplay, economy, UI or save changes need separate approval.
+  - **Authorized:** one non-production PixelLab Pro `edit_image` of `pl/g6/shake/32/house_day.png`, at 384 × 320, expected and hard-capped at 25 generations. No USD, no second attempt, no inpainting, no reroll. Strict stop rule, and a full Godot review package. No SpriteCook paid operations.
+  - **Not authorized:** production farmhouse, layout, crop or save migration, real saves, gameplay, `DESIGN.md`, camera or scaling, P-1, production stages.
+- **P1 result (2026-11-05, for review; not a decision):**
+  - The single edit was run and charged 25 (4,888 left, USD 0).
+  - The openings and footprint held within 1 px.
+  - The roof stayed a rectangle grid with pale blotches, and the fascia board became shake butts, so **the stop rule was triggered**. Nothing was rescued.
+  - See `AI_COLLAB/ART_005_P1_RESULTS.md`. Awaiting the owner's and ChatGPT's image review.
