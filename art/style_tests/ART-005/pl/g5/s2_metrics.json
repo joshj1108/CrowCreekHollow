@@ -1,0 +1,36 @@
+{
+ "log": {
+  "opaque_px": 97434,
+  "added_vs_sa": 1974,
+  "removed_vs_sa": 0,
+  "colours": 78
+ },
+ "st0": {
+  "opaque_px": 98094,
+  "added_vs_sa": 2859,
+  "removed_vs_sa": 225,
+  "colours": 126
+ },
+ "st1": {
+  "opaque_px": 97650,
+  "added_vs_sa": 2190,
+  "removed_vs_sa": 0,
+  "colours": 112
+ },
+ "st2": {
+  "opaque_px": 97474,
+  "added_vs_sa": 2014,
+  "removed_vs_sa": 0,
+  "colours": 105
+ },
+ "st3": {
+  "opaque_px": 97661,
+  "added_vs_sa": 2201,
+  "removed_vs_sa": 0,
+  "colours": 86
+ },
+ "sa": {
+  "opaque_px": 95460,
+  "colours": 21
+ }
+}

@@ -1781,3 +1781,33 @@ Reviewed `AI_COLLAB/ART_005_H1_ART_DIRECTION_BRIEF.md`, Claude handoff `c1b097e`
 - **Mockup sprites:** SA [day](https://raw.githubusercontent.com/joshj1108/CrowCreekHollow/6f224785e48412ae37e740fbc59e9a93bfe5826a/art/style_tests/ART-005/pl/g4/sa/32/house_day.png) · [night](https://raw.githubusercontent.com/joshj1108/CrowCreekHollow/6f224785e48412ae37e740fbc59e9a93bfe5826a/art/style_tests/ART-005/pl/g4/sa/32/house_night.png); SB [day](https://raw.githubusercontent.com/joshj1108/CrowCreekHollow/6f224785e48412ae37e740fbc59e9a93bfe5826a/art/style_tests/ART-005/pl/g4/sb/32/house_day.png) · [night](https://raw.githubusercontent.com/joshj1108/CrowCreekHollow/6f224785e48412ae37e740fbc59e9a93bfe5826a/art/style_tests/ART-005/pl/g4/sb/32/house_night.png) · **metrics:** [raw](https://raw.githubusercontent.com/joshj1108/CrowCreekHollow/6f224785e48412ae37e740fbc59e9a93bfe5826a/art/style_tests/ART-005/pl/g4/review/s1_metrics.json)
 - **Stopped** for the owner's and ChatGPT's review. ChatGPT has not reviewed these images yet. No generation is authorized or proposed until the owner picks SA or SB.
 - **Checks:** the raw links for the three masters, the document and the SB sprite returned HTTP 200 when posted.
+
+### 2026-11-05 — Claude Code → ChatGPT, Owner — ART-005 S2 — SA log-cabin farmhouse, stage schematics, extension retirement plan and small fields (design comparison)
+- **Answers:** the owner's ART-005 S1 review and art-direction update (SA chosen; log cabin; four fixed-structure stages; porch and second storey to be retired later; keep the ART-003 layout, road and gate; fields instead of garden boxes). Decisions recorded as D-014 to D-016. **Document:** `AI_COLLAB/ART_005_S2_LOGCABIN_FIELDS.md`.
+- **Spend:** zero. No PixelLab call of any kind, no SpriteCook, USD 0. No production art, live layout, gameplay, save, camera, night-lighting or `DESIGN.md` change; porch and storey code untouched; VIS-002 untouched.
+- **Farmhouse:**
+  - `pl/g5/log` is SA with only its wall and corners replaced: 8 hewn logs, 14–16 px each, with dark seams, grain streaks and knots, and notched end-grain corners.
+  - Everything else is SA, pixel for pixel.
+  - **[Judgement]** It reads as a log cabin at 720p, and the proportions hold. The slate roof is now the weakest, busiest part, and the corner ends read a little like stacked coins. A believable direction, not premium art.
+- **Stages:** `pl/g5/st0`–`st3` are SCHEMATIC.
+  - **[Measured]** Roofline, eave and openings are identical to SA in all four; only stage 0's broken chimney top removes pixels.
+  - **Known defect:** stage 1's lamplight between the window boards didn't render, so stages 0 and 1 look alike at night.
+- **Porch and storey:**
+  - The audit is re-checked (S1 §5): draw-only, with no collision. The hazards are `_from_save` dropping unknown ids and the `ACH_EXTENDED` goal.
+  - **Plan:** never delete the ids. Step 1 re-dresses the art and wording, with no save change. Step 2, only if wanted: withdraw from sale, grandfather owners, pin the achievement, move the benefits first, and re-run the sim.
+- **Fields (`art=f1` in the ART-003 prototype):**
+  - Ground-level tilled soil on the same four 7×4 areas: 112 plantable tiles, against the production plot's 105.
+  - One ridge per tile row, so one crop per tile, as the game plants.
+  - Shown: ripe, growing, watered-and-planted, and half-harvested soil.
+  - Stone cross walk → trodden dirt. Fence and gates unchanged.
+  - **[Measured]** The reachable tiles are identical to W-4.
+  - **Integration:** no farming logic needs to change; production already draws per-tile soil and stages. **Risk:** a `LAYOUT_VERSION` change drops all crops (`save_system.gd:295`), so the migration needs a `PLOT_ONE` → field-tile remap. A real tilling step would be a separate gameplay change.
+- **Recommendation (proposal):** S3, one PixelLab Pro `edit_image` of the stage-3 SA log house over this mockup, hard limit **30 subscription generations, USD 0**, with H1's stop rule. Optionally first, a zero-cost roof material mockup, so the roof choice is the owner's.
+- **Review package** (`art/style_tests/ART-005/s2/review/`):
+  - `ART-005S2_master.png`: SA vs log, 1080p and 720p, noon and harness night (64%).
+  - `_master_2.png`: stages 0–3, day and night, and silhouettes (74%).
+  - `_master_3.png`: garden beds vs fields at 720p, day and R3-1 night, and the tile diagram (70%).
+  - `_master_4.png`: wide homestead frames (50%).
+  - `_master_5.png`: 1:1 and 3× house close-ups (83%).
+  - Night labels: the farmhouse uses the ART-005 harness night (not R3-1); the fields use R3-1. Not captured: dusk, rain, fog, winter, trek.
+- **Committed locally, not pushed.** SHA-pinned links will follow once the owner authorizes a push. **Stopped for the owner's and ChatGPT's image review.** ChatGPT has not reviewed these images yet.

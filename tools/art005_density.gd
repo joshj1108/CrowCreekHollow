@@ -17,6 +17,9 @@ extends SceneTree
 #                        g3: ART-005 H1 files from pl/g3/<density>/ (the PixelLab Pro edit, tools/art005_h1.py), as g2
 #                        g4: ART-005 S1 simpler-roof mockups from pl/g4/<var>/<density>/ (tools/art005_s1.py), as g2
 #   var=sa|sb            g4 only: sa side gable, sb side gable with a front gable (default sa)
+#                        g5: ART-005 S2 log-cabin SA and schematic stages from pl/g5/<var>/<density>/ (tools/art005_s2.py),
+#                        as g4; var=log|st0|st1|st2|st3 (default log)
+#   winlights=0          g2-g5: no window lights at night (the unlit, boarded stages)
 #   ext=porch,dormer     g2 only: also draw these extension layers (ext_<name>_day|night.png) over the house
 #   hour=12|21.5         day (sunny daylight tint) or night (production NIGHT_TINT, lantern and window lights)
 #   task=stills          one PNG per res x framing (res=, framing=), plus a native-resolution PNG
@@ -148,8 +151,8 @@ func _tex(name: String) -> Texture2D:
 		path = ROOT + "pl/g3/%d/%s.png" % [D, name]        # H1: the PixelLab Pro edit, M0 alpha; others placeholders
 	elif art == "g4" and FileAccess.file_exists(ROOT + "pl/g4/%s/%d/%s.png" % [opts.get("var", "sa"), D, name]):
 		path = ROOT + "pl/g4/%s/%d/%s.png" % [opts.get("var", "sa"), D, name]   # S1: the simpler-roof mockups
-	elif art == "g4" and FileAccess.file_exists(ROOT + "pl/g4/%s/%d/%s.png" % [opts.get("var", "sa"), D, name]):
-		path = ROOT + "pl/g4/%s/%d/%s.png" % [opts.get("var", "sa"), D, name]   # S1: simpler-roof mockups
+	elif art == "g5" and FileAccess.file_exists(ROOT + "pl/g5/%s/%d/%s.png" % [opts.get("var", "log"), D, name]):
+		path = ROOT + "pl/g5/%s/%d/%s.png" % [opts.get("var", "log"), D, name]   # S2: log cabin and stage schematics
 	else:
 		path = ROOT + "placeholder/%d/%s.png" % [D, name]
 	var img := Image.load_from_file(ProjectSettings.globalize_path(path))
@@ -331,8 +334,8 @@ func _build_world() -> void:
 			if o[0] == "house":
 				house_at = o[1]
 		# g2: the exact window centres, HOUSE_SPRITE_WINDOWS (3.0, 7.0) and (8.94, 7.0) of the 12 x 10 sprite
-		var wins := [Vector2(-3.0, -3.0), Vector2(2.94, -3.0)] if (art == "g2" or art == "g3" or art == "g4") else [Vector2(-3.1, -2.8), Vector2(3.1, -2.8)]
-		for wo in wins:
+		var wins := [Vector2(-3.0, -3.0), Vector2(2.94, -3.0)] if (art == "g2" or art == "g3" or art == "g4" or art == "g5") else [Vector2(-3.1, -2.8), Vector2(3.1, -2.8)]
+		for wo in (wins if str(opts.get("winlights", "1")) != "0" else []):
 			var w := PointLight2D.new()
 			w.color = LANTERN_COLOR
 			w.energy = LANTERN_ENERGY
@@ -543,7 +546,7 @@ func _res_list() -> Array:
 
 
 func _tag() -> String:
-	return "%s%d_%s_%s" % ["A" if art == "a" else ("L" if art == "pl" else ("G" if art == "g2" else ("H" if art == "g3" else ("S" + str(opts.get("var", "sa")).to_upper() if art == "g4" else "P")))), D, "night" if night else "day", framing]
+	return "%s%d_%s_%s" % ["A" if art == "a" else ("L" if art == "pl" else ("G" if art == "g2" else ("H" if art == "g3" else ("S" + str(opts.get("var", "sa")).to_upper() if art == "g4" else ("V" + str(opts.get("var", "log")).to_upper() if art == "g5" else "P"))))), D, "night" if night else "day", framing]
 
 
 # --- Tasks -----------------------------------------------------------------------------------------------------

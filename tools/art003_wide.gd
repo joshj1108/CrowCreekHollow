@@ -34,6 +34,12 @@ extends "res://tools/art003_round3s.gd"
 #                             closed east gate (x 59, rows 33-36) and a forest avenue beyond it, drawn only (collision
 #                             keeps the base layout, so the gate tiles block exactly as the forest did); a 14-tile
 #                             forest margin (the live border's width) instead of 6
+#   art=f1                    ART-005 S2 field layout (layout b only), on top of art=w4, no generation (art in f1/,
+#                             tools/art003_f1.py): the four raised beds become ground-level tilled fields on the same
+#                             7x4 tiles, one planted ridge per tile row (one crop per tile, as the game plants); the
+#                             garden's stone cross walk becomes a trodden dirt walk. The fields show the soil states
+#                             and stages the game needs: NW ripe, NE growing, SW just planted and watered, SE half
+#                             harvested. Drawn only: collision and every tile code are unchanged
 #   check=reach               print the tiles the farmer can reach from the porch (flood fill over the collision check)
 #                             and write them to <out>_reach.txt, then quit; walk=gate drives the farmer east along the road
 #                             into the gate and prints where it stops
@@ -78,6 +84,7 @@ const W3B := "res://art/style_tests/ART-003/w3b/"
 const W3P := "res://art/style_tests/ART-003/w3p/"
 const W3C := "res://art/style_tests/ART-003/w3c/"
 const W4 := "res://art/style_tests/ART-003/w4/"
+const F1 := "res://art/style_tests/ART-003/f1/"
 const GRASS_LIFT := {"1": 1.15, "2": 1.30}
 
 var grid: Array = []          # rows of single-character codes
@@ -126,7 +133,11 @@ func _w3c() -> bool:
 
 
 func _w4() -> bool:
-	return o3.get("art", "") == "w4"
+	return o3.get("art", "") == "w4" or _f1()
+
+
+func _f1() -> bool:
+	return o3.get("art", "") == "f1"
 
 
 # The ground material under a map code: g grass, p path (paths, the garden floor, the porch, the dock's land end,
@@ -537,7 +548,7 @@ func _build(main, night: bool) -> void:
 						ring = false
 					if M.call(x + dx, y + dy) != "g":
 						open = false
-			var walk := _w3b() and _code(x, y) == "w" and (x == 51 or y == 24)   # W-3B: the garden's stone cross walk
+			var walk := _w3b() and not _f1() and _code(x, y) == "w" and (x == 51 or y == 24)   # W-3B: the garden's stone cross walk
 			if ring and (_code(x, y) == "c" or _code(x, y) == "W" or walk or wnoise.get_noise_2d(x, y) > 0.35):
 				stone[Vector2i(x, y)] = true
 			elif open and ((_near(x, y, "rB", 1 if _w3() else 2) and lnoise.get_noise_2d(x, y) > (0.3 if _w3() else 0.15)) or (_near(x, y, "To", 1) and lnoise.get_noise_2d(x, y) > 0.38)):
@@ -873,6 +884,10 @@ func _build(main, night: bool) -> void:
 			hgt += 1
 		var cx: float = b.x + w / 2.0
 		var base: float = b.y + hgt - 0.5
+		if _f1():
+			_f1_field(add, b, w, hgt, bi, crops_b)
+			bi += 1
+			continue
 		if _w3b():
 			# W-3B: the bed refitted to all 7x4 tiles, flat under its crops; every column of its three furrows planted,
 			# the tall crops in the north row so they hide neither the rows behind nor the farmer on the walk.
@@ -1183,3 +1198,49 @@ func _measure(main, img: Image, mask_path: String) -> Dictionary:
 			"p10": snappedf(a[int(a.size() * 0.1)], 0.0001), "p90": snappedf(a[int(a.size() * 0.9)], 0.0001),
 			"above_0.12": snappedf(float(lit) / a.size(), 0.0001)}
 	return out
+
+
+# --- ART-005 S2: ground-level fields (art=f1) ------------------------------------------------------------------
+
+# One field on the bed's own 7x4 tiles: the flat soil image (3 px margin round the tiles), then one crop per tile in
+# each of the four tile rows, as the game plants. NW ripe (the W-3p crops in clumps), NE growing (production strips,
+# stages 1-2), SW just planted and watered (stage 0 on two rows), SE half harvested (two ripe rows, two bare).
+func _f1_field(add: Callable, b: Vector2i, w: int, hgt: int, bi: int, crops_b: Array) -> void:
+	var names := ["field_dry_a", "field_dry_b", "field_wet_c", "field_dry_d"]
+	var tex := ImageTexture.create_from_image(Image.load_from_file(ProjectSettings.globalize_path(F1 + names[bi % 4] + ".png")))
+	add.call(tex, b.x + w / 2.0, b.y + hgt + 3.0 / 16.0, false, Color.WHITE)
+	(sorted[sorted.size() - 1] as Array)[1] = b.y - 1.0   # flat: under the crops and the farmer
+	var strips := {}
+	for kind in ["pumpkin", "turnip", "corn"]:
+		strips[kind] = (load("res://art/farm/crop_%s.png" % kind) as Texture2D).get_image()
+	var frame := func(kind: String, st: int) -> Texture2D:
+		return ImageTexture.create_from_image((strips[kind] as Image).get_region(Rect2i(st * 16, 0, 16, 16)))
+	# w3p cells: corn pumpkin beans cabbage kale squash turnip sunflower
+	var ripe_rows: Array = [[0], [2], [5, 1], [3, 4]]
+	for r in hgt:
+		var ry: float = b.y + r + 0.8
+		for k in w:
+			var j := _hash(b.x + k, b.y + r, 13)
+			var t: Texture2D = null
+			var dx := ((j % 5) - 2) * 0.03
+			match bi % 4:
+				0:
+					if j % 9 == 0 and k > 0 and k < w - 1:
+						continue   # one picked or failed plant here and there
+					var kinds: Array = ripe_rows[r]
+					t = crops_b[kinds[(k / 3) % kinds.size()]]
+				1:
+					var kind: String = ["corn", "pumpkin", "turnip", "turnip"][r]
+					t = frame.call(kind, 1 + int(k % 3 == 1 or j % 4 == 0))
+				2:
+					if r >= 2:
+						continue
+					t = frame.call(["turnip", "pumpkin"][r], 0)
+				3:
+					if r >= 2:
+						continue
+					if k > 4:
+						continue   # harvested from the east end
+					t = crops_b[[6, 3][r]]
+			var v: float = [1.0, 0.92, 1.05][j % 3]
+			add.call(t, b.x + k + 0.5 + dx, ry, j % 2 == 0, Color(v, v, v))
