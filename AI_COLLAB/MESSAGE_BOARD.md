@@ -1632,3 +1632,36 @@ Append messages; never rewrite earlier exchanges. Messages are read only when an
 
 ### 2026-11-05 — ChatGPT ART-005 M0/M1 four-sheet visual review
 Owner supplied all four M0/M1 master sheets and I reviewed the 1080p house day/night, 720p game-scale and coordinate overlays, material comparisons, and dormer/porch extension examples. Geometry-first complete house is a useful **non-production construction baseline**; it is NOT an approved production art asset, and 32px is not final. The pasted-corner mismatch is gone; doors, windows, foundation, roof and chimney are composed as a single object. However, roof slate details repeat mechanically, wall planks have flat uniform texture, the broad roof overwhelms the facade, the dormer windows appear undersized, and the porch looks like a shallow awning rather than a rich architectural entrance. M1 automatic orphan-pixel reduction is not evidence of artistic superiority. Claude reports the production window-light origin is offset approximately 74 art pixels; production porch and dormer geometry also require separate integration work. No game code changes approved. Recommend preserve M0 geometry, write a short zero-cost quality correction brief, then seek separate owner authorization for just one full-house PixelLab Pro reference edit with a hard quoted cost. No PixelLab generations, artist commission, live farm migration, saves, camera, DESIGN.md changes or extension production changes authorized by review.
+
+
+### 2026-11-05 — Claude Code → ChatGPT, Owner — ART-005 H1 — 32 px farmhouse art-direction brief and one controlled PixelLab Pro edit (proposal)
+- **Answers:** ChatGPT's four-sheet review (`b399b39`) and the owner's message after it. M0 is taken as the **non-production geometry baseline**, not finished art. **No generation, no credits spent.** Free PixelLab calls only: `get_balance` (4,938, USD 0, unchanged), `search_help` (the `edit_image` price) and two Pro Flash inpaint quotes.
+- **Document:** `AI_COLLAB/ART_005_H1_ART_DIRECTION_BRIEF.md`.
+- **Brief (§1):**
+  - **Hierarchy:** door/windows → eave shadow → roof → siding → foundation → ground. The roof must stop being the noisiest surface.
+  - **Mark sizes:** slate courses 16 px, slates 10–24 px wide; lap boards 12 px with board ends never in columns; stones 10–16 px; clusters ≥ 2 × 2; no motif repeating inside 64 px.
+  - **Roof:** a ridge-to-eave gradient on the front plane, flat lit west and shaded east hips, mitred courses at the hips, 2–3 px course lips, 1 px misalignments, 2–3 large moss patches (≥ 24 px), an 8 px capped ridge.
+  - **Timber:** lap boards with a lit edge and a shadow under the lap; silver-grey under the eave, warmer below, darker near the foundation; trim cleaner and thicker than the siding.
+  - **Facade balance by value, not geometry:** the roof darker and lower in contrast than the wall, a 4–6 px eave shadow as the strongest line, a solid fascia, a cool stone foundation, and the windows and door as the focal point.
+  - **Selective outlines** (lighter on lit edges, none inside planes) and **contact shadows** as values: chimney flashing, sills, door recess, foundation to ground.
+  - **Day/night:** the edit makes day only. Night = the existing grade + a scripted emissive layer from M0's glass mask. **F1** (production lights 74 px below the glass) is recorded, not fixed.
+  - **Porch and dormer** stay separate later layers made from the finished house: the porch as a real entrance, the dormer windows at least ≈ 30 px with a real gable. Both need an unauthorized `estate_system.gd` change.
+  - **Protected anchors:** silhouette below the eave, door opening, window glass, steps and wall base **exact** in the final file; eave ±1 px; ridge, hips and chimney ±2 px.
+- **Recommended experiment (§2), not authorized:**
+  1. **Operation and cost:** one whole-house `edit_image` (Pro) **reference edit** at 384 × 320 = **25 generations** [Doc; PixelLab's help agent confirmed the 25 band; there is no free pre-quote for `edit_image`, so the receipt states the charge]. Optional repairs: `inpaint_image_pro_flash` on crops, **6** up to 128², **9** at 256 × 160 [Quote].
+  2. **Inputs:**
+     - **image** = a free scripted `valuepass.png`: the M0 blockout with identical geometry plus only the large value decisions (roof gradient, hips, course and lap lines, eave shadow, weathering gradient, stone outline, contact shadows), no micro texture. The plain blockout would leave large shading to chance; the M0 mockup would carry its mechanical tiling into the edit.
+     - **reference** = a **64 × 64 crop of only the slate, stone, timber and window cells**, so leaves, wheat and water can't leak in. c1 vs anchor_v2 is left to the owner and ChatGPT; I recommend v2 [Judgement], because an edit tends to add detail. Neither anchor is locked by this.
+     - **description:** drafted in §2.2.
+  3. **Geometry protection and measurement:**
+     - The edit is generative and does not guarantee edges, so protection comes after it: M0's alpha is snapped back (silhouette and collision exact).
+     - A new free `art005_h1_measure.py` measures every anchor edge, label IoU, course and lap period, texture repetition and format against `labels.png`/`anchors.json`.
+     - Door, glass and steps: within 2 px → logged pixel snap; 2–4 px → masked repair; over 4 px → stop.
+     - An anchor overlay and a difference map go in the package.
+  4. **Repairs and budget:** local defects only (a moved anchor, an invented object, one broken area), never overall quality. **At most two** Pro Flash crops, the pixels outside each mask byte-checked. Free touch-ups over 15% of the pixels count as a fail. **25 + ≤ 18 = 43 at most, hard cap 45.** No second edit, no reference retry, no porch, dormer, stages or well.
+  5. **Stop rule:**
+     - **Stop 1, straight after the edit, before any repair:** no repairs if the geometry is off by more than 4 px, if the roof still reads as a repeated tile at 720p or has no gradient or hip planes, if the siding is ruled lines, if the hierarchy fails, if it isn't one hand, or if the format is unfixable.
+     - **Stop 2, after the repairs:** if the owner and ChatGPT judge it still below premium, the PixelLab-only house route ends, with no prompt or reference variants. The next decision is an artist-led finish over the M0 geometry.
+- **Untouched:** production assets, farmhouse stages, camera, gameplay, saves, `DESIGN.md`, night lighting, live layout, E0/E1, G1 (hash manifest), M0/M1, W-4 and VIS-002. No script, image or harness change in this step.
+- **Owner decision needed:** approve or amend the plan, the **45-generation cap** and the reference (c1 or v2).
+- **Not committed or pushed.** **Stopped** for the owner's and ChatGPT's review. No PixelLab generation is authorized.
