@@ -1724,3 +1724,49 @@ Reviewed `AI_COLLAB/ART_005_H1_ART_DIRECTION_BRIEF.md`, Claude handoff `c1b097e`
 - **NEW OWNER DIRECTION (proposal, not yet authorized code change):** simplify farmhouse, potentially dropping purchasable porch and second-story upgrades. Favor one compact, attractive farmhouse silhouette and fixed footprint/roofline, door and window centers across four existing restoration conditions (dilapidated, stabilized/boarded, repaired/patched, restored). Change condition, roof damage, siding, window boarding, vegetation and dressing rather than structure. This may substantially improve art coherence and reduce AI geometry drift and asset variants. Do NOT remove upgrades or alter saves/estate flags until explicit owner approval and compatibility plan.
 - **Important technical caveat:** existing `estate_system.gd` may tie porch/second-storey purchases to game progression, saves, UI, cost and benefits. Ask Claude to audit these dependencies and recommend deprecation, compensation for existing owners, and backward-compatible load behavior before any deletion. Preserve other upgrades and gameplay.
 - **Recommended next gate:** documentation-only house simplification alternatives (reuse current 384x320 fixed geometry versus a simpler roof design, unchanged 11 tile collision), stages 0–3 art matrix, optional cosmetic-only facade details, estate/save compatibility inventory, and one small non-production side-by-side silhouette mockup using zero new PixelLab generations. Compare current H1/M0 with genuinely simpler gable or shed roof avoiding bright hip-panel problems, at 720p day/night. Then owner chooses whether to authorize new asset generation. PixelLab and SpriteCook both remain viable candidate tools; H1 failure does not prove all simple-architecture outputs will fail.
+
+### 2026-11-05 — Claude Code → ChatGPT, Owner — ART-005 S1 — farmhouse simplification: mockups, restoration matrix, upgrade audit (design and feasibility only)
+- **Answers:** the owner's simplification direction and ChatGPT's H1 review (`4fc3500`). **Document:** `AI_COLLAB/ART_005_S1_SIMPLIFICATION.md`.
+- **Spend:** zero generations, no credits. No change to gameplay, saves, production art, collision, lighting, camera or `DESIGN.md`. M0, M1, H1, VIS-002 and existing assets untouched.
+- **Mockups:** both are non-production, built by `tools/art005_s1.py`. M0's facade (y >= 160) is copied pixel for pixel, day and night, so only the roof differs. Same canvas, door, window centres and footprint.
+  - **SA:** side gable, low roof, no hips.
+  - **SB:** SA plus one centred front gable with a board-and-batten face and an attic window.
+- **Measured:**
+  - Slate share of the silhouette: M0 45%, SA **40%**, SB **33%**.
+  - Roof height : wall falls from 1.16 to 1.01.
+  - At the game's 720p zoom, M0/H1's roof top is cut off by the camera, while SA/SB fit.
+  - The harness G/H frames re-captured with the new `art=g4` mode are byte-identical to the H1 package.
+- **My reading [Judgement]:**
+  - SA is clean but reads as a flat lid.
+  - **SB is the better house:** a centred focal point over the door, two smaller slate fields, and the only upper window lit at night.
+  - **Recommend SB**, with SA as the fallback.
+  - The texture is still M0's placeholder; these sheets judge silhouette and proportion only.
+- **Restoration matrix:** doc §4.
+  - Fixed at every stage: silhouette, openings, footprint and alpha.
+  - Changes per stage: roof holes → patches → mostly new → complete; gable boards; attic window broken → boarded → glazed → lit; siding, windows, door, steps; a separate ground-dressing overlay.
+  - Maps one to one onto `STAGE_NAMES` (Decrepit, Boarded, Patched, Restored).
+  - Noted: the outside paint currently tints the whole sprite. Later it should be a siding-only mask.
+- **Upgrade audit:** doc §5, every file and line.
+  - **Collision and interaction: none.** Both upgrades are draw-only.
+  - **Main hazard:** `_from_save` silently drops ids that aren't in `EXTENSIONS`. Deleting an entry would delete owners' purchases, effects and property value.
+  - Also involved: stand demand, sleep and night sanity, property tax (+15% each), `ACH_EXTENDED` (goal = `EXTENSIONS.size()`, published on Steam), the Extensions tab, `balance_sim`, `save_test` and `capture`.
+- **Retirement options:** doc §6.
+  - **A (recommended):** keep the ids, costs and effects, and re-dress only the art and wording. The porch becomes furnishings inside the porch row; the second storey becomes "Attic rooms", shown by SB's lit attic window. No save, balance or achievement change.
+  - **B:** withdraw from sale and grandfather owners.
+  - **C:** remove and refund (not recommended).
+- **Tools:** doc §7. **Combination:**
+  - PixelLab makes **one** stage-3 master over SB's value pass. SB has no hips, which is where H1 failed.
+  - Stages 2-0 are derived by masked edits on the same alpha.
+  - SpriteCook supplies a small strip kit of damage and dressing overlays (max 128 px, so not the whole house). The SpriteCook plugin needs re-authorising first.
+- **Next experiment (proposal):**
+  - **S2a (zero credits):** a roof material pass, plus stage 0 and stage 3 overlay mockups on the chosen alpha.
+  - **S2b (one PixelLab Pro edit, about 25 generations):** only if S2a reads well, with H1's stop rule.
+- **Review package** (`art/style_tests/ART-005/pl/g4/review/`):
+  - `ART-005S1_master.png`: 1080p harness, day and night, M0 | H1 | SA | SB (58%).
+  - `_master_2.png`: real 720p gameplay zoom (74%).
+  - `_master_3.png`: sprites at 2x and 1:1, silhouettes, roof share (62%).
+  - Not captured: dusk, rain and fog, and a trek.
+- **Files:**
+  - New non-production scripts: `tools/art005_s1.py`, `tools/art005_s1_review.py`.
+  - Harness: `tools/art005_density.gd` gains `art=g4 var=sa|sb`; the other modes are unchanged.
+- **Not committed or pushed.** **Stopped for the owner's and ChatGPT's review.** ChatGPT has not reviewed these images yet.

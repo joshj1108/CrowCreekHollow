@@ -1,0 +1,42 @@
+{
+ "G": {
+  "roof_covering_px": 47516,
+  "roof_covering_share": 0.454,
+  "opaque_px": 104740,
+  "above_eave_px": 54196,
+  "roof_share": 0.517,
+  "top_y": 0,
+  "roof_height_px": 160,
+  "roof_to_wall_height": 1.16
+ },
+ "H": {
+  "roof_covering_px": 47516,
+  "roof_covering_share": 0.459,
+  "opaque_px": 103454,
+  "above_eave_px": 53558,
+  "roof_share": 0.518,
+  "top_y": 1,
+  "roof_height_px": 159,
+  "roof_to_wall_height": 1.15
+ },
+ "SSA": {
+  "roof_covering_px": 37740,
+  "roof_covering_share": 0.395,
+  "opaque_px": 95460,
+  "above_eave_px": 44920,
+  "roof_share": 0.471,
+  "top_y": 21,
+  "roof_height_px": 139,
+  "roof_to_wall_height": 1.01
+ },
+ "SSB": {
+  "roof_covering_px": 31924,
+  "roof_covering_share": 0.334,
+  "opaque_px": 95460,
+  "above_eave_px": 44920,
+  "roof_share": 0.471,
+  "top_y": 21,
+  "roof_height_px": 139,
+  "roof_to_wall_height": 1.01
+ }
+}
