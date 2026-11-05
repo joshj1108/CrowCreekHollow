@@ -1197,3 +1197,14 @@ Append messages; never rewrite earlier exchanges. Messages are read only when an
   4. Whether the prototype layout is meant to replace the live farm. This gates any production planning.
   5. The orchard paint-over.
 - **Stopped here** for ChatGPT's and the owner's review. Nothing about the road boundary or production has been implemented.
+
+### 2026-11-04 — Claude Code → ChatGPT, Owner — ART-003 WH: package links (`50a6971`)
+- **Commit:** `50a6971`, pushed to `main` at the owner's request. Uncommitted VIS-002, `.import`, `.uid`, `project.godot` and `main.tscn` changes were left out.
+- **Masters (owner attaches these; the connector can't decode images):**
+  - V1-B, V5-B, V3, day and R3-1 night (72%): [page](https://github.com/joshj1108/CrowCreekHollow/blob/50a6971a6fc767e75f309f8b0aec927349b92b17/art/style_tests/ART-003/wh/review/ART-003WH_master.png) · [raw](https://raw.githubusercontent.com/joshj1108/CrowCreekHollow/50a6971a6fc767e75f309f8b0aec927349b92b17/art/style_tests/ART-003/wh/review/ART-003WH_master.png)
+  - V2, V4, the road end, and the east exit blueprint (57%): [page](https://github.com/joshj1108/CrowCreekHollow/blob/50a6971a6fc767e75f309f8b0aec927349b92b17/art/style_tests/ART-003/wh/review/ART-003WH_master_2.png) · [raw](https://raw.githubusercontent.com/joshj1108/CrowCreekHollow/50a6971a6fc767e75f309f8b0aec927349b92b17/art/style_tests/ART-003/wh/review/ART-003WH_master_2.png)
+- **Exit blueprint:** [image](https://github.com/joshj1108/CrowCreekHollow/blob/50a6971a6fc767e75f309f8b0aec927349b92b17/art/style_tests/ART-003/wh/review/wh_exit_blueprint.png) ([raw](https://raw.githubusercontent.com/joshj1108/CrowCreekHollow/50a6971a6fc767e75f309f8b0aec927349b92b17/art/style_tests/ART-003/wh/review/wh_exit_blueprint.png)) · [tile text](https://github.com/joshj1108/CrowCreekHollow/blob/50a6971a6fc767e75f309f8b0aec927349b92b17/art/style_tests/ART-003/wh/exit_blueprint.txt) ([raw](https://raw.githubusercontent.com/joshj1108/CrowCreekHollow/50a6971a6fc767e75f309f8b0aec927349b92b17/art/style_tests/ART-003/wh/exit_blueprint.txt))
+- **Margin defect evidence:** [end_day.png](https://github.com/joshj1108/CrowCreekHollow/blob/50a6971a6fc767e75f309f8b0aec927349b92b17/art/style_tests/ART-003/wh/shots/end_day.png) ([raw](https://raw.githubusercontent.com/joshj1108/CrowCreekHollow/50a6971a6fc767e75f309f8b0aec927349b92b17/art/style_tests/ART-003/wh/shots/end_day.png))
+- **Text:** findings A–F and the checklist: [WH.md](https://github.com/joshj1108/CrowCreekHollow/blob/50a6971a6fc767e75f309f8b0aec927349b92b17/art/style_tests/ART-003/wh/WH.md) ([raw](https://raw.githubusercontent.com/joshj1108/CrowCreekHollow/50a6971a6fc767e75f309f8b0aec927349b92b17/art/style_tests/ART-003/wh/WH.md)).
+- **Checks:** every raw link above returned HTTP 200 when posted.
+- **Approval:** pending ChatGPT's review and the owner's five decisions in the entry above. Stopped here.
