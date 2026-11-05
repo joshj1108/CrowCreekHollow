@@ -40,6 +40,12 @@ extends "res://tools/art003_round3s.gd"
 #                             garden's stone cross walk becomes a trodden dirt walk. The fields show the soil states
 #                             and stages the game needs: NW ripe, NE growing, SW just planted and watered, SE half
 #                             harvested. Drawn only: collision and every tile code are unchanged
+#   art=f2                    ART-005 S3 polish of art=f1 (fields from f2/, tools/art003_f2.py): softer, non-parallel
+#                             furrows, a more irregular field rim and patchy wet soil, crops a little more clustered.
+#                             Drawn only, as f1: collision and every tile code are unchanged
+#   house=g6:<var>            with art=w3b and later: the ART-005 S3 log-cabin mockup (pl/g6/<var>/32/, 32 art px per
+#                             tile) drawn at half scale on the house's door anchor, so one art px is 1.5 screen px at
+#                             3x, as the ART-005 harness's 720p frames; the house's dressing tiles are left bare
 #   check=reach               print the tiles the farmer can reach from the porch (flood fill over the collision check)
 #                             and write them to <out>_reach.txt, then quit; walk=gate drives the farmer east along the road
 #                             into the gate and prints where it stops
@@ -137,7 +143,7 @@ func _w4() -> bool:
 
 
 func _f1() -> bool:
-	return o3.get("art", "") == "f1"
+	return o3.get("art", "") == "f1" or o3.get("art", "") == "f2"
 
 
 # The ground material under a map code: g grass, p path (paths, the garden floor, the porch, the dock's land end,
@@ -791,8 +797,25 @@ func _build(main, night: bool) -> void:
 			if _code(x, y) == "D":
 				dx = x + 0.5
 				dy = y + 1.0
-	house_at = Vector2(dx - house_tex.get_width() / 32.0, dy - house_tex.get_height() / 16.0)
-	add.call(house_tex, dx, dy, false, Color.WHITE)
+	var g6: String = str(o3.get("house", ""))
+	if g6.begins_with("g6:"):
+		# ART-005 S3: the 32 px log-cabin mockup at half scale; its foundation bottom (y 298 of 320) on the door row's
+		# lower edge, its door centre (x 192 of 384) on the door tile's centre
+		var hp6 := "res://art/style_tests/ART-005/pl/g6/%s/32/house_%s.png" % [g6.substr(3), "night" if night else "day"]
+		house_tex = ImageTexture.create_from_image(Image.load_from_file(ProjectSettings.globalize_path(hp6)))
+		var hs := Sprite2D.new()
+		hs.texture = house_tex
+		hs.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+		hs.scale = Vector2(S, S) * 0.5
+		hs.centered = false
+		var base6 := dy + 22.0 / 32.0
+		hs.position = inner_origin + Vector2(dx * px - 192.0 * S * 0.5, base6 * px - 320.0 * S * 0.5)
+		main.add_child(hs)
+		sorted.append([hs, base6])
+		house_at = Vector2(dx - 6.0, base6 - 10.0)
+	else:
+		house_at = Vector2(dx - house_tex.get_width() / 32.0, dy - house_tex.get_height() / 16.0)
+		add.call(house_tex, dx, dy, false, Color.WHITE)
 	# Its dressing: firewood, a barrel, a flower pot, a crate.
 	var kit := _strip(R3 + "garden_props_clean.png", 30)   # corn, trellis, barrel, crate, flower pot
 	var dressing := [load("res://art/farm/woodstore.png"), kit[2], kit[4], kit[3]]
@@ -804,14 +827,14 @@ func _build(main, night: bool) -> void:
 	i = 0
 	for y in GH:
 		for x in GW:
-			if _code(x, y) == "d":
+			if _code(x, y) == "d" and not g6.begins_with("g6:"):
 				add.call(dressing[i % dressing.size()], x + 0.5, y + 1.0, i % 2 == 1, Color.WHITE)
 				i += 1
-	if _w3p():   # flower clumps along the front of the footing
+	if _w3p() and not g6.begins_with("g6:"):   # flower clumps along the front of the footing
 		var flowers := _strip(R3 + "groundcover.png", 6)
 		for f in [[40.6, 7], [43.3, 6], [47.7, 7], [50.4, 6], [39.6, 7]]:
 			add.call(flowers[f[1] % flowers.size()], f[0], dy + 0.15, int(f[0] * 10.0) % 2 == 0, Color.WHITE)
-	if _w3b():   # pumpkins either side of the porch steps, beside the dressing (art only; the tiles stay walkable)
+	if _w3b() and not g6.begins_with("g6:"):   # pumpkins either side of the porch steps, beside the dressing (art only; the tiles stay walkable)
 		var pk: Texture2D = _strip(R3 + "crops_b_clean.png", 20)[-1]
 		for p in [Vector2(dx - 2.3, dy + 0.95), Vector2(dx - 1.8, dy + 1.05), Vector2(dx + 2.4, dy + 1.0)]:
 			add.call(pk, p.x, p.y, int(p.x * 10.0) % 2 == 0, Color.WHITE)
@@ -1207,7 +1230,9 @@ func _measure(main, img: Image, mask_path: String) -> Dictionary:
 # stages 1-2), SW just planted and watered (stage 0 on two rows), SE half harvested (two ripe rows, two bare).
 func _f1_field(add: Callable, b: Vector2i, w: int, hgt: int, bi: int, crops_b: Array) -> void:
 	var names := ["field_dry_a", "field_dry_b", "field_wet_c", "field_dry_d"]
-	var tex := ImageTexture.create_from_image(Image.load_from_file(ProjectSettings.globalize_path(F1 + names[bi % 4] + ".png")))
+	var fdir: String = F1 if o3.get("art", "") == "f1" else "res://art/style_tests/ART-003/f2/"
+	var tex := ImageTexture.create_from_image(Image.load_from_file(ProjectSettings.globalize_path(fdir + names[bi % 4] + ".png")))
+	var f2: bool = o3.get("art", "") == "f2"
 	add.call(tex, b.x + w / 2.0, b.y + hgt + 3.0 / 16.0, false, Color.WHITE)
 	(sorted[sorted.size() - 1] as Array)[1] = b.y - 1.0   # flat: under the crops and the farmer
 	var strips := {}
@@ -1223,6 +1248,8 @@ func _f1_field(add: Callable, b: Vector2i, w: int, hgt: int, bi: int, crops_b: A
 			var j := _hash(b.x + k, b.y + r, 13)
 			var t: Texture2D = null
 			var dx := ((j % 5) - 2) * 0.03
+			if f2:   # S3: plants pull into loose pairs and threes, and sit a little off the ridge line
+				dx = (0.09 if k % 3 == 0 else (-0.07 if k % 3 == 2 else 0.0)) + ((j % 5) - 2) * 0.025
 			match bi % 4:
 				0:
 					if j % 9 == 0 and k > 0 and k < w - 1:
@@ -1243,4 +1270,4 @@ func _f1_field(add: Callable, b: Vector2i, w: int, hgt: int, bi: int, crops_b: A
 						continue   # harvested from the east end
 					t = crops_b[[6, 3][r]]
 			var v: float = [1.0, 0.92, 1.05][j % 3]
-			add.call(t, b.x + k + 0.5 + dx, ry, j % 2 == 0, Color(v, v, v))
+			add.call(t, b.x + k + 0.5 + dx, ry + (((j >> 3) % 3) - 1) * 0.04 if f2 else ry, j % 2 == 0, Color(v, v, v))

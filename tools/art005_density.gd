@@ -19,7 +19,10 @@ extends SceneTree
 #   var=sa|sb            g4 only: sa side gable, sb side gable with a front gable (default sa)
 #                        g5: ART-005 S2 log-cabin SA and schematic stages from pl/g5/<var>/<density>/ (tools/art005_s2.py),
 #                        as g4; var=log|st0|st1|st2|st3 (default log)
-#   winlights=0          g2-g5: no window lights at night (the unlit, boarded stages)
+#                        g6: ART-005 S3 roof candidates, revised corners and stages from pl/g6/<var>/<density>/
+#                        (tools/art005_s3.py), as g4; var=logc|shake|slate|sh0..sh3|sl0..sl3 (default shake)
+#   winlights=0          g2-g6: no window lights at night (the unlit, boarded stages)
+#   winlights=dim        g2-g6: a faint, small light at each window (S3 stage 1: a lamp behind boarded windows)
 #   ext=porch,dormer     g2 only: also draw these extension layers (ext_<name>_day|night.png) over the house
 #   hour=12|21.5         day (sunny daylight tint) or night (production NIGHT_TINT, lantern and window lights)
 #   task=stills          one PNG per res x framing (res=, framing=), plus a native-resolution PNG
@@ -153,6 +156,8 @@ func _tex(name: String) -> Texture2D:
 		path = ROOT + "pl/g4/%s/%d/%s.png" % [opts.get("var", "sa"), D, name]   # S1: the simpler-roof mockups
 	elif art == "g5" and FileAccess.file_exists(ROOT + "pl/g5/%s/%d/%s.png" % [opts.get("var", "log"), D, name]):
 		path = ROOT + "pl/g5/%s/%d/%s.png" % [opts.get("var", "log"), D, name]   # S2: log cabin and stage schematics
+	elif art == "g6" and FileAccess.file_exists(ROOT + "pl/g6/%s/%d/%s.png" % [opts.get("var", "shake"), D, name]):
+		path = ROOT + "pl/g6/%s/%d/%s.png" % [opts.get("var", "shake"), D, name]   # S3: roofs, corners, stages
 	else:
 		path = ROOT + "placeholder/%d/%s.png" % [D, name]
 	var img := Image.load_from_file(ProjectSettings.globalize_path(path))
@@ -334,12 +339,13 @@ func _build_world() -> void:
 			if o[0] == "house":
 				house_at = o[1]
 		# g2: the exact window centres, HOUSE_SPRITE_WINDOWS (3.0, 7.0) and (8.94, 7.0) of the 12 x 10 sprite
-		var wins := [Vector2(-3.0, -3.0), Vector2(2.94, -3.0)] if (art == "g2" or art == "g3" or art == "g4" or art == "g5") else [Vector2(-3.1, -2.8), Vector2(3.1, -2.8)]
+		var wins := [Vector2(-3.0, -3.0), Vector2(2.94, -3.0)] if (art == "g2" or art == "g3" or art == "g4" or art == "g5" or art == "g6") else [Vector2(-3.1, -2.8), Vector2(3.1, -2.8)]
 		for wo in (wins if str(opts.get("winlights", "1")) != "0" else []):
 			var w := PointLight2D.new()
 			w.color = LANTERN_COLOR
-			w.energy = LANTERN_ENERGY
-			_light_texture(w, 2.0, false)
+			var dim := str(opts.get("winlights", "1")) == "dim"
+			w.energy = LANTERN_ENERGY * (0.3 if dim else 1.0)
+			_light_texture(w, 1.0 if dim else 2.0, false)
 			w.position = _u(house_at) + wo * TILE
 			world.add_child(w)
 
@@ -546,7 +552,7 @@ func _res_list() -> Array:
 
 
 func _tag() -> String:
-	return "%s%d_%s_%s" % ["A" if art == "a" else ("L" if art == "pl" else ("G" if art == "g2" else ("H" if art == "g3" else ("S" + str(opts.get("var", "sa")).to_upper() if art == "g4" else ("V" + str(opts.get("var", "log")).to_upper() if art == "g5" else "P"))))), D, "night" if night else "day", framing]
+	return "%s%d_%s_%s" % ["A" if art == "a" else ("L" if art == "pl" else ("G" if art == "g2" else ("H" if art == "g3" else ("S" + str(opts.get("var", "sa")).to_upper() if art == "g4" else ("V" + str(opts.get("var", "log")).to_upper() if art == "g5" else ("X" + str(opts.get("var", "shake")).to_upper() if art == "g6" else "P")))))), D, "night" if night else "day", framing]
 
 
 # --- Tasks -----------------------------------------------------------------------------------------------------

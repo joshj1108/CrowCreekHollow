@@ -1835,3 +1835,42 @@ Reviewed `AI_COLLAB/ART_005_H1_ART_DIRECTION_BRIEF.md`, Claude handoff `c1b097e`
 - **Overall homestead:** maintain the ART-003 W-4 placement: house, oak, well, orchard, pond/dock, paths, forest, incoming road and closed east gate. S2 wide view supports continuity but does not show all landmarks simultaneously. No map/road/gameplay changes authorized.
 - **Porch/storey retirement:** Claude's audit finds visual-only drawing but save flags, costs, property value, achievement threshold, stand and sanity benefits. Favor backward-compatible retain-ids/rewording plan if owner later chooses, not deletion; preserve saves and Steam achievement.
 - **Budget and process:** Claude reports S2 used **0** generations, no production files altered. Recommend free roof A/B mockup plus only a brief F1 visual softening and restoration-night schematic fix; then review. Separate owner authorization required for any PixelLab Pro edit (suggest one quoted operation only), SpriteCook, rendering policy, farm migration, or asset adoption. Do not conflate harness night with ART-003 R3-1 night.
+
+### 2026-11-05 — Claude Code → ChatGPT, Owner — ART-005 S3 — roof A/B, hewn corners, stage fixes, field polish, production feasibility
+- **Answers:** the owner's S3 brief after ChatGPT's S2 review (`6146d5b`); the owner's acceptance of S2 is recorded as D-017. **Document:** `AI_COLLAB/ART_005_S3_ROOF_STAGES_FIELDS.md`.
+- **Spend:** zero generations. PixelLab: only the free balance, help and Pro Flash capability lookups (4,913 generations, USD 0, unchanged). SpriteCook: no calls. No production art, layout, gameplay, farming, save, camera, lighting or `DESIGN.md` change; no upgrade removed; VIS-002, ART-003 (`f1/`, W-4) and ART-005 `g2`–`g5` untouched (S3 writes only `pl/g6/`, `ART-003/f2/`, `s3/`).
+- **Roofs (Task 1)** on the S2 SA log cabin; roofline, chimney, door, windows, foundation and footprint are SA's:
+  - **A** (`g6/shake`): dark hand-laid shakes, 8–18 px, 10 courses, sparse grain, soft silvering, moss only in a few eave clumps.
+  - **B** (`g6/slate`): dark blue-grey slate, wide units, one base tone, no motif.
+  - **[Measured]** Roof luma SD: S2 21.4 → A 11.2, B 9.0.
+  - **[Judgement]** Recommend **A**: it belongs with the logs. B is calmer and more formal. At harness night both fall almost to black (the roof reads by fascia and ridge only), so the final roof should sit one value step lighter.
+- **Corners:** S2's eight identical round log ends become dovetailed hewn timbers: front logs run 5–8 px past the corner with an axe-cut end; squared side-timber ends of varied size straddle each seam, with an off-centre pith, a check crack and some bark. **[Measured]** The wall outside the corners is byte-identical to S2 (`logc`).
+- **Stages (Task 2, schematic)** on both roofs (`sh0`–`sh3`, `sl0`–`sl3`). **[Measured]** The roofline, footprint, openings and centres are unchanged in all four.
+  - Stage 0: holes are whole missing units in a lobed outline, broken units at the rim, slipped units.
+  - Stage 1: uneven tarred boards and a draped tarp. **Night fix:** lamplight in the gaps between the window boards, a line under the door, and a faint low light at each window (harness `winlights=dim`), so stage 1 now differs from the dark stage 0.
+  - Stage 2: re-roofed areas in a muted, fresher tone.
+- **Fields (Task 3)** (`art=f2`):
+  - Each ridge row wobbles on its own, the furrows are broken, and the crest shows in runs.
+  - Irregular rims with bites and spilt clods; patchy wet soil in C.
+  - Crops are a little clustered. All four states are kept.
+  - **[Measured]** Reachable tiles are identical to F1 (1,608). Walks, fences, gates and tile codes are unchanged.
+- **Feasibility (Task 4, plan only):**
+  - **House:** the stage textures swap with no code-path change. The paint tint needs a siding mask. **Density is an open owner decision:** production houses are 16 px (192 × 160), the mockups 32 px.
+  - **Stages:** map onto `STAGE_NAMES` with no save change. Stage 1 needs a dim per-stage window light.
+  - **Porch and storey:** keep the ids; re-dress first.
+  - **Crops:** a new spatial `PLOT_ONE` → field map (`s3/plot_one_to_fields.csv`, verified one-to-one): 98 of 105 crops keep their neighbours, the 7 middle-column crops move to field C's bottom row, none is lost. It replaces the `LAYOUT_VERSION` crop drop when a migration is authorized.
+  - **Homestead:** the north/south frames show the cabin with the oak, well, fields, road and closed gate together. No map change.
+- **Recommendation:** once the owner picks the roof, a single PixelLab `edit_image` (Pro) of the stage 3 house is justified.
+  - **Quoted cost: 25 generations, USD 0.** That is the documented band, and the same as H1's billed receipt. `edit_image` has no free pre-quote, and Pro Flash doesn't support 384 × 320.
+  - **Inputs:** input `pl/g6/shake/32/house_day.png`; a 64 × 64 ART-003 PixelLab swatch reference (`r3/log.png`, bark, stone); the prompt in the document §6.
+  - **Limits:** hard cap 25, one attempt, H1's stop rule.
+  - Needs separate authorization.
+- **Review package** (`art/style_tests/ART-005/s3/review/`):
+  - `ART-005S3_master.png`: roofs, 720p and 1080p, day and night (53%).
+  - `_master_2.png`: corner and roof close-ups (100%).
+  - `_master_3.png`: stages on A, and the night fix (74%).
+  - `_master_4.png`: stages on B, fix close-ups, silhouettes (53%).
+  - `_master_5.png`: fields (56%).
+  - `_master_6.png` and `_master_7.png`: homestead north and south (50%, borderline; the full panels are beside them).
+  - Night labels: the house sheets use the ART-005 harness night (not R3-1); the field and homestead sheets use R3-1. Not captured: dusk, rain, fog, winter, trek, motion.
+- **Stopped for the owner's and ChatGPT's image review.** ChatGPT has not reviewed these images yet. No generation is authorized.

@@ -1,0 +1,116 @@
+{
+ "logc": {
+  "opaque_px": 98311,
+  "added_vs_sa": 2851,
+  "removed_vs_sa": 0,
+  "colours": 77,
+  "roof_colours": 13,
+  "roof_mean_luma": 65.9,
+  "roof_luma_sd": 21.4
+ },
+ "shake": {
+  "opaque_px": 98311,
+  "added_vs_sa": 2851,
+  "removed_vs_sa": 0,
+  "colours": 88,
+  "roof_colours": 16,
+  "roof_mean_luma": 45.4,
+  "roof_luma_sd": 11.2
+ },
+ "sh0": {
+  "opaque_px": 98914,
+  "added_vs_sa": 3679,
+  "removed_vs_sa": 225,
+  "colours": 131,
+  "roof_colours": 31,
+  "roof_mean_luma": 41.9,
+  "roof_luma_sd": 15.9
+ },
+ "sh1": {
+  "opaque_px": 98562,
+  "added_vs_sa": 3102,
+  "removed_vs_sa": 0,
+  "colours": 115,
+  "roof_colours": 31,
+  "roof_mean_luma": 48.8,
+  "roof_luma_sd": 17.0
+ },
+ "sh2": {
+  "opaque_px": 98348,
+  "added_vs_sa": 2888,
+  "removed_vs_sa": 0,
+  "colours": 111,
+  "roof_colours": 33,
+  "roof_mean_luma": 48.6,
+  "roof_luma_sd": 14.8
+ },
+ "sh3": {
+  "opaque_px": 98538,
+  "added_vs_sa": 3078,
+  "removed_vs_sa": 0,
+  "colours": 103,
+  "roof_colours": 16,
+  "roof_mean_luma": 45.4,
+  "roof_luma_sd": 11.2
+ },
+ "slate": {
+  "opaque_px": 98311,
+  "added_vs_sa": 2851,
+  "removed_vs_sa": 0,
+  "colours": 83,
+  "roof_colours": 11,
+  "roof_mean_luma": 51.0,
+  "roof_luma_sd": 9.0
+ },
+ "sl0": {
+  "opaque_px": 98905,
+  "added_vs_sa": 3670,
+  "removed_vs_sa": 225,
+  "colours": 124,
+  "roof_colours": 23,
+  "roof_mean_luma": 46.1,
+  "roof_luma_sd": 16.1
+ },
+ "sl1": {
+  "opaque_px": 98515,
+  "added_vs_sa": 3055,
+  "removed_vs_sa": 0,
+  "colours": 114,
+  "roof_colours": 28,
+  "roof_mean_luma": 53.6,
+  "roof_luma_sd": 15.5
+ },
+ "sl2": {
+  "opaque_px": 98354,
+  "added_vs_sa": 2894,
+  "removed_vs_sa": 0,
+  "colours": 107,
+  "roof_colours": 29,
+  "roof_mean_luma": 52.3,
+  "roof_luma_sd": 10.7
+ },
+ "sl3": {
+  "opaque_px": 98538,
+  "added_vs_sa": 3078,
+  "removed_vs_sa": 0,
+  "colours": 98,
+  "roof_colours": 11,
+  "roof_mean_luma": 51.0,
+  "roof_luma_sd": 9.0
+ },
+ "sa": {
+  "opaque_px": 95460,
+  "colours": 21,
+  "roof_colours": 13,
+  "roof_mean_luma": 65.9,
+  "roof_luma_sd": 21.4
+ },
+ "s2_log": {
+  "opaque_px": 97434,
+  "colours": 78,
+  "roof_colours": 13,
+  "roof_mean_luma": 65.9,
+  "roof_luma_sd": 21.4
+ },
+ "logc_vs_s2_outside_corners_identical": true
+}
