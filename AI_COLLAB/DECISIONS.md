@@ -20,3 +20,9 @@ Record accepted owner decisions, with date/source; separate them from assistant 
 - **D-009 — Farmhouse:** Compare close-ups of farmhouse stages against the locked style anchor before editing farmhouse assets. No automatic redraw or quantization.
 
 These approvals supersede the pending status of the initial VIS-001 lighting proposal. Broader changes (occluder shadows, sprite regeneration, trek lighting overhaul, scaling changes) remain unapproved.
+
+## ART-003 W-3 owner approvals — 2026-11-03
+- **D-010 — House wall (prototype):** Wall variant **A** (warm weathered) is the restored-house palette for the non-production ART-003 prototype, as ChatGPT recommended after its image review (`cad881d`). Not a production or `DESIGN.md` change.
+- **D-011 — Batch C:** The whole proposed non-production Batch C scope (orchard fruit trees, V3 crossroads, road arrival, worn path edges, garden → pond dressing, per `art/style_tests/ART-003/w3w/W3W.md`) is approved. Reuse first. PixelLab: 3 standard `create_image_pixflux` generations expected, **hard limit 5**; no Pro Flash, inpainting or other premium tools; one retry per asset, then stop and report. Review: Godot BEFORE/AFTER of V3, V4 and the arrival, day and R3-1 night, walking route, collision and performance checks, labelled master, then stop for review.
+
+Still unapproved: production integration, the live layout, saves, camera, scaling, gameplay, locked `DESIGN.md` rules, P-1 and other night-lighting changes, farmhouse stages 0–2.

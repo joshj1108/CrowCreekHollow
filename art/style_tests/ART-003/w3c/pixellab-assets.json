@@ -1,0 +1,7 @@
+{
+  "_note": "ART-003 W-3 Batch C (2026-11-04). NON-PRODUCTION test art; not in spritecook-assets.json. PixelLab balance 4,964 -> 4,960 generations: 4 used of the owner's 5-generation hard limit (D-011), 3 expected. All create_image_pixflux (1 generation each), forced palette art/style_tests/ART-003/src/concept_palette.png, no_background, view high top-down, selective outline, medium shading, medium detail. No Pro Flash, inpainting or other premium tool. $0.00 USD credit used.",
+  "gen/apple.png": {"job_id": "cb7266e8-cd2f-4b3a-aef7-d56a84282b62", "asset_id": "9de01ee8-7147-5982-80bd-d931f648ad23", "size": "48x64", "seed": 811, "use": "hand-fixed into orchard/apple_w3c.png by orchard/fix_apple.py (ground disc removed, trunk browned, rimmed apples added); no retry spent"},
+  "gen/pear.png": {"job_id": "30fd56b1-11d6-46b5-8cd8-7a736bea2a09", "asset_id": "fee95b59-f2cf-5b94-abb4-9844f14e96f3", "size": "48x64", "seed": 812, "use": "orchard/pear_w3c.png, unchanged"},
+  "gen/props.png": {"job_id": "dbd32c46-b329-46b0-8c34-c2e3632b0548", "asset_id": "6e04dd9f-0134-55ca-8b89-804457a2476c", "size": "128x48", "seed": 813, "use": "sliced into props/: signpost, handcart, compost, apple_barrel used; covered_cart unused. No mailbox came out"},
+  "gen/mailbox.png": {"job_id": "71348251-ae33-4342-a15f-87b3d44d71d8", "asset_id": "a2b3ea5e-7a17-5c35-afa0-8daad68adf4f", "size": "32x32", "seed": 814, "use": "the prop strip's one retry, for the missing mailbox only; cropped to props/mailbox.png"}
+}

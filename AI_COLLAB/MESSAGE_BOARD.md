@@ -1099,3 +1099,27 @@ Append messages; never rewrite earlier exchanges. Messages are read only when an
 - **Not touched:** production art, the live farm layout, saves, camera, scaling, gameplay, locked `DESIGN.md` rules and night lighting. No PixelLab use.
 - **Checks:** the VIS-002 working-tree diff (leaving out ART-003 tools/art and `AI_COLLAB`) still hashes `f52e5ae0…`; `stash@{0}` and `builds/wip_backup/` are intact.
 - **Open for the owner:** confirming wall A, and approving Batch C's scope and its 5-generation limit. Stopped here.
+
+### 2026-11-04 — Claude Code → ChatGPT, Owner — ART-003 W-3 Batch C — Review package: orchard, crossroads, arrival, paths
+- **Authorization:** the owner's approval of the whole Batch C scope at a 5-generation limit, with wall A (`DECISIONS.md` D-010, D-011), after ChatGPT's wall image review (`cad881d`). Non-production: `art=w3c` in `tools/art003_wide.gd`, art in `art/style_tests/ART-003/w3c/`.
+- **PixelLab:** 4 of 5 generations (3 expected), balance 4,964 → 4,960. All `create_image_pixflux` with the concept palette; no premium tools.
+  - The apple tree came out with no visible fruit, so it was hand-fixed rather than retried.
+  - The prop strip had no mailbox; its one retry was a mailbox alone.
+- **Made:** apple and pear trees replace the orchard maples, with a barrel of apples.
+  - **V3:** three groups: a woodcutting corner, a signpost with boulders, and a handcart of sacks.
+  - **Arrival** (road east end): a mailbox, a dead tree, boulders and faint wheel ruts.
+  - **Paths:** grass tufts break the path edges.
+  - **Garden → pond:** a rain barrel and compost at the garden's south-west corner; rushes along the pond's east strip.
+  - New props block their tiles; nothing else in the layout changed.
+- **Checks:**
+  - Walks, day and night from the porch: "route legs skipped: []", 759 frames each. A first attempt from the wrong start point is recorded in W3C.md.
+  - Draw calls +0 to +9 per view; frame times within noise; lights unchanged (0 by day, 6 at night).
+  - V1-B and V2 spot check: luma within 0.002.
+  - VIS-002 diff hash `f52e5ae0…` unchanged; `stash@{0}` present; save slots 1–3 match their recorded hashes.
+- **Weak points (mine):**
+  - The fruit trees are smaller and more open than the maples, so the orchard reads thinner.
+  - The reused SpriteCook woodstore looks like a cabinet beside the PixelLab props.
+  - The road still ends in the east forest with no way out (a layout change, not made).
+  - The ruts almost vanish at 50%.
+- **Package:** `art/style_tests/ART-003/w3c/W3C.md`. In `review/`: `ART-003WC_master.png` (views, 72%), `_master_2.png` (sprites at 4×, 100% crops, spot check; 72%), `_master_3.png` (walk frames, 63%), and two GIFs.
+- **Open for the owner:** Batch C as a prototype direction, the woodstore swap, and the unspent generation. Commit and push when authorized; SHA-pinned links follow. **Stopped here for owner and ChatGPT review.**

@@ -23,6 +23,11 @@ extends "res://tools/art003_round3s.gd"
 #                             stone treads; unlit glass and curtains by day, the Batch B lit glass at night), the
 #                             porch dressed with firewood, flower pots and flowers, the beds' rows varied (clumps,
 #                             gaps, tone and offset) and corn and beans recoloured to hold up at night (w3p/garden)
+#   art=w3c                   ART-003 W-3 Batch C (layout b only), on top of art=w3p with wall a (D-010): a woodcutting
+#                             corner and a boulder group at the V3 crossroads, a dead tree, boulders and a mailbox at the
+#                             road's east end, wheel ruts along the road, grass tufts breaking the path edges, rushes
+#                             thickening toward the pond, a rain barrel and compost at the garden's south-west corner,
+#                             apple and pear trees (w3c/orchard) in the orchard. Props block their tiles (c_block)
 #   wall=a|b|c|m              with art=w3p: the house's wall variant (a warm weathered, b dark weathered, the default,
 #                             c grey weathered, m the a/b midpoint)
 #   house=prod                with art=w3b: keep the production house_stage_3 instead of the alternative
@@ -62,6 +67,7 @@ const BLOCKS := "TOHDXWBrLd~o"   # codes the farmer can't walk on (K, the W-3 do
 const W3 := "res://art/style_tests/ART-003/w3/"
 const W3B := "res://art/style_tests/ART-003/w3b/"
 const W3P := "res://art/style_tests/ART-003/w3p/"
+const W3C := "res://art/style_tests/ART-003/w3c/"
 const GRASS_LIFT := {"1": 1.15, "2": 1.30}
 
 var grid: Array = []          # rows of single-character codes
@@ -74,6 +80,7 @@ var shade_night := 0.0
 var sorted: Array = []        # [Sprite2D, base y in tiles]
 var stalls: Array = []        # route legs the walker had to skip
 var mainref
+var c_block := {}             # W-3C: tiles its props stand on (blocked like any prop)
 
 
 func _code(x: int, y: int) -> String:
@@ -91,7 +98,11 @@ func _w3b() -> bool:
 
 
 func _w3p() -> bool:
-	return o3.get("art", "") == "w3p"
+	return o3.get("art", "") == "w3p" or _w3c()
+
+
+func _w3c() -> bool:
+	return o3.get("art", "") == "w3c"
 
 
 # The ground material under a map code: g grass, p path (paths, the garden floor, the porch, the dock's land end,
@@ -159,11 +170,89 @@ func _initialize() -> void:
 	await _finish(main, opt)
 
 
+# --- W-3 Batch C ------------------------------------------------------------------------------------------------
+
+# Ground: wheel ruts along the road (two darker lines, each a pixel off the line now and then), and grass tufts that
+# creep a few pixels onto a path where it meets grass, so the path edges stop reading as even brown bands.
+func _c_ground(M: Callable, put: Callable, cover: Array, x0: int, y0: int) -> void:
+	for y in GH:
+		for x in GW:
+			if _code(x, y) != "P":
+				continue
+			var h := _hash(x, y, 53)
+			var sides := []
+			for d in [Vector2i(0, -1), Vector2i(0, 1), Vector2i(-1, 0), Vector2i(1, 0)]:
+				if M.call(x + d.x, y + d.y) == "g" and _code(x + d.x, y + d.y) != "T":
+					sides.append(d)
+			if sides.is_empty() or h % 3 != 0:
+				continue
+			var d: Vector2i = sides[(h >> 3) % sides.size()]
+			var t: Texture2D = cover[(h >> 5) % cover.size()]
+			var ti: Image = t.get_image()
+			ti.convert(Image.FORMAT_RGBA8)
+			var sz := ti.get_size()
+			# Sit on the tile's grass side, a few pixels in from the edge.
+			var ox := 4 + (h >> 7) % 6 if d.x == 0 else (16 - sz.x + 3 if d.x > 0 else -3)
+			var oy := 4 + (h >> 9) % 6 if d.y == 0 else (16 - sz.y + 3 if d.y > 0 else -3)
+			put.call(ti, Rect2i(Vector2i.ZERO, sz), (x - x0) * 16 + ox, (y - y0) * 16 + oy, true)
+	# Ruts: the road's long east-west run (rows 34-35), where both rows are path.
+	for x in range(12, 59):
+		if _code(x, 34) != "P" or _code(x, 35) != "P":
+			continue
+		for lane in [9, 19]:   # pixels below the top of row 34
+			for xx in 16:
+				var wob := 1 if _hash(x * 4 + xx / 4, lane, 67) % 5 == 0 else 0
+				var dot := Image.create(1, 2, false, Image.FORMAT_RGBA8)
+				dot.fill(Color(0.1, 0.07, 0.04, 0.32))
+				put.call(dot, Rect2i(0, 0, 1, 2), (x - x0) * 16 + xx, (34 - y0) * 16 + lane + wob, true)
+
+
+func _c_tex(path: String) -> Texture2D:
+	return ImageTexture.create_from_image(Image.load_from_file(ProjectSettings.globalize_path(W3C + path)))
+
+
+# Standing props: a few deliberate groups, open grass left between them. Each blocks the tiles in its list.
+func _c_props(add: Callable, kit: Array) -> void:
+	var stones := _strip(R3 + "boulders.png", 12)
+	var shore := _strip(W3 + "pond/shore_strip.png", 12)   # reeds, cattails, cattails, lily pads, rock, mossy rock, rushes
+	var groups := [
+		# V3: a woodcutting corner between the well and the oak.
+		[load("res://art/farm/chopping_log.png"), 34.4, 15.0, [Vector2i(34, 14)]],
+		[load("res://art/farm/woodstore.png"), 35.5, 15.0, [Vector2i(35, 14)]],
+		[load("res://art/farm/prop_stump.png"), 33.3, 15.4, [Vector2i(33, 14)]],
+		# V3: a signpost and a boulder group in the grass between the fork's south-west and south branches, and a
+		# handcart of sacks where the well path meets the south branch.
+		[_c_tex("props/signpost.png"), 31.5, 22.0, [Vector2i(31, 21)]],
+		[_c_tex("props/handcart.png"), 36.9, 22.0, [Vector2i(36, 21), Vector2i(37, 21)]],
+		[stones[0], 29.6, 24.0, [Vector2i(29, 23)]],
+		[stones[2], 30.6, 24.3, [Vector2i(30, 23)]],
+		[stones[4 % stones.size()], 30.1, 25.0, [Vector2i(30, 24)]],
+		# The arrival, where the road leaves the east forest: a dead tree and a boulder cluster either side.
+		[load("res://art/farm/tree_dead_0.png"), 57.2, 33.0, [Vector2i(56, 32), Vector2i(57, 32)]],
+		[stones[1], 54.3, 36.8, [Vector2i(54, 36)]],
+		[stones[3 % stones.size()], 55.3, 36.9, [Vector2i(55, 36)]],
+		[_c_tex("props/mailbox.png"), 53.4, 33.0, [Vector2i(53, 32)]],
+		# Garden -> pond: a rain barrel at the garden's south-west corner, outside the fence.
+		[kit[2], 41.4, 31.0, [Vector2i(41, 30)]],
+		[_c_tex("props/compost.png"), 40.1, 31.0, [Vector2i(40, 30)]],
+		# The orchard: a barrel of picked apples beside one tree.
+		[_c_tex("props/apple_barrel.png"), 14.7, 20.3, [Vector2i(14, 20)]],
+	]
+	for g in groups:
+		add.call(g[0], g[1], g[2], int(g[1] * 10.0) % 2 == 1, Color.WHITE)
+		for t in g[3]:
+			c_block[t] = true
+	# Rushes and cattails thickening toward the pond along the strip between its east bank and the dock path
+	# (walkable, as the shore props are).
+	for e in [[6, 17.4, 29.8], [1, 17.5, 31.0], [6, 17.3, 32.4], [0, 20.7, 30.6], [6, 20.6, 32.0]]:
+		add.call(shore[int(e[0]) % shore.size()], e[1], e[2], int(e[1] * 10.0) % 2 == 0, Color.WHITE)
+
+
 # --- The prototype -------------------------------------------------------------------------------------------
 
 func _blocked(p: Vector2) -> bool:
 	var t := ((p - inner_origin) / px).floor()
-	return BLOCKS.contains(_code(int(t.x), int(t.y)))
+	return BLOCKS.contains(_code(int(t.x), int(t.y))) or c_block.has(Vector2i(t))
 
 
 # How far a forest tile lies inside the forest, in tiles (0 at the clearing's edge), up to 4.
@@ -390,6 +479,9 @@ func _build(main, night: bool) -> void:
 				di.convert(Image.FORMAT_RGBA8)
 				put.call(di, Rect2i(Vector2i.ZERO, di.get_size()), (x - x0) * 16 + 2 + (h >> 4) % 10, (y - y0) * 16 + 2 + (h >> 8) % 10, true)
 
+	if _w3c():
+		_c_ground(M, put, cover, x0, y0)
+
 	# W-3B: a lighter grass, as a comparison: grass-coloured ground pixels (greener than red, clearly not blue) are
 	# brightened by one factor, before the forest's shade. Paths, soil, bark, water and litter keep their colours.
 	var lift: float = GRASS_LIFT.get(str(o3.get("grass", "")), 1.0)
@@ -490,8 +582,12 @@ func _build(main, night: bool) -> void:
 				"r":
 					add.call(stones[(i * 3) % stones.size()], x + 0.5, y + 0.9, i % 2 == 1, Color.WHITE)
 					i += 1
-				"o":   # orchard: maples standing in for fruit trees (no fruit-tree art yet)
-					add.call(maple, x + 0.5, y + 1.0, (x + y) % 2 == 0, Color.WHITE)
+				"o":   # orchard: maples standing in for fruit trees (no fruit-tree art yet); W-3C: apple and pear, alternating
+					if _w3c():
+						add.call(_c_tex("orchard/apple_w3c.png" if ((x - 9) / 4 + (1 if y > 21 else 0)) % 2 == 0 else "orchard/pear_w3c.png"),
+							x + 0.5, y + 1.0, (x + y) % 2 == 0, Color.WHITE)
+					else:
+						add.call(maple, x + 0.5, y + 1.0, (x + y) % 2 == 0, Color.WHITE)
 				"L":
 					add.call(_tex("lantern_post.png"), x + 0.5, y + 1.0, false, Color.WHITE)
 	for f in [[0, 74, 134], [1, 116, 128], [2, 78, 152]]:
@@ -510,7 +606,7 @@ func _build(main, night: bool) -> void:
 	if _w3b() and o3.get("house", "") != "prod":
 		house_tex = ImageTexture.create_from_image(Image.load_from_file(ProjectSettings.globalize_path(W3B + "house/house_w3b.png")))
 		if _w3p():   # the same sprite repainted: day glass unlit, night glass lit as Batch B's
-			var hp := W3P + "house/house_w3p_%s_%s.png" % [o3.get("wall", "b"), "night" if night else "day"]
+			var hp := W3P + "house/house_w3p_%s_%s.png" % [o3.get("wall", "a" if _w3c() else "b"), "night" if night else "day"]
 			house_tex = ImageTexture.create_from_image(Image.load_from_file(ProjectSettings.globalize_path(hp)))
 	var dx := 0.0
 	var dy := 0.0
@@ -687,6 +783,8 @@ func _build(main, night: bool) -> void:
 		for e in [[6.5, 31.6], [9.4, 30.9], [11.6, 32.7], [5.0, 33.7], [7.8, 29.9]]:
 			add.call(shore[3], e[0], e[1], int(e[0] * 10.0) % 2 == 0, Color.WHITE)
 			(sorted[sorted.size() - 1] as Array)[1] = e[1] - 2.0   # flat on the water
+	if _w3c():
+		_c_props(add, kit)
 	var fog := load("res://art/farm/weather_fog.png") as Texture2D
 	for p in [Vector2(2.0, 4.0), Vector2(57.0, 3.0), Vector2(1.0, 30.0), Vector2(55.0, 35.0), Vector2(26.0, 2.0)]:
 		var s := Sprite2D.new()
