@@ -1,0 +1,109 @@
+{
+  "hour": "21.5",
+  "lights": [
+    {
+      "at_tiles": [
+        63.0,
+        32.0
+      ],
+      "colour": "ffd38a",
+      "energy": 0.5,
+      "reach_tiles": 2.5
+    },
+    {
+      "at_tiles": [
+        61.0,
+        20.3
+      ],
+      "colour": "ffc070",
+      "energy": 0.5,
+      "reach_tiles": 4.0
+    },
+    {
+      "at_tiles": [
+        55.0,
+        29.3
+      ],
+      "colour": "ffc070",
+      "energy": 0.5,
+      "reach_tiles": 4.0
+    },
+    {
+      "at_tiles": [
+        56.5,
+        18.0
+      ],
+      "colour": "ffc878",
+      "energy": 0.540000021457672,
+      "reach_tiles": 2.4
+    },
+    {
+      "at_tiles": [
+        62.4,
+        18.0
+      ],
+      "colour": "ffc878",
+      "energy": 0.540000021457672,
+      "reach_tiles": 2.4
+    },
+    {
+      "at_tiles": [
+        59.5,
+        20.5
+      ],
+      "colour": "ffd27a",
+      "energy": 0.540000021457672,
+      "reach_tiles": 1.6
+    }
+  ],
+  "mode": "wide",
+  "perf": {
+    "adapter": "AMD Radeon Graphics",
+    "draw_calls": 849,
+    "frame_ms_mean": 8.81,
+    "frame_ms_median": 6.99,
+    "frame_ms_p95": 17.47,
+    "objects": 1505,
+    "primitives": 4160,
+    "process_ms": 62.21,
+    "render_cpu_ms": 2.36,
+    "render_gpu_ms": 5.34,
+    "renderer": "gl_compatibility"
+  },
+  "regions": {
+    "forest_edge": {
+      "above_0.12": 0.1265,
+      "mean": 0.054,
+      "p10": 0.0017,
+      "p90": 0.1373,
+      "pixels": 33408
+    },
+    "frame": {
+      "above_0.12": 0.3888,
+      "mean": 0.1219,
+      "p10": 0.041,
+      "p90": 0.234,
+      "pixels": 921600
+    },
+    "lantern_pool": {
+      "above_0.12": 0.645,
+      "mean": 0.1962,
+      "p10": 0.0589,
+      "p90": 0.3787,
+      "pixels": 45244
+    },
+    "play_area": {
+      "above_0.12": 0.3855,
+      "mean": 0.1206,
+      "p10": 0.044,
+      "p90": 0.2258,
+      "pixels": 842948
+    }
+  },
+  "sanity": 99.8753967985501,
+  "size": [
+    1280,
+    720
+  ],
+  "weather": "sunny"
+}

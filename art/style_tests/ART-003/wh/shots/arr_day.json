@@ -1,0 +1,47 @@
+{
+  "hour": "12",
+  "lights": [],
+  "mode": "wide",
+  "perf": {
+    "adapter": "AMD Radeon Graphics",
+    "draw_calls": 731,
+    "frame_ms_mean": 9.05,
+    "frame_ms_median": 7.37,
+    "frame_ms_p95": 13.34,
+    "objects": 1373,
+    "primitives": 2848,
+    "process_ms": 53.83,
+    "render_cpu_ms": 3.89,
+    "render_gpu_ms": 5.21,
+    "renderer": "gl_compatibility"
+  },
+  "regions": {
+    "forest_edge": {
+      "above_0.12": 0.1095,
+      "mean": 0.0533,
+      "p10": 0.0014,
+      "p90": 0.1228,
+      "pixels": 517248
+    },
+    "frame": {
+      "above_0.12": 0.423,
+      "mean": 0.1176,
+      "p10": 0.0017,
+      "p90": 0.2601,
+      "pixels": 921600
+    },
+    "play_area": {
+      "above_0.12": 0.8241,
+      "mean": 0.1999,
+      "p10": 0.0941,
+      "p90": 0.2936,
+      "pixels": 404352
+    }
+  },
+  "sanity": 100.0,
+  "size": [
+    1280,
+    720
+  ],
+  "weather": "sunny"
+}

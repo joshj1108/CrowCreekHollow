@@ -1,0 +1,109 @@
+{
+  "hour": "21.5",
+  "lights": [
+    {
+      "at_tiles": [
+        45.0,
+        27.0
+      ],
+      "colour": "ffd38a",
+      "energy": 0.5,
+      "reach_tiles": 2.5
+    },
+    {
+      "at_tiles": [
+        61.0,
+        20.3
+      ],
+      "colour": "ffc070",
+      "energy": 0.5,
+      "reach_tiles": 4.0
+    },
+    {
+      "at_tiles": [
+        55.0,
+        29.3
+      ],
+      "colour": "ffc070",
+      "energy": 0.5,
+      "reach_tiles": 4.0
+    },
+    {
+      "at_tiles": [
+        56.5,
+        18.0
+      ],
+      "colour": "ffc878",
+      "energy": 0.540000021457672,
+      "reach_tiles": 2.4
+    },
+    {
+      "at_tiles": [
+        62.4,
+        18.0
+      ],
+      "colour": "ffc878",
+      "energy": 0.540000021457672,
+      "reach_tiles": 2.4
+    },
+    {
+      "at_tiles": [
+        59.5,
+        20.5
+      ],
+      "colour": "ffd27a",
+      "energy": 0.540000021457672,
+      "reach_tiles": 1.6
+    }
+  ],
+  "mode": "wide",
+  "perf": {
+    "adapter": "AMD Radeon Graphics",
+    "draw_calls": 737,
+    "frame_ms_mean": 8.81,
+    "frame_ms_median": 7.19,
+    "frame_ms_p95": 18.98,
+    "objects": 1467,
+    "primitives": 4039,
+    "process_ms": 46.64,
+    "render_cpu_ms": 1.87,
+    "render_gpu_ms": 6.03,
+    "renderer": "gl_compatibility"
+  },
+  "regions": {
+    "frame": {
+      "above_0.12": 0.3668,
+      "mean": 0.1179,
+      "p10": 0.0496,
+      "p90": 0.2073,
+      "pixels": 921600
+    },
+    "lantern_pool": {
+      "above_0.12": 0.8079,
+      "mean": 0.2112,
+      "p10": 0.0894,
+      "p90": 0.3513,
+      "pixels": 45244
+    },
+    "oak": {
+      "above_0.12": 0.2549,
+      "mean": 0.0809,
+      "p10": 0.0112,
+      "p90": 0.1795,
+      "pixels": 21369
+    },
+    "play_area": {
+      "above_0.12": 0.3462,
+      "mean": 0.1138,
+      "p10": 0.0505,
+      "p90": 0.1889,
+      "pixels": 854987
+    }
+  },
+  "sanity": 99.8755556951668,
+  "size": [
+    1280,
+    720
+  ],
+  "weather": "sunny"
+}

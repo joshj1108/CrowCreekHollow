@@ -1,0 +1,123 @@
+{
+  "hour": "21.5",
+  "lights": [
+    {
+      "at_tiles": [
+        59.0,
+        21.5
+      ],
+      "colour": "ffd38a",
+      "energy": 0.5,
+      "reach_tiles": 2.5
+    },
+    {
+      "at_tiles": [
+        61.0,
+        20.3
+      ],
+      "colour": "ffc070",
+      "energy": 0.5,
+      "reach_tiles": 4.0
+    },
+    {
+      "at_tiles": [
+        55.0,
+        29.3
+      ],
+      "colour": "ffc070",
+      "energy": 0.5,
+      "reach_tiles": 4.0
+    },
+    {
+      "at_tiles": [
+        56.5,
+        18.0
+      ],
+      "colour": "ffc878",
+      "energy": 0.540000021457672,
+      "reach_tiles": 2.4
+    },
+    {
+      "at_tiles": [
+        62.4,
+        18.0
+      ],
+      "colour": "ffc878",
+      "energy": 0.540000021457672,
+      "reach_tiles": 2.4
+    },
+    {
+      "at_tiles": [
+        59.5,
+        20.5
+      ],
+      "colour": "ffd27a",
+      "energy": 0.540000021457672,
+      "reach_tiles": 1.6
+    }
+  ],
+  "mode": "wide",
+  "perf": {
+    "adapter": "AMD Radeon Graphics",
+    "draw_calls": 765,
+    "frame_ms_mean": 9.41,
+    "frame_ms_median": 7.61,
+    "frame_ms_p95": 19.58,
+    "objects": 1621,
+    "primitives": 4858,
+    "process_ms": 58.96,
+    "render_cpu_ms": 2.25,
+    "render_gpu_ms": 7.61,
+    "renderer": "gl_compatibility"
+  },
+  "regions": {
+    "forest_edge": {
+      "above_0.12": 0.0,
+      "mean": 0.046,
+      "p10": 0.0272,
+      "p90": 0.069,
+      "pixels": 768
+    },
+    "frame": {
+      "above_0.12": 0.3854,
+      "mean": 0.1336,
+      "p10": 0.0393,
+      "p90": 0.2605,
+      "pixels": 921600
+    },
+    "house": {
+      "above_0.12": 0.4523,
+      "mean": 0.175,
+      "p10": 0.0172,
+      "p90": 0.4201,
+      "pixels": 130470
+    },
+    "lantern_pool": {
+      "above_0.12": 0.8568,
+      "mean": 0.3324,
+      "p10": 0.0962,
+      "p90": 0.716,
+      "pixels": 45244
+    },
+    "oak": {
+      "above_0.12": 0.4099,
+      "mean": 0.1153,
+      "p10": 0.0042,
+      "p90": 0.2461,
+      "pixels": 63662
+    },
+    "play_area": {
+      "above_0.12": 0.3395,
+      "mean": 0.1143,
+      "p10": 0.0488,
+      "p90": 0.1897,
+      "pixels": 681456
+    }
+  },
+  "sanity": 99.8751856922001,
+  "size": [
+    1280,
+    720
+  ],
+  "weather": "sunny"
+}
