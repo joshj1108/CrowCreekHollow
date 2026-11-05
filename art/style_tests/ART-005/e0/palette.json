@@ -1,0 +1,238 @@
+{
+ "ramps": {
+  "ink": [
+   "1a1410",
+   "241c22",
+   "2a1f18"
+  ],
+  "moss": [
+   "1e2a1c",
+   "2e3f24",
+   "43552c",
+   "5e6e34",
+   "7d8a3e",
+   "9a9a4a"
+  ],
+  "leaf": [
+   "6e1a16",
+   "9c2a1e",
+   "c4402a",
+   "d0641c",
+   "f0a030",
+   "f6c45a"
+  ],
+  "bark": [
+   "2a1f18",
+   "3b2a1e",
+   "5a3d26",
+   "7a5434",
+   "9a6d42"
+  ],
+  "timber": [
+   "3b2a1e",
+   "5c4128",
+   "7e5a36",
+   "a07a4c",
+   "c8b89a"
+  ],
+  "soil": [
+   "241c22",
+   "3a2a24",
+   "4f3a2e",
+   "6a5040"
+  ],
+  "path": [
+   "4a4038",
+   "6e6250",
+   "8a867a",
+   "a8a088",
+   "c8b89a"
+  ],
+  "stone": [
+   "2c3a44",
+   "3a3a3a",
+   "5e5c56",
+   "8a867a",
+   "b4b0a2"
+  ],
+  "shingle": [
+   "1e2230",
+   "2c3a44",
+   "46525a",
+   "66707a"
+  ],
+  "skin": [
+   "5a3d26",
+   "9a6d42",
+   "c88a62",
+   "e8b48a"
+  ],
+  "coat": [
+   "1e2a2c",
+   "2c3a44",
+   "46606a",
+   "6a8a8a"
+  ],
+  "accent": [
+   "6e1a16",
+   "9c2a1e",
+   "c4402a"
+  ],
+  "pumpkin": [
+   "8a3a12",
+   "b8561a",
+   "d97a22",
+   "f0a030"
+  ],
+  "lantern": [
+   "8a3a12",
+   "d97a22",
+   "f4b850",
+   "f6c45a",
+   "fff0c0"
+  ],
+  "night": [
+   "241c22",
+   "2c3a44",
+   "5a3a6a",
+   "8a86a8"
+  ],
+  "water": [
+   "1e2a3a",
+   "2c3a44",
+   "3e5a64",
+   "6a8a8a",
+   "a8bcb4"
+  ]
+ },
+ "source": {
+  "ink": [
+   "c",
+   "c",
+   "c"
+  ],
+  "moss": [
+   "c",
+   "c",
+   "c",
+   "c",
+   "c",
+   "c"
+  ],
+  "leaf": [
+   "c",
+   "c",
+   "c",
+   "c",
+   "c",
+   "c"
+  ],
+  "bark": [
+   "c",
+   "c",
+   "c",
+   "c",
+   "c"
+  ],
+  "timber": [
+   "c",
+   "c",
+   "c",
+   "c",
+   "c"
+  ],
+  "soil": [
+   "c",
+   "n",
+   "n",
+   "n"
+  ],
+  "path": [
+   "n",
+   "n",
+   "c",
+   "n",
+   "c"
+  ],
+  "stone": [
+   "c",
+   "c",
+   "c",
+   "c",
+   "n"
+  ],
+  "shingle": [
+   "n",
+   "c",
+   "n",
+   "n"
+  ],
+  "skin": [
+   "c",
+   "c",
+   "n",
+   "n"
+  ],
+  "coat": [
+   "n",
+   "c",
+   "n",
+   "n"
+  ],
+  "accent": [
+   "c",
+   "c",
+   "c"
+  ],
+  "pumpkin": [
+   "c",
+   "c",
+   "c",
+   "c"
+  ],
+  "lantern": [
+   "c",
+   "c",
+   "c",
+   "c",
+   "n"
+  ],
+  "night": [
+   "c",
+   "c",
+   "c",
+   "n"
+  ],
+  "water": [
+   "n",
+   "c",
+   "n",
+   "n",
+   "n"
+  ]
+ },
+ "use": {
+  "ink": "outer outlines against light ground, deepest contact shadow",
+  "moss": "grass, ground cover, crop leaves",
+  "leaf": "autumn oak crown, leaf litter",
+  "bark": "trunks, roots",
+  "timber": "house planks, fence, bed edging, door",
+  "soil": "tilled beds and field",
+  "path": "packed-earth path and porch apron",
+  "stone": "foundation, steps, chimney, pebbles",
+  "shingle": "roof",
+  "skin": "farmer's face and hands",
+  "coat": "farmer's coat and hat",
+  "accent": "scarf, berries, small red accents",
+  "pumpkin": "pumpkins and gourds",
+  "lantern": "emissive only: lantern glass, lit windows (never key-lit)",
+  "night": "cold accents, fog, night-only details",
+  "water": "glass by day, water"
+ },
+ "shadow": {
+  "rgb": "1e2230",
+  "alpha": 96
+ },
+ "night_tint": "3a3f6e",
+ "unique_colours": 52
+}

@@ -1,0 +1,763 @@
+{
+ "probe": {
+  "P16_int_720p": {
+   "widths": {
+    "2": 336
+   },
+   "uniform_share": 1.0,
+   "mode_px": 2,
+   "distinct_width_sets_over_offsets": 1
+  },
+  "P16_today_720p": {
+   "widths": {
+    "2": 3,
+    "3": 336
+   },
+   "uniform_share": 0.991,
+   "mode_px": 3,
+   "distinct_width_sets_over_offsets": 2
+  },
+  "P16_int_1080p": {
+   "widths": {
+    "4": 336
+   },
+   "uniform_share": 1.0,
+   "mode_px": 4,
+   "distinct_width_sets_over_offsets": 1
+  },
+  "P16_today_1080p": {
+   "widths": {
+    "4": 174,
+    "5": 165
+   },
+   "uniform_share": 0.513,
+   "mode_px": 4,
+   "distinct_width_sets_over_offsets": 1
+  },
+  "P16_int_1440p": {
+   "widths": {
+    "5": 336
+   },
+   "uniform_share": 1.0,
+   "mode_px": 5,
+   "distinct_width_sets_over_offsets": 1
+  },
+  "P16_today_1440p": {
+   "widths": {
+    "5": 6,
+    "6": 332
+   },
+   "uniform_share": 0.982,
+   "mode_px": 6,
+   "distinct_width_sets_over_offsets": 2
+  },
+  "P16_int_2160p": {
+   "widths": {
+    "8": 336
+   },
+   "uniform_share": 1.0,
+   "mode_px": 8,
+   "distinct_width_sets_over_offsets": 1
+  },
+  "P16_today_2160p": {
+   "widths": {
+    "8": 3,
+    "9": 336
+   },
+   "uniform_share": 0.991,
+   "mode_px": 9,
+   "distinct_width_sets_over_offsets": 2
+  },
+  "P32_int_720p": {
+   "widths": {
+    "1": 720
+   },
+   "uniform_share": 1.0,
+   "mode_px": 1,
+   "distinct_width_sets_over_offsets": 1
+  },
+  "P32_today_720p": {
+   "widths": {
+    "1": 351,
+    "2": 345,
+    "3": 14
+   },
+   "uniform_share": 0.494,
+   "mode_px": 1,
+   "distinct_width_sets_over_offsets": 2
+  },
+  "P32_int_1080p": {
+   "widths": {
+    "2": 720
+   },
+   "uniform_share": 1.0,
+   "mode_px": 2,
+   "distinct_width_sets_over_offsets": 1
+  },
+  "P32_today_1080p": {
+   "widths": {
+    "2": 546,
+    "3": 180
+   },
+   "uniform_share": 0.752,
+   "mode_px": 2,
+   "distinct_width_sets_over_offsets": 1
+  },
+  "P32_int_1440p": {
+   "widths": {
+    "2": 720
+   },
+   "uniform_share": 1.0,
+   "mode_px": 2,
+   "distinct_width_sets_over_offsets": 1
+  },
+  "P32_today_1440p": {
+   "widths": {
+    "2": 6,
+    "3": 718
+   },
+   "uniform_share": 0.992,
+   "mode_px": 3,
+   "distinct_width_sets_over_offsets": 2
+  },
+  "P32_int_2160p": {
+   "widths": {
+    "4": 720
+   },
+   "uniform_share": 1.0,
+   "mode_px": 4,
+   "distinct_width_sets_over_offsets": 1
+  },
+  "P32_today_2160p": {
+   "widths": {
+    "4": 372,
+    "5": 357
+   },
+   "uniform_share": 0.51,
+   "mode_px": 4,
+   "distinct_width_sets_over_offsets": 1
+  },
+  "P64_int_720p": {
+   "note": "n/a: probe off screen (only 20 x 11.25 tiles visible)"
+  },
+  "P64_today_720p": {
+   "widths": {
+    "1": 379,
+    "2": 342,
+    "3": 4,
+    "4": 2
+   },
+   "uniform_share": 0.521,
+   "mode_px": 1,
+   "distinct_width_sets_over_offsets": 3
+  },
+  "P64_int_1080p": {
+   "widths": {
+    "1": 1488
+   },
+   "uniform_share": 1.0,
+   "mode_px": 1,
+   "distinct_width_sets_over_offsets": 1
+  },
+  "P64_today_1080p": {
+   "widths": {
+    "1": 1305,
+    "2": 183
+   },
+   "uniform_share": 0.877,
+   "mode_px": 1,
+   "distinct_width_sets_over_offsets": 1
+  },
+  "P64_int_1440p": {
+   "widths": {
+    "1": 1488
+   },
+   "uniform_share": 1.0,
+   "mode_px": 1,
+   "distinct_width_sets_over_offsets": 1
+  },
+  "P64_today_1440p": {
+   "widths": {
+    "1": 746,
+    "2": 734,
+    "3": 6
+   },
+   "uniform_share": 0.502,
+   "mode_px": 1,
+   "distinct_width_sets_over_offsets": 2
+  },
+  "P64_int_2160p": {
+   "widths": {
+    "2": 1488
+   },
+   "uniform_share": 1.0,
+   "mode_px": 2,
+   "distinct_width_sets_over_offsets": 1
+  },
+  "P64_today_2160p": {
+   "widths": {
+    "2": 1125,
+    "3": 369
+   },
+   "uniform_share": 0.753,
+   "mode_px": 2,
+   "distinct_width_sets_over_offsets": 1
+  }
+ },
+ "walk": {
+  "P16_day_int_1080p_smooth_walk144": {
+   "frames": 431,
+   "mean_step_px": 1.666,
+   "std_step_px": 0.472,
+   "min_step_px": 1.0,
+   "max_step_px": 2.0,
+   "frames_off_by_ge_1px": 0.0,
+   "stall_frames": 0,
+   "player_screen_jitter_px": 4.0
+  },
+  "P16_day_int_1080p_snap_walk144": {
+   "frames": 431,
+   "mean_step_px": 1.671,
+   "std_step_px": 1.973,
+   "min_step_px": -0.0,
+   "max_step_px": 4.0,
+   "frames_off_by_ge_1px": 1.0,
+   "stall_frames": 251,
+   "player_screen_jitter_px": 0.0
+  },
+  "P32_day_int_1080p_smooth_walk144": {
+   "frames": 431,
+   "mean_step_px": 1.666,
+   "std_step_px": 0.472,
+   "min_step_px": 1.0,
+   "max_step_px": 2.0,
+   "frames_off_by_ge_1px": 0.0,
+   "stall_frames": 0,
+   "player_screen_jitter_px": 2.0
+  },
+  "P32_day_int_1080p_snap_walk144": {
+   "frames": 431,
+   "mean_step_px": 1.666,
+   "std_step_px": 0.746,
+   "min_step_px": -0.0,
+   "max_step_px": 2.0,
+   "frames_off_by_ge_1px": 0.167,
+   "stall_frames": 72,
+   "player_screen_jitter_px": 0.0
+  },
+  "P64_day_int_1080p_smooth_walk144": {
+   "frames": 431,
+   "mean_step_px": 1.666,
+   "std_step_px": 0.472,
+   "min_step_px": 1.0,
+   "max_step_px": 2.0,
+   "frames_off_by_ge_1px": 0.0,
+   "stall_frames": 0,
+   "player_screen_jitter_px": 0.0
+  },
+  "P64_day_int_1080p_snap_walk144": {
+   "frames": 431,
+   "mean_step_px": 1.666,
+   "std_step_px": 0.472,
+   "min_step_px": 1.0,
+   "max_step_px": 2.0,
+   "frames_off_by_ge_1px": 0.0,
+   "stall_frames": 0,
+   "player_screen_jitter_px": 0.0
+  },
+  "A16_day_int_1080p_smooth_walk50": {
+   "frames": 149,
+   "mean_step_px": 4.799,
+   "std_step_px": 0.401,
+   "min_step_px": 4.0,
+   "max_step_px": 5.0,
+   "frames_off_by_ge_1px": 0.0,
+   "stall_frames": 0,
+   "player_screen_jitter_px": 4.0
+  },
+  "A16_day_int_1080p_snap_walk50": {
+   "frames": 149,
+   "mean_step_px": 4.805,
+   "std_step_px": 1.604,
+   "min_step_px": 4.0,
+   "max_step_px": 8.0,
+   "frames_off_by_ge_1px": 0.201,
+   "stall_frames": 0,
+   "player_screen_jitter_px": 0.0
+  },
+  "A16_day_today_1080p_smooth_walk50": {
+   "frames": 149,
+   "mean_step_px": 5.4,
+   "std_step_px": 0.0,
+   "min_step_px": 5.4,
+   "max_step_px": 5.4,
+   "frames_off_by_ge_1px": 0.0,
+   "stall_frames": 0,
+   "player_screen_jitter_px": 0.0
+  },
+  "A16_night_int_1080p_smooth_walk50": {
+   "frames": 149,
+   "mean_step_px": 4.799,
+   "std_step_px": 0.401,
+   "min_step_px": 4.0,
+   "max_step_px": 5.0,
+   "frames_off_by_ge_1px": 0.0,
+   "stall_frames": 0,
+   "player_screen_jitter_px": 4.0
+  },
+  "A16_night_int_1080p_smooth_walk50_stepped": {
+   "frames": 149,
+   "mean_step_px": 4.799,
+   "std_step_px": 0.401,
+   "min_step_px": 4.0,
+   "max_step_px": 5.0,
+   "frames_off_by_ge_1px": 0.0,
+   "stall_frames": 0,
+   "player_screen_jitter_px": 4.0
+  },
+  "P32_day_int_1080p_smooth_walk50": {
+   "frames": 149,
+   "mean_step_px": 4.799,
+   "std_step_px": 0.401,
+   "min_step_px": 4.0,
+   "max_step_px": 5.0,
+   "frames_off_by_ge_1px": 0.0,
+   "stall_frames": 0,
+   "player_screen_jitter_px": 2.0
+  },
+  "P32_day_int_1080p_snap_walk50": {
+   "frames": 149,
+   "mean_step_px": 4.805,
+   "std_step_px": 0.981,
+   "min_step_px": 4.0,
+   "max_step_px": 6.0,
+   "frames_off_by_ge_1px": 0.403,
+   "stall_frames": 0,
+   "player_screen_jitter_px": 0.0
+  },
+  "P32_day_today_1080p_smooth_walk50": {
+   "frames": 149,
+   "mean_step_px": 5.4,
+   "std_step_px": 0.0,
+   "min_step_px": 5.4,
+   "max_step_px": 5.4,
+   "frames_off_by_ge_1px": 0.0,
+   "stall_frames": 0,
+   "player_screen_jitter_px": 0.0
+  },
+  "P32_night_int_1080p_smooth_walk50": {
+   "frames": 149,
+   "mean_step_px": 4.799,
+   "std_step_px": 0.401,
+   "min_step_px": 4.0,
+   "max_step_px": 5.0,
+   "frames_off_by_ge_1px": 0.0,
+   "stall_frames": 0,
+   "player_screen_jitter_px": 2.0
+  },
+  "P64_day_int_1080p_smooth_walk50": {
+   "frames": 149,
+   "mean_step_px": 4.799,
+   "std_step_px": 0.401,
+   "min_step_px": 4.0,
+   "max_step_px": 5.0,
+   "frames_off_by_ge_1px": 0.0,
+   "stall_frames": 0,
+   "player_screen_jitter_px": 0.0
+  },
+  "P64_day_int_1080p_snap_walk50": {
+   "frames": 149,
+   "mean_step_px": 4.799,
+   "std_step_px": 0.401,
+   "min_step_px": 4.0,
+   "max_step_px": 5.0,
+   "frames_off_by_ge_1px": 0.0,
+   "stall_frames": 0,
+   "player_screen_jitter_px": 0.0
+  },
+  "P64_day_today_1080p_smooth_walk50": {
+   "frames": 149,
+   "mean_step_px": 5.4,
+   "std_step_px": 0.0,
+   "min_step_px": 5.4,
+   "max_step_px": 5.4,
+   "frames_off_by_ge_1px": 0.0,
+   "stall_frames": 0,
+   "player_screen_jitter_px": 0.0
+  },
+  "P64_night_int_1080p_smooth_walk50": {
+   "frames": 149,
+   "mean_step_px": 4.799,
+   "std_step_px": 0.401,
+   "min_step_px": 4.0,
+   "max_step_px": 5.0,
+   "frames_off_by_ge_1px": 0.0,
+   "stall_frames": 0,
+   "player_screen_jitter_px": 0.0
+  }
+ },
+ "swing": {
+  "A16_night_int_1080p_smooth_swing": {
+   "mean_changed_px_share": 0.0008,
+   "max_changed_px_share": 0.0061
+  },
+  "A16_night_int_1080p_smooth_swing_stepped": {
+   "mean_changed_px_share": 0.0515,
+   "max_changed_px_share": 0.41
+  },
+  "P32_night_int_1080p_smooth_swing": {
+   "mean_changed_px_share": 0.0007,
+   "max_changed_px_share": 0.0051
+  },
+  "P32_night_int_1080p_smooth_swing_stepped": {
+   "mean_changed_px_share": 0.1813,
+   "max_changed_px_share": 0.4672
+  },
+  "P64_night_int_1080p_smooth_swing": {
+   "mean_changed_px_share": 0.0006,
+   "max_changed_px_share": 0.005
+  },
+  "P64_night_int_1080p_smooth_swing_stepped": {
+   "mean_changed_px_share": 0.2395,
+   "max_changed_px_share": 0.4662
+  }
+ },
+ "perf": [
+  {
+   "adapter": "AMD Radeon Graphics",
+   "api": "3.3.0 Core Profile Context 25.30.44.260508",
+   "art_rgba_mb": 1.86,
+   "cpu_render_ms": 0.155,
+   "draw_calls": 26,
+   "frames": 10168,
+   "godot": "4.7.2-stable (steam)",
+   "gpu_output_ms": 0.163,
+   "gpu_world_ms": 0.126,
+   "mean_ms": 0.769,
+   "method": "gl_compatibility",
+   "native": "482x272",
+   "p50_ms": 0.726,
+   "p95_ms": 1.031,
+   "p99_ms": 1.349,
+   "scale": 4,
+   "tag": "A16_night_int_1080p_smooth",
+   "texture_mem_mb": 37.77,
+   "video_mem_mb": 60.14
+  },
+  {
+   "adapter": "AMD Radeon Graphics",
+   "api": "3.3.0 Core Profile Context 25.30.44.260508",
+   "art_rgba_mb": 1.86,
+   "cpu_render_ms": 0.2,
+   "draw_calls": 26,
+   "frames": 6020,
+   "godot": "4.7.2-stable (steam)",
+   "gpu_output_ms": 0.597,
+   "gpu_world_ms": 0.134,
+   "mean_ms": 1.288,
+   "method": "gl_compatibility",
+   "native": "482x272",
+   "p50_ms": 1.231,
+   "p95_ms": 1.651,
+   "p99_ms": 2.055,
+   "scale": 8,
+   "tag": "A16_night_int_2160p_smooth",
+   "texture_mem_mb": 85.23,
+   "video_mem_mb": 107.6
+  },
+  {
+   "adapter": "AMD Radeon Graphics",
+   "api": "3.3.0 Core Profile Context 25.30.44.260508",
+   "art_rgba_mb": 1.86,
+   "cpu_render_ms": 0.2,
+   "draw_calls": 26,
+   "frames": 4129,
+   "godot": "4.7.2-stable (steam)",
+   "gpu_output_ms": 0.214,
+   "gpu_world_ms": 1.156,
+   "mean_ms": 1.861,
+   "method": "gl_compatibility",
+   "native": "1920x1080",
+   "p50_ms": 1.8,
+   "p95_ms": 2.213,
+   "p99_ms": 2.513,
+   "scale": 1,
+   "tag": "A16_night_today_1080p_smooth",
+   "texture_mem_mb": 62.47,
+   "video_mem_mb": 84.84
+  },
+  {
+   "adapter": "AMD Radeon Graphics",
+   "api": "3.3.0 Core Profile Context 25.30.44.260508",
+   "art_rgba_mb": 1.86,
+   "cpu_render_ms": 0.256,
+   "draw_calls": 26,
+   "frames": 1347,
+   "godot": "4.7.2-stable (steam)",
+   "gpu_output_ms": 0.703,
+   "gpu_world_ms": 4.106,
+   "mean_ms": 5.386,
+   "method": "gl_compatibility",
+   "native": "3840x2160",
+   "p50_ms": 5.334,
+   "p95_ms": 5.956,
+   "p99_ms": 6.548,
+   "scale": 1,
+   "tag": "A16_night_today_2160p_smooth",
+   "texture_mem_mb": 189.03,
+   "video_mem_mb": 213.43
+  },
+  {
+   "adapter": "AMD Radeon Graphics",
+   "api": "3.3.0 Core Profile Context 25.30.44.260508",
+   "art_rgba_mb": 1.82,
+   "cpu_render_ms": 0.156,
+   "draw_calls": 26,
+   "frames": 10172,
+   "godot": "4.7.2-stable (steam)",
+   "gpu_output_ms": 0.166,
+   "gpu_world_ms": 0.126,
+   "mean_ms": 0.767,
+   "method": "gl_compatibility",
+   "native": "482x272",
+   "p50_ms": 0.722,
+   "p95_ms": 1.029,
+   "p99_ms": 1.441,
+   "scale": 4,
+   "tag": "P16_night_int_1080p_smooth",
+   "texture_mem_mb": 37.72,
+   "video_mem_mb": 60.09
+  },
+  {
+   "adapter": "AMD Radeon Graphics",
+   "api": "3.3.0 Core Profile Context 25.30.44.260508",
+   "art_rgba_mb": 1.82,
+   "cpu_render_ms": 0.196,
+   "draw_calls": 26,
+   "frames": 6049,
+   "godot": "4.7.2-stable (steam)",
+   "gpu_output_ms": 0.605,
+   "gpu_world_ms": 0.13,
+   "mean_ms": 1.283,
+   "method": "gl_compatibility",
+   "native": "482x272",
+   "p50_ms": 1.228,
+   "p95_ms": 1.623,
+   "p99_ms": 2.019,
+   "scale": 8,
+   "tag": "P16_night_int_2160p_smooth",
+   "texture_mem_mb": 85.19,
+   "video_mem_mb": 107.55
+  },
+  {
+   "adapter": "AMD Radeon Graphics",
+   "api": "3.3.0 Core Profile Context 25.30.44.260508",
+   "art_rgba_mb": 1.82,
+   "cpu_render_ms": 0.217,
+   "draw_calls": 26,
+   "frames": 4182,
+   "godot": "4.7.2-stable (steam)",
+   "gpu_output_ms": 0.207,
+   "gpu_world_ms": 1.147,
+   "mean_ms": 1.835,
+   "method": "gl_compatibility",
+   "native": "1920x1080",
+   "p50_ms": 1.764,
+   "p95_ms": 2.267,
+   "p99_ms": 2.656,
+   "scale": 1,
+   "tag": "P16_night_today_1080p_smooth",
+   "texture_mem_mb": 62.42,
+   "video_mem_mb": 84.79
+  },
+  {
+   "adapter": "AMD Radeon Graphics",
+   "api": "3.3.0 Core Profile Context 25.30.44.260508",
+   "art_rgba_mb": 1.82,
+   "cpu_render_ms": 0.269,
+   "draw_calls": 26,
+   "frames": 1336,
+   "godot": "4.7.2-stable (steam)",
+   "gpu_output_ms": 0.713,
+   "gpu_world_ms": 4.147,
+   "mean_ms": 5.436,
+   "method": "gl_compatibility",
+   "native": "3840x2160",
+   "p50_ms": 5.345,
+   "p95_ms": 6.135,
+   "p99_ms": 6.824,
+   "scale": 1,
+   "tag": "P16_night_today_2160p_smooth",
+   "texture_mem_mb": 188.99,
+   "video_mem_mb": 213.38
+  },
+  {
+   "adapter": "AMD Radeon Graphics",
+   "api": "3.3.0 Core Profile Context 25.30.44.260508",
+   "art_rgba_mb": 7.3,
+   "cpu_render_ms": 0.187,
+   "draw_calls": 26,
+   "frames": 7512,
+   "godot": "4.7.2-stable (steam)",
+   "gpu_output_ms": 0.187,
+   "gpu_world_ms": 0.36,
+   "mean_ms": 1.038,
+   "method": "gl_compatibility",
+   "native": "962x542",
+   "p50_ms": 0.982,
+   "p95_ms": 1.422,
+   "p99_ms": 1.826,
+   "scale": 2,
+   "tag": "P32_night_int_1080p_smooth",
+   "texture_mem_mb": 49.98,
+   "video_mem_mb": 74.38
+  },
+  {
+   "adapter": "AMD Radeon Graphics",
+   "api": "3.3.0 Core Profile Context 25.30.44.260508",
+   "art_rgba_mb": 7.3,
+   "cpu_render_ms": 0.258,
+   "draw_calls": 26,
+   "frames": 4855,
+   "godot": "4.7.2-stable (steam)",
+   "gpu_output_ms": 0.641,
+   "gpu_world_ms": 0.367,
+   "mean_ms": 1.591,
+   "method": "gl_compatibility",
+   "native": "962x542",
+   "p50_ms": 1.522,
+   "p95_ms": 1.99,
+   "p99_ms": 2.452,
+   "scale": 4,
+   "tag": "P32_night_int_2160p_smooth",
+   "texture_mem_mb": 97.44,
+   "video_mem_mb": 119.81
+  },
+  {
+   "adapter": "AMD Radeon Graphics",
+   "api": "3.3.0 Core Profile Context 25.30.44.260508",
+   "art_rgba_mb": 7.3,
+   "cpu_render_ms": 0.216,
+   "draw_calls": 26,
+   "frames": 4147,
+   "godot": "4.7.2-stable (steam)",
+   "gpu_output_ms": 0.207,
+   "gpu_world_ms": 1.167,
+   "mean_ms": 1.855,
+   "method": "gl_compatibility",
+   "native": "1920x1080",
+   "p50_ms": 1.787,
+   "p95_ms": 2.24,
+   "p99_ms": 2.537,
+   "scale": 1,
+   "tag": "P32_night_today_1080p_smooth",
+   "texture_mem_mb": 69.72,
+   "video_mem_mb": 92.09
+  },
+  {
+   "adapter": "AMD Radeon Graphics",
+   "api": "3.3.0 Core Profile Context 25.30.44.260508",
+   "art_rgba_mb": 7.3,
+   "cpu_render_ms": 0.272,
+   "draw_calls": 26,
+   "frames": 1314,
+   "godot": "4.7.2-stable (steam)",
+   "gpu_output_ms": 0.72,
+   "gpu_world_ms": 4.213,
+   "mean_ms": 5.511,
+   "method": "gl_compatibility",
+   "native": "3840x2160",
+   "p50_ms": 5.44,
+   "p95_ms": 6.084,
+   "p99_ms": 6.562,
+   "scale": 1,
+   "tag": "P32_night_today_2160p_smooth",
+   "texture_mem_mb": 196.28,
+   "video_mem_mb": 220.68
+  },
+  {
+   "adapter": "AMD Radeon Graphics",
+   "api": "3.3.0 Core Profile Context 25.30.44.260508",
+   "art_rgba_mb": 29.19,
+   "cpu_render_ms": 0.223,
+   "draw_calls": 26,
+   "frames": 3926,
+   "godot": "4.7.2-stable (steam)",
+   "gpu_output_ms": 0.222,
+   "gpu_world_ms": 1.238,
+   "mean_ms": 1.956,
+   "method": "gl_compatibility",
+   "native": "1922x1082",
+   "p50_ms": 1.894,
+   "p95_ms": 2.34,
+   "p99_ms": 2.841,
+   "scale": 1,
+   "tag": "P64_night_int_1080p_smooth",
+   "texture_mem_mb": 98.98,
+   "video_mem_mb": 121.35
+  },
+  {
+   "adapter": "AMD Radeon Graphics",
+   "api": "3.3.0 Core Profile Context 25.30.44.260508",
+   "art_rgba_mb": 29.19,
+   "cpu_render_ms": 0.22,
+   "draw_calls": 26,
+   "frames": 3126,
+   "godot": "4.7.2-stable (steam)",
+   "gpu_output_ms": 0.648,
+   "gpu_world_ms": 1.227,
+   "mean_ms": 2.434,
+   "method": "gl_compatibility",
+   "native": "1922x1082",
+   "p50_ms": 2.358,
+   "p95_ms": 2.83,
+   "p99_ms": 3.172,
+   "scale": 2,
+   "tag": "P64_night_int_2160p_smooth",
+   "texture_mem_mb": 146.44,
+   "video_mem_mb": 170.84
+  },
+  {
+   "adapter": "AMD Radeon Graphics",
+   "api": "3.3.0 Core Profile Context 25.30.44.260508",
+   "art_rgba_mb": 29.19,
+   "cpu_render_ms": 0.218,
+   "draw_calls": 26,
+   "frames": 3947,
+   "godot": "4.7.2-stable (steam)",
+   "gpu_output_ms": 0.212,
+   "gpu_world_ms": 1.241,
+   "mean_ms": 1.942,
+   "method": "gl_compatibility",
+   "native": "1920x1080",
+   "p50_ms": 1.873,
+   "p95_ms": 2.373,
+   "p99_ms": 2.774,
+   "scale": 1,
+   "tag": "P64_night_today_1080p_smooth",
+   "texture_mem_mb": 98.91,
+   "video_mem_mb": 123.3
+  },
+  {
+   "adapter": "AMD Radeon Graphics",
+   "api": "3.3.0 Core Profile Context 25.30.44.260508",
+   "art_rgba_mb": 29.19,
+   "cpu_render_ms": 0.341,
+   "draw_calls": 26,
+   "frames": 1259,
+   "godot": "4.7.2-stable (steam)",
+   "gpu_output_ms": 0.716,
+   "gpu_world_ms": 4.436,
+   "mean_ms": 5.74,
+   "method": "gl_compatibility",
+   "native": "3840x2160",
+   "p50_ms": 5.678,
+   "p95_ms": 6.281,
+   "p99_ms": 6.787,
+   "scale": 1,
+   "tag": "P64_night_today_2160p_smooth",
+   "texture_mem_mb": 225.47,
+   "video_mem_mb": 249.87
+  }
+ ]
+}

@@ -1,0 +1,56 @@
+GIMP Palette
+Name: Crow Creek Hollow ART-005 proposed master
+Columns: 8
+#
+ 26  20  16	ink 1a1410 c
+ 36  28  34	ink 241c22 c
+ 42  31  24	ink 2a1f18 c
+ 30  42  28	moss 1e2a1c c
+ 46  63  36	moss 2e3f24 c
+ 67  85  44	moss 43552c c
+ 94 110  52	moss 5e6e34 c
+125 138  62	moss 7d8a3e c
+154 154  74	moss 9a9a4a c
+110  26  22	leaf 6e1a16 c
+156  42  30	leaf 9c2a1e c
+196  64  42	leaf c4402a c
+208 100  28	leaf d0641c c
+240 160  48	leaf f0a030 c
+246 196  90	leaf f6c45a c
+ 59  42  30	bark 3b2a1e c
+ 90  61  38	bark 5a3d26 c
+122  84  52	bark 7a5434 c
+154 109  66	bark 9a6d42 c
+ 92  65  40	timber 5c4128 c
+126  90  54	timber 7e5a36 c
+160 122  76	timber a07a4c c
+200 184 154	timber c8b89a c
+ 58  42  36	soil 3a2a24 n
+ 79  58  46	soil 4f3a2e n
+106  80  64	soil 6a5040 n
+ 74  64  56	path 4a4038 n
+110  98  80	path 6e6250 n
+138 134 122	path 8a867a c
+168 160 136	path a8a088 n
+ 44  58  68	stone 2c3a44 c
+ 58  58  58	stone 3a3a3a c
+ 94  92  86	stone 5e5c56 c
+180 176 162	stone b4b0a2 n
+ 30  34  48	shingle 1e2230 n
+ 70  82  90	shingle 46525a n
+102 112 122	shingle 66707a n
+200 138  98	skin c88a62 n
+232 180 138	skin e8b48a n
+ 30  42  44	coat 1e2a2c n
+ 70  96 106	coat 46606a n
+106 138 138	coat 6a8a8a n
+138  58  18	pumpkin 8a3a12 c
+184  86  26	pumpkin b8561a c
+217 122  34	pumpkin d97a22 c
+244 184  80	lantern f4b850 c
+255 240 192	lantern fff0c0 n
+ 90  58 106	night 5a3a6a c
+138 134 168	night 8a86a8 n
+ 30  42  58	water 1e2a3a n
+ 62  90 100	water 3e5a64 n
+168 188 180	water a8bcb4 n

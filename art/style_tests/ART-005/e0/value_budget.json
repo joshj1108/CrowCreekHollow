@@ -1,0 +1,42 @@
+[
+ {
+  "pair": "farmer coat (coat 2) on grass (moss 2)",
+  "dL_day": 5.4,
+  "dL_night_untinted_light": 2.5
+ },
+ {
+  "pair": "farmer coat lit (coat 3) on grass (moss 2)",
+  "dL_day": 21.4,
+  "dL_night_untinted_light": 7.4
+ },
+ {
+  "pair": "farmer outline (coat 0) on path (path 2)",
+  "dL_day": 39.9,
+  "dL_night_untinted_light": 10.7
+ },
+ {
+  "pair": "path (path 2) next to grass (moss 2)",
+  "dL_day": 22.2,
+  "dL_night_untinted_light": 7.3
+ },
+ {
+  "pair": "tilled soil (soil 2) next to grass (moss 2)",
+  "dL_day": 7.3,
+  "dL_night_untinted_light": 1.7
+ },
+ {
+  "pair": "timber wall (timber 2) on grass (moss 2)",
+  "dL_day": 7.5,
+  "dL_night_untinted_light": 1.9
+ },
+ {
+  "pair": "pumpkin (pumpkin 2) on soil (soil 2)",
+  "dL_day": 34.2,
+  "dL_night_untinted_light": 8.9
+ },
+ {
+  "pair": "oak crown mid (leaf 3) on grass (moss 2)",
+  "dL_day": 21.0,
+  "dL_night_untinted_light": 5.3
+ }
+]
