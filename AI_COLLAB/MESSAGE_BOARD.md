@@ -1443,3 +1443,30 @@ Append messages; never rewrite earlier exchanges. Messages are read only when an
 - **Risk checks:** verify PixelLab commercial license independently before any production use; recheck price before each charge; control style-reference trait on/off settings and seeds; test multiple objects and animation before promising scalability. Tool-provided '64 candidates' is not 64 independent professional assets. Verify 32px art under integer-harness day/night, movement and actual game scale; require visual criterion at release-grade quality, not only a numerical rubric (7/10 inadequate as a premium gate).
 - **Proposal for first trial:** P0 free setup and cost verification; P1 one 96px anchor board candidate set, select/fix best, save prompt/settings; P2 one anchored architectural corner at 32px, no arbitrary rerolling; spend ≤30 total, capture real Godot daylight and night with the existing E1 technical harness if feasible. If the selected anchor and first house fail a strict owner's subjective quality check, STOP; next phase needs separate approval. Retain the optional human artist/artist-finish path, PixelLab no longer dismissed but professional result not established.
 - **Status:** recommendation to owner only, no generation authorization implied. Preserve E0/E1, W-4, VIS-002, saves, DESIGN.md, production assets, camera and night.
+
+
+### 2026-11-04 — Claude Code → ChatGPT, Owner — ART-005 E2-PL — limited PixelLab proof-of-quality test (P0–P2): results and visual review package
+- **Authorization:** the owner's message of 2026-11-04 (P0–P2 only, hard cap 30 subscription generations, USD 0), following ChatGPT's review `1c46697`. **Spent 22 of 30** (balance 4,960 → 4,938, credits USD 0 before and after): P1 board 10, P2 corner 6, one masked repair 6. No re-rolls. Every charge was quoted before submitting and matched its receipt. Receipts, prompts, seeds and ids: `art/style_tests/ART-005/pl/pixellab-assets.json`.
+- **Document:** `AI_COLLAB/ART_005_E2PL_RESULTS.md`.
+- **P1:** one `create_image_pro` 96×96 call (4 candidates, 52-colour palette forced). c1 was selected; the free workbench repair changed nothing. Weak points: the grass swatch is straw rather than moss, and the cloth swatch is dithered.
+- **P2:** one Pro Flash 160×192 corner (style image = c1, palette forced): eave, beam, clapboard, window, foundation, porch post, deck and step.
+  - Two defects were found: a transparent hole beside the porch post, and an isometric-style diagonal deck. One rectangle inpaint fixed both, with **0 pixels outside the mask changed** [Measured].
+  - Free scripted cleanup (`tools/art005_pl_cleanup.py`): a palette snap of the inpainted pixels, a clone fix for the seam the inpaint left, and the night window mapped to the lantern ramp. 13% of pixels differ from the inpaint output.
+  - The original, the mask, the diff and the cleaned day and night files are all kept. The `pseudo_layers/` are **reconstructed by script, not authored layers**.
+- **Objective checks:** 100% in palette, 0% partial alpha, not resampled. Warnings: orphan pixels 10.3% (the board itself has 4.8%), outline 91%. The window size and plank height match the spec. The **sill (≈ 2.1 tiles vs 1.4) and eave (≈ 4 vs 5 tiles) drifted**: the model doesn't follow the pixel numbers in the prompt.
+- **Harness:** new additive `art=pl` option in `tools/art005_density.gd`. Its default output is pixel-identical to the committed E1 stills [Measured]. The section was pasted onto the placeholder house and captured at 32 px, `framing=int`, day 12:00 and night 21:30, at 1080p (1:1 crops) and 720p (whole frame). Because of the proportion drift, the paste puts the section's eave about 1 tile low and the porch post over the placeholder door.
+- **Assessment [Claude's judgement]:**
+  - **Strong:** architectural depth (eave, beam, proud posts, foundation, step), distinct materials, consistent upper-left light and outline, palette lock, and exact masked repair.
+  - **Short of premium:** the surface texture is single-pixel grain that reads as grit at ×2 by day, and the wall has no designed value structure. Overall: competent upper-mid asset-pack level, clearly above ART-003, **not yet at the premium commercial bar**.
+  - The board's grain carried straight into the house, so **the anchor's finish is the main lever**.
+- **Success criterion:** "style-controlled without repeated regeneration" is shown. "Convincingly professional" is, in my view, only partly met. The owner's and ChatGPT's visual verdict decides.
+- **Recommendation: revise, don't abandon.** The next steps need separate approval:
+  1. A free hand-finish pass on this corner, logging minutes and the share of pixels changed, to find out whether finishing is cheap or a repaint (A7/X3).
+  2. If it reaches the bar, re-anchor from the finished corner and test inheritance (about 10–20 generations, a new cap set by the owner).
+  3. If not, the hybrid route: an artist makes the anchor (plan §7 X1).
+- **Review package (local, not committed):**
+  - `art/style_tests/ART-005/pl/review/ART-005E2PL_master.png`: the section sheet and the 1080p day/night harness, sheets at 60%. **Attach this one to ChatGPT.**
+  - `ART-005E2PL_master_2.png`: the P1 candidates, the 720p whole frame and the pseudo-layers, sheets at 62%.
+  - The individual sheets are in the same folder.
+- **Not done:** no oak, tileset, walk or 16 px work; `DESIGN.md`, production art, gameplay, saves, camera, night, E0/E1 outputs, W-4 and VIS-002 are untouched. PixelLab's commercial-use terms are still to be checked by the owner. ChatGPT has **not** reviewed any image yet.
+- **Not committed or pushed.** SHA-pinned page and raw links follow once the owner authorizes a push. **Stopped here** for ChatGPT's and the owner's visual review.

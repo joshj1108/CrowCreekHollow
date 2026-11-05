@@ -1,0 +1,92 @@
+{
+  "task": "ART-005 E2-PL limited proof-of-quality test (owner-authorized 2026-11-04, cap 30 subscription generations, USD 0)",
+  "balance": {
+    "before": {
+      "generations_remaining": 4960,
+      "credits_usd": 0.0
+    },
+    "after": {
+      "generations_remaining": 4938,
+      "credits_usd": 0.0
+    },
+    "spent": 22,
+    "cap": 30,
+    "unspent_allowance": 8
+  },
+  "free_calls": [
+    "get_balance x2",
+    "get_pro_flash_capabilities (create 160x192 -> 6; inpaint 160x192 -> 6)",
+    "get_upload_url",
+    "pixelart_workbench lint + repair (board c1: no change)",
+    "wait_for_jobs, get_image"
+  ],
+  "jobs": [
+    {
+      "phase": "P1",
+      "tool": "create_image_pro",
+      "job_id": "d77d256c-e58a-4157-ab87-224e08e69652",
+      "asset_id": "078541d7-c864-5aba-b199-21eb9df1b9d5",
+      "size": "96x96",
+      "candidates": 4,
+      "seed": 5001,
+      "no_background": false,
+      "palette": "52 colours of art/style_tests/ART-005/e0/palette.json ramps (night tint excluded), palette_name 'Crow Creek Hollow master (ART-005 E0)'",
+      "references": "none",
+      "charged_generations": 10,
+      "outputs": [
+        "pl/anchors/board_c0.png",
+        "pl/anchors/board_c1.png (SELECTED)",
+        "pl/anchors/board_c2.png",
+        "pl/anchors/board_c3.png"
+      ],
+      "prompt": "Pixel-art material style board for a cozy-horror autumn farming game, top-down straight-on 3/4 view, 3x3 grid of square material swatches each 32x32 pixels, no gaps, no text: row 1 = slate roof shingles in staggered half-rows with lit top edge and dark row shadow; vertical weathered timber plank wall with a lit left corner post and dark plank seams; rough fieldstone foundation blocks with chipped corners and dark mortar. Row 2 = oak bark with vertical grooves lit on the left third; autumn oak leaf masses in orange and red, shaded as volumes; meadow grass with tufts and warm tips. Row 3 = packed earth path with small pebble clusters; edge of a small-paned window with dark wooden frame and cool glass glint; dark blue-grey wool coat cloth with one fold. Key light from the upper left, shadows shift toward blue-violet, highlights toward warm yellow. Professional hand-placed pixel clusters of 2+ pixels, selective 1-pixel dark outlines, no dithered gradients, no noise, muted earthy palette."
+    },
+    {
+      "phase": "P2",
+      "tool": "create_image_pro_flash",
+      "job_id": "e72f26b0-6d0e-4b6c-884f-37ef720015e8",
+      "source_image_id": "5f686c7d-981d-5def-9c5b-fba84e7fa25c",
+      "size": "160x192",
+      "seed": 5101,
+      "no_background": true,
+      "style_image": "upload:9404c18c-038b-4da3-ad7e-e93243b5d055 (= pl/anchors/board_c1.png), style_options default (palette, outline, detail, shading all on), usage 'Material style board: copy the shingle, timber, foundation stone and window rendering, outlines, cluster size and upper-left lighting'",
+      "palette": "same 52 colours forced",
+      "charged_generations": 6,
+      "outputs": [
+        "pl/house/house_section_original.png (unedited)"
+      ],
+      "prompt": "Pixel-art game sprite: the front-left corner section of a weathered old wooden farmhouse, seen in straight-on 3/4 top-down view (front wall faces the viewer flat, no isometric angle, all horizontal lines level). Top: the lower edge of a dark blue-grey slate shingle roof with a thick overhanging eave and a fascia board, casting a dark shadow band onto the wall beneath. Middle: wall of horizontal weathered timber clapboard planks (each plank about 12 pixels tall, dark seams, grain along the plank), a lit square timber corner post on the far left edge. One small four-pane window with a dark wooden frame and sill, cool grey-blue glass with a glint, centred in the wall, its sill about 45 pixels above the ground. Bottom: a low rough fieldstone foundation band with chipped blocks and dark mortar. Right edge: the start of a wooden front porch, a plank deck one step high with one square porch post and a stone step in front. Key light from the upper left. Muted autumn horror-farm mood. Same material rendering, outline and shading as the style board. Transparent background, no ground, no shadow on the ground."
+    },
+    {
+      "phase": "P2 repair",
+      "tool": "inpaint_image_pro_flash",
+      "job_id": "1cde1437-399c-4925-ae3f-7fc5f8802fa1",
+      "source_image_id": "3dadcd06-b1ac-5d1f-9c03-03cf956f0b15",
+      "input": "5f686c7d-981d-5def-9c5b-fba84e7fa25c",
+      "mask": "rectangle x=116 y=44 w=44 h=132 (pl/house/inpaint1_mask.png)",
+      "seed": 5102,
+      "no_background": true,
+      "output_method": "Modify current layer",
+      "charged_generations": 6,
+      "why": "a transparent hole between the wall and the porch post, and a porch deck drawn on an isometric-style diagonal",
+      "verified": "0 pixels changed outside the mask",
+      "outputs": [
+        "pl/house/house_section_inpaint1.png"
+      ],
+      "prompt": "Straight-on front view, no diagonal perspective: the horizontal timber clapboard wall continues to the right edge behind the porch, in deeper shade under the porch roof (same planks, one ramp step darker). One square wooden porch post standing in front of it, lit on its left side. At the bottom, the porch deck seen face-on as a level front edge: a thick horizontal fascia plank and the deck top as a narrow band of horizontal boards, one step high, with a fieldstone step centred below it. Every line level, matching the rest of the image exactly."
+    }
+  ],
+  "free_cleanup": {
+    "script": "tools/art005_pl_cleanup.py",
+    "steps": [
+      "palette snap of 2661 inpainted px (inpaint takes no forced palette)",
+      "seam: 1449 wall px in the inpainted strip replaced by a clone of the adjacent wall columns (horizontal planks)",
+      "night: 599 window-glass px mapped to the lantern ramp",
+      "pseudo-layers (reconstructed)",
+      "harness composites on the placeholder house"
+    ],
+    "changed_px_vs_inpaint": 3405,
+    "opaque_px": 25883
+  },
+  "license": "PixelLab commercial-use terms not checked in this task (owner to verify before any production use)"
+}

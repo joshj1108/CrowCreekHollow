@@ -10,7 +10,8 @@ extends SceneTree
 # Options (any order, after "--"):
 #   density=16|32|64     art px per logical tile (the grid stays 16 x 16 units)
 #   art=a|ph             a: column A, the existing 16 px art (W-3/W-4 house, oak and beds, production ground,
-#                        fence and farmer), only with density=16; ph (default): the formula-drawn placeholders
+#                        fence and farmer), only with density=16; ph (default): the formula-drawn placeholders;
+#                        pl: E2-PL PixelLab trial files from pl/<density>/ where they exist, placeholders elsewhere
 #   hour=12|21.5         day (sunny daylight tint) or night (production NIGHT_TINT, lantern and window lights)
 #   task=stills          one PNG per res x framing (res=, framing=), plus a native-resolution PNG
 #   task=walk            the walking route at a fixed step (fps=, default 50), saving a 1:1 screen crop per frame
@@ -133,6 +134,8 @@ func _tex(name: String) -> Texture2D:
 		path = ROOT + "placeholder/16/%s.png" % name        # column A has no separate shadows or lantern
 	elif art == "a" and A_CROPS.has(name):
 		path = "res://art/style_tests/ART-003/w3p/garden/crops_w3p.png"
+	elif art == "pl" and FileAccess.file_exists(ROOT + "pl/%d/%s.png" % [D, name]):
+		path = ROOT + "pl/%d/%s.png" % [D, name]           # E2-PL: a PixelLab trial piece; others stay placeholders
 	else:
 		path = ROOT + "placeholder/%d/%s.png" % [D, name]
 	var img := Image.load_from_file(ProjectSettings.globalize_path(path))
@@ -517,7 +520,7 @@ func _res_list() -> Array:
 
 
 func _tag() -> String:
-	return "%s%d_%s_%s" % ["A" if art == "a" else "P", D, "night" if night else "day", framing]
+	return "%s%d_%s_%s" % ["A" if art == "a" else ("L" if art == "pl" else "P"), D, "night" if night else "day", framing]
 
 
 # --- Tasks -----------------------------------------------------------------------------------------------------
