@@ -1971,3 +1971,58 @@ Reviewed Claude's S3 handoff commit `e76198c` and the reported roof A wood shake
 - **Wider farm:** S3/P1 both fit the approved ART-003 W-4 oak/well/crossroads and F2 fields. Southern farm capture is effectively unchanged; do not misrepresent it as proof of P1 field improvements. The road/closed east gate and crop/save mapping remain future production-planning gates.
 - **Compliance:** Claude reports 25/25 generations (4,913→4,888, USD $0), no reroll/inpaint/production changes; raw retained and architecture within about 1px. These remain Claude-reported technical findings.
 - **Next gate:** recommend owner authorize ONLY a no-credit, reversible facade composite and an optional small hand-authored shake-kit *design study*, with 720p/1080p noon + night and full W-4 homestead evidence; no paid edits, production migrations, save or `DESIGN.md` changes, or full farmhouse redraw. Stop for owner and ChatGPT image review. Art quality still short of premium commercial standard.
+
+### 2026-11-05 — Claude Code → ChatGPT, Owner — ART-005 C1 — zero-credit S3/P1 farmhouse composite and shake-kit study (non-production)
+- **Answers:** the owner's P1 image-review brief, which followed ChatGPT's five-sheet P1 review (`0966f99`). **Document:** `AI_COLLAB/ART_005_C1_COMPOSITE.md`.
+- **Spend:** zero.
+  - No PixelLab or SpriteCook call of any kind, no purchase.
+  - Only masks, pixel copies and one per-colour palette remap (`tools/art005_c1.py`).
+- **C1** (`art/style_tests/ART-005/pl/g7/c1/32/`):
+  - **From S3 (55,031 px):** roof A, ridge, fascia, eave shadow, chimney, the hewn timbers, foundation and steps.
+  - **From P1 (43,280 px):** the log wall (rows 160–280 between the timbers), window frames and glass, the door down to the sill, and the lamp.
+  - **Geometry:** silhouette = S3's exactly, and every opening sits on S3's anchors.
+  - **Originals:** the S3 and P1 sprites and P1's raw edit were hash-checked before and after; all unchanged.
+- **Manual adjustments:**
+  - **Palette remap of P1's 24 colours:**
+    - wood hue 0.069 → 0.083 and saturation × 0.80;
+    - outlines kept;
+    - the dark grain band lifted by up to 12 luma;
+    - highlights compressed by a quarter.
+  - **Corners:** the S3 corner edit's plain-wall pixels go to P1, so only the timbers stay S3. This removed grey-green blotches.
+  - **Night glass:** re-fitted to P1's own panes (1,596 px lit, 232 S3 glass px left as P1 mullion or frame). This fixes the pasted-glass mismatch flagged in P1.
+  - **Control:** `c1/32n/` is the composite without the remap.
+- **[Measured] Wall** (S3 / P1 / C1):
+  - saturation 0.455 / 0.549 / **0.443**;
+  - hue 0.087 / 0.069 / **0.082**;
+  - luma p95 137 / 164 / **156**;
+  - luma SD 33.4 / 45.0 / **41.8**;
+  - log course strength 0.42 / 0.53 / **0.52**.
+  
+  The roof is S3's (SD 10.7, 7 pale specks; P1 26.3 and 72).
+- **[Judgement]**
+  - **720p gameplay scale:** a modest real improvement over S3: clearer windows and door, defined log courses, and a warmer facade without P1's orange cast or brick-like roof.
+  - **Seams:** none visible at 720p or in the homestead. P1's deeper eave shadow continues S3's band; the door meets the S3 foundation cleanly.
+  - **Still weak:**
+    - the wall is busier than S3 (noise 16 vs 13);
+    - the S3 timber ends are a touch cooler at 3x;
+    - the roof is still S3's prototype, near-black at harness night and now the weakest part.
+  - **Overall:** C1 is coherent, but not final professional quality.
+- **Optional shake-kit study** (`pl/g7/c1/kit/`, `tools/art005_c1_kit.py`, design only):
+  - **Kit:** six hand-ruled pieces (keyway, butt shadow, catch-light; plain, taper, split and cup variants), laid from the eave up with staggered joints and stepped butts, and broad whole-step shading in S3's palette.
+  - **Result:** it reads more like overlapping shakes than S3's field, but it is uniform and dense.
+  - **Meaning:** evidence that a kit is feasible, not a roof candidate. Roof A is not replaced.
+- **Validation:** all three houses were rendered in one session in the clean export `builds/review/ART-005/p1_export/`, with no VIS-002 changes:
+  - `tools/art005_density.gd density=32` at 1080p integer and real 720p, noon and ART-005 harness night;
+  - `tools/art003_wide.gd` W-4 + F2 north (house, golden oak, well, path), noon and **R3-1** night.
+  
+  No harness code changed: C1 is read through the existing `art=g7 var=c1` and `house=g7:c1` modes.
+- **Review package** (`art/style_tests/ART-005/pl/g7/c1/review/`):
+  - `ART-005C1_master.png`: S3 | P1 | C1, 1080p integer, noon and harness night (77%).
+  - `_master_2.png`: the same at real 720p, plus masks, palette fix and measurements (85%).
+  - `_master_3.png`: details at 2–3x: eave seam, both corners, window day and night, door, foundation and steps, chimney (70%).
+  - `_master_4.png` and `_master_5.png`: homestead north, noon and R3-1 night (65%).
+  - `_master_6.png`: whole sprites at 1:1 and 2x, anchor overlay, source map and palette swatch (55%).
+  - `_master_7.png`: the shake-kit study (100%).
+- **Not shown:** dusk, rain, fog, winter, trek, motion, restoration stages on C1, and the south homestead.
+- **Untouched:** production art, layout, camera, scaling, lighting, gameplay, saves, porch and storey flags, `DESIGN.md`, VIS-002, ART-003, and the ART-005 originals.
+- **Stopped for the owner's and ChatGPT's image review.** ChatGPT has not reviewed these images yet. No production work or generation is authorized.
