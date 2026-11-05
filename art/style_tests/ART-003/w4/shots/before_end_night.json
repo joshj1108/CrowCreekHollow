@@ -1,0 +1,109 @@
+{
+  "hour": "21.5",
+  "lights": [
+    {
+      "at_tiles": [
+        72.4,
+        42.5
+      ],
+      "colour": "ffd38a",
+      "energy": 0.5,
+      "reach_tiles": 2.5
+    },
+    {
+      "at_tiles": [
+        61.0,
+        20.3
+      ],
+      "colour": "ffc070",
+      "energy": 0.5,
+      "reach_tiles": 4.0
+    },
+    {
+      "at_tiles": [
+        55.0,
+        29.3
+      ],
+      "colour": "ffc070",
+      "energy": 0.5,
+      "reach_tiles": 4.0
+    },
+    {
+      "at_tiles": [
+        56.5,
+        18.0
+      ],
+      "colour": "ffc878",
+      "energy": 0.540000021457672,
+      "reach_tiles": 2.4
+    },
+    {
+      "at_tiles": [
+        62.4,
+        18.0
+      ],
+      "colour": "ffc878",
+      "energy": 0.540000021457672,
+      "reach_tiles": 2.4
+    },
+    {
+      "at_tiles": [
+        59.5,
+        20.5
+      ],
+      "colour": "ffd27a",
+      "energy": 0.540000021457672,
+      "reach_tiles": 1.6
+    }
+  ],
+  "mode": "wide",
+  "perf": {
+    "adapter": "AMD Radeon Graphics",
+    "draw_calls": 760,
+    "frame_ms_mean": 2.92,
+    "frame_ms_median": 2.79,
+    "frame_ms_p95": 3.92,
+    "objects": 1377,
+    "primitives": 2868,
+    "process_ms": 401.53,
+    "render_cpu_ms": 1.01,
+    "render_gpu_ms": 1.81,
+    "renderer": "gl_compatibility"
+  },
+  "regions": {
+    "forest_edge": {
+      "above_0.12": 0.0963,
+      "mean": 0.0258,
+      "p10": 0.0011,
+      "p90": 0.0992,
+      "pixels": 563757
+    },
+    "frame": {
+      "above_0.12": 0.2188,
+      "mean": 0.0608,
+      "p10": 0.0014,
+      "p90": 0.1697,
+      "pixels": 921600
+    },
+    "lantern_pool": {
+      "above_0.12": 0.5463,
+      "mean": 0.1568,
+      "p10": 0.0031,
+      "p90": 0.343,
+      "pixels": 45244
+    },
+    "play_area": {
+      "above_0.12": 0.3924,
+      "mean": 0.11,
+      "p10": 0.0362,
+      "p90": 0.1759,
+      "pixels": 312599
+    }
+  },
+  "sanity": 99.8967705721835,
+  "size": [
+    1280,
+    720
+  ],
+  "weather": "sunny"
+}

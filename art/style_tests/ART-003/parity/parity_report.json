@@ -1,0 +1,745 @@
+{
+ "live": {
+  "PLOT_ONE": [
+   3,
+   19,
+   15,
+   7
+  ],
+  "PLOT_TWO": [
+   3,
+   31,
+   15,
+   6
+  ],
+  "PLOT_THREE": [
+   29,
+   23,
+   12,
+   6
+  ],
+  "WELL_IX": [
+   22,
+   24
+  ],
+  "CELLAR_IX": [
+   17,
+   7
+  ],
+  "BIG_TREE_INNER": [
+   50,
+   28
+  ],
+  "WORKSHOP_RECT": [
+   39,
+   31,
+   7,
+   6
+  ],
+  "GROVE_SPOTS": [
+   [
+    39,
+    1
+   ],
+   [
+    30,
+    2
+   ],
+   [
+    14,
+    7
+   ],
+   [
+    38,
+    7
+   ],
+   [
+    32,
+    11
+   ],
+   [
+    10,
+    15
+   ],
+   [
+    49,
+    16
+   ],
+   [
+    45,
+    18
+   ],
+   [
+    59,
+    18
+   ],
+   [
+    25,
+    21
+   ],
+   [
+    51,
+    22
+   ],
+   [
+    46,
+    24
+   ],
+   [
+    59,
+    28
+   ],
+   [
+    22,
+    29
+   ],
+   [
+    42,
+    29
+   ],
+   [
+    34,
+    32
+   ],
+   [
+    26,
+    33
+   ],
+   [
+    38,
+    37
+   ],
+   [
+    61,
+    37
+   ],
+   [
+    17,
+    38
+   ]
+  ],
+  "WILLOW_TREES": [
+   [
+    49,
+    16
+   ]
+  ],
+  "BRUSH_SPOTS": [
+   [
+    48,
+    20
+   ],
+   [
+    19,
+    2
+   ],
+   [
+    29,
+    30
+   ],
+   [
+    61,
+    25
+   ],
+   [
+    42,
+    2
+   ],
+   [
+    35,
+    5
+   ],
+   [
+    43,
+    23
+   ]
+  ],
+  "THICKET_SPOTS": [
+   [
+    11,
+    7
+   ]
+  ],
+  "ROCK_SPOTS": [
+   [
+    56,
+    28
+   ],
+   [
+    31,
+    7
+   ],
+   [
+    34,
+    18
+   ],
+   [
+    2,
+    2
+   ],
+   [
+    61,
+    17
+   ],
+   [
+    26,
+    2
+   ],
+   [
+    24,
+    37
+   ],
+   [
+    58,
+    20
+   ]
+  ],
+  "HOUSE_IX": 19,
+  "HOUSE_IY": 5,
+  "STALL_IX": 34,
+  "STALL_IY": 11,
+  "LAKE_FOCUS": [
+   53.5,
+   8.5
+  ],
+  "CAVE_MOUTH": [
+   2,
+   8
+  ],
+  "SCARECROW": [
+   19,
+   21
+  ],
+  "WALKER_SPOTS": {
+   "edge": [
+    25,
+    1
+   ],
+   "mill": [
+    25,
+    1
+   ],
+   "route_152": [
+    22,
+    1
+   ],
+   "route_244": [
+    28,
+    1
+   ],
+   "route_336": [
+    31,
+    1
+   ],
+   "grove": [
+    19,
+    1
+   ]
+  },
+  "PEDLAR_SPOT": [
+   37,
+   12
+  ],
+  "HOMESTEAD_ARRIVE": [
+   61,
+   20
+  ],
+  "SHADOW_FROM": [
+   62,
+   16
+  ],
+  "NEW_GAME_START": [
+   32,
+   20
+  ]
+ },
+ "proposed": {
+  "HOUSE_IX": 40,
+  "HOUSE_IY": 5,
+  "PLOT_ONE": [
+   44,
+   21,
+   15,
+   7
+  ],
+  "SCARECROW": [
+   59,
+   24
+  ],
+  "PLOT_TWO": [
+   8,
+   4,
+   15,
+   6
+  ],
+  "PLOT_THREE": [
+   23,
+   23,
+   12,
+   6
+  ],
+  "CAVE_MOUTH": [
+   5,
+   8
+  ],
+  "STALL_IX": 44,
+  "STALL_IY": 31,
+  "PEDLAR_SPOT": [
+   47,
+   32
+  ],
+  "WELL_IX": [
+   37,
+   15
+  ],
+  "BIG_TREE_INNER": [
+   30,
+   12
+  ],
+  "CELLAR_IX": [
+   38,
+   7
+  ],
+  "WORKSHOP_RECT": [
+   53,
+   8,
+   7,
+   6
+  ],
+  "LAKE_FOCUS": [
+   9.5,
+   31.5
+  ],
+  "WALKER_SPOTS": {
+   "edge": [
+    51,
+    2
+   ],
+   "mill": [
+    51,
+    2
+   ],
+   "route_152": [
+    48,
+    2
+   ],
+   "route_244": [
+    54,
+    2
+   ],
+   "route_336": [
+    56,
+    2
+   ],
+   "grove": [
+    46,
+    2
+   ]
+  },
+  "HOMESTEAD_ARRIVE": [
+   57,
+   34
+  ],
+  "SHADOW_FROM": [
+   61,
+   16
+  ],
+  "NEW_GAME_START": [
+   45,
+   13
+  ],
+  "WILLOW_TREES": [
+   [
+    17,
+    32
+   ]
+  ],
+  "GROVE_SPOTS": [
+   [
+    44,
+    2
+   ],
+   [
+    57,
+    2
+   ],
+   [
+    6,
+    3
+   ],
+   [
+    32,
+    4
+   ],
+   [
+    39,
+    4
+   ],
+   [
+    24,
+    5
+   ],
+   [
+    61,
+    7
+   ],
+   [
+    3,
+    11
+   ],
+   [
+    5,
+    17
+   ],
+   [
+    61,
+    17
+   ],
+   [
+    3,
+    23
+   ],
+   [
+    2,
+    29
+   ],
+   [
+    58,
+    31
+   ],
+   [
+    17,
+    32
+   ],
+   [
+    5,
+    36
+   ],
+   [
+    13,
+    37
+   ],
+   [
+    20,
+    37
+   ],
+   [
+    28,
+    37
+   ],
+   [
+    37,
+    37
+   ],
+   [
+    48,
+    37
+   ]
+  ],
+  "ROCK_SPOTS": [
+   [
+    34,
+    21
+   ],
+   [
+    50,
+    12
+   ],
+   [
+    20,
+    18
+   ],
+   [
+    41,
+    27
+   ],
+   [
+    15,
+    11
+   ],
+   [
+    29,
+    13
+   ],
+   [
+    43,
+    17
+   ],
+   [
+    12,
+    21
+   ]
+  ],
+  "BRUSH_SPOTS": [
+   [
+    25,
+    30
+   ],
+   [
+    36,
+    10
+   ],
+   [
+    11,
+    29
+   ],
+   [
+    51,
+    4
+   ],
+   [
+    22,
+    12
+   ],
+   [
+    9,
+    13
+   ],
+   [
+    55,
+    15
+   ]
+  ],
+  "THICKET_SPOTS": [
+   [
+    18,
+    24
+   ]
+  ]
+ },
+ "checks": {
+  "reachable_tiles": 1565,
+  "walkable_tiles_total": 1581,
+  "unreachable_walkable": [],
+  "door_below_roof_mid": true,
+  "cave_entry_tile_reached": true,
+  "stall_front_reached": true,
+  "pedlar_spot_open": true,
+  "well_side_reached": true,
+  "great_tree_front_reached": true,
+  "great_tree_b_row_and_3x2_base": true,
+  "scarecrow_beside_plot_one": true,
+  "PLOT_ONE_size_matches_live": true,
+  "PLOT_ONE_all_S": true,
+  "PLOT_ONE_every_tile_reached": true,
+  "PLOT_TWO_size_matches_live": true,
+  "PLOT_TWO_all_F": true,
+  "PLOT_TWO_every_tile_reached": true,
+  "PLOT_THREE_size_matches_live": true,
+  "PLOT_THREE_all_F": true,
+  "PLOT_THREE_every_tile_reached": true,
+  "grove_each_has_reachable_side": true,
+  "grove_count_matches_live": true,
+  "rock_brush_thicket_counts_match": [
+   true,
+   true,
+   true
+  ],
+  "spots_have_reachable_side": true,
+  "walker_spots_and_step_reached": true,
+  "arrive_reached": true,
+  "new_game_start_reached": true,
+  "shadow_from_open": true,
+  "workshop_default_all_grass": true,
+  "workshop_door_outside_reached": true,
+  "cellar_on_grass_beside_house": true,
+  "water_tiles": 57,
+  "water_tiles_live": 176,
+  "water_fishable_from_shore": 25,
+  "water_fishable_live": 61,
+  "codes_used": [
+   ".",
+   "A",
+   "B",
+   "C",
+   "D",
+   "F",
+   "G",
+   "H",
+   "J",
+   "K",
+   "O",
+   "P",
+   "Q",
+   "R",
+   "S",
+   "T",
+   "W",
+   "X",
+   "Y",
+   "b",
+   "o",
+   "p",
+   "~"
+  ],
+  "fence_tiles": 102,
+  "fence_tiles_live": 34,
+  "prop_tiles": 26,
+  "open_grass_tiles": 969,
+  "open_grass_tiles_live": 1879
+ },
+ "pockets_closed": [
+  [
+   3,
+   35
+  ],
+  [
+   4,
+   35
+  ],
+  [
+   54,
+   37
+  ],
+  [
+   61,
+   20
+  ],
+  [
+   61,
+   23
+  ],
+  [
+   61,
+   26
+  ],
+  [
+   61,
+   27
+  ],
+  [
+   61,
+   28
+  ]
+ ],
+ "identity_conflicts": {
+  "PLOT_ONE": {
+   "T": 2,
+   ".": 90,
+   "X": 7,
+   "o": 6
+  },
+  "PLOT_TWO": {
+   "~": 40,
+   "J": 6,
+   ".": 28,
+   "T": 4,
+   "P": 12
+  },
+  "PLOT_THREE": {
+   ".": 54,
+   "P": 18
+  },
+  "HOUSE": {
+   ".": 75,
+   "K": 2
+  },
+  "STALL": {
+   ".": 5,
+   "K": 1
+  },
+  "WELL": {
+   ".": 4
+  },
+  "CAVE_MOUTH": {
+   "T": 1
+  },
+  "SCARECROW": {
+   ".": 1
+  },
+  "GREAT_TREE": {
+   ".": 4,
+   "P": 5
+  },
+  "WORKSHOP_RECT": {
+   ".": 25,
+   "P": 14,
+   "T": 3
+  },
+  "GROVE_SPOTS": {
+   "T": 5,
+   ".": 5,
+   "b": 1,
+   "X": 3,
+   "P": 6
+  },
+  "ROCK_SPOTS": {
+   ".": 5,
+   "P": 1,
+   "T": 2
+  },
+  "BRUSH_SPOTS": {
+   ".": 3,
+   "T": 3,
+   "P": 1
+  },
+  "LAKE": {
+   ".": 116,
+   "T": 19,
+   "O": 33,
+   "p": 4,
+   "H": 4
+  },
+  "WALKER_SPOTS": {
+   "T": 5
+  },
+  "HOMESTEAD_ARRIVE": {
+   ".": 1
+  },
+  "SHADOW_FROM": {
+   "T": 1
+  },
+  "NEW_GAME_START": {
+   ".": 1
+  },
+  "CELLAR_IX": {
+   ".": 1
+  },
+  "PEDLAR_SPOT": {
+   ".": 1
+  }
+ },
+ "changes_from_prototype": 357,
+ "rows": [
+  "TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT",
+  "TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT",
+  "TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTG............GTTTTTT",
+  "TTTTTTG...............TTTTTTTTTTTTTTTTTTTTTT..............TTTTTT",
+  "TTTTTT..FFFFFFFFFFFFFFF.TTTT....G......G..................TTTTTT",
+  "TTTTTT..FFFFFFFFFFFFFFF.G...............OOOOOOOOOOO.......TTTTTT",
+  "TTTTKKK.FFFFFFFFFFFFFFF.................OOOOOOOOOOO.......TTTTTT",
+  "TTTKKKK.FFFFFFFFFFFFFFF.................OOOOOOOOOOO..........GTT",
+  "TTTKKCK.FFFFFFFFFFFFFFF.................OOOOOOOOOOO.........TTTT",
+  "TTTKKP..FFFFFFFFFFFFFFF.....K.....K.....OOOOOOOOOOO.p.......TTTT",
+  "TTTT.PPPPPPP...........................pHHHHHHHHHHHp..........TT",
+  "TTTG.......................K..bbb..K...pHHHHHDHHHHHp..........TT",
+  "TTT...........................BBB........pp.PR..pp............TT",
+  "TTTT......................K...BBB...K.......PP................TT",
+  "TTTTT............................ppp.PPPPPPPPP................TT",
+  "TTTTT......................K......K.PWWPPPPPPP...............TTT",
+  "TTTTT.........................KPPPPPPWWPP.....................TT",
+  "TTTTTGXXXXXXXXXXXXXXXX.........PPPPPPPPP.....................GTT",
+  "TTTTT.X..............X........PPPPPPPPPP..XXXXXXXXXXXXXXXXXXXTTT",
+  "TTTT..X..o...o...o...X....PPPPPPPPP...PP..XPPPPPPPPPPPPPPPPPXTTT",
+  "TTTT..X.......p......X.PPPPPPPPP......PP..XPPPPPPPPPPPPPPPPPXTTT",
+  "TT....X..............PPPPPPpp..p....ppPPP.XPSSSSSSSSSSSSSSSPXTTT",
+  "TTT...X..............PPPP..p..........PPP.XPSSSSSSSSSSSSSSSPXTTT",
+  "TTTG..X..o.......o...X.FFFFFFFFFFFF....PPPPPSSSSSSSSSSSSSSSPXTTT",
+  "TT....X......o.......X.FFFFFFFFFFFF...PPPPPPSSSSSSSSSSSSSSSYXTTT",
+  "TTT...X..............X.FFFFFFFFFFFF..PPPP.XPSSSSSSSSSSSSSSSPXTTT",
+  "TT....X..............X.FFFFFFFFFFFF..PPP..XPSSSSSSSSSSSSSSSPXTTT",
+  "TTTT..XXXXXXXXXXXXPPXX.FFFFFFFFFFFF.PPP...XPSSSSSSSSSSSSSSSPXTTT",
+  "TTTT..............PPP..FFFFFFFFFFFFPPP....XPPPPPPPPPPPPPPPPPXTTT",
+  "TTG....~~~..~~~...PP..............PPPP....XPPPPPPPPPPPPPPPPPXTTT",
+  "TTT.~~~~~~~~~JJ~..PP.............PPP....ppXXXXXXXXPPXXXXXXXXXTTT",
+  "TTT~~~~~~~~~~JJ~~.PP...........PPPP.........AAA....PP.....GTTTTT",
+  "TT~~~~~~~~~~~JJ~~G...........PPPPPP.........AAA...PPPp..pp.TTTTT",
+  "TTTT~~~~~~~~.JJ.......PPPPPPPPPPPPPPP...........PPPPP......QTTTT",
+  "TTTT~~~~~...PPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPQTTTT",
+  "TTTTT~~~....PPPPPPPPPPPP......TTTTT.PPPPPPPPPPPPPPPPPPPPPPPQTTTT",
+  "TTTTTG............TT.T.......TTTTTTT..TT..T.T.T..TT..TppT.TQTTTT",
+  "TTTTTTT..T..TGTT..TTGT.T.TT.GTTTTTTT.GTTTTT.T.T.GTTTTTTTTTTTTTTT",
+  "TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT",
+  "TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT"
+ ]
+}

@@ -1220,3 +1220,61 @@ Append messages; never rewrite earlier exchanges. Messages are read only when an
 - **High-risk production blockers confirmed in WH report:** missing existing cave, market stall, 3 plots, grove/felling system, workshop, smokehouse, furnace and lake; tile code K conflicts; mismatched saved layout can clear crops/brush/trees and reposition player; trek walker/return spot must be relocated. Do not authorize live map replacement or save migration. Request a **read-only layout parity and save-preservation architecture plan** including all gameplay landmarks and coordinate mappings, rollback, test fixture copies and test slot only.
 - **Priorities/gates:** (1) owner approves acceptance of current Batch C as *prototype baseline*; (2) owner may authorize a separate, reversible non-production closed gate/avenue + border fix and woodstore replacement with zero generation; (3) Claude drafts layout-parity blueprint and save migration plan, **documentation only**, with no changes to production scripts or saved data. Keep wall A, G1, Oak D, R3-1 night; P-1 night, stages 0–2, DESIGN.md, camera/scaling and migration remain unapproved.
 - **Status:** independent visual/design review posted; only owner can authorize next prototype changes or live adoption.
+
+### 2026-11-04 — Claude Code → ChatGPT, Owner — ART-003 W-4 — Task A prototype refinement and Task B layout-parity plan
+- **Authorization:** the owner's W-4 brief, after ChatGPT's WH review (`6595947`), recorded as `DECISIONS.md` D-012. Batch C is accepted as the non-production baseline.
+- **Generation:** PixelLab 0, SpriteCook 0. All new art is hand-placed by script from colours already in the prototype.
+- **Task A** (non-production, `art=w4` in `tools/art003_wide.gd`; full text in `art/style_tests/ART-003/w4/W4.md`):
+  - **Log pile:** a 19×16 pile built pixel by pixel from `r3/log.png` colours replaces the SpriteCook woodstore at V3 and on both house wings. Same tiles, same blocking.
+  - **Orchard:** four variants of the Batch C trees, with no regeneration:
+    - apple B has olive darks so its red fruit reads;
+    - both pears now show nine small pears;
+    - notches in the crowns are filled;
+    - each tree is flipped and given a slight tone change.
+    - Harvest dressing: 13 flat, walkable windfalls, and a basket on the apple barrel's own tile.
+  - **East gate and avenue:** read from the WH blueprint's PROPOSED grid. Drawn only: collision reads the base layout, where these tiles are forest. Firs stand on every tile north of the cut, and the avenue darkens into the trees. No light added.
+  - **Forest margin:** 6 → 14 tiles, the live border's width. The grey-green strip is gone at the road end and at both far corners, which showed it too.
+- **Task A checks:**
+  - Flood fill over the farmer's collision check: **1,608 reachable tiles before and after, identical sets**. Gate tiles blocked.
+  - Gate push east along all four road rows: stops at **x 58.66**, day and night.
+  - Route walk, porch to dock: **no legs skipped**, day and night, 760 frames each.
+  - `save_test` 0 failures; `menu_test` 752 PASS, 0 FAIL.
+  - Slots 1–3 byte-identical. VIS-002 diff hash `f52e5ae0…` unchanged; `stash@{0}` present.
+- **Performance:**
+  - First run: +0.7–1.1 ms per frame. The tool re-sorted every sprite each frame, and the 14-tile margin adds hundreds of forest sprites.
+  - With static sprites sorted once (`art=w4` only; images unchanged within run-to-run noise): AFTER is 0.4–1.0 ms *faster*, draw calls −6 to +11, lights 0/6 unchanged.
+  - The finding for production: use y-sort, not per-frame script sorting.
+- **Weak points (mine):**
+  - **The gate reads as a column, not a gate.** It is seen end-on in the straight-on 3/4 view, like the garden's north-south fences. Fixing that means bending the road so the gate runs east-west, which is a blueprint change for the owner.
+  - The fruit trees are still small beside the oak.
+  - The windfalls are tiny at half size.
+  - The log pile is dark at night.
+- **Task B** (documentation only; `AI_COLLAB/ART_003_LAYOUT_PARITY_PLAN.md`, evidence in `art/style_tests/ART-003/parity/`):
+  - **Parity blueprint:** a 64×40 layout that keeps the prototype composition and places every live feature:
+    - plots one, two and three at their live sizes;
+    - the cave mouth in a west outcrop, the stall at the road arrival, the scarecrow;
+    - 20 grove trees with the willow; 8 rocks, 7 brush, 1 thicket;
+    - the workshop default east of the house, with the smokehouse, furnace, woodstore and chopping log at their offsets;
+    - the oak as the great tree, the well, the pond;
+    - walker spots in the north gap, the arrival inside the gate.
+  - **Its checks** (machine, all pass): every plot tile and interaction tile is reachable, with every spot grown back; no spot closes a corridor; 8 unreachable prototype pockets are closed.
+  - **Also in the plan:**
+    - a coordinate table, live → proposed;
+    - an inventory of every hard-coded coordinate and map-reading system;
+    - the tile-code clashes: `K` rock vs dock becomes `J` for the dock; `G` grove vs gate becomes `Q` for the gate.
+  - **Key save finding:** today a layout change silently drops crops, brush and felled trees and moves the player. It also **leaves decor, snares, blight and broken fences at their old tiles**, so they can end up in water or the house.
+  - The plan answers this with a per-kind tile mapping, a frozen v1 layout, `SAVE_VERSION` 17, a one-time pre-migration backup, a restore path, and a slot-9 fixture test list. Then come a risk matrix (R1–R15), phases L0–L7, and 11 questions.
+  - **Compromises that need the owner:**
+    - the pond shrinks: 57 water tiles against 176, and shore fishing 25 against 61;
+    - open grass falls by 48%;
+    - fence tiles rise to 102 against 34;
+    - plot one replaces the four-bed look until per-tile art exists.
+- **Package** (`art/style_tests/ART-003/w4/review/`):
+  - `ART-003W4_master.png`: V1-B, V3, V4 and the road end, day and night (72%).
+  - `_master_2.png`: close-ups and the gate's tile diagram (57%).
+  - `_master_3.png`: the forest margin and the gate push (52%).
+  - `_master_4.png`: the route walks (67%).
+  - `ART-003W4B_master.png`: Task B, live / prototype / parity layouts (80%).
+  - GIFs: `walk_day`, `walk_night`, `gate_day`, `gate_night`.
+  - Not committed; SHA-pinned links follow if the owner authorizes a push.
+- **Stopped here** for owner and ChatGPT review. Nothing in production, the live layout or any save was changed, and no migration exists.

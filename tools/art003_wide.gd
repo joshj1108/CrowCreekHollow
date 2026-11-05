@@ -28,6 +28,15 @@ extends "res://tools/art003_round3s.gd"
 #                             road's east end, wheel ruts along the road, grass tufts breaking the path edges, rushes
 #                             thickening toward the pond, a rain barrel and compost at the garden's south-west corner,
 #                             apple and pear trees (w3c/orchard) in the orchard. Props block their tiles (c_block)
+#   art=w4                    ART-003 W-4 refinement (layout b only), on top of art=w3c, no generation (art in w4/):
+#                             a low log pile hand-built from r3/log.png in place of the woodstore at V3 and on both
+#                             house wings; orchard crown variants (apple a/b, pear a/b), windfalls and a basket; the
+#                             closed east gate (x 59, rows 33-36) and a forest avenue beyond it, drawn only (collision
+#                             keeps the base layout, so the gate tiles block exactly as the forest did); a 14-tile
+#                             forest margin (the live border's width) instead of 6
+#   check=reach               print the tiles the farmer can reach from the porch (flood fill over the collision check)
+#                             and write them to <out>_reach.txt, then quit; walk=gate drives the farmer east along the road
+#                             into the gate and prints where it stops
 #   wall=a|b|c|m              with art=w3p: the house's wall variant (a warm weathered, b dark weathered, the default,
 #                             c grey weathered, m the a/b midpoint)
 #   house=prod                with art=w3b: keep the production house_stage_3 instead of the alternative
@@ -51,7 +60,7 @@ const WIDE := "res://art/style_tests/ART-003/wide/"
 const GW := 64
 const GH := 40
 var CH := 16          # chunk size in tiles (chunk=N to try others)
-const MARGIN := 6     # tiles of forest drawn round the inner farm
+var MARGIN := 6       # tiles of forest drawn round the inner farm (W-4: 14, the live border's width)
 const VIEWS := {"V1": Vector2(37.5, 9.5), "V2": Vector2(49.0, 24.0), "V3": Vector2(31.0, 19.0),
 	"V4": Vector2(14.0, 27.5), "V5": Vector2(45.0, 12.5)}
 const VIEWS_B := {"V1": Vector2(38.5, 10.0), "V5": Vector2(45.0, 13.5)}   # the variant's house sits a row lower
@@ -68,6 +77,7 @@ const W3 := "res://art/style_tests/ART-003/w3/"
 const W3B := "res://art/style_tests/ART-003/w3b/"
 const W3P := "res://art/style_tests/ART-003/w3p/"
 const W3C := "res://art/style_tests/ART-003/w3c/"
+const W4 := "res://art/style_tests/ART-003/w4/"
 const GRASS_LIFT := {"1": 1.15, "2": 1.30}
 
 var grid: Array = []          # rows of single-character codes
@@ -81,9 +91,19 @@ var sorted: Array = []        # [Sprite2D, base y in tiles]
 var stalls: Array = []        # route legs the walker had to skip
 var mainref
 var c_block := {}             # W-3C: tiles its props stand on (blocked like any prop)
+var sorted_once := false
+var overlay := {}             # W-4: drawn-only codes (the gate and avenue); collision never reads them
+
+
+func _code_base(x: int, y: int) -> String:
+	if x < 0 or y < 0 or x >= GW or y >= GH:
+		return "T"
+	return grid[y][x]
 
 
 func _code(x: int, y: int) -> String:
+	if overlay.has(Vector2i(x, y)):
+		return overlay[Vector2i(x, y)]
 	if x < 0 or y < 0 or x >= GW or y >= GH:
 		return "T"
 	return grid[y][x]
@@ -102,13 +122,17 @@ func _w3p() -> bool:
 
 
 func _w3c() -> bool:
-	return o3.get("art", "") == "w3c"
+	return o3.get("art", "") == "w3c" or _w4()
+
+
+func _w4() -> bool:
+	return o3.get("art", "") == "w4"
 
 
 # The ground material under a map code: g grass, p path (paths, the garden floor, the porch, the dock's land end,
 # round the well), w water (the pond, and the W-3 dock's tiles, which stand over water).
 func _mat(c: String) -> String:
-	if "PwSgRkcW".contains(c):
+	if "PwSgRkcWG".contains(c):   # G, the W-4 gate's leaves, stand on the road
 		return "p"
 	if c == "~" or c == "K":
 		return "w"
@@ -135,6 +159,9 @@ func _initialize() -> void:
 		file = WIDE + ("blueprint_wide_v1b_w3b.txt" if _w3b() else "blueprint_wide_v1b_w3.txt")
 	for line in FileAccess.get_file_as_string(file).split("\n", false):
 		grid.append(line)
+	if _w4():
+		MARGIN = 14
+		_w4_layout()
 	var opt := o3
 	CH = int(o3.get("chunk", "16"))
 	DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_WINDOWED)
@@ -167,7 +194,126 @@ func _initialize() -> void:
 		_build(main, night)
 		main.player.is_blocked = Callable(self, "_blocked")
 		main.tree_exiting.connect(_restore)
+		if o3.get("check", "") == "reach":
+			_reach()
+			_restore()
+			quit()
+			return
 	await _finish(main, opt)
+
+
+# --- W-4 refinement ---------------------------------------------------------------------------------------------
+
+func _w4_tex(path: String) -> Texture2D:
+	return ImageTexture.create_from_image(Image.load_from_file(ProjectSettings.globalize_path(W4 + path)))
+
+
+# The gate and avenue, read from the approved blueprint's PROPOSED grid (wh/exit_blueprint.txt): every tile from x 59
+# east that differs from CURRENT becomes a drawn-only code. The blueprint's gate posts X are kept as Q here so the
+# fence code doesn't draw them as fence. Collision reads _code_base, which never sees these.
+func _w4_layout() -> void:
+	var lines := FileAccess.get_file_as_string("res://art/style_tests/ART-003/wh/exit_blueprint.txt").split("
+")
+	var cur := {}
+	var section := ""
+	for line in lines:
+		if line.begins_with("CURRENT"):
+			section = "c"
+		elif line.begins_with("PROPOSED"):
+			section = "p"
+		elif line.begins_with("y="):
+			var y := int(line.substr(2, 2))
+			var row := line.substr(6)
+			for i in row.length():
+				var x := 46 + i
+				if x < 59:
+					continue
+				var c := row[i]
+				if section == "c":
+					cur[Vector2i(x, y)] = c
+				elif cur.get(Vector2i(x, y), "") != c:
+					overlay[Vector2i(x, y)] = "Q" if c == "X" else c
+	print("W-4 overlay tiles: ", overlay.size())
+
+
+# The orchard's six trees: the four variants, each flipped or not and a step lighter or darker, so no two neighbours
+# match. Same tiles, same footprint as Batch C.
+const W4_TREES := {Vector2i(9, 19): ["apple_b", false, 1.0], Vector2i(13, 19): ["apple_a", true, 0.95],
+	Vector2i(17, 19): ["pear_a", false, 1.0], Vector2i(9, 23): ["pear_b", true, 0.96],
+	Vector2i(17, 23): ["apple_b", true, 1.04], Vector2i(13, 24): ["pear_a", true, 0.93]}
+
+
+func _w4_tree(add: Callable, x: int, y: int) -> void:
+	var e: Array = W4_TREES.get(Vector2i(x, y), ["apple_a", false, 1.0])
+	var v: float = e[2]
+	add.call(_w4_tex("orchard/%s.png" % e[0]), x + 0.5, y + 1.0, e[1], Color(v, v, v))
+
+
+func _w4_dress(add: Callable) -> void:
+	# The gate: capped posts on Q, plank leaves on G (the north leaf carries the latch).
+	var post := _w4_tex("gate/gatepost.png")
+	var leaf_n := _w4_tex("gate/gate_leaf_n.png")
+	var leaf_s := _w4_tex("gate/gate_leaf_s.png")
+	var spur := _w4_tex("gate/gate_spur.png")
+	# A soft shadow line across the road at the leaves' foot, so they read as a barrier standing on it.
+	var sh := Image.create(5, 32, false, Image.FORMAT_RGBA8)
+	sh.fill(Color(0.06, 0.04, 0.03, 0.4))
+	add.call(ImageTexture.create_from_image(sh), 59.65, 36.0, false, Color.WHITE)
+	(sorted[sorted.size() - 1] as Array)[1] = 32.0
+	for y in [32, 37]:   # the fence running on into the trees either side (drawn only; those tiles are forest)
+		add.call(spur, 59.5, y + 1.0, false, Color.WHITE)
+	for t in overlay:
+		var c: String = overlay[t]
+		if c == "Q":
+			add.call(post, t.x + 0.5, t.y + 1.0, false, Color.WHITE)
+		elif c == "G":
+			add.call(leaf_n if _code(t.x, t.y - 1) == "Q" else leaf_s, t.x + 0.5, t.y + 1.0, false, Color.WHITE)
+	# Harvest: windfalls lying flat round the trees' feet (walkable, like the lily pads), and a basket of picked fruit in
+	# front of the Batch C barrel, on the barrel's own blocked tile.
+	var wa := _w4_tex("orchard/windfall_apple.png")
+	var wp := _w4_tex("orchard/windfall_pear.png")
+	for e in [[wa, 8.4, 20.35], [wa, 9.9, 20.6], [wa, 10.3, 20.2], [wa, 12.4, 20.5], [wp, 17.9, 20.4], [wp, 16.6, 20.7],
+			[wp, 8.5, 24.3], [wp, 9.8, 24.6], [wa, 16.5, 24.4], [wa, 17.8, 24.2], [wa, 18.2, 24.7], [wp, 12.6, 25.5], [wp, 13.9, 25.3]]:
+		add.call(e[0], e[1], e[2], int(e[1] * 10.0) % 2 == 0, Color.WHITE)
+		(sorted[sorted.size() - 1] as Array)[1] = e[2] - 2.0
+	add.call(_w4_tex("orchard/basket.png"), 14.3, 20.95, false, Color.WHITE)
+
+
+# check=reach: a flood fill from the porch over the farmer's collision check, tile by tile, 4-connected.
+func _reach() -> void:
+	var start := Vector2i(ROUTE[0].floor())
+	var seen := {start: true}
+	var todo := [start]
+	while not todo.is_empty():
+		var t: Vector2i = todo.pop_back()
+		for d in [Vector2i(1, 0), Vector2i(-1, 0), Vector2i(0, 1), Vector2i(0, -1)]:
+			var n: Vector2i = t + d
+			if n.x < 0 or n.y < 0 or n.x >= GW or n.y >= GH or seen.has(n):
+				continue
+			if _blocked(inner_origin + (Vector2(n) + Vector2(0.5, 0.5)) * px):
+				continue
+			seen[n] = true
+			todo.append(n)
+	var keys := seen.keys()
+	keys.sort_custom(func(a, b): return a.y < b.y or (a.y == b.y and a.x < b.x))
+	var lines := PackedStringArray()
+	var east := 0
+	for k in keys:
+		lines.append("%d,%d" % [k.x, k.y])
+		if k.x >= 59:
+			east += 1
+	var path := ProjectSettings.globalize_path("res://" + str(o3["out"])).get_basename() + "_reach.txt"
+	DirAccess.make_dir_recursive_absolute(path.get_base_dir())
+	var f := FileAccess.open(path, FileAccess.WRITE)
+	f.store_string("
+".join(lines) + "
+")
+	f.close()
+	var gate := []
+	for y in range(33, 37):
+		gate.append(_blocked(inner_origin + Vector2(59.5, y + 0.5) * px))
+	print("reach: ", keys.size(), " tiles; reachable with x >= 59: ", east, "; gate tiles (59, 33..36) blocked: ", gate,
+		"; overlay tiles: ", overlay.size(), "; list in ", path)
 
 
 # --- W-3 Batch C ------------------------------------------------------------------------------------------------
@@ -218,7 +364,7 @@ func _c_props(add: Callable, kit: Array) -> void:
 	var groups := [
 		# V3: a woodcutting corner between the well and the oak.
 		[load("res://art/farm/chopping_log.png"), 34.4, 15.0, [Vector2i(34, 14)]],
-		[load("res://art/farm/woodstore.png"), 35.5, 15.0, [Vector2i(35, 14)]],
+		[_w4_tex("props/logpile.png") if _w4() else load("res://art/farm/woodstore.png"), 35.5, 15.0, [Vector2i(35, 14)]],
 		[load("res://art/farm/prop_stump.png"), 33.3, 15.4, [Vector2i(33, 14)]],
 		# V3: a signpost and a boulder group in the grass between the fork's south-west and south branches, and a
 		# handcart of sacks where the well path meets the south branch.
@@ -252,7 +398,7 @@ func _c_props(add: Callable, kit: Array) -> void:
 
 func _blocked(p: Vector2) -> bool:
 	var t := ((p - inner_origin) / px).floor()
-	return BLOCKS.contains(_code(int(t.x), int(t.y))) or c_block.has(Vector2i(t))
+	return BLOCKS.contains(_code_base(int(t.x), int(t.y))) or c_block.has(Vector2i(t))
 
 
 # How far a forest tile lies inside the forest, in tiles (0 at the clearing's edge), up to 4.
@@ -260,15 +406,30 @@ func _depth(x: int, y: int) -> float:
 	for r in range(1, 5):
 		for dy in range(-r, r + 1):
 			for dx in range(-r, r + 1):
-				if _code(x + dx, y + dy) != "T":
+				if _code_base(x + dx, y + dy) != "T":   # W-4: the avenue doesn't thin the forest's shade round it
 					return float(r - 1)
 	return 4.0
 
 
 func _shade_at(x: int, y: int) -> float:
+	if overlay.has(Vector2i(x, y)) and x >= 60:   # W-4: the avenue darkens under the canopy as it runs east
+		return 1.0 - shade_night * 0.85 * smoothstep(60.0, 71.0, float(x))
 	if _code(x, y) != "T":
 		return 1.0
-	return 1.0 - shade_night * smoothstep(0.0, 3.5, _depth(x, y) + 0.5)
+	var d := _depth(x, y)
+	if _avenue_wall(x, y):   # W-4: the wall of firs over the avenue stands on deep-forest ground
+		d = maxf(d, 2.5)
+	return 1.0 - shade_night * smoothstep(0.0, 3.5, d + 0.5)
+
+
+# W-4: a forest tile within three rows north of the avenue (east of the gate).
+func _avenue_wall(x: int, y: int) -> bool:
+	if overlay.is_empty() or x < 60 or _code(x, y) != "T":
+		return false
+	for k in range(1, 4):
+		if overlay.has(Vector2i(x, y + k)) and overlay[Vector2i(x, y + k)] != "T":
+			return true
+	return false
 
 
 func _near(x: int, y: int, codes: String, r: int) -> bool:
@@ -546,7 +707,9 @@ func _build(main, night: bool) -> void:
 			for k in range(1, 4):
 				if _code(x, y - k) != "T":
 					open_north = true
-			if open_north:
+			if _avenue_wall(x, y) and not open_north:   # W-4: a fir on every tile, so the avenue reads as cut through
+				add.call(fir, x + 0.5 + ((h >> 3) % 5 - 2) * 0.12, y + 1.0, h & 1 == 1, tint)
+			elif open_north:
 				if h % 2 == 0:
 					add.call(under, x + 0.5, y + 0.9, h & 4 == 4, tint)
 			elif (x + 2 * y + (h % 2)) % 3 == 0:
@@ -583,7 +746,9 @@ func _build(main, night: bool) -> void:
 					add.call(stones[(i * 3) % stones.size()], x + 0.5, y + 0.9, i % 2 == 1, Color.WHITE)
 					i += 1
 				"o":   # orchard: maples standing in for fruit trees (no fruit-tree art yet); W-3C: apple and pear, alternating
-					if _w3c():
+					if _w4():
+						_w4_tree(add, x, y)
+					elif _w3c():
 						add.call(_c_tex("orchard/apple_w3c.png" if ((x - 9) / 4 + (1 if y > 21 else 0)) % 2 == 0 else "orchard/pear_w3c.png"),
 							x + 0.5, y + 1.0, (x + y) % 2 == 0, Color.WHITE)
 					else:
@@ -622,6 +787,8 @@ func _build(main, night: bool) -> void:
 	var dressing := [load("res://art/farm/woodstore.png"), kit[2], kit[4], kit[3]]
 	if _w3p():   # W-3 polish: firewood against both wings, a chopping block, flower pots and barrels at the front
 		var wood: Texture2D = load("res://art/farm/woodstore.png")   # the same d tiles, in reading order
+		if _w4():   # W-4: the hand-built log pile on both wings
+			wood = _w4_tex("props/logpile.png")
 		dressing = [kit[2], wood, wood, load("res://art/farm/chopping_log.png"), kit[3], kit[2], kit[4], kit[4], kit[2]]
 	i = 0
 	for y in GH:
@@ -785,6 +952,8 @@ func _build(main, night: bool) -> void:
 			(sorted[sorted.size() - 1] as Array)[1] = e[1] - 2.0   # flat on the water
 	if _w3c():
 		_c_props(add, kit)
+	if _w4():
+		_w4_dress(add)
 	var fog := load("res://art/farm/weather_fog.png") as Texture2D
 	for p in [Vector2(2.0, 4.0), Vector2(57.0, 3.0), Vector2(1.0, 30.0), Vector2(55.0, 35.0), Vector2(26.0, 2.0)]:
 		var s := Sprite2D.new()
@@ -840,8 +1009,13 @@ func _process(_d):
 
 
 func _sort() -> void:
-	for e in sorted:
-		(e[0] as Sprite2D).z_index = 2 + int((e[1] + MARGIN) * 4.0)
+	# W-4: the standing sprites never move, so they are sorted once (the margin of 14 roughly doubled their number,
+	# and re-sorting all of them each frame cost about 1 ms); the farmer is sorted every frame. Earlier art= values
+	# keep the per-frame loop, so their measurements stay comparable with past packages.
+	if not (_w4() and sorted_once):
+		for e in sorted:
+			(e[0] as Sprite2D).z_index = 2 + int((e[1] + MARGIN) * 4.0)
+		sorted_once = true
 	var feet: Vector2 = (mainref.player.position - inner_origin) / px
 	mainref.player.z_index = 2 + int((feet.y + 0.45 + MARGIN) * 4.0)
 
@@ -871,7 +1045,7 @@ func _restore() -> void:
 
 # The walking route: steers toward each waypoint in turn with the move keys (8 directions), as a player would.
 func _walk(main) -> void:
-	if str(o3.get("walk", "")) != "route":
+	if not str(o3.get("walk", "")) in ["route", "gate"]:
 		await super._walk(main)
 		return
 	AudioServer.set_bus_mute(AudioServer.get_bus_index("Music"), true)
@@ -879,7 +1053,11 @@ func _walk(main) -> void:
 		main.message_label.text = ""
 		await process_frame
 	var held := {}
+	var max_x := 0.0
 	var route: Array = ROUTE.slice(0, 15) + ROUTE_W3_END if _w3() else ROUTE
+	if str(o3["walk"]) == "gate":   # east along both road rows into the gate, then try the verges either side
+		route = [Vector2(63.5, 34.5), Vector2(57.5, 35.5), Vector2(63.5, 35.5), Vector2(57.5, 33.4), Vector2(63.5, 33.4),
+			Vector2(57.5, 36.5), Vector2(63.5, 36.5)]
 	for target in route:
 		var stuck := 0
 		var best := 1e9
@@ -898,6 +1076,7 @@ func _walk(main) -> void:
 				held[k] = want[k]
 			main.message_label.text = ""
 			await process_frame
+			max_x = maxf(max_x, (main.player.position.x - inner_origin.x) / px)
 			if d.length() < best - 0.01:
 				best = d.length()
 				stuck = 0
@@ -910,6 +1089,8 @@ func _walk(main) -> void:
 		if held[k]:
 			Input.action_release(k)
 	print("route legs skipped: ", stalls)
+	print("farmer stopped at ", snappedf((main.player.position.x - inner_origin.x) / px, 0.01), ", ",
+		snappedf((main.player.position.y - inner_origin.y) / px, 0.01), " (inner tiles); furthest east: ", snappedf(max_x, 0.01))
 	for i in 30:
 		main.message_label.text = ""
 		await process_frame
