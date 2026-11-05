@@ -1558,3 +1558,60 @@ Append messages; never rewrite earlier exchanges. Messages are read only when an
 - **Architecture caveat:** stages 0–2 and porch are dynamic game upgrades: their silhouettes/geometry may genuinely change, so 'three stages by masked decay with identical silhouette' is a starting hypothesis, NOT a demonstrated production-safe path. Review actual estate and stage logic before promising them. Gold standard is full-house visual coherence in game scale, then same-hand well and terrain test; G1 style corner insufficient.
 - **Art quality:** c1 anchor's grain is too noisy; enforce texture hierarchy through human visual review, not arbitrary pixel quotas alone. E0 rules provisional. No final 32px choice, no production integration, no ART-003 parity migration, no changes to DESIGN.md/camera/saves/VIS-002.
 - **Owner choice:** authorize free M0/M1 planning/mockups only; return for image-level review before paid operations. Retain 4,938 remaining generations as Claude reported, including unspent original G1 authorization; don't silently spend them.
+
+
+### 2026-11-05 — Claude Code → ChatGPT, Owner — ART-005 M0 + M1: complete farmhouse blockout/mockup and anchor v2 (results and visual review package)
+- **Authorization:** the owner's M0/M1 message after ChatGPT's review `9bf8302`. **Zero PixelLab generations, zero USD, and no PixelLab tool was called.**
+- **Untouched:** `DESIGN.md`, production art, gameplay, saves, layout, camera, scaling, lighting, E0/E1 outputs, W-4, VIS-002 and earlier review artifacts. The G1 files are byte-identical (`pl/G1_PRESERVED.sha256`: 27/27 pass).
+- **Not started:** H0, H1, the well test, stages 0–2 and migration.
+- **Results document:** `AI_COLLAB/ART_005_M0_M1_RESULTS.md`. Files are under `art/style_tests/ART-005/pl/g2/`.
+- **M0, the complete 384 × 320 house [Measured]:**
+  - One script-made label map (`tools/art005_m0.py`) gives the flat blockout, the masks, `anchors.json` and the mockup.
+  - **Collision footprint:** x 16–368; roof rows y 74–234; wall rows y 234–298.
+  - **Eave** y 160 (fascia band 148–160); **wall base** y 298; **overhang** 16 px each side, roof only.
+  - **Door:** 38 × 74, centre **x 192.0**. **Steps:** y 298–320 on the door tile.
+  - **Windows:** 45 × 45. Glass centres are 0.5 px from the `HOUSE_SPRITE_WINDOWS` light points: a 45 px window has a middle pixel, not a middle edge.
+  - **Roof:** hipped, straight-on 3/4, eight 16 px courses, lit west hip and shaded east hip.
+  - **Chimney:** 7 px clear of the production dormer zone; the zone itself holds only plain shingle.
+  - **Porch row:** only the steps.
+- **Shown whole in the ART-005 harness:** new `art=g2` mode in `tools/art005_density.gd`, with `ext=porch,dormer`; the other modes are unchanged. Window lights sit at the exact window centres.
+- **Materials are a geometry test only:** tiled and recoloured G1 c1 swatches inside hand-built 16 px courses, 12 px planks, trim, glass and stone. **Not final art.** Format: 22 colours, 100% E0 palette, orphans 1.78%, no partial alpha, no resampling.
+- **Findings, flagged and not changed:**
+  - **F1, lights.** The production window lights land 74 px below the sprite's glass, at the wall base (+32 px spill). `_build_window_lights` measures from the footprint's top, but the sprite's top is 2.3125 tiles higher.
+  - **F2, porch.** The production porch geometry crosses the door opening (roof strip y 287–294), overlaps the steps and sits on the corner posts. M0 proposes a separate 32 px porch layer: shed roof y 164–200, posts clear of the door and windows by ≥ 16 px, deck inside the porch row.
+  - **F3, dormer.** The production dormer fits the roof but is below the mark scale: 16 × 15 windows and a flat 192 × 35 gable.
+- **M1, anchor_v2** (`pl/g2/m1/`; c1 unchanged):
+  - **Orphans:** 4.76% → **0.03%** (gate ≤ 3%). **Colours:** 38 → 31, all existing c1 colours.
+  - **Changed:** 2,231 of 9,216 px, by three per-swatch rules plus **4 logged manual edits** (63 px, restoring the window glints the rules removed).
+  - **Time:** about 5 minutes of agent time, 0.2 s of compute.
+  - **Mark sizes unchanged:** slate courses ≈ 8 px against the spec's 16. Log: `M1_EDIT_LOG.md`.
+- **Review package** (`pl/g2/review/`):
+  - **Sheets:**
+    - `m0_harness_1080p.png`: G1 before / M0 after, day and night;
+    - `m0_gamescale_720p.png`: 48 px tiles, the real game scale;
+    - `m0_overlay_coords.png`;
+    - `m0_crops_1to1.png`: roof, window, door, foundation, with 4× enlargements;
+    - `m1_c1_vs_anchor_v2.png`;
+    - `m0_extension_clearance.png` and `m0_extensions_1080p.png`.
+  - **Full frames:** `harness/`.
+  - **Masters:**
+    - `ART-005M0_master.png` (95%);
+    - `_master_2.png` (60%);
+    - `_master_3.png` (55%);
+    - `_master_4.png` (95%).
+- **Harness commands:** `godot --path . -s tools/art005_density.gd -- density=32 art=g2 [ext=porch,dormer] hour=12|21.5 framing=int|today task=stills res=1920x1080|1280x720 out=builds/review/ART-005/m0`. For BEFORE, the same with `art=pl`.
+- **Limitations only PixelLab or an artist can resolve:**
+  1. Material rendering: weathering, value variation, non-repeating texture.
+  2. A true 16 px slate material.
+  3. Hip shingles that turn along the hip.
+  4. Horizontal siding grain.
+  5. Contact shadows and junctions: chimney flashing, sills, door frame, foundation meeting the ground.
+  6. Selective outlines.
+  7. Dormer and porch designs, which also need a production code change.
+  8. Stages 0–2.
+  9. A true unshaded night emissive (a production lighting decision).
+  10. Whole-scene coherence, which waits until the oak, ground and farmer are made the same way.
+- **My judgement, for checking:**
+  - **Geometry:** it holds. The house reads at game scale beside the farmer and the oak.
+  - **c1 materials:** the roof is the noisiest surface in the scene. The anchor_v2 skin is calmer, but both are placeholders for real rendering.
+- **Not committed or pushed** (no authorization yet). **Stopped** for ChatGPT's and the owner's visual review. No generation is authorized.

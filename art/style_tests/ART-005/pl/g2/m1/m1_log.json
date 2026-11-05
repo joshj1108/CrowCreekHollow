@@ -1,0 +1,184 @@
+{
+ "source": "pl/anchors/board_c1.png (read only)",
+ "steps": {},
+ "swatches": {
+  "slate": {
+   "colours_before": 20,
+   "orphans_before": 0.064453125,
+   "ramp_px": 256,
+   "ramp_s": 0.0,
+   "orphan_px": 32,
+   "orphan_s": 0.0,
+   "speck_px": 148,
+   "speck_s": 0.01,
+   "colours_after": 9,
+   "orphans_after": 0.0,
+   "changed_px_total": 365,
+   "course_period_before": 8.0,
+   "course_period_after": 8.0
+  },
+  "timber": {
+   "colours_before": 14,
+   "orphans_before": 0.060546875,
+   "ramp_px": 130,
+   "ramp_s": 0.0,
+   "orphan_px": 44,
+   "orphan_s": 0.0,
+   "speck_px": 136,
+   "speck_s": 0.01,
+   "colours_after": 7,
+   "orphans_after": 0.0,
+   "changed_px_total": 281,
+   "plank_period_before": 3.2857142857142856,
+   "plank_period_after": 3.8333333333333335
+  },
+  "fieldstone": {
+   "colours_before": 11,
+   "orphans_before": 0.0625,
+   "ramp_px": 31,
+   "ramp_s": 0.0,
+   "orphan_px": 44,
+   "orphan_s": 0.0,
+   "speck_px": 169,
+   "speck_s": 0.01,
+   "colours_after": 8,
+   "orphans_after": 0.0,
+   "changed_px_total": 233,
+   "course_period_before": 9.0,
+   "course_period_after": 11.0
+  },
+  "bark": {
+   "colours_before": 13,
+   "orphans_before": 0.0673828125,
+   "ramp_px": 115,
+   "ramp_s": 0.0,
+   "orphan_px": 43,
+   "orphan_s": 0.0,
+   "speck_px": 166,
+   "speck_s": 0.01,
+   "colours_after": 6,
+   "orphans_after": 0.0,
+   "changed_px_total": 300
+  },
+  "maple": {
+   "colours_before": 8,
+   "orphans_before": 0.029296875,
+   "ramp_px": 0,
+   "ramp_s": 0.0,
+   "orphan_px": 30,
+   "orphan_s": 0.0,
+   "speck_px": 174,
+   "speck_s": 0.01,
+   "colours_after": 5,
+   "orphans_after": 0.0,
+   "changed_px_total": 203
+  },
+  "grass": {
+   "colours_before": 17,
+   "orphans_before": 0.052734375,
+   "ramp_px": 154,
+   "ramp_s": 0.0,
+   "orphan_px": 33,
+   "orphan_s": 0.0,
+   "speck_px": 161,
+   "speck_s": 0.01,
+   "colours_after": 7,
+   "orphans_after": 0.0,
+   "changed_px_total": 294
+  },
+  "soil": {
+   "colours_before": 23,
+   "orphans_before": 0.056640625,
+   "ramp_px": 127,
+   "ramp_s": 0.0,
+   "orphan_px": 31,
+   "orphan_s": 0.0,
+   "speck_px": 131,
+   "speck_s": 0.01,
+   "colours_after": 8,
+   "orphans_after": 0.0,
+   "changed_px_total": 225
+  },
+  "window": {
+   "colours_before": 15,
+   "orphans_before": 0.017578125,
+   "ramp_px": 132,
+   "ramp_s": 0.0,
+   "orphan_px": 11,
+   "orphan_s": 0.0,
+   "speck_px": 55,
+   "speck_s": 0.01,
+   "colours_after": 9,
+   "orphans_after": 0.0,
+   "changed_px_total": 167
+  },
+  "water": {
+   "colours_before": 6,
+   "orphans_before": 0.0224609375,
+   "ramp_px": 0,
+   "ramp_s": 0.0,
+   "orphan_px": 23,
+   "orphan_s": 0.0,
+   "speck_px": 205,
+   "speck_s": 0.02,
+   "colours_after": 5,
+   "orphans_after": 0.0,
+   "changed_px_total": 226
+  }
+ },
+ "manual_edits": [
+  {
+   "swatch": "window",
+   "rect": [
+    5,
+    15,
+    27,
+    18
+   ],
+   "action": "copy:5,15",
+   "px": 26
+  },
+  {
+   "swatch": "window",
+   "rect": [
+    18,
+    5,
+    27,
+    15
+   ],
+   "action": "copy:18,5",
+   "px": 15
+  },
+  {
+   "swatch": "window",
+   "rect": [
+    5,
+    18,
+    15,
+    27
+   ],
+   "action": "copy:5,18",
+   "px": 14
+  },
+  {
+   "swatch": "window",
+   "rect": [
+    18,
+    18,
+    27,
+    27
+   ],
+   "action": "copy:18,18",
+   "px": 8
+  }
+ ],
+ "board": {
+  "orphans_before": 0.04763454861111111,
+  "orphans_after": 0.0003255208333333333,
+  "colours_before": 38,
+  "colours_after": 31,
+  "changed_px": 2231,
+  "of_px": 9216
+ },
+ "script_wall_s": 0.2
+}
