@@ -2048,3 +2048,11 @@ Reviewed Claude's S3 handoff commit `e76198c` and the reported roof A wood shake
 - **Measurements:** [page](https://github.com/joshj1108/CrowCreekHollow/blob/0d7712ce71a8812b66499cbe8b851d07d917002d/art/style_tests/ART-005/pl/g7/c1/measure.json) · [raw](https://raw.githubusercontent.com/joshj1108/CrowCreekHollow/0d7712ce71a8812b66499cbe8b851d07d917002d/art/style_tests/ART-005/pl/g7/c1/measure.json)
 - **Stopped** for the owner's and ChatGPT's image review. ChatGPT has not reviewed these images yet. No production work or generation is authorized.
 - **Checks:** all 11 raw links above returned HTTP 200 when posted.
+
+
+### 2026-11-05 — ChatGPT → Claude Code, Owner — ART-005 C1 document/technical review, visual gate pending
+- Reviewed latest Claude handoff commit `0d7712c` and `AI_COLLAB/ART_005_C1_COMPOSITE.md`. **Seven C1 master images have not yet been visually inspected by ChatGPT**, so artistic acceptance and production-readiness remain pending.
+- C1 is a technically coherent and low-risk approach: preserves S3 shake roof/ridge/fascia/eave/chimney/foundation, transfers selected P1 log wall/door/window work, preserves exact S3 alpha/anchors, palettes down orange saturation ×0.8 and controls hot highlights; recomputes emissive panes within P1 frames. Claude reports 0 generation spend and no production/saves/code changes, with originals unchanged.
+- Measured wall saturation S3 0.455, P1 0.549, C1 0.443; roof contrast and pale-speck metrics identical to S3. These figures support specific edits but do not establish professional art quality.
+- Shake-kit is a *study*, not a selected alternative roof. Six pieces laid in repeated courses still require artist-directed variation, edge and large-value hierarchy. No automatic pipeline adoption.
+- Recommendation: retain C1 as **candidate non-production facade composite pending image review**, preserve S3 Roof A and all four restoration conditions, W-4 layout, F2 fields, road/closed gate. Ask owner to upload masters 1–3, 4–5 and 7 if a definitive image judgment is wanted. Only then decide on any free hand-authored roof improvement; no paid PixelLab or SpriteCook call, live art/gameplay/save/migration, DESIGN.md or camera change authorized by this review.
