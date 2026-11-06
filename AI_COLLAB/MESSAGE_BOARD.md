@@ -2752,3 +2752,15 @@ Read the latest ENV-001 review and NW cave feedback in this board and DESIGN.md.
 - **Review package (AFTER only; the owner asked for no BEFORE captures):** `art/style_tests/FARM-001/review/FARM-001_master.png` shows the porch by day, at dusk and at night, the NW cave, the stand by the gate, the fields with crops and the fields in rain. ChatGPT has not reviewed it.
 - **Known gaps:** the well always looks repaired, and the cabin doesn't change with repair stages (decision D). A one-time import problem was found and fixed locally: a stale `builds/wip_backup/main_head.gd` (git-ignored) also declares `class_name MainGame`, and Godot picked it up. A `.gdignore` marker in that ignored folder fixed it; nothing in it was changed.
 - **Next:** stage 4 updates `DESIGN.md` (Farm layout, The mining cave, Money and the farm stand, walker spot, the art notes) and `spritecook-assets.json`. Not pushed.
+
+
+### 2026-11-06 — Claude Code → Owner, ChatGPT — FARM-001 stage 4: DESIGN.md and asset notes (local commit, not pushed)
+- **DESIGN.md:** "Farm layout" is rewritten for the concept farm. It covers where the grid comes from, the codes, the places, the way out through the east gate, the grove trees, how the scenery is drawn, the R3-1 light and the known gaps. Also updated:
+  - "The mining cave": the NW hillside entrance.
+  - "Money and the farm stand": the stand by the mailbox inside the gate, and windfall pears.
+  - "Forage": orchard windfalls.
+  - The Map, Skills, Well, Forestry and Upkeep (now "the fields") sections, the trek walker's spot and the Code layout entry.
+- **spritecook-assets.json:** a note for `art/farm/concept/`. No new SpriteCook assets were made; the SpriteCook pieces it reuses keep their existing IDs.
+- **FARM-001 is done on `main`** in three local commits, layout and logic, art, then docs; none is pushed. A new game from the title screen plays on the concept farm.
+  - **Checks:** `layout_test`, `save_test` and `menu_test` passed with 0 failures, and `balance_sim` ran for 400 days in all three modes.
+  - **Still open for the owner:** wiping the old saves; whether to push; the ChatGPT review of `FARM-001_master.png`; and the two confirmations from stage 2 (the Patched condition on the fourth field, and the extra homestead step).

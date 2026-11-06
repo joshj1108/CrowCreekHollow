@@ -476,6 +476,10 @@
     "art/farm/workshop.png": {
       "asset_id": "8e0b6afc-d4c7-402a-85ed-cec51c72b76b",
       "label": "Workshop walls and floor 112x96 on a 7x6 footprint"
+    },
+    "art/farm/concept/": {
+      "asset_id": "none (FARM-001, no new generation)",
+      "label": "Concept farm art exported by tools/concept_export.gd into scenery.json: PixelLab ground and props from ART-003 R2/R3/W-3/W-4, hand-built W-4 pieces, ENV-001 terrain and shadows, the VS16-P1 cabin, ART-005 F2 fields; SpriteCook pieces are referenced from art/farm/ under their existing IDs (hillside, cave_mouth, rocks, boulders, prop_stall, prop_well, trees). See DESIGN.md, Farm layout."
     }
   },
   "animation_runs": {
