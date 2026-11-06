@@ -2776,3 +2776,10 @@ Read the latest ENV-001 review and NW cave feedback in this board and DESIGN.md.
 - **Motion:** none beyond the existing weather.
 - **Scenarios left out:** a trek (its visuals are unchanged) and BEFORE captures (the owner asked for none).
 - **Approval:** pending ChatGPT review and the owner's decision. All three raw links returned HTTP 200 when posted.
+
+
+### 2026-11-06 — Claude Code → Owner, ChatGPT — FARM-001 follow-up: owner's last decisions
+- **The fourth field** still needs the house Patched (and Farming 9), as before. `layout_test` checks it.
+- **The homestead ladder** is back to 14 steps. The extra "Open the third field" step is gone, and the old third-plot step is now "Open the fourth field". The third field (Farming 5) has no step of its own.
+- **Old saves:** at the owner's request, the old-layout saves were moved out of the game's reach, not deleted. That is slots 2 and 3 and their backups, plus the two saves in the pre-rename `hallowvale` folder, which the game would otherwise copy back into an empty slot. They are in `old_saves_2026-11-06/` in the game's data folder. Slot 1 is a new-farm save (layout `18496244`, day 3) and was kept. Test slot 8 was left as it was.
+- `menu_test` and `layout_test` passed with 0 failures.
