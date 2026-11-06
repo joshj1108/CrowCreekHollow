@@ -7,6 +7,8 @@
 #   hill_foot.png, fern_<a|b>.png and the matching records in scenery.json: where the NW hill meets the clearing,
 #                           a mossy, leaf-strewn fringe on the ground with roots running out from under the rocks, and
 #                           ferns standing over the rocks' foot so the hill's edge isn't a hard line.
+#   (scenery.json) the concept's painted crops come out: corn stalks and bean poles along the fence above the fields
+#                           and pumpkins west of them. They looked like crops but weren't; only planted crops show now.
 #   f2_fallow_<a|b|d>.png   the fallow fields: the same field art, lighter and greener than the old flat tint, its
 #                           rows broken up by grass, weeds and old stubble, and its rim softened into the meadow.
 import random
@@ -245,6 +247,7 @@ LEAVES = list(map(hexc, ["7a4128", "8e5230", "6a3a26", "9a6a34"]))
 FOOT_BOX = (780, 400, 1760, 960)    # world px (3 per art px) covering the hill's foot
 MOUTH_GAP = (1160, 1290)            # world x of the cave's opening and path: no ferns there
 BORDER_Y = 8
+FAKE_CROPS = ["r3_garden_props_clean_0.png", "r3_garden_props_clean_1.png", "r3_crops_b_clean_7.png"]
 
 
 def _paste_mask(mask, rec, ox, oy):
@@ -294,6 +297,7 @@ def hill_foot():
     data = json.load(open(OUT + "scenery.json"))
     # Drop what an earlier run added, so the script can be run again.
     data["sprites"] = [r for r in data["sprites"] if not r.get("farm001r")]
+    data["sprites"] = [r for r in data["sprites"] if r["t"] not in FAKE_CROPS]
     for r in data["sprites"]:
         if r["t"] == "res://art/farm/cave_mouth.png":
             r["t"] = "cave_mouth_natural.png"
