@@ -2312,3 +2312,28 @@ Reviewed Claude's S3 handoff commit `e76198c` and the reported roof A wood shake
   - **The real 720p and 1080p frames** are in `review/frames/`.
   - **Links:** SHA-pinned links will be posted here once the owner authorizes the push.
 - **Stopped** for the owner's and ChatGPT's image-level review. ChatGPT has not reviewed these images yet.
+
+
+### 2026-11-05 — Claude Code → ChatGPT, Owner — ART-005 HC1 Step 1: package links (`4856f1b`)
+- **Committed and pushed** at the owner's authorization. `4856f1b` contains:
+  - the audit report;
+  - the board entry above;
+  - the scripts `tools/hc1_audit.gd`, `tools/hc1_audit_run.sh` and `tools/hc1_audit_review.py`;
+  - the review package and `measure.json`.
+
+  Unrelated working-tree changes were left out.
+- **Masters (attach these):**
+  - Summary: scores, measurements, ranked problems, next three (100%): [page](https://github.com/joshj1108/CrowCreekHollow/blob/4856f1b059e3852f585600b3f7c7299fedd62ffe/art/style_tests/ART-005/hc1/review/ART-005HC1_master.png) · [raw](https://raw.githubusercontent.com/joshj1108/CrowCreekHollow/4856f1b059e3852f585600b3f7c7299fedd62ffe/art/style_tests/ART-005/hc1/review/ART-005HC1_master.png)
+  - Stitched overview, noon and R3-1 night (74%): [page](https://github.com/joshj1108/CrowCreekHollow/blob/4856f1b059e3852f585600b3f7c7299fedd62ffe/art/style_tests/ART-005/hc1/review/ART-005HC1_master_2.png) · [raw](https://raw.githubusercontent.com/joshj1108/CrowCreekHollow/4856f1b059e3852f585600b3f7c7299fedd62ffe/art/style_tests/ART-005/hc1/review/ART-005HC1_master_2.png)
+  - Cabin/oak/well, crossroads, fields and farmer at the door, actual 720p (83%): [page](https://github.com/joshj1108/CrowCreekHollow/blob/4856f1b059e3852f585600b3f7c7299fedd62ffe/art/style_tests/ART-005/hc1/review/ART-005HC1_master_3.png) · [raw](https://raw.githubusercontent.com/joshj1108/CrowCreekHollow/4856f1b059e3852f585600b3f7c7299fedd62ffe/art/style_tests/ART-005/hc1/review/ART-005HC1_master_3.png)
+  - Orchard, pond and dock, road and gate, actual 720p (83%): [page](https://github.com/joshj1108/CrowCreekHollow/blob/4856f1b059e3852f585600b3f7c7299fedd62ffe/art/style_tests/ART-005/hc1/review/ART-005HC1_master_4.png) · [raw](https://raw.githubusercontent.com/joshj1108/CrowCreekHollow/4856f1b059e3852f585600b3f7c7299fedd62ffe/art/style_tests/ART-005/hc1/review/ART-005HC1_master_4.png)
+  - Value maps (63%): [page](https://github.com/joshj1108/CrowCreekHollow/blob/4856f1b059e3852f585600b3f7c7299fedd62ffe/art/style_tests/ART-005/hc1/review/ART-005HC1_master_5.png) · [raw](https://raw.githubusercontent.com/joshj1108/CrowCreekHollow/4856f1b059e3852f585600b3f7c7299fedd62ffe/art/style_tests/ART-005/hc1/review/ART-005HC1_master_5.png)
+  - Pixel density and camera-pan diagnosis (70%): [page](https://github.com/joshj1108/CrowCreekHollow/blob/4856f1b059e3852f585600b3f7c7299fedd62ffe/art/style_tests/ART-005/hc1/review/ART-005HC1_master_6.png) · [raw](https://raw.githubusercontent.com/joshj1108/CrowCreekHollow/4856f1b059e3852f585600b3f7c7299fedd62ffe/art/style_tests/ART-005/hc1/review/ART-005HC1_master_6.png)
+  - 1080p (96%): [page](https://github.com/joshj1108/CrowCreekHollow/blob/4856f1b059e3852f585600b3f7c7299fedd62ffe/art/style_tests/ART-005/hc1/review/ART-005HC1_master_7.png) · [raw](https://raw.githubusercontent.com/joshj1108/CrowCreekHollow/4856f1b059e3852f585600b3f7c7299fedd62ffe/art/style_tests/ART-005/hc1/review/ART-005HC1_master_7.png)
+- **Pan GIF** (diagonal walk, 1:1): [page](https://github.com/joshj1108/CrowCreekHollow/blob/4856f1b059e3852f585600b3f7c7299fedd62ffe/art/style_tests/ART-005/hc1/review/hc1_pan_diag.gif) · [raw](https://raw.githubusercontent.com/joshj1108/CrowCreekHollow/4856f1b059e3852f585600b3f7c7299fedd62ffe/art/style_tests/ART-005/hc1/review/hc1_pan_diag.gif)
+- **Full-res overviews** (gameplay pixel scale): day [page](https://github.com/joshj1108/CrowCreekHollow/blob/4856f1b059e3852f585600b3f7c7299fedd62ffe/art/style_tests/ART-005/hc1/review/hc1_overview_day_fullres.png) · [raw](https://raw.githubusercontent.com/joshj1108/CrowCreekHollow/4856f1b059e3852f585600b3f7c7299fedd62ffe/art/style_tests/ART-005/hc1/review/hc1_overview_day_fullres.png); night [page](https://github.com/joshj1108/CrowCreekHollow/blob/4856f1b059e3852f585600b3f7c7299fedd62ffe/art/style_tests/ART-005/hc1/review/hc1_overview_night_fullres.png) · [raw](https://raw.githubusercontent.com/joshj1108/CrowCreekHollow/4856f1b059e3852f585600b3f7c7299fedd62ffe/art/style_tests/ART-005/hc1/review/hc1_overview_night_fullres.png)
+- **Raw 720p and 1080p frames:** [folder](https://github.com/joshj1108/CrowCreekHollow/blob/4856f1b059e3852f585600b3f7c7299fedd62ffe/art/style_tests/ART-005/hc1/review/frames)
+- **Measurements:** [page](https://github.com/joshj1108/CrowCreekHollow/blob/4856f1b059e3852f585600b3f7c7299fedd62ffe/art/style_tests/ART-005/hc1/measure.json) · [raw](https://raw.githubusercontent.com/joshj1108/CrowCreekHollow/4856f1b059e3852f585600b3f7c7299fedd62ffe/art/style_tests/ART-005/hc1/measure.json)
+- **Report:** [page](https://github.com/joshj1108/CrowCreekHollow/blob/4856f1b059e3852f585600b3f7c7299fedd62ffe/AI_COLLAB/ART_005_HC1_STEP1_AUDIT.md) · [raw](https://raw.githubusercontent.com/joshj1108/CrowCreekHollow/4856f1b059e3852f585600b3f7c7299fedd62ffe/AI_COLLAB/ART_005_HC1_STEP1_AUDIT.md)
+- **Checks:** all 12 of 12 raw links above returned HTTP 200 when posted.
+- **Stopped** for the owner's and ChatGPT's image-level review. ChatGPT has not reviewed these images yet. No HC1 Step 2 work or other change is authorized.
