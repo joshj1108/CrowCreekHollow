@@ -384,6 +384,12 @@ const RESERVED := [FarmLayout.CELLAR_IX]
 const FLAT_FARM_ART := true
 # Pixel art from art/farm/ instead of flat blocks. Off falls back to the flat view.
 const FARM_SPRITES := true
+# FARM-001: the farm is drawn with the playable concept's art (art/farm/concept/, scripts/farm_scenery.gd): baked
+# ground, the forest, the P1 cabin, the oak, well, stand, fences and gate, the orchard and the cave's hillside, and the
+# R3-1 night. main.gd still draws what changes in play (soil and crops on the F2 fields, brush, rocks, stumps,
+# buildings, decor). Off falls back to the SpriteCook tile art above.
+const CONCEPT_ART := true
+var farm_scenery: FarmScenery
 const LAYOUT_VERSION := FarmLayout.VERSION
 const STALL_CLOSE_HOUR := 18.0
 const SELL_FISH := 6
@@ -1365,7 +1371,15 @@ func _draw() -> void:
 	var fy0 := clampi(floori(top_left.y / PX) - 1, 0, MAP_H - 1)
 	var fx1 := clampi(ceili((top_left.x + view.x) / PX) + 1, 0, MAP_W - 1)
 	var fy1 := clampi(ceili((top_left.y + view.y) / PX) + 1, 0, MAP_H - 1)
-	if FLAT_FARM_ART:
+	if CONCEPT_ART:
+		# The ground and everything that stands are FarmScenery's; here only the fields and what changes in play.
+		_draw_concept_fields()
+		_draw_workshop()
+		tree_view = Rect2i(fx0, fy0, fx1 - fx0 + 1, fy1 - fy0 + 1)
+		_draw_trees(self, false)
+		if tree_front_layer != null:
+			tree_front_layer.queue_redraw()
+	elif FLAT_FARM_ART:
 		for y in range(fy0, fy1 + 1):
 			for x in range(fx0, fx1 + 1):
 				_draw_flat_tile(Vector2i(x, y))
@@ -1479,6 +1493,24 @@ func _draw() -> void:
 
 	_draw_house()
 
+
+
+# The four F2 fields (ART-005 S3 art, art/farm/concept/f2_*.png): each 7 by 4 field is one picture with a 3 px rim,
+# tilled and ready once the field is open, and the same ground grown over (darker and greener) while it is fallow.
+# Crops and watered soil are drawn on top, per tile, by _draw.
+const CONCEPT_FIELDS := ["f2_field_dry_a", "f2_field_dry_b", "f2_field_dry_d", "f2_field_dry_b"]
+const FALLOW_TINT := Color(0.62, 0.7, 0.46)
+
+
+func _draw_concept_fields() -> void:
+	var plots := [PLOT_ONE, PLOT_TWO, PLOT_THREE, PLOT_FOUR]
+	for i in plots.size():
+		var r: Rect2i = plots[i]
+		var origin := _world_tile(r.position.x, r.position.y)
+		var tex: Texture2D = FarmSprites.tex("concept/" + str(CONCEPT_FIELDS[i]))
+		var dest := Rect2(Vector2(origin) * PX - Vector2.ONE * 3.0 * SCALE, Vector2(tex.get_width(), tex.get_height()) * SCALE)
+		var open: bool = map[origin.y][origin.x] != Tile.FALLOW
+		draw_texture_rect(tex, dest, false, Color.WHITE if open else FALLOW_TINT)
 
 
 # Ground is the tiles drawn flat with detail on top: grass, soil, path, fallow ground, and water.
@@ -1908,6 +1940,12 @@ func _build_world() -> void:
 	goat_layer.draw.connect(_draw_goat_layer)
 	goat_layer.visible = false
 	add_child(goat_layer)
+	if CONCEPT_ART:
+		farm_scenery = FarmScenery.new(self)
+		farm_scenery.build()
+		add_child(farm_scenery.ground)
+		add_child(farm_scenery)
+		farm_scenery.place_lights()
 
 	house_roof_layer = Node2D.new()
 	house_roof_layer.draw.connect(_draw_house_roof_layer)
@@ -2047,6 +2085,8 @@ func _build_window_lights() -> void:
 	_glow(cave_mouth_light, 1.4)
 	cave_mouth_light.enabled = false
 	add_child(cave_mouth_light)
+	if farm_scenery != null:
+		farm_scenery.place_lights()
 
 
 # The pond's shine, drawn every frame while on the farm.
@@ -2574,7 +2614,7 @@ const HOUSE_SPRITE_WINDOWS := [Vector2(3.0, 7.0), Vector2(8.94, 7.0)]
 
 
 func _draw_house_roof_layer() -> void:
-	if not FARM_SPRITES:
+	if not FARM_SPRITES or CONCEPT_ART:
 		return
 	var origin := _house_origin()
 	if origin.x < 0:
@@ -2623,6 +2663,8 @@ func _well_cell() -> Rect2:
 # The stall covers 3 by 2 tiles and its art (48×48 at 3×) is drawn 3 tiles square, standing on the footprint's
 # bottom edge; the awning rises a tile above it.
 func _draw_stall_layer() -> void:
+	if CONCEPT_ART:
+		return
 	var cell := _stall_cell()
 	var stall_size := PX * 3.0
 	stall_layer.draw_texture_rect(FarmSprites.tex("prop_stall"), Rect2(cell.get_center().x - stall_size * 0.5, cell.end.y - stall_size, stall_size, stall_size), false)
@@ -2631,6 +2673,8 @@ func _draw_stall_layer() -> void:
 # The well covers WELL_TILES by WELL_TILES tiles; its art (32×48 at 3×) stands on the footprint's bottom edge,
 # with the roof rising a tile above it.
 func _draw_well_layer() -> void:
+	if CONCEPT_ART:
+		return
 	var cell := _well_cell()
 	well_layer.draw_texture_rect(FarmSprites.tex("prop_well"), Rect2(cell.position.x, cell.end.y - PX * 3.0, PX * 2.0, PX * 3.0), false)
 
@@ -2644,7 +2688,7 @@ func _update_big_tree_depth() -> void:
 
 
 func _draw_big_tree_layer() -> void:
-	if not FARM_SPRITES:
+	if not FARM_SPRITES or CONCEPT_ART:
 		return
 	var bottom := _big_tree_base_bottom()
 	var size := PX * BIG_TREE_ART_TILES
@@ -2707,6 +2751,8 @@ func _draw_trees(ci: CanvasItem, front: bool) -> void:
 			var t := Vector2i(x, y)
 			var kind: int = map[y][x]
 			var cell := _tile_rect(t)
+			if CONCEPT_ART and (kind == Tile.TREE or kind == Tile.CAVE_MOUTH):
+				continue   # FarmScenery stands every tree, the oak and the cave's hillside
 			if kind == Tile.TREE and not _in_big_tree(t):
 				if trees_here:
 					var nudge := float(FarmArt.hash_int(x, y, 13) % 7 - 3) * SCALE
