@@ -4946,6 +4946,7 @@ const CAVE_WALL_TINT := Color(0.55, 0.55, 0.6)
 # tools/aoh_cave_int.py): rock walls with dark tops and faces, a stone floor with decals, moss and roots by the
 # way out, new ore and steps. Art only. Off, the SpriteCook cave below returns.
 const CAVE_ART_V2 := true
+const CAVE_BELOW := 2   # tiles of rock the camera may show under the mine, to lift the way out above the hotbar
 
 
 func _draw_cave_sprites(x0: int, y0: int, x1: int, y1: int) -> void:
@@ -6080,7 +6081,8 @@ func _set_bounds() -> void:
 		camera.limit_left = 0
 		camera.limit_top = 0
 		camera.limit_right = CAVE_W * PX
-		camera.limit_bottom = CAVE_H * PX
+		# The mine's camera looks CAVE_BELOW tiles past its last row, so the way out sits above the hotbar (C2).
+		camera.limit_bottom = (CAVE_H + (CAVE_BELOW if CAVE_ART_V2 and not trek.active else 0)) * PX
 		return
 	if inside:
 		player.min_pos = _tile_center(INT_ORIGIN.x + 1, INT_ORIGIN.y + INT_BEDROOM.position.y)

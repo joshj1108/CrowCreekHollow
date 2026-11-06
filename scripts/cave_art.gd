@@ -4,7 +4,9 @@ extends RefCounted
 # The mining cave in PixelLab art (ART-OVERHAUL-001 Stage C, CAVE_ART_V2 in main.gd). Art only: the cave's
 # layout, ore, collision, creatures, mining and saves are main.gd's and are untouched.
 #
-# - The floor: one stone tile repeated, unturned (its grain runs one way, so turned copies show seams).
+# - The floor: one stone tile, unturned (its grain runs one way, so turned copies show seams), in six variants
+#   (floor_var.png, tools/aoh_cave_c2.py) that share its edge pixels and differ only in the bright crescent: lifted
+#   out, mirrored, moved or kept. Placed by position, mostly plain, so the floor no longer reads as a grid.
 # - The walls: PixelLab transition (cliff) tilesets on the dual grid, so walls have a dark top and a rock face on
 #   their south side. A vertex sits at each tile centre and counts as rock when its tile is rock AND the tile south
 #   of it is rock too, so the face falls inside the wall's own bottom row, not on the floor in front of it (the
@@ -25,12 +27,17 @@ extends RefCounted
 const DIR := "res://art/farm/cave_int/"
 const T := 16                    # art px per tile
 const NEAR := 5                  # tiles (walking distance) from the way in that count as "near the way out"
-const FRONT_REACH := 6           # art px a front-layer piece may reach onto the floor north of its wall
+const FRONT_REACH := 3           # art px a front-layer piece may reach onto the floor north of its wall (C2: was 6)
+const FRONT_ODDS := 0.07         # share of north lips with a front piece (C2: was 0.12, which hid the farmer too often)
+const FLOOR_WEIGHTS := [1, 4, 5, 2, 2, 2]   # floor_var.png: original, no crescent, plain, then three moved crescents
+const BELOW := 3                 # rows of solid rock drawn under the cave, for the camera's margin below the way out
 const CENTER := [5, 6, 9, 10]    # pattern_4x4 indices of a cell's own four corners
 
 var ok := false
 var walls: Texture2D
 var floor_tex: Texture2D
+var floor_var: Texture2D
+var solid := Rect2()             # the all-rock top tile, for the rows under the cave
 var atlas: Texture2D
 var tiles: Array = []            # {p: PackedInt32Array (16), r: [Vector2 per set], key: int}
 var by_key := {}                 # centre key -> [tile index]
@@ -54,6 +61,8 @@ func _init() -> void:
 	var data: Dictionary = JSON.parse_string(FileAccess.get_file_as_string(DIR + "cave_int.json"))
 	walls = load(DIR + "walls.png")
 	floor_tex = load(DIR + "floor.png")
+	if ResourceLoader.exists(DIR + "floor_var.png"):
+		floor_var = load(DIR + "floor_var.png")
 	atlas = load(DIR + "atlas.png")
 	sets = int(data["sets"])
 	for i in data["tiles"].size():
@@ -74,6 +83,9 @@ func _init() -> void:
 		if not kinds.has(kind):
 			kinds[kind] = []
 		kinds[kind].append(Rect2(pc["x"], pc["y"], pc["w"], pc["h"]))
+	var all_rock: Array = by_key.get(_key(1, 1, 1, 1), [])
+	if not all_rock.is_empty():
+		solid = Rect2(tiles[all_rock[0]]["r"][0], Vector2(T, T))
 	ok = face_tile >= 0
 
 
@@ -237,18 +249,20 @@ func _place(m, cave: Array, rock: Callable) -> void:
 			if by_ore.call(x, y) or by_exit:
 				continue
 			if floor_s:
-				# A face: something hung from its top, or rubble or a fern at its foot.
+				# A face: something hung from its top, or rubble or a fern at its foot. A face in a long run
+				# (faces on both sides) is dressed more often, so long faces don't show the tiles' straight rhythm.
+				var long_run: bool = rock.call(x - 1, y) and rock.call(x + 1, y) and not rock.call(x - 1, y + 1) and not rock.call(x + 1, y + 1)
 				var roll := _roll(x, y, 6)
 				if near and roll < 0.45:
 					_hang(_pick("moss", x, y, 8), o)
-				elif not near and roll < 0.22:
+				elif not near and roll < (0.4 if long_run else 0.22):
 					_hang(_pick("drip", x, y, 8), o)
 				var roll2 := _roll(x, y, 9)
 				if near and roll2 < 0.3:
 					_foot(_pick("fern", x, y, 10), o)
-				elif roll2 < 0.1:
+				elif roll2 < (0.2 if long_run else 0.1):
 					_foot(_pick("foot", x, y, 10), o)
-			elif floor_n and not floor_s and _roll(x, y, 11) < 0.12:
+			elif floor_n and not floor_s and not near and _roll(x, y, 11) < FRONT_ODDS:
 				# A stone or spire standing on the rock's north lip, over the farmer.
 				var src := _pick("mossrock" if near else ("spire" if _roll(x, y, 12) < 0.5 else "boulder"), x, y, 13)
 				if src.size != Vector2.ZERO:
@@ -281,11 +295,21 @@ func draw(m, x0: int, y0: int, x1: int, y1: int) -> void:
 	_refresh(m)
 	var px: float = m.PX
 	var s := px / T
-	# The floor tile as PixelLab made it: it tiles seamlessly only unturned (its grain runs one way), so the
-	# variety comes from the decals.
+	# The floor: a variant per tile by position (all share the tile's edges, so any mix is seamless).
+	var total := 0
+	for wgt in FLOOR_WEIGHTS:
+		total += wgt
 	for y in range(y0, y1 + 1):
 		for x in range(x0, x1 + 1):
-			m.draw_texture_rect(floor_tex, Rect2(x * px, y * px, px, px), false)
+			if floor_var == null:
+				m.draw_texture_rect(floor_tex, Rect2(x * px, y * px, px, px), false)
+				continue
+			var roll := _hash(x, y, 21) % total
+			var i := 0
+			while roll >= FLOOR_WEIGHTS[i]:
+				roll -= FLOOR_WEIGHTS[i]
+				i += 1
+			m.draw_texture_rect_region(floor_var, Rect2(x * px, y * px, px, px), Rect2(i * T, 0, T, T))
 	var view := Rect2(x0 * T - T * 2, y0 * T - T * 2, (x1 - x0 + 5) * T, (y1 - y0 + 5) * T)
 	_draw_list(m, _decals, s, view)
 	for r in range(y0 - 1, y1 + 1):
@@ -307,6 +331,11 @@ func draw(m, x0: int, y0: int, x1: int, y1: int) -> void:
 		var e: Vector2i = m.CAVE_EXIT_TILE
 		var at := Vector2(e.x * T + T - steps.size.x * 0.5, e.y * T)
 		m.draw_texture_rect_region(atlas, Rect2(at * s, steps.size * s), steps)
+	# Solid rock under the cave, where the camera's margin (CAVE_BELOW in main.gd) looks past its last row.
+	if solid.size != Vector2.ZERO and y1 >= _h - 3:
+		for r in range(BELOW):
+			for c in range(x0 - 1, x1 + 2):
+				m.draw_texture_rect_region(walls, Rect2((c + 0.5) * px, (_h + 0.5 + r) * px, px, px), solid)
 
 
 func draw_front(ci: CanvasItem, m, x0: int, y0: int, x1: int, y1: int) -> void:
