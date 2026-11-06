@@ -2764,3 +2764,15 @@ Read the latest ENV-001 review and NW cave feedback in this board and DESIGN.md.
 - **FARM-001 is done on `main`** in three local commits, layout and logic, art, then docs; none is pushed. A new game from the title screen plays on the concept farm.
   - **Checks:** `layout_test`, `save_test` and `menu_test` passed with 0 failures, and `balance_sim` ran for 400 days in all three modes.
   - **Still open for the owner:** wiping the old saves; whether to push; the ChatGPT review of `FARM-001_master.png`; and the two confirmations from stage 2 (the Patched condition on the fourth field, and the extra homestead step).
+
+
+### 2026-11-06 — Claude Code → ChatGPT, Owner — FARM-001 — Visual review package: the concept farm in production
+- **Status:** review requested. Pushed with the owner's go-ahead: `efd4b4a`, `ec8dc4e` and `97f5a3f` are on `main`.
+- **Commit:** `ec8dc4e` (images). AFTER only: the owner asked for no BEFORE captures.
+- **What changed:** the real game now draws the concept farm's art (`scripts/farm_scenery.gd`, `art/farm/concept/`): the ground, forest, P1 cabin, oak, well, stand, fences, east gate, orchard, the NW hillside and cave, the F2 fields with the game's own crops, and the R3-1 night with a small midday warmth.
+- **What to judge:** does production match the reviewed concept? Do the open and fallow fields read right? How do dusk, night and rain look?
+- **Master sheet (attach this to ChatGPT):** [page](https://github.com/joshj1108/CrowCreekHollow/blob/ec8dc4ec9e501967ed29c9ddfc5bded0b31cb302/art/style_tests/FARM-001/review/FARM-001_master.png) · [raw](https://raw.githubusercontent.com/joshj1108/CrowCreekHollow/ec8dc4ec9e501967ed29c9ddfc5bded0b31cb302/art/style_tests/FARM-001/review/FARM-001_master.png)
+- **Images:** homestead [page](https://github.com/joshj1108/CrowCreekHollow/blob/ec8dc4ec9e501967ed29c9ddfc5bded0b31cb302/art/style_tests/FARM-001/review/homestead.png) · [raw](https://raw.githubusercontent.com/joshj1108/CrowCreekHollow/ec8dc4ec9e501967ed29c9ddfc5bded0b31cb302/art/style_tests/FARM-001/review/homestead.png); landmarks [page](https://github.com/joshj1108/CrowCreekHollow/blob/ec8dc4ec9e501967ed29c9ddfc5bded0b31cb302/art/style_tests/FARM-001/review/landmarks.png) · [raw](https://raw.githubusercontent.com/joshj1108/CrowCreekHollow/ec8dc4ec9e501967ed29c9ddfc5bded0b31cb302/art/style_tests/FARM-001/review/landmarks.png)
+- **Motion:** none beyond the existing weather.
+- **Scenarios left out:** a trek (its visuals are unchanged) and BEFORE captures (the owner asked for none).
+- **Approval:** pending ChatGPT review and the owner's decision. All three raw links returned HTTP 200 when posted.
