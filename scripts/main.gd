@@ -30,12 +30,16 @@ const HOUSE_H := FarmLayout.HOUSE_H
 const HOUSE_DOOR_IX := HOUSE_IX + HOUSE_W / 2
 const HOUSE_DOOR_IY := HOUSE_IY + HOUSE_H - 1
 
-# The first plot is open from the start. The second is overgrown until Farming 2.
+# The four fields in the fenced garden, one per Farming level: the north-west is open from the start, the
+# north-east opens at Farming 2, the south-west at Farming 5, and the south-east at Farming 9 once the house is
+# Patched. Each is 7 by 4.
 const PLOT_ONE := FarmLayout.PLOT_ONE
 const PLOT_TWO := FarmLayout.PLOT_TWO
-# The third plot opens at Farming 9 once the house is Patched. It sits between the paths.
 const PLOT_THREE := FarmLayout.PLOT_THREE
-const PLOT_THREE_LEVEL := 9
+const PLOT_FOUR := FarmLayout.PLOT_FOUR
+const PLOT_TWO_LEVEL := 2
+const PLOT_THREE_LEVEL := 5
+const PLOT_FOUR_LEVEL := 9
 
 # The walk-in interior sits below the farm, out of view of it. It is sized for the farmer, who is two tiles
 # tall: three rooms along the north over a long hall, and every wall that faces a room is three tiles tall.
@@ -79,6 +83,7 @@ const THICKET_LEVEL := 3
 # Trees on the property. Felling one with a hatchet gives wood. They grow back with the brush, once a week.
 # The first five are the grove in the north-west corner. The rest frame the house, the yard, and the pond.
 const GROVE_SPOTS := FarmLayout.GROVE_SPOTS
+const ORCHARD_TREES := FarmLayout.ORCHARD_TREES   # the orchard's old trees (blocking, not felled); windfalls in autumn
 # Weeping willows lean over the back fence and the pond. The bare tree at the top of the field is dead.
 const WILLOW_TREES := FarmLayout.WILLOW_TREES
 const DEAD_TREES := FarmLayout.DEAD_TREES
@@ -241,7 +246,7 @@ const TIPS := [
 	{"id": "smelt", "title": "Smelting and preserving", "text": "Stand beside the furnace and press {hand} to smelt ore into bars. The smokehouse preserves food, and the cooler keeps fish fresh."},
 	{"id": "needs", "title": "Food, water, and warmth", "text": "Food and water drain through the day, and warmth drops outside on cold days. Eat from the bag ({bag}), drink from the pond, and warm up in the house. Sleep to be fully warm again, but only with a fire lit: feed the hearth from the firewood store at the workshop."},
 	{"id": "cave", "title": "The mine", "text": "The cave is at the west edge of the farm. Each day it lays out differently, with ore to mine and creatures to watch for."},
-	{"id": "wood", "title": "The Rookery Wood", "text": "People from the lane wait at the gap in the trees north of the house to be walked through the wood: from day 14, about one morning in three, Old Maren to her sister's mill. Press {hand} beside a walker to hear where, and again to set out. In the wood your lantern burns a flask of lamp oil (the catalog, 8 coins) a little over a minute, and goes out without one. The walker's nerve falls in the dark, off the trail, and when you get far ahead; a word ({hand} beside them) or a trail ration (Cooking, at the fire) brings it back, and at 0 they run home. The tall one walks the deep wood: lift the lantern at it ({hand}, close by) before it reaches them. Each walk keeps the wood, and the nights, back a little."},
+	{"id": "wood", "title": "The Rookery Wood", "text": "People from the lane wait at the east gate to be walked through the wood: from day 14, about one morning in three, Old Maren to her sister's mill. Press {hand} beside a walker to hear where, and again to set out. In the wood your lantern burns a flask of lamp oil (the catalog, 8 coins) a little over a minute, and goes out without one. The walker's nerve falls in the dark, off the trail, and when you get far ahead; a word ({hand} beside them) or a trail ration (Cooking, at the fire) brings it back, and at 0 they run home. The tall one walks the deep wood: lift the lantern at it ({hand}, close by) before it reaches them. Each walk keeps the wood, and the nights, back a little."},
 ]
 # How often, in seconds, the player is reminded that the diary waits in the desk until it is found.
 const DIARY_HINT_EVERY := 90.0
@@ -404,7 +409,7 @@ const DESK_IX := Vector2i(4, 3)     # the desk's left tile (it is two wide), in 
 
 const XP_HIT := 4
 const BASE_HP := 10
-const HOMESTEAD_ARRIVE := Vector2i(BORDER_X + INNER_W - 3, BORDER_Y + INNER_H / 2)
+const HOMESTEAD_ARRIVE := Vector2i(BORDER_X, BORDER_Y) + FarmLayout.ARRIVE_IX   # on the road inside the east gate
 const SWING_TIME := 0.3       # seconds the swing animation plays
 const SWING_COOLDOWN := 0.5
 const SWING_REACH := 1.5      # tiles
@@ -464,7 +469,7 @@ const STORY := [
 	{"id": "edge", "title": "To the Wood's Edge",
 		"story": "Since Agnes Rook's bell came down, nobody from the lane crosses the Rookery Wood alone. Old Maren, from the last cottage, wants walking as far as its edge, by daylight. She has never asked anyone at this farm before.",
 		"text": "Walk Old Maren to the wood's edge.",
-		"prompt": "From day 4 she waits at the gap in the trees north of the house until 15:00. Stand beside her and press {hand}. Keep her in your lantern's light and on the trail, and press {hand} beside her for a word when she's frightened.",
+		"prompt": "From day 4 she waits at the east gate until 15:00. Stand beside her and press {hand}. Keep her in your lantern's light and on the trail, and press {hand} beside her for a word when she's frightened.",
 		"stat": "edge_walked", "goal": 1, "reward": {"skill": "Bushcrafting", "xp": 20}},
 	{"id": "first_crop", "title": "Food Takes Time",
 		"story": "Seeds need days to become food. Each night they are watered, they grow. Turnips take a week and pumpkins ten days. Come back when something is ripe, and take it.",
@@ -499,7 +504,7 @@ const STORY := [
 	{"id": "act_orchard", "title": "The Water Rises",
 		"story": "Davy says the water in Elias's orchard has come up a row since spring, and the dogs won't go near it. The man in the rows has stopped walking.",
 		"text": "Walk Davy to the drowned orchard.",
-		"prompt": "From midsummer (day 265), walk Davy Tull to the drowned orchard when he waits at the north gate.",
+		"prompt": "From midsummer (day 265), walk Davy Tull to the drowned orchard when he waits at the east gate.",
 		"stat": "act_orchard", "goal": 1, "reward": {"feathers": 6}},
 	{"id": "act_knock", "title": "His Knock",
 		"story": "The lantern on the branch was dry. Whatever walks in the Rookery Wood has learned something from the man who carried it, and it knows the way to his door.",
@@ -522,9 +527,9 @@ const STORY := [
 		"prompt": "Buildings, The crow bell lists its parts. With all four, place the bell from Decor on October 31.",
 		"stat": "bell_hung", "goal": 1, "reward": {"feathers": 10}},
 	{"id": "act_grove", "title": "The Hollow's Grove",
-		"story": "The day after All Hallows a woman in a grey shawl waits at the north gate and asks to be walked to the Hollow's grove. She gives no name.",
+		"story": "The day after All Hallows a woman in a grey shawl waits at the east gate and asks to be walked to the Hollow's grove. She gives no name.",
 		"text": "Walk the woman in grey to the Hollow's grove.",
-		"prompt": "She waits at the north gate from the day after the bell is hung, until 22:00. By night the wood is harder, and some say the ring is only open in the dark.",
+		"prompt": "She waits at the east gate from the day after the bell is hung, until 22:00. By night the wood is harder, and some say the ring is only open in the dark.",
 		"stat": "grove_walked", "goal": 1, "reward": {"skill": "Bushcrafting", "xp": 200}},
 ]
 
@@ -834,6 +839,7 @@ var coop_hopper := 0               # crops in the coop's hopper
 var barn_hopper_built := false
 var barn_hopper := 0
 var plot_three_open := false
+var plot_four_open := false
 var clean_nights := 0               # nights in a row with every chore done
 var cleanse_day := 0
 var sanity := SANITY_MAX
@@ -1761,6 +1767,7 @@ const TERRAIN_CODES := {
 	".": Tile.GRASS, "S": Tile.SOIL, "F": Tile.FALLOW, "P": Tile.PATH, "~": Tile.WATER,
 	"H": Tile.HOUSE, "D": Tile.DOOR, "A": Tile.STALL, "W": Tile.WELL, "R": Tile.PORCH,
 	"C": Tile.CAVE_MOUTH, "G": Tile.TREE, "B": Tile.TREE, "b": Tile.GRASS, "X": Tile.FENCE, "K": Tile.ROCK, "O": Tile.ROOF, "Y": Tile.SCARECROW,
+	"T": Tile.TREE, "o": Tile.TREE, "k": Tile.PATH, "Z": Tile.ROCK,
 }
 
 
@@ -1926,7 +1933,7 @@ func _build_world() -> void:
 
 	player = Node2D.new()
 	player.set_script(load("res://scripts/player.gd"))
-	player.position = _tile_center(BORDER_X + INNER_W / 2, BORDER_Y + INNER_H / 2)
+	player.position = _tile_center(BORDER_X + HOUSE_DOOR_IX, BORDER_Y + HOUSE_DOOR_IY + 1)
 	player.is_blocked = _is_blocked_world
 	player.stepped.connect(func() -> void: play_sfx("step", 0.03))
 	add_child(player)
@@ -3999,7 +4006,7 @@ func _interact() -> void:
 		_toggle_tab("Smokehouse")
 		return
 	if kind == Tile.FALLOW:
-		_show_message("Overgrown. Reach Farming level 2 to clear this plot.")
+		_show_message("Overgrown. Reach Farming level %s to clear this field." % _fallow_level(tile))
 		return
 	if kind != Tile.SOIL:
 		return
@@ -4018,9 +4025,19 @@ func _interact() -> void:
 	queue_redraw()
 
 
+# The Farming level (and anything else) that opens the field this fallow tile is in.
+func _fallow_level(tile: Vector2i) -> String:
+	var ix := tile - Vector2i(BORDER_X, BORDER_Y)
+	if PLOT_FOUR.has_point(ix):
+		return "%d, with the house Patched," % PLOT_FOUR_LEVEL
+	if PLOT_THREE.has_point(ix):
+		return str(PLOT_THREE_LEVEL)
+	return str(PLOT_TWO_LEVEL)
+
+
 # --- Fishing ----------------------------------------------------------------
 
-# Water tiles that touch land. Fishing spots are picked from these.
+# Water tiles that touch land or the dock (a path over the pond). Fishing spots are picked from these.
 func _find_pond_edges() -> void:
 	pond_edges = []
 	for y in MAP_H:
@@ -4029,7 +4046,7 @@ func _find_pond_edges() -> void:
 				continue
 			for d in [Vector2i.LEFT, Vector2i.RIGHT, Vector2i.UP, Vector2i.DOWN]:
 				var n: Vector2i = Vector2i(x, y) + d
-				if _in_bounds(n) and map[n.y][n.x] == Tile.GRASS:
+				if _in_bounds(n) and (map[n.y][n.x] == Tile.GRASS or map[n.y][n.x] == Tile.PATH):
 					pond_edges.append(Vector2i(x, y))
 					break
 
@@ -5708,7 +5725,7 @@ func _advance_lantern() -> void:
 # bag tier, the house restored, every storage building, the pump and hose, and full needs. The coop and
 # barn still need placing, so build them from the Buildings panel.
 const DEV_LEVEL := 10
-# Dev only (Shift+F4): the next day a walker waits at the north edge, at 08:00, standing below them, with a
+# Dev only (Shift+F4): the next day a walker waits at the east gate, at 08:00, standing below them, with a
 # lantern, a hatchet, 2 lamp oil and 2 trail rations. Nothing else changes, so it's a fair test of the trek.
 func _dev_trek_day() -> void:
 	var d := maxi(day + 1, TrekSystem.FROM_DAY)

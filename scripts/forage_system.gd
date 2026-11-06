@@ -20,6 +20,13 @@ const FORAGE := [
 	{"id": "morels", "seasons": ["Spring"], "level": 4, "weight": 8},
 	{"id": "ghost_pipe", "seasons": ["Summer", "Autumn"], "level": 5, "weight": 5},
 ]
+# The orchard's old trees drop windfalls in autumn: apples under the apple trees, pears under the pears (the tree
+# art in art/farm/concept/ follows the same tiles). Picked like any forage, for Bushcrafting XP.
+const WINDFALLS := {"apple": {"id": "apple", "level": 0}, "pear": {"id": "pear", "level": 0}}
+const PEAR_TREES := [Vector2i(17, 19), Vector2i(9, 23), Vector2i(13, 24)]   # inner tiles; the rest are apples
+const WINDFALL_SEASON := "Autumn"
+const WINDFALL_MIN := 1           # windfalls each autumn morning, plus one per four Bushcrafting levels
+const WINDFALL_MAX := 3
 const PER_MORNING := 2            # on the farm each morning, plus one per three Bushcrafting levels
 const MAX_PER_MORNING := 5
 const PER_CLEARING := 2           # on each trek clearing
@@ -100,7 +107,29 @@ func _new_day() -> void:
 		var t: Vector2i = options[_rng.randi_range(0, options.size() - 1)]
 		options.erase(t)
 		spots[t] = _roll(pool)
+	_lay_windfalls()
 	_redraw()
+
+
+# Autumn windfalls on the orchard's grass, each beside the tree it fell from.
+func _lay_windfalls() -> void:
+	if m._season_today() != WINDFALL_SEASON:
+		return
+	var options: Array = []
+	for tree in m.ORCHARD_TREES:
+		var fruit := "pear" if PEAR_TREES.has(tree) else "apple"
+		for d in [Vector2i.DOWN, Vector2i.LEFT, Vector2i.RIGHT, Vector2i.UP]:
+			var t: Vector2i = m._world_tile(tree.x, tree.y) + d
+			if m.happenings._open_grass(t) and not spots.has(t):
+				options.append([t, fruit])
+	var n := mini(WINDFALL_MAX, WINDFALL_MIN + m.progression._level("Bushcrafting") / 4)
+	for i in n:
+		if options.is_empty():
+			break
+		var e: Array = options[_rng.randi_range(0, options.size() - 1)]
+		options.erase(e)
+		if not spots.has(e[0]):
+			spots[e[0]] = e[1]
 
 
 # One or two finds beside the trail in a trek clearing. Called once the clearing is laid out in the cave grid.
@@ -164,6 +193,8 @@ func _pick(id: String) -> bool:
 
 
 func _spec(id: String) -> Dictionary:
+	if WINDFALLS.has(id):
+		return WINDFALLS[id]
 	for f in FORAGE:
 		if f["id"] == id:
 			return f
@@ -208,6 +239,12 @@ func _draw_one(c: Vector2, id: String) -> void:
 	var ink := Color("1d1611")
 	var px := float(m.PX)
 	var base := c + Vector2(0, px * 0.28)
+	if WINDFALLS.has(id):
+		# Two or three fallen fruit in the grass.
+		for p in [Vector2(-0.16, -0.06), Vector2(0.12, -0.02), Vector2(-0.02, -0.16)]:
+			layer.draw_circle(base + p * px, px * 0.09, ink)
+			layer.draw_circle(base + p * px, px * 0.075, tint)
+		return
 	match str(f["icon"]):
 		"mushroom":
 			for k in 3:

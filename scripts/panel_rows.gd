@@ -346,7 +346,7 @@ func _house_rows() -> Array:
 		})
 	rows.append({"name": "Wear", "status": "%d / %d" % [m.wear, m.WEAR_MAX], "status_kind": "short" if m.wear >= m.WEAR_RUNDOWN else "info",
 		"progress": float(m.wear) / float(m.WEAR_MAX),
-		"note": "The house wears a little each night. Mending, tidying, and repairs bring it down. At %d wear, rain ruins a crop overnight. At %d, foxes and worse come to the coop and barn more often at night. A third plot opens at Farming %d once the house is Patched." % [m.WEAR_RUNDOWN, m.WEAR_FOX, m.PLOT_THREE_LEVEL]})
+		"note": "The house wears a little each night. Mending, tidying, and repairs bring it down. At %d wear, rain ruins a crop overnight. At %d, foxes and worse come to the coop and barn more often at night. The fourth field opens at Farming %d once the house is Patched." % [m.WEAR_RUNDOWN, m.WEAR_FOX, m.PLOT_FOUR_LEVEL]})
 	rows.append({"name": "Sanity limit", "status": "%d / %d" % [m.sanity_sys._sanity_max(), int(m.SANITY_MAX)],
 		"progress": float(m.sanity_sys._sanity_max()) / float(m.SANITY_MAX),
 		"note": "The bed is in the bedroom. Walk there and press Space from 18:00 to save and end the day. If you aren't in bed by 03:00 you collapse, and your sanity limit drops permanently."})

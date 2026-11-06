@@ -103,14 +103,15 @@ func _build() -> void:
 func _steps() -> Array:
 	return [
 		{"id": "boarded", "title": "Board up the house", "how": "House section: repair to Boarded, Carpentry 1.", "done": m.house_stage >= 1},
-		{"id": "plot_two", "title": "Open the second plot", "how": "Opens at Farming 2.", "done": m.plot_two_open},
+		{"id": "plot_two", "title": "Open the second field", "how": "Opens at Farming 2.", "done": m.plot_two_open},
 		{"id": "coop", "title": "Build the coop", "how": "Buildings section: 6 wood, 4 fiber, Carpentry 2.", "done": m.coop_built},
 		{"id": "patched", "title": "Patch the house", "how": "House section: repair to Patched, Carpentry 3.", "done": m.house_stage >= 2},
 		{"id": "smokehouse", "title": "Build the smokehouse", "how": "Buildings section, in the workshop: Carpentry 4.", "done": m.smokehouse_built},
 		{"id": "woodshed", "title": "Build the firewood store", "how": "Buildings section, after the smokehouse or furnace.", "done": m.woodshed_built},
 		{"id": "furnace", "title": "Build the furnace", "how": "Buildings section, in the workshop: Carpentry 5.", "done": m.furnace_built},
 		{"id": "lamp", "title": "Light the yard", "how": "Place a lamp post (Buildings, Decor): 3 wood, 1 iron bar, Smithing 7.", "done": _count("lamp") >= 1},
-		{"id": "plot_three", "title": "Open the third plot", "how": "Opens at Farming 9 once the house is Patched.", "done": m.plot_three_open},
+		{"id": "plot_field_three", "title": "Open the third field", "how": "Opens at Farming 5.", "done": m.plot_three_open},
+		{"id": "plot_three", "title": "Open the fourth field", "how": "Opens at Farming 9 once the house is Patched.", "done": m.plot_four_open},
 		{"id": "barn", "title": "Build the barn", "how": "Buildings section: 10 wood, 6 fiber, Carpentry 7.", "done": m.barn_built},
 		{"id": "hollow_lantern", "title": "Make the Hollow Lantern", "how": "Craft section, Other tab: the lantern's third tier.", "done": m.lantern_tier >= 3},
 		{"id": "flowers", "title": "Plant four flower beds", "how": "Buildings, Decor, in spring or summer: 1 wood and 2 turnip seeds each, Farming 2.", "done": _count("flowers") >= 4},

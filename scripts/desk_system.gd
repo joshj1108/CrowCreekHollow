@@ -231,7 +231,7 @@ func _fixture_count() -> int:
 func _property_value() -> int:
 	var house_mult := pow(m.PROPERTY_HOUSE_GROWTH, m.house_stage)
 	var building_mult := 1.0 + m.PROPERTY_PER_BUILDING * _building_count() + m.estate.EXTENSION_VALUE * m.estate.built.size()
-	var plot_mult := 1.0 + m.PROPERTY_PER_PLOT * (int(m.plot_two_open) + int(m.plot_three_open))
+	var plot_mult := 1.0 + m.PROPERTY_PER_PLOT * (int(m.plot_two_open) + int(m.plot_three_open) + int(m.plot_four_open))
 	var stock := m.PROPERTY_PER_HEN * m.hens + m.PROPERTY_PER_GOAT * m.goats + m.PROPERTY_PER_FIXTURE * _fixture_count()
 	return roundi(m.PROPERTY_TAX * house_mult * building_mult * plot_mult) + stock
 
@@ -242,7 +242,7 @@ func _property_text() -> String:
 	return "%d coins a quarter. Starts at %d; x%.1f per house upgrade, +%d%% per building (%d), +%d%% per extension (%d), +%d%% per farm plot past the first (%d), and %d a hen, %d a goat, %d a lamp post or sprinkler." % [
 		_property_value(), m.PROPERTY_TAX, m.PROPERTY_HOUSE_GROWTH, int(m.PROPERTY_PER_BUILDING * 100), _building_count(),
 		int(m.estate.EXTENSION_VALUE * 100), m.estate.built.size(),
-		int(m.PROPERTY_PER_PLOT * 100), int(m.plot_two_open) + int(m.plot_three_open), m.PROPERTY_PER_HEN, m.PROPERTY_PER_GOAT, m.PROPERTY_PER_FIXTURE]
+		int(m.PROPERTY_PER_PLOT * 100), int(m.plot_two_open) + int(m.plot_three_open) + int(m.plot_four_open), m.PROPERTY_PER_HEN, m.PROPERTY_PER_GOAT, m.PROPERTY_PER_FIXTURE]
 
 
 func _tax_evicts() -> bool:

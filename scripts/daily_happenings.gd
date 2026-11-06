@@ -10,7 +10,7 @@ var m: MainGame
 
 const PEDLAR_LEAVES := 18.0     # the pedlar packs up at the stall's closing hour
 const FRENZY_BONUS := 0.25      # extra catch chance on a fish frenzy day
-const PEDLAR_SPOT := Vector2i(37, 12)   # inner tile beside the farm stand
+const PEDLAR_SPOT := FarmLayout.PEDLAR_SPOT   # inner tile beside the farm stand
 
 const HAPPENINGS := [
 	{"id": "pedlar", "weight": 3,

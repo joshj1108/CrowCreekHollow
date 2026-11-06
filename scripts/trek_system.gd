@@ -2,7 +2,7 @@ class_name TrekSystem
 extends RefCounted
 
 # Treks into the Rookery Wood (DESIGN.md, Groves and treks). Since Agnes Rook's bell came down nobody from the
-# lane crosses the wood alone, so now and then people wait at the gap in the trees north of the house and ask
+# lane crosses the wood alone, so now and then people wait at the farm's east gate and ask
 # to be walked. Each route (ROUTES) has its walker, who waits at their own spot: Space beside one picks that route.
 # First, in the first week, Old Maren asks to be walked only to the wood's edge (the "edge" route: two short
 # clearings by day, a fallen tree and a glimpse of the tall one, which teaches the walker, the lantern and the oil
@@ -29,7 +29,7 @@ extends RefCounted
 
 var m: MainGame
 
-const WALKER_SPOT := Vector2i(25, 1)  # inner farm tile at the north edge, above the house, where walkers wait
+const WALKER_SPOT := FarmLayout.WALKER_SPOT  # inner farm tile on the road inside the east gate, where walkers wait
 const FROM_DAY := 14                  # the mill path opens (day 62, the first winter, until October 2026)
 const EDGE_DAY := 4                   # Old Maren first waits to be walked to the wood's edge (she says so the morning before)
 const EDGE_OIL := 2                   # flasks she brings if you have fewer, so nobody is stuck without coins
@@ -230,20 +230,20 @@ const FLIP := 100                     # a layout index FLIP + i is clearing i mi
 const MARKED_ROUTE := [0, 1, 2, 4]    # the mill path's clearings by the marked trail
 const DARK_ROUTE := [0, 3, 4]         # ... and by the dark trail
 
-# The routes. "spot" is where the walker waits (an inner farm tile at the north edge). "level" is the
+# The routes. "spot" is where the walker waits (an inner farm tile on the road inside the east gate). "level" is the
 # Bushcrafting the walker asks for, "oil" the lamp oil needed to set out by day. "feathers" and "xp" are the
 # base pay on arriving (dread, the dark trail and the night add to it). "talk" is a line a clearing (the last
 # line at the end), and the {w} {W} {she} {She} {her} {his} tokens in messages name the walker (see _w).
 const ROUTES := {
 	"edge": {"walker": "Old Maren", "short": "Maren", "she": "she", "her": "her", "his": "her", "to": "the wood's edge",
-		"from": EDGE_DAY, "level": 0, "oil": 1, "xp": EDGE_XP, "feathers": 0, "spot": Vector2i(25, 1), "night": false,
+		"from": EDGE_DAY, "level": 0, "oil": 1, "xp": EDGE_XP, "feathers": 0, "spot": WALKER_SPOT, "night": false,
 		"marked": [7, 8], "dark": [7, 8], "extra": [],
 		"talk": [
 			"\"I'm Maren, from the last cottage down the lane. I walked this alone every Sunday, once. Since they took the bell down, nobody does.\"",
 			"\"There's the stile. Past it is the old way on to the mill, where my sister Ruth is.\""],
 		"arrive": "At the stile Maren stops and looks down the old trail into the dark of the trees. \"That's the way to the mill. The town met there, the night they voted Agnes Rook's bell down. I was there.\" She doesn't say how she voted. \"I'll want walking all the way, in a week or so, once you know the wood. Ask me about Agnes then.\""},
 	"mill": {"walker": "Old Maren", "short": "Maren", "she": "she", "her": "her", "his": "her", "to": "the mill",
-		"from": FROM_DAY, "level": 0, "oil": 1, "xp": REWARD_XP, "feathers": 0, "spot": Vector2i(25, 1), "night": false,
+		"from": FROM_DAY, "level": 0, "oil": 1, "xp": REWARD_XP, "feathers": 0, "spot": WALKER_SPOT, "night": false,
 		"marked": MARKED_ROUTE, "dark": DARK_ROUTE, "extra": [],
 		"talk": [
 			"\"My sister's at the mill. We used to cross this wood every Sunday, before.\"",
@@ -252,7 +252,7 @@ const ROUTES := {
 			"\"They took the bell down at the mill, you know. Held the meeting right there. I voted with them. I was afraid.\""],
 		"arrive": "Maren's sister opens the mill door before you knock. Maren presses a paper of seed and a black feather into your hand. \"You'll walk me again?\""},
 	"orchard": {"walker": "the Tull boy", "short": "Davy", "she": "he", "her": "him", "his": "his", "to": "the drowned orchard",
-		"from": 152, "level": 4, "oil": 2, "xp": 120, "feathers": 1, "spot": Vector2i(22, 1), "night": false,
+		"from": 152, "level": 4, "oil": 2, "xp": 120, "feathers": 1, "spot": WALKER_SPOT + Vector2i(0, 1), "night": false,
 		"marked": [0, 1, 5, FLIP + 2, 4], "dark": [0, 3, 6, 4], "extra": ["dogs"],
 		"talk": [
 			"\"Pip ran off after the wild dogs at harvest. Ma says he's gone feral with them. I'd know his bark anywhere.\"",
@@ -262,7 +262,7 @@ const ROUTES := {
 			"\"This is it. Pip liked it here. He used to chase the ducks off the water.\""],
 		"arrive": "The drowned orchard: black water standing between the apple trees, and no ducks now. Davy whistles his two notes until his lips give out. Nothing comes. He gives you what his mother sent and says he'll look again."},
 	"chapel": {"walker": "the vicar", "short": "the vicar", "she": "he", "her": "him", "his": "his", "to": "the chapel on the hill",
-		"from": 244, "level": 5, "oil": 2, "xp": 200, "feathers": 2, "spot": Vector2i(28, 1), "night": true,
+		"from": 244, "level": 5, "oil": 2, "xp": 200, "feathers": 2, "spot": WALKER_SPOT + Vector2i(-1, 1), "night": true,
 		"marked": [0, FLIP + 1, 5, 2, FLIP + 5, 4], "dark": [0, 3, 6, FLIP + 3, 4], "extra": ["dogs"],
 		"talk": [
 			"\"I hold a service at the chapel once a month, for whoever will come. Nobody comes. I go anyway.\"",
@@ -273,7 +273,7 @@ const ROUTES := {
 			"\"There, the chapel. Whatever happens, don't let me stay past dark.\""],
 		"arrive": "The chapel on the hill: a grey stone nave and an empty bell-cote. The vicar lets himself in with a key on a string and comes back from the vestry with flasks of lamp oil. \"For the walk home. And for next time.\""},
 	"post": {"walker": "the postman", "short": "the postman", "she": "he", "her": "him", "his": "his", "to": "the chapel on the hill",
-		"from": 336, "level": 5, "oil": 2, "xp": 160, "feathers": 1, "spot": Vector2i(31, 1), "night": false,
+		"from": 336, "level": 5, "oil": 2, "xp": 160, "feathers": 1, "spot": WALKER_SPOT + Vector2i(-2, 1), "night": false,
 		"marked": [0, FLIP + 2, 1, FLIP + 5, 4], "dark": [0, FLIP + 6, 3, 4], "extra": ["dogs"],
 		"talk": [
 			"\"I've had the lane's post thirty years. Since the bell came down I come round by your farm and wait to be walked, like everyone.\"",
@@ -284,7 +284,7 @@ const ROUTES := {
 		"arrive": "The chapel on the hill, locked, the bell-cote empty. The postman takes a yellowed letter from the bottom of his sack and slides it under the vestry door. \"It'll be back in my sack by morning. It always is.\"",
 		"arrive_after_grove": "The chapel on the hill, locked, the bell-cote empty. The postman reaches into the bottom of his sack and comes up with nothing. \"It's gone.\" He looks at the door a long while. \"Thirty years. Somebody's had it at last.\""},
 	"grove": {"walker": "a woman in a grey shawl", "short": "the woman", "she": "she", "her": "her", "his": "her", "to": "the Hollow's grove",
-		"from": GROVE_DAY, "level": 5, "oil": 2, "xp": 300, "feathers": 5, "spot": Vector2i(19, 1), "night": true,
+		"from": GROVE_DAY, "level": 5, "oil": 2, "xp": 300, "feathers": 5, "spot": WALKER_SPOT + Vector2i(-3, 1), "night": true,
 		"marked": [0, 1, 5, 2, FLIP + 5, FLIP + 1, 4], "dark": [0, 3, 6, FLIP + 3, FLIP + 6, 4], "extra": ["dogs"],
 		"talk": [
 			"She says nothing. When you look back she is watching the crows, not the path.",
@@ -375,7 +375,7 @@ const WORKS := {
 		"about": "Planks over the hollows on the mill path, so a flood there is crossed dry.",
 		"built": "The hollows on the mill path are crossed dry."},
 	"gate_lamp": {"name": "A lamp at the gate", "route": "mill", "cost": {"coins": 400, "iron_bar": 2},
-		"about": "A lamp hung at the gap in the trees. The lane sees it, and walkers come twice as often.",
+		"about": "A lamp hung on the east gate. The lane sees it, and walkers come twice as often.",
 		"built": "Walkers come two days in three."},
 	"boardwalk": {"name": "The orchard boardwalk", "route": "orchard", "cost": {"coins": 700, "wood": 20, "rope": 8},
 		"about": "A boardwalk over the wet ground: the orchard is one clearing shorter.",
@@ -470,7 +470,7 @@ func _night_sanity() -> float:
 	return NIGHT_SANITY
 
 
-# --- The walkers at the north edge --------------------------------------------------------------
+# --- The walkers at the east gate ----------------------------------------------------------------
 
 # A route is open from its day; the grove only once the crow bell is hung, and only once.
 func _route_open(id: String) -> bool:
@@ -516,7 +516,7 @@ func _morning_note() -> String:
 	if names.is_empty():
 		return _edge_note() + _wood_note()
 	var who: String = names[0] if names.size() == 1 else ", ".join(names.slice(0, -1)) + " and " + str(names[-1])
-	return " %s %s waiting at the gap in the trees north of the house, wanting walking through the wood, before three." % [
+	return " %s %s waiting at the east gate, wanting walking through the wood, before three." % [
 		_cap(who), "is" if names.size() == 1 else "are"] + _wood_note()
 
 
@@ -527,7 +527,7 @@ func _edge_note() -> String:
 	if m.day == EDGE_DAY - 1:
 		return " Old Maren from the last cottage down the lane stopped at the gate at first light. She'll be back tomorrow morning: she wants walking as far as the edge of the Rookery Wood, and says you'll want a lantern."
 	if m.day >= EDGE_DAY:
-		return " Old Maren is waiting at the gap in the trees north of the house, wanting walking to the wood's edge, before three."
+		return " Old Maren is waiting at the east gate, wanting walking to the wood's edge, before three."
 	return ""
 
 
@@ -706,12 +706,12 @@ func _start(id := "mill") -> void:
 	_enter_clearing()
 	var by_night := " The sky is dark already; the wood is darker." if night else ""
 	if id == "edge":
-		m._show_message("You lead Maren through the gap in the trees. The light goes green, then grey, and your lantern burns oil in here. Her nerve shows by your needs: keep her close, in your light and on the path.")
+		m._show_message("You lead Maren out through the east gate and into the trees. The light goes green, then grey, and your lantern burns oil in here. Her nerve shows by your needs: keep her close, in your light and on the path.")
 		return
 	if _dread() > 0:
-		m._show_message(_w("You lead {w} through the gap in the trees.%s The wood is quieter than last time, as if it has been waiting. It knows you now (dread %d of %d). Press Space beside {her} for a word, or a trail ration.") % [by_night, _dread(), MAX_DREAD])
+		m._show_message(_w("You lead {w} out through the east gate and into the trees.%s The wood is quieter than last time, as if it has been waiting. It knows you now (dread %d of %d). Press Space beside {her} for a word, or a trail ration.") % [by_night, _dread(), MAX_DREAD])
 		return
-	m._show_message(_w("You lead {w} through the gap in the trees.%s The light goes green, then grey. \"Stay close.\" Press Space beside {her} for a word, or to give {her} a trail ration.") % by_night)
+	m._show_message(_w("You lead {w} out through the east gate and into the trees.%s The light goes green, then grey. \"Stay close.\" Press Space beside {her} for a word, or to give {her} a trail ration.") % by_night)
 
 
 # A message about the walker: {w} and {W} are their name, {she} {She} {her} {his} their pronouns.
@@ -1625,13 +1625,12 @@ func _pass_hours(hours: float) -> void:
 	m._update_needs(hours)
 
 
-# Ends a trek and puts you back at the gap in the trees. Walking home from the mill takes an hour.
+# Ends a trek and puts you back on the road inside the east gate. Walking home from the mill takes an hour.
 func _end(text: String, arrived: bool) -> void:
 	active = false
 	m.in_cave = false
 	m.foes = []
-	var out := _walker_tile(route_id) + Vector2i(0, 1)
-	m.player.position = m._tile_center(out.x, out.y)
+	m.player.position = m._tile_center(m.HOMESTEAD_ARRIVE.x, m.HOMESTEAD_ARRIVE.y)
 	m._set_bounds()
 	if arrived:
 		_pass_hours(0.5 if route_id == "edge" else 1.0)

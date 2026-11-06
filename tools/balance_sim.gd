@@ -57,10 +57,11 @@ const WOODPILE := 200        # trees are felled while the wood is under this, or
 const HARDWOOD_WANT := 150
 const FENCES := 120          # wattle fence the sim puts up, ten a day while the sticks last
 # Crops kept growing are what the tank waters on a dry day (m._well_capacity(): 40, 64 with the cistern).
-# Sprinklers go on these plot-one tiles (inner coordinates), one in the middle of each 3 by 3, so the rows
-# planted first are the ones they water; the sim never plants on them.
-const SPRINKLER_SPOTS := [Vector2i(4, 20), Vector2i(7, 20), Vector2i(10, 20), Vector2i(13, 20), Vector2i(16, 20),
-	Vector2i(4, 23), Vector2i(7, 23), Vector2i(10, 23), Vector2i(13, 23), Vector2i(16, 23)]
+# Sprinklers go on these field tiles (inner coordinates), one in the middle of each 3 by 3 across the top three
+# rows of each 7 by 4 field, first field first, so the rows planted first are the ones they water; the sim never
+# plants on them.
+const SPRINKLER_SPOTS := [Vector2i(45, 21), Vector2i(48, 21), Vector2i(53, 21), Vector2i(56, 21), Vector2i(45, 26),
+	Vector2i(48, 26), Vector2i(53, 26), Vector2i(56, 26), Vector2i(50, 21), Vector2i(58, 21)]
 
 var m: MainGame
 # The trek routes (TrekSystem.ROUTES), longest first, with the trail rations the sim packs for each. The rest
@@ -364,6 +365,8 @@ func _soil_tiles() -> Array:
 		plots.append(m.PLOT_TWO)
 	if m.plot_three_open:
 		plots.append(m.PLOT_THREE)
+	if m.plot_four_open:
+		plots.append(m.PLOT_FOUR)
 	for r in plots:
 		for y in range(r.position.y, r.end.y):
 			for x in range(r.position.x, r.end.x):

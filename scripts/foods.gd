@@ -39,6 +39,8 @@ const LIST := [
 		"desc": "From a low bush that fruits again every few days through the summer."},
 	{"id": "apple", "held": "apples", "kind": "crop", "name": "Apple", "icon": "turnip", "tint": "b8442e", "skill": "Farming", "level": 4, "difficulty": 2, "price": 0,
 		"desc": "From an apple tree grown from the drowned orchard's stock. Sharp and sweet, and it keeps."},
+	{"id": "pear", "held": "pears", "kind": "forage", "name": "Pear", "icon": "turnip", "tint": "b8a43e", "skill": "Bushcrafting", "level": 1, "difficulty": 1, "price": 3,
+		"desc": "A windfall from the old pear trees in the farm's orchard, gathered off the grass in autumn. Gritty and sweet."},
 	# From the animals.
 	{"id": "egg", "held": "eggs", "kind": "animal", "name": "Egg", "icon": "egg", "tint": "f2ead2", "skill": "Farming", "level": 0, "difficulty": 1, "price": 0,
 		"desc": "Laid by the hens."},

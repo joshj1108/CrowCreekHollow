@@ -71,26 +71,32 @@ func _switch_seed() -> void:
 	m._show_message("You'll plant %s seeds now." % _seed_label(m.selected_seed).to_lower())
 
 
-# Opens the third plot once Farming reaches level 4 and the house is at least Patched.
+# Opens the fourth field once Farming reaches level 9 and the house is at least Patched.
 func _check_plot_three() -> void:
-	if m.plot_three_open or m.progression._level("Farming") < m.PLOT_THREE_LEVEL or m.house_stage < 2:
+	if m.plot_four_open or m.progression._level("Farming") < m.PLOT_FOUR_LEVEL or m.house_stage < 2:
 		return
-	m.plot_three_open = true
-	for y in range(m.PLOT_THREE.position.y, m.PLOT_THREE.end.y):
-		for x in range(m.PLOT_THREE.position.x, m.PLOT_THREE.end.x):
-			m.map[y + m.BORDER_Y][x + m.BORDER_X] = m.Tile.SOIL
-	m.queue_redraw()
+	m.plot_four_open = true
+	_open_plot(m.PLOT_FOUR)
 
 
-# Opens the second plot once Farming reaches level 2. It stays open afterward.
+# Opens the second field at Farming 2 and the third at Farming 5 (and the fourth, above). Each stays open afterward.
 func _check_unlocks() -> void:
 	_check_plot_three()
-	if m.plot_two_open or m.progression._level("Farming") < 2:
-		return
-	m.plot_two_open = true
-	for y in range(m.PLOT_TWO.position.y, m.PLOT_TWO.end.y):
-		for x in range(m.PLOT_TWO.position.x, m.PLOT_TWO.end.x):
-			m.map[y + m.BORDER_Y][x + m.BORDER_X] = m.Tile.SOIL
+	var level: int = m.progression._level("Farming")
+	if not m.plot_two_open and level >= m.PLOT_TWO_LEVEL:
+		m.plot_two_open = true
+		_open_plot(m.PLOT_TWO)
+	if not m.plot_three_open and level >= m.PLOT_THREE_LEVEL:
+		m.plot_three_open = true
+		_open_plot(m.PLOT_THREE)
+
+
+# Fallow ground in a field becomes soil. Tiles already tilled or planted are left as they are.
+func _open_plot(plot: Rect2i) -> void:
+	for y in range(plot.position.y, plot.end.y):
+		for x in range(plot.position.x, plot.end.x):
+			if m.map[y + m.BORDER_Y][x + m.BORDER_X] == m.Tile.FALLOW:
+				m.map[y + m.BORDER_Y][x + m.BORDER_X] = m.Tile.SOIL
 	m.queue_redraw()
 
 

@@ -130,7 +130,7 @@ func _swap_tool() -> void:
 # An empty soil tile on a plot, for a crop that isn't there.
 func _fake_spot() -> Vector2i:
 	var spots: Array = []
-	for plot in [m.PLOT_ONE, m.PLOT_TWO]:
+	for plot in [m.PLOT_ONE, m.PLOT_TWO, m.PLOT_THREE, m.PLOT_FOUR]:
 		var r: Rect2i = plot
 		for y in range(r.position.y, r.end.y):
 			for x in range(r.position.x, r.end.x):
