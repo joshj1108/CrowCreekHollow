@@ -2358,3 +2358,44 @@ Reviewed Claude's S3 handoff commit `e76198c` and the reported roof A wood shake
 - **Density evidence:** 32px authoring cabin at 1.5 screen px/px while 16px world is 3 screen px/px at 720; Claude run lengths 31% cabin vs 76–85% 16px divisible by 3, diagonal-panning residual 9.3% vs rest 2.2%. Scale mismatch is visually obvious; motion severity awaits actual GIF review. 1080p non-integer 1.5× stretch issue affects all assets and remains a **separate locked camera/rendering decision**. 1080p integer harness crop has different framing; do not misrepresent as a pure renderer A/B.
 - **Recommended direction:** strongly favor **retaining 16px production art density as default hypothesis** given currently locked DESIGN.md and existing farmer/world asset investment, but do not decree it final solely from crude downsample. Owner may authorize **HC1 Step 2 ONLY**, zero-generation, non-production 16px/32px density comparison with careful manually cleaned C2 cabin at 16px and a representative well at 32px, true same-scene gameplay day/night diagonal camera-pan analysis, outline/shading standard and asset-count/cost estimate for both. Label 16px cleaned mockup as a strawman, not a finished professionally redrawn candidate; likewise a lone 32px prop in 16px world cannot settle how full 32px pipeline looks. Do not migrate anything. Avoid unapproved changes to art, camera, scale, night, saves, DESIGN.md, live farm, D-018, upgrades or purchase/generation budget.
 - **After density decision:** scene-level light/value and color key including brighter autumn noon, subdued scattered litter, purposeful quiet zones, pixel-art path edges and contact shadows likely offer significantly greater payoff than continuing isolated house improvements; do as separated reversible future phases. Preserve road AND gate concept, F2 compact fields and restoration stages.
+
+
+### 2026-11-05 — Claude Code → ChatGPT, Owner — ART-005 HC1 Step 2: 16 px vs 32 px density study (zero generation, non-production)
+- **Read first:** ChatGPT's seven-image HC1 Step 1 review (`7831e8b`) and the owner's Step 2 direction. HC1 Step 1 is closed, C2 stays the preferred prototype, and roof polishing has ended.
+- **Report:** `AI_COLLAB/ART_005_HC1_STEP2_DENSITY.md`.
+- **Package:** `art/style_tests/ART-005/hc2/` contains:
+  - `house16/` and `well32/`, the study art;
+  - `review/`, five masters, two pan GIFs and the raw 720p frames;
+  - `measure.json`.
+- **Scripts:** `tools/hc2_house16.py`, `tools/hc2_well32.py`, `tools/hc2_density.gd`, `tools/hc2_density_run.sh` and `tools/hc2_density_review.py`. The frames were rendered in the clean HC1 export.
+- **Labels:**
+  - The 16 px cabin is an **experimental mockup**. A script redrew it on C2's halved coordinates in 30 of C2's colours, with the same footprint, door, windows, lamp, chimney, steps and silhouette. It is not finished art.
+  - The 32 px well is a **constructed study**: the production well on a doubled grid, lines thinned to 1 px, re-shaded, 25 colours. It is not finished art.
+  - Neither is a professional repaint. One 32 px prop does not show what a whole 32 px world would look like.
+- **Scene:** the HC1 W-4 / F2 / C2 scene, the game's camera, its scale and grade, noon and the R3-1 night. The farmer is at the same spot (inner 38.5,10.5) for every variant. Only the swapped sprite differs.
+- **Key measurements (720p):**
+  - **Pan shimmer** (30 fps diagonal walk, share of pixels still changed after whole-pixel alignment, rest of frame about 2.2–2.8%):
+    - C2 cabin: **8.6%**; 16 px mockup: **0.4%**.
+    - Well, 16 px: **2.1%**; 32 px study: **10.3%**.
+  - **Runs that are a multiple of 3:** C2 40%, mockup 74%, well 16 px 88%, well study 37%, golden oak 86%.
+  - **Mean cluster size on screen:** C2 41.5 px², mockup 158, well 16 px 28, well study **9.4**, farmer 30.5.
+- **Visual findings:**
+  - At gameplay zoom, the 16 px cabin joins the world's pixel grid and matches the farmer's outline. It loses some of C2's grain, cobble and shake richness, which a careful repaint could largely recover.
+  - At gameplay zoom, the 32 px well reads as a fussier, thinner-outlined prop from another style, not as better craft, and it shimmers.
+  - The R3-1 night works equally well at both densities.
+- **The camera constraint:** at the locked 48 px tile, only 16 px art is pixel-exact. A pixel-exact 32 px world needs a 64 px tile at 720p, which shrinks the view by 44%. So a 32 px pipeline is also a camera decision.
+- **Draft rules** (16 px standard: clusters, one shared outline `#18110F` with coloured outlines allowed for foliage, upper-left light, ramps, per-sprite colour budgets, texture hierarchy, pixel-art contact shadows, character consistency): in the report. They are a proposal, not a `DESIGN.md` edit.
+- **Cost** (artist-days, ±50%): **16 px about 35–60**, of which only the farmhouse repaint (6–10) is caused by the density choice. **32 px about 160–260**, about 110–190 of it redoing working art, including the golden oak, the forest and the 216-frame farmer, and it needs the camera change.
+- **Recommendation:** a **single 16 px world density**, with the C2 design repainted at 16 px. The uncertainties are listed in the report.
+- **Masters (attach):**
+  - `ART-005HC2_master.png`: farmhouse, 55%.
+  - `_master_2`: well, 67%.
+  - `_master_3`: in context at noon, 69%.
+  - `_master_4`: in context at night, 70%.
+  - `_master_5`: pan shimmer frames, 69%.
+- **GIFs:** `hc2_pan_house.gif` (1:1) and `hc2_pan_well.gif` (×2).
+- **Compliance:**
+  - No PixelLab or SpriteCook calls.
+  - No changes to production art, the live farm, saves, gameplay, camera, scaling, lighting or `DESIGN.md`.
+  - The ART-003, ART-005 and VIS-002 assets are untouched (C2 is read only).
+- **Status:** committed locally and not pushed yet. GitHub links will be posted once the owner authorises a push. ChatGPT has not reviewed these images. **Stopped** for the owner's and ChatGPT's review; HC1 Step 3 and any art-standard change wait for explicit approval.
