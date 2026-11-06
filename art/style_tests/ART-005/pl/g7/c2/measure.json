@@ -1,0 +1,79 @@
+{
+ "spend": "zero: no PixelLab, SpriteCook or other generation",
+ "seed": 5,
+ "roof_field": {
+  "rows": [
+   57,
+   147
+  ],
+  "cols": [
+   8,
+   375
+  ],
+  "chimney_block_kept": [
+   294,
+   333,
+   57,
+   66
+  ],
+  "pixels_changed": 24422,
+  "pixels_in_field": 33088,
+  "new_colours_vs_c1_roof": []
+ },
+ "timbers": {
+  "timber_before": {
+   "hue": 0.0778,
+   "sat": 0.492,
+   "luma_med": 96.4,
+   "luma_p90": 131.5
+  },
+  "wall": {
+   "hue": 0.0806,
+   "sat": 0.465,
+   "luma_med": 100.0,
+   "luma_p90": 138.2
+  },
+  "colours_remapped": 8,
+  "colours_kept": 2,
+  "pixels_in_mask": 2400,
+  "pixels_changed": 1580
+ },
+ "untouched": "everything else: ridge 42-56, fascia 148-154, eave shadow 155-159, verges, chimney block, log wall, windows, door, lamp, foundation, steps, night glass, alpha",
+ "shakes": {
+  "shakes": 337,
+  "hard": 103,
+  "soft": 190,
+  "none": 34,
+  "drop+1": 55,
+  "drop-1": 38,
+  "chips": 51,
+  "splits": 33,
+  "grain": 92,
+  "silver": 44,
+  "widths": {
+   "min": 6,
+   "max": 16,
+   "mean": 10.92,
+   "distinct": 11
+  }
+ },
+ "c1_roof": {
+  "luma_mean": 46.2,
+  "luma_sd": 10.9,
+  "pixel_noise": 4.62,
+  "mass_sd": 2.64,
+  "course_repeat_ac9": 0.785,
+  "dark_line_share": 0.096,
+  "colours": 25
+ },
+ "c2_roof": {
+  "luma_mean": 45.4,
+  "luma_sd": 12.1,
+  "pixel_noise": 4.74,
+  "mass_sd": 4.2,
+  "course_repeat_ac9": 0.76,
+  "dark_line_share": 0.101,
+  "colours": 23
+ },
+ "sources_unchanged": true
+}

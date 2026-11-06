@@ -2064,3 +2064,43 @@ Reviewed Claude's S3 handoff commit `e76198c` and the reported roof A wood shake
 - **Details:** corner timbers' slightly cooler, duller tone than new wall courses is noticeable at 3×; consider a carefully scoped hand palette adjustment. C1 night glass is better aligned within P1 frames and warm, but the dark shake roof loses definition in harness night; confirm final with ART-003 R3-1 images rather than conflating night pipelines. The facade has more local grain/noise than S3, so don't keep increasing texture density.
 - **Kit image-level verdict:** the six-piece shake kit field is **not acceptable as a replacement roof**: extremely repetitive short rectangular courses with strong dark divisions, visually masonry/brick-like and denser than S3. Keep strictly as feasibility study. S3 roof remains baseline pending artistic finishing. Favor hand-authored larger value masses, staggered irregular shake butt edges, restrained highlights and a deliberate eave/ridge transition. Avoid per-shake dark outlines on every small unit.
 - **Next recommendation:** accept C1 as candidate and prepare a one-area, zero-generation artist-guided hand polish **on a new copy**, primarily roof shading/pattern and minor corner palette, with A/B day/night at actual 720p and 1080p and a full ART-003 W-4 northern homestead. Do NOT regenerate a whole farmhouse or authorize costly roof variants automatically. Preserve all four fixed-structure restoration stages, F2 compact tilled fields, road/closed gate, existing saves, production art/camera/gameplay/night, VIS-002, and `DESIGN.md`. User approval of any implementation or production migration remains separate.
+
+### 2026-11-05 — Claude Code → ChatGPT, Owner — ART-005 C2 — zero-credit roof polish of C1 (non-production)
+- **Answers:** the owner's C1 image-review brief, following ChatGPT's four-sheet C1 review (`f63e72b`). **Document:** `AI_COLLAB/ART_005_C2_ROOF_POLISH.md`.
+- **Spend:** zero. No PixelLab or SpriteCook call, no purchase. The work is a deterministic repaint script, `tools/art005_c2.py`; the six-piece kit was not used.
+- **C2** (`art/style_tests/ART-005/pl/g7/c2/32/`) is C1 with exactly two regions changed. Every other pixel and the alpha are C1's (asserted). C1, S3 Roof A and P1 were hash-checked and are unchanged.
+  - **Roof shake field** (rows 57–147, x 8–375, minus the chimney block): 24,422 px changed, using C1's own roof colours only (0 new colours). It now has:
+    - 337 staggered shakes, 6–16 px wide;
+    - joints at three weights: 110 hard, 186 soft, 31 shown as a value change only;
+    - ±1 px butt drops (59 down, 34 short);
+    - restrained wear: 64 chips, 57 splits, 154 interrupted grain streaks, and 7 tiny moss clusters;
+    - hand-authored value masses, one value per shake: ridge shadow, lit upper slope, a silvered field, a bleached patch, chimney runoff, damp eave corners, and verge occlusion.
+    
+    The ridge, fascia, eave shadow, verges and chimney are untouched.
+  - **Corner timbers:** 1,580 px; 8 colours moved half way toward the wall's hue and saturation. Timber hue 0.0778 → 0.0805 against the wall's 0.0806; saturation 0.492 → 0.475 against 0.465.
+- **[Measured] Roof** (C1 → C2):
+  - pixel noise 4.62 → 4.74 (+3%);
+  - broad mass contrast 2.64 → **4.20**;
+  - course repetition 0.785 → 0.760;
+  - near-black lines 0.096 → 0.101;
+  - colours 25 → 23.
+- **[Judgement]**
+  - **1080p and 3×:** the roof now reads as overlapping, hand-laid shakes rather than C1's brick or tile grid, with no added speckle.
+  - **Real 720p and the W-4 homestead:** the improvement is visible but modest. The roof is calmer and less blotchy, but the masses are faint and it still reads largely as one dark plane.
+  - **Harness night:** no change; the roof is still near-black.
+  - **Timbers:** harmonised by measurement, barely visible except at 3×.
+  - **Overall:** closer to professional craft, but not commercial-finish.
+- **Limitation:** more polish of the same kind won't substantially change the gameplay-scale read. What remains is the roof's value range and mass contrast, which needs the owner's decision: either lift the ramp one step with stronger masses (still zero-credit), or a human artist's butt-edge finish. Neither has been done.
+- **Validation:** both houses were rendered in one session in the clean export:
+  - `art005_density.gd` at 1080p integer and real 720p, noon and harness night;
+  - `art003_wide.gd` W-4 + F2 north, noon and R3-1 night.
+  
+  Leaves and grass in the homestead frames vary between runs; only the house is an authored difference.
+- **Review package** (`art/style_tests/ART-005/pl/g7/c2/review/`):
+  - `ART-005C2_master.png`: 1080p, day and night (97%).
+  - `_master_2.png`: real 720p, plus the changed-pixel map, the shading plan and the change record (66%).
+  - `_master_3.png`: roof, eave and corners at 3× and 1:1 (81%).
+  - `_master_4.png` and `_master_5.png`: homestead north, noon and R3-1 night (65%).
+- **Not shown:** dusk, rain, fog, winter, trek, motion, the restoration stages on C2, and the south homestead.
+- **Untouched:** production art, layout, camera, scaling, lighting, gameplay, saves, porch and storey code, `DESIGN.md`, VIS-002, ART-003, and the S3, P1 and C1 files.
+- **Stopped for the owner's and ChatGPT's image review.** ChatGPT has not reviewed these images. The work is committed locally and not pushed.
