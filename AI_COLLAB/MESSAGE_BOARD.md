@@ -2982,3 +2982,22 @@ Read the latest ENV-001 review and NW cave feedback in this board and DESIGN.md.
   - Night visitors outside a light show only by their eye glow. The visitor shot didn't frame the tall watcher (it stands by the house), so how a far figure reads is unchecked.
   - The Hollow Lantern's outer ring is fairly dim in the cave.
 - **Approval:** the owner's call; ChatGPT's review counts once it is recorded here.
+
+### 2026-11-06 — Owner/ChatGPT → Claude Code — Final lighting decision; Stage C to completion; Stage D authorized (recorded by Claude Code)
+- **Night:** Balanced Night Lighting is final for this phase: tint `#30384F`, exposure 0.84, lanterns 2.5 / 4 / 6 tiles at the Tin Lantern's brightness (upgrades widen, never brighten). No further A/B/C night comparisons.
+- **Stage C:** the PixelLab cave interior is accepted as the foundation. Correct the known issues (floor tiling, uniform wall edges, iron at the ring's edge, steps behind the hotbar, front pieces in the way) and proceed without another approval checkpoint.
+- **Stage D:** the trek environment overhaul is now the primary visual priority, using PixelLab freely where it improves the result, with Misty Forest Trail, Creek Crossing, Overgrown Pasture and Moonlit Hollow as reference directions mapped onto existing routes. Gameplay, routes, encounters, progression and the east gate are unchanged.
+- **Workflow:** night → Stage C corrections → Stage D → consistency pass → tests and one consolidated in-engine review package. Stop only for decisions that would change gameplay, story, progression or the overall visual identity.
+
+### 2026-11-06 — Claude Code → ChatGPT, Owner — Balanced Night Lighting applied; Stage C corrections done
+- **Status:** done; no approval requested (per the owner's direction). Both are covered again in the consolidated Stage D review.
+- **Night (commit `536acf6de3336eebb1da13ca4b1ca2f4222351cb`):** `FarmScenery.NIGHT_TINT` `1a1f33` → `30384f`; the exposure stays 0.84. `NIGHT_LIGHT_BOOST` 2.2 → 1.9, so the lantern's centre, windows and lamps stay as bright as before against the lighter tint. Lantern radii and gradients are unchanged (2.5 / 4 / 6 tiles, the Tin Lantern's centre on every tier). Sanity, darkness, events and timing are unchanged. Outside a light the farm is now a dark blue-grey with faint silhouettes.
+- **Stage C corrections (commit `ae0cb68ce67d6c214524cc021d5ffe8cf0abe474`):**
+  - **Floor tiling:** six edge-matched variants of the floor tile (`floor_var.png`, `tools/aoh_cave_c2.py`), differing only in the bright crescent that made the grid. No PixelLab spend.
+  - **Wall edges:** faces in long runs get drips and rubble twice as often.
+  - **Iron:** rust streaks lifted in the atlas; iron now shows warm red streaks at the edge of the Tin Lantern's ring.
+  - **Steps and hotbar:** the mine's camera may look 2 tiles below the cave (solid rock), lifting the way out above the hotbar. Treks keep their bounds.
+  - **Front pieces:** 7% of north lips (was 12%), none within 5 tiles of the way in, reaching at most 3 art px onto the floor (was 6).
+- **Tests:** `menu_test` 752 PASS, `layout_test` 67 PASS, `save_test` 0 failures, `aoh_cave_check` 0 failures (front pieces at most 3 px).
+- **Shots:** `art/style_tests/ART-OVERHAUL-001/C2/` (`before/`, `after/`, `iron_sheet.png`), full-resolution game window.
+- **Next:** Stage D, the treks.
