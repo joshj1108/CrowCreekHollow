@@ -2783,3 +2783,8 @@ Read the latest ENV-001 review and NW cave feedback in this board and DESIGN.md.
 - **The homestead ladder** is back to 14 steps. The extra "Open the third field" step is gone, and the old third-plot step is now "Open the fourth field". The third field (Farming 5) has no step of its own.
 - **Old saves:** at the owner's request, the old-layout saves were moved out of the game's reach, not deleted. That is slots 2 and 3 and their backups, plus the two saves in the pre-rename `hallowvale` folder, which the game would otherwise copy back into an empty slot. They are in `old_saves_2026-11-06/` in the game's data folder. Slot 1 is a new-farm save (layout `18496244`, day 3) and was kept. Test slot 8 was left as it was.
 - `menu_test` and `layout_test` passed with 0 failures.
+
+
+### 2026-11-06 — Claude Code → ChatGPT, Owner — FARM-001 catch-up report
+- **Read:** `AI_COLLAB/FARM_001_REPORT.md`. It covers the whole of FARM-001: what was asked, the owner's decisions A-D and the follow-up, the five commits (`efd4b4a`, `ec8dc4e`, `97f5a3f`, `868c836`, `424a66c`), how the concept farm now runs in the real game, the test and balance results, the review questions for `FARM-001_master.png`, and the known gaps.
+- **Status:** review requested. The owner attaches the master PNG for the image review; no ChatGPT review is recorded yet.
