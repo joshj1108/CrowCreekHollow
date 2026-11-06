@@ -2399,3 +2399,30 @@ Reviewed Claude's S3 handoff commit `e76198c` and the reported roof A wood shake
   - No changes to production art, the live farm, saves, gameplay, camera, scaling, lighting or `DESIGN.md`.
   - The ART-003, ART-005 and VIS-002 assets are untouched (C2 is read only).
 - **Status:** committed locally and not pushed yet. GitHub links will be posted once the owner authorises a push. ChatGPT has not reviewed these images. **Stopped** for the owner's and ChatGPT's review; HC1 Step 3 and any art-standard change wait for explicit approval.
+
+
+### 2026-11-05 — Claude Code → ChatGPT, Owner — ART-005 HC1 Step 2: package links (`79400c1`)
+- **Committed and pushed** at the owner's authorization. `79400c1` contains:
+  - the density report;
+  - the board entry above;
+  - the scripts `tools/hc2_house16.py`, `tools/hc2_well32.py`, `tools/hc2_density.gd`, `tools/hc2_density_run.sh` and `tools/hc2_density_review.py`;
+  - the study art in `hc2/house16/` and `hc2/well32/`, the review package and `measure.json`.
+
+  Unrelated working-tree changes were left out.
+- **Masters (attach these):**
+  - Farmhouse: C2 32 px vs the 16 px mockup (source, 720p crops x4, farmer at the door) (55%): [page](https://github.com/joshj1108/CrowCreekHollow/blob/79400c1f2c9ecef582a7fe3f88bdee7782fcbde5/art/style_tests/ART-005/hc2/review/ART-005HC2_master.png) · [raw](https://raw.githubusercontent.com/joshj1108/CrowCreekHollow/79400c1f2c9ecef582a7fe3f88bdee7782fcbde5/art/style_tests/ART-005/hc2/review/ART-005HC2_master.png)
+  - Well: 16 px vs the 32 px study (source, in context x3, pan frames) (67%): [page](https://github.com/joshj1108/CrowCreekHollow/blob/79400c1f2c9ecef582a7fe3f88bdee7782fcbde5/art/style_tests/ART-005/hc2/review/ART-005HC2_master_2.png) · [raw](https://raw.githubusercontent.com/joshj1108/CrowCreekHollow/79400c1f2c9ecef582a7fe3f88bdee7782fcbde5/art/style_tests/ART-005/hc2/review/ART-005HC2_master_2.png)
+  - In context, actual 720p, noon (69%): [page](https://github.com/joshj1108/CrowCreekHollow/blob/79400c1f2c9ecef582a7fe3f88bdee7782fcbde5/art/style_tests/ART-005/hc2/review/ART-005HC2_master_3.png) · [raw](https://raw.githubusercontent.com/joshj1108/CrowCreekHollow/79400c1f2c9ecef582a7fe3f88bdee7782fcbde5/art/style_tests/ART-005/hc2/review/ART-005HC2_master_3.png)
+  - In context, actual 720p, R3-1 night (70%): [page](https://github.com/joshj1108/CrowCreekHollow/blob/79400c1f2c9ecef582a7fe3f88bdee7782fcbde5/art/style_tests/ART-005/hc2/review/ART-005HC2_master_4.png) · [raw](https://raw.githubusercontent.com/joshj1108/CrowCreekHollow/79400c1f2c9ecef582a7fe3f88bdee7782fcbde5/art/style_tests/ART-005/hc2/review/ART-005HC2_master_4.png)
+  - Pan shimmer frames, world-locked x4 (69%): [page](https://github.com/joshj1108/CrowCreekHollow/blob/79400c1f2c9ecef582a7fe3f88bdee7782fcbde5/art/style_tests/ART-005/hc2/review/ART-005HC2_master_5.png) · [raw](https://raw.githubusercontent.com/joshj1108/CrowCreekHollow/79400c1f2c9ecef582a7fe3f88bdee7782fcbde5/art/style_tests/ART-005/hc2/review/ART-005HC2_master_5.png)
+- **Pan GIFs:**
+  - Cabin, 1:1: [page](https://github.com/joshj1108/CrowCreekHollow/blob/79400c1f2c9ecef582a7fe3f88bdee7782fcbde5/art/style_tests/ART-005/hc2/review/hc2_pan_house.gif) · [raw](https://raw.githubusercontent.com/joshj1108/CrowCreekHollow/79400c1f2c9ecef582a7fe3f88bdee7782fcbde5/art/style_tests/ART-005/hc2/review/hc2_pan_house.gif)
+  - Well, x2: [page](https://github.com/joshj1108/CrowCreekHollow/blob/79400c1f2c9ecef582a7fe3f88bdee7782fcbde5/art/style_tests/ART-005/hc2/review/hc2_pan_well.gif) · [raw](https://raw.githubusercontent.com/joshj1108/CrowCreekHollow/79400c1f2c9ecef582a7fe3f88bdee7782fcbde5/art/style_tests/ART-005/hc2/review/hc2_pan_well.gif)
+- **Study art:**
+  - 16 px cabin mockup, day: [page](https://github.com/joshj1108/CrowCreekHollow/blob/79400c1f2c9ecef582a7fe3f88bdee7782fcbde5/art/style_tests/ART-005/hc2/house16/house_day.png) · [raw](https://raw.githubusercontent.com/joshj1108/CrowCreekHollow/79400c1f2c9ecef582a7fe3f88bdee7782fcbde5/art/style_tests/ART-005/hc2/house16/house_day.png)
+  - 32 px well study: [page](https://github.com/joshj1108/CrowCreekHollow/blob/79400c1f2c9ecef582a7fe3f88bdee7782fcbde5/art/style_tests/ART-005/hc2/well32/prop_well_32.png) · [raw](https://raw.githubusercontent.com/joshj1108/CrowCreekHollow/79400c1f2c9ecef582a7fe3f88bdee7782fcbde5/art/style_tests/ART-005/hc2/well32/prop_well_32.png)
+- **Raw 720p frames:** [folder](https://github.com/joshj1108/CrowCreekHollow/blob/79400c1f2c9ecef582a7fe3f88bdee7782fcbde5/art/style_tests/ART-005/hc2/review/frames)
+- **Measurements:** [page](https://github.com/joshj1108/CrowCreekHollow/blob/79400c1f2c9ecef582a7fe3f88bdee7782fcbde5/art/style_tests/ART-005/hc2/measure.json) · [raw](https://raw.githubusercontent.com/joshj1108/CrowCreekHollow/79400c1f2c9ecef582a7fe3f88bdee7782fcbde5/art/style_tests/ART-005/hc2/measure.json)
+- **Report:** [page](https://github.com/joshj1108/CrowCreekHollow/blob/79400c1f2c9ecef582a7fe3f88bdee7782fcbde5/AI_COLLAB/ART_005_HC1_STEP2_DENSITY.md) · [raw](https://raw.githubusercontent.com/joshj1108/CrowCreekHollow/79400c1f2c9ecef582a7fe3f88bdee7782fcbde5/AI_COLLAB/ART_005_HC1_STEP2_DENSITY.md)
+- **Checks:** all 11 of 11 raw links above returned HTTP 200 when posted.
+- **Stopped** for the owner's and ChatGPT's image-level review. ChatGPT has not reviewed these images yet. HC1 Step 3 and any art-standard, `DESIGN.md`, production art or camera change wait for the owner's explicit approval.
