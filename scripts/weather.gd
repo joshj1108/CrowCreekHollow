@@ -25,8 +25,8 @@ const PRESETS := {
 	"cloudy":   {"wash": 0.12, "edge": 0.22, "clouds": 0.22, "drops": 0,   "speed": Vector2(0, 0),     "snow": false},
 	"fog":      {"wash": 0.42, "edge": 0.55, "clouds": 0.10, "drops": 0,   "speed": Vector2(0, 0),     "snow": false},
 	"drizzle":  {"wash": 0.20, "edge": 0.30, "clouds": 0.25, "drops": 90,  "speed": Vector2(120, 170), "snow": false},
-	"rain":     {"wash": 0.30, "edge": 0.50, "clouds": 0.30, "drops": 170, "speed": Vector2(210, 310), "snow": false},
-	"downpour": {"wash": 0.40, "edge": 0.65, "clouds": 0.36, "drops": 300, "speed": Vector2(300, 420), "snow": false},
+	"rain":     {"wash": 0.25, "edge": 0.42, "clouds": 0.30, "drops": 170, "speed": Vector2(210, 310), "snow": false},
+	"downpour": {"wash": 0.34, "edge": 0.56, "clouds": 0.36, "drops": 300, "speed": Vector2(300, 420), "snow": false},
 	"snow":     {"wash": 0.22, "edge": 0.35, "clouds": 0.25, "drops": 140, "speed": Vector2(40, 70),   "snow": true},
 }
 
@@ -59,7 +59,7 @@ func _ready() -> void:
 	var size := get_viewport().get_visible_rect().size
 
 	wash_rect = ColorRect.new()
-	wash_rect.color = Color(0.3, 0.34, 0.4, 1.0)
+	wash_rect.color = Color(0.36, 0.4, 0.46, 1.0)   # a haze, not a darkening: lighter since FARM-001's review
 	_fill(wash_rect)
 	add_child(wash_rect)
 

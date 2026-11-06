@@ -1496,10 +1496,10 @@ func _draw() -> void:
 
 
 # The four F2 fields (ART-005 S3 art, art/farm/concept/f2_*.png): each 7 by 4 field is one picture with a 3 px rim,
-# tilled and ready once the field is open, and the same ground grown over (darker and greener) while it is fallow.
+# tilled and ready once the field is open. While it is fallow it shows f2_fallow_*, the same field grown over (grass
+# patches, tufts and stubble on grey-brown soil, its rim ragged into the meadow), made by tools/farm001r_art.py.
 # Crops and watered soil are drawn on top, per tile, by _draw.
-const CONCEPT_FIELDS := ["f2_field_dry_a", "f2_field_dry_b", "f2_field_dry_d", "f2_field_dry_b"]
-const FALLOW_TINT := Color(0.62, 0.7, 0.46)
+const CONCEPT_FIELDS := ["a", "b", "d", "b"]
 
 
 func _draw_concept_fields() -> void:
@@ -1507,10 +1507,10 @@ func _draw_concept_fields() -> void:
 	for i in plots.size():
 		var r: Rect2i = plots[i]
 		var origin := _world_tile(r.position.x, r.position.y)
-		var tex: Texture2D = FarmSprites.tex("concept/" + str(CONCEPT_FIELDS[i]))
-		var dest := Rect2(Vector2(origin) * PX - Vector2.ONE * 3.0 * SCALE, Vector2(tex.get_width(), tex.get_height()) * SCALE)
 		var open: bool = map[origin.y][origin.x] != Tile.FALLOW
-		draw_texture_rect(tex, dest, false, Color.WHITE if open else FALLOW_TINT)
+		var tex: Texture2D = FarmSprites.tex("concept/%s_%s" % ["f2_field_dry" if open else "f2_fallow", CONCEPT_FIELDS[i]])
+		var dest := Rect2(Vector2(origin) * PX - Vector2.ONE * 3.0 * SCALE, Vector2(tex.get_width(), tex.get_height()) * SCALE)
+		draw_texture_rect(tex, dest, false)
 
 
 # Ground is the tiles drawn flat with detail on top: grass, soil, path, fallow ground, and water.

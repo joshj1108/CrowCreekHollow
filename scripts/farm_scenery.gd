@@ -21,12 +21,27 @@ const FRONT_MARGIN := 0.45  # a piece is drawn over the farmer once its base is 
 # The grade's own values by day (shaders/grade.gdshader); the night grade blends in as darkness falls.
 const DAY_GRADE := {"exposure": 0.84, "contrast": 1.1, "shadow_cool": 0.035, "vignette": 0.55, "warmth": 0.02}
 const DAY_WARMTH := 0.03    # extra grade warmth at midday, gone by dusk
+# The evening (FARM-001 review, priority 3): the farm's light by the clock from late afternoon until night takes over,
+# multiplied into the weather's daylight. Golden late afternoon, amber dusk around sunset, a cool blue twilight, then
+# the R3-1 night. Colour and brightness only: the darkness that drives lamps, sanity and the night is unchanged.
+const EVENING := [
+	[16.5, Color(1.0, 1.0, 1.0)],
+	[18.0, Color(1.0, 0.93, 0.8)],      # golden hour
+	[19.0, Color(0.93, 0.78, 0.66)],    # sunset amber, a little dimmer
+	[19.75, Color(0.76, 0.68, 0.74)],   # the sun gone: rose fading to lilac
+	[20.5, Color(0.6, 0.62, 0.78)],     # blue twilight, close to the night tint
+]
+const EVENING_WARMTH := 0.05   # extra grade warmth at the golden hour and sunset
+const TWILIGHT_COOL := 0.04    # extra shadow coolness in the blue twilight
+const RAIN_LIFT := 0.06        # extra exposure in rain, snow and fog by day, so crops and paths stay readable
+const DULL_WEATHER := ["fog", "drizzle", "rain", "downpour", "snow"]
 
 var m: MainGame
 var ground := Node2D.new()          # the chunks and contact shadows, under main's drawing
 var day_chunks: Array = []
 var night_chunks: Array = []
 var pieces: Array = []              # [Sprite2D, base row, day tint, night tint], sorted by base
+var ground_tinted: Array = []      # [Sprite2D, day tint, night tint] ground decals that darken with the night
 var night_only: Array = []          # [day sprite, night sprite] pairs that swap textures at night (the cabin's lit windows)
 var groves := {}                    # world tile -> Array of Sprite2D standing on that grove tree
 var front_from := 0                 # pieces[front_from..] are in front of the farmer
@@ -86,6 +101,8 @@ func build() -> void:
 				pieces.append([s, INF, day, night])
 			else:
 				ground.add_child(s)
+				if r.has("mn"):
+					ground_tinted.append([s, day, night])
 			continue
 		add_child(s)
 		pieces.append([s, base, day, night])
@@ -172,6 +189,8 @@ func _tint(dark: float) -> void:
 		(c as Sprite2D).modulate.a = dark
 	for p in pieces:
 		(p[0] as Sprite2D).modulate = (p[2] as Color).lerp(p[3], dark)
+	for g in ground_tinted:
+		(g[0] as Sprite2D).modulate = (g[1] as Color).lerp(g[2], dark)
 
 
 # The R3-1 night over the game's dusk, and a little warmth at midday. Colour and grade only: the game's darkness
@@ -179,23 +198,47 @@ func _tint(dark: float) -> void:
 func _light(dark: float) -> void:
 	var lamp_dark: float = dark * (1.0 - m.sanity_sys._night_relief())
 	var gloom: float = m.sanity_sys._low_sanity_boost() / 0.25
-	var sky: Color
-	if lamp_dark < m.DUSK_PEAK:
-		sky = m._light_tint().lerp(m.DUSK_TINT, lamp_dark / m.DUSK_PEAK)
-	else:
-		sky = m.DUSK_TINT.lerp(NIGHT_TINT, (lamp_dark - m.DUSK_PEAK) / (1.0 - m.DUSK_PEAK))
-	sky = sky.lerp(m.SANITY_TINT, gloom * 0.5)
 	var h: float = m.current_hour
+	var relief: float = m.sanity_sys._night_relief()
+	var dull: float = 1.0 if m.weather_kind in DULL_WEATHER else 0.0
+	# The evening light, by the clock; under cloud it keeps its dimming but loses most of its colour.
+	var ev := _evening(h)
+	var ev_grey := ev.r * 0.3 + ev.g * 0.55 + ev.b * 0.15
+	ev = ev.lerp(Color(ev_grey, ev_grey, ev_grey), 0.7 * dull)
+	ev = Color.WHITE.lerp(ev, 1.0 - relief)
+	var day_sky: Color = m._light_tint()
+	var sky := Color(day_sky.r * ev.r, day_sky.g * ev.g, day_sky.b * ev.b)
+	sky = sky.lerp(NIGHT_TINT, smoothstep(0.35, 1.0, lamp_dark))
+	sky = sky.lerp(m.SANITY_TINT, gloom * 0.5)
 	var noon: float = smoothstep(7.0, 9.0, h) * (1.0 - smoothstep(16.5, m.DUSK_HOUR, h))
 	if noon > 0.0:
 		sky = Color(sky.r, sky.g * (1.0 - 0.015 * noon), sky.b * (1.0 - 0.06 * noon), sky.a)
 	m.canvas_modulate.color = sky
 	var dim := lerpf(1.0, WEATHER_DIM, lamp_dark)
 	m.weather.night_tint = Color(sky.r * dim, sky.g * dim, sky.b * dim)
+	var golden: float = smoothstep(16.5, 18.25, h) * (1.0 - smoothstep(19.0, 19.75, h)) * (1.0 - dull) * (1.0 - relief)
+	var twilight: float = smoothstep(19.25, 20.0, h) * (1.0 - lamp_dark) * (1.0 - relief)
 	for k in DAY_GRADE:
 		var v: float = lerpf(DAY_GRADE[k], NIGHT_GRADE[k], lamp_dark)
 		if k == "warmth":
-			v += DAY_WARMTH * noon
+			v += DAY_WARMTH * noon + EVENING_WARMTH * golden
+		elif k == "shadow_cool":
+			v += TWILIGHT_COOL * twilight
+		elif k == "exposure":
+			v += RAIN_LIFT * dull * (1.0 - lamp_dark)
 		m.grade_mat.set_shader_parameter(k, v)
-	var sat: float = m.grade_mat.get_shader_parameter("saturation")
+	var sat_v: Variant = m.grade_mat.get_shader_parameter("saturation")
+	var sat: float = 0.62 if sat_v == null else float(sat_v)   # unset until main first writes it
 	m.grade_mat.set_shader_parameter("saturation", lerpf(sat, NIGHT_GRADE["saturation"] * (1.0 - m.SANITY_DESAT * gloom), lamp_dark))
+
+
+# The evening multiplier for this hour: white until late afternoon, then through EVENING's keys (held at the last).
+func _evening(h: float) -> Color:
+	if h <= EVENING[0][0]:
+		return EVENING[0][1]
+	for i in range(1, EVENING.size()):
+		if h <= EVENING[i][0]:
+			var a: Array = EVENING[i - 1]
+			var b: Array = EVENING[i]
+			return (a[1] as Color).lerp(b[1], smoothstep(a[0], b[0], h))
+	return EVENING[-1][1]
