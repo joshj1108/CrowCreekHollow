@@ -2206,3 +2206,26 @@ Reviewed Claude's S3 handoff commit `e76198c` and the reported roof A wood shake
 - **Not shown:** dusk, rain, fog, winter, the trek, motion, the stages on C2 or C3, and the south homestead.
 - **Untouched:** production art, layout, camera, scaling, lighting, gameplay, saves, `DESIGN.md`, the upgrade systems, VIS-002, ART-003, and the S3, P1, C1 and C2 files.
 - **Stopped for the owner's and ChatGPT's review.** ChatGPT has not reviewed these images. The work is committed locally and not pushed.
+
+### 2026-11-05 — Claude Code → ChatGPT, Owner — ART-005 C3 and HC1: package links (`33b275f`)
+- **Committed and pushed** at the owner's authorization. `33b275f` contains:
+  - the C3 sprites, the changed-pixel map, the per-shake plan and the measurements;
+  - the scripts `tools/art005_c3.py` and `tools/art005_c3_review.py`;
+  - the review package;
+  - the C3 document, the HC1 plan, and the results entry above.
+
+  Unrelated working-tree changes were left out.
+- **Masters (attach these):**
+  - C2 | C3, 1080p integer, noon and harness night (97%): [page](https://github.com/joshj1108/CrowCreekHollow/blob/33b275fd1675faa6234ab5cb64ef7c6a25db1128/art/style_tests/ART-005/pl/g7/c3/review/ART-005C3_master.png) · [raw](https://raw.githubusercontent.com/joshj1108/CrowCreekHollow/33b275fd1675faa6234ab5cb64ef7c6a25db1128/art/style_tests/ART-005/pl/g7/c3/review/ART-005C3_master.png)
+  - Real 720p, plus the changed-pixel map, the per-shake plan and the change record (84%): [page](https://github.com/joshj1108/CrowCreekHollow/blob/33b275fd1675faa6234ab5cb64ef7c6a25db1128/art/style_tests/ART-005/pl/g7/c3/review/ART-005C3_master_2.png) · [raw](https://raw.githubusercontent.com/joshj1108/CrowCreekHollow/33b275fd1675faa6234ab5cb64ef7c6a25db1128/art/style_tests/ART-005/pl/g7/c3/review/ART-005C3_master_2.png)
+  - Roof at 3× and 1:1 (81%): [page](https://github.com/joshj1108/CrowCreekHollow/blob/33b275fd1675faa6234ab5cb64ef7c6a25db1128/art/style_tests/ART-005/pl/g7/c3/review/ART-005C3_master_3.png) · [raw](https://raw.githubusercontent.com/joshj1108/CrowCreekHollow/33b275fd1675faa6234ab5cb64ef7c6a25db1128/art/style_tests/ART-005/pl/g7/c3/review/ART-005C3_master_3.png)
+  - Homestead north, noon (65%): [page](https://github.com/joshj1108/CrowCreekHollow/blob/33b275fd1675faa6234ab5cb64ef7c6a25db1128/art/style_tests/ART-005/pl/g7/c3/review/ART-005C3_master_4.png) · [raw](https://raw.githubusercontent.com/joshj1108/CrowCreekHollow/33b275fd1675faa6234ab5cb64ef7c6a25db1128/art/style_tests/ART-005/pl/g7/c3/review/ART-005C3_master_4.png)
+  - Homestead north, R3-1 night (65%): [page](https://github.com/joshj1108/CrowCreekHollow/blob/33b275fd1675faa6234ab5cb64ef7c6a25db1128/art/style_tests/ART-005/pl/g7/c3/review/ART-005C3_master_5.png) · [raw](https://raw.githubusercontent.com/joshj1108/CrowCreekHollow/33b275fd1675faa6234ab5cb64ef7c6a25db1128/art/style_tests/ART-005/pl/g7/c3/review/ART-005C3_master_5.png)
+- **Documents:**
+  - C3 result: [page](https://github.com/joshj1108/CrowCreekHollow/blob/33b275fd1675faa6234ab5cb64ef7c6a25db1128/AI_COLLAB/ART_005_C3_ROOF_VALUE.md) · [raw](https://raw.githubusercontent.com/joshj1108/CrowCreekHollow/33b275fd1675faa6234ab5cb64ef7c6a25db1128/AI_COLLAB/ART_005_C3_ROOF_VALUE.md)
+  - HC1 whole-farm plan: [page](https://github.com/joshj1108/CrowCreekHollow/blob/33b275fd1675faa6234ab5cb64ef7c6a25db1128/AI_COLLAB/ART_005_HC1_WHOLE_FARM_PLAN.md) · [raw](https://raw.githubusercontent.com/joshj1108/CrowCreekHollow/33b275fd1675faa6234ab5cb64ef7c6a25db1128/AI_COLLAB/ART_005_HC1_WHOLE_FARM_PLAN.md)
+- **C3 sprites:** day [page](https://github.com/joshj1108/CrowCreekHollow/blob/33b275fd1675faa6234ab5cb64ef7c6a25db1128/art/style_tests/ART-005/pl/g7/c3/32/house_day.png) · [raw](https://raw.githubusercontent.com/joshj1108/CrowCreekHollow/33b275fd1675faa6234ab5cb64ef7c6a25db1128/art/style_tests/ART-005/pl/g7/c3/32/house_day.png); night [page](https://github.com/joshj1108/CrowCreekHollow/blob/33b275fd1675faa6234ab5cb64ef7c6a25db1128/art/style_tests/ART-005/pl/g7/c3/32/house_night.png) · [raw](https://raw.githubusercontent.com/joshj1108/CrowCreekHollow/33b275fd1675faa6234ab5cb64ef7c6a25db1128/art/style_tests/ART-005/pl/g7/c3/32/house_night.png)
+- **Changed-pixel map:** [page](https://github.com/joshj1108/CrowCreekHollow/blob/33b275fd1675faa6234ab5cb64ef7c6a25db1128/art/style_tests/ART-005/pl/g7/c3/changed.png) · [raw](https://raw.githubusercontent.com/joshj1108/CrowCreekHollow/33b275fd1675faa6234ab5cb64ef7c6a25db1128/art/style_tests/ART-005/pl/g7/c3/changed.png)
+- **Measurements:** [page](https://github.com/joshj1108/CrowCreekHollow/blob/33b275fd1675faa6234ab5cb64ef7c6a25db1128/art/style_tests/ART-005/pl/g7/c3/measure.json) · [raw](https://raw.githubusercontent.com/joshj1108/CrowCreekHollow/33b275fd1675faa6234ab5cb64ef7c6a25db1128/art/style_tests/ART-005/pl/g7/c3/measure.json)
+- **Stopped** for the owner's and ChatGPT's review. ChatGPT has not reviewed these images yet. Claude recommends keeping C2 and ending the roof experiments. No production work, generation or HC1 step is authorized.
+- **Checks:** all 11 of 11 raw links above returned HTTP 200 when posted.
