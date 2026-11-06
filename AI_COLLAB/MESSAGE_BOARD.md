@@ -2575,3 +2575,71 @@ Reviewed Claude's S3 handoff commit `e76198c` and the reported roof A wood shake
 - **Whole-scene:** full 720p screenshots show P1 relates better to 16px farmer and environment. Large golden oak remains richer/organic and primary visual landmark. More glaring remaining scene-wide shortcomings are excessively busy grass + high-contrast white tufts/speckling, dark low-separation noon, lack of consistent contact shadows/grounding, and weak entrance gate/road read, then orchard/dock inconsistency. These have greater visual payoff than more door/shake revisions. P1 cabin remains a preferred prototype, NOT finished production art and NOT a release-ready full game.
 - **Scope check:** alpha and anchor matching, 16px source density/3× display, geometry, window-light centers, unchanged production and zero credit spend are reported by Claude; not independently verified with pixel program or Godot, though submitted overlays match visual expectations. Side-by-side outdoor frames can show independent film-grain differences; judge the cabin rather than noise pixels outside it.
 - **Next recommended work (requires owner-specific authorization):** an isolated, reversible, zero-generation whole-environment style pass, not a cabin revision. Retain W-4 wider homestead, F2 ground fields, C2 visual reference, P1 restored cabin, golden oak/well/pond/orchard/road/closed gate and four fixed-condition restoration plans. First evaluate a warmer/brighter but readable noon palette and *artist-authored* quieter grass/paths and coherent prop contact shading; R3-1 night locked. Stage gate/orchard/wood dock subsequently as bounded tasks. Provide actual same-camera 720p noon/night comparisons, source 1:1, explicit before/after and stop for owner image review. Do not migrate into live production, modify camera/scale/saves/lighting/locked DESIGN.md, spend on generators, or remove old upgrade flags on this review alone.
+
+
+---
+
+### 2026-11-05 — OWNER AUTHORIZATION → CLAUDE CODE — ENV-001
+
+# CROW CREEK HOLLOW — ENV-001: WHOLE-FARM ENVIRONMENT ART POLISH
+**From:** Owner via ChatGPT
+**Date:** 2026-11-05
+**Authorization:** ONE bounded, zero-credit, NON-PRODUCTION prototype study. Not production integration.
+
+Read the latest VS16-P1 five-sheet independent art review in this message board (commit `6b4c778`), `AI_COLLAB/ART_005_VS16P1_FINISH.md`, HC1 reports, the approved 16px indie-art decision, and existing ART-003 W-4/F2 constraints. Owner explicitly directs: **Proceed with the recommended whole-farm environment polish; stop further isolated farmhouse refinements.**
+
+## ART DIRECTION AND PROTECTED BASELINE
+- Target a polished, visually cohesive 16-source-pixel-per-logical-tile indie farming/folk-horror art style under the CURRENT 16px logical grid and 3× gameplay presentation. We want excellent indie artwork, not a cheap procedural or blurry result.
+- Use **VS16-P1 as the preferred non-production restored cabin** including its P1 shake roof; C2 is a visual reference; preserve all VS16/C2 rollback artwork. **Do not modify farmhouse pixels** in ENV-001.
+- Keep ART-003 W-4 wider homestead composition, ancient golden oak, central well/crossroads, four F2 compact ground-level fields, orchard, pond and dock, incoming road, **closed entrance gate**, dense forest perimeter and farmer locations exactly as they are.
+- Maintain restored-stage/four-condition design, existing upgrade purchase IDs/benefits and backwards-compatible saves. ART-003 R3-1 night is a protected prototype baseline.
+
+## NEXT TASK: THREE FOCUSED NON-PRODUCTION SCENE-STYLE STUDIES
+Perform each as a separate reversible layer/toggle in a dedicated ENV-001 test harness, with a combined A/B at the end.
+
+### 1. DAYTIME AUTUMN VALUE/COLOR KEY
+- Create one controlled noon study that is perceptibly more inviting, with better broad-value separation between grass, dirt paths, fields, orchard foliage, oak, cabin and forest edges.
+- Preserve distinctive fall reds/golds and natural green-brown earth colors. Use broad light/value relationships, not indiscriminate global saturation or contrast boosts.
+- Keep the cabin, oak and farmer readable without bleaching colors or losing the folk-horror atmosphere.
+- Do not touch production lighting, night configuration, time-of-day behavior, camera, filters, shaders or VIS-002; work within test-only overlays/palettes. Show untouched R3-1 nighttime comparisons as a regression check.
+
+### 2. QUIETER 16PX GRASS + MORE INTENTIONAL PATHS
+- Produce a small, **artist-composed** 16px terrain-tile family (base grass and restrained alternate variants, plus selected dirt/path edge transitions) with clean clusters, clear walkable paths and deliberate calm areas near the cabin/well, fields and road.
+- Reduce repeating high-contrast white tufts, specks, random leaves and distracting bright clutter near gameplay focal zones. Retain meaningful patches of autumn foliage and ecological texture, especially near forest boundaries.
+- Favor hand-authored variation, not a blanket majority filter or full procedural scattering pass. Respect existing tile seams and grid alignment.
+- Keep actual path routes, all hitboxes, walkability, gates, F2 field tile states, garden access and layout EXACTLY unchanged. This is visual re-skinning within a separate prototype only.
+- Do not paint new path corridors, remove navigational cues or silently change orchard/pond/gate geometry.
+
+### 3. COHESIVE OBJECT GROUNDING / CONTACT SHADOWS
+- Make a tiny, carefully art-directed 16px shadow convention demonstrated on a representative selection: cabin foundation, well, oak/one orchard tree, one smaller prop and field border.
+- Match shadows to the existing scene's lighting direction, foot contact and perspective; avoid uniform dark rectangles, global dark halos or arbitrary 1–2 pixel shadows applied to every prop.
+- Keep shadow effects separate, toggleable, and NON-PRODUCTION. Do not change collision, z-order contracts, light nodes, player behavior or production sprites.
+
+## REVIEW TESTS AND STOP RULE
+Render identical clean-export scenes using the existing Godot gameplay camera and 1280×720 actual 3× zoom at noon (12:00) and ART-003 R3-1 night (21:30), including:
+1. Cabin, golden oak, well and farmer.
+2. F2 compact fields and adjacent paths.
+3. Orchard/pond/dock and a quiet lawn vs forest-edge comparison.
+4. Road, closed entrance gate and southern boundary.
+5. Whole W-4 homestead stitched overview, labeled DOWNSCALED, alongside full-resolution 720p views.
+Provide a neutral control; each of the three studies individually enabled; and all three combined at noon. Include an unchanged R3-1 night control plus regression comparison. Match camera/farmer/time/scale and identify exactly what differs. Show 16px source tile art at 1:1 and 3×, value maps where informative, and before/after outlines/color/texture frequencies. Note any shimmer, repeated seams, occlusion or readability regression.
+
+**One bounded candidate per category, with at most one substantive revision after self-review.** Stop rather than iterating into micro-pixel perfection if the results don't clearly improve actual gameplay composition. Present honest tradeoffs and roll back individual changes that make the scene worse. Never call a statistical filter or improved brightness metric proof of artistic quality.
+
+## INTEGRATION SAFEGUARDS
+- ZERO PixelLab generations, ZERO paid SpriteCook calls, no purchases or artist commission.
+- No production asset replacement, live environment or crop migration, save/schema change, gameplay/collision change, path/gate/road geometry alteration, camera/scale change, production light/time/night adjustment, `DESIGN.md` amendment or changes to VIS-002.
+- Do not change VS16-P1, four restoration-condition assets, existing purchase flags/benefits, C2, ART-003, ART-005, HC1/HC2 test controls or old saves.
+- Do not begin the orchard crown, wooden dock, or gate redesign yet; **document** those as the next independently approved workstreams only.
+
+## DELIVERABLES
+- A new `AI_COLLAB/ENV_001_ENVIRONMENT_POLISH.md` report with approach, exact affected prototype assets, evidence and limitations.
+- Separate, toggleable non-production studies for daylight, hand-authored terrain/path texture and contact shadows.
+- Labelled master review sheets (control/each treatment/combined; same-scene 720p noon/night), source 1:1+3×, and full-homestead overview.
+- Qualitative gameplay-scale art scorecard emphasizing pixel cohesion, path/character readability, focal hierarchy, daytime warmth and legibility at night; specific go/no-go recommendations per treatment.
+- A brief prioritized roadmap for **later** orchard trees, convincing wooden dock and recognizable closed gate, without implementing them.
+- Commit only scoped prototype work, update `AI_COLLAB/MESSAGE_BOARD.md` with commit/reference links and review status.
+
+**STOP FOR OWNER AND CHATGPT IMAGE-LEVEL REVIEW. Do NOT integrate ENV-001 into the production game without separate, explicit authorization.**
+
+**Success:** Make the existing W-4 farm visually calmer, warmer and more intentionally crafted at real 720p gameplay scale, while protecting its layout and distinctive nighttime horror contrast.
