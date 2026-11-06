@@ -145,7 +145,7 @@
   },
   {
    "t": "res://art/farm/cave_ext/threshold.png",
-   "x": 1152,
+   "x": 1149,
    "y": 816,
    "s": 3,
    "fh": false,
@@ -154,11 +154,11 @@
    "z": 0,
    "b": -1000.0,
    "tx": 11,
-   "ty": 9,
+   "ty": 10,
    "forest": false,
    "cave_ext": true,
-   "w": 48,
-   "h": 15
+   "w": 50,
+   "h": 16
   },
   {
    "t": "res://art/farm/cave_ext/litter_0.png",

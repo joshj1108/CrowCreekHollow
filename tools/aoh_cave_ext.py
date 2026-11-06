@@ -18,6 +18,9 @@ from PIL import Image
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SRC = os.path.join(ROOT, 'art/style_tests/ART-OVERHAUL-001/B')
 RAW = os.path.join(SRC, 'raw')
+# B2 (Stage B corrections): the cliff re-inpainted as irregular rock, the jambs too, and hand-drawn roots
+# (B2/scripts/roots.py), built from B/raw/mouth_a.png.
+RAW_B2 = os.path.join(ROOT, 'art/style_tests/ART-OVERHAUL-001/B2/raw')
 OUT = os.path.join(ROOT, 'art/farm/cave_ext')
 RES = 'res://art/farm/cave_ext/'
 T = 16                       # art px per tile
@@ -31,7 +34,7 @@ M_ROCK, MN_ROCK = 'f2f2f0ff', 'c2c2c0ff'
 M_MOUTH, MN_MOUTH = 'ffffffff', 'ccccccff'
 # The throat: the opening's core steps down to these by depth (px in from the core's edge). CAVE_TINT is 050508.
 THROAT = [(3, (14, 12, 16)), (6, (5, 5, 8))]
-SHADOW = (20, 16, 18)        # the threshold decal's colour, the farm's darkest outline step
+SHADOW = (20, 16, 18)        # the threshold decal's core colour, the farm's darkest outline step
 
 
 def load(rel):
@@ -117,19 +120,30 @@ def prop(name, rel, cx, foot, base=None, flat=False, fh=False):
     place(name, im, cx - im.shape[1] // 2, foot - im.shape[0], foot / T if base is None else base, flat=flat)
 
 
-def threshold(w=48, h=15):
-    """The doorway's shadow on row 9: a half-ellipse in three stepped densities (solid, 4x4 ordered dither at
-    1/2, then 1/4), one opaque colour, no partial alpha."""
-    bayer = np.array([[0, 8, 2, 10], [12, 4, 14, 6], [3, 11, 1, 9], [15, 7, 13, 5]]) / 16.0
+def threshold(w=50, h=16, seed=7):
+    """The doorway's shadow on row 9 (B2): a ragged half-ellipse in three solid tones, darkest at the mouth and
+    easing to a dark soil brown at its edge. Each band's edge is wobbled by smooth noise so it reads as worn earth
+    sliding into the dark, not a pattern; no dither, no partial alpha, no lone pixels."""
+    rng = np.random.default_rng(seed)
+    def wobble(n, amp):                      # smooth 1-D noise along x, one value per column
+        k = rng.normal(0, 1, n // 6 + 3)
+        xs = np.arange(n) / 6.0
+        return amp * np.interp(xs, np.arange(len(k)), k)
+    edge = [wobble(w, a) for a in (0.10, 0.08, 0.07)]
+    tones = [SHADOW, (36, 28, 33), (50, 38, 30)]   # the threshold, then two palette darks (241c21, 322619)
+    limits = [0.30, 0.62, 1.0]
     im = np.zeros((h, w, 4), np.uint8)
     for y in range(h):
         for x in range(w):
             r = ((x + 0.5 - w / 2) / (w / 2)) ** 2 + ((y + 0.5) / h) ** 2
-            if r >= 1.0:
-                continue
-            density = 1.0 if r < 0.18 else (0.5 if r < 0.5 else 0.25)
-            if bayer[y % 4, x % 4] < density:
-                im[y, x] = (*SHADOW, 255)
+            for band in range(3):
+                if r < limits[band] + edge[band][x] * (1.0 + y / h):
+                    im[y, x] = (*tones[band], 255)
+                    break
+    a = im[..., 3] > 0                       # drop lone pixels on the outer edge
+    n = np.zeros(a.shape, int)
+    n[1:] += a[:-1]; n[:-1] += a[1:]; n[:, 1:] += a[:, :-1]; n[:, :-1] += a[:, 1:]
+    im[a & (n <= 1)] = 0
     return im
 
 
@@ -138,8 +152,8 @@ def main():
     for f in os.listdir(OUT):
         if f.endswith('.png'):
             os.remove(os.path.join(OUT, f))
-    # --- the cliff with its mouth (cliff_v1, then mouth_a inpainted into x 56-152, y 16-96) ---
-    full = load('mouth_a.png')
+    # --- the cliff with its mouth (cliff_v1, mouth_a inpainted into x 56-152, y 16-96, then the B2 rock and roots) ---
+    full = load(os.path.join(RAW_B2, 'cliff_b2.png'))
     H, W = full.shape[:2]
     MX0, MX1, MY0 = 56, 152, 16
     L = luma(full)
@@ -182,7 +196,7 @@ def main():
         if fh:
             im = im[:, ::-1]
         place('foot_%d.png' % i, im, x0, y0, 0, flat=True)
-    place('threshold.png', threshold(), DOOR_X * T + T // 2 - 24, FOOT_Y, 0, flat=True)
+    place('threshold.png', threshold(), DOOR_X * T + T // 2 - 25, FOOT_Y, 0, flat=True)
     # --- flat litter and pebbles ---
     prop('litter_0.png', 'under/32.png', 200, 168, flat=True)
     prop('litter_1.png', 'under/37.png', 236, 170, flat=True)
@@ -246,6 +260,13 @@ def registry():
         'tool': 'tools/aoh_cave_ext.py', 'sources': 'art/style_tests/ART-OVERHAUL-001/B/',
         'generations': sum(j.get('cost', 0) for j in jobs), 'jobs': jobs,
         'game_files': sorted(used) + [RES + 'pieces.json']}
+    jobs2 = [json.loads(l) for l in open(os.path.join(RAW_B2, 'jobs.jsonl')) if l.strip()]
+    reg['ART-OVERHAUL-001/B2'] = {
+        'tool': 'tools/aoh_cave_ext.py', 'sources': 'art/style_tests/ART-OVERHAUL-001/B2/',
+        'note': 'Stage B corrections: irregular cliff rock, solid-tone threshold, varied roots (hand-drawn)',
+        'generations': sum(j.get('cost', 0) for j in jobs2), 'jobs': jobs2,
+        'game_files': [RES + 'cliff_top.png', RES + 'cliff_w.png', RES + 'cliff_e.png', RES + 'mouth.png',
+                       RES + 'lip.png', RES + 'threshold.png']}
     json.dump(reg, open(path, 'w'), indent=1)
 
 
