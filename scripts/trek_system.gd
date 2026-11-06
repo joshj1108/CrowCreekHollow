@@ -226,6 +226,11 @@ const CLEARINGS := [
 	{"points": [[20, 22, 2], [20, 19, 2], [28, 16, 2], [28, 11, 2], [18, 9, 2], [14, 6, 2], [20, 4, 2], [20, 1, 1]],
 		"event": -1, "detour": [], "dest": Rect2i(24, 1, 5, 3)},
 ]
+# ART-OVERHAUL-001 Stage D: the treks in PixelLab art (scripts/trek_art.gd, art/farm/trek/, made by tools/aoh_trek.py):
+# a ground per route, trees and undergrowth by depth, and the events and destinations as sprites. Art only: the
+# tiles, blocking, routes, events and timings are unchanged. Off, the drawing below returns.
+const TREK_ART_V2 := true
+var art: TrekArt                      # loaded on first use
 const FLIP := 100                     # a layout index FLIP + i is clearing i mirrored left to right
 const MARKED_ROUTE := [0, 1, 2, 4]    # the mill path's clearings by the marked trail
 const DARK_ROUTE := [0, 3, 4]         # ... and by the dark trail
@@ -1696,6 +1701,12 @@ func _draw_map() -> void:
 	var y0 := clampi(floori(top_left.y / m.PX) - 1, 0, m.CAVE_H - 1)
 	var x1 := clampi(ceili((top_left.x + view.x) / m.PX) + 1, 0, m.CAVE_W - 1)
 	var y1 := clampi(ceili((top_left.y + view.y) / m.PX) + 2, 0, m.CAVE_H - 1)
+	if TREK_ART_V2:
+		if art == null:
+			art = TrekArt.new()
+		if art.ok:
+			art.draw(m, self, x0, y0, x1, y1)
+			return
 	var T := MainGame.Tile
 	for y in range(y0, y1 + 1):
 		for x in range(x0, x1 + 1):
@@ -2022,6 +2033,8 @@ func _draw_layer() -> void:
 			_draw_dog(foe)
 	if tall_on:
 		_draw_tall(tall_pos + Vector2(0, px * 0.42))
+	if TREK_ART_V2 and art != null and art.ok:
+		art.draw_fog_layers(m, layer)
 	var t := Time.get_ticks_msec() / 1000.0
 	if _event() == "lights" and not event_done:
 		for k in 3:

@@ -804,5 +804,807 @@
    "res://art/farm/cave_int/atlas.png",
    "res://art/farm/cave_int/cave_int.json"
   ]
+ },
+ "ART-OVERHAUL-001/D": {
+  "tool": "tools/aoh_trek.py",
+  "sources": "art/style_tests/ART-OVERHAUL-001/D/raw/<key>/NN.png (candidates), raw/<key>/sheet.png and meta.json (tilesets); fetch.py downloads, registry.py writes this entry",
+  "note": "Stage D: the treks. Reuses Stage B pieces (cave_ext fern, bramble, boulder, litter, pebbles) as undergrowth and decals. Pieces are cropped to their main shape (fragments of neighbouring candidates dropped) with binary alpha.",
+  "generations": 355,
+  "jobs": [
+   {
+    "key": "forest",
+    "tool": "create_topdown_tileset",
+    "tileset_id": "f80722e3-6725-4a34-8a76-9a7bcef6edf5",
+    "size": [
+     16,
+     16
+    ],
+    "cost": 15,
+    "settings": {
+     "mode": "pro",
+     "view": "high top-down",
+     "boundary_seed": 4101,
+     "palette": "D/palette.json (Stage B palette minus 3 near-duplicates, plus autumn rust, creek blues, bone and hollow greys); a subset per job"
+    },
+    "prompt": {
+     "lower": "dark temperate forest floor: mossy loam, fallen rust and ochre leaves ...",
+     "upper": "worn packed dirt footpath through woods ..."
+    },
+    "kept": false,
+    "note": "rejected: the trail came out orange; its floor tile (base 25d5f971-8be9-4b06-b6ba-1099990e5420) is the floor of forest2 and creek",
+    "raw": "art/style_tests/ART-OVERHAUL-001/D/raw/forest/"
+   },
+   {
+    "key": "pasture",
+    "tool": "create_topdown_tileset",
+    "tileset_id": "49ee01c5-5a29-4575-b5e5-17eb565eee2d",
+    "size": [
+     16,
+     16
+    ],
+    "cost": 15,
+    "settings": {
+     "mode": "pro",
+     "view": "high top-down",
+     "boundary_seed": 4102,
+     "palette": "D/palette.json (Stage B palette minus 3 near-duplicates, plus autumn rust, creek blues, bone and hollow greys); a subset per job"
+    },
+    "prompt": {
+     "lower": "overgrown abandoned pasture: rough tall meadow grass ...",
+     "upper": "neglected muddy cart track ..."
+    },
+    "kept": false,
+    "note": "rejected: grass too yellow and bright, sawtooth edges",
+    "raw": "art/style_tests/ART-OVERHAUL-001/D/raw/pasture/"
+   },
+   {
+    "key": "hollow",
+    "tool": "create_topdown_tileset",
+    "tileset_id": "caf71755-d818-423b-9c63-5b9a27aa0e32",
+    "size": [
+     16,
+     16
+    ],
+    "cost": 15,
+    "settings": {
+     "mode": "pro",
+     "view": "high top-down",
+     "boundary_seed": 4103,
+     "palette": "D/palette.json (Stage B palette minus 3 near-duplicates, plus autumn rust, creek blues, bone and hollow greys); a subset per job"
+    },
+    "prompt": {
+     "lower": "very dark old-growth forest floor ... cold violet-grey shadow",
+     "upper": "pale worn footpath ..."
+    },
+    "kept": false,
+    "note": "rejected: violet floor, path too pale",
+    "raw": "art/style_tests/ART-OVERHAUL-001/D/raw/hollow/"
+   },
+   {
+    "key": "creek",
+    "tool": "create_topdown_tileset",
+    "tileset_id": "b6d36b24-720c-4654-9bfb-e1f97228d4ae",
+    "size": [
+     16,
+     16
+    ],
+    "cost": 15,
+    "settings": {
+     "mode": "pro",
+     "view": "high top-down",
+     "boundary_seed": 4104,
+     "palette": "D/palette.json (Stage B palette minus 3 near-duplicates, plus autumn rust, creek blues, bone and hollow greys); a subset per job"
+    },
+    "prompt": {
+     "lower": "dark still creek water, muted blue-grey ...",
+     "upper": "forest floor (the forest base tile)"
+    },
+    "kept": true,
+    "note": "kept: ground_creek.png (transition 0.25, step_slope 1: low muddy banks with wet stones and reeds)",
+    "raw": "art/style_tests/ART-OVERHAUL-001/D/raw/creek/"
+   },
+   {
+    "key": "forest2",
+    "tool": "create_topdown_tileset",
+    "tileset_id": "1ee52946-6bb0-4376-8954-bf68b9c45c87",
+    "size": [
+     16,
+     16
+    ],
+    "cost": 15,
+    "settings": {
+     "mode": "pro",
+     "view": "high top-down",
+     "boundary_seed": 4111,
+     "palette": "D/palette.json (Stage B palette minus 3 near-duplicates, plus autumn rust, creek blues, bone and hollow greys); a subset per job"
+    },
+    "prompt": {
+     "lower": "forest floor (the forest base tile)",
+     "upper": "muted grey-brown packed earth footpath through woods ..."
+    },
+    "kept": true,
+    "note": "kept: ground_forest.png; the trail greys recoloured to warm path browns (TRAIL_BROWN in tools/aoh_trek.py)",
+    "raw": "art/style_tests/ART-OVERHAUL-001/D/raw/forest2/"
+   },
+   {
+    "key": "hollow2",
+    "tool": "create_topdown_tileset",
+    "tileset_id": "830d504a-9804-49ab-a2a1-6e174fb7394a",
+    "size": [
+     16,
+     16
+    ],
+    "cost": 15,
+    "settings": {
+     "mode": "pro",
+     "view": "high top-down",
+     "boundary_seed": 4113,
+     "palette": "D/palette.json (Stage B palette minus 3 near-duplicates, plus autumn rust, creek blues, bone and hollow greys); a subset per job"
+    },
+    "prompt": {
+     "lower": "very dark old-growth forest floor: deep dark moss and black loam ...",
+     "upper": "dim grey-brown worn earth footpath with flat sunken stones"
+    },
+    "kept": true,
+    "note": "kept: ground_hollow.png; the path greys darkened a step (HOLLOW_PATH)",
+    "raw": "art/style_tests/ART-OVERHAUL-001/D/raw/hollow2/"
+   },
+   {
+    "key": "pasture2",
+    "tool": "create_topdown_tileset",
+    "tileset_id": "f7de5990-353a-43f8-ae80-015f5396ab44",
+    "size": [
+     16,
+     16
+    ],
+    "cost": 15,
+    "settings": {
+     "mode": "pro",
+     "view": "high top-down",
+     "boundary_seed": 4112,
+     "palette": "D/palette.json (Stage B palette minus 3 near-duplicates, plus autumn rust, creek blues, bone and hollow greys); a subset per job"
+    },
+    "prompt": {
+     "lower": "overgrown abandoned pasture: rough dark olive meadow grass ...",
+     "upper": "neglected muddy cart track ..."
+    },
+    "kept": true,
+    "note": "kept: ground_pasture.png",
+    "raw": "art/style_tests/ART-OVERHAUL-001/D/raw/pasture2/"
+   },
+   {
+    "key": "fir",
+    "tool": "create_image_pro",
+    "job_id": "d34dcd5d-b28e-40e2-94f3-300ec3de6592",
+    "size": [
+     32,
+     48
+    ],
+    "cost": 10,
+    "seed": 4201,
+    "settings": {
+     "no_background": true,
+     "style_image": "style_trees (farm src_fir and src_maple, Stage B fern, boulder, bramble, litter)",
+     "style_copy": [
+      "outline",
+      "detail",
+      "shading"
+     ],
+     "palette": "D/palette.json (Stage B palette minus 3 near-duplicates, plus autumn rust, creek blues, bone and hollow greys); a subset per job"
+    },
+    "prompt": "single dark evergreen fir, narrow conical shadowed blue-green canopy, root flare",
+    "kept": true,
+    "note": "kept candidates: [0, 8, 17, 18, 23, 24, 26, 27]",
+    "raw": "art/style_tests/ART-OVERHAUL-001/D/raw/fir/"
+   },
+   {
+    "key": "maple",
+    "tool": "create_image_pro",
+    "job_id": "18a5af1a-7d91-40da-8c85-4c30485d7333",
+    "size": [
+     32,
+     48
+    ],
+    "cost": 10,
+    "seed": 4202,
+    "settings": {
+     "no_background": true,
+     "style_image": "style_trees",
+     "style_copy": [
+      "outline",
+      "detail",
+      "shading"
+     ],
+     "palette": "D/palette.json (Stage B palette minus 3 near-duplicates, plus autumn rust, creek blues, bone and hollow greys); a subset per job"
+    },
+    "prompt": "single autumn broadleaf maple or oak, rust, ochre and dull orange canopy",
+    "kept": true,
+    "note": "kept candidates: [4, 7, 10, 13, 19, 25, 27, 30]",
+    "raw": "art/style_tests/ART-OVERHAUL-001/D/raw/maple/"
+   },
+   {
+    "key": "dead",
+    "tool": "create_image_pro",
+    "job_id": "c31c2940-2add-4cda-a946-40c12dd1ae9e",
+    "size": [
+     32,
+     48
+    ],
+    "cost": 10,
+    "seed": 4203,
+    "settings": {
+     "no_background": true,
+     "style_image": "style_trees",
+     "style_copy": [
+      "outline",
+      "detail",
+      "shading"
+     ],
+     "palette": "D/palette.json (Stage B palette minus 3 near-duplicates, plus autumn rust, creek blues, bone and hollow greys); a subset per job"
+    },
+    "prompt": "single dead bare tree snag, crooked broken branches, peeling bark",
+    "kept": true,
+    "note": "kept candidates: [0, 1, 3, 6, 13, 15, 16, 25, 26, 29]",
+    "raw": "art/style_tests/ART-OVERHAUL-001/D/raw/dead/"
+   },
+   {
+    "key": "ancient",
+    "tool": "create_image_pro",
+    "job_id": "28941256-35d9-4761-9dcc-90d6a3736d84",
+    "size": [
+     48,
+     64
+    ],
+    "cost": 10,
+    "seed": 4204,
+    "settings": {
+     "no_background": true,
+     "style_image": "style_trees",
+     "style_copy": [
+      "outline",
+      "detail",
+      "shading"
+     ],
+     "palette": "D/palette.json (Stage B palette minus 3 near-duplicates, plus autumn rust, creek blues, bone and hollow greys); a subset per job"
+    },
+    "prompt": "single ancient old-growth tree, massive gnarled trunk, twisted roots, dark canopy, no glow",
+    "kept": true,
+    "note": "kept candidates: [0, 5, 9, 10]",
+    "raw": "art/style_tests/ART-OVERHAUL-001/D/raw/ancient/"
+   },
+   {
+    "key": "apple",
+    "tool": "create_image_pro",
+    "job_id": "bc6be369-7e17-44ca-b279-c580a7e04c5f",
+    "size": [
+     32,
+     48
+    ],
+    "cost": 10,
+    "seed": 4205,
+    "settings": {
+     "no_background": true,
+     "style_image": "art/farm/concept/w4_orchard_apple_a.png",
+     "style_copy": [
+      "outline",
+      "detail",
+      "shading"
+     ],
+     "palette": "D/palette.json (Stage B palette minus 3 near-duplicates, plus autumn rust, creek blues, bone and hollow greys); a subset per job"
+    },
+    "prompt": "neglected gone-wild old apple tree, crooked trunk, sparse olive canopy, a few red apples",
+    "kept": true,
+    "note": "kept candidates: [13, 14, 26, 28, 29]",
+    "raw": "art/style_tests/ART-OVERHAUL-001/D/raw/apple/"
+   },
+   {
+    "key": "dec_forest",
+    "tool": "create_image_pro",
+    "job_id": "a1bbb530-09a4-45ea-809c-1dd94beda5a5",
+    "size": [
+     32,
+     32
+    ],
+    "cost": 10,
+    "seed": 4301,
+    "settings": {
+     "no_background": true,
+     "style_image": "cave_ext/litter_0.png",
+     "style_copy": [
+      "outline",
+      "detail",
+      "shading"
+     ],
+     "palette": "D/palette.json (Stage B palette minus 3 near-duplicates, plus autumn rust, creek blues, bone and hollow greys); a subset per job"
+    },
+    "prompt": "forest floor details: toadstools, roots, moss, autumn leaves, twigs, cones, mossy stones, fern",
+    "kept": true,
+    "note": "kept candidates: [1, 3, 7, 8, 11, 13, 16, 22, 24, 26, 29, 31, 32, 33, 37, 41, 48, 49, 52, 56, 59]",
+    "raw": "art/style_tests/ART-OVERHAUL-001/D/raw/dec_forest/"
+   },
+   {
+    "key": "dec_creek",
+    "tool": "create_image_pro",
+    "job_id": "7129d41d-b1b2-422f-b9d3-dc3bcc14e814",
+    "size": [
+     32,
+     32
+    ],
+    "cost": 10,
+    "seed": 4302,
+    "settings": {
+     "no_background": true,
+     "style_image": "cave_ext/litter_0.png",
+     "style_copy": [
+      "outline",
+      "detail",
+      "shading"
+     ],
+     "palette": "D/palette.json (Stage B palette minus 3 near-duplicates, plus autumn rust, creek blues, bone and hollow greys); a subset per job"
+    },
+    "prompt": "creek bank details: reeds, cattails, stepping stones, wet rocks, mud",
+    "kept": true,
+    "note": "kept candidates: [0, 2, 6, 10, 14, 15, 16, 19, 22, 25, 28, 30, 37, 40, 44, 48, 52]",
+    "raw": "art/style_tests/ART-OVERHAUL-001/D/raw/dec_creek/"
+   },
+   {
+    "key": "dec_pasture",
+    "tool": "create_image_pro",
+    "job_id": "3c408e85-726f-4976-9af9-9f539e05b559",
+    "size": [
+     32,
+     32
+    ],
+    "cost": 10,
+    "seed": 4303,
+    "settings": {
+     "no_background": true,
+     "style_image": "style_trees",
+     "style_copy": [
+      "outline",
+      "detail",
+      "shading"
+     ],
+     "palette": "D/palette.json (Stage B palette minus 3 near-duplicates, plus autumn rust, creek blues, bone and hollow greys); a subset per job"
+    },
+    "prompt": "pasture details: dry grass, bramble, thistle, nettles, broken fence, fallen rail, mossy stone",
+    "kept": true,
+    "note": "kept candidates: [2, 3, 7, 9, 11, 13, 17, 21, 25, 29, 32, 33, 34, 35, 41, 43, 46, 52, 54, 56, 59]",
+    "raw": "art/style_tests/ART-OVERHAUL-001/D/raw/dec_pasture/"
+   },
+   {
+    "key": "dec_hollow",
+    "tool": "create_image_pro",
+    "job_id": "656ba2ea-e807-4707-9d98-8c5cc34d2efc",
+    "size": [
+     32,
+     32
+    ],
+    "cost": 10,
+    "seed": 4304,
+    "settings": {
+     "no_background": true,
+     "style_image": "cave_ext/mouth.png",
+     "style_copy": [
+      "outline",
+      "detail",
+      "shading"
+     ],
+     "palette": "D/palette.json (Stage B palette minus 3 near-duplicates, plus autumn rust, creek blues, bone and hollow greys); a subset per job"
+    },
+    "prompt": "hollow details: twisted roots, standing stone fragments, carved blocks, pale toadstools, moss mounds (pale toadstools dropped: they read as glowing at night)",
+    "kept": true,
+    "note": "kept candidates: [0, 2, 3, 8, 9, 11, 13, 20, 22, 33, 35, 41, 43, 45, 49, 51, 56, 57]",
+    "raw": "art/style_tests/ART-OVERHAUL-001/D/raw/dec_hollow/"
+   },
+   {
+    "key": "mill",
+    "tool": "create_image_pro",
+    "job_id": "fcdad7bc-2a9d-4f97-8557-eb9bb13903db",
+    "size": [
+     128,
+     96
+    ],
+    "cost": 10,
+    "seed": 4401,
+    "settings": {
+     "no_background": true,
+     "style_image": "cave_ext/mouth.png",
+     "style_copy": [
+      "outline",
+      "detail",
+      "shading"
+     ],
+     "palette": "D/palette.json (Stage B palette minus 3 near-duplicates, plus autumn rust, creek blues, bone and hollow greys); a subset per job"
+    },
+    "prompt": "old watermill with wheel",
+    "kept": false,
+    "note": "rejected: angled three-quarter view, not straight-on",
+    "raw": "art/style_tests/ART-OVERHAUL-001/D/raw/mill/"
+   },
+   {
+    "key": "chapel",
+    "tool": "create_image_pro",
+    "job_id": "e13cae4e-f86f-483f-a8d9-7f6cee6e670a",
+    "size": [
+     96,
+     96
+    ],
+    "cost": 10,
+    "seed": 4402,
+    "settings": {
+     "no_background": true,
+     "style_image": "cave_ext/mouth.png",
+     "style_copy": [
+      "outline",
+      "detail",
+      "shading"
+     ],
+     "palette": "D/palette.json (Stage B palette minus 3 near-duplicates, plus autumn rust, creek blues, bone and hollow greys); a subset per job"
+    },
+    "prompt": "small grey stone hill chapel, empty bell-cote",
+    "kept": false,
+    "note": "rejected: angled three-quarter view",
+    "raw": "art/style_tests/ART-OVERHAUL-001/D/raw/chapel/"
+   },
+   {
+    "key": "stile",
+    "tool": "create_image_pro",
+    "job_id": "7b1ad80d-44b0-4f67-8fee-91b16898104a",
+    "size": [
+     96,
+     48
+    ],
+    "cost": 10,
+    "seed": 4403,
+    "settings": {
+     "no_background": true,
+     "style_image": "style_trees",
+     "style_copy": [
+      "outline",
+      "detail",
+      "shading"
+     ],
+     "palette": "D/palette.json (Stage B palette minus 3 near-duplicates, plus autumn rust, creek blues, bone and hollow greys); a subset per job"
+    },
+    "prompt": "split-rail fence with a step stile and a one-armed fingerpost",
+    "kept": true,
+    "note": "kept candidates: [3]",
+    "raw": "art/style_tests/ART-OVERHAUL-001/D/raw/stile/"
+   },
+   {
+    "key": "log",
+    "tool": "create_image_pro",
+    "job_id": "3c6dc472-8bdb-456c-af5f-a4e576f72573",
+    "size": [
+     96,
+     40
+    ],
+    "cost": 10,
+    "seed": 4404,
+    "settings": {
+     "no_background": true,
+     "style_image": "style_trees",
+     "style_copy": [
+      "outline",
+      "detail",
+      "shading"
+     ],
+     "palette": "D/palette.json (Stage B palette minus 3 near-duplicates, plus autumn rust, creek blues, bone and hollow greys); a subset per job"
+    },
+    "prompt": "big fallen mossy trunk across a path, root plate and snapped end",
+    "kept": true,
+    "note": "kept candidates: [0, 3, 8]",
+    "raw": "art/style_tests/ART-OVERHAUL-001/D/raw/log/"
+   },
+   {
+    "key": "sign",
+    "tool": "create_image_pro",
+    "job_id": "0f7d363e-b155-468f-908e-0e87bbc97db5",
+    "size": [
+     32,
+     32
+    ],
+    "cost": 10,
+    "seed": 4405,
+    "settings": {
+     "no_background": true,
+     "style_image": "style_trees",
+     "style_copy": [
+      "outline",
+      "detail",
+      "shading"
+     ],
+     "palette": "D/palette.json (Stage B palette minus 3 near-duplicates, plus autumn rust, creek blues, bone and hollow greys); a subset per job"
+    },
+    "prompt": "weathered wooden fingerpost with two arms",
+    "kept": true,
+    "note": "kept candidates: [6]",
+    "raw": "art/style_tests/ART-OVERHAUL-001/D/raw/sign/"
+   },
+   {
+    "key": "cairn",
+    "tool": "create_image_pro",
+    "job_id": "49e9d14a-843b-4077-99e4-ef4c5a22d684",
+    "size": [
+     32,
+     32
+    ],
+    "cost": 10,
+    "seed": 4406,
+    "settings": {
+     "no_background": true,
+     "style_image": "cave_ext/mouth.png",
+     "style_copy": [
+      "outline",
+      "detail",
+      "shading"
+     ],
+     "palette": "D/palette.json (Stage B palette minus 3 near-duplicates, plus autumn rust, creek blues, bone and hollow greys); a subset per job"
+    },
+    "prompt": "heap of pale crow skulls on mossy stones",
+    "kept": false,
+    "note": "rejected: about two tiles wide, covered the trail beside it; replaced by cairn2",
+    "raw": "art/style_tests/ART-OVERHAUL-001/D/raw/cairn/"
+   },
+   {
+    "key": "bridge",
+    "tool": "create_image_pro",
+    "job_id": "99bd8829-8741-48dc-a594-e9ea654bda3c",
+    "size": [
+     64,
+     32
+    ],
+    "cost": 10,
+    "seed": 4407,
+    "settings": {
+     "no_background": true,
+     "style_image": "style_trees",
+     "style_copy": [
+      "outline",
+      "detail",
+      "shading"
+     ],
+     "palette": "D/palette.json (Stage B palette minus 3 near-duplicates, plus autumn rust, creek blues, bone and hollow greys); a subset per job"
+    },
+    "prompt": "rough plank footbridge on log stringers",
+    "kept": true,
+    "note": "kept candidates: [2]",
+    "raw": "art/style_tests/ART-OVERHAUL-001/D/raw/bridge/"
+   },
+   {
+    "key": "stone",
+    "tool": "create_image_pro",
+    "job_id": "0c05b5e5-7cd3-4254-bdbd-94d600a91c1b",
+    "size": [
+     32,
+     48
+    ],
+    "cost": 10,
+    "seed": 4408,
+    "settings": {
+     "no_background": true,
+     "style_image": "cave_ext/mouth.png",
+     "style_copy": [
+      "outline",
+      "detail",
+      "shading"
+     ],
+     "palette": "D/palette.json (Stage B palette minus 3 near-duplicates, plus autumn rust, creek blues, bone and hollow greys); a subset per job"
+    },
+    "prompt": "ancient weathered standing stone, lichen, faint worn rings, no glow",
+    "kept": true,
+    "note": "kept candidates: [1, 3, 14, 26, 35]",
+    "raw": "art/style_tests/ART-OVERHAUL-001/D/raw/stone/"
+   },
+   {
+    "key": "wheel",
+    "tool": "create_image_pro",
+    "job_id": "0209a523-1f26-4ced-99db-5ded8665c52f",
+    "size": [
+     32,
+     32
+    ],
+    "cost": 10,
+    "seed": 4409,
+    "settings": {
+     "no_background": true,
+     "style_image": "style_trees",
+     "style_copy": [
+      "outline",
+      "detail",
+      "shading"
+     ],
+     "palette": "D/palette.json (Stage B palette minus 3 near-duplicates, plus autumn rust, creek blues, bone and hollow greys); a subset per job"
+    },
+    "prompt": "wooden mill waterwheel, eight spokes and paddles",
+    "kept": true,
+    "note": "kept candidates: [9]",
+    "raw": "art/style_tests/ART-OVERHAUL-001/D/raw/wheel/"
+   },
+   {
+    "key": "mill2",
+    "tool": "create_image_pro",
+    "job_id": "d7f95d26-f1d1-4b48-b8ea-7b693ad13432",
+    "size": [
+     96,
+     96
+    ],
+    "cost": 10,
+    "seed": 4411,
+    "settings": {
+     "no_background": true,
+     "style_image": "art/farm/barn.png",
+     "style_copy": [
+      "outline",
+      "detail",
+      "shading"
+     ],
+     "palette": "D/palette.json (Stage B palette minus 3 near-duplicates, plus autumn rust, creek blues, bone and hollow greys); a subset per job"
+    },
+    "prompt": "watermill in straight-on front view, no wheel",
+    "kept": false,
+    "note": "rejected for size: 89 px tall, pokes above the trek map; style image for mill3",
+    "raw": "art/style_tests/ART-OVERHAUL-001/D/raw/mill2/"
+   },
+   {
+    "key": "chapel2",
+    "tool": "create_image_pro",
+    "job_id": "03ba6e8c-424b-4617-b478-307b220b9fd5",
+    "size": [
+     96,
+     96
+    ],
+    "cost": 10,
+    "seed": 4412,
+    "settings": {
+     "no_background": true,
+     "style_image": "art/farm/barn.png",
+     "style_copy": [
+      "outline",
+      "detail",
+      "shading"
+     ],
+     "palette": "D/palette.json (Stage B palette minus 3 near-duplicates, plus autumn rust, creek blues, bone and hollow greys); a subset per job"
+    },
+    "prompt": "stone chapel in straight-on front view, empty bell-cote",
+    "kept": false,
+    "note": "rejected for size (as mill2); style image for chapel3",
+    "raw": "art/style_tests/ART-OVERHAUL-001/D/raw/chapel2/"
+   },
+   {
+    "key": "mill3",
+    "tool": "create_image_pro",
+    "job_id": "c89206fd-73dc-4d78-8ec9-77834cab28dd",
+    "size": [
+     64,
+     64
+    ],
+    "cost": 10,
+    "seed": 4421,
+    "settings": {
+     "no_background": true,
+     "style_image": "mill2 #0",
+     "style_copy": [
+      "outline",
+      "detail",
+      "shading"
+     ],
+     "palette": "D/palette.json (Stage B palette minus 3 near-duplicates, plus autumn rust, creek blues, bone and hollow greys); a subset per job"
+    },
+    "prompt": "small watermill, straight-on front view, no wheel",
+    "kept": true,
+    "note": "kept candidates: [13]",
+    "raw": "art/style_tests/ART-OVERHAUL-001/D/raw/mill3/"
+   },
+   {
+    "key": "chapel3",
+    "tool": "create_image_pro",
+    "job_id": "e84e1300-063f-496f-bb81-ad398297dd8b",
+    "size": [
+     64,
+     64
+    ],
+    "cost": 10,
+    "seed": 4422,
+    "settings": {
+     "no_background": true,
+     "style_image": "chapel2 #2",
+     "style_copy": [
+      "outline",
+      "detail",
+      "shading"
+     ],
+     "palette": "D/palette.json (Stage B palette minus 3 near-duplicates, plus autumn rust, creek blues, bone and hollow greys); a subset per job"
+    },
+    "prompt": "small stone chapel, straight-on front view, empty bell-cote",
+    "kept": true,
+    "note": "kept candidates: [9]",
+    "raw": "art/style_tests/ART-OVERHAUL-001/D/raw/chapel3/"
+   },
+   {
+    "key": "small",
+    "tool": "create_image_pro",
+    "job_id": "679ab2ec-2a38-4431-9faf-13741aad2520",
+    "size": [
+     16,
+     16
+    ],
+    "cost": 10,
+    "seed": 4501,
+    "settings": {
+     "no_background": true,
+     "style_image": "cave_ext/litter_0.png",
+     "style_copy": [
+      "outline",
+      "detail",
+      "shading"
+     ],
+     "palette": "D/palette.json (Stage B palette minus 3 near-duplicates, plus autumn rust, creek blues, bone and hollow greys); a subset per job"
+    },
+    "prompt": "one-tile undergrowth: stump, shrub, fern, rock, bramble, log end",
+    "kept": true,
+    "note": "kept candidates: [1, 3, 9, 16, 18, 23, 26, 29, 33, 36, 41, 45, 46, 49, 52]",
+    "raw": "art/style_tests/ART-OVERHAUL-001/D/raw/small/"
+   },
+   {
+    "key": "cairn2",
+    "tool": "create_image_pro",
+    "job_id": "c352bafe-cd33-45f0-bce8-9a256c203fcc",
+    "size": [
+     24,
+     24
+    ],
+    "cost": 10,
+    "seed": 4502,
+    "settings": {
+     "no_background": true,
+     "style_image": "cave_ext/mouth.png",
+     "style_copy": [
+      "outline",
+      "detail",
+      "shading"
+     ],
+     "palette": "D/palette.json (Stage B palette minus 3 near-duplicates, plus autumn rust, creek blues, bone and hollow greys); a subset per job"
+    },
+    "prompt": "small heap of three or four crow skulls on a mossy stone",
+    "kept": true,
+    "note": "kept candidates: [0, 3, 18]",
+    "raw": "art/style_tests/ART-OVERHAUL-001/D/raw/cairn2/"
+   },
+   {
+    "key": "logshort",
+    "tool": "create_image_pro",
+    "job_id": "2c3c7342-c8f2-43a1-b320-cf82ba92843c",
+    "size": [
+     64,
+     32
+    ],
+    "cost": 10,
+    "seed": 4503,
+    "settings": {
+     "no_background": true,
+     "style_image": "style_trees",
+     "style_copy": [
+      "outline",
+      "detail",
+      "shading"
+     ],
+     "palette": "D/palette.json (Stage B palette minus 3 near-duplicates, plus autumn rust, creek blues, bone and hollow greys); a subset per job"
+    },
+    "prompt": "shorter fallen mossy trunk, for blocked stretches the long log would overhang",
+    "kept": true,
+    "note": "kept candidates: [1, 5, 20]",
+    "raw": "art/style_tests/ART-OVERHAUL-001/D/raw/logshort/"
+   }
+  ],
+  "game_files": [
+   "art/farm/trek/ground_forest.png",
+   "art/farm/trek/ground_pasture.png",
+   "art/farm/trek/ground_hollow.png",
+   "art/farm/trek/ground_creek.png",
+   "art/farm/trek/atlas.png",
+   "art/farm/trek/trek.json"
+  ]
  }
 }

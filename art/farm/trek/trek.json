@@ -1,0 +1,1937 @@
+{
+ "tile": 16,
+ "ground": {
+  "forest": {
+   "file": "ground_forest.png",
+   "source": "forest2",
+   "masks": 16
+  },
+  "pasture": {
+   "file": "ground_pasture.png",
+   "source": "pasture2",
+   "masks": 16
+  },
+  "hollow": {
+   "file": "ground_hollow.png",
+   "source": "hollow2",
+   "masks": 16
+  },
+  "creek": {
+   "file": "ground_creek.png",
+   "source": "creek",
+   "masks": 16
+  }
+ },
+ "kinds": {
+  "big": [
+   0,
+   1
+  ],
+  "fir": [
+   2,
+   3,
+   4,
+   5,
+   6,
+   7,
+   8,
+   9
+  ],
+  "maple": [
+   10,
+   11,
+   12,
+   13,
+   14,
+   15,
+   16,
+   17
+  ],
+  "dead": [
+   18,
+   19,
+   20,
+   21,
+   22,
+   23,
+   24,
+   25
+  ],
+  "apple": [
+   26,
+   27,
+   28,
+   29,
+   30
+  ],
+  "ancient": [
+   31,
+   32,
+   33,
+   34
+  ],
+  "hollowtree": [
+   35,
+   36
+  ],
+  "u_forest": [
+   37,
+   38,
+   39,
+   40,
+   41,
+   42,
+   43,
+   44,
+   45,
+   46,
+   47,
+   48,
+   49
+  ],
+  "d_forest": [
+   50,
+   51,
+   52,
+   53,
+   54,
+   55,
+   56,
+   57,
+   58,
+   59,
+   60,
+   61,
+   62,
+   63,
+   64,
+   65,
+   66,
+   67,
+   68,
+   69
+  ],
+  "u_pasture": [
+   70,
+   71,
+   72,
+   73,
+   74,
+   75,
+   76,
+   77,
+   78,
+   79,
+   80,
+   81,
+   82,
+   83,
+   84,
+   85
+  ],
+  "d_pasture": [
+   86,
+   87,
+   88,
+   89,
+   90,
+   91,
+   92,
+   93
+  ],
+  "u_hollow": [
+   94,
+   95,
+   96,
+   97,
+   98,
+   99,
+   100,
+   101,
+   102,
+   103,
+   104,
+   105,
+   106,
+   107,
+   108
+  ],
+  "d_hollow": [
+   109,
+   110,
+   111,
+   112,
+   113,
+   114,
+   115
+  ],
+  "reeds": [
+   116,
+   117,
+   118,
+   119,
+   120,
+   121,
+   122,
+   123,
+   124,
+   125,
+   126,
+   127,
+   128
+  ],
+  "stepstones": [
+   129,
+   130,
+   131,
+   132
+  ],
+  "log": [
+   133,
+   134,
+   135
+  ],
+  "sign": [
+   136
+  ],
+  "cairn": [
+   137,
+   138,
+   139
+  ],
+  "log_short": [
+   140,
+   141,
+   142
+  ],
+  "u_small": [
+   143,
+   144,
+   145,
+   146,
+   147,
+   148,
+   149,
+   150,
+   151,
+   152,
+   153,
+   154,
+   155,
+   156,
+   157
+  ],
+  "bridge": [
+   158
+  ],
+  "stone": [
+   159,
+   160,
+   161,
+   162,
+   163
+  ],
+  "wheel": [
+   164
+  ],
+  "mill": [
+   165
+  ],
+  "chapel": [
+   166
+  ],
+  "stile": [
+   167
+  ]
+ },
+ "pieces": [
+  {
+   "kind": "big",
+   "src": "farm/src_fir",
+   "r": [
+    0,
+    0,
+    42,
+    89
+   ]
+  },
+  {
+   "kind": "big",
+   "src": "farm/src_maple",
+   "r": [
+    43,
+    0,
+    52,
+    71
+   ]
+  },
+  {
+   "kind": "fir",
+   "src": "fir/0",
+   "r": [
+    170,
+    90,
+    23,
+    41
+   ]
+  },
+  {
+   "kind": "fir",
+   "src": "fir/8",
+   "r": [
+    194,
+    90,
+    25,
+    41
+   ]
+  },
+  {
+   "kind": "fir",
+   "src": "fir/17",
+   "r": [
+    220,
+    90,
+    24,
+    41
+   ]
+  },
+  {
+   "kind": "fir",
+   "src": "fir/18",
+   "r": [
+    245,
+    90,
+    24,
+    41
+   ]
+  },
+  {
+   "kind": "fir",
+   "src": "fir/24",
+   "r": [
+    73,
+    90,
+    23,
+    42
+   ]
+  },
+  {
+   "kind": "fir",
+   "src": "fir/26",
+   "r": [
+    97,
+    90,
+    23,
+    42
+   ]
+  },
+  {
+   "kind": "fir",
+   "src": "fir/27",
+   "r": [
+    121,
+    90,
+    25,
+    42
+   ]
+  },
+  {
+   "kind": "fir",
+   "src": "fir/23",
+   "r": [
+    270,
+    90,
+    25,
+    41
+   ]
+  },
+  {
+   "kind": "maple",
+   "src": "maple/4",
+   "r": [
+    408,
+    90,
+    27,
+    34
+   ]
+  },
+  {
+   "kind": "maple",
+   "src": "maple/7",
+   "r": [
+    436,
+    90,
+    26,
+    34
+   ]
+  },
+  {
+   "kind": "maple",
+   "src": "maple/10",
+   "r": [
+    463,
+    90,
+    27,
+    34
+   ]
+  },
+  {
+   "kind": "maple",
+   "src": "maple/13",
+   "r": [
+    0,
+    134,
+    26,
+    34
+   ]
+  },
+  {
+   "kind": "maple",
+   "src": "maple/25",
+   "r": [
+    27,
+    134,
+    26,
+    34
+   ]
+  },
+  {
+   "kind": "maple",
+   "src": "maple/27",
+   "r": [
+    54,
+    134,
+    27,
+    34
+   ]
+  },
+  {
+   "kind": "maple",
+   "src": "maple/19",
+   "r": [
+    82,
+    134,
+    27,
+    34
+   ]
+  },
+  {
+   "kind": "maple",
+   "src": "maple/30",
+   "r": [
+    110,
+    134,
+    27,
+    34
+   ]
+  },
+  {
+   "kind": "dead",
+   "src": "dead/0",
+   "r": [
+    458,
+    0,
+    24,
+    43
+   ]
+  },
+  {
+   "kind": "dead",
+   "src": "dead/1",
+   "r": [
+    382,
+    0,
+    24,
+    44
+   ]
+  },
+  {
+   "kind": "dead",
+   "src": "dead/6",
+   "r": [
+    483,
+    0,
+    25,
+    43
+   ]
+  },
+  {
+   "kind": "dead",
+   "src": "dead/13",
+   "r": [
+    0,
+    90,
+    22,
+    43
+   ]
+  },
+  {
+   "kind": "dead",
+   "src": "dead/15",
+   "r": [
+    407,
+    0,
+    26,
+    44
+   ]
+  },
+  {
+   "kind": "dead",
+   "src": "dead/16",
+   "r": [
+    147,
+    90,
+    22,
+    42
+   ]
+  },
+  {
+   "kind": "dead",
+   "src": "dead/25",
+   "r": [
+    434,
+    0,
+    23,
+    44
+   ]
+  },
+  {
+   "kind": "dead",
+   "src": "dead/26",
+   "r": [
+    23,
+    90,
+    24,
+    43
+   ]
+  },
+  {
+   "kind": "apple",
+   "src": "apple/13",
+   "r": [
+    427,
+    134,
+    26,
+    31
+   ]
+  },
+  {
+   "kind": "apple",
+   "src": "apple/14",
+   "r": [
+    109,
+    169,
+    30,
+    30
+   ]
+  },
+  {
+   "kind": "apple",
+   "src": "apple/26",
+   "r": [
+    454,
+    134,
+    27,
+    31
+   ]
+  },
+  {
+   "kind": "apple",
+   "src": "apple/28",
+   "r": [
+    482,
+    134,
+    26,
+    31
+   ]
+  },
+  {
+   "kind": "apple",
+   "src": "apple/29",
+   "r": [
+    353,
+    134,
+    28,
+    32
+   ]
+  },
+  {
+   "kind": "ancient",
+   "src": "ancient/0",
+   "r": [
+    263,
+    0,
+    38,
+    53
+   ]
+  },
+  {
+   "kind": "ancient",
+   "src": "ancient/5",
+   "r": [
+    222,
+    0,
+    40,
+    54
+   ]
+  },
+  {
+   "kind": "ancient",
+   "src": "ancient/9",
+   "r": [
+    343,
+    0,
+    38,
+    50
+   ]
+  },
+  {
+   "kind": "ancient",
+   "src": "ancient/10",
+   "r": [
+    302,
+    0,
+    40,
+    52
+   ]
+  },
+  {
+   "kind": "hollowtree",
+   "src": "dead/29",
+   "r": [
+    48,
+    90,
+    24,
+    43
+   ],
+   "hole": [
+    11,
+    24
+   ]
+  },
+  {
+   "kind": "hollowtree",
+   "src": "dead/3",
+   "r": [
+    296,
+    90,
+    24,
+    41
+   ],
+   "hole": [
+    13,
+    20
+   ]
+  },
+  {
+   "kind": "u_forest",
+   "src": "ext/fern_0",
+   "r": [
+    139,
+    260,
+    29,
+    23
+   ]
+  },
+  {
+   "kind": "u_forest",
+   "src": "ext/fern_1",
+   "r": [
+    397,
+    309,
+    25,
+    19
+   ]
+  },
+  {
+   "kind": "u_forest",
+   "src": "ext/fern_2",
+   "r": [
+    423,
+    309,
+    23,
+    19
+   ]
+  },
+  {
+   "kind": "u_forest",
+   "src": "ext/fern_3",
+   "r": [
+    169,
+    260,
+    29,
+    23
+   ]
+  },
+  {
+   "kind": "u_forest",
+   "src": "ext/bramble_0",
+   "r": [
+    225,
+    201,
+    28,
+    28
+   ]
+  },
+  {
+   "kind": "u_forest",
+   "src": "ext/bramble_1",
+   "r": [
+    254,
+    201,
+    28,
+    28
+   ]
+  },
+  {
+   "kind": "u_forest",
+   "src": "ext/boulder_1",
+   "r": [
+    199,
+    260,
+    26,
+    23
+   ]
+  },
+  {
+   "kind": "u_forest",
+   "src": "dec_forest/48",
+   "r": [
+    105,
+    309,
+    25,
+    20
+   ]
+  },
+  {
+   "kind": "u_forest",
+   "src": "dec_forest/52",
+   "r": [
+    226,
+    286,
+    25,
+    21
+   ]
+  },
+  {
+   "kind": "u_forest",
+   "src": "dec_forest/56",
+   "r": [
+    85,
+    260,
+    26,
+    24
+   ]
+  },
+  {
+   "kind": "u_forest",
+   "src": "dec_forest/59",
+   "r": [
+    226,
+    260,
+    26,
+    23
+   ]
+  },
+  {
+   "kind": "u_forest",
+   "src": "dec_forest/1",
+   "r": [
+    252,
+    286,
+    23,
+    21
+   ]
+  },
+  {
+   "kind": "u_forest",
+   "src": "dec_forest/8",
+   "r": [
+    253,
+    260,
+    24,
+    23
+   ]
+  },
+  {
+   "kind": "d_forest",
+   "src": "dec_forest/3",
+   "r": [
+    407,
+    260,
+    20,
+    22
+   ]
+  },
+  {
+   "kind": "d_forest",
+   "src": "dec_forest/7",
+   "r": [
+    276,
+    286,
+    24,
+    21
+   ]
+  },
+  {
+   "kind": "d_forest",
+   "src": "dec_forest/11",
+   "r": [
+    278,
+    260,
+    26,
+    23
+   ]
+  },
+  {
+   "kind": "d_forest",
+   "src": "dec_forest/13",
+   "r": [
+    428,
+    260,
+    26,
+    22
+   ]
+  },
+  {
+   "kind": "d_forest",
+   "src": "dec_forest/16",
+   "r": [
+    131,
+    309,
+    23,
+    20
+   ]
+  },
+  {
+   "kind": "d_forest",
+   "src": "dec_forest/22",
+   "r": [
+    455,
+    260,
+    26,
+    22
+   ]
+  },
+  {
+   "kind": "d_forest",
+   "src": "dec_forest/24",
+   "r": [
+    301,
+    286,
+    25,
+    21
+   ]
+  },
+  {
+   "kind": "d_forest",
+   "src": "dec_forest/26",
+   "r": [
+    327,
+    286,
+    24,
+    21
+   ]
+  },
+  {
+   "kind": "d_forest",
+   "src": "dec_forest/29",
+   "r": [
+    352,
+    286,
+    23,
+    21
+   ]
+  },
+  {
+   "kind": "d_forest",
+   "src": "dec_forest/31",
+   "r": [
+    376,
+    286,
+    23,
+    21
+   ]
+  },
+  {
+   "kind": "d_forest",
+   "src": "dec_forest/32",
+   "r": [
+    482,
+    260,
+    21,
+    22
+   ]
+  },
+  {
+   "kind": "d_forest",
+   "src": "dec_forest/33",
+   "r": [
+    447,
+    309,
+    21,
+    19
+   ]
+  },
+  {
+   "kind": "d_forest",
+   "src": "dec_forest/37",
+   "r": [
+    400,
+    286,
+    25,
+    21
+   ]
+  },
+  {
+   "kind": "d_forest",
+   "src": "dec_forest/41",
+   "r": [
+    0,
+    286,
+    22,
+    22
+   ]
+  },
+  {
+   "kind": "d_forest",
+   "src": "dec_forest/49",
+   "r": [
+    426,
+    286,
+    26,
+    21
+   ]
+  },
+  {
+   "kind": "d_forest",
+   "src": "ext/litter_0",
+   "r": [
+    453,
+    286,
+    26,
+    21
+   ]
+  },
+  {
+   "kind": "d_forest",
+   "src": "ext/litter_1",
+   "r": [
+    480,
+    286,
+    25,
+    21
+   ]
+  },
+  {
+   "kind": "d_forest",
+   "src": "ext/litter_2",
+   "r": [
+    462,
+    231,
+    32,
+    25
+   ]
+  },
+  {
+   "kind": "d_forest",
+   "src": "ext/pebbles_0",
+   "r": [
+    155,
+    309,
+    21,
+    20
+   ]
+  },
+  {
+   "kind": "d_forest",
+   "src": "ext/pebbles_1",
+   "r": [
+    469,
+    309,
+    22,
+    19
+   ]
+  },
+  {
+   "kind": "u_pasture",
+   "src": "dec_pasture/2",
+   "r": [
+    208,
+    231,
+    29,
+    26
+   ]
+  },
+  {
+   "kind": "u_pasture",
+   "src": "dec_pasture/3",
+   "r": [
+    325,
+    169,
+    30,
+    29
+   ]
+  },
+  {
+   "kind": "u_pasture",
+   "src": "dec_pasture/7",
+   "r": [
+    356,
+    169,
+    30,
+    29
+   ]
+  },
+  {
+   "kind": "u_pasture",
+   "src": "dec_pasture/9",
+   "r": [
+    55,
+    231,
+    30,
+    27
+   ]
+  },
+  {
+   "kind": "u_pasture",
+   "src": "dec_pasture/11",
+   "r": [
+    0,
+    260,
+    30,
+    25
+   ]
+  },
+  {
+   "kind": "u_pasture",
+   "src": "dec_pasture/13",
+   "r": [
+    86,
+    231,
+    30,
+    27
+   ]
+  },
+  {
+   "kind": "u_pasture",
+   "src": "dec_pasture/17",
+   "r": [
+    140,
+    169,
+    22,
+    30
+   ]
+  },
+  {
+   "kind": "u_pasture",
+   "src": "dec_pasture/21",
+   "r": [
+    163,
+    169,
+    22,
+    30
+   ]
+  },
+  {
+   "kind": "u_pasture",
+   "src": "dec_pasture/25",
+   "r": [
+    387,
+    169,
+    30,
+    29
+   ]
+  },
+  {
+   "kind": "u_pasture",
+   "src": "dec_pasture/29",
+   "r": [
+    418,
+    169,
+    30,
+    29
+   ]
+  },
+  {
+   "kind": "u_pasture",
+   "src": "dec_pasture/32",
+   "r": [
+    449,
+    169,
+    30,
+    29
+   ]
+  },
+  {
+   "kind": "u_pasture",
+   "src": "dec_pasture/33",
+   "r": [
+    480,
+    169,
+    29,
+    29
+   ]
+  },
+  {
+   "kind": "u_pasture",
+   "src": "dec_pasture/34",
+   "r": [
+    117,
+    231,
+    29,
+    27
+   ]
+  },
+  {
+   "kind": "u_pasture",
+   "src": "dec_pasture/35",
+   "r": [
+    0,
+    201,
+    27,
+    29
+   ]
+  },
+  {
+   "kind": "u_pasture",
+   "src": "dec_pasture/52",
+   "r": [
+    238,
+    231,
+    29,
+    26
+   ]
+  },
+  {
+   "kind": "u_pasture",
+   "src": "dec_pasture/54",
+   "r": [
+    147,
+    231,
+    29,
+    27
+   ]
+  },
+  {
+   "kind": "d_pasture",
+   "src": "dec_pasture/41",
+   "r": [
+    28,
+    201,
+    29,
+    29
+   ]
+  },
+  {
+   "kind": "d_pasture",
+   "src": "dec_pasture/43",
+   "r": [
+    177,
+    309,
+    30,
+    20
+   ]
+  },
+  {
+   "kind": "d_pasture",
+   "src": "dec_pasture/46",
+   "r": [
+    283,
+    201,
+    30,
+    28
+   ]
+  },
+  {
+   "kind": "d_pasture",
+   "src": "dec_pasture/56",
+   "r": [
+    186,
+    169,
+    30,
+    30
+   ]
+  },
+  {
+   "kind": "d_pasture",
+   "src": "dec_pasture/59",
+   "r": [
+    58,
+    201,
+    29,
+    29
+   ]
+  },
+  {
+   "kind": "d_pasture",
+   "src": "dec_forest/29",
+   "r": [
+    0,
+    309,
+    23,
+    21
+   ]
+  },
+  {
+   "kind": "d_pasture",
+   "src": "dec_forest/31",
+   "r": [
+    24,
+    309,
+    23,
+    21
+   ]
+  },
+  {
+   "kind": "d_pasture",
+   "src": "dec_forest/33",
+   "r": [
+    0,
+    331,
+    21,
+    19
+   ]
+  },
+  {
+   "kind": "u_hollow",
+   "src": "dec_hollow/0",
+   "r": [
+    88,
+    201,
+    30,
+    29
+   ]
+  },
+  {
+   "kind": "u_hollow",
+   "src": "dec_hollow/2",
+   "r": [
+    314,
+    201,
+    29,
+    28
+   ]
+  },
+  {
+   "kind": "u_hollow",
+   "src": "dec_hollow/3",
+   "r": [
+    344,
+    201,
+    30,
+    28
+   ]
+  },
+  {
+   "kind": "u_hollow",
+   "src": "dec_hollow/8",
+   "r": [
+    119,
+    201,
+    20,
+    29
+   ]
+  },
+  {
+   "kind": "u_hollow",
+   "src": "dec_hollow/9",
+   "r": [
+    140,
+    201,
+    22,
+    29
+   ]
+  },
+  {
+   "kind": "u_hollow",
+   "src": "dec_hollow/11",
+   "r": [
+    217,
+    169,
+    21,
+    30
+   ]
+  },
+  {
+   "kind": "u_hollow",
+   "src": "dec_hollow/13",
+   "r": [
+    375,
+    201,
+    18,
+    28
+   ]
+  },
+  {
+   "kind": "u_hollow",
+   "src": "dec_hollow/20",
+   "r": [
+    177,
+    231,
+    30,
+    27
+   ]
+  },
+  {
+   "kind": "u_hollow",
+   "src": "dec_hollow/22",
+   "r": [
+    48,
+    309,
+    30,
+    21
+   ]
+  },
+  {
+   "kind": "u_hollow",
+   "src": "dec_hollow/33",
+   "r": [
+    163,
+    201,
+    30,
+    29
+   ]
+  },
+  {
+   "kind": "u_hollow",
+   "src": "dec_hollow/35",
+   "r": [
+    394,
+    201,
+    30,
+    28
+   ]
+  },
+  {
+   "kind": "u_hollow",
+   "src": "dec_hollow/49",
+   "r": [
+    239,
+    169,
+    30,
+    30
+   ]
+  },
+  {
+   "kind": "u_hollow",
+   "src": "dec_hollow/51",
+   "r": [
+    425,
+    201,
+    30,
+    28
+   ]
+  },
+  {
+   "kind": "u_hollow",
+   "src": "dec_hollow/56",
+   "r": [
+    456,
+    201,
+    30,
+    28
+   ]
+  },
+  {
+   "kind": "u_hollow",
+   "src": "dec_hollow/57",
+   "r": [
+    194,
+    201,
+    30,
+    29
+   ]
+  },
+  {
+   "kind": "d_hollow",
+   "src": "dec_hollow/41",
+   "r": [
+    22,
+    331,
+    29,
+    19
+   ]
+  },
+  {
+   "kind": "d_hollow",
+   "src": "dec_hollow/43",
+   "r": [
+    208,
+    309,
+    30,
+    20
+   ]
+  },
+  {
+   "kind": "d_hollow",
+   "src": "dec_hollow/45",
+   "r": [
+    239,
+    309,
+    29,
+    20
+   ]
+  },
+  {
+   "kind": "d_hollow",
+   "src": "dec_forest/11",
+   "r": [
+    305,
+    260,
+    26,
+    23
+   ]
+  },
+  {
+   "kind": "d_hollow",
+   "src": "dec_forest/13",
+   "r": [
+    23,
+    286,
+    26,
+    22
+   ]
+  },
+  {
+   "kind": "d_hollow",
+   "src": "dec_forest/16",
+   "r": [
+    269,
+    309,
+    23,
+    20
+   ]
+  },
+  {
+   "kind": "d_hollow",
+   "src": "dec_forest/22",
+   "r": [
+    50,
+    286,
+    26,
+    22
+   ]
+  },
+  {
+   "kind": "reeds",
+   "src": "dec_creek/0",
+   "r": [
+    268,
+    231,
+    21,
+    26
+   ]
+  },
+  {
+   "kind": "reeds",
+   "src": "dec_creek/2",
+   "r": [
+    290,
+    231,
+    21,
+    26
+   ]
+  },
+  {
+   "kind": "reeds",
+   "src": "dec_creek/6",
+   "r": [
+    312,
+    231,
+    26,
+    26
+   ]
+  },
+  {
+   "kind": "reeds",
+   "src": "dec_creek/10",
+   "r": [
+    339,
+    231,
+    18,
+    26
+   ]
+  },
+  {
+   "kind": "reeds",
+   "src": "dec_creek/14",
+   "r": [
+    358,
+    231,
+    24,
+    26
+   ]
+  },
+  {
+   "kind": "reeds",
+   "src": "dec_creek/15",
+   "r": [
+    383,
+    231,
+    24,
+    26
+   ]
+  },
+  {
+   "kind": "reeds",
+   "src": "dec_creek/25",
+   "r": [
+    293,
+    309,
+    26,
+    20
+   ]
+  },
+  {
+   "kind": "reeds",
+   "src": "dec_creek/28",
+   "r": [
+    320,
+    309,
+    25,
+    20
+   ]
+  },
+  {
+   "kind": "reeds",
+   "src": "dec_creek/30",
+   "r": [
+    31,
+    260,
+    26,
+    25
+   ]
+  },
+  {
+   "kind": "reeds",
+   "src": "dec_creek/40",
+   "r": [
+    332,
+    260,
+    26,
+    23
+   ]
+  },
+  {
+   "kind": "reeds",
+   "src": "dec_creek/44",
+   "r": [
+    346,
+    309,
+    26,
+    20
+   ]
+  },
+  {
+   "kind": "reeds",
+   "src": "dec_creek/48",
+   "r": [
+    408,
+    231,
+    26,
+    26
+   ]
+  },
+  {
+   "kind": "reeds",
+   "src": "dec_creek/52",
+   "r": [
+    58,
+    260,
+    26,
+    25
+   ]
+  },
+  {
+   "kind": "stepstones",
+   "src": "dec_creek/16",
+   "r": [
+    52,
+    331,
+    26,
+    19
+   ]
+  },
+  {
+   "kind": "stepstones",
+   "src": "dec_creek/19",
+   "r": [
+    435,
+    231,
+    26,
+    26
+   ]
+  },
+  {
+   "kind": "stepstones",
+   "src": "dec_creek/22",
+   "r": [
+    112,
+    260,
+    26,
+    24
+   ]
+  },
+  {
+   "kind": "stepstones",
+   "src": "dec_creek/37",
+   "r": [
+    79,
+    309,
+    25,
+    21
+   ]
+  },
+  {
+   "kind": "log",
+   "src": "log/0",
+   "r": [
+    0,
+    169,
+    85,
+    31
+   ]
+  },
+  {
+   "kind": "log",
+   "src": "log/3",
+   "r": [
+    138,
+    134,
+    85,
+    34
+   ]
+  },
+  {
+   "kind": "log",
+   "src": "log/8",
+   "r": [
+    321,
+    90,
+    86,
+    35
+   ]
+  },
+  {
+   "kind": "sign",
+   "src": "sign/6",
+   "r": [
+    270,
+    169,
+    25,
+    30
+   ]
+  },
+  {
+   "kind": "cairn",
+   "src": "cairn2/0",
+   "r": [
+    373,
+    309,
+    23,
+    20
+   ]
+  },
+  {
+   "kind": "cairn",
+   "src": "cairn2/3",
+   "r": [
+    359,
+    260,
+    23,
+    23
+   ]
+  },
+  {
+   "kind": "cairn",
+   "src": "cairn2/18",
+   "r": [
+    383,
+    260,
+    23,
+    23
+   ]
+  },
+  {
+   "kind": "log_short",
+   "src": "logshort/1",
+   "r": [
+    77,
+    286,
+    48,
+    22
+   ]
+  },
+  {
+   "kind": "log_short",
+   "src": "logshort/5",
+   "r": [
+    126,
+    286,
+    49,
+    22
+   ]
+  },
+  {
+   "kind": "log_short",
+   "src": "logshort/20",
+   "r": [
+    176,
+    286,
+    49,
+    22
+   ]
+  },
+  {
+   "kind": "u_small",
+   "src": "small/1",
+   "r": [
+    234,
+    331,
+    14,
+    11
+   ]
+  },
+  {
+   "kind": "u_small",
+   "src": "small/3",
+   "r": [
+    249,
+    331,
+    14,
+    11
+   ]
+  },
+  {
+   "kind": "u_small",
+   "src": "small/9",
+   "r": [
+    79,
+    331,
+    14,
+    14
+   ]
+  },
+  {
+   "kind": "u_small",
+   "src": "small/16",
+   "r": [
+    264,
+    331,
+    12,
+    10
+   ]
+  },
+  {
+   "kind": "u_small",
+   "src": "small/18",
+   "r": [
+    188,
+    331,
+    14,
+    13
+   ]
+  },
+  {
+   "kind": "u_small",
+   "src": "small/23",
+   "r": [
+    94,
+    331,
+    14,
+    14
+   ]
+  },
+  {
+   "kind": "u_small",
+   "src": "small/26",
+   "r": [
+    109,
+    331,
+    14,
+    14
+   ]
+  },
+  {
+   "kind": "u_small",
+   "src": "small/29",
+   "r": [
+    124,
+    331,
+    14,
+    14
+   ]
+  },
+  {
+   "kind": "u_small",
+   "src": "small/33",
+   "r": [
+    203,
+    331,
+    15,
+    12
+   ]
+  },
+  {
+   "kind": "u_small",
+   "src": "small/36",
+   "r": [
+    139,
+    331,
+    14,
+    14
+   ]
+  },
+  {
+   "kind": "u_small",
+   "src": "small/41",
+   "r": [
+    277,
+    331,
+    15,
+    10
+   ]
+  },
+  {
+   "kind": "u_small",
+   "src": "small/45",
+   "r": [
+    154,
+    331,
+    16,
+    14
+   ]
+  },
+  {
+   "kind": "u_small",
+   "src": "small/46",
+   "r": [
+    171,
+    331,
+    16,
+    14
+   ]
+  },
+  {
+   "kind": "u_small",
+   "src": "small/49",
+   "r": [
+    293,
+    331,
+    15,
+    10
+   ]
+  },
+  {
+   "kind": "u_small",
+   "src": "small/52",
+   "r": [
+    219,
+    331,
+    14,
+    12
+   ]
+  },
+  {
+   "kind": "bridge",
+   "src": "bridge/2",
+   "r": [
+    0,
+    231,
+    54,
+    28
+   ]
+  },
+  {
+   "kind": "stone",
+   "src": "stone/1",
+   "r": [
+    309,
+    134,
+    21,
+    33
+   ]
+  },
+  {
+   "kind": "stone",
+   "src": "stone/3",
+   "r": [
+    382,
+    134,
+    21,
+    32
+   ]
+  },
+  {
+   "kind": "stone",
+   "src": "stone/14",
+   "r": [
+    86,
+    169,
+    22,
+    31
+   ]
+  },
+  {
+   "kind": "stone",
+   "src": "stone/26",
+   "r": [
+    331,
+    134,
+    21,
+    33
+   ]
+  },
+  {
+   "kind": "stone",
+   "src": "stone/35",
+   "r": [
+    404,
+    134,
+    22,
+    32
+   ]
+  },
+  {
+   "kind": "wheel",
+   "src": "wheel/9",
+   "r": [
+    296,
+    169,
+    28,
+    30
+   ]
+  },
+  {
+   "kind": "mill",
+   "src": "mill3/13",
+   "r": [
+    96,
+    0,
+    64,
+    64
+   ]
+  },
+  {
+   "kind": "chapel",
+   "src": "chapel3/9",
+   "r": [
+    161,
+    0,
+    60,
+    64
+   ]
+  },
+  {
+   "kind": "stile",
+   "src": "stile/3",
+   "r": [
+    224,
+    134,
+    84,
+    34
+   ]
+  }
+ ]
+}
