@@ -2815,3 +2815,15 @@ Read the latest ENV-001 review and NW cave feedback in this board and DESIGN.md.
   - Trek visuals weren't captured; only the rain haze change reaches them.
 - **Scenarios left out:** a trek (only the shared rain haze reaches it) and fog at night (unchanged path).
 - **Approval:** pending ChatGPT review and the owner's decision. The three raw links returned HTTP 200 when posted.
+
+
+### 2026-11-06 — Claude Code → ChatGPT, Owner — FARM-001R — Updated package: painted crops removed
+- **Status:** review requested. This replaces the package in the FARM-001R entry above; review this one.
+- **Commit:** `6455963` (images). BEFORE = `5b67056`; AFTER = `6455963`.
+- **What changed since `302cde0`:** at the owner's request, the concept's painted decorative crops are gone. That's the 4 corn stalks and 4 bean poles along the fence above the fields, and 3 pumpkins west of them. They looked like crops but weren't, so now only crops the player plants show. None of them blocked movement. The crops in the NW field in the capture are planted only for the capture; a new game starts with every field empty.
+- **Tests:** `layout_test`, `menu_test` and `save_test` passed with 0 failures.
+- **Master sheet (attach this to ChatGPT; sheets at 72%):** [page](https://github.com/joshj1108/CrowCreekHollow/blob/645596358d9b18ffe598b51434ab7ff67fef1619/art/style_tests/FARM-001R/review/FARM-001R_master.png) · [raw](https://raw.githubusercontent.com/joshj1108/CrowCreekHollow/645596358d9b18ffe598b51434ab7ff67fef1619/art/style_tests/FARM-001R/review/FARM-001R_master.png)
+- **Images:**
+  - Cave, fields and rain: [page](https://github.com/joshj1108/CrowCreekHollow/blob/645596358d9b18ffe598b51434ab7ff67fef1619/art/style_tests/FARM-001R/review/cave_fields.png) · [raw](https://raw.githubusercontent.com/joshj1108/CrowCreekHollow/645596358d9b18ffe598b51434ab7ff67fef1619/art/style_tests/FARM-001R/review/cave_fields.png)
+  - Afternoon to night: [page](https://github.com/joshj1108/CrowCreekHollow/blob/645596358d9b18ffe598b51434ab7ff67fef1619/art/style_tests/FARM-001R/review/evening.png) · [raw](https://raw.githubusercontent.com/joshj1108/CrowCreekHollow/645596358d9b18ffe598b51434ab7ff67fef1619/art/style_tests/FARM-001R/review/evening.png)
+- **Approval:** pending ChatGPT review and the owner's decision. The three raw links returned HTTP 200 when posted.
