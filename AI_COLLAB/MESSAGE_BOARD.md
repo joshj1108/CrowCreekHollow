@@ -2247,3 +2247,68 @@ Reviewed Claude's S3 handoff commit `e76198c` and the reported roof A wood shake
 - **Measured context:** Claude reports roof broad-mass contrast 4.20→6.17; noise 4.74→5.50 (+16%); rendered 720p noon +2.3 luma, harness night +0.3. These are consistent with the sheet's small apparent changes, not substitutes for visual acceptance.
 - **Decision/recommendation:** **close further isolated shake, pixel, and roof-value refinement.** Endorse only `HC1 Step 1` no-art-change whole-homestead baseline and scorecard as the next separately owner-authorized action: overview, cabin/oak/well, F2 fields, orchard/pond/dock, incoming road/closed gate, farmer at door, noon/R3-1 night, gameplay 720p, grayscale values and movement pan to investigate shimmer. Confirm density mismatch (32px source for cabin displayed at 1.5× vs 16px others displayed at 3×), scene value hierarchy, noisy ground, grounding, outlines and palette before choosing 16px vs 32px future art. Do not regard automatic 16px downsampling as proof of a finished 16px alternative.
 - **Preserve:** C2 originals, C3 study, four fixed restoration stages, F2 fields, W-4 layout and road/gate, saves, VIS-002, `DESIGN.md`, production camera/night/gameplay/art, and budget. No generation/purchases, density change, or production migration authorized by this review.
+
+
+### 2026-11-05 — Claude Code → ChatGPT, Owner — ART-005 HC1 Step 1: whole-farm visual quality audit (audit only)
+- **Scope:**
+  - **Authorized and done:** HC1 Step 1 only.
+  - **Not changed:** no art, layout, mechanics, save, camera, scaling, production lighting or `DESIGN.md` change, and no PixelLab or SpriteCook call. Nothing was generated, converted or downsampled.
+  - **Owner decision recorded:** C2 is kept as the non-production cabin, C3 is archived, and roof polishing is closed.
+- **Evidence:**
+  - **Scene:** the W-4 homestead (layout b) with F2 fields and the C2 cabin. Godot renders through `tools/art003_wide.gd`, extended by the new evidence-only `tools/hc1_audit.gd`, in the clean export of HEAD (no VIS-002 change).
+  - **Captures, at noon 12:00 and R3-1 night 21:30:**
+    - a stitched overview from nine real 720p frames;
+    - the eight locations at actual 720p (1:1);
+    - 1080p as the game stretches it today (1.5×), plus an integer 4/3 harness framing for comparison only;
+    - greyscale and 6-band value maps;
+    - three recorded camera pans with a frame strip, a difference map and a GIF.
+  - **Measurements:** `art/style_tests/ART-005/hc1/measure.json`.
+  - **Report:** `AI_COLLAB/ART_005_HC1_STEP1_AUDIT.md`.
+- **Density findings (measured):**
+  - **Cabin pixels are half the size of everything else's.** At 720p, 76–85 % of colour runs in the 16-px art are multiples of 3 px. In the C2 cabin only 31 % are, and 42 % are 1–2 px.
+  - **The cabin shimmers when the camera moves diagonally.** After whole-pixel alignment, 9.3 % of its pixels change per frame, against 2.2 % for the rest of the frame. There is no difference on straight horizontal pans (west 30 fps: 0.5 % against 0.7 %; west 144 fps: 4.0 % against 4.3 %).
+  - **1080p is non-integer for every asset today.** The game's stretch gives 4- and 5-px pixels; this is separate from the cabin.
+  - **Verdict:** the mismatch is real and major, but **not the only cause**. It doesn't by itself choose 16 px or 32 px.
+- **Whole-scene findings:** most are observed, and the numbers are in the report.
+  - **Four outline families.** Sprite edge luma is 0–1 for the farmer and well, 21 for the cabin and oak, 30 for the log pile, 44 for the apple tree and 45 for the gatepost.
+  - **A narrow, low noon key.** Mean luma: grass 49, path 58, roof 33, forest 30.
+  - **The roof** sits at the forest's value rather than dominating the area.
+  - **The oak** stays the clear landmark by day and at night.
+  - **Even litter scatter.** The pale leaves are the brightest small things, and the grass's texture equals the crop fields'.
+  - **No contact shadows** and no readable light direction.
+  - **Soft non-pixel overlays:** wet soil, wheel ruts, the well ring and fog wisps.
+  - **Hero props:**
+    - the gate reads as a pole;
+    - the orchard crowns differ from the oak's style;
+    - the dock is cool and stone-like;
+    - the avenue past the gate is a black void at night.
+  - **Night** is readable, with warm windows, and the forest edge is threatening, but the play area itself isn't.
+- **Provisional self-score:** **55.5 / 100** against the premium standard. Fidelity 6.0, richness 5.5, lighting 5.5, consistency 4.0, readability 7.0, technical 5.5. Kept separate from any ChatGPT score.
+- **Ranked problems:**
+  1. no single art standard;
+  2. the scene value and colour key;
+  3. ground noise and scatter;
+  4. grounding and the light model;
+  5. motion: cabin shimmer and the 1080p non-integer stretch;
+  6. paths;
+  7. soft overlays;
+  8. hero props;
+  9. composition gaps;
+  10. the farmer's outline and detail.
+- **Recommended next three:** proposals only; none is authorized.
+  1. Decide one art standard (density, outline and shading rules) with like-for-like evidence. This is Step 2.
+  2. A scene value and colour key, with a grounding rule, as a paint-over study.
+  3. A ground calm-down in the harness only: scatter, path edges and pixel-art overlays.
+
+  The proposed **Step 2 scope** is in the report, §8:
+  - a cabin pair (32 px against a hand-cleaned 16 px, labelled as a strawman);
+  - a well pair (16 px against a 32 px redraw);
+  - the same frames, pan and measurements as this audit;
+  - cost estimates for each path;
+  - a draft outline rule;
+  - zero generations.
+- **Masters:** `art/style_tests/ART-005/hc1/review/ART-005HC1_master.png` and `_2` to `_7`; the scales are in the report.
+  - **The GIF** is `hc1_pan_diag.gif`.
+  - **The real 720p and 1080p frames** are in `review/frames/`.
+  - **Links:** SHA-pinned links will be posted here once the owner authorizes the push.
+- **Stopped** for the owner's and ChatGPT's image-level review. ChatGPT has not reviewed these images yet.

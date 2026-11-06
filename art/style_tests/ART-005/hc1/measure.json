@@ -1,0 +1,525 @@
+{
+ "values": {
+  "day": {
+   "grass": {
+    "mean": 49.3,
+    "p10": 27.8,
+    "p90": 73.8,
+    "texture": 20.5,
+    "tiles": 1189
+   },
+   "path/road": {
+    "mean": 58.1,
+    "p10": 37.3,
+    "p90": 75.0,
+    "texture": 16.2,
+    "tiles": 223
+   },
+   "water": {
+    "mean": 38.4,
+    "p10": 22.0,
+    "p90": 49.9,
+    "texture": 14.3,
+    "tiles": 57
+   },
+   "fields": {
+    "mean": 49.5,
+    "p10": 22.1,
+    "p90": 78.0,
+    "texture": 20.0,
+    "tiles": 112
+   },
+   "forest": {
+    "mean": 29.6,
+    "p10": 1.2,
+    "p90": 64.9,
+    "texture": 19.5,
+    "tiles": 655
+   },
+   "fence": {
+    "mean": 53.4,
+    "p10": 27.8,
+    "p90": 90.1,
+    "texture": 23.8,
+    "tiles": 102
+   },
+   "cabin roof": {
+    "mean": 32.6,
+    "p10": 8.3,
+    "p90": 55.0,
+    "texture": 16.9
+   },
+   "cabin (whole sprite rect)": {
+    "mean": 44.0,
+    "p10": 6.4,
+    "p90": 94.2,
+    "texture": 23.6
+   },
+   "golden oak (sprite rect)": {
+    "mean": 64.3,
+    "p90": 133.0
+   }
+  },
+  "night": {
+   "grass": {
+    "mean": 27.6,
+    "p10": 12.5,
+    "p90": 43.6,
+    "texture": 14.7,
+    "tiles": 1189
+   },
+   "path/road": {
+    "mean": 34.9,
+    "p10": 19.0,
+    "p90": 49.6,
+    "texture": 12.9,
+    "tiles": 223
+   },
+   "water": {
+    "mean": 22.3,
+    "p10": 9.7,
+    "p90": 29.9,
+    "texture": 9.7,
+    "tiles": 57
+   },
+   "fields": {
+    "mean": 28.1,
+    "p10": 9.3,
+    "p90": 47.5,
+    "texture": 14.5,
+    "tiles": 112
+   },
+   "forest": {
+    "mean": 12.9,
+    "p10": 0.5,
+    "p90": 35.0,
+    "texture": 10.0,
+    "tiles": 655
+   },
+   "fence": {
+    "mean": 31.0,
+    "p10": 12.4,
+    "p90": 58.4,
+    "texture": 17.1,
+    "tiles": 102
+   },
+   "cabin roof": {
+    "mean": 16.2,
+    "p10": 1.3,
+    "p90": 30.8,
+    "texture": 11.7
+   },
+   "cabin (whole sprite rect)": {
+    "mean": 36.3,
+    "p10": 1.3,
+    "p90": 85.1,
+    "texture": 22.6
+   },
+   "golden oak (sprite rect)": {
+    "mean": 36.8,
+    "p90": 82.9
+   }
+  }
+ },
+ "pixel_runs_1080p_today": {
+  "C2 cabin walls": {
+   "runs": 14608,
+   "top": [
+    [
+     2,
+     3946
+    ],
+    [
+     3,
+     1598
+    ],
+    [
+     4,
+     1529
+    ],
+    [
+     5,
+     1173
+    ],
+    [
+     1,
+     876
+    ],
+    [
+     7,
+     756
+    ]
+   ]
+  },
+  "golden oak canopy": {
+   "runs": 19728,
+   "top": [
+    [
+     4,
+     6367
+    ],
+    [
+     5,
+     5841
+    ],
+    [
+     9,
+     3157
+    ],
+    [
+     1,
+     956
+    ],
+    [
+     2,
+     748
+    ],
+    [
+     3,
+     726
+    ]
+   ]
+  }
+ },
+ "pixel_runs_720p": {
+  "C2 cabin walls (32 px art at 0.5x)": {
+   "runs": 9567,
+   "multiple_of_3": 0.305,
+   "length_1_or_2": 0.42,
+   "top": [
+    [
+     1,
+     2125
+    ],
+    [
+     2,
+     1897
+    ],
+    [
+     3,
+     1587
+    ],
+    [
+     4,
+     432
+    ],
+    [
+     5,
+     366
+    ],
+    [
+     6,
+     290
+    ]
+   ]
+  },
+  "golden oak canopy (16 px art)": {
+   "runs": 12998,
+   "multiple_of_3": 0.846,
+   "length_1_or_2": 0.114,
+   "top": [
+    [
+     3,
+     8011
+    ],
+    [
+     6,
+     2204
+    ],
+    [
+     1,
+     827
+    ],
+    [
+     2,
+     661
+    ],
+    [
+     9,
+     526
+    ],
+    [
+     4,
+     201
+    ]
+   ]
+  },
+  "grass east of the cabin (16 px)": {
+   "runs": 16516,
+   "multiple_of_3": 0.825,
+   "length_1_or_2": 0.117,
+   "top": [
+    [
+     3,
+     8933
+    ],
+    [
+     6,
+     3176
+    ],
+    [
+     9,
+     1082
+    ],
+    [
+     1,
+     1058
+    ],
+    [
+     2,
+     876
+    ],
+    [
+     4,
+     349
+    ]
+   ]
+  },
+  "farmer (16 px)": {
+   "runs": 1188,
+   "multiple_of_3": 0.755,
+   "length_1_or_2": 0.184,
+   "top": [
+    [
+     3,
+     613
+    ],
+    [
+     6,
+     177
+    ],
+    [
+     1,
+     113
+    ],
+    [
+     2,
+     106
+    ],
+    [
+     9,
+     59
+    ],
+    [
+     5,
+     31
+    ]
+   ]
+  }
+ },
+ "outlines_source": {
+  "C2 cabin (32 px)": {
+   "size": [
+    384,
+    320
+   ],
+   "edge_px": 1347,
+   "edge_mean_rgb": [
+    25,
+    19,
+    16
+   ],
+   "edge_median_luma": 21.0,
+   "edge_share_luma_below_40": 1.0,
+   "colours": 58
+  },
+  "golden oak (16 px)": {
+   "size": [
+    192,
+    192
+   ],
+   "edge_px": 1391,
+   "edge_mean_rgb": [
+    40,
+    24,
+    17
+   ],
+   "edge_median_luma": 21.0,
+   "edge_share_luma_below_40": 0.891,
+   "colours": 45
+  },
+  "well (16 px)": {
+   "size": [
+    32,
+    48
+   ],
+   "edge_px": 191,
+   "edge_mean_rgb": [
+    6,
+    5,
+    4
+   ],
+   "edge_median_luma": 0.0,
+   "edge_share_luma_below_40": 0.948,
+   "colours": 17
+  },
+  "apple tree (16 px)": {
+   "size": [
+    48,
+    64
+   ],
+   "edge_px": 187,
+   "edge_mean_rgb": [
+    87,
+    36,
+    27
+   ],
+   "edge_median_luma": 43.6,
+   "edge_share_luma_below_40": 0.299,
+   "colours": 16
+  },
+  "gatepost (16 px)": {
+   "size": [
+    10,
+    34
+   ],
+   "edge_px": 78,
+   "edge_mean_rgb": [
+    59,
+    42,
+    30
+   ],
+   "edge_median_luma": 44.7,
+   "edge_share_luma_below_40": 0.0,
+   "colours": 9
+  },
+  "log pile (16 px)": {
+   "size": [
+    19,
+    16
+   ],
+   "edge_px": 64,
+   "edge_mean_rgb": [
+    43,
+    32,
+    35
+   ],
+   "edge_median_luma": 30.1,
+   "edge_share_luma_below_40": 0.922,
+   "colours": 7
+  },
+  "farmer idle (16 px)": {
+   "size": [
+    288,
+    36
+   ],
+   "edge_px": 677,
+   "edge_mean_rgb": [
+    3,
+    1,
+    1
+   ],
+   "edge_median_luma": 1.2,
+   "edge_share_luma_below_40": 0.999,
+   "colours": 18
+  }
+ },
+ "pan_instability": {
+  "method": "consecutive frames aligned by the best whole-pixel shift over a 1000x520 centre region; share of pixels that still differ (sum |dRGB| > 24); farmer masked; cabin = the C2 sprite rect inset 12 px, rest = everything else (includes drifting leaf particles and water animation)",
+  "pans": {
+   "pan": {
+    "what": "straight west, 30 fps (camera steps exactly 6.0 px)",
+    "pairs": 147,
+    "cabin_changed_share_mean": 0.0055,
+    "rest_changed_share_mean": 0.007,
+    "cabin_changed_share_max": 0.0823,
+    "camera_fractions_seen": [
+     [
+      0.35,
+      0.0
+     ],
+     [
+      0.5,
+      0.0
+     ],
+     [
+      0.75,
+      0.0
+     ]
+    ]
+   },
+   "pan_diag": {
+    "what": "diagonal north-west, 30 fps (4.24 px steps)",
+    "pairs": 53,
+    "cabin_changed_share_mean": 0.0929,
+    "rest_changed_share_mean": 0.0218,
+    "cabin_changed_share_max": 0.2184,
+    "camera_fractions_seen": [
+     [
+      0.015,
+      0.229
+     ],
+     [
+      0.023,
+      0.023
+     ],
+     [
+      0.053,
+      0.053
+     ],
+     [
+      0.082,
+      0.082
+     ],
+     [
+      0.111,
+      0.111
+     ],
+     [
+      0.141,
+      0.141
+     ],
+     [
+      0.149,
+      0.149
+     ],
+     [
+      0.17,
+      0.17
+     ]
+    ]
+   },
+   "pan_hz144": {
+    "what": "straight west, 144 fps (1.25 px steps)",
+    "pairs": 58,
+    "cabin_changed_share_mean": 0.0405,
+    "rest_changed_share_mean": 0.0433,
+    "cabin_changed_share_max": 0.0807,
+    "camera_fractions_seen": [
+     [
+      0.0,
+      0.0
+     ],
+     [
+      0.1,
+      0.0
+     ],
+     [
+      0.25,
+      0.0
+     ],
+     [
+      0.3,
+      0.0
+     ],
+     [
+      0.45,
+      0.0
+     ],
+     [
+      0.5,
+      0.0
+     ],
+     [
+      0.7,
+      0.0
+     ],
+     [
+      0.75,
+      0.0
+     ]
+    ]
+   }
+  }
+ }
+}
