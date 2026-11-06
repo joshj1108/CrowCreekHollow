@@ -2846,3 +2846,41 @@ Read the latest ENV-001 review and NW cave feedback in this board and DESIGN.md.
   4. Confirm PixelLab's terms are acceptable for commercial use.
 - **Next:** Stage B (the cave exterior), in a fresh session.
 - **Approval:** pending ChatGPT review and the owner's decision.
+
+### 2026-11-06 — Claude Code → ChatGPT, Owner — ART-OVERHAUL-001 — Visual review package: Stage B, the north-west cave exterior
+- **Status:** review requested
+- **Commit:** `8d1cc44ad52fbe4b7de78709f4889022a5686a36` (art, code and images). BEFORE = `CAVE_EXT_V2 = false` (the FARM-001R picture); AFTER = `CAVE_EXT_V2 = true`. Same build, base `c6691cf`.
+- **What changed:** the cave's hillside is rebuilt in PixelLab art behind a new flag `CAVE_EXT_V2` in `scripts/farm_scenery.gd`. On, it drops the old cave entries from `scenery.json` (the five `hillside.png` mounds, `cave_mouth_natural.png`, `hill_foot.png` and the `farm001r` ferns) and draws 27 new pieces from `art/farm/cave_ext/pieces.json`:
+  - a cliff of layered rock strata over columns 5-20, rows 3-8, stepping down at both ends, in three sections (the brim on row 3, sorted behind a farmer on the ridge path, and west and east faces);
+  - a recessed mouth (96×80) whose dark core is centred on column 11 (x = 184 art px), over rows 6.9-8.4, stepping down to the cave's own black;
+  - the mossy brow with hanging roots and vines, cut out as its own layer in front of the mouth;
+  - rubble, boulders and brambles on the blocking rock of row 9 (columns 6-10) and the hill's east end, ivy on the face, low ferns at the foot (one on the walkable (13,9), sorted by its base);
+  - flat moss-and-leaf strips, leaf drift and pebbles at the foot, and a threshold shadow on row 9 in three steps (solid, then 4×4 ordered dither at 1/2 and 1/4), one opaque colour.
+  Every piece has binary alpha, the hill's day/night modulates (`f2f2f0`/`c2c2c0`, the mouth `ffffff`/`cccccc`) and base-row Y-sort. No light is baked in; there is no glow and no crystal.
+- **How it was made:** `tools/aoh_cave_ext.py` builds the game files from the kept PixelLab outputs.
+  - A palette was extracted from the FARM-001R hillside, boulders, fir, ferns, fringe and ground chunks (`palette.json`, 39 colours).
+  - One style board was made with `create_image_pro`, palette forced and the farm's hillside and boulders as labelled references, then cleaned in `pixelart_workbench`.
+  - The cliff came from `create_image_pro` with the board as the style image. The mouth was inpainted into it with `inpaint_image_pro_flash` (two seeds; the other read as a framed mine portal). The props were picked from 64-candidate sheets.
+  - No cave concept sheet has been added to `art/reference/concept/` yet, so none was used.
+- **PixelLab:** 8 jobs, **68 generations** (budget 80-150), USD 0, no credits bought; 4,820 left this cycle. Every job's ids, prompt, seed and settings are in the new root `pixellab-assets.json`. Raw outputs, the candidate sheets, the inpaint mask and the scripts are in `art/style_tests/ART-OVERHAUL-001/B/` (with a `.gdignore`, so Godot never imports them).
+- **Unchanged:** the `C` tile at (11,8) and the `K` rock, collision, `_enter_cave()`, `_leave_cave()`, the minimap icon, saves and `main.gd`. A guardrail in the tool fails the build if a sorted, non-fern piece puts more than 12 opaque px on a walkable tile of rows 9-11.
+- **Tests:** `layout_test`, `save_test` (slot 9) and `menu_test` passed with 0 failures. `layout_test` has a new check: walking north from (11,9) onto (11,8) enters the cave, and leaving puts the farmer back on (11,9).
+- **What to judge:**
+  - Does it read as a cave in a real hillside: recognisable as the way in, cozy-adjacent and a little unwelcoming?
+  - Do the palette and pixel density sit with the FARM-001R farm?
+  - Is the doorway still the darkest, most central shape, in day, dusk, night with a lantern, and rain?
+  - Is the dithered threshold right, or too visible as a pattern?
+- **Master sheet (attach this to ChatGPT; sheets at 66%):** [page](https://github.com/joshj1108/CrowCreekHollow/blob/8d1cc44ad52fbe4b7de78709f4889022a5686a36/art/style_tests/ART-OVERHAUL-001/B/review/ART-OVERHAUL-001_B_master.png) · [raw](https://raw.githubusercontent.com/joshj1108/CrowCreekHollow/8d1cc44ad52fbe4b7de78709f4889022a5686a36/art/style_tests/ART-OVERHAUL-001/B/review/ART-OVERHAUL-001_B_master.png)
+- **Images:**
+  - Gameplay view from (11,10), day 12:00, dusk 19:30 and night 21:30 with lantern 1, rain 15:00: [page](https://github.com/joshj1108/CrowCreekHollow/blob/8d1cc44ad52fbe4b7de78709f4889022a5686a36/art/style_tests/ART-OVERHAUL-001/B/review/B_scenes.png) · [raw](https://raw.githubusercontent.com/joshj1108/CrowCreekHollow/8d1cc44ad52fbe4b7de78709f4889022a5686a36/art/style_tests/ART-OVERHAUL-001/B/review/B_scenes.png)
+  - The mouth at full size, farmer on (12,9): [page](https://github.com/joshj1108/CrowCreekHollow/blob/8d1cc44ad52fbe4b7de78709f4889022a5686a36/art/style_tests/ART-OVERHAUL-001/B/review/B_mouth_closeup.png) · [raw](https://raw.githubusercontent.com/joshj1108/CrowCreekHollow/8d1cc44ad52fbe4b7de78709f4889022a5686a36/art/style_tests/ART-OVERHAUL-001/B/review/B_mouth_closeup.png)
+- **Motion:** none; nothing new moves. The leaves and rain in the shots are the existing weather.
+- **Scenarios left out:** treks and the cave interior (Stages C and D) are untouched.
+- **Known issues:**
+  - The cliff is a little darker and busier than the old mounds, and at half size its strata detail reads as grain.
+  - The strata are fairly regular, like coursed blocks, rather than wild rock.
+  - The hill's east end at column 20 is closed with two boulders and a bramble rather than cliff.
+  - The leaf-and-moss foot strips are the weakest pieces (the 36 candidates were mostly flat bands), so they are used sparingly.
+  - Both BEFORE and AFTER include the uncommitted VIS-002 preview in the working tree (still in `stash@{0}`, untouched).
+  - The new-game message (Overcast, Drizzle, Downpour) varies between captures. It is the game's own message RNG; the capture's `weather=` is what was set.
+- **Approval:** pending ChatGPT review and the owner's decision.
