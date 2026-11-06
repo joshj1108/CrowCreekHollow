@@ -297,6 +297,10 @@ const CAVE_LANTERN_BOOST := 4.0
 # The daylight at the cave's exit, kept barely there so the cave still reads as dark.
 const CAVE_MOUTH_ENERGY := 0.6
 const WINDOW_ENERGY := 0.45
+# The farm's night is near-dark (FarmScenery.NIGHT_TINT, owner's direction 2026-11-06). Lights add to that tint, so
+# against it they burn this many times stronger by full night, which keeps the lantern's ring, the windows, the lamps
+# and a visitor's eyes about as bright as they were against the old, lighter night. Rises with the farm's night.
+const NIGHT_LIGHT_BOOST := 2.2
 
 # Crops. Turnips are the starter crop and grow in every season; the rest have the Pacific Northwest seasons they
 # grow in (seasons; planting out of season is refused, and a crop still in the ground when its seasons end withers).
@@ -962,6 +966,7 @@ var farm: FarmSystem
 var animals: AnimalSystem
 var desk: DeskSystem
 var forage: ForageSystem
+var night_boost := 1.0           # how much stronger outdoor lights burn against the dark night (see NIGHT_LIGHT_BOOST)
 var lantern_light: PointLight2D
 var window_lights: Array = []   # glows for the lit windows, one PointLight2D each
 var porch_light: PointLight2D     # the lamp by the door, once the house is restored
@@ -1280,6 +1285,7 @@ func _process(delta: float) -> void:
 	if in_cave:
 		canvas_modulate.color = trek._tint(darkness) if trek.active else CAVE_TINT
 	weather.night_tint = canvas_modulate.color if LIGHTING_V2 else Color.WHITE
+	night_boost = lerpf(1.0, NIGHT_LIGHT_BOOST, smoothstep(0.35, 1.0, lamp_dark)) if farm_scenery != null and not in_cave and not inside else 1.0
 	_update_lantern(1.0 if in_cave else lamp_dark)
 	projects._update(lamp_dark)
 	_update_cave_mouth_light(smoothstep(DUSK_HOUR, DUSK_HOUR + 2.0, current_hour))
@@ -5896,11 +5902,31 @@ func _apply_lantern_radius() -> void:
 		return
 	var radius: float = LANTERN_TIERS[lantern_tier - 1]["radius"]
 	if LANTERN_SMOOTH:
-		if not lantern_light.texture is GradientTexture2D:   # swapping one not yet drawn makes Godot complain
-			lantern_light.texture = _glow_texture()
+		lantern_light.texture = _lantern_texture(radius)
 		lantern_light.texture_scale = radius * PX / 128.0
 	else:
 		_glow(lantern_light, radius * PX / 128.0)
+
+
+# A better lantern lights farther, never brighter. Every tier keeps the Tin Lantern's falloff out to half the Tin
+# Lantern's radius (full at the centre, half strength at 1.25 tiles), so the bright pool round the player is the
+# same size and strength at every tier; past that it fades more gently, out to the tier's own radius. With one
+# tier's radius this is the Tin Lantern's straight falloff exactly. Made once per radius.
+static var _lantern_textures := {}
+
+
+func _lantern_texture(radius: float) -> GradientTexture2D:
+	if _lantern_textures.has(radius):
+		return _lantern_textures[radius]
+	var knee: float = float(LANTERN_TIERS[0]["radius"]) * 0.5 / radius   # where the Tin Lantern is at half strength
+	var gradient := Gradient.new()
+	gradient.set_color(0, Color.WHITE)
+	gradient.set_color(1, Color.BLACK)
+	gradient.add_point(knee, Color(0.5, 0.5, 0.5))
+	var texture := _glow_texture()
+	texture.gradient = gradient
+	_lantern_textures[radius] = texture
+	return texture
 
 
 func _update_lantern(darkness: float) -> void:
@@ -5909,7 +5935,7 @@ func _update_lantern(darkness: float) -> void:
 	# The lantern's pool steps across the art-pixel grid as you walk, rather than sliding under it.
 	if LIGHTING_V2 and not LANTERN_SMOOTH:
 		lantern_light.position = _light_snap(player.global_position) - player.global_position
-	var energy := LANTERN_ENERGY * ((TREK_LANTERN_BOOST if trek.active else CAVE_LANTERN_BOOST) if in_cave else 1.0)
+	var energy := LANTERN_ENERGY * ((TREK_LANTERN_BOOST if trek.active else CAVE_LANTERN_BOOST) if in_cave else night_boost)
 	if lantern_tier >= LANTERN_FLICKER_TIER:
 		var t := Time.get_ticks_msec() / 1000.0
 		if LIGHTING_V2:
@@ -5922,7 +5948,7 @@ func _update_lantern(darkness: float) -> void:
 	# Lit windows glow once the house has glass, and the porch lamp once it is restored.
 	var outdoors := not inside and not in_cave and world_started
 	var lit := outdoors and house_stage >= 2 and darkness > 0.1
-	var glow := WINDOW_ENERGY * (0.6 + 0.4 * darkness) * (1.0 if house_stage == 3 else 0.75)
+	var glow := WINDOW_ENERGY * (0.6 + 0.4 * darkness) * (1.0 if house_stage == 3 else 0.75) * night_boost
 	for light in window_lights:
 		light.enabled = lit
 		light.energy = glow

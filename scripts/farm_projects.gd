@@ -384,7 +384,7 @@ func _update(darkness: float) -> void:
 	var on := not m.inside and not m.in_cave and darkness > 0.1
 	for l in lights.values():
 		(l as PointLight2D).enabled = on
-		(l as PointLight2D).energy = m.WINDOW_ENERGY * (0.7 + 0.5 * darkness)
+		(l as PointLight2D).energy = m.WINDOW_ENERGY * (0.7 + 0.5 * darkness) * m.night_boost
 	if layer != null:
 		layer.visible = not m.inside and not m.in_cave
 

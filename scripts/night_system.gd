@@ -233,7 +233,7 @@ func _show_visitor() -> void:
 			m._glow(light, glow_scale)
 		else:
 			light.texture_scale = glow_scale
-		light.energy = 1.6 if big else 0.9
+		light.energy = (1.6 if big else 0.9) * m.night_boost   # the eyes keep showing against the dark night
 	layer.queue_redraw()
 
 
