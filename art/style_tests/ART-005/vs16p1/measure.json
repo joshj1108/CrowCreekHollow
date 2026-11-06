@@ -1,0 +1,88 @@
+{
+ "task": "ART-005 VS16-P1",
+ "status": "zero generation, NON-PRODUCTION finishing pass",
+ "colours": {
+  "vs16_day": 39,
+  "vs16_night": 42,
+  "p1_day": 66,
+  "p1_night": 70
+ },
+ "source_change": {
+  "day": {
+   "alpha_identical": true,
+   "changed_px": 9457,
+   "opaque_px": 24575,
+   "changed_by_region": {
+    "roof": 6287,
+    "chimney": 9,
+    "walls+corners": 1722,
+    "foundation": 1427,
+    "steps": 21,
+    "door": 844,
+    "window L": 387,
+    "window R": 387
+   }
+  },
+  "night": {
+   "alpha_identical": true,
+   "changed_px": 9479,
+   "opaque_px": 24575,
+   "changed_by_region": {
+    "roof": 6287,
+    "chimney": 9,
+    "walls+corners": 1744,
+    "foundation": 1427,
+    "steps": 21,
+    "door": 844,
+    "window L": 398,
+    "window R": 398
+   }
+  }
+ },
+ "frame_change": {
+  "home_day": {
+   "cabin_rect": [
+    699,
+    75,
+    1275,
+    555
+   ],
+   "strong_px_in_cabin": 42851,
+   "strong_px_outside": 8016,
+   "mean_abs_diff_all": 12.34
+  },
+  "home_night": {
+   "cabin_rect": [
+    672,
+    27,
+    1248,
+    507
+   ],
+   "strong_px_in_cabin": 32284,
+   "strong_px_outside": 5386,
+   "mean_abs_diff_all": 11.65
+  },
+  "door_day": {
+   "cabin_rect": [
+    387,
+    -42,
+    963,
+    438
+   ],
+   "strong_px_in_cabin": 35596,
+   "strong_px_outside": 6168,
+   "mean_abs_diff_all": 11.35
+  },
+  "door_night": {
+   "cabin_rect": [
+    387,
+    0,
+    963,
+    480
+   ],
+   "strong_px_in_cabin": 28145,
+   "strong_px_outside": 6042,
+   "mean_abs_diff_all": 11.26
+  }
+ }
+}
