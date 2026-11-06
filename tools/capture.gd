@@ -10,6 +10,8 @@ extends SceneTree
 #   itile=X,Y       with inside, stand on this house tile (interior coordinates)
 #   cave            stand in the mining cave
 #   ctile=X,Y       with cave, stand on this cave tile (the exit is at 20,21)
+#   mine=DX,DY      with cave and ctile, face the ore at that offset and start working it
+#   lit             diagnostic: lift the darkness (canvas tint white) just before the shot; not a gameplay view
 #   tile=X,Y        stand on this farm tile (layout coordinates, before the border)
 #   weather=KIND    sunny, cloudy, fog, drizzle, rain, downpour or snow
 #   season=NAME     Spring, Summer, Autumn or Winter
@@ -238,6 +240,11 @@ func _initialize() -> void:
 		if opt.has("ctile"):
 			var ct: PackedStringArray = opt["ctile"].split(",")
 			main.player.position = main._tile_center(int(ct[0]), int(ct[1]))
+		if opt.has("mine"):
+			# Face the ore at this offset and start working it, as pressing the hand on it does (the progress shows).
+			var dv: PackedStringArray = opt["mine"].split(",")
+			main.player.facing = Vector2(int(dv[0]), int(dv[1]))
+			main.farm._start_harvest("cave_ore", main._player_tile() + Vector2i(int(dv[0]), int(dv[1])))
 	elif opt.has("tile"):
 		var t: PackedStringArray = opt["tile"].split(",")
 		main.player.position = main._tile_center(int(t[0]) + main.BORDER_X, int(t[1]) + main.BORDER_Y)
@@ -382,6 +389,12 @@ func _initialize() -> void:
 		main._toggle_tab(opt["tab"])
 		await process_frame
 		await process_frame
+	if opt.has("lit"):
+		# Diagnostic only, never a gameplay view: freeze the game and lift the darkness, to judge art the lantern hides.
+		main.set_process(false)
+		main.canvas_modulate.color = Color.WHITE
+		for i in 3:
+			await process_frame
 	if opt.has("hold"):
 		await _hold(main, opt)
 		quit()

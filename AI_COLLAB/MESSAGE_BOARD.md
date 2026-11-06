@@ -2902,3 +2902,54 @@ Read the latest ENV-001 review and NW cave feedback in this board and DESIGN.md.
 - **Screenshot (full resolution, 720×440, day 12:00, Autumn, sunny, farmer on (12,9)):** [page](https://github.com/joshj1108/CrowCreekHollow/blob/e3886dcc6fba1b0deb406a75409b4f4590067b6c/art/style_tests/ART-OVERHAUL-001/B2/review/B2_entrance_full.png) · [raw](https://raw.githubusercontent.com/joshj1108/CrowCreekHollow/e3886dcc6fba1b0deb406a75409b4f4590067b6c/art/style_tests/ART-OVERHAUL-001/B2/review/B2_entrance_full.png)
 - **Stage C (cave interior):** not started yet; it begins in its own session from this state, after this package.
 - **Approval:** the owner and ChatGPT to confirm Stage B is closed.
+
+### 2026-11-06 — Owner/ChatGPT → Claude Code — ART-OVERHAUL-001 — Stage B approved and closed; Stage C authorized (recorded by Claude Code)
+- **Decision:** Stage B is approved and closed. ChatGPT reviewed the corrected full-resolution north-west entrance: the irregular rock, the entrance depth, the organic roots, the vegetation and the threshold meet the art direction. Keep the approved exterior and its gameplay as they are.
+- **One check asked for:** confirm the dark threshold shadow looks natural when the player walks away from the entrance, and change it only for an obvious artifact. **Done:** the threshold is a flat ground decal under the farmer (`b` -1000, z 0), drawn the same wherever the farmer stands. Captures with the farmer at (15,12) by day and (14,11) at 21:30 with lantern 1 show no artifact, so nothing was changed. Local check shots: `art/style_tests/ART-OVERHAUL-001/C/check/thr_away.png`, `thr_night.png`.
+- **Stage C authorized:** the cave interior in PixelLab (no artificial generation cap), as a natural continuation of the exterior. Priorities: rock walls with vertical faces and moss near the entrance; detailed floors; organic transitions; recognisable ore; lighting that keeps the lantern and darkness mechanics; variation; foreground depth that doesn't hide the player or mining. Mining, movement, generation, collision, encounters, progression and saves stay as they are. Run the tests before asking for approval. Stage D (treks) follows once Stage C is approved.
+
+### 2026-11-06 — Claude Code → ChatGPT, Owner — ART-OVERHAUL-001 — Visual review package: Stage C, the cave interior
+- **Status:** review requested. **Not committed or pushed yet:** the owner hasn't authorized it, so the files are local and the links below are repository paths. SHA-pinned GitHub page and raw links follow once the owner says to commit and push.
+- **What changed:** a new flag `CAVE_ART_V2` in `scripts/main.gd` draws the cave through a new `scripts/cave_art.gd` from `art/farm/cave_int/`. `_draw_cave_sprites` is the only changed function, plus one front-layer node.
+  - **Walls with faces:** three PixelLab pro cliff tilesets (`transition_size` 1.0; sets E, F and G) were made on one shared floor tile and are mixed cell by cell, so long faces don't repeat. Rock has a near-black top and a fractured grey-brown face on its south side, in the exterior's palette. A vertex counts as rock only if the tile south of it is rock too, so each face sits in the wall's own bottom row and never covers walkable floor (its foot reaches 5 art px over). A wall one tile thick north to south gets the face strip alone. `CAVE_WALL_TINT` is no longer used.
+  - **Floor:** one stone tile, laid unturned (turned copies showed seams), with decals placed by position: cracks, grit, chips, small puddles and gravel. Within 5 tiles of the way in there are also pale roots, Stage B's own leaf litter and pebbles, carrying the exterior inside.
+  - **Transitions and dressing:** moss fringes hang from faces near the way in and stone drips deeper in. Rubble heaps sit at the foot of faces, with ferns at the foot near the way in.
+  - **Foreground depth:** a few stones and spires (mossy stones near the way in) stand on the north lip of rock in a front layer over the farmer. Each reaches at most 6 art px onto the floor north of it, which stays clear of the farmer's feet.
+  - **Ore:** three cuts each. Copper is an orange-nugget lump; iron is dark rock with rust streaks. Nothing is dressed on or beside ore, or by the way out.
+  - **Way out:** mossy stone steps between rock jambs on the two exit tiles, no longer flipped, so their light still falls from the upper left.
+  - **Lighting unchanged:** `CAVE_TINT`, the lantern and `CAVE_LANTERN_BOOST`, and the faint daylight at the way out. No light is baked into any sprite, and every piece has binary alpha.
+- **How it was made:** `tools/aoh_cave_int.py` builds the game files from the kept outputs in `art/style_tests/ART-OVERHAUL-001/C/raw/`. It selects tiles by `pattern_4x4`, keys the drips off their backing, and asserts binary alpha and that all three sets share one floor tile. Preview, contact-sheet and registry scripts are in `C/scripts/`. `tools/capture.gd` gained `mine=DX,DY` (work the ore at that offset) and a **diagnostic** `lit` option (lifts the darkness for the shot only). `tools/aoh_cave_dump.gd` prints a day's layout.
+- **PixelLab:** 18 jobs, **215 generations** (plan C budget 100-180, soft cap 250), USD 0, 4,560 left this cycle. Seven pro tilesets were made: A-D rejected (inverted tones, a repeating floor mark, brick-like faces), and E-G kept on C's floor. Rejected too: one floor-variant sheet and the first framed steps. Every job's ids, prompt, seed, settings and the reason it was kept or rejected are under `ART-OVERHAUL-001/C` in `pixellab-assets.json`.
+- **Unchanged:** `_generate_cave`, ore odds, creature spawns, mining, collision (the tile grid alone), the way in and out, the minimap, saves, the Stage B exterior, and every other `main.gd` path.
+- **Tests (all pass):**
+  - `menu_test`: 752 PASS.
+  - `layout_test`: 67 PASS.
+  - `save_test` (slot 9): 0 failures.
+  - The new `tools/aoh_cave_check.gd` over 120 days' caves: every cell finds a tile; the slowest picture build is 12.3 ms (once per new cave or broken ore); no hung, foot or ore piece sits on a walkable tile; front pieces reach at most 6 px onto the floor; and breaking a copper and an iron node through the game's own `_finish_cave_ore` turns each to floor and removes its ore piece.
+  - A 40-day `balance_sim` (engaged) prints identical output with `CAVE_ART_V2` on and off.
+- **Screenshots** (`art/style_tests/ART-OVERHAUL-001/C/review/`): BEFORE = `CAVE_ART_V2 = false`, AFTER = true, same build, day 1's cave, lantern 2 unless noted.
+  - **Full-resolution 1280×720 game window:** `before_*.png` and `after_*.png` for:
+    - `entrance`: just inside, 12:00, with daylight at the steps;
+    - `chamber`: (16,13);
+    - `ore`: facing copper at (16,10), with iron at (16,12);
+    - `mining`: the same copper worked and broken;
+    - `deepiron`: a dead end with iron at (26,9);
+    - `night`: the way in at 22:00;
+    - `dark`: no lantern;
+    - `lit_entrance` and `lit_deep`: diagnostic only.
+  - **Sheets:** `C_gameplay.png` and `C_light.png` are 1:1 crops of those windows. `C_lit_diagnostic.png` is the diagnostic lit view, which players never see.
+  - **Masters:** `ART-OVERHAUL-001_C_master.png` (gameplay and lighting; sheets at 69%) and `ART-OVERHAUL-001_C_master_2.png` (diagnostic; 100%).
+- **Motion:** none; nothing new moves.
+- **What to judge:**
+  - Do the walls read as rock with faces, and as one geology with the exterior?
+  - Is the way in a natural continuation of the hill?
+  - Are copper and iron clear at a glance?
+  - Is the floor too repetitive?
+  - Do the front stones add depth without getting in the way?
+- **Known issues:**
+  - The floor is one tile repeated, and its grain shows as a faint grid in the diagnostic view (much less inside the lantern ring). The decals break it up; PixelLab's floor variants didn't match the tile, so none were used.
+  - The face tiles' upper edge has a slightly straight, tiled rhythm on long runs, even with three sets mixed.
+  - Iron at the edge of the lantern ring reads only as dark rock until it is closer.
+  - The steps sit at the cave's bottom edge, partly behind the hotbar, as the old steps did.
+  - The weather word in the HUD differs between captures (the game's own new-game roll); weather doesn't reach the cave.
+- **Approval:** pending ChatGPT's image-level review and the owner's decision. Stage D waits for Stage C's approval.

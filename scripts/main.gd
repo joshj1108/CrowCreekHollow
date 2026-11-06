@@ -923,6 +923,9 @@ var well_layer: Node2D  # the well's art; over the player while they are north o
 var big_tree_layer: Node2D  # the great tree's art; drawn over the player north of its base, under it south of it
 var tree_front_layer: Node2D  # trees standing south of the player's row, drawn over the player
 var tree_view := Rect2i()     # the tile range the farm was last drawn over, for tree_front_layer
+var cave_art: CaveArt          # the cave's PixelLab art (CAVE_ART_V2), loaded on first use
+var cave_front_layer: Node2D   # the cave's standing stones and spires on the rock's north lip, over the player
+var cave_view := Rect2i()      # the cave tiles last drawn, for cave_front_layer
 var camera: Camera2D
 # Full-screen fade for sleeping and collapsing. While a scene plays the world is frozen.
 var transitioning := false
@@ -1358,6 +1361,11 @@ func _process(delta: float) -> void:
 func _draw() -> void:
 	if not world_started:
 		return
+	if cave_front_layer != null and cave_view.size != Vector2i.ZERO:
+		# Redrawn while in the cave (it follows the view) and once more after, to clear it.
+		cave_front_layer.queue_redraw()
+		if not in_cave or trek.active:
+			cave_view = Rect2i()
 	if in_cave:
 		if trek.active:
 			trek._draw_map()
@@ -1968,6 +1976,13 @@ func _build_world() -> void:
 		_draw_trees(tree_front_layer, true)
 		_draw_interior(tree_front_layer, true))
 	add_child(tree_front_layer)
+	cave_front_layer = Node2D.new()
+	cave_front_layer.z_index = 1
+	cave_front_layer.draw.connect(func() -> void:
+		if in_cave and not trek.active and cave_art != null and cave_view.size != Vector2i.ZERO:
+			cave_art.draw_front(cave_front_layer, self, cave_view.position.x, cave_view.position.y,
+					cave_view.end.x - 1, cave_view.end.y - 1))
+	add_child(cave_front_layer)
 
 	player = Node2D.new()
 	player.set_script(load("res://scripts/player.gd"))
@@ -4904,6 +4919,9 @@ func _draw_cave() -> void:
 	var y1 := clampi(ceili((top_left.y + view.y) / PX) + 1, 0, CAVE_H - 1)
 	if FARM_SPRITES:
 		_draw_cave_sprites(x0, y0, x1, y1)
+		if CAVE_ART_V2 and cave_front_layer != null:
+			cave_view = Rect2i(x0, y0, x1 - x0 + 1, y1 - y0 + 1)
+			cave_front_layer.queue_redraw()
 	else:
 		for y in range(y0, y1 + 1):
 			for x in range(x0, x1 + 1):
@@ -4917,9 +4935,19 @@ func _draw_cave() -> void:
 const CAVE_WALLS := [Tile.WALL, Tile.ORE_COPPER, Tile.ORE_IRON]
 # The wall art is close in tone to the floor; darkening it makes the tunnels read at a glance.
 const CAVE_WALL_TINT := Color(0.55, 0.55, 0.6)
+# ART-OVERHAUL-001 Stage C: the cave in PixelLab art (scripts/cave_art.gd, art/farm/cave_int/, made by
+# tools/aoh_cave_int.py): rock walls with dark tops and faces, a stone floor with decals, moss and roots by the
+# way out, new ore and steps. Art only. Off, the SpriteCook cave below returns.
+const CAVE_ART_V2 := true
 
 
 func _draw_cave_sprites(x0: int, y0: int, x1: int, y1: int) -> void:
+	if CAVE_ART_V2:
+		if cave_art == null:
+			cave_art = CaveArt.new()
+		if cave_art.ok:
+			cave_art.draw(self, x0, y0, x1, y1)
+			return
 	var floor_tex := FarmSprites.tex("cave_floor")
 	var src := _ground_frame_rect(GROUND_FILLED_FRAME)
 	for y in range(y0, y1 + 1):

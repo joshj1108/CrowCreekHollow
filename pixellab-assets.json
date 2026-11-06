@@ -320,5 +320,489 @@
    "res://art/farm/cave_ext/lip.png",
    "res://art/farm/cave_ext/threshold.png"
   ]
+ },
+ "ART-OVERHAUL-001/C": {
+  "tool": "tools/aoh_cave_int.py",
+  "sources": "art/style_tests/ART-OVERHAUL-001/C/",
+  "note": "Stage C: the mining cave's interior. Candidates in C/raw/<key>/NN.png; tilesets in C/raw/tiles/ts_<a-g>.png and .json.",
+  "generations": 215,
+  "jobs": [
+   {
+    "key": "tileset_a",
+    "tool": "create_topdown_tileset",
+    "tileset_id": "dff124a5-18f3-41b5-896c-e6ded79f2cbb",
+    "size": [
+     16,
+     16
+    ],
+    "cost": 15,
+    "settings": {
+     "mode": "pro",
+     "transition_size": 1.0,
+     "view": "high top-down",
+     "raggedness": 0.6,
+     "boundary_amplitude": 0.2,
+     "boundary_seed": 3101,
+     "roundness": 0.6,
+     "palette": "25-colour Stage B palette subset"
+    },
+    "prompt": {
+     "lower": "damp dark cave floor ...",
+     "upper": "rough natural cave rock wall ... a little dark moss",
+     "transition": "tall vertical natural rock face of fractured stone"
+    },
+    "kept": false,
+    "note": "rejected: pale rock tops on a dark floor read inverted"
+   },
+   {
+    "key": "tileset_b",
+    "tool": "create_topdown_tileset",
+    "tileset_id": "e53db4d2-65bc-40f6-b443-f90b8d2936f1",
+    "size": [
+     16,
+     16
+    ],
+    "cost": 15,
+    "settings": {
+     "mode": "pro",
+     "transition_size": 1.0,
+     "view": "high top-down",
+     "raggedness": 0.8,
+     "boundary_amplitude": 0.25,
+     "boundary_seed": 3102,
+     "roundness": 0.4,
+     "palette": "25-colour Stage B palette subset"
+    },
+    "prompt": {
+     "lower": "dark wet cave floor ...",
+     "upper": "solid mass of natural cave bedrock ...",
+     "transition": "tall rugged cliff face of layered broken rock"
+    },
+    "kept": false,
+    "note": "rejected: the floor repeats an arrow mark"
+   },
+   {
+    "key": "tileset_c",
+    "tool": "create_topdown_tileset",
+    "tileset_id": "746bcbff-1198-4217-b387-b57023095ba1",
+    "size": [
+     16,
+     16
+    ],
+    "cost": 15,
+    "settings": {
+     "mode": "pro",
+     "transition_size": 1.0,
+     "view": "high top-down",
+     "raggedness": 0.7,
+     "boundary_amplitude": 0.2,
+     "boundary_seed": 3103,
+     "roundness": 0.5,
+     "palette": "22-colour cave stone palette (Stage B palette subset plus three warm greys)"
+    },
+    "prompt": {
+     "lower": "natural cave floor of mid grey-brown packed stone and grit ...",
+     "upper": "top of solid cave bedrock in deep shadow ...",
+     "transition": "tall natural vertical cave wall of fractured irregular rock slabs ..."
+    },
+    "kept": false,
+    "note": "faces read as brickwork; its floor tile (base 8178e6bc-10d1-4842-89e0-79b668817e66) is the game floor, shared by E, F and G"
+   },
+   {
+    "key": "tileset_d",
+    "tool": "create_topdown_tileset",
+    "tileset_id": "05463686-645d-4dbe-ab58-d1a11da5be15",
+    "size": [
+     16,
+     16
+    ],
+    "cost": 15,
+    "settings": {
+     "mode": "pro",
+     "transition_size": 1.0,
+     "view": "high top-down",
+     "raggedness": 0.9,
+     "boundary_amplitude": 0.3,
+     "boundary_seed": 3104,
+     "roundness": 0.8,
+     "palette": "22-colour cave stone palette (Stage B palette subset plus three warm greys)"
+    },
+    "prompt": {
+     "lower": "damp cave floor ...",
+     "upper": "dark unlit rock mass ...",
+     "transition": "rugged vertical rock face ... thin moss in crevices"
+    },
+    "kept": false,
+    "note": "rejected: the floor pattern repeats"
+   },
+   {
+    "key": "tileset_e",
+    "tool": "create_topdown_tileset",
+    "tileset_id": "7f3cfc3e-566d-484e-93ef-532f94f84afa",
+    "size": [
+     16,
+     16
+    ],
+    "cost": 15,
+    "settings": {
+     "mode": "pro",
+     "transition_size": 1.0,
+     "view": "high top-down",
+     "raggedness": 1.0,
+     "boundary_amplitude": 0.3,
+     "boundary_seed": 3105,
+     "roundness": 0.7,
+     "palette": "22-colour cave stone palette (Stage B palette subset plus three warm greys)",
+     "lower_base_tile_id": "8178e6bc-10d1-4842-89e0-79b668817e66"
+    },
+    "prompt": {
+     "lower": "natural cave floor (set C base tile)",
+     "upper": "top of solid cave bedrock in deep shadow ...",
+     "transition": "natural vertical cave rock face, NOT bricks, NOT masonry: big irregular fractured boulders and jagged slabs ..."
+    },
+    "kept": true,
+    "note": "kept: one of the three face sets mixed per cell"
+   },
+   {
+    "key": "tileset_f",
+    "tool": "create_topdown_tileset",
+    "tileset_id": "7e3c4cac-3c72-4b7b-8581-04b933c5b791",
+    "size": [
+     16,
+     16
+    ],
+    "cost": 15,
+    "settings": {
+     "mode": "pro",
+     "transition_size": 1.0,
+     "view": "high top-down",
+     "raggedness": 0.8,
+     "boundary_amplitude": 0.25,
+     "boundary_seed": 3106,
+     "roundness": 1.0,
+     "palette": "22-colour cave stone palette (Stage B palette subset plus three warm greys)",
+     "lower_base_tile_id": "8178e6bc-10d1-4842-89e0-79b668817e66"
+    },
+    "prompt": {
+     "lower": "natural cave floor (set C base tile)",
+     "upper": "dark unlit rock mass ...",
+     "transition": "rough organic cliff of wild cave rock, lumpy weathered bulges, deep fissures, no blocks"
+    },
+    "kept": true,
+    "note": "kept"
+   },
+   {
+    "key": "tileset_g",
+    "tool": "create_topdown_tileset",
+    "tileset_id": "f120e4aa-49d1-4a21-a30e-73151d916bf2",
+    "size": [
+     16,
+     16
+    ],
+    "cost": 15,
+    "settings": {
+     "mode": "pro",
+     "transition_size": 1.0,
+     "view": "high top-down",
+     "raggedness": 0.9,
+     "boundary_amplitude": 0.3,
+     "boundary_seed": 3107,
+     "roundness": 0.4,
+     "palette": "22-colour cave stone palette (Stage B palette subset plus three warm greys)",
+     "lower_base_tile_id": "8178e6bc-10d1-4842-89e0-79b668817e66"
+    },
+    "prompt": {
+     "lower": "natural cave floor (set C base tile)",
+     "upper": "top of solid cave bedrock in deep shadow ...",
+     "transition": "jagged natural cave wall face like a rocky hillside cliff ..."
+    },
+    "kept": true,
+    "note": "kept"
+   },
+   {
+    "key": "floor_variants",
+    "tool": "create_tiles_pro",
+    "tile_id": "b99f3b83-316b-4e10-a5e4-ef45c5109ed0",
+    "size": [
+     16,
+     16
+    ],
+    "seed": 3801,
+    "cost": 10,
+    "settings": {
+     "style_images": "set C floor tile",
+     "palette": "17 stone colours"
+    },
+    "prompt": "16 numbered cave floor variants (plain, gravel, crack, pebbles, damp ...)",
+    "kept": false,
+    "note": "rejected: flat, X marks, tone off the base tile; the variety comes from decals instead"
+   },
+   {
+    "key": "decals",
+    "tool": "create_image_pro",
+    "job_id": "50a84461-8eeb-4194-8913-3a0f362fa218",
+    "asset_id": "e85f37d2-cb17-58cc-af26-559c881beaf3",
+    "size": [
+     32,
+     32
+    ],
+    "candidates": 64,
+    "seed": 3201,
+    "cost": 10,
+    "settings": {
+     "no_background": true,
+     "style_image": "rock_ref64 (crop of Stage B cliff_e.png)",
+     "style_copy": [
+      "outline",
+      "detail",
+      "shading"
+     ],
+     "palette": "forced, muted cave/moss/ore colours"
+    },
+    "prompt": "Sheet of flat ground decals for a dark damp cave floor: gravel, cracks, rubble, puddle, stain, pebbles, root tips, timber",
+    "kept": true,
+    "note": "kept: cracks 00 02, gravel 08-11, roots 40 42 44"
+   },
+   {
+    "key": "copper",
+    "tool": "create_image_pro",
+    "job_id": "a335830a-24e8-433e-b78b-6eb7c4e5a4fa",
+    "asset_id": "11e4a6e6-4d85-5e8f-9680-89e553b19601",
+    "size": [
+     16,
+     16
+    ],
+    "candidates": 64,
+    "seed": 3301,
+    "cost": 10,
+    "settings": {
+     "no_background": true,
+     "style_image": "rock_ref64 (crop of Stage B cliff_e.png)",
+     "style_copy": [
+      "outline",
+      "detail",
+      "shading"
+     ],
+     "palette": "forced, muted cave/moss/ore colours"
+    },
+    "prompt": "Copper ore deposit set into rough grey cave rock, orange-brown nuggets and green verdigris",
+    "kept": true,
+    "note": "kept: 16, 22, 03 (the first picks 02 25 35 read too green under the lantern)"
+   },
+   {
+    "key": "iron",
+    "tool": "create_image_pro",
+    "job_id": "9d8c5385-dcde-4f5e-89dc-39282608f0b9",
+    "asset_id": "7b0f6daf-dda7-53ff-ab55-e502ce109646",
+    "size": [
+     16,
+     16
+    ],
+    "candidates": 64,
+    "seed": 3401,
+    "cost": 10,
+    "settings": {
+     "no_background": true,
+     "style_image": "rock_ref64 (crop of Stage B cliff_e.png)",
+     "style_copy": [
+      "outline",
+      "detail",
+      "shading"
+     ],
+     "palette": "forced, muted cave/moss/ore colours"
+    },
+    "prompt": "Iron ore deposit set into rough dark cave rock, rusty red-brown streaks, clearly darker than copper",
+    "kept": true,
+    "note": "kept: 00, 07, 28"
+   },
+   {
+    "key": "dress",
+    "tool": "create_image_pro",
+    "job_id": "399d3070-937e-436f-972f-74b510b084ff",
+    "asset_id": "d3ee237a-ab30-510c-851c-70d022ae884c",
+    "size": [
+     32,
+     32
+    ],
+    "candidates": 64,
+    "seed": 3501,
+    "cost": 10,
+    "settings": {
+     "no_background": true,
+     "style_image": "Stage B mouth.png",
+     "style_copy": [
+      "outline",
+      "detail",
+      "shading"
+     ],
+     "palette": "forced, muted cave/moss/ore colours"
+    },
+    "prompt": "Sheet of small cave wall dressings: moss, roots, stalactite tips, ferns",
+    "kept": true,
+    "note": "kept: ferns 50 54 58 (its moss and drips are too big for a 16 px face)"
+   },
+   {
+    "key": "steps_a",
+    "tool": "create_image_pro",
+    "job_id": "ba9bc293-f3ed-48da-b78b-2db3f2ccdcbf",
+    "asset_id": "ede23513-6f39-5687-aafa-01622c0498a1",
+    "size": [
+     32,
+     32
+    ],
+    "candidates": 64,
+    "seed": 3601,
+    "cost": 10,
+    "settings": {
+     "no_background": false,
+     "style_image": "rock_ref64 (crop of Stage B cliff_e.png)",
+     "style_copy": [
+      "outline",
+      "detail",
+      "shading"
+     ],
+     "palette": "forced, muted cave/moss/ore colours"
+    },
+    "prompt": "Rough natural stone steps climbing up out of a cave toward daylight",
+    "kept": false,
+    "note": "rejected: an opaque square with a frame, read as pasted in"
+   },
+   {
+    "key": "rocks",
+    "tool": "create_image_pro",
+    "job_id": "5999109d-e0e7-4a59-9c00-e3d7bf489c95",
+    "asset_id": "256cc56a-72bb-5cb0-b3bb-e5c618014e27",
+    "size": [
+     32,
+     32
+    ],
+    "candidates": 64,
+    "seed": 3701,
+    "cost": 10,
+    "settings": {
+     "no_background": true,
+     "style_image": "rock_ref64 (crop of Stage B cliff_e.png)",
+     "style_copy": [
+      "outline",
+      "detail",
+      "shading"
+     ],
+     "palette": "forced, muted cave/moss/ore colours"
+    },
+    "prompt": "Sheet of cave floor rocks: boulders, slabs, stalagmites, rubble heaps",
+    "kept": true,
+    "note": "kept: pebbles 00 61, foot rubble 24 25 33 34, spires 16-19, boulders 01-03, mossy 49 51"
+   },
+   {
+    "key": "mossfringe",
+    "tool": "create_image_pro",
+    "job_id": "b2285893-3e13-4bdc-9f57-a554654c48a6",
+    "asset_id": "30ea38d2-de33-5797-96d3-459e87494960",
+    "size": [
+     16,
+     16
+    ],
+    "candidates": 64,
+    "seed": 3901,
+    "cost": 10,
+    "settings": {
+     "no_background": true,
+     "style_image": "Stage B mouth.png",
+     "style_copy": [
+      "outline",
+      "detail",
+      "shading"
+     ],
+     "palette": "forced, muted cave/moss/ore colours"
+    },
+    "prompt": "Small dark green moss and thin roots hanging over the top edge of a rock face, 16 px wide",
+    "kept": true,
+    "note": "kept: 48-51 (the rest have a solid backing)"
+   },
+   {
+    "key": "drip",
+    "tool": "create_image_pro",
+    "job_id": "ea03b54e-54d4-4f10-8608-deffdee87cce",
+    "asset_id": "ffd8706b-7d8c-5b11-8bf3-ad4d362391f3",
+    "size": [
+     16,
+     16
+    ],
+    "candidates": 64,
+    "seed": 3902,
+    "cost": 10,
+    "settings": {
+     "no_background": true,
+     "style_image": "rock_ref64 (crop of Stage B cliff_e.png)",
+     "style_copy": [
+      "outline",
+      "detail",
+      "shading"
+     ],
+     "palette": "forced, muted cave/moss/ore colours"
+    },
+    "prompt": "Short fringe of small grey-brown stalactites hanging from the top edge of a cave wall",
+    "kept": true,
+    "note": "kept: 28 30 44 46, keyed off their opaque black backing and re-outlined by tools/aoh_cave_int.py"
+   },
+   {
+    "key": "small",
+    "tool": "create_image_pro",
+    "job_id": "7a3ba06f-eea6-4e44-8fc5-5599045fd136",
+    "asset_id": "cb13af9e-1f40-5403-b163-b80e5ec098e7",
+    "size": [
+     16,
+     16
+    ],
+    "candidates": 64,
+    "seed": 3903,
+    "cost": 10,
+    "settings": {
+     "no_background": true,
+     "style_image": "set C floor tile",
+     "style_copy": [
+      "outline",
+      "detail",
+      "shading"
+     ],
+     "palette": "forced, muted cave/moss/ore colours"
+    },
+    "prompt": "Small flat floor details: short crack, chips, damp patch, drip puddle, grit; subtle",
+    "kept": true,
+    "note": "kept: cracks and grit 00 02 03 04 08 10 12 48 50 52 53 56 60, puddles 37 41 45"
+   },
+   {
+    "key": "steps2",
+    "tool": "create_image_pro",
+    "job_id": "421b1ecb-3418-4bf0-820e-5d6a30773324",
+    "asset_id": "6dcfecd2-e50f-5ca7-abfe-dd490a68db7e",
+    "size": [
+     32,
+     32
+    ],
+    "candidates": 64,
+    "seed": 3602,
+    "cost": 10,
+    "settings": {
+     "no_background": true,
+     "style_image": "rock_ref64 (crop of Stage B cliff_e.png)",
+     "style_copy": [
+      "outline",
+      "detail",
+      "shading"
+     ],
+     "palette": "forced, muted cave/moss/ore colours"
+    },
+    "prompt": "Rough natural stone steps rising toward the viewer out of a cave, mossy, ragged edges, no frame",
+    "kept": true,
+    "note": "kept: 34"
+   }
+  ],
+  "game_files": [
+   "res://art/farm/cave_int/walls.png",
+   "res://art/farm/cave_int/floor.png",
+   "res://art/farm/cave_int/atlas.png",
+   "res://art/farm/cave_int/cave_int.json"
+  ]
  }
 }
