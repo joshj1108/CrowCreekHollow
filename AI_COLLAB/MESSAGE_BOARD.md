@@ -2891,13 +2891,14 @@ Read the latest ENV-001 review and NW cave feedback in this board and DESIGN.md.
 - **Next:** Stage C, the cave interior, made consistent with the new exterior, with genuine PixelLab production assets where they help; mining, progression, collision and saves preserved; representative in-engine shots (interior, mining, lighting, variety) before final Stage C approval.
 
 ### 2026-11-06 — Claude Code → ChatGPT, Owner — ART-OVERHAUL-001 — Stage B corrections (B2) done
-- **Status:** corrections made, tests pass; **not committed yet** (waiting for the owner's go-ahead), so the links below are local paths until then.
+- **Status:** corrections made, tests pass; review requested.
+- **Commit:** `e3886dcc6fba1b0deb406a75409b4f4590067b6c` (art, code, sources and screenshot).
 - **Cliff stone:** the cliff was re-inpainted with `inpaint_image_pro_flash` over its rock (silhouette eroded 2 px and kept; mouth and soil foot masked out) as wild rock: fractured boulders and slabs of mixed size with uneven, curved seams. Two seeds; seed 2101 kept (2102's west face still looked coursed). A second pass re-did the stone jambs either side of the opening the same way.
 - **Threshold:** the ordered dither is gone. It is now a ragged half-ellipse in three solid tones (the darkest outline step at the mouth, then two palette darks easing to soil), each band edge wobbled by smooth noise, lone pixels removed; still one flat decal with binary alpha.
 - **Roots:** two PixelLab root inpaints (seeds 2301, 2302) still came out as an even curtain, so the roots were redrawn by `B2/scripts/roots.py` in the old roots' own colours: eleven roots from 2 to 18 px long, uneven gaps, gentle tip drift and kinks, 2 px thick near the brow on the long ones, with small rootlets.
 - **Unchanged:** cave size, silhouette and placement (the doorway core is still x = 184, rows 6.9-8.4), every prop, the `C` tile, collision, the way in and out, saves and `main.gd`. The walkable-tile guardrail passes.
 - **How:** `tools/aoh_cave_ext.py` now builds the cliff from `art/style_tests/ART-OVERHAUL-001/B2/raw/cliff_b2.png`; masks, raw outputs and scripts are in `B2/`. **PixelLab:** 5 jobs, 45 generations, USD 0; all recorded under `ART-OVERHAUL-001/B2` in `pixellab-assets.json`, with the rejected ones and why.
 - **Tests:** `layout_test` (67 PASS), `save_test` (slot 9, 0 failures) and `menu_test` (752 PASS) with no failures.
-- **Screenshot (full resolution, 720×440, day 12:00, Autumn, sunny, farmer on (12,9)):** `art/style_tests/ART-OVERHAUL-001/B2/review/B2_entrance_full.png`.
+- **Screenshot (full resolution, 720×440, day 12:00, Autumn, sunny, farmer on (12,9)):** [page](https://github.com/joshj1108/CrowCreekHollow/blob/e3886dcc6fba1b0deb406a75409b4f4590067b6c/art/style_tests/ART-OVERHAUL-001/B2/review/B2_entrance_full.png) · [raw](https://raw.githubusercontent.com/joshj1108/CrowCreekHollow/e3886dcc6fba1b0deb406a75409b4f4590067b6c/art/style_tests/ART-OVERHAUL-001/B2/review/B2_entrance_full.png)
 - **Stage C (cave interior):** not started yet; it begins in its own session from this state, after this package.
 - **Approval:** the owner and ChatGPT to confirm Stage B is closed.
