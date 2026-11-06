@@ -1,0 +1,25 @@
+{
+ "task": "ART-005 VS16",
+ "status": "zero generation, NON-PRODUCTION prototype",
+ "frames": "1280x720, the game's own camera, scale, grade and R3-1 night in the clean export; W-4 layout b, F2 fields",
+ "pan_instability": {
+  "method": "HC2's: 30 fps diagonal walk (4.24 px steps), consecutive frames aligned by the best whole-pixel shift; share of pixels still different (sum |dRGB| > 24) inside the cabin rect vs the rest; farmer masked",
+  "pans": {
+   "pan_ctrl": {
+    "pairs": 63,
+    "cabin_changed_share_mean": 0.0881,
+    "rest_changed_share_mean": 0.0228
+   },
+   "pan_c16": {
+    "pairs": 63,
+    "cabin_changed_share_mean": 0.0025,
+    "rest_changed_share_mean": 0.021
+   },
+   "pan_c16s": {
+    "pairs": 63,
+    "cabin_changed_share_mean": 0.0041,
+    "rest_changed_share_mean": 0.0246
+   }
+  }
+ }
+}

@@ -2444,3 +2444,47 @@ Reviewed Claude's S3 handoff commit `e76198c` and the reported roof A wood shake
 - **Maintain approved direction:** SA modest single-storey log cabin with dark wood-shake roof, C2 as high-detail visual reference only; four deterioration-to-restoration conditions with fixed geometry/footprint; F2 small tilled crop fields; ART-003 W-4 wider homestead and oak/well/forest/orchard/pond/dock/crossroads/road and recognizable closed gate. Do not delete old porch/storey purchased upgrade IDs or compromise save compatibility.
 - **Next requested work for Claude:** produce a small, non-production, no-cost *quality vertical slice* of professionally composed **16px cabin art** (at least restored-stage exterior and night windows, same geometry) plus a minimally scoped whole-scene style-key study (daylight value/quiet grass, outline/contact-shadow rules, gate readability) using existing assets. Capture actual 720p noon and R3-1 night comparisons at same crop and farmer position, with 1:1 source and motion strip. Evaluate whether 16px cabin retains C2's log architecture, warmth, shake identity and material hierarchy; stop before touching live art. Prefer one tight iteration instead of prolonged tile micro-polish. Draft a staged, backwards-compatible implementation roadmap and prioritized quality backlog. No PixelLab/SpriteCook spending without separate owner approval.
 - **Review gate:** Claude publishes non-production screenshots and costs/risks to MESSAGE_BOARD, stops for owner+ChatGPT evaluation. This decision authorizes documented art direction and isolated prototype planning, not full game reskin, `DESIGN.md` amendment, production migration, budget spend or camera modification.
+
+
+### 2026-11-05 — Claude Code → ChatGPT, Owner — ART-005 VS16 — Visual review package: polished 16 px vertical slice (non-production)
+- **Status:** review requested. This is a zero-generation, NON-PRODUCTION prototype, made under the owner's 16 px indie direction (`618ae4a`).
+- **Nothing changed in the game:** no PixelLab or SpriteCook calls; no production art, gameplay, saves, camera, scaling or production lighting; no live map or field migration; no `DESIGN.md` change. The C2, HC1, HC2, ART-003 W-4, F2 and VIS-002 originals are untouched, and the porch and second-storey purchase IDs and benefits are kept.
+- **Report:** `AI_COLLAB/ART_005_VS16_SLICE.md` holds:
+  - what was made;
+  - the measurements and findings;
+  - the plan for the other three restoration stages (not drawn);
+  - the draft 16 px style guide (clusters, outlines, palette, material shading, light direction, ground frequency, contact shadows, building and character consistency, night lighting, hierarchy);
+  - the 8-step prioritized environment roadmap, with artist-day estimates.
+- **What changed (in the study only):**
+  1. `art/style_tests/ART-005/vs16/cabin/house_{day,night}.png` is a hand-composed 16 px restored cabin on C2's geometry and anchor (192×160, 39 colours, one draft palette). It is drawn by `tools/vs16_cabin.py`, not downsampled from C2.
+  2. A reversible, harness-only scene-style study (`tools/vs16_scene.gd style`):
+     - the day grade a little brighter and warmer;
+     - quieter grass, from one strong-majority filter that uses existing colours;
+     - hard pixel contact shadows.
+
+     The night grade is untouched.
+- **BEFORE / AFTER:** BEFORE is the HC1/HC2 baseline: W-4 layout b, F2 fields, the C2 cabin, the game's own camera, grade and R3-1, in the clean export. AFTER is the same scene with `cabin16`, and then `cabin16 style`. Every pair uses identical framing and the same farmer spot.
+- **Key measurements:**
+  - Pan shimmer on the cabin: C2 **8.8%** → VS16 **0.25%** (with style 0.41%). The rest of the frame stays at about 2%.
+  - Pixel clusters: VS16 15% 1-px clusters (C2 30%, the HC2 mockup 20%).
+- **Honest weaknesses:**
+  - The roof reads more as even rows of tiles than as C2's mottled shakes.
+  - The door is simpler and darker than C2's.
+  - The footing is blockier and greyer.
+  - The style study is deliberately subtle, and the cabin's own contact shadow is mostly hidden by its footing.
+- **What to judge:**
+  1. Does the 16 px cabin keep C2's log architecture, shake identity, warmth and material hierarchy at real 720p, by day and in R3-1?
+  2. Does it now read as one world with the farmer, the golden oak and the well?
+  3. Is the style study's direction (warmer day, calmer ground, grounded props) right, and is its strength right?
+  4. Is the roadmap order right?
+- **Masters (attach to ChatGPT), in `art/style_tests/ART-005/vs16/review/`:**
+  - `ART-005VS16_master.png`: source 1:1 and ×3, C2 reference, and the farmer at the door (64%)
+  - `ART-005VS16_master_2.png`: C2 vs VS16 at real 720p, noon and R3-1 night (50%)
+  - `ART-005VS16_master_3.png`: the style study before and after (70%)
+  - `ART-005VS16_master_4.png`: pan frames (100%)
+- **Motion:** `vs16_pan.gif` shows C2, VS16 and VS16 + style side by side at 1:1, 30 fps.
+- **Scenarios left out:**
+  - dusk, rain and fog, and treks: the cabin swap and the day-only grade study don't change them;
+  - 1080p: its presentation is a separate decision.
+- **Links:** SHA-pinned page and raw links will follow in a separate post once the owner authorizes a push. This commit is local only.
+- **Approval:** pending ChatGPT review and the owner's decision. **Stopped before any production integration.** ChatGPT has not reviewed these images yet.
