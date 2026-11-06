@@ -297,10 +297,11 @@ const CAVE_LANTERN_BOOST := 4.0
 # The daylight at the cave's exit, kept barely there so the cave still reads as dark.
 const CAVE_MOUTH_ENERGY := 0.6
 const WINDOW_ENERGY := 0.45
-# The farm's night is near-dark (FarmScenery.NIGHT_TINT, owner's direction 2026-11-06). Lights add to that tint, so
-# against it they burn this many times stronger by full night, which keeps the lantern's ring, the windows, the lamps
-# and a visitor's eyes about as bright as they were against the old, lighter night. Rises with the farm's night.
-const NIGHT_LIGHT_BOOST := 2.2
+# The farm's night is dark blue-grey (FarmScenery.NIGHT_TINT, the owner's Balanced Night of 2026-11-06). Lights add
+# to that tint, so against it they burn this many times stronger by full night, which keeps the lantern's centre,
+# the windows, the lamps and a visitor's eyes about as bright as they were against the old, lighter night (8592b8):
+# the boost's extra (0.9) is the old 1.2 scaled by how much of the tint's luminance gap remains (0.35 of 0.45).
+const NIGHT_LIGHT_BOOST := 1.9
 
 # Crops. Turnips are the starter crop and grow in every season; the rest have the Pacific Northwest seasons they
 # grow in (seasons; planting out of season is refused, and a crop still in the ground when its seasons end withers).

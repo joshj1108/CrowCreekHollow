@@ -19,10 +19,11 @@ const DIR := "res://art/farm/concept/"
 # Off, the farm is the FARM-001R picture. Art only: the C tile, collision and the cave's way in are unchanged.
 const CAVE_EXT_V2 := true
 const CAVE_EXT := "res://art/farm/cave_ext/pieces.json"
-# The night (owner's direction, 2026-11-06, replacing ART-003's lighter R3-1 night of 2026-11-02): dark enough
-# that little shows outside a light, only the faintest blue shapes. Lights are added on top of this tint, so the
+# The night: the owner's final "Balanced Night Lighting" (2026-11-06), between ART-003's bright R3-1 night
+# (8592b8) and the near-black 1a1f33 tried earlier that day. A dark blue-grey, with the farm's shapes faintly
+# readable outside a light. Lights are added on top of this tint (see NIGHT_LIGHT_BOOST in main.gd), so the
 # lantern's ring, the windows and the lamps are as bright as before. The grade keeps the day's exposure at night.
-const NIGHT_TINT := Color("1a1f33")
+const NIGHT_TINT := Color("30384f")
 const NIGHT_GRADE := {"saturation": 0.7, "exposure": 0.84, "contrast": 1.12, "shadow_cool": 0.07, "vignette": 0.62, "warmth": 0.06}
 const WEATHER_DIM := 0.6    # rain, snow and fog take the night tint darkened to this share
 const FRONT_MARGIN := 0.45  # a piece is drawn over the farmer once its base is this far (tiles) below the feet
