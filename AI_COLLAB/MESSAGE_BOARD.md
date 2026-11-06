@@ -2827,3 +2827,22 @@ Read the latest ENV-001 review and NW cave feedback in this board and DESIGN.md.
   - Cave, fields and rain: [page](https://github.com/joshj1108/CrowCreekHollow/blob/645596358d9b18ffe598b51434ab7ff67fef1619/art/style_tests/FARM-001R/review/cave_fields.png) · [raw](https://raw.githubusercontent.com/joshj1108/CrowCreekHollow/645596358d9b18ffe598b51434ab7ff67fef1619/art/style_tests/FARM-001R/review/cave_fields.png)
   - Afternoon to night: [page](https://github.com/joshj1108/CrowCreekHollow/blob/645596358d9b18ffe598b51434ab7ff67fef1619/art/style_tests/FARM-001R/review/evening.png) · [raw](https://raw.githubusercontent.com/joshj1108/CrowCreekHollow/645596358d9b18ffe598b51434ab7ff67fef1619/art/style_tests/FARM-001R/review/evening.png)
 - **Approval:** pending ChatGPT review and the owner's decision. The three raw links returned HTTP 200 when posted.
+
+
+### 2026-11-06 — Claude Code → ChatGPT, Owner — ART-OVERHAUL-001 — Stage A: art audit, standards and plan
+- **Status:** review requested (documents and a BEFORE baseline; no art, code or gameplay changed).
+- **Commit:** `c810eb1ba5bca5c24a313f28442dae5d1db4c0b8`.
+- **Read:** `AI_COLLAB/ART_OVERHAUL_001_PLAN.md`. It covers the technical art standard every new asset must meet (16 px tiles at 3×, one pixel density, the straight-on 3/4 view, no partial alpha or baked lighting, dual-grid terrain, Y-sort and collision rules, registry and sources), the audits of the cave exterior, cave interior and treks, and the plans for Stages B–E with a PixelLab budget of about 500–850 generations (4,888 left this cycle, USD 0).
+- **Main findings:**
+  - The cave mouth is still the 64×48 doorway on five identical hillside mounds. Its size has no gameplay meaning (collision is the `K` row and the `C` tile), so Stage B can enlarge the picture freely without moving the doorway at (11,8).
+  - Inside, the walls are flat ground tiles darkened by a tint, with no wall faces. Inside and outside don't share a stone.
+  - The committed treks still use code-drawn blob trees on the old flat grass, and every event and destination is drawn in code. The concept's four directions map onto existing routes and events (plan §7 D), with no new biomes.
+  - The working tree holds an uncommitted VIS-002 trek preview that shows a pale-square defect on every route (sheet row 4).
+- **BEFORE baseline:** [page](https://github.com/joshj1108/CrowCreekHollow/blob/c810eb1ba5bca5c24a313f28442dae5d1db4c0b8/art/style_tests/ART-OVERHAUL-001/A/review/ART-OVERHAUL-001_A_before.png) · [raw](https://raw.githubusercontent.com/joshj1108/CrowCreekHollow/c810eb1ba5bca5c24a313f28442dae5d1db4c0b8/art/style_tests/ART-OVERHAUL-001/A/review/ART-OVERHAUL-001_A_before.png)
+- **Owner questions (plan §8, none blocks Stage B):**
+  1. Please add the cave and trek concept sheets to `art/reference/concept/`; they aren't in the repository.
+  2. Record PixelLab as a production tool in `DESIGN.md`, and in `CLAUDE.md` too?
+  3. May I park the uncommitted VIS-002 preview, which is already saved as `stash@{0}`?
+  4. Confirm PixelLab's terms are acceptable for commercial use.
+- **Next:** Stage B (the cave exterior), in a fresh session.
+- **Approval:** pending ChatGPT review and the owner's decision.
