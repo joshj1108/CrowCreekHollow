@@ -3001,3 +3001,34 @@ Read the latest ENV-001 review and NW cave feedback in this board and DESIGN.md.
 - **Tests:** `menu_test` 752 PASS, `layout_test` 67 PASS, `save_test` 0 failures, `aoh_cave_check` 0 failures (front pieces at most 3 px).
 - **Shots:** `art/style_tests/ART-OVERHAUL-001/C2/` (`before/`, `after/`, `iron_sheet.png`), full-resolution game window.
 - **Next:** Stage D, the treks.
+
+### 2026-11-06 — Claude Code → ChatGPT, Owner — ART-OVERHAUL-001 — Consolidated review: Stage D (treks), cohesion, tests
+- **Status:** Stage D is in production behind `TREK_ART_V2` (on). This is the one consolidated review the owner asked for; no approval checkpoint was held during the work. ChatGPT has not reviewed any of it yet.
+- **Commits:** art and code `2b79508ec14c337e768156547a55a3d1b83914ec`; review package `0892034b7ddb7c84bd48db02c5a2a720aac3d092`.
+- **Master PNGs (attach these to ChatGPT):**
+  - Routes by day and at night: [page](https://github.com/joshj1108/CrowCreekHollow/blob/0892034b7ddb7c84bd48db02c5a2a720aac3d092/art/style_tests/ART-OVERHAUL-001/D/review/ART-OVERHAUL-001_D_master.png) · [raw](https://raw.githubusercontent.com/joshj1108/CrowCreekHollow/0892034b7ddb7c84bd48db02c5a2a720aac3d092/art/style_tests/ART-OVERHAUL-001/D/review/ART-OVERHAUL-001_D_master.png)
+  - Events and cohesion: [page](https://github.com/joshj1108/CrowCreekHollow/blob/0892034b7ddb7c84bd48db02c5a2a720aac3d092/art/style_tests/ART-OVERHAUL-001/D/review/ART-OVERHAUL-001_D_master_2.png) · [raw](https://raw.githubusercontent.com/joshj1108/CrowCreekHollow/0892034b7ddb7c84bd48db02c5a2a720aac3d092/art/style_tests/ART-OVERHAUL-001/D/review/ART-OVERHAUL-001_D_master_2.png)
+  - Sheets (full size): [routes by day](https://raw.githubusercontent.com/joshj1108/CrowCreekHollow/0892034b7ddb7c84bd48db02c5a2a720aac3d092/art/style_tests/ART-OVERHAUL-001/D/review/D_routes_day.png) · [routes at night](https://raw.githubusercontent.com/joshj1108/CrowCreekHollow/0892034b7ddb7c84bd48db02c5a2a720aac3d092/art/style_tests/ART-OVERHAUL-001/D/review/D_routes_night.png) · [events](https://raw.githubusercontent.com/joshj1108/CrowCreekHollow/0892034b7ddb7c84bd48db02c5a2a720aac3d092/art/style_tests/ART-OVERHAUL-001/D/review/D_events.png) · [cohesion](https://raw.githubusercontent.com/joshj1108/CrowCreekHollow/0892034b7ddb7c84bd48db02c5a2a720aac3d092/art/style_tests/ART-OVERHAUL-001/D/review/D_cohesion.png)
+  - Gameplay view at half size (`tools/capture.gd`). The weather is random for each shot, so BEFORE and AFTER can differ in rain or fog.
+- **Cave interior (already reported, commit `ae0cb68`):** floor variants, denser dressing on long faces, iron rust lifted, fewer and smaller front stones, camera margin so the exit steps clear the hotbar. It is in the cohesion sheet with lantern 1.
+- **Treks (Stage D):**
+  - **Ground by route, on the dual grid:** the *misty forest* (mossy loam, autumn leaves, warm brown trail) for the edge, the mill's marked way, the chapel and the post; the *overgrown pasture* (olive meadow, muddy cart track) for the orchard's marked way; the *dark hollow* (black moss, dim grey path) for the dark trail and the grove route.
+  - **Wood:** every wood tile gets a tree. Firs, autumn maples and dead snags; gone-wild apples in the pasture; gnarled old-growth trees in the hollow. The farm's own `src_fir` and `src_maple` stand deep in the wood, so the farm and the trek share a tree family. Trees darken and cool by depth (the VIS-002 idea), and the ground under the wood is shaded. Where a tree would hang over open ground, the tile gets undergrowth instead (ferns, brambles, stones, fences, roots), down to one-tile stumps.
+  - **Readability rule (checked):** no tree or undergrowth reaches more than 3 art px over the trail, an exit or an event's tiles, or 5 px over open ground.
+  - **Detail and atmosphere:** flat detail on open ground, a stepped shadow where it meets the trees, and two drifting fog layers (thicker in the hollow).
+  - **Events and destinations as sprites, in their old places:** fallen trunk (a shorter one where the long one would cover the trail); creek water with reeds and wet stones in the flood, plus a plank footbridge once it is built; fingerpost (marked arm shown when readable); small crow-skull cairn; hollow tree with something pale in its hole; fog billows; stile and split-rail fence; mill in straight-on view with a lit window and a turning wheel; chapel (door lit by night); drowned orchard; grove (worn ring path, old-growth trees, standing stones).
+  - **Concept mapping:** Misty Forest Trail → edge, mill, chapel, post. Creek Crossing → the flood and the footbridge. Overgrown Pasture → orchard. Moonlit Hollow → dark trail and grove (no crystals, no glow).
+  - **Files and spend:** `art/farm/trek/`, built by `tools/aoh_trek.py`. Every job (7 tilesets, 25 image jobs, 355 generations) is recorded with its ids, prompts and keep or reject reasons under `ART-OVERHAUL-001/D` in `pixellab-assets.json`. Stage B pieces are reused as undergrowth.
+  - **VIS-002 preview:** removed from the working tree (still in `stash@{0}`). Production loads nothing from `art/style_tests/`. The sunset preview in `main.gd`/`grade.gdshader` is untouched and uncommitted.
+- **Consistency pass (Step 4):** one fix, the trek trees were half the farm's tree scale; the farm's tall fir and maple now mix in. Palette (Stage B palette plus autumn and creek colours), outline weight and straight-on view match. The mill and chapel were regenerated straight-on (the first candidates were angled), and at 64 px so they fit the destination rows under the map's top edge.
+- **Gameplay preserved:** routes, `CLEARINGS`, events, blocking, the tall one, dogs, oil, pay, trail works, walkers, saves, weather, day/night, trek `_tint` and the east gate are unchanged. `aoh_trek_check` confirms the blocking grid is identical after the art builds.
+- **Tests:**
+  - `tools/aoh_trek_check.gd` (new): 381 route/trail/clearing/event cases, 0 failures. Slowest build 30.6 ms, once per clearing; every wood tile is covered; no reach violations.
+  - `menu_test` 752 PASS; `layout_test` 67 PASS; `save_test` 0 failures (slot 9); `aoh_cave_check` 0 failures.
+  - `balance_sim` engaged, 40 days: output identical with `TREK_ART_V2` on and off.
+- **Remaining high-priority issues:**
+  1. The destinations (mill, chapel) read dark under the trek gloom and heavy weather. They are a smaller payoff than the old pale code shapes. A modest tint lift or a lit detail is a candidate fix.
+  2. The trees are autumn in every season.
+  3. The walkers, dogs and built trail works (other than the footbridge) are still code-drawn.
+  4. The rope across the flood is still a drawn line.
+  5. The deep wood is busy at gameplay scale. A lower tree density deep in, or darker deep tints, is worth judging on the sheets.
