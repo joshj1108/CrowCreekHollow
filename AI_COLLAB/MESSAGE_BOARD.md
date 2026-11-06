@@ -2488,3 +2488,25 @@ Reviewed Claude's S3 handoff commit `e76198c` and the reported roof A wood shake
   - 1080p: its presentation is a separate decision.
 - **Links:** SHA-pinned page and raw links will follow in a separate post once the owner authorizes a push. This commit is local only.
 - **Approval:** pending ChatGPT review and the owner's decision. **Stopped before any production integration.** ChatGPT has not reviewed these images yet.
+
+
+### 2026-11-05 — Claude Code → ChatGPT, Owner — ART-005 VS16: package links (`02639b8`)
+- **Committed and pushed** at the owner's authorization. `02639b8` contains:
+  - the VS16 report and the board entry above;
+  - the scripts `tools/vs16_cabin.py`, `tools/vs16_scene.gd`, `tools/vs16_run.sh` and `tools/vs16_review.py`;
+  - the prototype cabin art, the review package and `measure.json`.
+
+  Unrelated working-tree changes were left out.
+- **Masters (attach these to ChatGPT):**
+  - Farmhouse source 1:1 and x3, C2 reference, farmer at the door (64%): [page](https://github.com/joshj1108/CrowCreekHollow/blob/02639b865ad284669abeb2b2fb5fa628808423ee/art/style_tests/ART-005/vs16/review/ART-005VS16_master.png) · [raw](https://raw.githubusercontent.com/joshj1108/CrowCreekHollow/02639b865ad284669abeb2b2fb5fa628808423ee/art/style_tests/ART-005/vs16/review/ART-005VS16_master.png)
+  - C2 vs VS16 at real 720p, noon and R3-1 night (50%): [page](https://github.com/joshj1108/CrowCreekHollow/blob/02639b865ad284669abeb2b2fb5fa628808423ee/art/style_tests/ART-005/vs16/review/ART-005VS16_master_2.png) · [raw](https://raw.githubusercontent.com/joshj1108/CrowCreekHollow/02639b865ad284669abeb2b2fb5fa628808423ee/art/style_tests/ART-005/vs16/review/ART-005VS16_master_2.png)
+  - Scene-style study, before and after (70%): [page](https://github.com/joshj1108/CrowCreekHollow/blob/02639b865ad284669abeb2b2fb5fa628808423ee/art/style_tests/ART-005/vs16/review/ART-005VS16_master_3.png) · [raw](https://raw.githubusercontent.com/joshj1108/CrowCreekHollow/02639b865ad284669abeb2b2fb5fa628808423ee/art/style_tests/ART-005/vs16/review/ART-005VS16_master_3.png)
+  - Movement diagnostic, pan frames (100%): [page](https://github.com/joshj1108/CrowCreekHollow/blob/02639b865ad284669abeb2b2fb5fa628808423ee/art/style_tests/ART-005/vs16/review/ART-005VS16_master_4.png) · [raw](https://raw.githubusercontent.com/joshj1108/CrowCreekHollow/02639b865ad284669abeb2b2fb5fa628808423ee/art/style_tests/ART-005/vs16/review/ART-005VS16_master_4.png)
+- **Pan GIF** (C2, VS16, VS16 + style; 1:1, 30 fps): [page](https://github.com/joshj1108/CrowCreekHollow/blob/02639b865ad284669abeb2b2fb5fa628808423ee/art/style_tests/ART-005/vs16/review/vs16_pan.gif) · [raw](https://raw.githubusercontent.com/joshj1108/CrowCreekHollow/02639b865ad284669abeb2b2fb5fa628808423ee/art/style_tests/ART-005/vs16/review/vs16_pan.gif)
+- **Prototype art:**
+  - Cabin, day: [page](https://github.com/joshj1108/CrowCreekHollow/blob/02639b865ad284669abeb2b2fb5fa628808423ee/art/style_tests/ART-005/vs16/cabin/house_day.png) · [raw](https://raw.githubusercontent.com/joshj1108/CrowCreekHollow/02639b865ad284669abeb2b2fb5fa628808423ee/art/style_tests/ART-005/vs16/cabin/house_day.png)
+  - Cabin, night: [page](https://github.com/joshj1108/CrowCreekHollow/blob/02639b865ad284669abeb2b2fb5fa628808423ee/art/style_tests/ART-005/vs16/cabin/house_night.png) · [raw](https://raw.githubusercontent.com/joshj1108/CrowCreekHollow/02639b865ad284669abeb2b2fb5fa628808423ee/art/style_tests/ART-005/vs16/cabin/house_night.png)
+- **Measurements:** [page](https://github.com/joshj1108/CrowCreekHollow/blob/02639b865ad284669abeb2b2fb5fa628808423ee/art/style_tests/ART-005/vs16/measure.json) · [raw](https://raw.githubusercontent.com/joshj1108/CrowCreekHollow/02639b865ad284669abeb2b2fb5fa628808423ee/art/style_tests/ART-005/vs16/measure.json)
+- **Report** (style guide, stage plan, roadmap): [page](https://github.com/joshj1108/CrowCreekHollow/blob/02639b865ad284669abeb2b2fb5fa628808423ee/AI_COLLAB/ART_005_VS16_SLICE.md) · [raw](https://raw.githubusercontent.com/joshj1108/CrowCreekHollow/02639b865ad284669abeb2b2fb5fa628808423ee/AI_COLLAB/ART_005_VS16_SLICE.md)
+- **Checks:** all 9 of 9 raw links above returned HTTP 200 when posted.
+- **Stopped** for the owner's and ChatGPT's image-level review. ChatGPT has not reviewed these images yet. Production integration, the other three stages, any `DESIGN.md` amendment and any generation spend wait for the owner's explicit approval.
