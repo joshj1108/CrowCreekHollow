@@ -2788,3 +2788,30 @@ Read the latest ENV-001 review and NW cave feedback in this board and DESIGN.md.
 ### 2026-11-06 — Claude Code → ChatGPT, Owner — FARM-001 catch-up report
 - **Read:** `AI_COLLAB/FARM_001_REPORT.md`. It covers the whole of FARM-001: what was asked, the owner's decisions A-D and the follow-up, the five commits (`efd4b4a`, `ec8dc4e`, `97f5a3f`, `868c836`, `424a66c`), how the concept farm now runs in the real game, the test and balance results, the review questions for `FARM-001_master.png`, and the known gaps.
 - **Status:** review requested. The owner attaches the master PNG for the image review; no ChatGPT review is recorded yet.
+
+
+### 2026-11-06 — Claude Code → ChatGPT, Owner — FARM-001R — Visual review package: refinements after ChatGPT's FARM-001 review
+- **Status:** review requested. The owner pasted ChatGPT's FARM-001 feedback (conditional approval, four priorities). This entry answers it.
+- **Commit:** `302cde0` (code, art and images); BEFORE = `5b67056` (FARM-001 as reviewed); AFTER = `302cde0`. The owner asked for an AFTER-only sheet; the package pairs each AFTER with a BEFORE as well, so the comparison with FARM-001 is in the same image.
+- **What changed:**
+  1. **Cave (priority 1):** the mouth is now `art/farm/concept/cave_mouth_natural.png`. The timber frame is gone (its planks are recoloured to the hill's stone), and the opening is wider and uneven, with a crown off-centre like a split in the rock. Inside, it goes from a shadowed overhang to black, and a floor slopes down into the dark. It has a mossy lip, six hanging roots and ferns at its foot, and the stone face is set back, darkest close to the opening. A ground fringe (`hill_foot.png`) of moss, roots and fallen leaves, plus ferns standing over the rocks' foot, softens the line between the hill and the clearing, and a dithered shadow lies just outside the mouth. There are no crystals, glow or gems. The collision, the transition and its tile (11,8) are unchanged.
+  2. **Fallow fields (priority 2):** `f2_fallow_a/b/d.png` replace the flat dark `FALLOW_TINT`. They have grass in soft patches (thickest at the rim), tufts and old stubble on grey-brown soil that keeps the furrows' shading, and a ragged, broken edge into the meadow. Open fields, crops and watered soil are unchanged.
+  3. **Dusk (priority 3):** the farm's evening now runs by the clock (`EVENING` in `scripts/farm_scenery.gd`): golden from 16:30, amber and dimmer at sunset (19:00), rose to lilac after 19:30, and blue twilight by 20:30. It then blends into the R3-1 night tint as darkness completes. There is extra grade warmth at the golden hour and extra shadow coolness in the twilight. Measured mean brightness of the porch view (R channel, scene area) from 17:00 to 21:30 was 59, 60, 52, 34, 29 BEFORE and 57, 52, 40, 27, 29 AFTER. The night at 21:30 is the same. This is colour and grade only: `darkness`, lamps, sanity and the night's events are untouched, and the restored house's night relief scales the evening down as before.
+  4. **Rain (priority 4):** the weather haze is lighter (`0.36, 0.4, 0.46`), rain's and downpour's haze and edge are a little weaker, and on the farm there's a daytime exposure lift of 0.06 in rain, snow and fog. Mean brightness of the rainy fields view at 15:00 went from about 45 to about 51. Under cloud, the evening keeps its dimming but loses most of its colour.
+- **How:** all the art is made by `tools/farm001r_art.py` from the existing `cave_mouth`, hillside and F2 field sprites. There was no generation and nothing was bought. The layout, object positions and gameplay are unchanged.
+- **Tests:** `layout_test`, `menu_test` and `save_test` all passed with 0 failures. While running `save_test`, a script error appeared: `farm_scenery._light` read the grade's saturation before it was set in headless runs. That line came from FARM-001, and it now falls back to 0.62.
+- **What to judge:** does the cave read as a natural, ominous cavern set into the hill? Do the fallow fields read as locked but organic, and clearly unlike the open field? Does 17:00 → 21:30 now progress, and is 19:30 readable? Is the rain readable but still moody?
+- **Master sheet (attach this to ChatGPT; sheets at 72%):** [page](https://github.com/joshj1108/CrowCreekHollow/blob/302cde0f51e09c3ae7ae13a5b0b13bfcefaccf7d/art/style_tests/FARM-001R/review/FARM-001R_master.png) · [raw](https://raw.githubusercontent.com/joshj1108/CrowCreekHollow/302cde0f51e09c3ae7ae13a5b0b13bfcefaccf7d/art/style_tests/FARM-001R/review/FARM-001R_master.png)
+- **Images:**
+  - Cave, fields and rain: [page](https://github.com/joshj1108/CrowCreekHollow/blob/302cde0f51e09c3ae7ae13a5b0b13bfcefaccf7d/art/style_tests/FARM-001R/review/cave_fields.png) · [raw](https://raw.githubusercontent.com/joshj1108/CrowCreekHollow/302cde0f51e09c3ae7ae13a5b0b13bfcefaccf7d/art/style_tests/FARM-001R/review/cave_fields.png)
+  - Afternoon to night: [page](https://github.com/joshj1108/CrowCreekHollow/blob/302cde0f51e09c3ae7ae13a5b0b13bfcefaccf7d/art/style_tests/FARM-001R/review/evening.png) · [raw](https://raw.githubusercontent.com/joshj1108/CrowCreekHollow/302cde0f51e09c3ae7ae13a5b0b13bfcefaccf7d/art/style_tests/FARM-001R/review/evening.png)
+- **Motion:** nothing new moves. Rain motion is unchanged, so check in play that rain still feels heavy.
+- **Limitations:**
+  - The captures are half size, so the roots and ferns are small; they show more clearly in play.
+  - The camera's framing differs slightly between BEFORE and AFTER runs in some porch rows, and the HUD's opening weather line is random. Lighting is forced the same in both.
+  - The cave mouth is still the old 64×48 footprint.
+  - The evening keys are a first pass and easy to tune.
+  - The fallow edge uses an ordered dither that may read as cross-hatching up close.
+  - Trek visuals weren't captured; only the rain haze change reaches them.
+- **Scenarios left out:** a trek (only the shared rain haze reaches it) and fog at night (unchanged path).
+- **Approval:** pending ChatGPT review and the owner's decision. The three raw links returned HTTP 200 when posted.
