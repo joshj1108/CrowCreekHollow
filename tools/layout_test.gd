@@ -256,6 +256,20 @@ func _place_checks() -> void:
 		m._leave_cave()
 		await process_frame
 		_check("leaving the cave lands on the approach", not m.in_cave and m._player_tile() == mouth + Vector2i.DOWN, str(m._player_tile() - B))
+	# ART-OVERHAUL-001 B-5: the new cave exterior is art only. The way in is still the C tile at (11, 8): walking
+	# north from (11, 9) enters the cave, and leaving puts the farmer back on (11, 9).
+	_check("cave art: the mouth is still the C tile at (11, 8)", mouth == _w(11, 8) and m._kind_at(_w(11, 8)) == m.Tile.CAVE_MOUTH, str(mouth - B))
+	_check("cave art: (11, 9) below it is walkable", _walkable(_w(11, 9)))
+	_stand(_w(11, 9), Vector2.UP)
+	await process_frame
+	await _steer(m._tile_center(_w(11, 8).x, _w(11, 8).y) + Vector2(0, -m.PX * 0.2), 60)
+	for i in 5:
+		await process_frame
+	_check("cave art: walking north from (11, 9) onto (11, 8) enters the cave", m.in_cave)
+	if m.in_cave:
+		m._leave_cave()
+		await process_frame
+		_check("cave art: leaving the cave puts the farmer back on (11, 9)", not m.in_cave and m._player_tile() == _w(11, 9), str(m._player_tile() - B))
 	# The house.
 	_stand(_porch_front(), Vector2.UP)
 	await _steer(m._tile_center(_porch_front().x, _porch_front().y - 1), 60)

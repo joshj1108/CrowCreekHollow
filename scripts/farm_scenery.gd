@@ -13,6 +13,12 @@ extends Node2D
 # Grove trees hide while felled. Nothing here blocks: collision is the map's.
 
 const DIR := "res://art/farm/concept/"
+# ART-OVERHAUL-001 Stage B: the north-west cave exterior (a cliff of rock strata with a recessed mouth, its mossy
+# lip, rubble and undergrowth), made by tools/aoh_cave_ext.py into art/farm/cave_ext/. On, it replaces the
+# FARM-001R cave pieces of scenery.json (the five hillside mounds, the mouth, the hill-foot fringe and its ferns).
+# Off, the farm is the FARM-001R picture. Art only: the C tile, collision and the cave's way in are unchanged.
+const CAVE_EXT_V2 := true
+const CAVE_EXT := "res://art/farm/cave_ext/pieces.json"
 # The reviewed R3-1 night (ART-003 Round 3, chosen 2026-11-02): a lighter night tint and its colour grade.
 const NIGHT_TINT := Color("8592b8")
 const NIGHT_GRADE := {"saturation": 0.7, "exposure": 1.0, "contrast": 1.12, "shadow_cool": 0.07, "vignette": 0.62, "warmth": 0.06}
@@ -85,6 +91,9 @@ func build() -> void:
 	for g in m.GROVE_SPOTS:
 		grove_tiles[Vector2i(g)] = true
 	var list: Array = data["sprites"]
+	if CAVE_EXT_V2:
+		list = list.filter(func(r) -> bool: return not _old_cave(r))
+		list.append_array(JSON.parse_string(FileAccess.get_file_as_string(CAVE_EXT))["sprites"])
 	list.sort_custom(func(a, b) -> bool: return float(a["b"]) < float(b["b"]))
 	var last_forest: Dictionary = {}
 	for r in list:
@@ -140,6 +149,12 @@ func build() -> void:
 		if (p[0] as Sprite2D).z_index != 100:
 			(p[0] as Sprite2D).z_index = 1
 	front_from = 0
+
+
+# The FARM-001R cave pieces that CAVE_EXT_V2 replaces.
+func _old_cave(r: Dictionary) -> bool:
+	var t := str(r["t"])
+	return t.ends_with("hillside.png") or t == "cave_mouth_natural.png" or t == "hill_foot.png" 		or (bool(r.get("farm001r", false)) and t.begins_with("fern_"))
 
 
 # The house's window lights and the porch lamp, placed on the P1 cabin as the concept placed them.
