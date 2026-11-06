@@ -2959,3 +2959,26 @@ Read the latest ENV-001 review and NW cave feedback in this board and DESIGN.md.
   - The steps sit at the cave's bottom edge, partly behind the hotbar, as the old steps did.
   - The weather word in the HUD differs between captures (the game's own new-game roll); weather doesn't reach the cave.
 - **Approval:** pending ChatGPT's image-level review and the owner's decision. Stage D waits for Stage C's approval.
+
+### 2026-11-06 — Claude Code → ChatGPT, Owner — Owner's lighting directions: dark nights, lanterns that reach farther (not brighter)
+- **Status:** done at the owner's direction and pushed; image-level review welcome.
+- **Commit:** `7339ccfad6a894906b51e9d26dd3c7a8dee8809b`.
+- **Owner's directions:**
+  1. Lantern upgrades should widen the light, not brighten it; the Tin Lantern is as bright as it should go.
+  2. The farm was far too bright at night; little should show outside the lantern.
+- **Lanterns:** every tier now keeps the Tin Lantern's centre (full at the player, half strength at 1.25 tiles), then fades more gently out to its own ring (2.5, 4 and 6 tiles). This is `_lantern_texture` in `main.gd`, one gradient per radius. Before, a bigger radius stretched the bright centre too, so the Hollow Lantern was up to 50% brighter near the farmer. The Tin Lantern is unchanged.
+- **Night:** the farm's night tint goes from `8592b8` (ART-003's R3-1 night of 2026-11-02) to `1a1f33`, and the night grade keeps the day's exposure (0.84, was 1.0). Away from any light the ground is about a quarter of its old brightness.
+  - Lights add to the tint, so outdoor lights burn up to `NIGHT_LIGHT_BOOST` (2.2) times stronger as the farm's night falls. That covers the lantern, the windows and porch lamp, lamp posts and a visitor's eye glow.
+  - Measured on the ground, the Tin Lantern's centre is within about 10% of before, and its pool now fades into real dark.
+- **Unchanged:** the darkness value that drives sanity, night events and lamps; the cave; treks.
+- **Tests:** `menu_test` 752 PASS, `layout_test` 67 PASS, `save_test` 0 failures. The committed `main.gd` was also tested on its own, without the uncommitted VIS-002 preview.
+- **Masters (attach to ChatGPT):**
+  - Night, no lantern / Tin / Hollow (83%): [page](https://github.com/joshj1108/CrowCreekHollow/blob/7339ccfad6a894906b51e9d26dd3c7a8dee8809b/art/style_tests/NIGHT-DARK/review/NIGHT-DARK_master.png) · [raw](https://raw.githubusercontent.com/joshj1108/CrowCreekHollow/7339ccfad6a894906b51e9d26dd3c7a8dee8809b/art/style_tests/NIGHT-DARK/review/NIGHT-DARK_master.png)
+  - Night at the restored house, a visitor's night, late dusk (83%): [page](https://github.com/joshj1108/CrowCreekHollow/blob/7339ccfad6a894906b51e9d26dd3c7a8dee8809b/art/style_tests/NIGHT-DARK/review/NIGHT-DARK_master_2.png) · [raw](https://raw.githubusercontent.com/joshj1108/CrowCreekHollow/7339ccfad6a894906b51e9d26dd3c7a8dee8809b/art/style_tests/NIGHT-DARK/review/NIGHT-DARK_master_2.png)
+  - Lantern tiers in the cave (71%): [page](https://github.com/joshj1108/CrowCreekHollow/blob/7339ccfad6a894906b51e9d26dd3c7a8dee8809b/art/style_tests/LANTERN-RADIUS/review/LANTERN-RADIUS_master.png) · [raw](https://raw.githubusercontent.com/joshj1108/CrowCreekHollow/7339ccfad6a894906b51e9d26dd3c7a8dee8809b/art/style_tests/LANTERN-RADIUS/review/LANTERN-RADIUS_master.png)
+  - Lantern tiers on the farm (100%): [page](https://github.com/joshj1108/CrowCreekHollow/blob/7339ccfad6a894906b51e9d26dd3c7a8dee8809b/art/style_tests/LANTERN-RADIUS/review/LANTERN-RADIUS_master_2.png) · [raw](https://raw.githubusercontent.com/joshj1108/CrowCreekHollow/7339ccfad6a894906b51e9d26dd3c7a8dee8809b/art/style_tests/LANTERN-RADIUS/review/LANTERN-RADIUS_master_2.png)
+- **Known issues:**
+  - By 20:30 the farm is already nearly as dark as midnight. The fade timing is unchanged, but the drop is much bigger now.
+  - Night visitors outside a light show only by their eye glow. The visitor shot didn't frame the tall watcher (it stands by the house), so how a far figure reads is unchecked.
+  - The Hollow Lantern's outer ring is fairly dim in the cave.
+- **Approval:** the owner's call; ChatGPT's review counts once it is recorded here.
