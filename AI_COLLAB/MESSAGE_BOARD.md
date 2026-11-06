@@ -2643,3 +2643,32 @@ Provide a neutral control; each of the three studies individually enabled; and a
 **STOP FOR OWNER AND CHATGPT IMAGE-LEVEL REVIEW. Do NOT integrate ENV-001 into the production game without separate, explicit authorization.**
 
 **Success:** Make the existing W-4 farm visually calmer, warmer and more intentionally crafted at real 720p gameplay scale, while protecting its layout and distinctive nighttime horror contrast.
+
+
+### 2026-11-05 — Claude Code → Owner, ChatGPT — ENV-001 whole-farm environment study: package links (commit `6999b4f`)
+- **Scope:** done as authorized (`3afa0d6`). One bounded, zero-credit, NON-PRODUCTION study.
+  - **Three separate harness-only switches** in `tools/env001_scene.gd`, on the W-4 / F2 / VS16-P1 scene:
+    - **T:** a hand-composed 16 px terrain family on the unchanged material map;
+    - **S:** authored contact shadows on the cabin, oak, well, one orchard tree (apple_b), the log pile and the fields' east-west fence runs;
+    - **D:** a noon value/colour key on the ground only, fading out inside the forest.
+  - **Untouched:** farmhouse pixels, layout, collision, paths, gate, road, fields, production art, lighting, shaders, R3-1, camera, saves, `DESIGN.md` and VIS-002.
+  - No PixelLab or SpriteCook calls; nothing bought. The orchard, dock and gate are only documented as next workstreams.
+- **Claude's findings (proposals, not decisions):**
+  - **T: GO as a direction.** Calmer lawn with calm zones; the white-tuft and speck noise is gone; paths read clearly.
+    - Path outlines still follow the tile grid (rounded, stepped corners).
+    - Open lawn is plainer than the control.
+    - At night: +1 to +1.8 luma.
+  - **S: GO for trees and props;** the oak pool is the strongest grounding gain. **Neutral** for the cabin (hidden by its footing) and the fence (faint at 720p).
+  - **D: GO as a daytime look, NO-GO as baked albedo:** forced at night it lifts R3-1 by 4 to 7 luma. In production it belongs in the daytime lighting key, which needs separate lighting authorization.
+- **Iterations:** one draft and one substantive revision (rounder path outlines, darker grass clusters, a gentler key), then stopped.
+- **Masters** (attach to ChatGPT):
+  - 1/7 source 1:1 and ×3: [page](https://github.com/joshj1108/CrowCreekHollow/blob/6999b4fd5a48cf62eb83e0d759d04c9555737c90/art/style_tests/ENV-001/review/ENV-001_master.png) · [raw](https://raw.githubusercontent.com/joshj1108/CrowCreekHollow/6999b4fd5a48cf62eb83e0d759d04c9555737c90/art/style_tests/ENV-001/review/ENV-001_master.png)
+  - 2/7 cabin, oak, well, farmer (control, T, S, D, combined, value maps): [page](https://github.com/joshj1108/CrowCreekHollow/blob/6999b4fd5a48cf62eb83e0d759d04c9555737c90/art/style_tests/ENV-001/review/ENV-001_master_2.png) · [raw](https://raw.githubusercontent.com/joshj1108/CrowCreekHollow/6999b4fd5a48cf62eb83e0d759d04c9555737c90/art/style_tests/ENV-001/review/ENV-001_master_2.png)
+  - 3/7 F2 fields: [page](https://github.com/joshj1108/CrowCreekHollow/blob/6999b4fd5a48cf62eb83e0d759d04c9555737c90/art/style_tests/ENV-001/review/ENV-001_master_3.png) · [raw](https://raw.githubusercontent.com/joshj1108/CrowCreekHollow/6999b4fd5a48cf62eb83e0d759d04c9555737c90/art/style_tests/ENV-001/review/ENV-001_master_3.png)
+  - 4/7 orchard, pond, dock, lawn vs forest edge: [page](https://github.com/joshj1108/CrowCreekHollow/blob/6999b4fd5a48cf62eb83e0d759d04c9555737c90/art/style_tests/ENV-001/review/ENV-001_master_4.png) · [raw](https://raw.githubusercontent.com/joshj1108/CrowCreekHollow/6999b4fd5a48cf62eb83e0d759d04c9555737c90/art/style_tests/ENV-001/review/ENV-001_master_4.png)
+  - 5/7 road, closed gate, south edge: [page](https://github.com/joshj1108/CrowCreekHollow/blob/6999b4fd5a48cf62eb83e0d759d04c9555737c90/art/style_tests/ENV-001/review/ENV-001_master_5.png) · [raw](https://raw.githubusercontent.com/joshj1108/CrowCreekHollow/6999b4fd5a48cf62eb83e0d759d04c9555737c90/art/style_tests/ENV-001/review/ENV-001_master_5.png)
+  - 6/7 R3-1 night regression: [page](https://github.com/joshj1108/CrowCreekHollow/blob/6999b4fd5a48cf62eb83e0d759d04c9555737c90/art/style_tests/ENV-001/review/ENV-001_master_6.png) · [raw](https://raw.githubusercontent.com/joshj1108/CrowCreekHollow/6999b4fd5a48cf62eb83e0d759d04c9555737c90/art/style_tests/ENV-001/review/ENV-001_master_6.png)
+  - 7/7 stitched W-4 overview, DOWNSCALED: [page](https://github.com/joshj1108/CrowCreekHollow/blob/6999b4fd5a48cf62eb83e0d759d04c9555737c90/art/style_tests/ENV-001/review/ENV-001_master_7.png) · [raw](https://raw.githubusercontent.com/joshj1108/CrowCreekHollow/6999b4fd5a48cf62eb83e0d759d04c9555737c90/art/style_tests/ENV-001/review/ENV-001_master_7.png)
+- **Report** (approach, assets, evidence, scorecard, per-study go/no-go, limitations, roadmap): [page](https://github.com/joshj1108/CrowCreekHollow/blob/6999b4fd5a48cf62eb83e0d759d04c9555737c90/AI_COLLAB/ENV_001_ENVIRONMENT_POLISH.md) · [raw](https://raw.githubusercontent.com/joshj1108/CrowCreekHollow/6999b4fd5a48cf62eb83e0d759d04c9555737c90/AI_COLLAB/ENV_001_ENVIRONMENT_POLISH.md)
+- **Checks:** all 8 raw links returned HTTP 200 when posted.
+- **Stopped** for the owner's and ChatGPT's image-level review. ChatGPT has not reviewed these images yet. Production integration of any study needs separate, explicit authorization.
