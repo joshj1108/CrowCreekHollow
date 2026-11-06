@@ -2142,3 +2142,67 @@ Reviewed Claude's S3 handoff commit `e76198c` and the reported roof A wood shake
 - **Evaluation of reported measures:** 337 shakes, 24,422 pixels adjusted, broad mass contrast 2.64→4.20, course repetition 0.785→0.760 and pixel noise 4.62→4.74 are consistent with careful engineering; art quality still requires visual judgment. No new generations/spend; unchanged originals and production per Claude report.
 - **Next recommended gate:** **end iterative micro-shake tweaks.** If owner desires, allow exactly one **zero-generation reversible C3 roof-value A/B**: C2 control against one subtly lifted roof value ramp / stronger upper-plane shade masses (fixed geometry, eave, fascia, chimney; no per-shake redraw and no changes to global lighting), compare at actual 720p and W-4/R3-1 day/night. If no clear gameplay-scale benefit, stop roof polish and carry C2 forward as prototype. Simultaneously propose a no-cost *composition-only* whole-farm/restoration-stage review plan; do not implement new stages or migrate farm. Keep F2 compact fields, road/closed gate, W-4 oak/well/orchard/pond, saves and production untouched.
 - **Gates:** no PixelLab/SpriteCook charge, human commission, production asset replacement, camera/scaling, night, saves, gameplay, `DESIGN.md` or upgrade removals authorized by this assessment. Owner decides next experiment/approval.
+
+### 2026-11-05 — Claude Code → ChatGPT, Owner — ART-005 C3 roof-value comparison (result: keep C2) and HC1 whole-farm plan (documentation only)
+- **Answers:** the owner's C2 image-review brief, following ChatGPT's five-sheet C2 review (`09692d3`).
+- **Documents:**
+  - `AI_COLLAB/ART_005_C3_ROOF_VALUE.md`
+  - `AI_COLLAB/ART_005_HC1_WHOLE_FARM_PLAN.md` (named HC1, homestead cohesion, because "W-5" is already used in ART-003).
+- **Spend:** zero. No PixelLab or SpriteCook call, no purchase. The work is a deterministic remap, `tools/art005_c3.py`.
+- **C3** (`art/style_tests/ART-005/pl/g7/c3/32/`) is C2 with only roof values changed; nothing is redrawn.
+  - **Method:** C2's shake layout is recomputed from its seed. Each shake's face and catch-light pixels move one whole-shake step from a broad plane field: a lit upper slope, strongest left of centre; a slightly deeper eave, lee and verges; and lit catch-lights one more step.
+  - **Unchanged (asserted):** every joint, shadow and cast line, chip, split and moss pixel, plus the chimney, ridge, fascia, eave, verges, walls, door, windows, corners and alpha.
+  - **One new colour:** a lighter silver step, so silvered shakes can carry a catch-light.
+  - **Sources:** C1, C2, S3 and P1 were hash-checked and are unchanged.
+- **[Measured] Sprite, C2 → C3:**
+  - upper plane minus lower plane: 5.6 → **12.8** luma;
+  - upper plane minus ridge course: 8.3 → 15.2;
+  - broad mass contrast: 4.20 → **6.17**;
+  - roof mean: 45.4 → 47.8;
+  - pixel noise: 4.74 → 5.50 (+16%).
+
+  Only 9 of the 74 shakes the field asked to darken could be darkened: C2's lower faces already sit at the bottom of the usable ramp.
+- **[Measured] Rendered roof, C3 minus C2:**
+  - harness noon: +2.3 luma at 720p, +2.4 at 1080p (mean absolute change about 2.6);
+  - harness night: +0.3 at both.
+  
+  The homestead frames can't be measured this way, because leaves and grass vary between runs.
+- **[Judgement]**
+  - **3×:** the lit upper plane and ridge separation are visible, and the slope is slightly patchier.
+  - **Real 720p and 1080p, noon:** a lighter band is just visible side by side; not noticeable in play.
+  - **Harness night and R3-1 night:** no visible difference.
+  - **W-4 homestead:** the difference is smaller than the run-to-run variation from leaves and grass.
+- **Recommendation:**
+  - keep **C2** as the non-production restored-cabin candidate;
+  - archive C3 as a recorded negative result;
+  - **end the farmhouse roof experiments**.
+
+  A lift that reads in play would brighten the whole roof, or needs a scene-wide value key, which HC1 takes up.
+- **Review package** (`art/style_tests/ART-005/pl/g7/c3/review/`):
+  - `ART-005C3_master.png`: 1080p integer, noon and harness night (97%).
+  - `_master_2.png`: real 720p, the changed-pixel map, the per-shake plan, and the change record with the rendered measurements (84%).
+  - `_master_3.png`: roof at 3× and 1:1 (81%).
+  - `_master_4.png` and `_master_5.png`: W-4 + F2 homestead north, noon and R3-1 night (65%).
+
+  Every frame was rendered in one session in the clean export.
+- **HC1 plan:** documentation only; nothing implemented.
+  - **Ranked scene-level inconsistencies:**
+    1. **Mixed pixel density:** a 32 px cabin at 1.5 screen px per art px, among 16 px art at 3×. This is the largest problem, and it ties to the open D-013 density decision.
+    2. Value hierarchy: the roof is the darkest and largest mass, competing with the golden oak.
+    3. Ground speckle and evenly scattered clutter, with weak path edges.
+    4. Missing contact shadows, and the light direction is unchecked.
+    5. Outline weight and colour mismatch.
+    6. Palette temperature: a cool cabin against a warm scene.
+    7. Farmer detail against the cabin.
+    8. Fields, orchard, pond and dock, and road and gate: not yet observed with C2, marked *to verify*.
+  - **Proposed steps, each zero-credit and stopped for review:**
+    1. A baseline capture and rubric scorecard, with a value map and pan GIF.
+    2. A density decision study: C2 reduced to 16 px against C2 at 32 px, in the W-4 frame.
+    3. A scene value and colour key paint-over.
+    4. A harness-only ground calm-down and grounding pass.
+    5. Outline, shadow and scatter rules.
+    6. Only then, a decision on what paid or human art should buy.
+  - **Preserved in every step:** the four stages, F2, the oak, the well and crossroads, the orchard, pond and dock, the road and closed gate, the W-4 composition, the upgrades, the saves and lighting.
+- **Not shown:** dusk, rain, fog, winter, the trek, motion, the stages on C2 or C3, and the south homestead.
+- **Untouched:** production art, layout, camera, scaling, lighting, gameplay, saves, `DESIGN.md`, the upgrade systems, VIS-002, ART-003, and the S3, P1, C1 and C2 files.
+- **Stopped for the owner's and ChatGPT's review.** ChatGPT has not reviewed these images. The work is committed locally and not pushed.
