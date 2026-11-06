@@ -1,0 +1,138 @@
+{
+ "home": {
+  "ctrl": {
+   "mean_luma": 51.7,
+   "busy": 0.2031
+  },
+  "terrain": {
+   "mean_luma": 53.1,
+   "busy": 0.1503
+  },
+  "shadows": {
+   "mean_luma": 50.4,
+   "busy": 0.1969
+  },
+  "day": {
+   "mean_luma": 56.7,
+   "busy": 0.2412
+  },
+  "all": {
+   "mean_luma": 58.2,
+   "busy": 0.1606
+  },
+  "night_ctrl": {
+   "mean_luma": 35.0,
+   "busy": 0.1426
+  },
+  "night_ts": {
+   "mean_luma": 36.1,
+   "busy": 0.1155
+  },
+  "night_alld": {
+   "mean_luma": 40.9,
+   "busy": 0.1252
+  }
+ },
+ "fields": {
+  "ctrl": {
+   "mean_luma": 46.8,
+   "busy": 0.1387
+  },
+  "terrain": {
+   "mean_luma": 49.5,
+   "busy": 0.1113
+  },
+  "shadows": {
+   "mean_luma": 46.7,
+   "busy": 0.1403
+  },
+  "day": {
+   "mean_luma": 52.1,
+   "busy": 0.1754
+  },
+  "all": {
+   "mean_luma": 55.1,
+   "busy": 0.1272
+  },
+  "night_ctrl": {
+   "mean_luma": 28.7,
+   "busy": 0.0898
+  },
+  "night_ts": {
+   "mean_luma": 30.5,
+   "busy": 0.0736
+  },
+  "night_alld": {
+   "mean_luma": 35.1,
+   "busy": 0.0861
+  }
+ },
+ "orchard": {
+  "ctrl": {
+   "mean_luma": 45.3,
+   "busy": 0.1564
+  },
+  "terrain": {
+   "mean_luma": 47.1,
+   "busy": 0.0848
+  },
+  "shadows": {
+   "mean_luma": 45.1,
+   "busy": 0.1525
+  },
+  "day": {
+   "mean_luma": 52.2,
+   "busy": 0.2112
+  },
+  "all": {
+   "mean_luma": 55.5,
+   "busy": 0.1022
+  },
+  "night_ctrl": {
+   "mean_luma": 25.5,
+   "busy": 0.0793
+  },
+  "night_ts": {
+   "mean_luma": 26.7,
+   "busy": 0.0503
+  },
+  "night_alld": {
+   "mean_luma": 32.5,
+   "busy": 0.0612
+  }
+ },
+ "gate": {
+  "ctrl": {
+   "mean_luma": 33.4,
+   "busy": 0.1291
+  },
+  "terrain": {
+   "mean_luma": 34.6,
+   "busy": 0.1014
+  },
+  "shadows": {
+   "mean_luma": 33.1,
+   "busy": 0.1273
+  },
+  "day": {
+   "mean_luma": 37.3,
+   "busy": 0.1523
+  },
+  "all": {
+   "mean_luma": 39.6,
+   "busy": 0.1171
+  },
+  "night_ctrl": {
+   "mean_luma": 16.8,
+   "busy": 0.0523
+  },
+  "night_ts": {
+   "mean_luma": 17.8,
+   "busy": 0.0393
+  },
+  "night_alld": {
+   "mean_luma": 21.3,
+   "busy": 0.0516
+  }
+ }
+}

@@ -1,0 +1,44 @@
+{
+ "cabin": {
+  "pad": [
+   2,
+   0
+  ],
+  "note": "contact under the footing and steps; cast band below; wedge east"
+ },
+ "well": {
+  "pad": [
+   2,
+   0
+  ],
+  "note": "contact under the ring; oval cast to the lower right"
+ },
+ "oak": {
+  "pad": [
+   8,
+   0
+  ],
+  "note": "dappled crown pool right of the trunk; contact under trunk and roots"
+ },
+ "apple_b": {
+  "pad": [
+   4,
+   0
+  ],
+  "note": "small dappled pool; contact under the trunk"
+ },
+ "logpile_flip": {
+  "pad": [
+   1,
+   0
+  ],
+  "note": "contact under the bottom logs; short wedge"
+ },
+ "fence": {
+  "pad": [
+   0,
+   0
+  ],
+  "note": "the fields' east-west fence runs: projected in the harness from each rail sprite (a pixel h rows above the base falls h/2 right and h/4 down); contact under posts"
+ }
+}
