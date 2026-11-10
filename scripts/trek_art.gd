@@ -47,6 +47,18 @@ const FOCUS_ROOM := 2
 const BACKDROP_ROWS := 4
 const LANDMARK_LIFT := Color(1.12, 1.12, 1.1)
 const CONTACT_SHADOW := Color(0.02, 0.02, 0.03, 0.38)
+# ART-OVERHAUL-001 Stage D finishing pass (ChatGPT's final Stage D review). Off restores the pass before it exactly.
+# - Trail: the ground_<g>_df.png grounds (tools/aoh_df.py): the trail's own colours lifted a little, the grass's
+#   value spread narrowed, so the way reads against the verge with the dual-grid edges unchanged.
+# - Density: wood tiles touching the trail keep their trees but take only one-tile undergrowth; flat details are
+#   rarer on the trail's verge and absent round an event or destination; the loudest flat details (pale, saturated
+#   leaf litter, DF_LOUD_VALUE) are dropped everywhere.
+# - Landmarks: the fingerpost, cairn and hollow tree get the landmarks' contact shadow, lift and dark backdrop;
+#   the mill and chapel a little more lift (DF_LIFT). No glow; the night lighting is untouched.
+const FINISH := true
+const DF_LIFT := Color(1.2, 1.19, 1.15)
+const DF_VERGE_ODDS := 0.3
+const DF_LOUD_VALUE := 70.0
 
 var ok := false
 var atlas: Texture2D
@@ -79,7 +91,10 @@ func _init() -> void:
 		return
 	atlas = load(DIR + "atlas.png")
 	for g in ["forest", "pasture", "hollow", "creek"]:
-		grounds[g] = load(DIR + "ground_%s.png" % g)
+		var path := DIR + "ground_%s.png" % g
+		if FINISH and ResourceLoader.exists(DIR + "ground_%s_df.png" % g):
+			path = DIR + "ground_%s_df.png" % g
+		grounds[g] = load(path)
 	var f := FileAccess.open(DIR + "trek.json", FileAccess.READ)
 	if f == null:
 		return
@@ -91,6 +106,8 @@ func _init() -> void:
 		pieces.append(Rect2(r[0], r[1], r[2], r[3]))
 	for k in meta["kinds"]:
 		kinds[k] = meta["kinds"][k]
+	if FINISH and atlas != null:
+		_drop_loud_decals()
 	ok = atlas != null and grounds.size() == 4
 	for n in ["walker_mill", "walker_orchard", "walker_chapel", "walker_post", "walker_grove", "dog", "tall", "stake",
 			"rope", "steps", "tins", "hut"]:
@@ -99,6 +116,31 @@ func _init() -> void:
 	for extra in [["lamp_post", LAMP_POST], ["handcart", HANDCART]]:
 		if ResourceLoader.exists(extra[1]):
 			e2[extra[0]] = load(extra[1])
+
+
+# Finishing pass: drop the flat details whose mean value stands well above the ground (the pale leaf litter).
+func _drop_loud_decals() -> void:
+	var img := atlas.get_image()
+	if img == null:
+		return
+	if img.is_compressed():
+		img.decompress()
+	for k in ["d_forest", "d_pasture", "d_hollow"]:
+		var keep: Array = []
+		for i in kinds.get(k, []):
+			var r: Rect2 = pieces[int(i)]
+			var sum := 0.0
+			var n := 0
+			for y in range(int(r.position.y), int(r.end.y)):
+				for x in range(int(r.position.x), int(r.end.x)):
+					var c := img.get_pixel(x, y)
+					if c.a > 0.0:
+						sum += (0.299 * c.r + 0.587 * c.g + 0.114 * c.b) * 255.0
+						n += 1
+			if n > 0 and sum / n <= DF_LOUD_VALUE:
+				keep.append(i)
+		if not keep.is_empty():
+			kinds[k] = keep
 
 
 static func _hash(x: int, y: int, salt: int) -> int:
@@ -244,6 +286,11 @@ func _rebuild(m, trek) -> void:
 	if spec.has("dest"):
 		var r: Rect2i = spec["dest"]
 		backdrop = Rect2i(r.position.x - 1, r.position.y - BACKDROP_ROWS, r.size.x + 2, BACKDROP_ROWS + 1)
+	var backdrops: Array = [backdrop]
+	if FINISH:
+		for t in [trek.sign_tile, trek.side_tile]:
+			if t.x >= 0:
+				backdrops.append(Rect2i(t.x - 1, t.y - 2, 3, 3))
 	_reaches = PackedInt32Array()
 	for y in m.CAVE_H:
 		for x in m.CAVE_W:
@@ -268,6 +315,8 @@ func _rebuild(m, trek) -> void:
 					if f.grow(FOCUS_ROOM).has_point(Vector2i(x, y)):
 						near = true
 						break
+				if FINISH and not near:
+					near = _by_trail(trek, x, y)
 				if got.is_empty() and not near:
 					got = _try(m, "u_" + ground, x, y, true)
 				if got.is_empty():
@@ -276,8 +325,9 @@ func _rebuild(m, trek) -> void:
 					unplaced += 1
 					continue
 				var tint: Color = DEPTH_TINTS[depth]
-				if backdrop.has_point(Vector2i(x, y)):
-					tint = DEPTH_TINTS[2]
+				for b in backdrops:
+					if b.has_point(Vector2i(x, y)):
+						tint = DEPTH_TINTS[2]
 				_upright.append([got[0], got[1], tint])
 			elif _open(k) and k != Tl.FENCE:
 				for d in [Vector2i(0, -1), Vector2i(0, 1), Vector2i(-1, 0), Vector2i(1, 0)]:
@@ -286,6 +336,12 @@ func _rebuild(m, trek) -> void:
 						_edges.append([Vector2i(x, y), d])
 				var on_trail := k != Tl.GRASS and k != Tl.FALLOW
 				var odds: float = DECAL_ODDS[ground] * (0.2 if on_trail else 1.0)
+				if FINISH:
+					if not on_trail and _by_trail(trek, x, y):
+						odds *= DF_VERGE_ODDS
+					for f in focus:
+						if f.grow(1).has_point(Vector2i(x, y)):
+							odds = 0.0
 				if float(_hash(x, y, 11) % 1000) / 1000.0 < odds:
 					var list: Array = kinds["d_" + ground]
 					var i: int = list[_hash(x, y, 13) % list.size()]
@@ -298,6 +354,15 @@ func _rebuild(m, trek) -> void:
 		var fa: float = a[1].y + pieces[a[0]].size.y
 		var fb: float = b[1].y + pieces[b[0]].size.y
 		return fa < fb if fa != fb else a[1].x < b[1].x)
+
+
+# A tile with the trail on one of its eight sides.
+func _by_trail(trek, x: int, y: int) -> bool:
+	for dy in [-1, 0, 1]:
+		for dx in [-1, 0, 1]:
+			if (dx != 0 or dy != 0) and trek._is_trail(x + dx, y + dy):
+				return true
+	return false
 
 
 # The trail works that stand in the wood: the waystation hut in the halfway clearing of a long route, and a lamp
@@ -614,7 +679,9 @@ func _event_items(m, trek, spec: Dictionary, ev: String) -> Array:
 		var sz: Vector2 = pieces[i].size
 		var at := Vector2(t.x * T + (T - sz.x) * 0.5, (t.y + 1) * T - sz.y + 1).round()
 		out.append([at.y + sz.y, func() -> void:
-			_blit(m, i, at, s)
+			if FINISH:
+				_shadow(m, at, sz, s)
+			_blit(m, i, at, s, DF_LIFT if FINISH else Color.WHITE)
 			if trek._can_read_sign() and not trek.plan.is_empty():
 				for side in 2:
 					var marked: bool = (side == 1) == bool(trek.plan["marked_right"])
@@ -630,7 +697,9 @@ func _event_items(m, trek, spec: Dictionary, ev: String) -> Array:
 		var sz: Vector2 = pieces[i].size
 		var at := _settle(m, Vector2(t.x * T + (T - sz.x) * 0.5, (t.y + 1) * T - sz.y + 1).round(), sz)
 		out.append([at.y + sz.y, func() -> void:
-			_blit(m, i, at, s)
+			if FINISH:
+				_shadow(m, at, sz, s)
+			_blit(m, i, at, s, DF_LIFT if FINISH else Color.WHITE)
 			if ev == "cairn" and trek.event_done:
 				m.draw_rect(Rect2((at + Vector2(sz.x * 0.5 - 1, sz.y - 4)) * s, Vector2(2, 2) * s), LIT)
 			elif ev == "hollow" and not trek.event_done:
@@ -715,7 +784,7 @@ func _building_item(m, trek, r: Rect2i, kind: String, s: float) -> Array:
 		at.x = base.x + 2
 	return [at.y + sz.y, func() -> void:
 		_shadow(m, at, sz, s)
-		_blit(m, i, at, s, LANDMARK_LIFT)
+		_blit(m, i, at, s, DF_LIFT if FINISH else LANDMARK_LIFT)
 		if kind == "mill":
 			m.draw_rect(Rect2((at + MILL_WINDOW.position) * s, MILL_WINDOW.size * s), LIT)
 			var wi := _first("wheel")
