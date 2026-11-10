@@ -229,28 +229,39 @@ static func build() -> Theme:
 	}, {"font_color": IVORY, "font_disabled_color": Color(BEIGE, 0.6)})
 
 	# --- Wells, cards and the footer band ---------------------------------------------------------------------
-	var well := _flat(WELL, Color(SHADOW, 0.9), 1, 8, 8)
-	well.border_width_top = 2
+	# Phase 2 final: the well reads as cut into the frame: deeper than the planks, shadowed along its top and left
+	# and caught by a faint lit lip on its bottom and right.
+	var well := _flat(Color(WELL, 0.94), Color(SHADOW, 0.95), 1, 8, 8)
+	well.border_width_top = 3
+	well.border_width_left = 2
+	# The lit lip: a 1 px copy of the box behind it, offset down and right, in walnut.
+	well.shadow_color = Color(WALNUT, 0.6)
+	well.shadow_size = 1
+	well.shadow_offset = Vector2(1, 1)
 	t.set_stylebox("panel", "ScrollContainer", well)
 	t.set_type_variation("PlainScroll", "ScrollContainer")
 	t.set_stylebox("panel", "PlainScroll", StyleBoxEmpty.new())
 	t.set_type_variation("FooterBar", "PanelContainer")
-	var foot := _flat(Color(SHADOW, 0.55), Color(BRASS, 0.7), 0, 10, 8)
-	foot.border_width_top = 1
+	# The footer band sits between the well and the frame in value: lighter than the well, darker than the planks,
+	# under a brass rule.
+	var foot := _flat(Color("1f170f", 0.78), Color(BRASS, 0.8), 0, 10, 8)
+	foot.border_width_top = 2
 	t.set_stylebox("panel", "FooterBar", foot)
 	t.set_type_variation("Card", "PanelContainer")
 	t.set_stylebox("panel", "Card", _flat(Color("1e1610"), EDGE_DIM, 1, 14, 9))
 
 	# --- Inventory slots: drawn frames (tools/make_ui_slots.py), with the focus ring over them -------------------
 	t.set_type_variation("Slot", "Button")
+	# Phase 2 final: the picked slot has a gold line set inside its iron rim; focus is a pale ivory frame with
+	# corner brackets just outside the slot (slot_focus()). The two never look alike and both show at once.
 	_set_button(t, "Slot", {"normal": slot("occupied"), "hover": slot("hover"), "pressed": slot("picked"),
-		"disabled": slot("locked"), "focus": focus_ring()}, {})
+		"disabled": slot("locked"), "focus": slot_focus()}, {})
 	t.set_type_variation("SlotSelected", "Button")
 	_set_button(t, "SlotSelected", {"normal": slot("picked"), "hover": slot("picked"), "pressed": slot("picked"),
-		"disabled": slot("locked"), "focus": focus_ring()}, {})
+		"disabled": slot("locked"), "focus": slot_focus()}, {})
 	t.set_type_variation("SlotLocked", "Button")
 	_set_button(t, "SlotLocked", {"normal": slot("locked"), "hover": slot("hover"), "pressed": slot("picked"),
-		"disabled": slot("locked"), "focus": focus_ring()}, {})
+		"disabled": slot("locked"), "focus": slot_focus()}, {})
 	t.set_type_variation("SlotEmpty", "PanelContainer")
 	t.set_stylebox("panel", "SlotEmpty", slot("empty"))
 
@@ -317,6 +328,19 @@ static func build() -> Theme:
 	t.set_stylebox("background", "InkProgress", _flat(Color("a8916a"), LEATHER, 1, 0, 0))
 	t.set_stylebox("fill", "InkProgress", _flat(Color("5e7a32"), INK_GOOD, 1, 0, 0))
 
+	# --- HUD (Phase 3): a thin plate, meters and the HUD's text roles -------------------------------------------
+	t.set_type_variation("HudPlate", "PanelContainer")
+	t.set_stylebox("panel", "HudPlate", hud_plate(8, 6))
+	t.set_type_variation("HudMeter", "ProgressBar")
+	t.set_stylebox("background", "HudMeter", hud_meter_back(false))
+	t.set_stylebox("fill", "HudMeter", hud_meter_fill(GOLD))
+	_label(t, "HudValue", numbers, SIZE_SMALL, IVORY, 3)
+	_label(t, "HudTime", numbers, 18, IVORY, 3)
+	_label(t, "HudDay", display, SIZE_SMALL, GOLD, 3)
+	_label(t, "HudNote", body, 13, MUTED, 3)
+	_label(t, "HudToolName", body, 15, Color("f2d27a"), 4)
+	_label(t, "HudKey", numbers, 11, MUTED, 3)
+
 	# --- Typography roles ------------------------------------------------------------------------------------
 	_label(t, "DisplayTitle", display, SIZE_DISPLAY, GOLD, 4)
 	_label(t, "DisplayHeading", display, SIZE_HEADING, GOLD, 3)
@@ -360,6 +384,65 @@ static func slot(state: String) -> StyleBox:
 	sb.texture = tex
 	sb.set_texture_margin_all(8)
 	sb.set_content_margin_all(6)
+	return sb
+
+
+# --- HUD pieces (Phase 3) ----------------------------------------------------------------------------------
+const HUD_WARN := Color("c8553f")   # a meter in its warning state: rust frame and value, never a flash
+# Meter fills: muted, one per need.
+const METER := {
+	"health": Color("a8463c"), "sanity": Color("8a82ac"), "food": Color("b8925a"), "water": Color("5a8ab4"),
+	"warmth": Color("c0703a"), "nerve": Color("b8a682"),
+}
+
+
+# The HUD's plate: a thin iron-rimmed dark-wood frame with a brass rivet at each corner
+# (art/ui/hud_plate.png, tools/make_hud_art.py), 9-sliced at its 5 px corner.
+static func hud_plate(content_x := 8, content_y := 6) -> StyleBox:
+	var tex: Texture2D = UiSkin._tex("hud_plate")
+	if tex == null:
+		var flat := _flat(Color("1c150f", 0.9), IRON, 2, content_x, content_y)
+		return flat
+	var sb := StyleBoxTexture.new()
+	sb.texture = tex
+	sb.set_texture_margin_all(5)
+	sb.content_margin_left = content_x
+	sb.content_margin_right = content_x
+	sb.content_margin_top = content_y
+	sb.content_margin_bottom = content_y
+	return sb
+
+
+# A meter's channel: near-black with a 1 px iron rim, rust in the warning state.
+static func hud_meter_back(warn: bool) -> StyleBoxFlat:
+	var sb := _flat(Color("0d0a07"), HUD_WARN if warn else Color("4a3e30"), 1, 0, 0)
+	sb.expand_margin_left = 1
+	sb.expand_margin_right = 1
+	sb.expand_margin_top = 1
+	sb.expand_margin_bottom = 1
+	return sb
+
+
+# A meter's fill: a flat muted colour with a lighter pixel line along its top.
+static func hud_meter_fill(color: Color) -> StyleBoxFlat:
+	var sb := _flat(color, color.lightened(0.28), 0, 0, 0)
+	sb.border_width_top = 1
+	return sb
+
+
+# The keyboard/pad focus on a slot: a pale ivory frame with corner brackets (art/ui/slot_focus.png, from
+# tools/make_ui_slots.py) drawn just outside the slot; an ivory ring when the art is missing.
+static func slot_focus() -> StyleBox:
+	var tex: Texture2D = UiSkin._tex("slot_focus")
+	if tex == null:
+		var ring := focus_ring(4)
+		ring.border_color = IVORY
+		return ring
+	var sb := StyleBoxTexture.new()
+	sb.texture = tex
+	sb.set_texture_margin_all(7)
+	sb.draw_center = false
+	sb.set_expand_margin_all(4)
 	return sb
 
 

@@ -25,7 +25,8 @@ var _detail_flat: StyleBox
 var footer_bar: PanelContainer    # the footer's band (prompts and Close): no band, or the theme's FooterBar
 var slot_caption: Label           # Phase 2: names the inventory slot in focus or under the mouse, over the grid
 var _caption_text := ""           # what the caption shows with nothing in focus: the picked item
-const SLOT_SIZE := 68             # an inventory slot, square; its picture is 44
+const SLOT_SIZE := 68             # an inventory slot, square
+const SLOT_ICON := 48             # its picture: 16 px art at 3x
 const SLOT_GAP := 6
 
 const SUBTITLES := {
@@ -367,7 +368,9 @@ func show_panel(tab: String, rows: Array) -> void:
 				if strip is HBoxContainer:
 					strip.add_child(slot_caption)
 					strip.move_child(slot_caption, 0)
-					var balance := Control.new()
+					# Phase 2 final: the right of the tab line holds Coins and Pack space, fixed above the grid so
+					# they never scroll away and take no room from the item page. Otherwise a plain spacer.
+					var balance: Control = _build_status_strip(row["split"]["status"]) if row["split"].has("status") else Control.new()
 					balance.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 					balance.custom_minimum_size.x = 60
 					balance.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -388,6 +391,8 @@ func show_panel(tab: String, rows: Array) -> void:
 				side_foot.add_child(_detail_button)
 			side_scroll.scroll_vertical = 0
 			side_column.visible = true
+		elif _themed and bool(row.get("fixed_status", false)):
+			continue   # shown in the fixed strip instead
 		else:
 			rows_box.add_child(_build_row(row))
 	# Highlight the first usable button so a gamepad can reach it.
@@ -788,13 +793,16 @@ func _build_slot(recipe: Dictionary) -> Control:
 	var icon := RecipeIcon.new()
 	icon.kind = str(recipe.get("icon", ""))
 	icon.tint = Color(str(recipe.get("tint", "6b4a3a")))
+	# Phase 2 final: the picture is 48 px, its 16 px art at exactly 3x (it was 44, which drew at 2x), set 3 px
+	# above centre so the count in the corner overlaps it as little as possible.
 	icon.set_anchors_preset(Control.PRESET_CENTER)
-	icon.offset_left = -22
-	icon.offset_top = -25
-	icon.offset_right = 22
-	icon.offset_bottom = 19
+	icon.offset_left = -SLOT_ICON / 2
+	icon.offset_top = -SLOT_ICON / 2 - 3
+	icon.offset_right = SLOT_ICON / 2
+	icon.offset_bottom = SLOT_ICON / 2 - 3
 	icon.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	icon.modulate = Color(1, 1, 1, 1) if usable or selected else Color(1, 1, 1, 0.4)
+	# An unavailable item is dimmed and greyed a little, but stays easy to make out.
+	icon.modulate = Color.WHITE if usable or selected else Color(0.78, 0.74, 0.68, 0.62)
 	tile.add_child(icon)
 	if recipe.has("count"):
 		var count := Label.new()
@@ -1043,6 +1051,47 @@ func _build_detail(recipe: Dictionary) -> Control:
 		block.add_child(button)
 		_detail_button = button
 	return card
+
+
+# Phase 2 final: Coins and Pack space on one line, right-aligned beside the tabs: a coin and the purse, then the
+# pack's used and free slots with a thin meter. Display only; it takes no focus.
+func _build_status_strip(status: Dictionary) -> Control:
+	var row := HBoxContainer.new()
+	row.add_theme_constant_override("separation", 8)
+	row.alignment = BoxContainer.ALIGNMENT_END
+	var coin := HudIcon.new()
+	coin.kind = "coin"
+	coin.custom_minimum_size = Vector2(20, 20)
+	coin.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	row.add_child(coin)
+	var coins := Label.new()
+	coins.theme_type_variation = "CardValue"
+	coins.text = str(status.get("coins", 0))
+	row.add_child(coins)
+	var gap := Control.new()
+	gap.custom_minimum_size.x = 6
+	row.add_child(gap)
+	var used := int(status.get("used", 0))
+	var cap := maxi(1, int(status.get("cap", 1)))
+	var pack := Label.new()
+	pack.theme_type_variation = "Hint"
+	pack.text = "Pack"
+	row.add_child(pack)
+	var meter := ProgressBar.new()
+	meter.show_percentage = false
+	meter.max_value = cap
+	meter.value = used
+	meter.custom_minimum_size = Vector2(56, 8)
+	meter.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	meter.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	row.add_child(meter)
+	var count := Label.new()
+	count.theme_type_variation = "CardValue"
+	count.text = "%d / %d" % [used, cap]
+	if used >= cap:
+		count.add_theme_color_override("font_color", UiTheme.RUST)
+	row.add_child(count)
+	return row
 
 
 # Phase 2: the picked inventory item on the parchment page: its picture on a slot, name, how many and where,

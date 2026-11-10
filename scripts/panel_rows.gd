@@ -193,9 +193,13 @@ func _inventory_rows() -> Array:
 			marked.append(tile)
 			var key := str(t["key"])
 			groups[1 if key.begins_with("seed:") else (2 if key.begins_with("mat:") else 0)]["tiles"].append(tile)
-		rows.append({"split": {"recipes": marked, "columns": 4, "detail": chosen, "groups": groups, "slot_columns": 8}})
-	rows.append({"name": "Coins", "value": str(m.money)})
+		rows.append({"split": {"recipes": marked, "columns": 4, "detail": chosen, "groups": groups, "slot_columns": 8,
+			"status": {"coins": m.money, "used": used, "cap": cap}}})
+	# The themed Inventory shows these two in a fixed strip beside the grid instead (fixed_status), when it has one.
+	var fixed := not tiles.is_empty()
+	rows.append({"name": "Coins", "value": str(m.money), "fixed_status": fixed})
 	rows.append({
+		"fixed_status": fixed,
 		"name": "Pack space",
 		"value": "%d/%d" % [m.stall._pack_used(), m.stall._pack_capacity()],
 		"progress": float(m.stall._pack_used()) / float(m.stall._pack_capacity()),

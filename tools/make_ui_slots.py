@@ -14,8 +14,10 @@ OUT = "art/ui/slot_%s.png"
 STATES = {
     "empty":    ("110d09", "2a2119", "2f251c", "1d1610", None, None, "080605"),
     "occupied": ("1e1610", "4f4234", "6a5a46", "2e251c", "7a5e34", "a8854a", "0e0a07"),
-    "hover":    ("2b2016", "8a6a3a", "a8854a", "5a4426", "8a6a3a", "c09a58", "120d09"),
-    "picked":   ("3a2a18", "d8b050", "efd08a", "a07c30", "d8b050", "f4e0a0", "1a130c"),
+    # Phase 2 final: hover is a subtle lift of the iron rim (it was brass, too close to the picked gold).
+    "hover":    ("251c14", "6e5e4a", "8c7a62", "3a3026", "7a5e34", "a8854a", "100c08"),
+    # Picked: the iron rim of an occupied slot, a warmer fill, and a gold line set inside the rim (INSET below).
+    "picked":   ("2c2016", "5a4a38", "75644e", "2e251c", "d8b050", "f4e0a0", "0e0a07"),
     "locked":   ("17110c", "332a20", "3d3226", "221a13", "3d3226", "4a3d2e", "0b0806"),
 }
 
@@ -48,6 +50,14 @@ def draw(state):
                 # A recessed lip: the inner shadow on the top and left, the fill elsewhere.
                 if i == 3 or j == 3:
                     px[i, j] = rgb(inner)
+    if state == "picked":
+        # The inset: a 2 px gold line one pixel inside the recessed lip, lit on its top and left.
+        for i in range(SIZE):
+            for j in range(SIZE):
+                edge = min(i, j, n - i, n - j)
+                if edge in (4, 5):
+                    lit = (i == edge or j == edge) and not (i == n - edge or j == n - edge)
+                    px[i, j] = rgb(("efd08a" if lit else "d8b050") if edge == 4 else "8a6428")
     if rivet:
         for (x, y) in ((4, 4), (n - 5, 4), (4, n - 5), (n - 5, n - 5)):
             px[x, y] = rgb(rivet_light)
@@ -57,6 +67,29 @@ def draw(state):
     im.save(OUT % state)
 
 
+def draw_focus():
+    """The focus frame (Phase 2 final): drawn just outside a slot, so it never hides the picked inset. A pale
+    lantern-ivory line between two dark lines, with heavier L-shaped brackets at the corners. Centre clear."""
+    size = 20
+    n = size - 1
+    im = Image.new("RGBA", (size, size), (0, 0, 0, 0))
+    px = im.load()
+    for i in range(size):
+        for j in range(size):
+            edge = min(i, j, n - i, n - j)
+            corner = (min(i, n - i) < 6) and (min(j, n - j) < 6)
+            if edge == 0:
+                px[i, j] = rgb("0b0806")
+            elif edge == 1:
+                px[i, j] = rgb("f1e6c8")
+            elif edge == 2:
+                px[i, j] = rgb("f1e6c8") if corner else rgb("0b0806")
+            elif edge == 3 and corner:
+                px[i, j] = rgb("0b0806")
+    im.save(OUT % "focus")
+
+
 for s in STATES:
     draw(s)
-print("wrote", ", ".join(OUT % s for s in STATES))
+draw_focus()
+print("wrote", ", ".join(OUT % s for s in list(STATES) + ["focus"]))

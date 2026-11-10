@@ -67,7 +67,9 @@ extends SceneTree
 #   ending=ID       play an ending's sequence over the farm (bell, elias or hollow): epage=N shows line N (-1 the
 #                   title, past the last line the credits); use with hour= for the light behind it
 #   trek=N          set out on the mill trek and stand in clearing N (0-3 marked, 0-2 dark), below its event, with the walker
-#   tevent=ID       with trek, the clearing's event: tree, crows, flood, lights, cairn, fog or hollow (the day sets it otherwise)
+#   hp=N food=N water=N warmth=N   HUD checks: set health and the body needs (e.g. hp=3 food=12 for warning states)
+#   diarynew        HUD checks: the diary is found and has a page unread
+#   tevent=ID      with trek, the clearing's event: tree, crows, flood, lights, cairn, fog or hollow (the day sets it otherwise)
 #   tdark           with trek, take the dark trail at the fork (trek=1 is then the dark clearing, 2 the mill)
 #   tsign           with trek=0, stand below the fingerpost at the fork
 #   works=A,B       trail works built: waymarks, footbridge, gate_lamp, boardwalk, waystation, chapel_steps,
@@ -221,6 +223,13 @@ func _initialize() -> void:
 		main._apply_storage_tiles()
 	if opt.has("sanity"):
 		main.sanity = float(opt["sanity"])
+	# HUD checks (UI-OVERHAUL-001 Phase 3): set the meters' values, and find the diary with a page unread.
+	for need in ["hp", "food", "water", "warmth"]:
+		if opt.has(need):
+			main.set(need, int(opt[need]) if need == "hp" else float(opt[need]))
+	if opt.has("diarynew"):
+		main.diary_found = true
+		main.diary_new.append("story")
 	if opt.has("hour"):
 		main.clock = (float(opt["hour"]) - main.START_HOUR) / (main.DAY_END_HOUR - main.START_HOUR) * main.DAY_LENGTH
 	if opt.has("inside"):

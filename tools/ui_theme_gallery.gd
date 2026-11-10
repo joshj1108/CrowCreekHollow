@@ -1,7 +1,7 @@
 extends SceneTree
 
 # Draws every component of the shared UI theme (scripts/ui_theme.gd) in each of its states, on one 1280 by 720
-# sheet, for reviewing the visual language (UI-OVERHAUL-001). Hover, pressed and focus can't be held on a real
+# sheet (1280 wide; tall enough that nothing is cut off: h=N, default 960), for reviewing the visual language (UI-OVERHAUL-001). Hover, pressed and focus can't be held on a real
 # control in a still, so each state is drawn with the theme's own stylebox and font colour for that state;
 # focus is drawn over normal, as Godot draws it. Not headless (it needs a renderer):
 #   godot --path . -s tools/ui_theme_gallery.gd -- out=art/style_tests/x.png [scale=0.5]
@@ -18,7 +18,8 @@ func _initialize() -> void:
 		var kv := a.split("=", true, 1)
 		opt[kv[0]] = kv[1] if kv.size() > 1 else "1"
 	DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_WINDOWED)
-	DisplayServer.window_set_size(Vector2i(1280, 720))
+	# Phase 2 final: taller than the 720 the game is laid out for, so the lower components are no longer cut off.
+	DisplayServer.window_set_size(Vector2i(1280, int(opt.get("h", "960"))))
 	theme = UiTheme.get_theme()
 
 	var page := Control.new()
@@ -49,7 +50,7 @@ func _initialize() -> void:
 	left.add_child(title)
 	var sub := Label.new()
 	sub.theme_type_variation = "Subtitle"
-	sub.text = "UI-OVERHAUL-001 Phase 2: the refined shared theme, every component and state"
+	sub.text = "UI-OVERHAUL-001 Phase 2 final: the shared theme, every component and state"
 	left.add_child(sub)
 	left.add_child(HSeparator.new())
 	var grid := GridContainer.new()
@@ -171,6 +172,87 @@ func _initialize() -> void:
 	scroll_box.add_child(scroll)
 	misc2.add_child(scroll_box)
 
+	# Phase 3: the HUD's pieces, drawn with the same theme and art as in play.
+	left.add_child(HSeparator.new())
+	left.add_child(_caption("HUD (Phase 3): plate, meters normal and warning, icons at 2x, hotbar slots at 3x, pad key caps"))
+	var hud := HBoxContainer.new()
+	hud.add_theme_constant_override("separation", 18)
+	left.add_child(hud)
+	var plate := PanelContainer.new()
+	plate.theme_type_variation = "HudPlate"
+	var meters := VBoxContainer.new()
+	meters.add_theme_constant_override("separation", 3)
+	plate.add_child(meters)
+	for spec in [["heart", "health", 8, 10, false], ["moon", "sanity", 72, 100, false], ["food", "food", 64, 100, false],
+			["water", "water", 18, 100, true], ["warmth", "warmth", 90, 100, false], ["nerve", "nerve", 40, 100, false]]:
+		var mrow := HBoxContainer.new()
+		mrow.add_theme_constant_override("separation", 6)
+		meters.add_child(mrow)
+		var ic := HudIcon.new()
+		ic.kind = spec[0]
+		ic.custom_minimum_size = Vector2(20, 20)
+		mrow.add_child(ic)
+		var mb := ProgressBar.new()
+		mb.theme_type_variation = "HudMeter"
+		mb.show_percentage = false
+		mb.max_value = spec[3]
+		mb.value = spec[2]
+		mb.custom_minimum_size = Vector2(84, 8)
+		mb.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+		mb.add_theme_stylebox_override("fill", UiTheme.hud_meter_fill(UiTheme.METER[spec[1]]))
+		mb.add_theme_stylebox_override("background", UiTheme.hud_meter_back(spec[4]))
+		mrow.add_child(mb)
+		var mv := Label.new()
+		mv.theme_type_variation = "HudValue"
+		mv.text = "%d/%d" % [spec[2], spec[3]] if spec[3] != 100 or spec[1] == "sanity" else str(spec[2])
+		if spec[4]:
+			mv.add_theme_color_override("font_color", UiTheme.HUD_WARN)
+		mrow.add_child(mv)
+	hud.add_child(plate)
+	var hud_right := VBoxContainer.new()
+	hud_right.add_theme_constant_override("separation", 10)
+	hud.add_child(hud_right)
+	var icons := HBoxContainer.new()
+	icons.add_theme_constant_override("separation", 6)
+	for k in HudIcon.ATLAS:
+		if k == "seal":
+			continue
+		var ic := HudIcon.new()
+		ic.kind = k
+		ic.dot = k == "book"
+		ic.custom_minimum_size = Vector2(20, 20)
+		icons.add_child(ic)
+	hud_right.add_child(icons)
+	var bar_row := HBoxContainer.new()
+	bar_row.add_theme_constant_override("separation", 4)
+	for spec in [["empty", ""], ["occupied", "axe"], ["picked", "hoe"], ["occupied", "rod"]]:
+		var sp := PanelContainer.new()
+		sp.custom_minimum_size = Vector2(Hotbar.SLOT, Hotbar.SLOT)
+		sp.add_theme_stylebox_override("panel", UiTheme.slot(spec[0]))
+		if spec[1] != "":
+			var ri := ActionBar.RecipeIcon.new()
+			ri.kind = spec[1]
+			ri.custom_minimum_size = Vector2(Hotbar.ICON, Hotbar.ICON)
+			sp.add_child(ri)
+		bar_row.add_child(sp)
+	for t in ["LB", "RB"]:
+		var cap := Label.new()
+		cap.theme_type_variation = "KeyGlyph"
+		cap.text = t
+		cap.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+		bar_row.add_child(cap)
+	hud_right.add_child(bar_row)
+	var type_row := HBoxContainer.new()
+	type_row.add_theme_constant_override("separation", 10)
+	for pair in [["HudTime", "21:35"], ["HudDay", "Day 12"], ["HudNote", "Oct 12 · Autumn"], ["HudValue", "250"],
+			["HudToolName", "Hoe"]]:
+		var l := Label.new()
+		l.theme_type_variation = pair[0]
+		l.text = pair[1]
+		l.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+		type_row.add_child(l)
+	hud_right.add_child(type_row)
+
 	# Right: the parchment description panel and the confirmation dialog.
 	var right := VBoxContainer.new()
 	right.add_theme_constant_override("separation", 14)
@@ -266,11 +348,11 @@ func _slot_swatch(type: String, state: String, icon_kind: String, count: String)
 		icon.kind = icon_kind
 		icon.tint = Color({"turnip": "8fd16b", "egg": "f2ead2", "fish_t": "b8b04a", "bandage": "e8e0d0", "seed": "e8c440"}[icon_kind])
 		icon.set_anchors_preset(Control.PRESET_CENTER)
-		icon.offset_left = -22
-		icon.offset_top = -25
-		icon.offset_right = 22
-		icon.offset_bottom = 19
-		icon.modulate = Color(1, 1, 1, 0.4) if type == "SlotLocked" else Color.WHITE
+		icon.offset_left = -ActionBar.SLOT_ICON / 2
+		icon.offset_top = -ActionBar.SLOT_ICON / 2 - 3
+		icon.offset_right = ActionBar.SLOT_ICON / 2
+		icon.offset_bottom = ActionBar.SLOT_ICON / 2 - 3
+		icon.modulate = Color(0.78, 0.74, 0.68, 0.62) if type == "SlotLocked" else Color.WHITE
 		holder.add_child(icon)
 		var n := Label.new()
 		n.theme_type_variation = "SlotCount"

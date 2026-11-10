@@ -1,14 +1,39 @@
 class_name HudIcon
 extends Control
 
-## Small hand-drawn icons for the info bar: a heart, moon, coin, the diary, and weather marks.
-## Each is drawn in code, so the bar needs no image files.
+## Small icons for the HUD: health, sanity, coins, the body needs, the diary, and weather marks.
+## UI-OVERHAUL-001 Phase 3: drawn from art/ui/hud_icons.png (10 x 10 pixel art, tools/make_hud_art.py) at the
+## largest whole multiple that fits, so they stay crisp. The shapes below are the fallback when the art is missing.
+
+const ATLAS := ["heart", "moon", "coin", "food", "water", "warmth", "nerve", "book", "seal", "sun", "cloud",
+	"rain", "snow", "fog"]
+const CELL := 10
+static var _atlas: Texture2D
+static var _atlas_checked := false
 
 var kind := "coin"
-var dot := false   # the diary's red dot, lit while a page is new
+var dot := false   # the diary's wax seal, shown while a page is new
+
+
+static func atlas() -> Texture2D:
+	if not _atlas_checked:
+		_atlas_checked = true
+		var path := "res://art/ui/hud_icons.png"
+		_atlas = load(path) if ResourceLoader.exists(path) else null
+	return _atlas
 
 
 func _draw() -> void:
+	var tex := atlas()
+	var cell := ATLAS.find(kind)
+	if tex != null and cell >= 0:
+		var k := maxf(1.0, floorf(minf(size.x, size.y) / CELL))
+		var side := CELL * k
+		var at := ((size - Vector2(side, side)) * 0.5).floor()
+		draw_texture_rect_region(tex, Rect2(at, Vector2(side, side)), Rect2(cell * CELL, 0, CELL, CELL))
+		if kind == "book" and dot:
+			draw_texture_rect_region(tex, Rect2(at, Vector2(side, side)), Rect2(ATLAS.find("seal") * CELL, 0, CELL, CELL))
+		return
 	var c := size * 0.5
 	var r := minf(size.x, size.y) * 0.46
 	var gold := Color("e0b35a")

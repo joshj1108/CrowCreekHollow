@@ -913,7 +913,9 @@ var hud_hp_label: Label
 var hud_sanity_label: Label
 var hud_coins_label: Label
 var hale_label: Label              # shown beside the needs while all three are high
-var needs_box: HBoxContainer
+var needs_box: VBoxContainer       # the survival plate's meters (UI-OVERHAUL-001 Phase 3)
+var hp_bar: ProgressBar
+var sanity_bar: ProgressBar
 var food_bar: ProgressBar
 var water_bar: ProgressBar
 var warmth_bar: ProgressBar
@@ -1212,6 +1214,7 @@ func _process(delta: float) -> void:
 	if placing != "":
 		placement_ghost.queue_redraw()
 	if hotbar != null:
+		hotbar.pad = action_bar._pad_glyphs
 		hotbar.set_state(_hotbar_entries(), active_slot)
 	player.held = _active_tool()
 	player.held_item = str(equipment["hand_r"]) if _active_tool() == "sword" else ""
@@ -1305,11 +1308,12 @@ func _process(delta: float) -> void:
 	var shown_hour := madness._clock_hour(current_hour)   # at the lowest sanity, the clock lies now and then
 	var minutes := int(fmod(shown_hour, 1.0) * 60.0)
 	var low := food < 25.0 or water < 25.0 or warmth < 25.0
-	food_bar.value = food
-	water_bar.value = water
-	warmth_bar.value = warmth
-	for bar in [food_bar, water_bar, warmth_bar]:
-		bar.modulate = Color(1.0, 0.55, 0.5) if low and bar.value < 25.0 else Color.WHITE
+	# The same thresholds as before (needs under 25); health warns at 30% and sanity under LOW_SANITY.
+	_set_meter(food_bar, food, 100.0, "%d" % roundi(food), low and food < 25.0)
+	_set_meter(water_bar, water, 100.0, "%d" % roundi(water), low and water < 25.0)
+	_set_meter(warmth_bar, warmth, 100.0, "%d" % roundi(warmth), low and warmth < 25.0)
+	if trek.nerve_col != null and trek.nerve_col.visible:
+		_set_meter(trek.nerve_bar, trek.nerve, 100.0, "%d" % roundi(trek.nerve), trek.nerve < 25.0)
 	needs_temp.text = "%d°F" % roundi(_temperature())
 	hale_label.visible = rewards._is_hale()
 	var date := _calendar_date(day)
@@ -1321,10 +1325,10 @@ func _process(delta: float) -> void:
 	hud_date_label.text = "%s %d · %s%s" % [MONTH_NAMES[date["month"]].substr(0, 3), date["day"], _season_of(date["month"]), event_name]
 	hud_time_label.text = "%02d:%02d" % [int(shown_hour), minutes]
 	hud_weather_label.text = WEATHER_NAMES.get(weather_kind, "Overcast")
-	hud_weather_icon.kind = "sun" if weather_kind == "sunny" else ("rain" if weather_kind in WATER_RAIN_KINDS else "cloud")
+	hud_weather_icon.kind = {"sunny": "sun", "snow": "snow", "fog": "fog"}.get(weather_kind, "rain" if weather_kind in WATER_RAIN_KINDS else "cloud")
 	hud_weather_icon.queue_redraw()
-	hud_hp_label.text = "%d / %d" % [hp, max_hp()]
-	hud_sanity_label.text = "%d / %d" % [int(sanity), sanity_sys._sanity_max()]
+	_set_meter(hp_bar, hp, max_hp(), "%d/%d" % [hp, max_hp()], hp <= max_hp() * 0.3)
+	_set_meter(sanity_bar, sanity, sanity_sys._sanity_max(), "%d/%d" % [int(sanity), sanity_sys._sanity_max()], sanity < LOW_SANITY)
 	hud_coins_label.text = "%d" % money
 
 	_handle_keys()
@@ -2173,78 +2177,119 @@ func _build_hud() -> void:
 
 	perf_label = _make_label(hud_root, Vector2(16, 120), 14)
 	perf_label.visible = false
-	# Two compact plates. The vitals and needs sit top-left; the date, clock, weather and
-	# temperature sit in a slim strip across the top middle, clear of the minimap.
+	# UI-OVERHAUL-001 Phase 3: two thin plates in the shared theme. The survival plate (top-left) has a meter per
+	# need, each an icon, a bar and its value, with coins and the diary at its foot. The clock plate (top middle)
+	# shows the weather, the time and the temperature over the day and the date.
+	var hud_theme := UiTheme.get_theme()
 	hud_panel = PanelContainer.new()
+	hud_panel.theme = hud_theme
+	hud_panel.theme_type_variation = "HudPlate"
 	hud_panel.position = Vector2(12, 10)
 	hud_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	hud_panel.add_theme_stylebox_override("panel", _hud_box())
 	hud_root.add_child(hud_panel)
-	var pad := MarginContainer.new()
-	for side in ["margin_left", "margin_right", "margin_top", "margin_bottom"]:
-		pad.add_theme_constant_override(side, 8)
-	hud_panel.add_child(pad)
 	var stack := VBoxContainer.new()
-	stack.add_theme_constant_override("separation", 5)
-	pad.add_child(stack)
-
-	var vitals := HBoxContainer.new()
-	vitals.add_theme_constant_override("separation", 14)
-	stack.add_child(vitals)
-	hud_hp_label = _vital_chip(vitals, "heart")
-	hud_sanity_label = _vital_chip(vitals, "moon")
-	hud_coins_label = _vital_chip(vitals, "coin")
-	diary_label = _vital_chip(vitals, "book")
-	diary_icon = diary_label.get_parent().get_child(0) as HudIcon
-	diary_label.add_theme_color_override("font_color", Color("d8b050"))
-
-	needs_box = HBoxContainer.new()
-	needs_box.add_theme_constant_override("separation", 10)
+	stack.add_theme_constant_override("separation", 4)
+	stack.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	hud_panel.add_child(stack)
+	needs_box = VBoxContainer.new()
+	needs_box.add_theme_constant_override("separation", 3)
+	needs_box.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	stack.add_child(needs_box)
-	food_bar = _make_need_bar("Food")
-	water_bar = _make_need_bar("Water")
-	warmth_bar = _make_need_bar("Warmth")
-	hale_label = _make_label(needs_box, Vector2.ZERO, 11)
-	hale_label.text = "Hale
-+20% XP"
-	hale_label.add_theme_color_override("font_color", Color("d8b050"))
+	hp_bar = _hud_meter(needs_box, "heart", "health", "Health")
+	hud_hp_label = hp_bar.get_meta("label")
+	sanity_bar = _hud_meter(needs_box, "moon", "sanity", "Sanity")
+	hud_sanity_label = sanity_bar.get_meta("label")
+	food_bar = _hud_meter(needs_box, "food", "food", "Food")
+	water_bar = _hud_meter(needs_box, "water", "water", "Water")
+	warmth_bar = _hud_meter(needs_box, "warmth", "warmth", "Warmth")
+	# The walker's nerve, shown only on a trek: its name over its meter.
+	var nerve_col := VBoxContainer.new()
+	nerve_col.add_theme_constant_override("separation", 0)
+	nerve_col.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	needs_box.add_child(nerve_col)
+	var nerve_name := Label.new()
+	nerve_name.theme_type_variation = "HudNote"
+	nerve_name.text = "%s's nerve" % TrekSystem.ROUTES["mill"]["short"]
+	nerve_col.add_child(nerve_name)
+	trek.nerve_bar = _hud_meter(nerve_col, "nerve", "nerve", "Nerve")
+	trek.nerve_col = nerve_col
+	trek.nerve_col.visible = false
+	hale_label = Label.new()
+	hale_label.theme_type_variation = "HudNote"
+	hale_label.add_theme_color_override("font_color", UiTheme.GOLD)
+	hale_label.text = "Hale  +20% XP"
+	hale_label.mouse_filter = Control.MOUSE_FILTER_PASS
 	hale_label.tooltip_text = "Food, water and warmth are all at %d or more, so skills train faster." % int(HomesteadRewards.HALE_NEED)
 	hale_label.visible = false
-	# The walker's nerve, shown only on a trek.
-	trek.nerve_bar = _make_need_bar("Nerve")
-	trek.nerve_col = needs_box.get_child(needs_box.get_child_count() - 1)
-	(trek.nerve_col.get_child(0) as Label).text = "%s's nerve" % TrekSystem.ROUTES["mill"]["short"]
-	trek.nerve_col.visible = false
+	stack.add_child(hale_label)
+	# The foot: coins on the left, the diary (a small leather journal, with a wax seal and "New" while a page is
+	# unread) on the right, under a faint brass rule.
+	stack.add_child(_hud_rule())
+	var foot := HBoxContainer.new()
+	foot.add_theme_constant_override("separation", 6)
+	foot.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	stack.add_child(foot)
+	foot.add_child(_hud_icon("coin"))
+	hud_coins_label = Label.new()
+	hud_coins_label.theme_type_variation = "HudValue"
+	foot.add_child(hud_coins_label)
+	var gap := Control.new()
+	gap.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	gap.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	foot.add_child(gap)
+	var diary_chip := HBoxContainer.new()
+	diary_chip.add_theme_constant_override("separation", 4)
+	diary_chip.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	foot.add_child(diary_chip)
+	diary_icon = _hud_icon("book")
+	diary_chip.add_child(diary_icon)
+	diary_label = Label.new()
+	diary_label.theme_type_variation = "HudValue"
+	diary_label.add_theme_color_override("font_color", UiTheme.GOLD)
+	diary_chip.add_child(diary_label)
 
 	hud_clock_panel = PanelContainer.new()
+	hud_clock_panel.theme = hud_theme
+	hud_clock_panel.theme_type_variation = "HudPlate"
 	hud_clock_panel.set_anchors_preset(Control.PRESET_CENTER_TOP)
 	hud_clock_panel.grow_horizontal = Control.GROW_DIRECTION_BOTH
 	hud_clock_panel.offset_top = 10
 	hud_clock_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	hud_clock_panel.add_theme_stylebox_override("panel", _hud_box())
 	hud_root.add_child(hud_clock_panel)
-	var clock_pad := MarginContainer.new()
-	for side in ["margin_left", "margin_right", "margin_top", "margin_bottom"]:
-		clock_pad.add_theme_constant_override(side, 6)
-	hud_clock_panel.add_child(clock_pad)
+	var clock_col := VBoxContainer.new()
+	clock_col.add_theme_constant_override("separation", 0)
+	clock_col.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	hud_clock_panel.add_child(clock_col)
 	var clock_row := HBoxContainer.new()
-	clock_row.add_theme_constant_override("separation", 10)
+	clock_row.add_theme_constant_override("separation", 8)
 	clock_row.alignment = BoxContainer.ALIGNMENT_CENTER
-	clock_pad.add_child(clock_row)
-	hud_day_label = _make_label(clock_row, Vector2.ZERO, 16)
-	hud_day_label.add_theme_color_override("font_color", Color("f2d27a"))
-	hud_date_label = _make_label(clock_row, Vector2.ZERO, 13)
-	hud_date_label.add_theme_color_override("font_color", Color("e8dcc0"))
-	clock_row.add_child(_hud_divider())
-	hud_time_label = _make_label(clock_row, Vector2.ZERO, 16)
-	clock_row.add_child(_hud_divider())
-	hud_weather_icon = HudIcon.new()
-	hud_weather_icon.custom_minimum_size = Vector2(16, 16)
-	hud_weather_icon.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	clock_row.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	clock_col.add_child(clock_row)
+	hud_weather_icon = _hud_icon("cloud")
 	clock_row.add_child(hud_weather_icon)
-	hud_weather_label = _make_label(clock_row, Vector2.ZERO, 13)
-	needs_temp = _make_label(clock_row, Vector2.ZERO, 13)
-	needs_temp.add_theme_color_override("font_color", Color("9a8a6a"))
+	hud_weather_label = Label.new()
+	hud_weather_label.theme_type_variation = "HudNote"
+	hud_weather_label.add_theme_color_override("font_color", UiTheme.IVORY)
+	clock_row.add_child(hud_weather_label)
+	clock_row.add_child(_hud_divider())
+	hud_time_label = Label.new()
+	hud_time_label.theme_type_variation = "HudTime"
+	clock_row.add_child(hud_time_label)
+	clock_row.add_child(_hud_divider())
+	needs_temp = Label.new()
+	needs_temp.theme_type_variation = "HudNote"
+	clock_row.add_child(needs_temp)
+	var date_row := HBoxContainer.new()
+	date_row.add_theme_constant_override("separation", 6)
+	date_row.alignment = BoxContainer.ALIGNMENT_CENTER
+	date_row.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	clock_col.add_child(date_row)
+	hud_day_label = Label.new()
+	hud_day_label.theme_type_variation = "HudDay"
+	date_row.add_child(hud_day_label)
+	hud_date_label = Label.new()
+	hud_date_label.theme_type_variation = "HudNote"
+	date_row.add_child(hud_date_label)
 
 	message_label = _make_label(hud_root, Vector2(16, 100), 20)
 	message_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
@@ -2301,37 +2346,56 @@ func _make_label(parent: Node, pos: Vector2, font_size: int) -> Label:
 	return label
 
 
-# A small labelled bar for one body need. It fills from 0 to 100.
-func _make_need_bar(title: String) -> ProgressBar:
-	var col := VBoxContainer.new()
-	col.add_theme_constant_override("separation", 3)
-	needs_box.add_child(col)
-	var name_label := _make_label(col, Vector2.ZERO, 11)
-	name_label.text = title
-	name_label.add_theme_color_override("font_color", Color("9a8a6a"))
+# One HUD meter (UI-OVERHAUL-001 Phase 3): the need's icon, a thin bar in its colour and its value, in a row.
+# Returns the bar; its value label is the bar's "label" meta. _set_meter() fills it and shows its warning state.
+func _hud_meter(parent: Node, icon_kind: String, fill: String, title: String) -> ProgressBar:
+	var row := HBoxContainer.new()
+	row.add_theme_constant_override("separation", 6)
+	row.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	parent.add_child(row)
+	row.add_child(_hud_icon(icon_kind))
 	var bar := ProgressBar.new()
+	bar.theme_type_variation = "HudMeter"
 	bar.show_percentage = false
 	bar.min_value = 0.0
 	bar.max_value = 100.0
-	var skinned_fill := UiSkin.bar_fill(title.to_lower())
-	if skinned_fill != null:
-		# The bar is the meter's channel; its frame is drawn around it, so a margin leaves the frame room.
-		bar.custom_minimum_size = UiSkin.CHANNEL_SIZE
-		bar.add_theme_stylebox_override("background", UiSkin.bar_background())
-		bar.add_theme_stylebox_override("fill", skinned_fill)
-		var room := MarginContainer.new()
-		room.add_theme_constant_override("margin_left", int(UiSkin.FRAME_OUTSET.x))
-		room.add_theme_constant_override("margin_right", int(UiSkin.FRAME_OUTSET.x))
-		room.add_theme_constant_override("margin_top", int(UiSkin.FRAME_OUTSET.y))
-		room.add_theme_constant_override("margin_bottom", int(UiSkin.FRAME_OUTSET.y))
-		room.add_child(bar)
-		col.add_child(room)
-		return bar
-	bar.custom_minimum_size = Vector2(64, 8)
-	bar.add_theme_stylebox_override("background", _bar_box(Color(0.06, 0.045, 0.035, 0.95)))
-	bar.add_theme_stylebox_override("fill", _bar_box(Color("c9a24a")))
-	col.add_child(bar)
+	bar.custom_minimum_size = Vector2(84, 8)
+	bar.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	bar.mouse_filter = Control.MOUSE_FILTER_PASS
+	bar.tooltip_text = title
+	bar.add_theme_stylebox_override("fill", UiTheme.hud_meter_fill(UiTheme.METER[fill]))
+	row.add_child(bar)
+	var value := Label.new()
+	value.theme_type_variation = "HudValue"
+	value.custom_minimum_size.x = 50
+	row.add_child(value)
+	bar.set_meta("label", value)
+	bar.set_meta("warn", false)
 	return bar
+
+
+# Fills a HUD meter and writes its value; in the warning state its rim and value turn rust (no flashing).
+func _set_meter(bar: ProgressBar, value: float, top: float, text: String, warn: bool) -> void:
+	bar.max_value = maxf(1.0, top)
+	bar.value = value
+	var label: Label = bar.get_meta("label")
+	label.text = text
+	if bool(bar.get_meta("warn")) != warn:
+		bar.set_meta("warn", warn)
+		bar.add_theme_stylebox_override("background", UiTheme.hud_meter_back(warn))
+		if warn:
+			label.add_theme_color_override("font_color", UiTheme.HUD_WARN)
+		else:
+			label.remove_theme_color_override("font_color")
+
+
+func _hud_icon(icon_kind: String) -> HudIcon:
+	var icon := HudIcon.new()
+	icon.kind = icon_kind
+	icon.custom_minimum_size = Vector2(20, 20)
+	icon.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	icon.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	return icon
 
 
 # The bar's frame: dark wood with gold trim and a soft shadow.
@@ -2350,11 +2414,12 @@ func _hud_box() -> StyleBox:
 	return box
 
 
-# A small gold divider between items in the clock strip.
+# A thin brass divider between items in the clock plate.
 func _hud_divider() -> ColorRect:
 	var rule := ColorRect.new()
-	rule.color = Color(0.72, 0.54, 0.25, 0.5)
-	rule.custom_minimum_size = Vector2(2, 14)
+	rule.color = Color(UiTheme.BRASS, 0.75)
+	rule.custom_minimum_size = Vector2(1, 12)
+	rule.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	rule.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	return rule
 
@@ -2362,23 +2427,10 @@ func _hud_divider() -> ColorRect:
 # A thin gold rule that divides the rows of the info bar.
 func _hud_rule() -> ColorRect:
 	var rule := ColorRect.new()
-	rule.color = Color(0.72, 0.54, 0.25, 0.4)
-	rule.custom_minimum_size = Vector2(0, 2)
+	rule.color = Color(UiTheme.BRASS, 0.45)
+	rule.custom_minimum_size = Vector2(0, 1)
 	rule.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	return rule
-
-
-# An icon with a value beside it, such as health or coins. Returns the value's label.
-func _vital_chip(parent: Node, icon_kind: String) -> Label:
-	var row := HBoxContainer.new()
-	row.add_theme_constant_override("separation", 6)
-	parent.add_child(row)
-	var icon := HudIcon.new()
-	icon.kind = icon_kind
-	icon.custom_minimum_size = Vector2(20, 20)
-	icon.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	row.add_child(icon)
-	return _make_label(row, Vector2.ZERO, 15)
 
 
 func _bar_box(color: Color) -> StyleBoxFlat:
@@ -3088,7 +3140,7 @@ func _open_diary() -> void:
 	_toggle_tab("Diary")
 
 
-# The diary by the vitals shows once it is found, and its dot blinks while a page is new.
+# The diary at the survival plate's foot shows once it is found, with a wax seal and "New" while a page is new.
 # Pages stay marked new while the diary is open, and count as read once it closes.
 func _update_diary_icon() -> void:
 	if diary_icon == null:
@@ -3099,7 +3151,7 @@ func _update_diary_icon() -> void:
 	var chip := diary_icon.get_parent() as Control
 	chip.visible = diary_found
 	var unread := not diary_new.is_empty() and not diary_reading
-	var lit := unread and fmod(Time.get_ticks_msec() / 1000.0, 1.0) < 0.6
+	var lit := unread   # UI-OVERHAUL-001 Phase 3: a steady wax seal, no blinking
 	if diary_icon.dot != lit:
 		diary_icon.dot = lit
 		diary_icon.queue_redraw()
