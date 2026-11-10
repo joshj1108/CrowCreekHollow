@@ -56,6 +56,9 @@ var groves := {}                    # world tile -> Array of Sprite2D standing o
 var front_from := 0                 # pieces[front_from..] are in front of the farmer
 var _dark := -1.0
 var house_at := Vector2.ZERO
+var gate_lamp: Sprite2D
+const GATE_LAMP_AT := Vector2(3438, 1872)   # world px: its post one tile west of the east gate's north gatepost
+const GATE_LAMP_BASE := 34.0
 
 
 func _init(main: MainGame) -> void:
@@ -146,6 +149,13 @@ func build() -> void:
 		add_child(s)
 		pieces.append([s, float(g.y + 1), day, night])
 		groves[w] = [s]
+	# ART-OVERHAUL-002 E2: the "lamp at the gate" trail work, the farm's own lantern post just inside the north
+	# gatepost of the east gate. Shown once the work is built (see _process); art only.
+	var lamp_rec := {"s": 3, "x": GATE_LAMP_AT.x, "y": GATE_LAMP_AT.y}
+	gate_lamp = _sprite("src_lantern_post.png", lamp_rec)
+	gate_lamp.visible = false
+	add_child(gate_lamp)
+	pieces.append([gate_lamp, GATE_LAMP_BASE, Color.WHITE, Color.WHITE])
 	# Children were added in base order, so pieces at the same depth overlap as the concept drew them.
 	pieces.sort_custom(func(a, b) -> bool: return a[1] < b[1])
 	for p in pieces:
@@ -180,6 +190,8 @@ func _process(_delta: float) -> void:
 	if not on_farm:
 		return
 	_sort()
+	if gate_lamp != null:
+		gate_lamp.visible = m.trek._has_work("gate_lamp")
 	for w in groves:
 		var up := not m.grove_felled.has(w)
 		for s in groves[w]:

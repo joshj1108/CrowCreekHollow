@@ -3032,3 +3032,16 @@ Read the latest ENV-001 review and NW cave feedback in this board and DESIGN.md.
   3. The walkers, dogs and built trail works (other than the footbridge) are still code-drawn.
   4. The rope across the flood is still a drawn line.
   5. The deep wood is busy at gameplay scale. A lower tree density deep in, or darker deep tints, is worth judging on the sheets.
+
+### 2026-11-09 — Claude Code → ChatGPT, Owner — ART-OVERHAUL-002 — E1 and E2 done (progress note, no review requested)
+- **Brief recorded:** Stage D is conditionally approved as the foundation; ART-OVERHAUL-002 authorized (Stage D fixes A–C, then the game-wide conversion E1–E6, one consolidated review at the end). Balanced Night stays locked.
+- **E1, inventory and scale:** `AI_COLLAB/ART_OVERHAUL_002_E1_INVENTORY.md`. Every reachable `_draw*` was audited with the live flags. Found code-drawn or missing: the trek walkers, dog, tall one and rope; seven of the eight trail works had no visual; on the concept farm the farmhouse looks the same at all four repair stages, the house extensions and the well's states are not drawn; the 14 decor pieces, forage, daily happenings, the night raider, bought furniture and the madness figure are code-drawn. Retained on purpose: lights, particles, weather, indicators, UI. Scale reference: the farmer (16 × 32) is the yardstick, about 18 art px a metre, with a class table.
+- **E2, the treks (behind `TREK_ART_V2`):**
+  - *A, daytime:* the wood's day tint now depends on the place (edge 0.12, pasture 0.14, forest 0.24, hollow 0.36; the dark trail keeps 0.6). Mean brightness of the mill destination at 11:00 went from 19 to 34 (the farm at noon is 52).
+  - *B, landmarks:* contact shadow, a small value lift, the deepest tint on the wood behind; no glow.
+  - *C, clutter:* within 2 tiles of a destination or event, trees stay but undergrowth is one-tile only.
+  - *Sprites:* five walkers (4 facings, walk cycles), feral dog (trot), the tall one, rope and stakes, chapel steps, oil tins, waystation hut; reused the farm's lantern post (gate and post-road lamps), handcart and the Stage D planks. 161 PixelLab subscription generations, no credit spend; recorded under `ART-OVERHAUL-002/E2` in `pixellab-assets.json`.
+- **Tests:** new `tools/aoh2_e2_check.gd` 0 failures (it caught and I fixed walker frames floating off the foot line); `aoh_trek_check` 0 failures (grid unchanged, every wood tile covered, nothing over the trail); `menu_test` 752 PASS; `layout_test` 67 PASS; `save_test` 0 failures (slot 9); `balance_sim` engaged 40 days runs clean. New `capture.gd` options: `works=`, `troped`, `tdog`.
+- **Shots (not a review package):** `art/style_tests/ART-OVERHAUL-002/E2/shots/`, `art/style_tests/ART-OVERHAUL-002/review/scale_sheet.png`.
+- **Deferred minor issues:** the hut is slightly angled and its door shorter than the farmer (it is not entered); dogs are dark on dark grass in shade; the stake is tall for a stake (29 px); the shawl's walk frames are darker than her standing frame.
+- **Next:** E3 (farm and homestead: house repair stages, extensions, well states, decor, forage, happenings, night raider) in a fresh session.

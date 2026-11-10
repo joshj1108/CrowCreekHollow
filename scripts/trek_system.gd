@@ -1685,7 +1685,25 @@ func _make_rope() -> void:
 
 func _tint(darkness: float) -> Color:
 	var gloom: float = (GLOOM_DARK if _trail() == "dark" else (EDGE_GLOOM if route_id == "edge" else GLOOM)) + float(SEASON_GLOOM.get(_season_on(m.day), 0.0))
+	if TREK_ART_V2:
+		gloom = _gloom_v2() + float(SEASON_GLOOM.get(_season_on(m.day), 0.0))
 	return m._light_tint().lerp(m.NIGHT_TINT, maxf(darkness, gloom))
+
+
+# ART-OVERHAUL-002 (Stage D review A): the PixelLab wood carries its own shade (trees darken with depth, the ground
+# under them is shaded), so by day the tint only adds the kind of dark each place is meant to have: ordinary
+# daylight at the wood's edge and in the open pasture, canopy shade on the forest routes, the hollow's cold under
+# the old growth, and the dark trail kept supernaturally dark (as before). Night is the night tint as ever.
+const GLOOM_V2 := {"edge": 0.12, "pasture": 0.14, "forest": 0.24, "hollow": 0.36, "dark": 0.6}
+
+
+func _gloom_v2() -> float:
+	if _trail() == "dark":
+		return GLOOM_V2["dark"]
+	if route_id == "edge":
+		return GLOOM_V2["edge"]
+	var g: String = art.ground if art != null and art.ok else "forest"
+	return float(GLOOM_V2.get(g, GLOOM_V2["forest"]))
 
 
 func _lantern_on() -> bool:
@@ -2062,6 +2080,19 @@ func m_line(a: Vector2, b: Vector2, width: float) -> void:
 func _draw_tall(f: Vector2) -> void:
 	var px := float(m.PX)
 	var lit_here: bool = lit and m.player.position.distance_to(f) <= _light_radius() * px
+	var tall_tex: Texture2D = _e2("tall")
+	if tall_tex != null:
+		# The sprite stands on f. Lit, it is all there (its own red eyes); out of the light only a faint shape
+		# and the eyes show, as before.
+		var sz := tall_tex.get_size() * (px / 16.0)
+		var at := (f - Vector2(sz.x * 0.5, sz.y)).snapped(Vector2(3, 3))
+		layer.draw_texture_rect(tall_tex, Rect2(at, sz), false, Color.WHITE if lit_here else Color(0.12, 0.1, 0.14, 0.55))
+		if not lit_here:
+			for dx in [-2.0, 2.0]:
+				var eye := Vector2(f.x + dx * 3.0, at.y + 5.0 * 3.0)
+				layer.draw_circle(eye, 7.0, Color(0.9, 0.1, 0.05, 0.25))
+				layer.draw_rect(Rect2(eye - Vector2(1.5, 1.5), Vector2(3, 3)), Color(1.0, 0.2, 0.1, 0.95))
+		return
 	var body := Color("3a3440") if lit_here else Color(0.1, 0.09, 0.12, 0.6)
 	var ink := Color(0.02, 0.02, 0.03, 0.95 if lit_here else 0.5)
 	var torso := Rect2(f + Vector2(-px * 0.18, -px * 2.6), Vector2(px * 0.36, px * 2.6))
@@ -2083,6 +2114,10 @@ func _draw_walker(f: Vector2, shake: float, id := "mill") -> void:
 	var px := float(m.PX)
 	var ink := Color("1d1611")
 	f.x += shake
+	var sheet: Texture2D = _e2("walker_" + (id if id in ["orchard", "chapel", "post", "grove"] else "mill"))
+	if sheet != null:
+		_draw_walker_sprite(sheet, f, active and f.distance_to(walker_pos + Vector2(shake, px * 0.42)) < 1.0)
+		return
 	match id:
 		"orchard":
 			# The Tull boy: short, a brown jacket, a red scarf and a flat cap.
@@ -2128,6 +2163,48 @@ func _draw_walker(f: Vector2, shake: float, id := "mill") -> void:
 	layer.draw_line(f + Vector2(px * 0.32, -px * 0.8), f + Vector2(px * 0.38, 0), Color("8a6a48"), 2.0)
 
 
+# ART-OVERHAUL-002 E2: a walker from their PixelLab sheet (rows south, north, east; column 0 standing, 1-6 the
+# walk; 32 px cells, feet on the bottom row). On a trek the facing and step follow the walker's own movement; on
+# the farm they stand facing you. West mirrors east.
+var _walker_seen := Vector2.ZERO
+var _walker_face := Vector2.DOWN
+var _walker_moving := 0.0
+
+
+func _draw_walker_sprite(sheet: Texture2D, f: Vector2, follows: bool) -> void:
+	var px := float(m.PX)
+	var frame := 0
+	var face := Vector2.DOWN
+	if follows:
+		var d := walker_pos - _walker_seen
+		_walker_seen = walker_pos
+		if d.length() > 0.2:
+			_walker_face = Vector2(signf(d.x), 0) if absf(d.x) > absf(d.y) else Vector2(0, signf(d.y))
+			_walker_moving = 0.15
+		face = _walker_face
+		if _walker_moving > 0.0:
+			_walker_moving -= get_process_delta_time_safe()
+			frame = 1 + int(Time.get_ticks_msec() / 110) % 6
+	var row := 0 if face == Vector2.DOWN else (1 if face == Vector2.UP else 2)
+	var cell := 32.0
+	var sz := Vector2(cell, cell) * (px / 16.0)
+	var at := (f - Vector2(sz.x * 0.5, sz.y)).snapped(Vector2(3, 3))
+	var dst := Rect2(at, sz)
+	if face == Vector2.LEFT:
+		dst = Rect2(at + Vector2(sz.x, 0), Vector2(-sz.x, sz.y))
+	layer.draw_texture_rect_region(sheet, dst, Rect2(frame * cell, row * cell, cell, cell))
+
+
+func get_process_delta_time_safe() -> float:
+	return clampf(m.get_process_delta_time(), 0.0, 0.1)
+
+
+func _e2(name: String) -> Texture2D:
+	if art == null:
+		art = TrekArt.new()
+	return art.e2.get(name) if TREK_ART_V2 and art.ok else null
+
+
 # A feral dog: a lean dark body low to the ground, four legs, a pointed head and a hanging tail, pale eyes.
 func _draw_dog(foe: Dictionary) -> void:
 	var px := float(m.PX)
@@ -2136,6 +2213,18 @@ func _draw_dog(foe: Dictionary) -> void:
 	var ink := Color("1d1611")
 	var body := Color("e8e0d0") if float(foe["flash"]) > 0.0 else Color("4a3a2e")
 	var trot := sin(Time.get_ticks_msec() / 70.0) * px * 0.06 if bool(foe.get("moving", false)) else 0.0
+	var dog_tex: Texture2D = _e2("dog")
+	if dog_tex != null:
+		# Seven 32 x 24 cells facing right: standing, then the trot. A hit flashes it pale, as before.
+		var frame := 1 + int(Time.get_ticks_msec() / 80) % 6 if bool(foe.get("moving", false)) else 0
+		var sz := Vector2(32, 24) * (px / 16.0)
+		var at := (f - Vector2(sz.x * 0.5, sz.y)).snapped(Vector2(3, 3))
+		var dst := Rect2(at, sz)
+		if s < 0.0:
+			dst = Rect2(at + Vector2(sz.x, 0), Vector2(-sz.x, sz.y))
+		var tint := Color(3.0, 3.0, 2.8) if float(foe["flash"]) > 0.0 else Color.WHITE
+		layer.draw_texture_rect_region(dog_tex, dst, Rect2(frame * 32, 0, 32, 24), tint)
+		return
 	for k in 4:
 		var lx: float = [-0.24, -0.1, 0.12, 0.26][k] * s
 		var step := trot if k % 2 == 0 else -trot

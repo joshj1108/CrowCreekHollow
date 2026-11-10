@@ -1606,5 +1606,212 @@
    "art/farm/trek/atlas.png",
    "art/farm/trek/trek.json"
   ]
+ },
+ "ART-OVERHAUL-002/E2": {
+  "tool": "tools/aoh2_e2.py",
+  "sources": "art/style_tests/ART-OVERHAUL-002/E2/raw/ (fetch.py, contact.py)",
+  "note": "E2: the treks' walkers, feral dog, the tall one, rope crossing and trail works. Reused: farm src_lantern_post (gate and post-road lamps), w3c_props_handcart (mill), the Stage D footbridge planks (orchard boardwalk).",
+  "generations": 161,
+  "jobs": [
+   {
+    "key": "maren",
+    "tool": "create_image_pro",
+    "job_id": "b75ac302-df08-48d1-886d-3f7d6dba1111",
+    "seed": 5101,
+    "settings": "pro, 32x32 (64 candidates), transparent; style image art/style_tests/ART-OVERHAUL-002/E2/refs/style_farmer.png (the farmer's walk frames)",
+    "prompt": "old village woman, bent, grey shawl, dark skirt, white bun, walking stick",
+    "note": "kept 01 -> character 5480705b-f1ff-4321-bed4-ce62133da50d",
+    "raw": "art/style_tests/ART-OVERHAUL-002/E2/raw/maren/"
+   },
+   {
+    "key": "tull",
+    "tool": "create_image_pro",
+    "job_id": "fc8e4108-4927-4168-b3e0-dc6c996f8170",
+    "seed": 5102,
+    "settings": "pro, 32x32 (64 candidates), transparent; style image art/style_tests/ART-OVERHAUL-002/E2/refs/style_farmer.png (the farmer's walk frames)",
+    "prompt": "farm boy, brown jacket, red scarf, flat cap",
+    "note": "rejected: 30 px tall, an adult's height",
+    "raw": "art/style_tests/ART-OVERHAUL-002/E2/raw/tull/"
+   },
+   {
+    "key": "tull2",
+    "tool": "create_image_pro",
+    "job_id": "1a7742e8-fa84-4856-befc-baad42eb90fe",
+    "seed": 5122,
+    "settings": "pro, 20x25 (64), style image tull/04",
+    "prompt": "short farm boy (same outfit), fills the canvas",
+    "note": "kept 01 (25 px tall) -> character e4c2f014-820c-44fe-b597-0834113e2155",
+    "raw": "art/style_tests/ART-OVERHAUL-002/E2/raw/tull2/"
+   },
+   {
+    "key": "vicar",
+    "tool": "create_image_pro",
+    "job_id": "4a3d33fa-afaa-4b47-b2e3-29ebfac2a900",
+    "seed": 5103,
+    "settings": "pro, 32x32 (64 candidates), transparent; style image art/style_tests/ART-OVERHAUL-002/E2/refs/style_farmer.png (the farmer's walk frames)",
+    "prompt": "tall thin vicar, black coat, white collar, wide black hat",
+    "note": "kept 01 -> character ec670c71-b934-4a45-9c5d-b424c33afd69",
+    "raw": "art/style_tests/ART-OVERHAUL-002/E2/raw/vicar/"
+   },
+   {
+    "key": "postman",
+    "tool": "create_image_pro",
+    "job_id": "d9e3e43e-32f3-472a-afa4-128c98af094c",
+    "seed": 5104,
+    "settings": "pro, 32x32 (64 candidates), transparent; style image art/style_tests/ART-OVERHAUL-002/E2/refs/style_farmer.png (the farmer's walk frames)",
+    "prompt": "postman, navy coat, satchel, peaked cap",
+    "note": "kept 04 -> character f1d37094-d727-441a-8820-726a72c11b76",
+    "raw": "art/style_tests/ART-OVERHAUL-002/E2/raw/postman/"
+   },
+   {
+    "key": "shawl",
+    "tool": "create_image_pro",
+    "job_id": "9bdeaa02-2a1e-4263-8829-f889e7599700",
+    "seed": 5105,
+    "settings": "pro, 32x32 (64 candidates), transparent; style image art/style_tests/ART-OVERHAUL-002/E2/refs/style_farmer.png (the farmer's walk frames)",
+    "prompt": "tall woman, grey shawl over her head, face in shadow, charcoal dress",
+    "note": "kept 02 -> character af62770c-e04c-49ec-81a3-fdfafcfa9ac5",
+    "raw": "art/style_tests/ART-OVERHAUL-002/E2/raw/shawl/"
+   },
+   {
+    "key": "dog",
+    "tool": "create_image_pro",
+    "job_id": "f435a32a-1a21-48f0-8c7b-57ce50f5c932",
+    "seed": 5106,
+    "settings": "pro, 32x32 (64 candidates), transparent; style image art/style_tests/ART-OVERHAUL-002/E2/refs/style_farmer.png (the farmer's walk frames)",
+    "prompt": "lean feral dog, side view facing right",
+    "note": "rejected: 29x22, too big beside the farmer",
+    "raw": "art/style_tests/ART-OVERHAUL-002/E2/raw/dog/"
+   },
+   {
+    "key": "dog2",
+    "tool": "create_image_pro",
+    "job_id": "a7dbf421-0493-402d-aa7b-6de64601ee9a",
+    "seed": 5126,
+    "settings": "pro, 24x16 (64), style image dog/03",
+    "prompt": "the same dog, fills the canvas",
+    "note": "kept 00 (24x15)",
+    "raw": "art/style_tests/ART-OVERHAUL-002/E2/raw/dog2/"
+   },
+   {
+    "key": "dog_trot",
+    "tool": "animate_image",
+    "job_id": "98a45cca-decd-4d5b-9a75-0a958ac4f381",
+    "seed": 5136,
+    "settings": "6 frames on dog2/00 padded to 32x24",
+    "prompt": "dog trotting right in place",
+    "note": "kept: dog.png",
+    "raw": "art/style_tests/ART-OVERHAUL-002/E2/raw/dog_trot/"
+   },
+   {
+    "key": "tall",
+    "tool": "create_image_pro",
+    "job_id": "7a845d67-5d52-40da-a65a-3a176706c832",
+    "seed": 5107,
+    "settings": "pro, 32x48 (36), style farmer",
+    "prompt": "impossibly tall thin dark figure, red eyes",
+    "note": "kept 12 (20x41)",
+    "raw": "art/style_tests/ART-OVERHAUL-002/E2/raw/tall/"
+   },
+   {
+    "key": "stake",
+    "tool": "create_image_pro",
+    "job_id": "b06bb128-3d06-4f1d-baad-d5a96bdf314b",
+    "seed": 5111,
+    "settings": "pro, transparent; style image refs/style_props.png (trek fingerpost, cairn, undergrowth)",
+    "prompt": "wooden stake with hemp rope knotted at the top",
+    "note": "kept 01",
+    "raw": "art/style_tests/ART-OVERHAUL-002/E2/raw/stake/"
+   },
+   {
+    "key": "rope",
+    "tool": "create_image_pro",
+    "job_id": "b5fee420-cd44-445e-ab18-00117736f6d7",
+    "seed": 5112,
+    "settings": "pro, 32x16, pro, transparent; style image refs/style_props.png (trek fingerpost, cairn, undergrowth)",
+    "prompt": "straight horizontal hemp rope segment",
+    "note": "kept 00",
+    "raw": "art/style_tests/ART-OVERHAUL-002/E2/raw/rope/"
+   },
+   {
+    "key": "steps",
+    "tool": "create_image_pro",
+    "job_id": "f792469a-e052-4316-b8d5-4b81fe59d6e8",
+    "seed": 5113,
+    "settings": "pro, transparent; style image refs/style_props.png (trek fingerpost, cairn, undergrowth)",
+    "prompt": "four rough stone steps with iron rails",
+    "note": "kept 11",
+    "raw": "art/style_tests/ART-OVERHAUL-002/E2/raw/steps/"
+   },
+   {
+    "key": "tins",
+    "tool": "create_image_pro",
+    "job_id": "c5b0cc2b-5786-4d7d-ae4e-fe2873662b9c",
+    "seed": 5114,
+    "settings": "pro, transparent; style image refs/style_props.png (trek fingerpost, cairn, undergrowth)",
+    "prompt": "two copper oil tins on a mossy stone",
+    "note": "kept 03",
+    "raw": "art/style_tests/ART-OVERHAUL-002/E2/raw/tins/"
+   },
+   {
+    "key": "hut",
+    "tool": "create_image_pro",
+    "job_id": "13b17da7-0558-48e2-906b-420199061fd3",
+    "seed": 5115,
+    "settings": "pro, 64x64 (16), style image ART-OVERHAUL-001/D/refs/style_trees.png",
+    "prompt": "timber trail shelter hut, front to the viewer",
+    "note": "kept 09, the most frontal; slightly angled (deferred)",
+    "raw": "art/style_tests/ART-OVERHAUL-002/E2/raw/hut/"
+   },
+   {
+    "key": "char_maren",
+    "tool": "create_character v3 (reference, 4 directions) + animate_character template walking-6-frames (south, east, north)",
+    "character_id": "5480705b-f1ff-4321-bed4-ce62133da50d",
+    "cost": 4,
+    "note": "kept: walker sheet (west mirrors east)"
+   },
+   {
+    "key": "char_tull",
+    "tool": "create_character v3 (reference, 4 directions) + animate_character template walking-6-frames (south, east, north)",
+    "character_id": "e4c2f014-820c-44fe-b597-0834113e2155",
+    "cost": 4,
+    "note": "kept: walker sheet (west mirrors east)"
+   },
+   {
+    "key": "char_vicar",
+    "tool": "create_character v3 (reference, 4 directions) + animate_character template walking-6-frames (south, east, north)",
+    "character_id": "ec670c71-b934-4a45-9c5d-b424c33afd69",
+    "cost": 4,
+    "note": "kept: walker sheet (west mirrors east)"
+   },
+   {
+    "key": "char_postman",
+    "tool": "create_character v3 (reference, 4 directions) + animate_character template walking-6-frames (south, east, north)",
+    "character_id": "f1d37094-d727-441a-8820-726a72c11b76",
+    "cost": 4,
+    "note": "kept: walker sheet (west mirrors east)"
+   },
+   {
+    "key": "char_shawl",
+    "tool": "create_character v3 (reference, 4 directions) + animate_character template walking-6-frames (south, east, north)",
+    "character_id": "af62770c-e04c-49ec-81a3-fdfafcfa9ac5",
+    "cost": 4,
+    "note": "kept: walker sheet (west mirrors east)"
+   }
+  ],
+  "game_files": [
+   "art/farm/trek/e2/walker_mill.png",
+   "walker_orchard.png",
+   "walker_chapel.png",
+   "walker_post.png",
+   "walker_grove.png",
+   "dog.png",
+   "tall.png",
+   "stake.png",
+   "rope.png",
+   "steps.png",
+   "tins.png",
+   "hut.png"
+  ]
  }
 }

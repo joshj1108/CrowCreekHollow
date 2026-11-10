@@ -39,6 +39,14 @@ const SIGN_ARMS := [Vector2(3, 5), Vector2(21, 7)]   # the fingerpost's left and
 const MILL_WINDOW := Rect2(29, 23, 6, 6)        # the upper window, lit as the old mill's was
 const CHAPEL_WINDOWS := [Rect2(30, 50, 4, 11)]   # by night, light through the door left ajar
 const LIT := Color("e8c070")
+# ART-OVERHAUL-002 (Stage D review B and C): the destinations read by shape, not glow. The wood right behind a
+# landmark is drawn at the deepest tint so its silhouette stands clear; the wood within FOCUS_ROOM tiles of a
+# destination or an event keeps its trees but swaps large undergrowth for one-tile pieces; the landmark gets a
+# contact shadow and a small lift in value (LANDMARK_LIFT). Art only: blocking is unchanged.
+const FOCUS_ROOM := 2
+const BACKDROP_ROWS := 4
+const LANDMARK_LIFT := Color(1.12, 1.12, 1.1)
+const CONTACT_SHADOW := Color(0.02, 0.02, 0.03, 0.38)
 
 var ok := false
 var atlas: Texture2D
@@ -55,6 +63,15 @@ var _shade: Array[Vector2i] = []    # wood tiles (shaded ground)
 var _edges: Array = []              # [tile, side] open tiles beside the wood, for the stepped shadow
 var unplaced := 0                   # wood tiles nothing would fit (the check reports it)
 var _reaches := PackedInt32Array()  # _reach per tile, while rebuilding
+# ART-OVERHAUL-002 E2: the walkers, dog, tall one, rope crossing and trail works (art/farm/trek/e2/, built by
+# tools/aoh2_e2.py; the lamp post and handcart are the farm's own concept pieces).
+const E2 := "res://art/farm/trek/e2/"
+const LAMP_POST := "res://art/farm/concept/src_lantern_post.png"
+const LAMP_SRC := Rect2(8, 1, 14, 46)      # the lantern post's opaque pixels
+const HANDCART := "res://art/farm/concept/w3c_props_handcart.png"
+const BLAZE := Color("d8cfb4")
+var e2 := {}                        # name -> Texture2D
+var _works: Array = []              # [Texture2D, src Rect2, art-px top-left] works placed in the wood (hut, lamps)
 
 
 func _init() -> void:
@@ -75,6 +92,13 @@ func _init() -> void:
 	for k in meta["kinds"]:
 		kinds[k] = meta["kinds"][k]
 	ok = atlas != null and grounds.size() == 4
+	for n in ["walker_mill", "walker_orchard", "walker_chapel", "walker_post", "walker_grove", "dog", "tall", "stake",
+			"rope", "steps", "tins", "hut"]:
+		if ResourceLoader.exists(E2 + n + ".png"):
+			e2[n] = load(E2 + n + ".png")
+	for extra in [["lamp_post", LAMP_POST], ["handcart", HANDCART]]:
+		if ResourceLoader.exists(extra[1]):
+			e2[extra[0]] = load(extra[1])
 
 
 static func _hash(x: int, y: int, salt: int) -> int:
@@ -214,15 +238,24 @@ func _rebuild(m, trek) -> void:
 	unplaced = 0
 	var Tl := MainGame.Tile
 	var depths := _depths(m)
+	var focus := _focus_rects(trek)
+	var spec: Dictionary = trek._spec()
+	var backdrop := Rect2i()
+	if spec.has("dest"):
+		var r: Rect2i = spec["dest"]
+		backdrop = Rect2i(r.position.x - 1, r.position.y - BACKDROP_ROWS, r.size.x + 2, BACKDROP_ROWS + 1)
 	_reaches = PackedInt32Array()
 	for y in m.CAVE_H:
 		for x in m.CAVE_W:
 			_reaches.append(_reach(m, Vector2i(x, y)))
+	_place_works(m, trek)
 	for y in m.CAVE_H:
 		for x in m.CAVE_W:
 			var k: int = m.cave[y][x]
 			if k == Tl.TREE:
 				_shade.append(Vector2i(x, y))
+				if _under_works(x, y):
+					continue
 				var depth: int = depths[Vector2i(x, y)]
 				var got: Array = []
 				# The farm's own tall firs and maples, now and then deep in the wood where they clear the open ground.
@@ -230,14 +263,22 @@ func _rebuild(m, trek) -> void:
 					got = _try(m, "big", x, y, false)
 				if got.is_empty():
 					got = _try(m, _pick_kind(x, y, depth), x, y, false)
-				if got.is_empty():
+				var near := false
+				for f in focus:
+					if f.grow(FOCUS_ROOM).has_point(Vector2i(x, y)):
+						near = true
+						break
+				if got.is_empty() and not near:
 					got = _try(m, "u_" + ground, x, y, true)
 				if got.is_empty():
 					got = _try(m, "u_small", x, y, true)
 				if got.is_empty():
 					unplaced += 1
 					continue
-				_upright.append([got[0], got[1], DEPTH_TINTS[depth]])
+				var tint: Color = DEPTH_TINTS[depth]
+				if backdrop.has_point(Vector2i(x, y)):
+					tint = DEPTH_TINTS[2]
+				_upright.append([got[0], got[1], tint])
 			elif _open(k) and k != Tl.FENCE:
 				for d in [Vector2i(0, -1), Vector2i(0, 1), Vector2i(-1, 0), Vector2i(1, 0)]:
 					var t: Vector2i = Vector2i(x, y) + d
@@ -259,6 +300,75 @@ func _rebuild(m, trek) -> void:
 		return fa < fb if fa != fb else a[1].x < b[1].x)
 
 
+# The trail works that stand in the wood: the waystation hut in the halfway clearing of a long route, and a lamp
+# post by the way in on the post road. Each takes the nearest wood spot to the way in where it stays off the trail
+# and open ground (fits), and the trees on those tiles give way to it. None found: it is not drawn.
+func _place_works(m, trek) -> void:
+	_works = []
+	var spec: Dictionary = trek._spec()
+	var pts: Array = spec.get("points", [])
+	if pts.is_empty():
+		return
+	var entry := Vector2(float(pts[0][0]) + 0.5, float(pts[0][1]) + 0.5) * T
+	var want: Array = []
+	if trek._rests_halfway() and trek.clearing == trek.route.size() / 2 and e2.has("hut"):
+		var t: Texture2D = e2["hut"]
+		want.append([t, Rect2(Vector2.ZERO, t.get_size())])
+	if trek.route_id == "post" and trek._has_work("post_lamps") and e2.has("lamp_post"):
+		want.append([e2["lamp_post"], LAMP_SRC])
+	for w in want:
+		var sz: Vector2 = (w[1] as Rect2).size
+		var best := Vector2(-1, -1)
+		var best_d := INF
+		for y in m.CAVE_H:
+			for x in m.CAVE_W:
+				if m.cave[y][x] != MainGame.Tile.TREE:
+					continue
+				var at := Vector2(x * T + (T - sz.x) * 0.5, (y + 1) * T - sz.y + 1).round()
+				var d := (at + sz * Vector2(0.5, 1.0)).distance_to(entry)
+				if d >= best_d or _overlaps_works(Rect2(at, sz)) or not fits(m, Rect2(at, sz)):
+					continue
+				best = at
+				best_d = d
+		if best.x >= 0:
+			_works.append([w[0], w[1], best])
+
+
+func _overlaps_works(r: Rect2) -> bool:
+	for w in _works:
+		if Rect2(w[2], (w[1] as Rect2).size).intersects(r):
+			return true
+	return false
+
+
+# A wood tile mostly under a placed work keeps no tree of its own.
+func _under_works(x: int, y: int) -> bool:
+	var cell := Rect2(x * T, y * T, T, T)
+	for w in _works:
+		var o := cell.intersection(Rect2(w[2], (w[1] as Rect2).size))
+		if o.get_area() >= T * T * 0.5:
+			return true
+	return false
+
+
+# The tiles the player must read at a glance: the destination, the blocked stretch, the fingerpost, the cairn or
+# hollow tree.
+func _focus_rects(trek) -> Array:
+	var out: Array = []
+	var spec: Dictionary = trek._spec()
+	if spec.has("dest"):
+		out.append(spec["dest"])
+	if not trek.blocked.is_empty():
+		var r := Rect2i(trek.blocked[0], Vector2i.ONE)
+		for t in trek.blocked:
+			r = r.expand(t).expand(t + Vector2i.ONE)
+		out.append(r)
+	for t in [trek.sign_tile, trek.side_tile, trek.event_point]:
+		if t.x >= 0:
+			out.append(Rect2i(t, Vector2i.ONE))
+	return out
+
+
 func _ground_of(trek) -> String:
 	if trek.route_id == "grove" or trek._trail() == "dark":
 		return "hollow"
@@ -269,7 +379,7 @@ func _ground_of(trek) -> String:
 
 func refresh(m, trek) -> void:
 	var g := _ground_of(trek)
-	var sig: int = hash([m.cave.hash(), g])
+	var sig: int = hash([m.cave.hash(), g, _focus_rects(trek), trek.works.keys(), trek.clearing])
 	if sig != _sig:
 		_sig = sig
 		ground = g
@@ -367,10 +477,15 @@ func draw(m, trek, x0: int, y0: int, x1: int, y1: int) -> void:
 	for e in ev_items:
 		items.append([e[0], 1, e])
 	items.sort_custom(func(a, b) -> bool: return a[0] < b[0] if a[0] != b[0] else a[1] < b[1])
+	var blazes: bool = trek.route_id == "mill" and trek._has_work("waymarks") and trek._trail() != "dark"
 	for it in items:
 		if it[1] == 0:
 			var u: Array = it[2]
 			_blit(m, u[0], u[1], s, u[2], _hash(int(u[1].x), int(u[1].y), 9) % 3 == 0)
+			# Waymarks: a pale blaze cut on every third edge tree's trunk, a hand's height above its foot.
+			if blazes and u[2] == DEPTH_TINTS[0] and _hash(int(u[1].x), int(u[1].y), 41) % 3 == 0:
+				var bsz: Vector2 = pieces[u[0]].size
+				m.draw_rect(Rect2((u[1] + Vector2(roundf(bsz.x * 0.5) - 1, bsz.y - 9)) * s, Vector2(2, 3) * s), BLAZE)
 		else:
 			(it[2][1] as Callable).call()
 	if ev == "fog":
@@ -421,11 +536,49 @@ func _draw_crossing(m, trek, s: float) -> void:
 				m.draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
 		return
 	if trek.roped:
+		if e2.has("rope") and e2.has("stake"):
+			_draw_rope(m, trek, s)
+			return
 		var a: Vector2 = m._tile_center(trek.blocked[0].x, trek.blocked[0].y)
 		var b: Vector2 = m._tile_center(trek.blocked[-1].x, trek.blocked[-1].y)
 		var px: float = m.PX
 		m.draw_line(a + Vector2(-px * 0.6, -px * 0.6), b + Vector2(px * 0.6, px * 0.3), Color("1d1611"), 4.0)
 		m.draw_line(a + Vector2(-px * 0.6, -px * 0.6), b + Vector2(px * 0.6, px * 0.3), Color("b89a68"), 2.0)
+
+
+# The rope across the flood: a stake on each bank and the rope run between them along the crossing, in whole
+# art pixels (rope pieces end to end; a crossing that runs up the trail turns them a quarter).
+func _draw_rope(m, trek, s: float) -> void:
+	var lo := Vector2(1e9, 1e9)
+	var hi := Vector2(-1e9, -1e9)
+	for t in trek.blocked:
+		lo = lo.min(Vector2(t * T))
+		hi = hi.max(Vector2(t * T + Vector2i(T, T)))
+	var across := hi.x - lo.x >= hi.y - lo.y
+	var rope: Texture2D = e2["rope"]
+	var stake: Texture2D = e2["stake"]
+	var rs := rope.get_size()
+	var ss := stake.get_size()
+	if across:
+		var y := roundf((lo.y + hi.y) * 0.5 - rs.y * 0.5)
+		var x := lo.x - T * 0.5
+		while x < hi.x + T * 0.5:
+			var w := minf(rs.x, hi.x + T * 0.5 - x)
+			m.draw_texture_rect_region(rope, Rect2(Vector2(x, y) * s, Vector2(w, rs.y) * s), Rect2(Vector2.ZERO, Vector2(w, rs.y)))
+			x += rs.x
+		for sx in [lo.x - T * 0.5 - ss.x * 0.5, hi.x + T * 0.5 - ss.x * 0.5]:
+			m.draw_texture_rect(stake, Rect2(Vector2(roundf(sx), y + rs.y + 4 - ss.y) * s, ss * s), false)
+	else:
+		var x := roundf((lo.x + hi.x) * 0.5 - rs.y * 0.5)
+		var y := lo.y - T * 0.5
+		while y < hi.y + T * 0.5:
+			var h := minf(rs.x, hi.y + T * 0.5 - y)
+			m.draw_set_transform(Vector2(x + rs.y, y) * s, PI * 0.5, Vector2.ONE)
+			m.draw_texture_rect_region(rope, Rect2(Vector2.ZERO, Vector2(h, rs.y) * s), Rect2(Vector2.ZERO, Vector2(h, rs.y)))
+			m.draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
+			y += rs.x
+		for sy in [lo.y - T * 0.5, hi.y + T * 0.5]:
+			m.draw_texture_rect(stake, Rect2(Vector2(roundf(x - ss.x * 0.5 + rs.y * 0.5), roundf(sy) - ss.y + 4) * s, ss * s), false)
 
 
 # [foot y in art px, Callable that draws it, art-px Rect2, kind] for the event's and destination's pieces.
@@ -483,6 +636,14 @@ func _event_items(m, trek, spec: Dictionary, ev: String) -> Array:
 			elif ev == "hollow" and not trek.event_done:
 				var h: Vector2 = holes.get(i, sz * Vector2(0.5, 0.7))
 				m.draw_rect(Rect2((at + h - Vector2(1, 0)) * s, Vector2(2, 1) * s), Color("b8b0a0")), Rect2(at, sz), kind])
+	for w in _works:
+		var src: Rect2 = w[1]
+		var at: Vector2 = w[2]
+		var tex: Texture2D = w[0]
+		out.append([at.y + src.size.y, func() -> void:
+			_shadow(m, at, src.size, s)
+			m.draw_texture_rect_region(tex, Rect2(at * s, src.size * s), src), Rect2(at, src.size), "work"])
+	out.append_array(_work_items(m, trek, spec, s))
 	if spec.has("dest"):
 		var r: Rect2i = spec["dest"]
 		match trek.route_id:
@@ -499,6 +660,49 @@ func _event_items(m, trek, spec: Dictionary, ev: String) -> Array:
 	return out
 
 
+# Trail works shown at their places: the chapel steps below the chapel door, the handcart by the mill, the oil
+# tins by the fingerpost on the orchard way, and the orchard boardwalk's planks on the trail before the orchard.
+func _work_items(m, trek, spec: Dictionary, s: float) -> Array:
+	var out: Array = []
+	if trek.sign_tile.x >= 0 and trek.route_id == "orchard" and trek._has_work("oil_cache") and e2.has("tins"):
+		var tins: Texture2D = e2["tins"]
+		var tsz := tins.get_size()
+		var tat := _settle(m, Vector2((trek.sign_tile.x + 1) * T + 1, (trek.sign_tile.y + 1) * T - tsz.y + 1), tsz)
+		out.append([tat.y + tsz.y, func() -> void: m.draw_texture_rect(tins, Rect2(tat * s, tsz * s), false), Rect2(tat, tsz), "work"])
+	if not spec.has("dest"):
+		return out
+	var r: Rect2i = spec["dest"]
+	var base := Vector2(r.position * T)
+	var w := Vector2(r.size * T)
+	if trek.route_id == "chapel" and trek._has_work("chapel_steps") and e2.has("steps"):
+		var steps: Texture2D = e2["steps"]
+		var ssz := steps.get_size()
+		var sat := Vector2(base.x + (w.x - ssz.x) * 0.5, base.y + w.y - 3).round()
+		out.append([sat.y + ssz.y, func() -> void: m.draw_texture_rect(steps, Rect2(sat * s, ssz * s), false), Rect2(sat, ssz), "work"])
+	if trek.route_id == "mill" and trek._has_work("handcart") and e2.has("handcart"):
+		var cart: Texture2D = e2["handcart"]
+		var csz := cart.get_size()
+		var cat := Vector2(base.x + w.x - csz.x - 2, base.y + w.y - csz.y).round()
+		out.append([cat.y + csz.y, func() -> void: m.draw_texture_rect(cart, Rect2(cat * s, csz * s), false), Rect2(cat, csz), "work"])
+	if trek.route_id == "orchard" and trek._has_work("boardwalk"):
+		var i := _first("bridge")
+		if i >= 0:
+			for ty in range(r.end.y, mini(r.end.y + 3, m.CAVE_H)):
+				for tx in range(r.position.x, r.end.x):
+					if trek._is_trail(tx, ty):
+						var pat := Vector2(tx * T, ty * T + (T - pieces[i].size.y) * 0.5).round()
+						out.append([float(ty * T), func() -> void: _blit(m, i, pat, s), Rect2(pat, pieces[i].size), "work"])
+	return out
+
+
+# A stepped contact shadow under a landmark's foot, on the art grid.
+func _shadow(m, at: Vector2, sz: Vector2, s: float) -> void:
+	var foot := at.y + sz.y
+	for band in [[2.0, 0.0], [4.0, 1.0]]:
+		var inset: float = band[0]
+		m.draw_rect(Rect2(Vector2(at.x + inset, foot - 2.0 + band[1]) * s, Vector2(sz.x - inset * 2.0, 2.0) * s), CONTACT_SHADOW)
+
+
 # A destination piece centred on its rect, its foot on the rect's foot. The mill gets its wheel and lit window,
 # the chapel its windows lit by night.
 func _building_item(m, trek, r: Rect2i, kind: String, s: float) -> Array:
@@ -510,7 +714,8 @@ func _building_item(m, trek, r: Rect2i, kind: String, s: float) -> Array:
 	if kind == "mill":
 		at.x = base.x + 2
 	return [at.y + sz.y, func() -> void:
-		_blit(m, i, at, s)
+		_shadow(m, at, sz, s)
+		_blit(m, i, at, s, LANDMARK_LIFT)
 		if kind == "mill":
 			m.draw_rect(Rect2((at + MILL_WINDOW.position) * s, MILL_WINDOW.size * s), LIT)
 			var wi := _first("wheel")
@@ -541,7 +746,9 @@ func _orchard_items(m, r: Rect2i, s: float) -> Array:
 		var sz: Vector2 = pieces[i].size
 		var foot := base.y + r.size.y * T - (4 if k % 2 == 0 else 12)
 		var at := Vector2(base.x + w * float(spots[k][0]) - sz.x * 0.5, foot - sz.y).round()
-		out.append([foot, func() -> void: _blit(m, i, at, s, Color(0.92, 0.94, 0.96)), Rect2(at, sz), "orchard"])
+		out.append([foot, func() -> void:
+			_shadow(m, at, sz, s)
+			_blit(m, i, at, s, LANDMARK_LIFT), Rect2(at, sz), "orchard"])
 	for side in [-1, 1]:
 		var list: Array = kinds["u_pasture"]
 		var i: int = list[10 if side < 0 else 12]

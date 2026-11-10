@@ -65,6 +65,10 @@ extends SceneTree
 #   tevent=ID       with trek, the clearing's event: tree, crows, flood, lights, cairn, fog or hollow (the day sets it otherwise)
 #   tdark           with trek, take the dark trail at the fork (trek=1 is then the dark clearing, 2 the mill)
 #   tsign           with trek=0, stand below the fingerpost at the fork
+#   works=A,B       trail works built: waymarks, footbridge, gate_lamp, boardwalk, waystation, chapel_steps,
+#                   handcart, oil_cache, post_lamps (ART-OVERHAUL-002 E2 draws them)
+#   troped          with trek and tevent=flood, the rope is across the flood
+#   tdog            with trek, two feral dogs stand beside you
 #   tread           with trek, the fingerpost reads (as with the Waymarks trail work)
 #   nooil           with trek, no lamp oil, so the lantern is out
 #   tall            with trek, the tall one stands in the trees beside you (with troute=edge, its eyes in the
@@ -116,6 +120,9 @@ func _initialize() -> void:
 			if main._season_of(main._calendar_date(d)["month"]) == opt["season"]:
 				main.day = d
 				break
+	if opt.has("works"):
+		for id in str(opt["works"]).split(","):
+			main.trek.works[id] = true
 	if opt.has("stage"):
 		main.house_stage = int(opt["stage"])
 		main._build_interior()
@@ -227,6 +234,16 @@ func _initialize() -> void:
 		main.player.position = main._tile_center(ep.x, ep.y + 3)
 		main.trek.walker_pos = main.player.position + Vector2(0, main.PX * 1.3)
 		main.trek.crumbs.assign([main.trek.walker_pos, main.player.position])
+		if opt.has("troped"):
+			main.trek.roped = true
+		if opt.has("tdog"):
+			# Two feral dogs a few tiles off, one trotting (ART-OVERHAUL-002 E2 sprite check).
+			for k in 2:
+				var pt := Vector2i((main.player.position / main.PX).floor()) + Vector2i(2 + k * 2, 1 - k)
+				var foe: Dictionary = main.combat_sys._new_foe("dog", pt)
+				foe["moving"] = k == 0
+				foe["face"] = -1.0 if k == 0 else 1.0
+				main.foes.append(foe)
 		if opt.has("tall"):
 			main.trek.tall_on = true
 			main.trek.tall_pos = main.player.position + Vector2(main.PX * 3.0, -main.PX * 0.5)
