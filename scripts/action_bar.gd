@@ -18,10 +18,15 @@ signal action_pressed(action_id: String)
 
 # UI-OVERHAUL-001 Phase 1: sections drawn with the shared theme (UiTheme) as the prototype. The rest keep
 # their own styling until Phase 3 moves them over. Only the look changes: focus, input and actions are the same.
-const THEMED_PANELS := ["Buildings"]
+const THEMED_PANELS := ["Buildings", "Inventory"]
 var _themed := false
 var detail_page: PanelContainer   # the ledger's detail page: dark wood, or parchment when themed
 var _detail_flat: StyleBox
+var footer_bar: PanelContainer    # the footer's band (prompts and Close): no band, or the theme's FooterBar
+var slot_caption: Label           # Phase 2: names the inventory slot in focus or under the mouse, over the grid
+var _caption_text := ""           # what the caption shows with nothing in focus: the picked item
+const SLOT_SIZE := 68             # an inventory slot, square; its picture is 44
+const SLOT_GAP := 6
 
 const SUBTITLES := {
 	"Skills": "How far you have come",
@@ -239,9 +244,13 @@ func _build_menu() -> Control:
 	main.add_child(_build_ledger_frame())
 	main.add_child(_build_book_frame())
 
+	# The footer sits in its own band, so a themed panel can set it apart from the list above.
+	footer_bar = PanelContainer.new()
+	footer_bar.add_theme_stylebox_override("panel", StyleBoxEmpty.new())
+	main.add_child(footer_bar)
 	var footer := HBoxContainer.new()
 	footer.add_theme_constant_override("separation", 12)
-	main.add_child(footer)
+	footer_bar.add_child(footer)
 	prompt_bar = HBoxContainer.new()
 	prompt_bar.add_theme_constant_override("separation", 18)
 	prompt_bar.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -342,8 +351,33 @@ func show_panel(tab: String, rows: Array) -> void:
 		if row.has("tabs"):
 			grid_top.add_child(_build_tabs(row))
 		elif row.has("split") and not row["split"].get("detail", {}).is_empty():
-			# The grid scrolls on the left; its detail card stays on the right.
-			rows_box.add_child(_centred(_build_split_grid(row["split"])))
+			# Phase 2: a slot grid gets a line over it naming the slot in focus (the picked one otherwise).
+			# It shares the tab strip's line, on the left, with a matching spacer on the right so the tabs stay centred.
+			var slotted: bool = _themed and row["split"].has("groups")
+			if slotted:
+				_caption_text = _slot_caption(row["split"]["detail"])
+				slot_caption = Label.new()
+				slot_caption.theme_type_variation = "SlotCaption"
+				slot_caption.text = _caption_text
+				slot_caption.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+				slot_caption.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+				slot_caption.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+				slot_caption.custom_minimum_size.x = 60
+				var strip: Node = grid_top.get_child(0) if grid_top.get_child_count() > 0 else null
+				if strip is HBoxContainer:
+					strip.add_child(slot_caption)
+					strip.move_child(slot_caption, 0)
+					var balance := Control.new()
+					balance.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+					balance.custom_minimum_size.x = 60
+					balance.mouse_filter = Control.MOUSE_FILTER_IGNORE
+					strip.add_child(balance)
+				else:
+					grid_top.add_child(slot_caption)
+			# The grid scrolls on the left; its detail card stays on the right. Slot groups line up on the left,
+			# with their headings and the rows below them.
+			var grid := _build_split_grid(row["split"])
+			rows_box.add_child(grid if slotted else _centred(grid))
 			var card := _build_detail(row["split"]["detail"])
 			card.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 			card.custom_minimum_size.x = 0
@@ -386,6 +420,22 @@ func _apply_theme(on: bool) -> void:
 	else:
 		detail_page.theme_type_variation = ""
 		detail_page.add_theme_stylebox_override("panel", _detail_flat)
+	# Phase 2: the footer's band, and no well behind the detail column (its card is its own panel). Lists and
+	# grids get the theme's well through ScrollContainer.
+	if on:
+		footer_bar.remove_theme_stylebox_override("panel")
+		footer_bar.theme_type_variation = "FooterBar"
+		side_scroll.theme_type_variation = "PlainScroll"
+		hint_label.theme_type_variation = "Hint"
+		hint_label.remove_theme_color_override("font_color")
+		hint_label.remove_theme_font_size_override("font_size")
+	else:
+		footer_bar.theme_type_variation = ""
+		footer_bar.add_theme_stylebox_override("panel", StyleBoxEmpty.new())
+		side_scroll.theme_type_variation = ""
+		hint_label.theme_type_variation = ""
+		hint_label.add_theme_font_size_override("font_size", 13)
+		hint_label.add_theme_color_override("font_color", COL_MUTED)
 	_style_button(close_button, false)
 
 
@@ -462,18 +512,24 @@ func _build_row(data: Dictionary) -> Control:
 	if data.has("section"):
 		var heading := Label.new()
 		heading.text = str(data["section"]).to_upper()
-		heading.add_theme_font_size_override("font_size", 13)
-		heading.add_theme_color_override("font_color", COL_ACCENT)
+		if _themed:
+			heading.theme_type_variation = "SectionHeading"
+		else:
+			heading.add_theme_font_size_override("font_size", 13)
+			heading.add_theme_color_override("font_color", COL_ACCENT)
 		var spaced := MarginContainer.new()
-		spaced.add_theme_constant_override("margin_top", 10)
+		spaced.add_theme_constant_override("margin_top", 14 if _themed else 10)
 		spaced.add_child(heading)
 		return spaced
 	if data.has("note") and not data.has("name"):
 		var note := Label.new()
 		note.text = str(data["note"])
 		note.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-		note.add_theme_font_size_override("font_size", 14)
-		note.add_theme_color_override("font_color", COL_MUTED)
+		if _themed:
+			note.theme_type_variation = "Hint"
+		else:
+			note.add_theme_font_size_override("font_size", 14)
+			note.add_theme_color_override("font_color", COL_MUTED)
 		return note
 	return _build_card(data)
 
@@ -489,7 +545,10 @@ func _centred(content: Control) -> Control:
 # One option: a name, a value, an optional button, and an optional progress bar.
 func _build_card(data: Dictionary) -> Control:
 	var card := PanelContainer.new()
-	card.add_theme_stylebox_override("panel", _skin(UiSkin.slot(false, 12), _box(COL_CARD, COL_CARD, 0, 8, 12)))
+	if _themed:
+		card.theme_type_variation = "Card"
+	else:
+		card.add_theme_stylebox_override("panel", _skin(UiSkin.slot(false, 12), _box(COL_CARD, COL_CARD, 0, 8, 12)))
 	var block := VBoxContainer.new()
 	block.add_theme_constant_override("separation", 6)
 	card.add_child(block)
@@ -521,8 +580,11 @@ func _build_card(data: Dictionary) -> Control:
 	# so the card never grows wider than the menu.
 	var value_label := Label.new()
 	value_label.text = str(data.get("value", ""))
-	value_label.add_theme_font_size_override("font_size", 14)
-	value_label.add_theme_color_override("font_color", COL_MUTED)
+	if _themed:
+		value_label.theme_type_variation = "CardValue"
+	else:
+		value_label.add_theme_font_size_override("font_size", 14)
+		value_label.add_theme_color_override("font_color", COL_MUTED)
 	if value_label.text.length() > 60:
 		value_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		value_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -554,17 +616,21 @@ func _build_card(data: Dictionary) -> Control:
 		var note := Label.new()
 		note.text = str(data["note"])
 		note.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-		note.add_theme_font_size_override("font_size", 14)
-		note.add_theme_color_override("font_color", COL_MUTED)
+		if _themed:
+			note.theme_type_variation = "Hint"
+		else:
+			note.add_theme_font_size_override("font_size", 14)
+			note.add_theme_color_override("font_color", COL_MUTED)
 		block.add_child(note)
 
 	if data.has("progress"):
 		var bar := ProgressBar.new()
 		bar.show_percentage = false
-		bar.custom_minimum_size = Vector2(0, 8)
+		bar.custom_minimum_size = Vector2(0, 10 if _themed else 8)
 		bar.value = clampf(float(data["progress"]), 0.0, 1.0) * 100.0
-		bar.add_theme_stylebox_override("background", _box(COL_TRACK, COL_TRACK, 0, 4, 0))
-		bar.add_theme_stylebox_override("fill", _box(COL_ACCENT, COL_ACCENT, 0, 4, 0))
+		if not _themed:
+			bar.add_theme_stylebox_override("background", _box(COL_TRACK, COL_TRACK, 0, 4, 0))
+			bar.add_theme_stylebox_override("fill", _box(COL_ACCENT, COL_ACCENT, 0, 4, 0))
 		block.add_child(bar)
 	return card
 
@@ -582,7 +648,12 @@ func _build_tabs(data: Dictionary) -> Control:
 		button.focus_mode = Control.FOCUS_NONE
 		var open := str(tab["id"]) == str(data.get("active", ""))
 		_style_button(button, open)
-		if open:
+		if _themed:
+			if open:
+				UiTheme.mark_active_tab(button)
+			else:
+				button.theme_type_variation = "TabInactive"
+		elif open:
 			button.add_theme_color_override("font_color", COL_ACCENT)
 		button.pressed.connect(_on_action_pressed.bind(str(tab.get("action", ""))))
 		holder.add_child(button)
@@ -650,7 +721,119 @@ func _build_split(data: Dictionary) -> Control:
 func _build_split_grid(data: Dictionary) -> Control:
 	if data.get("figure", false):
 		return _build_figure(data["recipes"])
+	if _themed and data.has("groups"):
+		return _build_slot_groups(data)
 	return _build_recipes({"recipes": data["recipes"], "columns": data.get("columns", 4)})
+
+
+# Phase 2: the Inventory's slots in their groups (the pack, the seed pouch, materials), each under its name and
+# count. A group can end in empty slots: the pack's free space. Picked, hovered, focused, unavailable and empty
+# slots each have their own frame (UiTheme's Slot* types). Only the look is new: each slot is the same button,
+# with the same action, as the tile it replaces.
+func _build_slot_groups(data: Dictionary) -> Control:
+	var column := VBoxContainer.new()
+	column.add_theme_constant_override("separation", 6)
+	var columns := int(data.get("slot_columns", 8))
+	for group in data["groups"]:
+		var tiles: Array = group.get("tiles", [])
+		var empty := int(group.get("empty", 0))
+		if tiles.is_empty() and empty <= 0:
+			continue
+		var head := HBoxContainer.new()
+		head.add_theme_constant_override("separation", 12)
+		var title := Label.new()
+		title.theme_type_variation = "GroupHeading"
+		title.text = str(group.get("title", "")).to_upper()
+		head.add_child(title)
+		if str(group.get("info", "")) != "":
+			var info := Label.new()
+			info.theme_type_variation = "NumberLabel"
+			info.text = str(group["info"])
+			head.add_child(info)
+		var spaced := MarginContainer.new()
+		spaced.add_theme_constant_override("margin_top", 0 if column.get_child_count() == 0 else 10)
+		spaced.add_child(head)
+		column.add_child(spaced)
+		var grid := GridContainer.new()
+		grid.columns = columns
+		grid.add_theme_constant_override("h_separation", SLOT_GAP)
+		grid.add_theme_constant_override("v_separation", SLOT_GAP)
+		for tile in tiles:
+			grid.add_child(_build_slot(tile))
+		for i in empty:
+			var free := PanelContainer.new()
+			free.theme_type_variation = "SlotEmpty"
+			free.custom_minimum_size = Vector2(SLOT_SIZE, SLOT_SIZE)
+			free.mouse_filter = Control.MOUSE_FILTER_IGNORE
+			grid.add_child(free)
+		column.add_child(grid)
+	return column
+
+
+# One inventory slot: the item's picture and its count in the corner. Its name shows in the caption over the
+# grid while it has focus or the mouse, and in its tooltip.
+func _build_slot(recipe: Dictionary) -> Control:
+	var selected := bool(recipe.get("selected", false))
+	var usable := bool(recipe.get("enabled", false))
+	var action := str(recipe.get("action", ""))
+	var tile := Button.new()
+	tile.custom_minimum_size = Vector2(SLOT_SIZE, SLOT_SIZE)
+	tile.focus_mode = Control.FOCUS_ALL
+	tile.theme_type_variation = "SlotSelected" if selected else ("Slot" if usable else "SlotLocked")
+	tile.tooltip_text = str(recipe.get("name", ""))
+	tile.set_meta("action", action)
+	if selected:
+		_picked_action = action
+	tile.pressed.connect(_pick_tile.bind(action, selected))
+	var icon := RecipeIcon.new()
+	icon.kind = str(recipe.get("icon", ""))
+	icon.tint = Color(str(recipe.get("tint", "6b4a3a")))
+	icon.set_anchors_preset(Control.PRESET_CENTER)
+	icon.offset_left = -22
+	icon.offset_top = -25
+	icon.offset_right = 22
+	icon.offset_bottom = 19
+	icon.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	icon.modulate = Color(1, 1, 1, 1) if usable or selected else Color(1, 1, 1, 0.4)
+	tile.add_child(icon)
+	if recipe.has("count"):
+		var count := Label.new()
+		count.theme_type_variation = "SlotCount"
+		count.text = str(recipe["count"])
+		count.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+		count.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		count.set_anchors_preset(Control.PRESET_BOTTOM_RIGHT)
+		count.grow_horizontal = Control.GROW_DIRECTION_BEGIN
+		count.grow_vertical = Control.GROW_DIRECTION_BEGIN
+		count.offset_right = -6
+		count.offset_bottom = -2
+		if not usable:
+			count.add_theme_color_override("font_color", UiTheme.MUTED)
+		tile.add_child(count)
+	var caption := _slot_caption(recipe)
+	tile.set_meta("caption", caption)
+	tile.focus_entered.connect(_show_caption.bind(caption))
+	tile.mouse_entered.connect(_show_caption.bind(caption))
+	tile.focus_exited.connect(_show_caption.bind(""))
+	tile.mouse_exited.connect(_show_caption.bind(""))
+	return tile
+
+
+# "Egg  ·  4 in the pack": the item's name without its count, then what its count means.
+func _slot_caption(recipe: Dictionary) -> String:
+	var name := str(recipe.get("short_name", recipe.get("name", "")))
+	var more := str(recipe.get("level_text", ""))
+	return name if more == "" else "%s   ·   %s" % [name, more]
+
+
+# The caption names the slot under the mouse or in focus; with neither, the focused slot or the picked item.
+func _show_caption(text: String) -> void:
+	if not is_instance_valid(slot_caption):
+		return
+	if text == "":
+		var focused := get_viewport().gui_get_focus_owner()
+		text = str(focused.get_meta("caption")) if focused != null and focused.has_meta("caption") else _caption_text
+	slot_caption.text = text
 
 
 # Tiles are 72 pixels with 6 between them: a 3-by-5 figure, then a row of tools.
@@ -779,6 +962,8 @@ func _build_recipe_tile(recipe: Dictionary, small: bool = false) -> Control:
 
 # The details of the picked recipe: the picture, what it does, what it costs, and the button to make it.
 func _build_detail(recipe: Dictionary) -> Control:
+	if _themed and recipe.has("count"):
+		return _build_item_page(recipe)
 	var card := PanelContainer.new()
 	card.custom_minimum_size = Vector2(280, 0)
 	card.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
@@ -857,6 +1042,73 @@ func _build_detail(recipe: Dictionary) -> Control:
 		button.pressed.connect(_on_action_pressed.bind(str(recipe.get("action", ""))))
 		block.add_child(button)
 		_detail_button = button
+	return card
+
+
+# Phase 2: the picked inventory item on the parchment page: its picture on a slot, name, how many and where,
+# what it does, and its action (Eat, Use...) pinned below. An item with nothing to do from the pack gets the
+# same button greyed out with the reason, so the action always sits in one place; it never takes focus.
+func _build_item_page(recipe: Dictionary) -> Control:
+	var card := PanelContainer.new()
+	card.theme_type_variation = "DescriptionPanel"
+	card.add_theme_stylebox_override("panel", UiTheme.parchment(22, 20))
+	card.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
+	var block := VBoxContainer.new()
+	block.add_theme_constant_override("separation", 8)
+	card.add_child(block)
+	# The picture on its slot, beside the name and how many.
+	var head := HBoxContainer.new()
+	head.add_theme_constant_override("separation", 12)
+	block.add_child(head)
+	var plate := PanelContainer.new()
+	plate.add_theme_stylebox_override("panel", UiTheme.slot("occupied"))
+	plate.custom_minimum_size = Vector2(68, 68)
+	plate.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	var icon := RecipeIcon.new()
+	icon.kind = str(recipe.get("icon", ""))
+	icon.tint = Color(str(recipe.get("tint", "6b4a3a")))
+	icon.custom_minimum_size = Vector2(52, 52)
+	plate.add_child(icon)
+	head.add_child(plate)
+	var names := VBoxContainer.new()
+	names.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	names.alignment = BoxContainer.ALIGNMENT_CENTER
+	names.add_theme_constant_override("separation", 2)
+	head.add_child(names)
+	var title := Label.new()
+	title.theme_type_variation = "InkHeading"
+	title.text = str(recipe.get("short_name", recipe.get("name", "")))
+	title.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	names.add_child(title)
+	var level_text := str(recipe.get("level_text", ""))
+	if level_text != "":
+		var level := Label.new()
+		level.theme_type_variation = "InkNumber" if bool(recipe.get("level_ok", true)) else "InkWarn"
+		level.text = level_text
+		level.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		names.add_child(level)
+	var rule := HSeparator.new()
+	block.add_child(rule)
+	var desc := Label.new()
+	desc.theme_type_variation = "InkBody"
+	desc.text = str(recipe.get("desc", ""))
+	desc.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	block.add_child(desc)
+	var button := Button.new()
+	button.custom_minimum_size = Vector2(0, 40)
+	button.set_meta("key", str(recipe.get("key", "")))
+	if recipe.has("button") and str(recipe.get("action", "")) != "":
+		button.text = str(recipe["button"])
+		_set_enabled(button, bool(recipe.get("enabled", false)))
+		button.set_meta("action", str(recipe["action"]))
+		button.pressed.connect(_on_action_pressed.bind(str(recipe["action"])))
+	else:
+		var key := str(recipe.get("key", ""))
+		button.text = "Planted in the field" if key.begins_with("seed:") else ("Used in crafting" if key.begins_with("mat:") else "Not used from the pack")
+		button.theme_type_variation = "SecondaryButton"
+		_set_enabled(button, false)
+	block.add_child(button)
+	_detail_button = button
 	return card
 
 
@@ -956,6 +1208,8 @@ func _build_ledger(panel_name: String, rows: Array) -> void:
 		if _themed:
 			if i != open:
 				tab_button.theme_type_variation = "TabInactive"
+			else:
+				UiTheme.mark_active_tab(tab_button)
 			# A badge counts what can be done in that tab now (a Build or Place that would work).
 			var ready := 0
 			for row in tabs[i]["rows"]:
@@ -1303,6 +1557,10 @@ func _ink_detail() -> void:
 			label.theme_type_variation = "InkHeading"
 		else:
 			label.add_theme_color_override("font_color", UiTheme.ink(color))
+			# Phase 2: nothing on the page smaller than the theme's small size, and body text at its size.
+			var font_size := label.get_theme_font_size("font_size")
+			if font_size < UiTheme.SIZE_SMALL or font_size == 15:
+				label.add_theme_font_size_override("font_size", maxi(UiTheme.SIZE_SMALL, font_size + 1))
 
 
 func _detail_text(text: String, color: Color, font_size: int) -> Label:

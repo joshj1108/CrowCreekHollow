@@ -49,7 +49,7 @@ func _initialize() -> void:
 	left.add_child(title)
 	var sub := Label.new()
 	sub.theme_type_variation = "Subtitle"
-	sub.text = "UI-OVERHAUL-001 Phase 1: the shared theme, every component and state"
+	sub.text = "UI-OVERHAUL-001 Phase 2: the refined shared theme, every component and state"
 	left.add_child(sub)
 	left.add_child(HSeparator.new())
 	var grid := GridContainer.new()
@@ -66,6 +66,16 @@ func _initialize() -> void:
 		grid.add_child(_caption(row[0]))
 		for s in STATES:
 			grid.add_child(_swatch(row[1], s, row[2]))
+
+	# Phase 2: inventory slots in each state, each with a picture and its count.
+	left.add_child(_caption("Inventory slots: empty, occupied, hover, picked, focused, picked + focused, unavailable"))
+	var slot_row := HBoxContainer.new()
+	slot_row.add_theme_constant_override("separation", 16)
+	for spec in [["SlotEmpty", "normal", "", ""], ["Slot", "normal", "turnip", "28"], ["Slot", "hover", "egg", "3"],
+			["SlotSelected", "normal", "egg", "4"], ["Slot", "focus", "fish_t", "2"], ["SlotSelected", "focus", "bandage", "1"],
+			["SlotLocked", "normal", "seed", "0"]]:
+		slot_row.add_child(_slot_swatch(spec[0], spec[1], spec[2], spec[3]))
+	left.add_child(slot_row)
 
 	left.add_child(HSeparator.new())
 	var misc := HBoxContainer.new()
@@ -231,9 +241,50 @@ func _swatch(type: String, state: String, text: String) -> Control:
 	var key: String = STATE_FONT[state]
 	l.add_theme_color_override("font_color", theme.get_color(key, type) if theme.has_color(key, type) else theme.get_color("font_color", type))
 	box.add_child(l)
+	if type == "TabActive":
+		UiTheme.mark_active_tab(holder)
 	if state == "focus":
 		var ring := Panel.new()
 		ring.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		ring.add_theme_stylebox_override("panel", theme.get_stylebox("focus", type))
+		ring.set_anchors_preset(Control.PRESET_FULL_RECT)
+		holder.add_child(ring)
+	return holder
+
+
+# One inventory slot in one state: its frame (focus over its own normal), a picture and its count.
+func _slot_swatch(type: String, state: String, icon_kind: String, count: String) -> Control:
+	var holder := Control.new()
+	holder.custom_minimum_size = Vector2(68, 68)
+	var frame := Panel.new()
+	frame.set_anchors_preset(Control.PRESET_FULL_RECT)
+	var sb: StyleBox = theme.get_stylebox("panel", type) if type == "SlotEmpty" else theme.get_stylebox("normal" if state == "focus" else state, type)
+	frame.add_theme_stylebox_override("panel", sb)
+	holder.add_child(frame)
+	if icon_kind != "":
+		var icon := ActionBar.RecipeIcon.new()
+		icon.kind = icon_kind
+		icon.tint = Color({"turnip": "8fd16b", "egg": "f2ead2", "fish_t": "b8b04a", "bandage": "e8e0d0", "seed": "e8c440"}[icon_kind])
+		icon.set_anchors_preset(Control.PRESET_CENTER)
+		icon.offset_left = -22
+		icon.offset_top = -25
+		icon.offset_right = 22
+		icon.offset_bottom = 19
+		icon.modulate = Color(1, 1, 1, 0.4) if type == "SlotLocked" else Color.WHITE
+		holder.add_child(icon)
+		var n := Label.new()
+		n.theme_type_variation = "SlotCount"
+		n.text = count
+		n.set_anchors_preset(Control.PRESET_BOTTOM_RIGHT)
+		n.grow_horizontal = Control.GROW_DIRECTION_BEGIN
+		n.grow_vertical = Control.GROW_DIRECTION_BEGIN
+		n.offset_right = -6
+		n.offset_bottom = -2
+		if type == "SlotLocked":
+			n.add_theme_color_override("font_color", UiTheme.MUTED)
+		holder.add_child(n)
+	if state == "focus":
+		var ring := Panel.new()
 		ring.add_theme_stylebox_override("panel", theme.get_stylebox("focus", type))
 		ring.set_anchors_preset(Control.PRESET_FULL_RECT)
 		holder.add_child(ring)

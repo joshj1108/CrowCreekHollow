@@ -28,6 +28,9 @@ extends SceneTree
 #   wheel           open the section wheel (wheel=N highlights section N, counting from 0)
 #   bag             open the bag
 #   title           stay on the title menu instead of starting a game
+#   pack            UI checks: put a mix of crops, fish, eggs, milk, a bandage and a crow charm in the pack
+#   ipick=KEY       the Inventory item whose details show, e.g. ipick=pack:egg or ipick=mat:wood
+#   focus=N         with tab, move the focus to the section's Nth focusable button (0 = the first tile)
 #   tab=NAME        open a section, e.g. tab=Craft
 #   page=N          with tab, open the section's Nth ledger tab (counting from 0)
 #   fight           put a creature in front of the player and swing at it, so it is hurt
@@ -132,6 +135,15 @@ func _initialize() -> void:
 		main.money += 2000
 		for k in main.materials:
 			main.materials[k] = int(main.materials[k]) + 40
+	if opt.has("pack"):
+		# UI checks: a mixed pack (crops, fish, eggs, a bandage, a charm, firewood) so the Inventory has usable
+		# and unusable items, a full stack and a part one. Counts only; no skill or price change.
+		for pair in [["crops", 31], ["potatoes", 6], ["apples", 3], ["eggs", 4], ["fish", 2], ["trout", 1], ["milk", 1]]:
+			main.inventory[pair[0]] = int(main.inventory[pair[0]]) + int(pair[1])
+		main.inventory["bandage"] = int(main.inventory["bandage"]) + 2
+		main.inventory["crow_charm"] = int(main.inventory["crow_charm"]) + 1
+	if opt.has("ipick"):
+		main.inventory_selected = str(opt["ipick"])
 	if opt.has("well"):
 		# ART-OVERHAUL-002 E3: 0 the broken well, 1 repaired, 2 repaired with the cistern and the hose.
 		var w := int(opt["well"])
@@ -418,6 +430,16 @@ func _initialize() -> void:
 		main._toggle_tab(opt["tab"])
 		await process_frame
 		await process_frame
+		if opt.has("focus"):
+			# Move the keyboard/pad focus to the open section's Nth button (counting from 0, in tree order:
+			# a grid's tiles first, then the rows' buttons), as the D-pad would.
+			var buttons: Array = main.action_bar.panel.find_children("*", "Button", true, false).filter(
+				func(b: Button) -> bool: return main.action_bar._focusable(b))
+			var i := int(opt["focus"])
+			if i < buttons.size():
+				buttons[i].grab_focus()
+			for f in 3:
+				await process_frame
 	if opt.has("lit"):
 		# Diagnostic only, never a gameplay view: freeze the game and lift the darkness, to judge art the lantern hides.
 		main.set_process(false)

@@ -52,6 +52,7 @@ func _run() -> void:
 	await _amount_cases()
 	await _diary_cases()
 	await _bag_cases()
+	await _inventory_cases()
 	await _small_panel_cases()
 	await _mouse_cases()
 	await _device_cases()
@@ -703,6 +704,95 @@ func _bag_cases() -> void:
 	var items: Array = m._bag_items()
 	_check("bag: focus is on a slot that holds something", items.size() == 0 or b.slots.find(_focus()) < items.size())
 	await _key(KEY_TAB)
+
+
+# --- The Inventory (UI-OVERHAUL-001 Phase 2): slots, picking and using by mouse, keyboard and pad -----------
+
+func _inventory_cases() -> void:
+	var ab: ActionBar = m.action_bar
+	m.inventory["eggs"] = int(m.inventory["eggs"]) + 3
+	m.inventory["bandage"] = int(m.inventory["bandage"]) + 1
+	m.food = 40.0
+	m.inventory_selected = ""
+	m._toggle_tab("Inventory")
+	await _frames(3)
+	_check("inventory: opens themed", m.open_tab == "Inventory" and ab._themed)
+	var slots: Array = _focusables(ab.grid_body).filter(func(c: Control) -> bool: return str(c.get_meta("action", "")).begins_with("inv_pick:"))
+	_check("inventory: one slot per item tile", slots.size() == m._inventory_tiles().size())
+	var counted := slots.all(func(s: Control) -> bool: return s.get_children().any(func(c: Node) -> bool: return c is Label and (c as Label).theme_type_variation == "SlotCount"))
+	_check("inventory: every slot shows its count", counted)
+	var empties := ab.grid_body.find_children("*", "PanelContainer", true, false).filter(func(c: Control) -> bool: return c.theme_type_variation == "SlotEmpty")
+	_check("inventory: the pack's free slots are drawn", empties.size() == m.stall._pack_capacity() - m.stall._pack_used())
+	_check("inventory: free slots never take focus or clicks", empties.all(func(c: Control) -> bool: return c.focus_mode == Control.FOCUS_NONE and c.mouse_filter == Control.MOUSE_FILTER_IGNORE))
+	_check("inventory: one slot is picked and framed as picked", slots.filter(func(s: Control) -> bool: return s.theme_type_variation == "SlotSelected").size() == 1)
+	# Mouse: a click picks the egg, and its page shows Eat.
+	var egg := _slot("pack:egg")
+	await _click(egg)
+	await _frames(2)
+	_check("inventory: a click picks a slot", m.inventory_selected == "pack:egg" and ab._detail_button != null and ab._detail_button.text == "Eat")
+	_check("inventory: the picked slot's frame follows the pick", _slot("pack:egg") != null and _slot("pack:egg").theme_type_variation == "SlotSelected")
+	# Keyboard: Space on the bandage picks it and moves focus to its Use button; Space again uses one.
+	var bandage := _slot("pack:bandage")
+	bandage.grab_focus()
+	await _frames(1)
+	_check("inventory: the caption names the slot in focus", ab.slot_caption != null and ab.slot_caption.text.begins_with(str(m.BANDAGE["name"])))
+	await _key(KEY_SPACE)
+	await _frames(2)
+	_check("inventory: Space picks a slot and focus moves to its action", m.inventory_selected == "pack:bandage" and _focus() == ab._detail_button and ab._detail_button.text == "Use")
+	# Pad: A on the egg picks it, A again eats one.
+	var eggs := int(m.inventory["eggs"])
+	_slot("pack:egg").grab_focus()
+	await _frames(1)
+	await _pad(JOY_BUTTON_A)
+	await _frames(2)
+	_check("inventory: A picks a slot and focus moves to Eat", m.inventory_selected == "pack:egg" and _focus() == ab._detail_button)
+	await _pad(JOY_BUTTON_A)
+	await _frames(2)
+	_check("inventory: A on Eat eats one egg", int(m.inventory["eggs"]) == eggs - 1)
+	_check("inventory: the count on the egg's slot follows", _slot_count("pack:egg") == str(eggs - 1))
+	# The D-pad moves between slots.
+	_slot("pack:egg").grab_focus()
+	await _frames(1)
+	var before := _focus()
+	await _pad(JOY_BUTTON_DPAD_RIGHT)
+	_check("inventory: the D-pad moves between slots", _focus() != before and _focus_ok())
+	# A material has no action from the pack: its button is greyed and out of the focus path.
+	var mat: Control = null
+	for s in _focusables(ab.grid_body):
+		if str(s.get_meta("action", "")).begins_with("inv_pick:mat:"):
+			mat = s
+			break
+	_check("inventory: a material slot to pick", mat != null)
+	if mat != null:
+		# Focus scrolls it into view (follow_focus), then the click lands on it.
+		mat.grab_focus()
+		await _frames(3)
+		await _click(mat)
+		await _frames(2)
+		if OS.has_environment("MENU_TEST_DEBUG"):
+			print("   picked ", m.inventory_selected, " button ", ab._detail_button)
+		_check("inventory: an item with no action shows it greyed, out of focus", ab._detail_button != null and ab._detail_button.disabled and ab._detail_button.focus_mode == Control.FOCUS_NONE)
+	_check("inventory: nothing disabled or hidden takes focus", _no_disabled_focus(ab.panel))
+	await _key(KEY_ESCAPE)
+	await _close_all()
+	await _handed_back("inventory")
+
+
+func _slot(key: String) -> Control:
+	for s in _focusables(m.action_bar.grid_body):
+		if str(s.get_meta("action", "")) == "inv_pick:" + key:
+			return s
+	return null
+
+
+func _slot_count(key: String) -> String:
+	var s := _slot(key)
+	if s == null:
+		return ""
+	for c in s.get_children():
+		if c is Label and (c as Label).theme_type_variation == "SlotCount":
+			return (c as Label).text
+	return ""
 
 
 # --- The small panels -----------------------------------------------------------

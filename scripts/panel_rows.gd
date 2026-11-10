@@ -155,21 +155,45 @@ func _skill_rows() -> Array:
 	]
 
 
+# A pack tile with its count and its name apart ("Egg x4" -> count 4, short_name "Egg"), for the slots' corner
+# numbers. The tile's own name is kept as it was.
+func _counted(t: Dictionary) -> Dictionary:
+	var tile: Dictionary = t.duplicate()
+	var parts := str(t.get("name", "")).rsplit(" x", true, 1)
+	if parts.size() == 2 and parts[1].is_valid_int():
+		tile["short_name"] = parts[0]
+		tile["count"] = int(parts[1])
+	return tile
+
+
 func _inventory_rows() -> Array:
-	var rows: Array = [_character_tabs("Inventory"), {"section": "Pack"}]
+	var rows: Array = [_character_tabs("Inventory")]
 	var tiles := m._inventory_tiles()
+	# The slot groups carry their own headings (Pack, Seed pouch, Materials).
 	if tiles.is_empty():
+		rows.append({"section": "Pack"})
 		rows.append({"note": "Nothing in the pack yet. Harvest, catch, or gather to fill it."})
 	else:
 		var marked: Array = []
-		var chosen := m._inventory_chosen(tiles)
+		var chosen: Dictionary = _counted(m._inventory_chosen(tiles))
+		# UI-OVERHAUL-001 Phase 2: the same tiles, also sorted into the groups the themed Inventory shows: the pack
+		# (with its free slots), the seed pouch and materials. Display only; the pack's numbers are its own.
+		var used: int = m.stall._pack_used()
+		var cap: int = m.stall._pack_capacity()
+		var groups: Array = [
+			{"title": "Pack", "info": "%d / %d slots" % [used, cap], "tiles": [], "empty": maxi(0, cap - used)},
+			{"title": "Seed pouch", "info": "", "tiles": []},
+			{"title": "Materials", "info": "", "tiles": []},
+		]
 		for t in tiles:
-			var tile: Dictionary = t.duplicate()
+			var tile: Dictionary = _counted(t)
 			tile["selected"] = str(t["key"]) == str(chosen["key"])
 			tile["action"] = "inv_pick:" + str(t["key"])
 			tile["names_on_focus"] = true
 			marked.append(tile)
-		rows.append({"split": {"recipes": marked, "columns": 4, "detail": chosen}})
+			var key := str(t["key"])
+			groups[1 if key.begins_with("seed:") else (2 if key.begins_with("mat:") else 0)]["tiles"].append(tile)
+		rows.append({"split": {"recipes": marked, "columns": 4, "detail": chosen, "groups": groups, "slot_columns": 8}})
 	rows.append({"name": "Coins", "value": str(m.money)})
 	rows.append({
 		"name": "Pack space",
