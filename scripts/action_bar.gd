@@ -16,6 +16,13 @@ var _last_tab := ""
 var _last_rows: Array = []
 signal action_pressed(action_id: String)
 
+# UI-OVERHAUL-001 Phase 1: sections drawn with the shared theme (UiTheme) as the prototype. The rest keep
+# their own styling until Phase 3 moves them over. Only the look changes: focus, input and actions are the same.
+const THEMED_PANELS := ["Buildings"]
+var _themed := false
+var detail_page: PanelContainer   # the ledger's detail page: dark wood, or parchment when themed
+var _detail_flat: StyleBox
+
 const SUBTITLES := {
 	"Skills": "How far you have come",
 	"Inventory": "What you carry",
@@ -293,6 +300,7 @@ func show_panel(tab: String, rows: Array) -> void:
 		hint_label.text = HINT_BACK if tab in ["Settings", "Controls"] else (HINT_SETTINGS if tab == "Pause" else HINT_DEFAULT)
 	subtitle_label.text = str(SUBTITLES.get(tab, ""))
 	active_tab = tab
+	_apply_theme(tab in THEMED_PANELS)
 	_clear(rows_box)
 	_clear(grid_top)
 	_clear(side_box)
@@ -350,6 +358,35 @@ func show_panel(tab: String, rows: Array) -> void:
 			rows_box.add_child(_build_row(row))
 	# Highlight the first usable button so a gamepad can reach it.
 	call_deferred("_focus_first_button", keep_action)
+
+
+# Puts the frame's fixed parts (title, subtitle, detail page, Close) in the shared theme or back in their own
+# styling. The parts rebuilt each time (tabs, entries, the detail, glyphs) check _themed as they are made.
+func _apply_theme(on: bool) -> void:
+	if on == _themed and menu_frame.theme == (UiTheme.get_theme() if on else null):
+		return
+	_themed = on
+	menu_frame.theme = UiTheme.get_theme() if on else null
+	for pair in [[title_label, "DisplayTitle"], [subtitle_label, "Subtitle"]]:
+		var label: Label = pair[0]
+		if on:
+			label.remove_theme_font_size_override("font_size")
+			label.remove_theme_color_override("font_color")
+			label.theme_type_variation = pair[1]
+		else:
+			label.theme_type_variation = ""
+	if not on:
+		title_label.add_theme_font_size_override("font_size", 30)
+		title_label.add_theme_color_override("font_color", COL_ACCENT)
+		subtitle_label.add_theme_font_size_override("font_size", 14)
+		subtitle_label.add_theme_color_override("font_color", COL_MUTED)
+	if on:
+		detail_page.remove_theme_stylebox_override("panel")
+		detail_page.theme_type_variation = "DescriptionPanel"
+	else:
+		detail_page.theme_type_variation = ""
+		detail_page.add_theme_stylebox_override("panel", _detail_flat)
+	_style_button(close_button, false)
 
 
 func hide_panel() -> void:
@@ -885,8 +922,10 @@ func _build_ledger_frame() -> Control:
 	list_scroll.add_child(list_box)
 	var page := PanelContainer.new()
 	page.custom_minimum_size = Vector2(LEDGER_DETAIL_WIDTH, 0)
-	page.add_theme_stylebox_override("panel", _box(Color("1b140d"), COL_BORDER, 2, 6, 16))
+	_detail_flat = _box(Color("1b140d"), COL_BORDER, 2, 6, 16)
+	page.add_theme_stylebox_override("panel", _detail_flat)
 	body.add_child(page)
+	detail_page = page
 	detail_box = VBoxContainer.new()
 	detail_box.add_theme_constant_override("separation", 8)
 	page.add_child(detail_box)
@@ -914,7 +953,20 @@ func _build_ledger(panel_name: String, rows: Array) -> void:
 		tab_button.custom_minimum_size = Vector2(130, 36)
 		tab_button.focus_mode = Control.FOCUS_NONE
 		_style_button(tab_button, i == open)
-		if i == open:
+		if _themed:
+			if i != open:
+				tab_button.theme_type_variation = "TabInactive"
+			# A badge counts what can be done in that tab now (a Build or Place that would work).
+			var ready := 0
+			for row in tabs[i]["rows"]:
+				if row.has("button") and str(row.get("action", "")) != "" and bool(row.get("enabled", true)):
+					ready += 1
+			if ready > 0:
+				UiTheme.add_badge(tab_button, ready)
+				tab_button.tooltip_text = "%s: %d ready to do" % [tabs[i]["name"], ready]
+			else:
+				tab_button.tooltip_text = "%s: nothing to do yet" % tabs[i]["name"]
+		elif i == open:
 			tab_button.add_theme_color_override("font_color", COL_ACCENT)
 		tab_button.pressed.connect(_open_ledger_tab.bind(i))
 		tab_strip.add_child(tab_button)
@@ -927,8 +979,11 @@ func _build_ledger(panel_name: String, rows: Array) -> void:
 		if row.has("section"):
 			var heading := Label.new()
 			heading.text = str(row["section"]).to_upper()
-			heading.add_theme_font_size_override("font_size", 13)
-			heading.add_theme_color_override("font_color", COL_ACCENT)
+			if _themed:
+				heading.theme_type_variation = "SectionHeading"
+			else:
+				heading.add_theme_font_size_override("font_size", 13)
+				heading.add_theme_color_override("font_color", COL_ACCENT)
 			list_box.add_child(heading)
 		elif row.has("note") and not row.has("name"):
 			notes.append(str(row["note"]))
@@ -974,12 +1029,15 @@ func _build_entry(row: Dictionary, index: int) -> Control:
 	var entry := Button.new()
 	entry.custom_minimum_size = Vector2(0, 42)
 	entry.focus_mode = Control.FOCUS_ALL
-	entry.add_theme_stylebox_override("normal", _box(COL_CARD, Color("3d3024"), 1, 4, 0))
-	entry.add_theme_stylebox_override("hover", _box(COL_NAV_HOVER, COL_BORDER, 1, 4, 0))
-	entry.add_theme_stylebox_override("pressed", _box(COL_NAV_ACTIVE, COL_ACCENT, 2, 4, 0))
-	var ring := _box(COL_NAV_ACTIVE, COL_ACCENT, 2, 4, 0)
-	ring.draw_center = false
-	entry.add_theme_stylebox_override("focus", ring)
+	if _themed:
+		entry.theme_type_variation = "ListEntry"
+	else:
+		entry.add_theme_stylebox_override("normal", _box(COL_CARD, Color("3d3024"), 1, 4, 0))
+		entry.add_theme_stylebox_override("hover", _box(COL_NAV_HOVER, COL_BORDER, 1, 4, 0))
+		entry.add_theme_stylebox_override("pressed", _box(COL_NAV_ACTIVE, COL_ACCENT, 2, 4, 0))
+		var ring := _box(COL_NAV_ACTIVE, COL_ACCENT, 2, 4, 0)
+		ring.draw_center = false
+		entry.add_theme_stylebox_override("focus", ring)
 	if row.has("action"):
 		entry.set_meta("action", str(row["action"]))
 	var line := HBoxContainer.new()
@@ -1003,6 +1061,8 @@ func _build_entry(row: Dictionary, index: int) -> Control:
 		chip.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 		chip.add_theme_font_size_override("font_size", 13)
 		chip.add_theme_color_override("font_color", _kind_color(str(status[1])))
+		if _themed:
+			chip.theme_type_variation = "NumberLabel"
 		line.add_child(chip)
 		entry.set_meta("chip", chip)
 	entry.focus_entered.connect(_pick_entry.bind(index))
@@ -1172,8 +1232,11 @@ func _show_detail() -> void:
 		bar.show_percentage = false
 		bar.custom_minimum_size = Vector2(0, 10)
 		bar.value = clampf(float(row["progress"]), 0.0, 1.0) * 100.0
-		bar.add_theme_stylebox_override("background", _box(COL_TRACK, COL_TRACK, 0, 4, 0))
-		bar.add_theme_stylebox_override("fill", _box(COL_ACCENT, COL_ACCENT, 0, 4, 0))
+		if _themed:
+			bar.theme_type_variation = "InkProgress"
+		else:
+			bar.add_theme_stylebox_override("background", _box(COL_TRACK, COL_TRACK, 0, 4, 0))
+			bar.add_theme_stylebox_override("fill", _box(COL_ACCENT, COL_ACCENT, 0, 4, 0))
 		detail_box.add_child(bar)
 	if str(row.get("note", "")) != "":
 		detail_box.add_child(_detail_text(str(row["note"]), COL_MUTED, 13))
@@ -1222,6 +1285,24 @@ func _show_detail() -> void:
 		_style_button(button, false)
 		button.pressed.connect(_on_action_pressed.bind(_amount_action(row)))
 		bottom.add_child(button)
+	if _themed:
+		_ink_detail()
+
+
+# On the parchment page the detail's text is ink: the same meanings (heading, have, short, muted) in colours
+# dark enough to read on paper. The key glyphs keep their own look.
+func _ink_detail() -> void:
+	for node in detail_box.find_children("*", "Label", true, false):
+		var label := node as Label
+		if not label.has_theme_color_override("font_color"):
+			continue
+		var color := label.get_theme_color("font_color")
+		if label.get_theme_font_size("font_size") >= 20 and color.is_equal_approx(COL_ACCENT):
+			label.remove_theme_color_override("font_color")
+			label.remove_theme_font_size_override("font_size")
+			label.theme_type_variation = "InkHeading"
+		else:
+			label.add_theme_color_override("font_color", UiTheme.ink(color))
 
 
 func _detail_text(text: String, color: Color, font_size: int) -> Label:
@@ -1255,6 +1336,9 @@ func _glyph(key_name: String) -> Control:
 	glyph.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	glyph.custom_minimum_size = Vector2(26, 24)
 	glyph.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	if _themed:
+		glyph.theme_type_variation = "KeyGlyph"
+		return glyph
 	glyph.add_theme_font_size_override("font_size", 12)
 	glyph.add_theme_color_override("font_color", COL_TEXT)
 	glyph.add_theme_stylebox_override("normal", _box(COL_BUTTON, COL_BORDER, 1, 4, 5))
@@ -1303,6 +1387,15 @@ func _refresh_prompts() -> void:
 
 
 func _style_button(button: Button, active: bool) -> void:
+	# In a themed panel the theme styles it: clear anything set before, so a reused button (Close) follows it.
+	if _themed and menu_frame.is_ancestor_of(button) or _themed and button.get_parent() == null:
+		for state in ["normal", "hover", "focus", "pressed", "disabled"]:
+			button.remove_theme_stylebox_override(state)
+		button.remove_theme_color_override("font_color")
+		button.remove_theme_color_override("font_disabled_color")
+		button.theme_type_variation = "TabActive" if active else ""
+		return
+	button.theme_type_variation = ""
 	button.add_theme_color_override("font_color", COL_TEXT)
 	button.add_theme_color_override("font_disabled_color", COL_MUTED)
 	if UiSkin.style_button(button):
