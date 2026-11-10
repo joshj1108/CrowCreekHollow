@@ -552,12 +552,76 @@ func _night_mult() -> float:
 	return BELL_NIGHT_MULT if _has_bell() else 1.0
 
 
+# ART-OVERHAUL-002 E3: the decor as sprites (art/farm/e3/, tools/aoh2_e3.py), standing on the foot of their tile.
+# The lamp is the farm's own lantern post, the apple tree the orchard's (bare in winter), the fence the concept's rail
+# pieces and the scarecrow the farm's existing sprite. The code drawing below stays as the fallback. The snare's catch
+# and the shutters' bar stay drawn over the sprite (they show state); every light is drawn elsewhere, as before.
+const E3_DECOR := true
+const FENCE_MID := ["concept/gen_e2fce52b5a", "concept/gen_653dc29112"]   # rails both ways, alternating
+const FENCE_W_END := "concept/gen_94981ce7b3"   # rails to the west only
+const FENCE_E_END := "concept/gen_355545383f"   # rails to the east only
+const FENCE_POST := "concept/gen_f4c74269c8"
+
+
+func _art(kind: String, t: Vector2i, winter: bool) -> String:
+	var name := ""
+	match kind:
+		"lamp":
+			name = "concept/src_lantern_post"
+		"flowers":
+			name = "e3/flowers_winter" if winter else ["e3/flowers_a", "e3/flowers_b", "e3/flowers_c"][absi(t.x + t.y) % 3]
+		"apple_tree":
+			name = "e3/apple_bare" if winter else ["concept/w4_orchard_apple_a", "concept/w4_orchard_apple_b"][absi(t.x + t.y) % 2]
+		"scarecrow":
+			name = "scarecrow"
+		"sprinkler", "sprinkler_big", "bench", "birdbath", "weathervane", "torch", "snare", "shutters", "bell":
+			name = "e3/" + kind
+	return name if name != "" and FarmSprites.has(name) else ""
+
+
+# A sprite standing on the foot of tile t (its bottom row on the tile's bottom edge, centred across).
+func _stand(name: String, t: Vector2i, lift := 0.0) -> void:
+	var tex := FarmSprites.tex(name)
+	var c := m._tile_center(t.x, t.y)
+	var s := Vector2(tex.get_width(), tex.get_height()) * 3.0
+	layer.draw_texture_rect(tex, Rect2(Vector2(c.x - s.x * 0.5, c.y + m.PX * 0.5 - s.y - lift), s), false)
+
+
+func _draw_fence(t: Vector2i) -> bool:
+	if broken.has(t) and FarmSprites.has("e3/fence_broken"):
+		_stand("e3/fence_broken", t)
+		return true
+	if not FarmSprites.has(FENCE_POST):
+		return false
+	var w: bool = decor.get(t + Vector2i(-1, 0), "") == "fence"
+	var e: bool = decor.get(t + Vector2i(1, 0), "") == "fence"
+	if decor.get(t + Vector2i(0, -1), "") == "fence":
+		_stand(FENCE_POST, t, m.PX * 0.5)   # a second post half a tile up joins the fence to the north
+	var name: String = FENCE_MID[absi(t.x) % 2] if w and e else (FENCE_W_END if w else (FENCE_E_END if e else FENCE_POST))
+	_stand(name, t, -18.0)   # the concept pieces stand on their row 26 of 32
+	return true
+
+
 func _draw() -> void:
 	var px := float(m.PX)
 	var ink := Color("1d1611")
 	var winter := m._season_of(m._calendar_date(m.day)["month"]) == "Winter"
 	for t in decor:
 		var c := m._tile_center(t.x, t.y)
+		if E3_DECOR:
+			var kind := str(decor[t])
+			if kind == "fence" and _draw_fence(t):
+				continue
+			var art := _art(kind, t, winter)
+			if art != "":
+				_stand(art, t)
+				if kind == "snare" and snared.has(t):
+					var catch_col := Color("8a7058") if snared[t] == "hare" else Color("1d1d22")
+					layer.draw_circle(c + Vector2(-px * 0.12, px * 0.05), px * 0.17, ink)
+					layer.draw_circle(c + Vector2(-px * 0.12, px * 0.05), px * 0.13, catch_col)
+				elif kind == "shutters" and _shutters_barred():
+					layer.draw_rect(Rect2(c + Vector2(-px * 0.42, -px * 0.1), Vector2(px * 0.84, px * 0.12)), Color("3a2a1c"))
+				continue
 		match str(decor[t]):
 			"lamp":
 				var base := c + Vector2(0, px * 0.35)
@@ -718,6 +782,8 @@ func _draw() -> void:
 				layer.draw_circle(b + Vector2(0, px * 0.5), 3.0, Color("2a2a30"))
 	# Torn fence rails: a dark gap with a splintered end, over the fence.
 	for t in broken:
+		if E3_DECOR and decor.get(t, "") == "fence" and FarmSprites.has("e3/fence_broken"):
+			continue   # drawn as the broken-fence sprite above
 		var c := m._tile_center(t.x, t.y)
 		layer.draw_rect(Rect2(c + Vector2(-px * 0.3, -px * 0.3), Vector2(px * 0.6, px * 0.5)), Color(0.12, 0.09, 0.07, 0.75))
 		layer.draw_line(c + Vector2(-px * 0.45, -px * 0.15), c + Vector2(-px * 0.05, px * 0.1), ink, 5.0)

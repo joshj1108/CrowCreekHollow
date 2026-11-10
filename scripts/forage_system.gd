@@ -239,6 +239,18 @@ func _draw_one(c: Vector2, id: String) -> void:
 	var ink := Color("1d1611")
 	var px := float(m.PX)
 	var base := c + Vector2(0, px * 0.28)
+	# ART-OVERHAUL-002 E3: a 16 px sprite per food (art/farm/e3/forage_<id>.png), standing on the tile's foot;
+	# windfalls are the orchard's own fallen fruit. The code drawing below is the fallback.
+	if WINDFALLS.has(id) and FarmSprites.has("concept/w4_orchard_windfall_" + id):
+		var fruit := FarmSprites.tex("concept/w4_orchard_windfall_" + id)
+		for p in [Vector2(-0.16, -0.06), Vector2(0.12, -0.02), Vector2(-0.02, -0.16)]:
+			layer.draw_texture_rect(fruit, Rect2(base + p * px - Vector2(4.5, 4.5), Vector2(9, 9)), false)
+		return
+	if FarmSprites.has("e3/forage_" + id):
+		var tex := FarmSprites.tex("e3/forage_" + id)
+		var s := Vector2(tex.get_width(), tex.get_height()) * 3.0
+		layer.draw_texture_rect(tex, Rect2(Vector2(c.x - s.x * 0.5, c.y + px * 0.4 - s.y), s), false)
+		return
 	if WINDFALLS.has(id):
 		# Two or three fallen fruit in the grass.
 		for p in [Vector2(-0.16, -0.06), Vector2(0.12, -0.02), Vector2(-0.02, -0.16)]:

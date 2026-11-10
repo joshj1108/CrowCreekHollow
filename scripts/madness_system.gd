@@ -164,13 +164,26 @@ func _draw() -> void:
 	if figure_left > 0.0:
 		var a := clampf(figure_left / 0.4, 0.0, 1.0) * 0.8
 		var s := figure_pos
-		ci.draw_colored_polygon(PackedVector2Array([s + Vector2(-px * 0.35, px * 0.4), s + Vector2(px * 0.35, px * 0.4), s + Vector2(px * 0.2, -px * 0.7), s + Vector2(-px * 0.2, -px * 0.7)]), Color(0.02, 0.01, 0.05, a))
-		ci.draw_circle(s + Vector2(0, -px * 0.75), px * 0.26, Color(0.02, 0.01, 0.05, a))
-		ci.draw_circle(s + Vector2(-5, -px * 0.78), 2.0, Color(2.4, 0.3, 0.2, a))
-		ci.draw_circle(s + Vector2(5, -px * 0.78), 2.0, Color(2.4, 0.3, 0.2, a))
+		# ART-OVERHAUL-002 E3: the shadow-person sprite, fading as the drawn one did; its eyes stay drawn (they glow).
+		if FarmSprites.has("e3/figure"):
+			var tex := FarmSprites.tex("e3/figure")
+			var sz := Vector2(tex.get_width(), tex.get_height()) * 3.0
+			ci.draw_texture_rect(tex, Rect2(Vector2(s.x - sz.x * 0.5, s.y + px * 0.4 - sz.y), sz), false, Color(1, 1, 1, a))
+			ci.draw_circle(s + Vector2(-4, -px * 1.2), 2.0, Color(2.4, 0.3, 0.2, a))
+			ci.draw_circle(s + Vector2(4, -px * 1.2), 2.0, Color(2.4, 0.3, 0.2, a))
+		else:
+			ci.draw_colored_polygon(PackedVector2Array([s + Vector2(-px * 0.35, px * 0.4), s + Vector2(px * 0.35, px * 0.4), s + Vector2(px * 0.2, -px * 0.7), s + Vector2(-px * 0.2, -px * 0.7)]), Color(0.02, 0.01, 0.05, a))
+			ci.draw_circle(s + Vector2(0, -px * 0.75), px * 0.26, Color(0.02, 0.01, 0.05, a))
+			ci.draw_circle(s + Vector2(-5, -px * 0.78), 2.0, Color(2.4, 0.3, 0.2, a))
+			ci.draw_circle(s + Vector2(5, -px * 0.78), 2.0, Color(2.4, 0.3, 0.2, a))
 	# The crop that isn't there: a ripe pumpkin on its vine.
 	if fake_crop.x >= 0:
 		var c := m._tile_center(fake_crop.x, fake_crop.y)
+		# E3: the crop art's own ripe pumpkin (its last frame), not a drawn one.
+		if FarmSprites.has("crop_pumpkin"):
+			var f: int = m.CROP_FRAME
+			ci.draw_texture_rect_region(FarmSprites.tex("crop_pumpkin"), Rect2(c - Vector2(px, px) * 0.5, Vector2(px, px)), Rect2(f * 3, 0, f, f))
+			return
 		ci.draw_line(c + Vector2(-px * 0.4, px * 0.2), c + Vector2(px * 0.4, px * 0.15), Color(0.25, 0.4, 0.2), 3.0)
 		ci.draw_circle(c + Vector2(-px * 0.3, px * 0.1), px * 0.13, Color(0.3, 0.48, 0.24))
 		ci.draw_circle(c + Vector2(0, px * 0.05), px * 0.3, Color(0.2, 0.1, 0.05))

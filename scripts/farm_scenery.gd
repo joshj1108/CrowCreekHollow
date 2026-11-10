@@ -59,6 +59,30 @@ var house_at := Vector2.ZERO
 var gate_lamp: Sprite2D
 const GATE_LAMP_AT := Vector2(3438, 1872)   # world px: its post one tile west of the east gate's north gatepost
 const GATE_LAMP_BASE := 34.0
+# ART-OVERHAUL-002 E3: the farmhouse by repair stage, its extensions, and the well's states (tools/aoh2_e3.py, art in
+# art/farm/e3/). Stages 0-2 are PixelLab edits of the P1 cabin with its footprint, door and windows; stage 3 is the
+# P1 cabin itself. The extensions are overlays on the cabin, shown once built. Off (or the art missing), the farm
+# draws scenery.json's one cabin for every stage, as before. Art only.
+const E3_ART := true
+const E3 := "res://art/farm/e3/"
+const HOUSE_PIECES := ["gen_be4b3d8247.png", "farmhouse_stage0.png"]   # the cabin's entry in scenery.json
+const HOUSE_REC := {"x": 2568.0, "y": 513.0, "s": 1.5}   # the P1 cabin, where the window lights were measured
+const HOUSE_H := 320.0                                   # the cabin sprite's height (px at scale 1)
+const HOUSE_DAY := ["res://art/farm/e3/house_stage_0.png", "res://art/farm/e3/house_stage_1.png",
+	"res://art/farm/e3/house_stage_2.png", "res://art/farm/concept/gen_be4b3d8247.png"]
+const HOUSE_NIGHT := ["res://art/farm/e3/house_stage_0.png", "res://art/farm/e3/house_stage_1.png",
+	"res://art/farm/e3/house_stage_2_night.png", "res://art/farm/concept/gen_d037a9b61e.png"]   # lit from Patched
+const HOUSE_EXT := {"cellar_room": "cellar", "porch": "porch", "second_storey": "storey"}   # estate id -> art
+const WELL_BROKEN := "res://art/farm/e3/well_broken.png"
+var house_pieces: Array = []      # the cabin's day and night pieces, for the paint tint
+var house_ext := {}               # estate id -> Sprite2D
+var _house_shown := -1
+var _paint_shown := ""
+var well_piece: Sprite2D
+var well_rec := {}
+var cistern: Sprite2D
+var hose: Sprite2D
+var _well_shown := -1
 
 
 func _init(main: MainGame) -> void:
@@ -103,7 +127,13 @@ func build() -> void:
 	list.sort_custom(func(a, b) -> bool: return float(a["b"]) < float(b["b"]))
 	var last_forest: Dictionary = {}
 	for r in list:
+		if E3_ART and HOUSE_PIECES.has(str(r["t"])) and ResourceLoader.exists(HOUSE_DAY[0]):
+			_build_house(r)
+			continue
 		var s := _sprite(str(r["t"]), r)
+		if str(r["t"]).ends_with("prop_well.png"):
+			well_piece = s
+			well_rec = r
 		var day := Color.html(str(r["m"]))
 		var night := Color.html(str(r.get("mn", r["m"])))
 		s.modulate = day
@@ -156,12 +186,101 @@ func build() -> void:
 	gate_lamp.visible = false
 	add_child(gate_lamp)
 	pieces.append([gate_lamp, GATE_LAMP_BASE, Color.WHITE, Color.WHITE])
+	if E3_ART and well_piece != null and ResourceLoader.exists(WELL_BROKEN):
+		_build_well()
 	# Children were added in base order, so pieces at the same depth overlap as the concept drew them.
 	pieces.sort_custom(func(a, b) -> bool: return a[1] < b[1])
 	for p in pieces:
 		if (p[0] as Sprite2D).z_index != 100:
 			(p[0] as Sprite2D).z_index = 1
 	front_from = 0
+
+
+# The cabin and its extension overlays (E3). The day sprite and its lit-window night twin swap texture by stage.
+func _build_house(r: Dictionary) -> void:
+	var base := float(r["b"])
+	var day := Color.html(str(r["m"]))
+	var night := Color.html(str(r.get("mn", r["m"])))
+	var d := _sprite(HOUSE_DAY[3], HOUSE_REC)
+	var n := _sprite(HOUSE_NIGHT[3], HOUSE_REC)
+	d.modulate = day
+	n.modulate = Color(night.r, night.g, night.b, 0.0)
+	add_child(d)
+	add_child(n)
+	var pd := [d, base, day, night]
+	var pn := [n, base, Color(day.r, day.g, day.b, 0.0), night]
+	pieces.append(pd)
+	pieces.append(pn)
+	night_only.append([d, n])
+	house_pieces = [[pd, day, night], [pn, pn[2], night]]
+	var info: Dictionary = JSON.parse_string(FileAccess.get_file_as_string(E3 + "sizes.json"))
+	var k := 0
+	for id in HOUSE_EXT:
+		var key := "ext_" + str(HOUSE_EXT[id])
+		if not info.has(key):
+			continue
+		var e: Array = info[key]   # width, height, x and y from the cabin's top-left (cabin px)
+		var s: float = HOUSE_REC["s"]
+		var rec := {"s": s, "x": float(HOUSE_REC["x"]) + float(e[2]) * s, "y": float(HOUSE_REC["y"]) + float(e[3]) * s}
+		var sp := _sprite(E3 + key + ".png", rec)
+		sp.visible = false
+		sp.modulate = day
+		add_child(sp)
+		# Below the cabin's foot line the piece sorts by its own foot; on the cabin, just after the cabin.
+		k += 1
+		var foot := (float(e[3]) + float(e[1]) - HOUSE_H) * s / float(m.PX)
+		pieces.append([sp, base + maxf(foot, 0.0) + 0.001 * k, day, night])
+		house_ext[id] = sp
+
+
+# The well's states (E3): broken until repaired, then the concept well; the cistern and hose beside it once built.
+func _build_well() -> void:
+	var wx := float(well_rec["x"])
+	var wy := float(well_rec["y"])
+	var base := float(well_rec["b"])
+	var cis := _tex(E3 + "cistern.png")
+	cistern = _sprite(E3 + "cistern.png", {"s": 3, "x": wx + 29.0 * 3.0, "y": wy + (48.0 - cis.get_height() + 2.0) * 3.0})
+	var hz := _tex(E3 + "hose.png")
+	hose = _sprite(E3 + "hose.png", {"s": 3, "x": wx - (hz.get_width() - 4.0) * 3.0, "y": wy + (48.0 - hz.get_height() + 1.0) * 3.0})
+	for sp in [cistern, hose]:
+		(sp as Sprite2D).visible = false
+		add_child(sp)
+		pieces.append([sp, base + 0.05, Color.html(str(well_rec["m"])), Color.html(str(well_rec.get("mn", well_rec["m"])))])
+
+
+func _update_e3() -> void:
+	if not house_pieces.is_empty():
+		var st := clampi(m.house_stage, 0, 3)
+		if st != _house_shown:
+			_house_shown = st
+			(house_pieces[0][0][0] as Sprite2D).texture = _tex(HOUSE_DAY[st])
+			(house_pieces[1][0][0] as Sprite2D).texture = _tex(HOUSE_NIGHT[st])
+		var paint: String = m.estate.paint
+		if paint != _paint_shown:
+			# The outside paint (estate), as the old farm's house took it: multiplied into the cabin's tints.
+			_paint_shown = paint
+			var c: Color = m.estate._paint_tint()
+			for h in house_pieces:
+				var p: Array = h[0]
+				p[2] = Color((h[1] as Color).r * c.r, (h[1] as Color).g * c.g, (h[1] as Color).b * c.b, (h[1] as Color).a)
+				p[3] = Color((h[2] as Color).r * c.r, (h[2] as Color).g * c.g, (h[2] as Color).b * c.b, (h[2] as Color).a)
+			_dark = -1.0
+		for id in house_ext:
+			(house_ext[id] as Sprite2D).visible = m.estate._has(id)
+	if well_piece != null and cistern != null:
+		var w := 1 if m.well_repaired else 0
+		if w != _well_shown:
+			_well_shown = w
+			if m.well_repaired:
+				well_piece.texture = _tex(str(well_rec["t"]))
+				well_piece.position = Vector2(float(well_rec["x"]), float(well_rec["y"]))
+			else:
+				var t := _tex(WELL_BROKEN)
+				well_piece.texture = t
+				well_piece.position = Vector2(float(well_rec["x"]) + (16.0 - t.get_width() * 0.5) * 3.0,
+					float(well_rec["y"]) + (48.0 - t.get_height()) * 3.0)
+		cistern.visible = m.cistern_built
+		hose.visible = m.hose_attached and m.well_repaired
 
 
 # The FARM-001R cave pieces that CAVE_EXT_V2 replaces.
@@ -192,6 +311,7 @@ func _process(_delta: float) -> void:
 	_sort()
 	if gate_lamp != null:
 		gate_lamp.visible = m.trek._has_work("gate_lamp")
+	_update_e3()
 	for w in groves:
 		var up := not m.grove_felled.has(w)
 		for s in groves[w]:

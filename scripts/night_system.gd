@@ -1167,9 +1167,23 @@ func _draw() -> void:
 			ci.draw_circle(s + Vector2(-8 + 8 * k, -px * 0.7), 3.0, Color(1.6, 1.9, 2.0, 0.9))
 
 
+const E3_ART := true
+
+
+# A farm sprite at 3x with its bottom row on foot, centred across.
+func _sprite_at(name: String, foot: Vector2) -> void:
+	var tex := FarmSprites.tex(name)
+	var s := Vector2(tex.get_width(), tex.get_height()) * 3.0
+	layer.draw_texture_rect(tex, Rect2(Vector2(foot.x - s.x * 0.5, foot.y - s.y), s), false)
+
+
 # A crow, black with a bright eye, standing on its tile.
 func _draw_crow(p: Vector2, size: float) -> void:
 	var ci := layer
+	# ART-OVERHAUL-002 E3: the farm's perched crow sprite, its feet on the crow's foot point; the shapes are the fallback.
+	if E3_ART and FarmSprites.has("crow_perch"):
+		_sprite_at("crow_perch", p + Vector2(0, float(m.PX) * 0.1))
+		return
 	var px := float(m.PX) * size
 	ci.draw_colored_polygon(PackedVector2Array([p + Vector2(-px * 0.3, 0), p + Vector2(px * 0.15, -px * 0.22), p + Vector2(px * 0.28, 0), p + Vector2(0, px * 0.1)]), Color(0.03, 0.02, 0.05, 0.95))
 	ci.draw_circle(p + Vector2(px * 0.2, -px * 0.22), px * 0.11, Color(0.03, 0.02, 0.05, 0.95))
@@ -1181,6 +1195,13 @@ func _draw_crow(p: Vector2, size: float) -> void:
 func _draw_raider(p: Vector2) -> void:
 	var ci := layer
 	var px := float(m.PX)
+	# E3: the fox and the thing at the barn as sprites (art/farm/e3/); the barn thing keeps its glowing eyes.
+	if E3_ART and raid in ["fox", "barn"] and FarmSprites.has("e3/fox") and FarmSprites.has("e3/barnthing"):
+		_sprite_at("e3/fox" if raid == "fox" else "e3/barnthing", p + Vector2(0, px * 0.25))
+		if raid == "barn":
+			ci.draw_circle(p + Vector2(px * 0.12, -px * 0.12), 2.0, Color(2.8, 0.4, 0.2))
+			ci.draw_circle(p + Vector2(px * 0.26, -px * 0.12), 2.0, Color(2.8, 0.4, 0.2))
+		return
 	match raid:
 		"fox":
 			ci.draw_colored_polygon(PackedVector2Array([p + Vector2(-px * 0.35, px * 0.1), p + Vector2(px * 0.25, px * 0.05), p + Vector2(px * 0.3, -px * 0.12), p + Vector2(-px * 0.3, -px * 0.1)]), Color(0.55, 0.26, 0.12))

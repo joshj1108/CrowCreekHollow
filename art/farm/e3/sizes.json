@@ -1,0 +1,180 @@
+{
+ "house_stage_0": [
+  384,
+  320
+ ],
+ "house_stage_1": [
+  384,
+  320
+ ],
+ "house_stage_2": [
+  384,
+  320
+ ],
+ "ext_porch": [
+  410,
+  220,
+  0,
+  118
+ ],
+ "ext_storey": [
+  340,
+  158,
+  28,
+  20
+ ],
+ "ext_cellar": [
+  173,
+  92,
+  0,
+  258
+ ],
+ "well_broken": [
+  28,
+  32
+ ],
+ "flowers_a": [
+  14,
+  14
+ ],
+ "flowers_b": [
+  15,
+  11
+ ],
+ "flowers_c": [
+  15,
+  13
+ ],
+ "flowers_winter": [
+  15,
+  11
+ ],
+ "sprinkler": [
+  13,
+  16
+ ],
+ "sprinkler_big": [
+  12,
+  23
+ ],
+ "bench": [
+  15,
+  14
+ ],
+ "birdbath": [
+  13,
+  22
+ ],
+ "weathervane": [
+  16,
+  41
+ ],
+ "torch": [
+  13,
+  16
+ ],
+ "snare": [
+  14,
+  15
+ ],
+ "shutters": [
+  13,
+  14
+ ],
+ "bell": [
+  18,
+  39
+ ],
+ "apple_bare": [
+  18,
+  30
+ ],
+ "cistern": [
+  27,
+  31
+ ],
+ "hose": [
+  14,
+  11
+ ],
+ "fence_broken": [
+  14,
+  15
+ ],
+ "pedlar": [
+  26,
+  30
+ ],
+ "branch": [
+  34,
+  22
+ ],
+ "storm_oak": [
+  35,
+  21
+ ],
+ "flax": [
+  14,
+  15
+ ],
+ "mushring": [
+  29,
+  25
+ ],
+ "fox": [
+  22,
+  11
+ ],
+ "barnthing": [
+  27,
+  22
+ ],
+ "figure": [
+  18,
+  31
+ ],
+ "forage_nettles": [
+  14,
+  13
+ ],
+ "forage_fiddleheads": [
+  14,
+  15
+ ],
+ "forage_salmonberries": [
+  14,
+  12
+ ],
+ "forage_blackberries": [
+  14,
+  15
+ ],
+ "forage_rosehips": [
+  14,
+  14
+ ],
+ "forage_chanterelles": [
+  12,
+  14
+ ],
+ "forage_yellowfoot": [
+  16,
+  14
+ ],
+ "forage_huckleberries": [
+  14,
+  14
+ ],
+ "forage_oyster_mushrooms": [
+  14,
+  14
+ ],
+ "forage_morels": [
+  14,
+  16
+ ],
+ "forage_ghost_pipe": [
+  14,
+  16
+ ]
+}

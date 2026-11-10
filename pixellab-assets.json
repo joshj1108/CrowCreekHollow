@@ -1813,5 +1813,523 @@
    "tins.png",
    "hut.png"
   ]
+ },
+ "ART-OVERHAUL-002/E3": {
+  "tool": "tools/aoh2_e3.py",
+  "sources": "art/style_tests/ART-OVERHAUL-002/E3/raw/ (fetch.py, contact.py, jobs.txt, picks.json)",
+  "note": "E3: the farmhouse stages 0-2 (stage 3 is the P1 cabin), porch, second storey and cellar overlays, the broken well, cistern, hose, decor, forage icons, the day's happenings, the fox and the barn thing, and the madness figure. Reused: concept src_lantern_post (lamp), w4_orchard_apple_a/b (apple tree), the concept rail-fence pieces, scarecrow.png, crow_perch.png (raid crows, downed crows), crop_pumpkin (the crop that isn't there), w4_orchard_windfall_apple/pear. Subscription generations only.",
+  "generations": 600,
+  "jobs": [
+   {
+    "key": "house0",
+    "tool": "edit_image",
+    "job_id": "37677676-21b3-48d4-a74e-2f4b9afc82f0",
+    "settings": "edit of art/farm/concept/gen_be4b3d8247.png (padded to 448x400 for the extensions)",
+    "prompt": "P1 cabin made derelict: holed mossy roof, broken windows, grey rotten logs",
+    "cost_generations": 25,
+    "raw": "art/style_tests/ART-OVERHAUL-002/E3/raw/house0/",
+    "note": "kept -> house_stage_0"
+   },
+   {
+    "key": "house1",
+    "tool": "edit_image",
+    "job_id": "32650a92-d225-4ac3-b8bb-a2eb0ea8796e",
+    "settings": "edit of art/farm/concept/gen_be4b3d8247.png (padded to 448x400 for the extensions)",
+    "prompt": "P1 cabin boarded up: planks over windows, patched walls and roof",
+    "cost_generations": 25,
+    "raw": "art/style_tests/ART-OVERHAUL-002/E3/raw/house1/",
+    "note": "kept -> house_stage_1"
+   },
+   {
+    "key": "house2",
+    "tool": "edit_image",
+    "job_id": "efa3090c-9c8c-4ecd-aefc-f65d139b9692",
+    "settings": "edit of art/farm/concept/gen_be4b3d8247.png (padded to 448x400 for the extensions)",
+    "prompt": "P1 cabin patched: clean glass, new shingles and logs mended in",
+    "cost_generations": 25,
+    "raw": "art/style_tests/ART-OVERHAUL-002/E3/raw/house2/",
+    "note": "kept -> house_stage_2 (+ house_stage_2_night)"
+   },
+   {
+    "key": "porch",
+    "tool": "edit_image",
+    "job_id": "0d068aa6-550a-49a7-bec5-6c1bc9a8682b",
+    "settings": "edit of art/farm/concept/gen_be4b3d8247.png (padded to 448x400 for the extensions)",
+    "prompt": "add a covered porch, plank deck, posts, copper roof",
+    "cost_generations": 25,
+    "raw": "art/style_tests/ART-OVERHAUL-002/E3/raw/porch/",
+    "note": "kept -> ext_porch"
+   },
+   {
+    "key": "storey",
+    "tool": "edit_image",
+    "job_id": "fe1077df-4e4c-4c33-8e44-5114befb87f6",
+    "settings": "edit of art/farm/concept/gen_be4b3d8247.png (padded to 448x400 for the extensions)",
+    "prompt": "add a second storey as a log gable dormer with two windows",
+    "cost_generations": 25,
+    "raw": "art/style_tests/ART-OVERHAUL-002/E3/raw/storey/",
+    "note": "kept -> ext_storey"
+   },
+   {
+    "key": "cellar",
+    "tool": "edit_image",
+    "job_id": "d3ddad58-4b4e-47d8-a320-13cd00ee3251",
+    "settings": "edit of art/farm/concept/gen_be4b3d8247.png (padded to 448x400 for the extensions)",
+    "prompt": "add slanted cellar doors at the west corner",
+    "cost_generations": 25,
+    "raw": "art/style_tests/ART-OVERHAUL-002/E3/raw/cellar/",
+    "note": "kept -> ext_cellar"
+   },
+   {
+    "key": "wellbroken",
+    "tool": "edit_image",
+    "job_id": "64a1b567-f7be-4b6f-9003-6b9ff1c39afb",
+    "settings": "edit of art/farm/prop_well.png",
+    "prompt": "the farm well broken: roof gone, no bucket, plank across",
+    "cost_generations": 10,
+    "raw": "art/style_tests/ART-OVERHAUL-002/E3/raw/wellbroken/",
+    "note": "kept 00 -> well_broken"
+   },
+   {
+    "key": "flowers",
+    "tool": "create_image_pro",
+    "job_id": "5c9e5f7a-6c38-4154-a0e8-ee658ccb97cf",
+    "settings": "pro, 64 candidates, transparent; style image art/style_tests/ART-OVERHAUL-002/E3/refs/style.png (concept handcart, lantern post, well, mailbox, basket, compost)",
+    "prompt": "flowers (see the E3 note on the board for the wording)",
+    "cost_generations": 10,
+    "raw": "art/style_tests/ART-OVERHAUL-002/E3/raw/flowers/",
+    "note": "none kept (replaced by a smaller canvas)"
+   },
+   {
+    "key": "sprinkler",
+    "tool": "create_image_pro",
+    "job_id": "6a66188f-c2be-47b2-b17c-53a17d7687ca",
+    "settings": "pro, 64 candidates, transparent; style image art/style_tests/ART-OVERHAUL-002/E3/refs/style.png (concept handcart, lantern post, well, mailbox, basket, compost)",
+    "prompt": "sprinkler (see the E3 note on the board for the wording)",
+    "cost_generations": 10,
+    "raw": "art/style_tests/ART-OVERHAUL-002/E3/raw/sprinkler/",
+    "note": "none kept (replaced by a smaller canvas)"
+   },
+   {
+    "key": "sprinkler_big",
+    "tool": "create_image_pro",
+    "job_id": "6691e715-4916-48f8-95ce-ea0c8249d2fc",
+    "settings": "pro, 36 candidates, transparent; style image art/style_tests/ART-OVERHAUL-002/E3/refs/style.png (concept handcart, lantern post, well, mailbox, basket, compost)",
+    "prompt": "sprinkler big (see the E3 note on the board for the wording)",
+    "cost_generations": 10,
+    "raw": "art/style_tests/ART-OVERHAUL-002/E3/raw/sprinkler_big/",
+    "note": "none kept (replaced by a smaller canvas)"
+   },
+   {
+    "key": "bench",
+    "tool": "create_image_pro",
+    "job_id": "997104f1-fe43-40c5-86f7-ae47f658cd9c",
+    "settings": "pro, 64 candidates, transparent; style image art/style_tests/ART-OVERHAUL-002/E3/refs/style.png (concept handcart, lantern post, well, mailbox, basket, compost)",
+    "prompt": "bench (see the E3 note on the board for the wording)",
+    "cost_generations": 10,
+    "raw": "art/style_tests/ART-OVERHAUL-002/E3/raw/bench/",
+    "note": "none kept (replaced by a smaller canvas)"
+   },
+   {
+    "key": "birdbath",
+    "tool": "create_image_pro",
+    "job_id": "251d1f92-7b62-4969-b036-aa594e4b4a13",
+    "settings": "pro, 64 candidates, transparent; style image art/style_tests/ART-OVERHAUL-002/E3/refs/style.png (concept handcart, lantern post, well, mailbox, basket, compost)",
+    "prompt": "birdbath (see the E3 note on the board for the wording)",
+    "cost_generations": 10,
+    "raw": "art/style_tests/ART-OVERHAUL-002/E3/raw/birdbath/",
+    "note": "none kept (replaced by a smaller canvas)"
+   },
+   {
+    "key": "weathervane",
+    "tool": "create_image_pro",
+    "job_id": "8811b3b1-8c80-47ac-83f5-8a4fa7bafc3c",
+    "settings": "pro, 36 candidates, transparent; style image art/style_tests/ART-OVERHAUL-002/E3/refs/style.png (concept handcart, lantern post, well, mailbox, basket, compost)",
+    "prompt": "weathervane (see the E3 note on the board for the wording)",
+    "cost_generations": 10,
+    "raw": "art/style_tests/ART-OVERHAUL-002/E3/raw/weathervane/",
+    "note": "kept 00 -> weathervane"
+   },
+   {
+    "key": "torch",
+    "tool": "create_image_pro",
+    "job_id": "79447e06-b97d-4158-93e2-bff54f127a9e",
+    "settings": "pro, 64 candidates, transparent; style image art/style_tests/ART-OVERHAUL-002/E3/refs/style.png (concept handcart, lantern post, well, mailbox, basket, compost)",
+    "prompt": "torch (see the E3 note on the board for the wording)",
+    "cost_generations": 10,
+    "raw": "art/style_tests/ART-OVERHAUL-002/E3/raw/torch/",
+    "note": "none kept (replaced by a smaller canvas)"
+   },
+   {
+    "key": "snare",
+    "tool": "create_image_pro",
+    "job_id": "793bf56d-6369-4d72-881e-3e3e8a391c6e",
+    "settings": "pro, 64 candidates, transparent; style image art/style_tests/ART-OVERHAUL-002/E3/refs/style.png (concept handcart, lantern post, well, mailbox, basket, compost)",
+    "prompt": "snare (see the E3 note on the board for the wording)",
+    "cost_generations": 10,
+    "raw": "art/style_tests/ART-OVERHAUL-002/E3/raw/snare/",
+    "note": "none kept (replaced by a smaller canvas)"
+   },
+   {
+    "key": "shutters",
+    "tool": "create_image_pro",
+    "job_id": "39b9f441-fa9f-4d4b-9608-6befc75073bd",
+    "settings": "pro, 64 candidates, transparent; style image art/style_tests/ART-OVERHAUL-002/E3/refs/style.png (concept handcart, lantern post, well, mailbox, basket, compost)",
+    "prompt": "shutters (see the E3 note on the board for the wording)",
+    "cost_generations": 10,
+    "raw": "art/style_tests/ART-OVERHAUL-002/E3/raw/shutters/",
+    "note": "none kept (replaced by a smaller canvas)"
+   },
+   {
+    "key": "bell",
+    "tool": "create_image_pro",
+    "job_id": "2ee7bb65-4ddb-44de-9087-973354f2b7e6",
+    "settings": "pro, 36 candidates, transparent; style image art/style_tests/ART-OVERHAUL-002/E3/refs/style.png (concept handcart, lantern post, well, mailbox, basket, compost)",
+    "prompt": "bell (see the E3 note on the board for the wording)",
+    "cost_generations": 10,
+    "raw": "art/style_tests/ART-OVERHAUL-002/E3/raw/bell/",
+    "note": "kept 09 -> bell"
+   },
+   {
+    "key": "apple_bare",
+    "tool": "create_image_pro",
+    "job_id": "be889f5b-e33b-47a8-84ac-ffd325fd2692",
+    "settings": "pro, 36 candidates, transparent; style image art/style_tests/ART-OVERHAUL-002/E3/refs/style.png (concept handcart, lantern post, well, mailbox, basket, compost)",
+    "prompt": "apple bare (see the E3 note on the board for the wording)",
+    "cost_generations": 10,
+    "raw": "art/style_tests/ART-OVERHAUL-002/E3/raw/apple_bare/",
+    "note": "kept 04 -> apple_bare"
+   },
+   {
+    "key": "cistern",
+    "tool": "create_image_pro",
+    "job_id": "e989d556-a85c-4dfa-8bef-bc3d500b8834",
+    "settings": "pro, 64 candidates, transparent; style image art/style_tests/ART-OVERHAUL-002/E3/refs/style.png (concept handcart, lantern post, well, mailbox, basket, compost)",
+    "prompt": "cistern (see the E3 note on the board for the wording)",
+    "cost_generations": 10,
+    "raw": "art/style_tests/ART-OVERHAUL-002/E3/raw/cistern/",
+    "note": "kept 09 -> cistern"
+   },
+   {
+    "key": "hose",
+    "tool": "create_image_pro",
+    "job_id": "dcdcad5b-dbef-4d8a-b30e-f6b1769a31da",
+    "settings": "pro, 64 candidates, transparent; style image art/style_tests/ART-OVERHAUL-002/E3/refs/style.png (concept handcart, lantern post, well, mailbox, basket, compost)",
+    "prompt": "hose (see the E3 note on the board for the wording)",
+    "cost_generations": 10,
+    "raw": "art/style_tests/ART-OVERHAUL-002/E3/raw/hose/",
+    "note": "none kept (replaced by a smaller canvas)"
+   },
+   {
+    "key": "fence_broken",
+    "tool": "create_image_pro",
+    "job_id": "f420f940-3215-4fac-9e93-4c112a3860d0",
+    "settings": "pro, 64 candidates, transparent; style image art/style_tests/ART-OVERHAUL-002/E3/refs/style.png (concept handcart, lantern post, well, mailbox, basket, compost)",
+    "prompt": "fence broken (see the E3 note on the board for the wording)",
+    "cost_generations": 10,
+    "raw": "art/style_tests/ART-OVERHAUL-002/E3/raw/fence_broken/",
+    "note": "none kept (replaced by a smaller canvas)"
+   },
+   {
+    "key": "pedlar",
+    "tool": "create_image_pro",
+    "job_id": "77dfed40-21eb-4d9a-aa16-f07a24dfb400",
+    "settings": "pro, 64 candidates, transparent; style image art/style_tests/ART-OVERHAUL-002/E3/refs/style.png (concept handcart, lantern post, well, mailbox, basket, compost)",
+    "prompt": "pedlar (see the E3 note on the board for the wording)",
+    "cost_generations": 10,
+    "raw": "art/style_tests/ART-OVERHAUL-002/E3/raw/pedlar/",
+    "note": "kept 03 -> pedlar"
+   },
+   {
+    "key": "branch",
+    "tool": "create_image_pro",
+    "job_id": "a2fcde56-993e-455f-879a-868d561cb2cb",
+    "settings": "pro, 36 candidates, transparent; style image art/style_tests/ART-OVERHAUL-002/E3/refs/style.png (concept handcart, lantern post, well, mailbox, basket, compost)",
+    "prompt": "branch (see the E3 note on the board for the wording)",
+    "cost_generations": 10,
+    "raw": "art/style_tests/ART-OVERHAUL-002/E3/raw/branch/",
+    "note": "kept 00 -> branch"
+   },
+   {
+    "key": "storm_oak",
+    "tool": "create_image_pro",
+    "job_id": "5af52280-0263-45bc-ac28-24e95c64e8af",
+    "settings": "pro, 36 candidates, transparent; style image art/style_tests/ART-OVERHAUL-002/E3/refs/style.png (concept handcart, lantern post, well, mailbox, basket, compost)",
+    "prompt": "storm oak (see the E3 note on the board for the wording)",
+    "cost_generations": 10,
+    "raw": "art/style_tests/ART-OVERHAUL-002/E3/raw/storm_oak/",
+    "note": "kept 14 -> storm_oak"
+   },
+   {
+    "key": "flax",
+    "tool": "create_image_pro",
+    "job_id": "fa7db8b4-f5db-4c35-8890-6b36e5eb144c",
+    "settings": "pro, 64 candidates, transparent; style image art/style_tests/ART-OVERHAUL-002/E3/refs/style.png (concept handcart, lantern post, well, mailbox, basket, compost)",
+    "prompt": "flax (see the E3 note on the board for the wording)",
+    "cost_generations": 10,
+    "raw": "art/style_tests/ART-OVERHAUL-002/E3/raw/flax/",
+    "note": "kept 12 -> flax"
+   },
+   {
+    "key": "mushring",
+    "tool": "create_image_pro",
+    "job_id": "73320372-e186-4325-93eb-e5821b33e5e2",
+    "settings": "pro, 64 candidates, transparent; style image art/style_tests/ART-OVERHAUL-002/E3/refs/style.png (concept handcart, lantern post, well, mailbox, basket, compost)",
+    "prompt": "mushring (see the E3 note on the board for the wording)",
+    "cost_generations": 10,
+    "raw": "art/style_tests/ART-OVERHAUL-002/E3/raw/mushring/",
+    "note": "kept 06 -> mushring"
+   },
+   {
+    "key": "fox",
+    "tool": "create_image_pro",
+    "job_id": "7686b068-4113-4db9-ba94-2e472c362a5f",
+    "settings": "pro, 64 candidates, transparent; style image art/style_tests/ART-OVERHAUL-002/E3/refs/style.png (concept handcart, lantern post, well, mailbox, basket, compost)",
+    "prompt": "fox (see the E3 note on the board for the wording)",
+    "cost_generations": 10,
+    "raw": "art/style_tests/ART-OVERHAUL-002/E3/raw/fox/",
+    "note": "none kept (replaced by a smaller canvas)"
+   },
+   {
+    "key": "barnthing",
+    "tool": "create_image_pro",
+    "job_id": "12fb13df-07e8-4acf-a6f1-41b3909ada63",
+    "settings": "pro, 64 candidates, transparent; style image art/style_tests/ART-OVERHAUL-002/E3/refs/style.png (concept handcart, lantern post, well, mailbox, basket, compost)",
+    "prompt": "barnthing (see the E3 note on the board for the wording)",
+    "cost_generations": 10,
+    "raw": "art/style_tests/ART-OVERHAUL-002/E3/raw/barnthing/",
+    "note": "kept 00 -> barnthing"
+   },
+   {
+    "key": "figure",
+    "tool": "create_image_pro",
+    "job_id": "313532b7-1b66-4875-ab70-6174f907f860",
+    "settings": "pro, 64 candidates, transparent; style image art/style_tests/ART-OVERHAUL-002/E3/refs/style.png (concept handcart, lantern post, well, mailbox, basket, compost)",
+    "prompt": "figure (see the E3 note on the board for the wording)",
+    "cost_generations": 10,
+    "raw": "art/style_tests/ART-OVERHAUL-002/E3/raw/figure/",
+    "note": "kept 09 -> figure"
+   },
+   {
+    "key": "nettles",
+    "tool": "create_image_pro",
+    "job_id": "ec1f49f7-1318-42ef-8be4-400832a3d49d",
+    "settings": "pro, 64 candidates, transparent; style image art/style_tests/ART-OVERHAUL-002/E3/refs/style.png (concept handcart, lantern post, well, mailbox, basket, compost)",
+    "prompt": "nettles (see the E3 note on the board for the wording)",
+    "cost_generations": 10,
+    "raw": "art/style_tests/ART-OVERHAUL-002/E3/raw/nettles/",
+    "note": "kept 04 -> forage_nettles"
+   },
+   {
+    "key": "fiddleheads",
+    "tool": "create_image_pro",
+    "job_id": "49cb02cb-235b-4515-9f34-c90401c29b46",
+    "settings": "pro, 64 candidates, transparent; style image art/style_tests/ART-OVERHAUL-002/E3/refs/style.png (concept handcart, lantern post, well, mailbox, basket, compost)",
+    "prompt": "fiddleheads (see the E3 note on the board for the wording)",
+    "cost_generations": 10,
+    "raw": "art/style_tests/ART-OVERHAUL-002/E3/raw/fiddleheads/",
+    "note": "kept 01 -> forage_fiddleheads"
+   },
+   {
+    "key": "salmonberries",
+    "tool": "create_image_pro",
+    "job_id": "4108fa86-36a3-42cd-8dd2-4872148fb573",
+    "settings": "pro, 64 candidates, transparent; style image art/style_tests/ART-OVERHAUL-002/E3/refs/style.png (concept handcart, lantern post, well, mailbox, basket, compost)",
+    "prompt": "salmonberries (see the E3 note on the board for the wording)",
+    "cost_generations": 10,
+    "raw": "art/style_tests/ART-OVERHAUL-002/E3/raw/salmonberries/",
+    "note": "kept 02 -> forage_salmonberries"
+   },
+   {
+    "key": "blackberries",
+    "tool": "create_image_pro",
+    "job_id": "8b066e50-d4a8-480e-b5fc-d07a5cc1abc4",
+    "settings": "pro, 64 candidates, transparent; style image art/style_tests/ART-OVERHAUL-002/E3/refs/style.png (concept handcart, lantern post, well, mailbox, basket, compost)",
+    "prompt": "blackberries (see the E3 note on the board for the wording)",
+    "cost_generations": 10,
+    "raw": "art/style_tests/ART-OVERHAUL-002/E3/raw/blackberries/",
+    "note": "kept 00 -> forage_blackberries"
+   },
+   {
+    "key": "rosehips",
+    "tool": "create_image_pro",
+    "job_id": "e0c6431b-7d8b-442d-a408-4e564dcbf631",
+    "settings": "pro, 64 candidates, transparent; style image art/style_tests/ART-OVERHAUL-002/E3/refs/style.png (concept handcart, lantern post, well, mailbox, basket, compost)",
+    "prompt": "rosehips (see the E3 note on the board for the wording)",
+    "cost_generations": 10,
+    "raw": "art/style_tests/ART-OVERHAUL-002/E3/raw/rosehips/",
+    "note": "kept 02 -> forage_rosehips"
+   },
+   {
+    "key": "chanterelles",
+    "tool": "create_image_pro",
+    "job_id": "b2f4a269-b852-4cc0-ada1-77ec987d9e0f",
+    "settings": "pro, 64 candidates, transparent; style image art/style_tests/ART-OVERHAUL-002/E3/refs/style.png (concept handcart, lantern post, well, mailbox, basket, compost)",
+    "prompt": "chanterelles (see the E3 note on the board for the wording)",
+    "cost_generations": 10,
+    "raw": "art/style_tests/ART-OVERHAUL-002/E3/raw/chanterelles/",
+    "note": "kept 03 -> forage_chanterelles"
+   },
+   {
+    "key": "yellowfoot",
+    "tool": "create_image_pro",
+    "job_id": "aa5d908f-7b83-4eaa-b9dc-f330a9c9757d",
+    "settings": "pro, 64 candidates, transparent; style image art/style_tests/ART-OVERHAUL-002/E3/refs/style.png (concept handcart, lantern post, well, mailbox, basket, compost)",
+    "prompt": "yellowfoot (see the E3 note on the board for the wording)",
+    "cost_generations": 10,
+    "raw": "art/style_tests/ART-OVERHAUL-002/E3/raw/yellowfoot/",
+    "note": "kept 03 -> forage_yellowfoot"
+   },
+   {
+    "key": "huckleberries",
+    "tool": "create_image_pro",
+    "job_id": "6a0e1568-1efa-4757-95b3-e48d0ef9effc",
+    "settings": "pro, 64 candidates, transparent; style image art/style_tests/ART-OVERHAUL-002/E3/refs/style.png (concept handcart, lantern post, well, mailbox, basket, compost)",
+    "prompt": "huckleberries (see the E3 note on the board for the wording)",
+    "cost_generations": 10,
+    "raw": "art/style_tests/ART-OVERHAUL-002/E3/raw/huckleberries/",
+    "note": "kept 02 -> forage_huckleberries"
+   },
+   {
+    "key": "oyster_mushrooms",
+    "tool": "create_image_pro",
+    "job_id": "6ff5c5dd-7bb8-4ada-9089-df75d03251a7",
+    "settings": "pro, 64 candidates, transparent; style image art/style_tests/ART-OVERHAUL-002/E3/refs/style.png (concept handcart, lantern post, well, mailbox, basket, compost)",
+    "prompt": "oyster mushrooms (see the E3 note on the board for the wording)",
+    "cost_generations": 10,
+    "raw": "art/style_tests/ART-OVERHAUL-002/E3/raw/oyster_mushrooms/",
+    "note": "kept 12 -> forage_oyster_mushrooms"
+   },
+   {
+    "key": "morels",
+    "tool": "create_image_pro",
+    "job_id": "85aabc44-88eb-4f86-9319-ad9c260112c9",
+    "settings": "pro, 64 candidates, transparent; style image art/style_tests/ART-OVERHAUL-002/E3/refs/style.png (concept handcart, lantern post, well, mailbox, basket, compost)",
+    "prompt": "morels (see the E3 note on the board for the wording)",
+    "cost_generations": 10,
+    "raw": "art/style_tests/ART-OVERHAUL-002/E3/raw/morels/",
+    "note": "kept 02 -> forage_morels"
+   },
+   {
+    "key": "ghost_pipe",
+    "tool": "create_image_pro",
+    "job_id": "12ea77a2-d30d-4942-9a44-7489a272f12d",
+    "settings": "pro, 64 candidates, transparent; style image art/style_tests/ART-OVERHAUL-002/E3/refs/style.png (concept handcart, lantern post, well, mailbox, basket, compost)",
+    "prompt": "ghost pipe (see the E3 note on the board for the wording)",
+    "cost_generations": 10,
+    "raw": "art/style_tests/ART-OVERHAUL-002/E3/raw/ghost_pipe/",
+    "note": "kept 00 -> forage_ghost_pipe"
+   },
+   {
+    "key": "flowers16",
+    "tool": "create_image_pro",
+    "job_id": "df7ab3d3-2212-4331-b03b-09e6f72c2ccb",
+    "settings": "pro, 64 candidates, transparent; style image art/style_tests/ART-OVERHAUL-002/E3/refs/style.png (concept handcart, lantern post, well, mailbox, basket, compost)",
+    "prompt": "flowers16 (see the E3 note on the board for the wording)",
+    "cost_generations": 10,
+    "raw": "art/style_tests/ART-OVERHAUL-002/E3/raw/flowers16/",
+    "note": "kept 00 -> flowers_a, 14 -> flowers_b, 06 -> flowers_c, 05 -> flowers_winter"
+   },
+   {
+    "key": "sprinkler16",
+    "tool": "create_image_pro",
+    "job_id": "2f934a5a-576a-4f8a-bcc0-528272254d01",
+    "settings": "pro, 64 candidates, transparent; style image art/style_tests/ART-OVERHAUL-002/E3/refs/style.png (concept handcart, lantern post, well, mailbox, basket, compost)",
+    "prompt": "sprinkler16 (see the E3 note on the board for the wording)",
+    "cost_generations": 10,
+    "raw": "art/style_tests/ART-OVERHAUL-002/E3/raw/sprinkler16/",
+    "note": "kept 02 -> sprinkler"
+   },
+   {
+    "key": "bench16",
+    "tool": "create_image_pro",
+    "job_id": "0c42be52-e1c1-4d33-8390-383dc79f6f6b",
+    "settings": "pro, 64 candidates, transparent; style image art/style_tests/ART-OVERHAUL-002/E3/refs/style.png (concept handcart, lantern post, well, mailbox, basket, compost)",
+    "prompt": "bench16 (see the E3 note on the board for the wording)",
+    "cost_generations": 10,
+    "raw": "art/style_tests/ART-OVERHAUL-002/E3/raw/bench16/",
+    "note": "kept 02 -> bench"
+   },
+   {
+    "key": "snare16",
+    "tool": "create_image_pro",
+    "job_id": "c390a23c-eb8a-43a5-8b63-8b2eae3853f8",
+    "settings": "pro, 64 candidates, transparent; style image art/style_tests/ART-OVERHAUL-002/E3/refs/style.png (concept handcart, lantern post, well, mailbox, basket, compost)",
+    "prompt": "snare16 (see the E3 note on the board for the wording)",
+    "cost_generations": 10,
+    "raw": "art/style_tests/ART-OVERHAUL-002/E3/raw/snare16/",
+    "note": "kept 07 -> snare"
+   },
+   {
+    "key": "hose16",
+    "tool": "create_image_pro",
+    "job_id": "e0eace65-4fc0-43ef-bde2-fd3e8d47b998",
+    "settings": "pro, 64 candidates, transparent; style image art/style_tests/ART-OVERHAUL-002/E3/refs/style.png (concept handcart, lantern post, well, mailbox, basket, compost)",
+    "prompt": "hose16 (see the E3 note on the board for the wording)",
+    "cost_generations": 10,
+    "raw": "art/style_tests/ART-OVERHAUL-002/E3/raw/hose16/",
+    "note": "kept 02 -> hose"
+   },
+   {
+    "key": "fence16",
+    "tool": "create_image_pro",
+    "job_id": "02ec519f-ea61-4858-be2f-96ecac826444",
+    "settings": "pro, 64 candidates, transparent; style image art/style_tests/ART-OVERHAUL-002/E3/refs/style.png (concept handcart, lantern post, well, mailbox, basket, compost)",
+    "prompt": "fence16 (see the E3 note on the board for the wording)",
+    "cost_generations": 10,
+    "raw": "art/style_tests/ART-OVERHAUL-002/E3/raw/fence16/",
+    "note": "kept 02 -> fence_broken"
+   },
+   {
+    "key": "shutters16",
+    "tool": "create_image_pro",
+    "job_id": "e901cc68-ca59-45f9-89ed-8c00b984a794",
+    "settings": "pro, 64 candidates, transparent; style image art/style_tests/ART-OVERHAUL-002/E3/refs/style.png (concept handcart, lantern post, well, mailbox, basket, compost)",
+    "prompt": "shutters16 (see the E3 note on the board for the wording)",
+    "cost_generations": 10,
+    "raw": "art/style_tests/ART-OVERHAUL-002/E3/raw/shutters16/",
+    "note": "kept 07 -> shutters"
+   },
+   {
+    "key": "birdbath24",
+    "tool": "create_image_pro",
+    "job_id": "ff045139-c1d4-4551-819e-df59baab6c4e",
+    "settings": "pro, 64 candidates, transparent; style image art/style_tests/ART-OVERHAUL-002/E3/refs/style.png (concept handcart, lantern post, well, mailbox, basket, compost)",
+    "prompt": "birdbath24 (see the E3 note on the board for the wording)",
+    "cost_generations": 10,
+    "raw": "art/style_tests/ART-OVERHAUL-002/E3/raw/birdbath24/",
+    "note": "kept 02 -> birdbath"
+   },
+   {
+    "key": "sprinkler_big24",
+    "tool": "create_image_pro",
+    "job_id": "a14bd6e5-e867-4d80-a47c-35563d5b4b68",
+    "settings": "pro, 64 candidates, transparent; style image art/style_tests/ART-OVERHAUL-002/E3/refs/style.png (concept handcart, lantern post, well, mailbox, basket, compost)",
+    "prompt": "sprinkler big24 (see the E3 note on the board for the wording)",
+    "cost_generations": 10,
+    "raw": "art/style_tests/ART-OVERHAUL-002/E3/raw/sprinkler_big24/",
+    "note": "kept 01 -> sprinkler_big"
+   },
+   {
+    "key": "fox24",
+    "tool": "create_image_pro",
+    "job_id": "477b261b-27ec-409f-96ac-91223e0258c6",
+    "settings": "pro, 64 candidates, transparent; style image art/style_tests/ART-OVERHAUL-002/E3/refs/style.png (concept handcart, lantern post, well, mailbox, basket, compost)",
+    "prompt": "fox24 (see the E3 note on the board for the wording)",
+    "cost_generations": 10,
+    "raw": "art/style_tests/ART-OVERHAUL-002/E3/raw/fox24/",
+    "note": "kept 04 -> fox"
+   },
+   {
+    "key": "torch16",
+    "tool": "create_image_pro",
+    "job_id": "9b0f57bb-49f2-4356-a2be-e1f64b88667e",
+    "settings": "pro, 64 candidates, transparent; style image art/style_tests/ART-OVERHAUL-002/E3/refs/style.png (concept handcart, lantern post, well, mailbox, basket, compost)",
+    "prompt": "torch16 (see the E3 note on the board for the wording)",
+    "cost_generations": 10,
+    "raw": "art/style_tests/ART-OVERHAUL-002/E3/raw/torch16/",
+    "note": "kept 07 -> torch"
+   }
+  ]
  }
 }

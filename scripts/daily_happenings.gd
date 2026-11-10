@@ -297,12 +297,22 @@ func _redraw() -> void:
 
 
 # Today's thing in the yard, while it waits.
+const E3_ART := {"pedlar": "e3/pedlar", "branch": "e3/branch", "storm_oak": "e3/storm_oak", "flax": "e3/flax", "mushrooms": "e3/mushring"}
+
+
 func _draw() -> void:
 	if not _pending() or tile.x < 0:
 		return
 	var c := m._tile_center(tile.x, tile.y)
 	var px := float(m.PX)
 	var ink := Color("1d1611")
+	# ART-OVERHAUL-002 E3: sprites on the tile's foot (art/farm/e3/). The glints stay drawn (they are a cue).
+	var art: String = E3_ART.get(str(today["id"]), "")
+	if art != "" and FarmSprites.has(art):
+		var tex := FarmSprites.tex(art)
+		var s := Vector2(tex.get_width(), tex.get_height()) * 3.0
+		layer.draw_texture_rect(tex, Rect2(Vector2(c.x - s.x * 0.5, c.y + px * 0.5 - s.y), s), false)
+		return
 	match str(today["id"]):
 		"pedlar":
 			# A traveller the farmer's height: wide hat, plum coat, a staff, and a pack bigger than they are.

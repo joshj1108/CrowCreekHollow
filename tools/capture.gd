@@ -48,6 +48,7 @@ extends SceneTree
 #                   frenzy or neighbour (it is placed, and its morning note shown)
 #   decor=A,B       place decor in a row two tiles below the player (snare comes with a hare, broken is a torn fence): lamp, flowers, path, fence, bench, birdbath,
 #                   weathervane, sprinkler_big or bell
+#   well=N          the well: 0 broken (a new game's), 1 repaired, 2 repaired with the cistern and hose (E3)
 #   estate          build every house extension and buy every piece of furniture (with paint=ID, paper=ID)
 #   feel=SOUND      play an action's sound with its burst (harvest, chop, tree_fall, hoe, ...) and pop up a gain
 #   pages=N         Agnes Rook's first N torn pages are found (show them with diary)
@@ -126,6 +127,12 @@ func _initialize() -> void:
 	if opt.has("stage"):
 		main.house_stage = int(opt["stage"])
 		main._build_interior()
+	if opt.has("well"):
+		# ART-OVERHAUL-002 E3: 0 the broken well, 1 repaired, 2 repaired with the cistern and the hose.
+		var w := int(opt["well"])
+		main.well_repaired = w >= 1
+		main.cistern_built = w >= 2
+		main.hose_attached = w >= 2
 	if opt.has("estate"):
 		for id in main.estate.EXTENSIONS:
 			main.estate.built[id] = true

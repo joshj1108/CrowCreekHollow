@@ -1,0 +1,51 @@
+house0 37677676-21b3-48d4-a74e-2f4b9afc82f0 1 edit
+house1 32650a92-d225-4ac3-b8bb-a2eb0ea8796e 1 edit
+house2 efa3090c-9c8c-4ecd-aefc-f65d139b9692 1 edit
+porch 0d068aa6-550a-49a7-bec5-6c1bc9a8682b 1 edit
+storey fe1077df-4e4c-4c33-8e44-5114befb87f6 1 edit
+cellar d3ddad58-4b4e-47d8-a320-13cd00ee3251 1 edit
+wellbroken 64a1b567-f7be-4b6f-9003-6b9ff1c39afb 1 edit
+flowers 5c9e5f7a-6c38-4154-a0e8-ee658ccb97cf 64
+sprinkler 6a66188f-c2be-47b2-b17c-53a17d7687ca 64
+sprinkler_big 6691e715-4916-48f8-95ce-ea0c8249d2fc 36
+bench 997104f1-fe43-40c5-86f7-ae47f658cd9c 64
+birdbath 251d1f92-7b62-4969-b036-aa594e4b4a13 64
+weathervane 8811b3b1-8c80-47ac-83f5-8a4fa7bafc3c 36
+torch 79447e06-b97d-4158-93e2-bff54f127a9e 64
+snare 793bf56d-6369-4d72-881e-3e3e8a391c6e 64
+shutters 39b9f441-fa9f-4d4b-9608-6befc75073bd 64
+bell 2ee7bb65-4ddb-44de-9087-973354f2b7e6 36
+apple_bare be889f5b-e33b-47a8-84ac-ffd325fd2692 36
+cistern e989d556-a85c-4dfa-8bef-bc3d500b8834 64
+hose dcdcad5b-dbef-4d8a-b30e-f6b1769a31da 64
+fence_broken f420f940-3215-4fac-9e93-4c112a3860d0 64
+pedlar 77dfed40-21eb-4d9a-aa16-f07a24dfb400 64
+branch a2fcde56-993e-455f-879a-868d561cb2cb 36
+storm_oak 5af52280-0263-45bc-ac28-24e95c64e8af 36
+flax fa7db8b4-f5db-4c35-8890-6b36e5eb144c 64
+mushring 73320372-e186-4325-93eb-e5821b33e5e2 64
+fox 7686b068-4113-4db9-ba94-2e472c362a5f 64
+barnthing 12fb13df-07e8-4acf-a6f1-41b3909ada63 64
+figure 313532b7-1b66-4875-ab70-6174f907f860 64
+nettles ec1f49f7-1318-42ef-8be4-400832a3d49d 64
+fiddleheads 49cb02cb-235b-4515-9f34-c90401c29b46 64
+salmonberries 4108fa86-36a3-42cd-8dd2-4872148fb573 64
+blackberries 8b066e50-d4a8-480e-b5fc-d07a5cc1abc4 64
+rosehips e0c6431b-7d8b-442d-a408-4e564dcbf631 64
+chanterelles b2f4a269-b852-4cc0-ada1-77ec987d9e0f 64
+yellowfoot aa5d908f-7b83-4eaa-b9dc-f330a9c9757d 64
+huckleberries 6a0e1568-1efa-4757-95b3-e48d0ef9effc 64
+oyster_mushrooms 6ff5c5dd-7bb8-4ada-9089-df75d03251a7 64
+morels 85aabc44-88eb-4f86-9319-ad9c260112c9 64
+ghost_pipe 12ea77a2-d30d-4942-9a44-7489a272f12d 64
+flowers16 df7ab3d3-2212-4331-b03b-09e6f72c2ccb 64
+sprinkler16 2f934a5a-576a-4f8a-bcc0-528272254d01 64
+bench16 0c42be52-e1c1-4d33-8390-383dc79f6f6b 64
+snare16 c390a23c-eb8a-43a5-8b63-8b2eae3853f8 64
+hose16 e0eace65-4fc0-43ef-bde2-fd3e8d47b998 64
+fence16 02ec519f-ea61-4858-be2f-96ecac826444 64
+shutters16 e901cc68-ca59-45f9-89ed-8c00b984a794 64
+birdbath24 ff045139-c1d4-4551-819e-df59baab6c4e 64
+sprinkler_big24 a14bd6e5-e867-4d80-a47c-35563d5b4b68 64
+fox24 477b261b-27ec-409f-96ac-91223e0258c6 64
+torch16 9b0f57bb-49f2-4356-a2be-e1f64b88667e 64
