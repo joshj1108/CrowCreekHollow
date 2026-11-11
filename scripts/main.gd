@@ -2192,7 +2192,7 @@ func _build_hud() -> void:
 	stack.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	hud_panel.add_child(stack)
 	needs_box = VBoxContainer.new()
-	needs_box.add_theme_constant_override("separation", 3)
+	needs_box.add_theme_constant_override("separation", 4)
 	needs_box.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	stack.add_child(needs_box)
 	hp_bar = _hud_meter(needs_box, "heart", "health", "Health")

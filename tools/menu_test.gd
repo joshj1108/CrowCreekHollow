@@ -495,16 +495,28 @@ func _split_cases() -> void:
 	await _open_from_wheel(2)
 	_check("split: Craft's card sits beside the list, outside its scroll", ab.side_column.visible and ab._detail_button != null and not ab.scroll.is_ancestor_of(ab._detail_button))
 	ab.scroll.scroll_vertical = 0
+	# UI-OVERHAUL-001 Phase 4: the themed grid holds eight slots a row, so a short list may fit with nothing to
+	# scroll. Then every recipe must be wholly in view instead; a list that overflows must still scroll.
+	var overflow := ab.rows_box.size.y > ab.scroll.size.y + 1.0
 	for i in 12:
 		await _pad(JOY_BUTTON_DPAD_DOWN)
-	_check("split: moving down the recipes scrolls the list", ab.scroll.scroll_vertical > 0)
+	if overflow:
+		_check("split: moving down the recipes scrolls the list", ab.scroll.scroll_vertical > 0)
+	else:
+		var view := ab.scroll.get_global_rect()
+		var fits := _focusables(ab.grid_body).filter(func(c: Control) -> bool: return ab.scroll.is_ancestor_of(c)).all(
+			func(c: Control) -> bool: return view.grow(1.0).encloses(c.get_global_rect()))
+		_check("split: the recipes all fit in view, nothing hidden to scroll to", fits)
 	var column := ab.side_column.get_global_rect()
 	var frame := ab.grid_body.get_global_rect()
 	var button := ab._detail_button.get_global_rect()
 	_check("split: the card's button stays in view while the list scrolls", column.encloses(button) and frame.encloses(button) and ab._detail_button.is_visible_in_tree())
 	var shown := ab.scroll.scroll_vertical
 	await _wheel(ab.scroll, MOUSE_BUTTON_WHEEL_UP)
-	_check("split: the mouse wheel scrolls the list", ab.scroll.scroll_vertical < shown)
+	if overflow:
+		_check("split: the mouse wheel scrolls the list", ab.scroll.scroll_vertical < shown)
+	else:
+		_check("split: the mouse wheel leaves a list that fits where it is", ab.scroll.scroll_vertical == 0)
 	# Every recipe, however long its text: its button is in view.
 	var all_in_view := true
 	var picks: Array = []

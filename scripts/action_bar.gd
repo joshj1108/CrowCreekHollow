@@ -16,9 +16,10 @@ var _last_tab := ""
 var _last_rows: Array = []
 signal action_pressed(action_id: String)
 
-# UI-OVERHAUL-001 Phase 1: sections drawn with the shared theme (UiTheme) as the prototype. The rest keep
-# their own styling until Phase 3 moves them over. Only the look changes: focus, input and actions are the same.
-const THEMED_PANELS := ["Buildings", "Inventory"]
+# UI-OVERHAUL-001: every section is drawn with the shared theme (UiTheme). Phases 1-2 proved it on Buildings and
+# Inventory; Phase 4 moved the rest over. Only the Diary keeps its own book (its redesign is a phase of its own).
+# Only the look changes: focus, input and actions are the same.
+const UNTHEMED_PANELS := ["Diary"]
 var _themed := false
 var detail_page: PanelContainer   # the ledger's detail page: dark wood, or parchment when themed
 var _detail_flat: StyleBox
@@ -46,6 +47,12 @@ const SUBTITLES := {
 	"Settings": "Saved at once, for every save slot",
 	"Controls": "Keyboard, mouse and gamepad",
 	"Diary": "What you have learned, and what to do next",
+	"Trade": "Sell from your pack at the stand",
+	"Cellar": "Crops kept cool and dry",
+	"Cooler": "Fish kept fresh",
+	"Smokehouse": "Smoke, dry and put by",
+	"Furnace": "Ore into bars",
+	"Woodstore": "Firewood for the hearth",
 }
 
 const COL_DIM := Color(0.0, 0.0, 0.0, 0.62)
@@ -310,7 +317,7 @@ func show_panel(tab: String, rows: Array) -> void:
 		hint_label.text = HINT_BACK if tab in ["Settings", "Controls"] else (HINT_SETTINGS if tab == "Pause" else HINT_DEFAULT)
 	subtitle_label.text = str(SUBTITLES.get(tab, ""))
 	active_tab = tab
-	_apply_theme(tab in THEMED_PANELS)
+	_apply_theme(not tab in UNTHEMED_PANELS)
 	_clear(rows_box)
 	_clear(grid_top)
 	_clear(side_box)
@@ -354,7 +361,8 @@ func show_panel(tab: String, rows: Array) -> void:
 		elif row.has("split") and not row["split"].get("detail", {}).is_empty():
 			# Phase 2: a slot grid gets a line over it naming the slot in focus (the picked one otherwise).
 			# It shares the tab strip's line, on the left, with a matching spacer on the right so the tabs stay centred.
-			var slotted: bool = _themed and row["split"].has("groups")
+			# Phase 4: every themed grid (Craft, Skills, Gear) gets the caption line, as the Inventory does.
+			var slotted: bool = _themed
 			if slotted:
 				_caption_text = _slot_caption(row["split"]["detail"])
 				slot_caption = Label.new()
@@ -380,7 +388,7 @@ func show_panel(tab: String, rows: Array) -> void:
 			# The grid scrolls on the left; its detail card stays on the right. Slot groups line up on the left,
 			# with their headings and the rows below them.
 			var grid := _build_split_grid(row["split"])
-			rows_box.add_child(grid if slotted else _centred(grid))
+			rows_box.add_child(grid if slotted and row["split"].has("groups") else _centred(grid))
 			var card := _build_detail(row["split"]["detail"])
 			card.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 			card.custom_minimum_size.x = 0
@@ -728,6 +736,8 @@ func _build_split_grid(data: Dictionary) -> Control:
 		return _build_figure(data["recipes"])
 	if _themed and data.has("groups"):
 		return _build_slot_groups(data)
+	if _themed:
+		return _build_slot_grid(data["recipes"], int(data.get("slot_columns", 0)))
 	return _build_recipes({"recipes": data["recipes"], "columns": data.get("columns", 4)})
 
 
@@ -775,6 +785,18 @@ func _build_slot_groups(data: Dictionary) -> Control:
 	return column
 
 
+# Phase 4: Craft's recipes and the skills as the Inventory's slots: a picture at 3x, a number in the corner (a
+# skill's level), the name in the caption over the grid. Ten or fewer make two even rows; more fill eight across.
+func _build_slot_grid(recipes: Array, columns: int) -> Control:
+	var grid := GridContainer.new()
+	grid.columns = columns if columns > 0 else (ceili(recipes.size() / 2.0) if recipes.size() <= 10 else 8)
+	grid.add_theme_constant_override("h_separation", SLOT_GAP)
+	grid.add_theme_constant_override("v_separation", SLOT_GAP)
+	for recipe in recipes:
+		grid.add_child(_build_slot(recipe))
+	return grid
+
+
 # One inventory slot: the item's picture and its count in the corner. Its name shows in the caption over the
 # grid while it has focus or the mouse, and in its tooltip.
 func _build_slot(recipe: Dictionary) -> Control:
@@ -804,10 +826,10 @@ func _build_slot(recipe: Dictionary) -> Control:
 	# An unavailable item is dimmed and greyed a little, but stays easy to make out.
 	icon.modulate = Color.WHITE if usable or selected else Color(0.78, 0.74, 0.68, 0.62)
 	tile.add_child(icon)
-	if recipe.has("count"):
+	if recipe.has("count") or recipe.has("corner"):
 		var count := Label.new()
 		count.theme_type_variation = "SlotCount"
-		count.text = str(recipe["count"])
+		count.text = str(recipe.get("count", recipe.get("corner", "")))
 		count.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 		count.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		count.set_anchors_preset(Control.PRESET_BOTTOM_RIGHT)
@@ -829,8 +851,11 @@ func _build_slot(recipe: Dictionary) -> Control:
 
 # "Egg  ·  4 in the pack": the item's name without its count, then what its count means.
 func _slot_caption(recipe: Dictionary) -> String:
-	var name := str(recipe.get("short_name", recipe.get("name", "")))
+	var name := str(recipe.get("short_name", recipe.get("name", ""))).replace("\n", "   ·   ")
 	var more := str(recipe.get("level_text", ""))
+	# A long note (a recipe's "Needs Bushcrafting 2 (you have 1)") stays on the page; the caption keeps the name.
+	if more.length() > 24:
+		more = ""
 	return name if more == "" else "%s   ·   %s" % [name, more]
 
 
@@ -850,16 +875,18 @@ const FIGURE_GAP := 6
 
 
 func _build_figure(recipes: Array) -> Control:
+	# Phase 4: themed, each piece is an Inventory slot (68 px, its picture at 3x), an empty one the locked frame.
+	var tile_size := float(SLOT_SIZE) if _themed else float(FIGURE_TILE)
 	var column := VBoxContainer.new()
 	column.add_theme_constant_override("separation", 10)
 	var figure := Control.new()
-	figure.custom_minimum_size = Vector2(3 * FIGURE_TILE + 2 * FIGURE_GAP, 5 * FIGURE_TILE + 4 * FIGURE_GAP)
+	figure.custom_minimum_size = Vector2(3 * tile_size + 2 * FIGURE_GAP, 5 * tile_size + 4 * FIGURE_GAP)
 	var loose: Array = []
 	for recipe in recipes:
 		if recipe.has("pos"):
 			var spot: Vector2i = recipe["pos"]
-			var placed := _build_recipe_tile(recipe, true)
-			placed.position = Vector2(spot.x * (FIGURE_TILE + FIGURE_GAP), spot.y * (FIGURE_TILE + FIGURE_GAP))
+			var placed := _build_slot(recipe) if _themed else _build_recipe_tile(recipe, true)
+			placed.position = Vector2(spot.x * (tile_size + FIGURE_GAP), spot.y * (tile_size + FIGURE_GAP))
 			figure.add_child(placed)
 		else:
 			loose.append(recipe)
@@ -867,13 +894,16 @@ func _build_figure(recipes: Array) -> Control:
 	if not loose.is_empty():
 		var heading := Label.new()
 		heading.text = "TOOLBELT"
-		heading.add_theme_font_size_override("font_size", 13)
-		heading.add_theme_color_override("font_color", COL_ACCENT)
+		if _themed:
+			heading.theme_type_variation = "GroupHeading"
+		else:
+			heading.add_theme_font_size_override("font_size", 13)
+			heading.add_theme_color_override("font_color", COL_ACCENT)
 		column.add_child(heading)
 		var row := HBoxContainer.new()
 		row.add_theme_constant_override("separation", FIGURE_GAP)
 		for recipe in loose:
-			row.add_child(_build_recipe_tile(recipe, true))
+			row.add_child(_build_slot(recipe) if _themed else _build_recipe_tile(recipe, true))
 		column.add_child(row)
 	return column
 
@@ -970,7 +1000,7 @@ func _build_recipe_tile(recipe: Dictionary, small: bool = false) -> Control:
 
 # The details of the picked recipe: the picture, what it does, what it costs, and the button to make it.
 func _build_detail(recipe: Dictionary) -> Control:
-	if _themed and recipe.has("count"):
+	if _themed:
 		return _build_item_page(recipe)
 	var card := PanelContainer.new()
 	card.custom_minimum_size = Vector2(280, 0)
@@ -1126,31 +1156,68 @@ func _build_item_page(recipe: Dictionary) -> Control:
 	head.add_child(names)
 	var title := Label.new()
 	title.theme_type_variation = "InkHeading"
-	title.text = str(recipe.get("short_name", recipe.get("name", "")))
+	title.text = str(recipe.get("short_name", recipe.get("name", ""))).get_slice("\n", 0)
 	title.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	names.add_child(title)
 	var level_text := str(recipe.get("level_text", ""))
+	var level: Label = null
 	if level_text != "":
-		var level := Label.new()
+		level = Label.new()
 		level.theme_type_variation = "InkNumber" if bool(recipe.get("level_ok", true)) else "InkWarn"
 		level.text = level_text
 		level.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-		names.add_child(level)
+		# Phase 4: a short note ("28 in the pack") sits by the name; a long one goes under the rule, full width.
+		if level_text.length() <= 24:
+			names.add_child(level)
 	var rule := HSeparator.new()
 	block.add_child(rule)
+	if level != null and level.get_parent() == null:
+		block.add_child(level)
 	var desc := Label.new()
 	desc.theme_type_variation = "InkBody"
 	desc.text = str(recipe.get("desc", ""))
 	desc.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	block.add_child(desc)
+	# Phase 4 (Craft, Skills, Gear): progress to the next level, and a recipe's materials as a short ledger,
+	# each with what you have against what it needs, in green ink when there is enough and red when not.
+	if recipe.has("progress"):
+		var bar := ProgressBar.new()
+		bar.theme_type_variation = "InkProgress"
+		bar.show_percentage = false
+		bar.custom_minimum_size = Vector2(0, 10)
+		bar.value = clampf(float(recipe["progress"]), 0.0, 1.0) * 100.0
+		block.add_child(bar)
+	if not recipe.get("costs", []).is_empty():
+		var needs := Label.new()
+		needs.theme_type_variation = "InkMuted"
+		needs.text = "Materials"
+		block.add_child(needs)
+		for cost in recipe["costs"]:
+			var enough := int(cost["have"]) >= int(cost["need"])
+			var line := HBoxContainer.new()
+			var what := Label.new()
+			what.theme_type_variation = "InkBody" if enough else "InkWarn"
+			what.text = str(cost["label"])
+			what.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+			line.add_child(what)
+			var count := Label.new()
+			count.theme_type_variation = "InkGood" if enough else "InkWarn"
+			count.text = "%d / %d" % [int(cost["have"]), int(cost["need"])]
+			line.add_child(count)
+			block.add_child(line)
+	var action := str(recipe.get("action", ""))
+	if not recipe.has("button") and not recipe.has("count"):
+		_detail_button = null
+		return card   # nothing to do from this page (a skill, an empty gear slot)
 	var button := Button.new()
 	button.custom_minimum_size = Vector2(0, 40)
 	button.set_meta("key", str(recipe.get("key", "")))
-	if recipe.has("button") and str(recipe.get("action", "")) != "":
+	if recipe.has("button"):
 		button.text = str(recipe["button"])
-		_set_enabled(button, bool(recipe.get("enabled", false)))
-		button.set_meta("action", str(recipe["action"]))
-		button.pressed.connect(_on_action_pressed.bind(str(recipe["action"])))
+		_set_enabled(button, bool(recipe.get("enabled", false)) and action != "")
+		button.set_meta("action", action)
+		if action != "":
+			button.pressed.connect(_on_action_pressed.bind(action))
 	else:
 		var key := str(recipe.get("key", ""))
 		button.text = "Planted in the field" if key.begins_with("seed:") else ("Used in crafting" if key.begins_with("mat:") else "Not used from the pack")

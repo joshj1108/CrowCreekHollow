@@ -130,7 +130,7 @@ func _skill_rows() -> Array:
 		tiles.append({
 			"key": "skill:" + skill, "name": "%s\nLevel %d" % [skill, m.progression._level(skill)],
 			"icon": str(info["icon"]), "tint": str(info["tint"]), "enabled": true, "costs": [], "level_ok": true,
-			"desc": str(info["desc"]), "action": "",
+			"desc": str(info["desc"]), "action": "", "corner": m.progression._level(skill),
 		})
 	var chosen := m._skill_chosen(tiles)
 	var marked: Array = []

@@ -24,7 +24,7 @@ func _init() -> void:
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
 	var plate := PanelContainer.new()
 	plate.theme_type_variation = "HudPlate"
-	plate.add_theme_stylebox_override("panel", UiTheme.hud_plate(6, 6))
+	plate.add_theme_stylebox_override("panel", UiTheme.hud_plate(10, 9))
 	plate.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	plate.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 	add_child(plate)
@@ -100,7 +100,9 @@ func set_state(entries: Array, active: int) -> void:
 		icon.modulate = Color.WHITE if enabled else Color(0.5, 0.48, 0.45, 0.8)
 		icon.queue_redraw()
 		var state := "picked" if i == active else ("occupied" if has_tool else "empty")
-		(cell["panel"] as PanelContainer).add_theme_stylebox_override("panel", UiTheme.slot(state))
+		# Phase 3 final: a free slot keeps a lit iron rim (hotbar_empty), so all ten read apart at night.
+		var box: StyleBox = UiTheme.hotbar_empty() if state == "empty" else UiTheme.slot(state)
+		(cell["panel"] as PanelContainer).add_theme_stylebox_override("panel", box)
 		var num: Label = cell["num"]
 		if i == active:
 			num.add_theme_color_override("font_color", UiTheme.GOLD)

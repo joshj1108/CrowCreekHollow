@@ -330,7 +330,7 @@ static func build() -> Theme:
 
 	# --- HUD (Phase 3): a thin plate, meters and the HUD's text roles -------------------------------------------
 	t.set_type_variation("HudPlate", "PanelContainer")
-	t.set_stylebox("panel", "HudPlate", hud_plate(8, 6))
+	t.set_stylebox("panel", "HudPlate", hud_plate())
 	t.set_type_variation("HudMeter", "ProgressBar")
 	t.set_stylebox("background", "HudMeter", hud_meter_back(false))
 	t.set_stylebox("fill", "HudMeter", hud_meter_fill(GOLD))
@@ -396,16 +396,24 @@ const METER := {
 }
 
 
-# The HUD's plate: a thin iron-rimmed dark-wood frame with a brass rivet at each corner
-# (art/ui/hud_plate.png, tools/make_hud_art.py), 9-sliced at its 5 px corner.
-static func hud_plate(content_x := 8, content_y := 6) -> StyleBox:
-	var tex: Texture2D = UiSkin._tex("hud_plate")
+# The HUD's plate. Phase 3 final: a compact instrument frame (art/ui/hud_frame.png, tools/make_hud_art.py) in
+# the kit panel's language: a walnut rail lit on its top and left, a thin muted-brass line, a dark recess and
+# dark planks, with an iron bracket and brass rivet at each corner; 9-sliced at its 10 px corner, edges tiled.
+# The Phase 3 plate (hud_plate.png, a thin iron rim) is the fallback.
+static func hud_plate(content_x := 11, content_y := 9) -> StyleBox:
+	var tex: Texture2D = UiSkin._tex("hud_frame")
+	var margin := 10
+	if tex == null:
+		tex = UiSkin._tex("hud_plate")
+		margin = 5
 	if tex == null:
 		var flat := _flat(Color("1c150f", 0.9), IRON, 2, content_x, content_y)
 		return flat
 	var sb := StyleBoxTexture.new()
 	sb.texture = tex
-	sb.set_texture_margin_all(5)
+	sb.set_texture_margin_all(margin)
+	sb.axis_stretch_horizontal = StyleBoxTexture.AXIS_STRETCH_MODE_TILE_FIT
+	sb.axis_stretch_vertical = StyleBoxTexture.AXIS_STRETCH_MODE_TILE_FIT
 	sb.content_margin_left = content_x
 	sb.content_margin_right = content_x
 	sb.content_margin_top = content_y
@@ -413,20 +421,40 @@ static func hud_plate(content_x := 8, content_y := 6) -> StyleBox:
 	return sb
 
 
-# A meter's channel: near-black with a 1 px iron rim, rust in the warning state.
-static func hud_meter_back(warn: bool) -> StyleBoxFlat:
-	var sb := _flat(Color("0d0a07"), HUD_WARN if warn else Color("4a3e30"), 1, 0, 0)
-	sb.expand_margin_left = 1
-	sb.expand_margin_right = 1
-	sb.expand_margin_top = 1
-	sb.expand_margin_bottom = 1
+# A meter's channel. Phase 3 final: a recessed groove (art/ui/hud_track.png): its top and left in shadow and
+# its bottom lip catching the light, drawn 2 px around the bar; rust in the warning state (hud_track_warn.png).
+static func hud_meter_back(warn: bool) -> StyleBox:
+	var tex: Texture2D = UiSkin._tex("hud_track_warn" if warn else "hud_track")
+	if tex == null:
+		var flat := _flat(Color("0d0a07"), HUD_WARN if warn else Color("4a3e30"), 1, 0, 0)
+		flat.set_expand_margin_all(1)
+		return flat
+	var sb := StyleBoxTexture.new()
+	sb.texture = tex
+	sb.set_texture_margin_all(3)
+	sb.set_expand_margin_all(2)
 	return sb
 
 
-# A meter's fill: a flat muted colour with a lighter pixel line along its top.
+# A meter's fill: a flat muted colour, a shade line under the groove's top edge and a lighter line under that,
+# so the fill sits down in the channel rather than on it.
 static func hud_meter_fill(color: Color) -> StyleBoxFlat:
-	var sb := _flat(color, color.lightened(0.28), 0, 0, 0)
+	var sb := _flat(color, color.darkened(0.42), 0, 0, 0)
 	sb.border_width_top = 1
+	sb.border_width_bottom = 1
+	return sb
+
+
+# The hotbar's free slot (art/ui/hotbar_empty.png): a lit iron rim, easier to see at night than the
+# Inventory's empty slot, still without rivets. Falls back to the Inventory's empty slot.
+static func hotbar_empty() -> StyleBox:
+	var tex: Texture2D = UiSkin._tex("hotbar_empty")
+	if tex == null:
+		return slot("empty")
+	var sb := StyleBoxTexture.new()
+	sb.texture = tex
+	sb.set_texture_margin_all(8)
+	sb.set_content_margin_all(6)
 	return sb
 
 
