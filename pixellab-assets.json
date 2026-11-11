@@ -2331,5 +2331,117 @@
     "note": "kept 07 -> torch"
    }
   ]
+ },
+ "ART-OVERHAUL-002/E4": {
+  "tool": "tools/aoh2_e4.py",
+  "sources": "art/style_tests/ART-OVERHAUL-002/E4/raw/ (fetch.py, reslice.py, sheet.py, jobs.txt, refs/int_style.png)",
+  "note": "E4: the farmhouse's six bought furniture pieces (create_image_pro, style image = the int_* house art). The 24 and 32 px pro candidates came back shifted half a cell; reslice.py rejoins them. Picks: dresser24_fix/09, armchair24_fix/12, bookshelf2_fix/10, painting_fix/09, clock/15. The feather bed is a recolour of int_beds.png (no generation). 80 subscription generations (8 jobs, of which dresser, armchair and bookshelf at 32 px were rejected: three-quarter side panels, too wide), USD 0.",
+  "jobs": [
+   {
+    "key": "dresser",
+    "job_id": "9b411e51-25c4-42ec-bdf8-a671e73174bf",
+    "candidates": 64,
+    "tool": "pro"
+   },
+   {
+    "key": "armchair",
+    "job_id": "4011c44a-6adb-4d87-b4bb-b35d7bee38cd",
+    "candidates": 64,
+    "tool": "pro"
+   },
+   {
+    "key": "clock",
+    "job_id": "923c3f65-505f-4729-b717-6b2a2b5dd004",
+    "candidates": 36,
+    "tool": "pro"
+   },
+   {
+    "key": "painting",
+    "job_id": "4319c66d-d1ff-4b6b-91e0-37dd66156d16",
+    "candidates": 64,
+    "tool": "pro"
+   },
+   {
+    "key": "bookshelf",
+    "job_id": "381e1b6b-453d-49e5-a51c-483ba46454c3",
+    "candidates": 64,
+    "tool": "pro"
+   },
+   {
+    "key": "dresser24",
+    "job_id": "71d6239f-5533-4064-86ab-8d08098c0402",
+    "candidates": 64,
+    "tool": "pro"
+   },
+   {
+    "key": "armchair24",
+    "job_id": "a26a1b46-9818-4c0b-89c8-e77c1c9acfbe",
+    "candidates": 64,
+    "tool": "pro"
+   },
+   {
+    "key": "bookshelf2",
+    "job_id": "d4f5d120-cf9f-490f-83f6-584f8629d40c",
+    "candidates": 64,
+    "tool": "pro"
+   }
+  ],
+  "outputs": {
+   "art/farm/e4/dresser.png": [
+    18,
+    20
+   ],
+   "art/farm/e4/armchair.png": [
+    19,
+    20
+   ],
+   "art/farm/e4/clock.png": [
+    18,
+    42
+   ],
+   "art/farm/e4/painting.png": [
+    25,
+    25
+   ],
+   "art/farm/e4/bookshelf.png": [
+    27,
+    25
+   ],
+   "art/farm/e4/feather_bed.png": [
+    32,
+    47
+   ]
+  }
+ },
+ "ART-OVERHAUL-002/E5": {
+  "tool": "tools/aoh2_e5.py",
+  "sources": "art/style_tests/ART-OVERHAUL-002/E5/raw/ (fetch.py, jobs.txt; uploaded sources in src/)",
+  "note": "E5: winter bare trees by edit_image of the autumn sprites (Great Tree 192x192; farm maple 64x80 and big trek maple 52x71 in one call; orchard pears 48x64 x2; 13 trek maples and apples at 32x36). Trek maple frames 0-3 came back white-crowned and are not used (frames 4-7 serve all eight maples). Spring and summer are a scripted recolour (no generation). 40 subscription generations, USD 0.",
+  "jobs": [
+   {
+    "key": "greattree_bare",
+    "job_id": "d5feac66-5fb8-40b7-8a90-a87cfdcb7b81",
+    "frames": 1,
+    "tool": "edit"
+   },
+   {
+    "key": "maple_bare",
+    "job_id": "040d7228-79ed-4628-8cc1-3f7b5f6f6096",
+    "frames": 2,
+    "tool": "edit"
+   },
+   {
+    "key": "pear_bare",
+    "job_id": "1acb0cae-2f24-4c1d-895c-b35b20ef35f3",
+    "frames": 2,
+    "tool": "edit"
+   },
+   {
+    "key": "trek_bare",
+    "job_id": "636508d7-4c7f-4173-96d9-bc525fa95a74",
+    "frames": 13,
+    "tool": "edit"
+   }
+  ]
  }
 }

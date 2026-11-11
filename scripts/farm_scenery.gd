@@ -83,6 +83,26 @@ var well_rec := {}
 var cistern: Sprite2D
 var hose: Sprite2D
 var _well_shown := -1
+# ART-OVERHAUL-002 E5: the farm by season (tools/aoh2_e5.py, art/farm/e5/). The concept art is autumn; spring and summer
+# swap in green-leaved copies of the deciduous pieces, winter bare ones (and dormant brambles and litter). The windfall
+# fruit lies only in summer and autumn. The ground keeps its baked chunks under shaders/season_ground.gdshader, which
+# shifts the grass by season and dusts it with snow on snowy days. Textures only: no piece moves, nothing blocks.
+const E5_SEASONS := true
+const E5 := "res://art/farm/e5/"
+const SEASONAL := ["gen_833b1e3652", "src_maple", "w4_orchard_pear_a", "w4_orchard_pear_b", "w4_orchard_apple_a",
+	"w4_orchard_apple_b", "src_undergrowth", "bramble_0", "bramble_1", "ivy_0", "ivy_1", "litter_0", "litter_1", "litter_2"]
+const WINDFALLS := ["w4_orchard_windfall_apple", "w4_orchard_windfall_pear"]
+# Hue shift, saturation and value scale, frost mix; the same numbers as SEASON_GRASS in tools/aoh2_e5.py.
+const SEASON_GRASS := {"Spring": [0.02, 1.1, 1.06, 0.0], "Summer": [0.0, 1.06, 1.0, 0.0],
+	"Autumn": [-0.035, 0.88, 0.99, 0.0], "Winter": [-0.02, 0.62, 0.9, 0.1]}
+# The baked leaf litter out of autumn: [amount, colour]. Green under the grass in spring and summer, dull in winter.
+const SEASON_LITTER := {"Spring": [1.0, Color(0.22, 0.33, 0.17)], "Summer": [1.0, Color(0.2, 0.3, 0.16)],
+	"Autumn": [0.0, Color.BLACK], "Winter": [0.85, Color(0.33, 0.28, 0.23)]}
+const SNOW_COVER := 0.75
+var seasonal: Array = []          # [Sprite2D, base name, autumn texture]
+var windfalls: Array = []         # Sprite2D
+var ground_mat: ShaderMaterial
+var _season_shown := ""
 
 
 func _init(main: MainGame) -> void:
@@ -103,6 +123,12 @@ func _sprite(name: String, rec: Dictionary) -> Sprite2D:
 	s.scale = Vector2.ONE * float(rec["s"])
 	s.flip_h = bool(rec.get("fh", false))
 	s.position = Vector2(float(rec["x"]), float(rec["y"]))
+	if E5_SEASONS:
+		var base := name.get_file().get_basename()
+		if SEASONAL.has(base):
+			seasonal.append([s, base, s.texture])
+		elif WINDFALLS.has(base):
+			windfalls.append(s)
 	return s
 
 
@@ -113,6 +139,12 @@ func build() -> void:
 		var d := _sprite(str(c["t"]), c)
 		var n := _sprite(str(c["tn"]), c)
 		n.modulate.a = 0.0
+		if E5_SEASONS:
+			if ground_mat == null:
+				ground_mat = ShaderMaterial.new()
+				ground_mat.shader = load("res://shaders/season_ground.gdshader")
+			d.material = ground_mat
+			n.material = ground_mat
 		ground.add_child(d)
 		ground.add_child(n)
 		day_chunks.append(d)
@@ -312,6 +344,7 @@ func _process(_delta: float) -> void:
 	if gate_lamp != null:
 		gate_lamp.visible = m.trek._has_work("gate_lamp")
 	_update_e3()
+	_update_season()
 	for w in groves:
 		var up := not m.grove_felled.has(w)
 		for s in groves[w]:
@@ -321,6 +354,35 @@ func _process(_delta: float) -> void:
 		_dark = dark
 		_tint(dark)
 	_light(dark)
+
+
+# The season's textures and ground (E5), swapped only when the season or the snow changes.
+func _update_season() -> void:
+	if not E5_SEASONS:
+		return
+	var season: String = m._season_today()
+	var snowing: bool = m.weather_kind == "snow"
+	var key := season + ("+snow" if snowing else "")
+	if key == _season_shown:
+		return
+	_season_shown = key
+	var tag := season.to_lower()
+	for e in seasonal:
+		var path := E5 + "%s_%s.png" % [e[1], tag]
+		(e[0] as Sprite2D).texture = load(path) if season != "Autumn" and ResourceLoader.exists(path) else e[2]
+	for w in windfalls:
+		(w as Sprite2D).visible = season in ["Summer", "Autumn"]
+	if ground_mat != null:
+		var g: Array = SEASON_GRASS.get(season, [0.0, 1.0, 1.0, 0.0])
+		ground_mat.set_shader_parameter("hue_shift", g[0])
+		ground_mat.set_shader_parameter("sat_scale", g[1])
+		ground_mat.set_shader_parameter("val_scale", g[2])
+		ground_mat.set_shader_parameter("frost", g[3])
+		ground_mat.set_shader_parameter("snow", SNOW_COVER if snowing else 0.0)
+		var l: Array = SEASON_LITTER.get(season, [0.0, Color.BLACK])
+		ground_mat.set_shader_parameter("litter", l[0])
+		var lc: Color = l[1]
+		ground_mat.set_shader_parameter("litter_color", Vector3(lc.r, lc.g, lc.b))
 
 
 # Pieces whose base is below the farmer's feet go in front (z 1 over the farmer's 0); the rest stay behind.

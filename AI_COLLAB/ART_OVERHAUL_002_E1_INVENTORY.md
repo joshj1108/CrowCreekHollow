@@ -96,3 +96,14 @@ The farmer is the yardstick: **16 × 32 px** (bbox in a 36 px cell: 16 wide, 32 
 Validation: `tools/scale_check.gd` (E2) loads every production sprite the game draws, checks it exists, that its
 size matches the rule for its class, that its alpha is binary, and that its foot row is opaque; and
 `art/style_tests/ART-OVERHAUL-002/review/scale_sheet.png` shows the farmer beside each class at 3×.
+
+## 7. Status (2026-11-11)
+
+- **E4:** the cave exterior (Stage B) and interior (Stage C) are reused unchanged, as decided above. The farmhouse is the
+  only indoor space (the coop, barn, workshop and cellar are drawn on the farm, not entered); its six bought pieces are
+  now sprites (`art/farm/e4/`: dresser 18x20, armchair 19x20, clock 18x42, painting 25x25, bookshelf 27x25, feather bed
+  32x47). The doormat and rug were already sprites (`int_mat`, `int_rug`); their drawn versions are the fallback only.
+  Wallpaper stays a tint, as decided.
+- **E5:** done more widely than section 4 planned: the farm was autumn all year too (FarmScenery had no season), so the
+  farm's deciduous pieces, its ground and the treks' atlas and grounds all follow the season (DESIGN.md, Calendar).
+- **E6:** landmarks checked at one display scale (review Sheet 6); no landmark art changed.

@@ -451,6 +451,31 @@ func refresh(m, trek) -> void:
 		_rebuild(m, trek)
 
 
+# ART-OVERHAUL-002 E5: the wood by season (tools/aoh2_e5.py, art/farm/trek/e5/). The atlas was drawn for autumn; the
+# other seasons swap in a copy with the same layout (greens in spring and summer, bare maples and apples in winter),
+# and the grounds take the farm's seasonal grass. Layout, pieces and placement are unchanged. Off, autumn all year.
+const E5_SEASONS := true
+const E5 := "res://art/farm/trek/e5/"
+var _base_atlas: Texture2D
+var _base_grounds := {}
+var _season_shown := ""
+
+
+func _season(season: String) -> void:
+	if not E5_SEASONS or season == _season_shown or atlas == null:
+		return
+	if _base_atlas == null:
+		_base_atlas = atlas
+		_base_grounds = grounds.duplicate()
+	_season_shown = season
+	var tag := season.to_lower()
+	var path := E5 + "atlas_%s.png" % tag
+	atlas = load(path) if season != "Autumn" and ResourceLoader.exists(path) else _base_atlas
+	for g in ["forest", "pasture", "hollow"]:
+		var gp := E5 + "ground_%s_%s.png" % [g, tag]
+		grounds[g] = load(gp) if ResourceLoader.exists(gp) else _base_grounds[g]
+
+
 # --- drawing ---
 
 func _blit(ci: CanvasItem, i: int, at: Vector2, s: float, tint := Color.WHITE, flip_h := false) -> void:
@@ -489,6 +514,7 @@ func _dual(m, tex: Texture2D, on: Callable, x0: int, y0: int, x1: int, y1: int, 
 
 
 func draw(m, trek, x0: int, y0: int, x1: int, y1: int) -> void:
+	_season(trek._season_on(m.day))
 	refresh(m, trek)
 	var px: float = m.PX
 	var s := px / T

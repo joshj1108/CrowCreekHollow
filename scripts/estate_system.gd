@@ -396,12 +396,38 @@ func _draw_paper(ci: CanvasItem, cell: Rect2, pos: Vector2i) -> void:
 		ci.draw_circle(cell.position + Vector2(cell.size.x * (0.25 + 0.5 * k), cell.size.y * (0.3 + 0.4 * ((k + pos.x + pos.y) % 2))), 2.5, dot)
 
 
+# ART-OVERHAUL-002 E4: the bought furniture as PixelLab sprites (tools/aoh2_e4.py, art/farm/e4/), standing on their
+# spot like the house's own pieces; the painting hangs where the drawn frame was. The feather bed is the Restored bed
+# with a cream eiderdown, drawn over whichever bed the stage shows. Off (or the art missing), the drawn pieces below.
+const E4_ART := true
+const E4_TILES := {"bookshelf": 2, "feather_bed": 2}
+
+
+func _draw_furniture_sprite(ci: CanvasItem, cell: Rect2, id: String) -> void:
+	var tex := FarmSprites.tex("e4/" + id)
+	var src := Rect2(Vector2.ZERO, tex.get_size())
+	if id == "painting":
+		var size := src.size * m.SCALE
+		var centre := cell.position + Vector2(-cell.size.x * 0.1, cell.size.y * 0.65)   # drawn from the tile east of its spot
+		ci.draw_texture_rect_region(tex, Rect2((centre - size * 0.5).snapped(Vector2(m.SCALE, m.SCALE)), size), src)
+		return
+	m._draw_standing(ci, cell, "e4/" + id, src, int(E4_TILES.get(id, 1)))
+
+
 func _draw_furniture(ci: CanvasItem, cell: Rect2, pos: Vector2i) -> void:
 	for id in furniture:
 		var f: Dictionary = FURNITURE[id]
-		if f["spot"] != pos or m.house_stage < int(f["stage"]):
+		if m.house_stage < int(f["stage"]):
+			continue
+		var art := E4_ART and FarmSprites.has("e4/" + str(id))
+		# The painting spans two wall tiles, so its sprite is drawn with the second, after both walls.
+		var spot: Vector2i = f["spot"] + (Vector2i(1, 0) if art and id == "painting" else Vector2i.ZERO)
+		if spot != pos:
 			continue
 		var px := cell.size.x
+		if art:
+			_draw_furniture_sprite(ci, cell, str(id))
+			continue
 		var ink := Color("1d1611")
 		var r := cell.grow(-px * 0.1)
 		match str(id):
