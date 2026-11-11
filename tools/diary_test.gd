@@ -309,7 +309,7 @@ func _place() -> int:
 
 
 func _art_loads() -> bool:
-	for name in ["cover", "page_l", "page_r", "spine", "ribbon", "grommet", "endpaper", "feather", "fleuron"]:
+	for name in ["cover", "page_l", "page_r", "spine", "ribbon", "grommet", "endpaper", "torn_l", "torn_r", "feather", "fleuron"]:
 		if DiaryBook.tex(name) == null:
 			print("   missing art/ui/diary/%s.png" % name)
 			return false

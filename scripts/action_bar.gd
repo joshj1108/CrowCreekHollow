@@ -2277,6 +2277,16 @@ class TornPage extends Control:
 			draw_rect(Rect2(Vector2.ZERO, size), Color("2a1a10"))
 		var spine_x := size.x if side == 0 else 0.0
 		var dir := -1.0 if side == 0 else 1.0
+		# Phase 5 finishing pass: the remnant is pixel art (ragged tear, loose fibres, the paper's pale core,
+		# its shadow on the endpaper), tiled down the binding. The drawn stub below is the fallback.
+		var stub_tex := DiaryBook.tex("torn_l" if side == 0 else "torn_r")
+		if stub_tex != null:
+			var w := float(stub_tex.get_width())
+			draw_texture_rect(stub_tex, Rect2(spine_x - (w if side == 0 else 0.0), 0.0, w, size.y), true)
+			# The endpaper's own shade along the top and foot, where the page block's edges overhang it.
+			draw_rect(Rect2(0, 0, size.x, 4), Color(0.05, 0.03, 0.02, 0.35))
+			draw_rect(Rect2(0, size.y - 4, size.x, 4), Color(0.05, 0.03, 0.02, 0.25))
+			return
 		# The stub's torn edge, stepped on the art's 2 px grid.
 		var torn := PackedVector2Array()
 		var y := 0.0

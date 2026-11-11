@@ -8,7 +8,8 @@
 #   art/ui/diary/spine.png       the sewn gutter between the pages: 4x8 native, tiled down; a thread every 8 px
 #   art/ui/diary/ribbon.png      a bookmark ribbon 9-slice (grey, tinted per section): 30x19 native, swallowtail end
 #   art/ui/diary/grommet.png     the brass eyelet on the open ribbon: 5x5 native
-#   art/ui/diary/endpaper.png    the dark marbled inside cover a torn-out page leaves bare: 16x16 native tile
+#   art/ui/diary/endpaper.png    the muted marbled endpaper a torn-out page leaves bare: 48x48 native tile
+#   art/ui/diary/torn_l.png      the torn remnant at the binding, tiled down: 18x48 native (torn_r mirrored)
 #   art/ui/diary/feather.png     a small faded-ink sketch of a crow feather for a blank page: 24x24 native
 #   art/ui/diary/fleuron.png     the ornament at the centre of a page's title rule: 11x5 native
 # Run: python tools/make_diary_art.py   (then import once with Godot --import)
@@ -275,26 +276,79 @@ def grommet():
 
 
 def endpaper():
-    # Dark marbled endpaper: a few periodic swirls folded into three close tones, dithered where they meet.
+    # Finishing pass: a muted marbled endpaper, the kind glued inside an old journal's board: a warm umber ground
+    # with a few thin wandering veins (contour lines of a warped field) in one close tone, the odd darker pool,
+    # and no repeating figure, so it reads as old paper rather than wood or cloth. 48x48 native tile, periodic
+    # both ways (every wave fits the tile's period).
     import math
-    n = 16
+    n = 48
     img = canvas(n, n)
     px = img.load()
+    a = 2 * math.pi / n
+    speck = periodic(43, n, n)
     for y in range(n):
         for x in range(n):
-            a = 2 * math.pi / n
-            v = (math.sin(a * (x + 3 * math.sin(a * y * 2))) + math.sin(a * (2 * y - x) + 1.3)
-                 + 0.6 * math.sin(a * 3 * (x + y) + 0.5))
-            if v > 1.2:
-                tone = "3b2417"
-            elif v > 0.55:
-                tone = "33200f" if (x + y) % 2 else "3b2417"
-            elif v > -0.2:
-                tone = "2e1c10"
-            else:
-                tone = "26170d"
+            wx = 3.0 * math.sin(a * y + 0.7) + 2.0 * math.sin(a * (2 * y + x) + 2.1)
+            wy = 2.5 * math.sin(a * x + 1.9) + 1.5 * math.sin(a * (x - 2 * y) + 0.3)
+            v = (math.sin(a * (x + wx) + 0.3) + 0.8 * math.sin(a * (y + wy) * 2 + 1.1)
+                 + 0.5 * math.sin(a * (x + y + wx - wy) + 2.6))
+            tone = "302419"
+            if v < -1.6:
+                tone = "2a1f16"          # a darker pool
+            for c in (-0.6, 0.35, 1.2):
+                if abs(v - c) < 0.07:
+                    tone = "3a2c1f"      # a vein
+            if abs(v - 1.2) < 0.03:
+                tone = "44352a"          # the vein's lighter heart, rarely
+            if speck[y][x] > 0.992:
+                tone = "3e3024"
             px[x, y] = rgba(tone)
     save(img, "endpaper.png")
+
+
+def torn_stub(left):
+    # The remnant a torn-out page leaves at the binding, tiled down the page: 18x48 native, the spine on the
+    # right for the left page. Parchment with the gutter's shade, a ragged tear (a slow wobble plus a fixed jitter,
+    # periodic down the tile), the torn paper's paler core showing as the sheet's thickness, loose fibres past
+    # the tear, a broken dark outline, and a two-step shadow on the endpaper. Transparent beyond, so the endpaper
+    # shows through.
+    import math
+    w, h = 18, 48
+    img = canvas(w, h)
+    px = img.load()
+    rng = random.Random(57)
+    jitter = [rng.choice([0, 0, 0, 1, -1, 1]) for _ in range(h)]
+    fibres = {}
+    for y in range(h):
+        if rng.random() < 0.28:
+            fibres[y] = rng.choice([1, 1, 2, 3])
+    for y in range(h):
+        wob = 1.6 * math.sin(2 * math.pi * y / h + 0.5) + 1.0 * math.sin(2 * math.pi * 3 * y / h + 2.0)
+        edge = 9 + int(round(wob)) + jitter[y]          # the tear's distance from the spine, in native px
+        for d in range(w):
+            x = (w - 1 - d) if left else d               # d counts out from the spine
+            if d < edge - 1:
+                if d < 2:
+                    tone = PAPER["3"]                    # deep in the gutter
+                elif d < 4:
+                    tone = PAPER["2"]
+                else:
+                    tone = PAPER["b"] if (d + y) % 7 else PAPER["2"]
+                px[x, y] = rgba(tone)
+            elif d == edge - 1:
+                px[x, y] = rgba(PAPER["h"])              # the torn core: the sheet's thickness, paler
+            elif d == edge:
+                if (y + d) % 5 != 0:
+                    px[x, y] = rgba("5a4632")            # the broken outline along the tear
+                else:
+                    px[x, y] = rgba(PAPER["l"])
+            elif d <= edge + fibres.get(y, 0):
+                px[x, y] = rgba(PAPER["l"] if d == edge + 1 else PAPER["2"], 220)   # a loose fibre
+            elif d <= edge + 2:
+                px[x, y] = (12, 8, 4, 105)               # the remnant's shadow on the endpaper
+            elif d <= edge + 4:
+                px[x, y] = (12, 8, 4, 50)
+    save(img, "torn_l.png" if left else "torn_r.png")
 
 
 def feather():
@@ -357,5 +411,7 @@ if __name__ == "__main__":
     ribbon()
     grommet()
     endpaper()
+    torn_stub(True)
+    torn_stub(False)
     feather()
     fleuron()

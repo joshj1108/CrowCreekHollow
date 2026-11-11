@@ -6,6 +6,12 @@ extends CanvasLayer
 ## stick highlights one and A opens it; the D-pad, the arrow keys or WASD step round the ring (right and
 ## down clockwise), and Enter, Space or A opens it. B or Esc closes the wheel. Choosing a section closes the wheel
 ## and shows that section alone, with no other sections in sight.
+##
+## UI-OVERHAUL-001 Phase 6: the wheel is drawn as a farmer's field instrument from pixel art (art/ui/wheel/,
+## tools/make_wheel_art.py): walnut wedges in an iron rim, brass strips and rivets, and a brass-ringed hub that
+## names the section. The lit wedge, its rim notch and the hub's pointer are pre-drawn frames, one per segment, so
+## nothing is rotated or scaled off the pixel grid. Every piece is drawn at ART_SCALE; without the art the older
+## code-drawn ring is drawn instead. Presentation only: the sections, the input and the geometry are unchanged.
 
 signal section_chosen(section_name: String)
 
@@ -44,9 +50,31 @@ const COL_IRON := Color("5f5b55")
 const WOOD_SHADE := Color(0.72, 0.68, 0.64)   # the wood's tint on a segment that isn't highlighted
 const WOOD_HOT := Color(1.35, 1.2, 1.0)        # and on the highlighted one
 
+# The Phase 6 art, drawn at 2x like the diary and the HUD.
+const ART_DIR := "res://art/ui/wheel/"
+const ART_SCALE := 2.0
+const DIAL_SIZE := 232.0
+const ICON_SIZE := 20.0
+const ICON_R := 150.0          # the icon-and-label block's centre, from the wheel's centre (screen px)
+const LABEL_SIZE := 12
+const COL_LABEL := Color("a89878")
+const COL_LABEL_HOT := Color("efe4c8")
+const COL_NAME := Color("e8dcc0")
+const COL_SUB := Color("b0a080")
+const COL_GLYPH_BG := Color("2f1c12")
+const COL_GLYPH_EDGE := Color("8a6a3a")
+const HUB_TEXT_W := 128.0      # the hub's text column: inside the brass ring (radius 79 px at 2x)
+static var fade_seconds := 0.18   # the open and close fade; 0 shows and hides at once (tests set it)
+
 var open := false
 var highlight := 0
 var ring: Control
+var pad_prompts := false       # the prompts name the controller's buttons (the last device used was a pad)
+var _fade := 1.0               # 0 to 1: how far the wheel has faded in
+var _fading_out := false
+var dial_tex: Texture2D = _art("dial")
+var hot_tex: Texture2D = _art("hot")
+var icon_tex: Texture2D = _art("icons")
 var wheel_icons: Texture2D = load(WHEEL_ICONS_PATH) if ResourceLoader.exists(WHEEL_ICONS_PATH) else null
 
 
@@ -61,22 +89,68 @@ func _ready() -> void:
 	visible = false
 
 
+static func _art(art_name: String) -> Texture2D:
+	var path := ART_DIR + art_name + ".png"
+	return load(path) if ResourceLoader.exists(path) else null
+
+
+# The wheel takes input from its first frame; the fade is only how it looks.
 func show_wheel() -> void:
 	open = true
 	visible = true
+	_fading_out = false
 	ring.mouse_filter = Control.MOUSE_FILTER_STOP
+	# The prompts follow the device the rest of the UI last saw.
+	var host := get_parent()
+	var bar: Object = host.get("action_bar") if host != null else null
+	if bar != null and bar.get("_pad_glyphs") != null:
+		pad_prompts = bool(bar.get("_pad_glyphs"))
+	_fade = 0.0 if fade_seconds > 0.0 else 1.0
+	ring.modulate.a = _fade
 	ring.queue_redraw()
 
 
-func hide_wheel() -> void:
+# Closing (Esc, B, Shift, a click off the ring) fades out; choosing a section hides it at once, as the
+# section's panel takes the screen. Either way the wheel stops taking input now.
+func hide_wheel(fade_out := true) -> void:
 	open = false
-	visible = false
 	ring.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	if fade_out and fade_seconds > 0.0 and visible and _fade > 0.0:
+		_fading_out = true
+	else:
+		_fading_out = false
+		visible = false
 
 
-func _process(_delta: float) -> void:
+# Notes which device was used last, for the prompts. Never handles the event.
+func _input(event: InputEvent) -> void:
 	if not open:
 		return
+	var pad := pad_prompts
+	if event is InputEventJoypadButton:
+		pad = true
+	elif event is InputEventJoypadMotion:
+		pad = pad or absf((event as InputEventJoypadMotion).axis_value) > STICK_DEADZONE
+	elif event is InputEventKey or event is InputEventMouseButton:
+		pad = false
+	if pad != pad_prompts:
+		pad_prompts = pad
+		ring.queue_redraw()
+
+
+func _process(delta: float) -> void:
+	if _fading_out:
+		_fade = maxf(0.0, _fade - delta / fade_seconds)
+		ring.modulate.a = _fade
+		if _fade <= 0.0:
+			_fading_out = false
+			visible = false
+		return
+	if not open:
+		return
+	if _fade < 1.0:
+		_fade = minf(1.0, _fade + delta / maxf(fade_seconds, 0.001))
+		ring.modulate.a = _fade
 	# The left stick moves the highlight; the mouse does the same when it moves.
 	var pads := Input.get_connected_joypads()
 	var device: int = pads[0] if not pads.is_empty() else 0
@@ -136,11 +210,88 @@ func _on_ring_input(event: InputEvent) -> void:
 
 func _choose(i: int) -> void:
 	var section_name := str(SECTIONS[i]["name"])
-	hide_wheel()
+	hide_wheel(false)
 	section_chosen.emit(section_name)
 
 
 func _draw_ring() -> void:
+	if dial_tex == null or hot_tex == null or icon_tex == null:
+		_draw_ring_flat()
+		return
+	var size_now := ring.get_rect().size
+	ring.draw_rect(Rect2(Vector2.ZERO, size_now), COL_DIM)
+	var c := (size_now * 0.5).round()
+	var n := SECTIONS.size()
+	var seg := TAU / float(n)
+	var font := ThemeDB.fallback_font
+	var dial := Vector2(DIAL_SIZE, DIAL_SIZE) * ART_SCALE
+	var at := c - dial * 0.5
+	ring.draw_texture_rect(dial_tex, Rect2(at, dial), false)
+	ring.draw_texture_rect_region(hot_tex, Rect2(at, dial), Rect2(highlight * DIAL_SIZE, 0, DIAL_SIZE, DIAL_SIZE))
+	# Each wedge: its icon with its name under it, the pair centred ICON_R out. The lit wedge's icon is a
+	# shade brighter and its name ivory; the rest are muted, so the lit one is the one the eye finds.
+	for i in n:
+		var hot := i == highlight
+		var mid := float(i) * seg
+		var label := str(SECTIONS[i]["name"])
+		var label_dim := font.get_string_size(label, HORIZONTAL_ALIGNMENT_LEFT, -1, LABEL_SIZE)
+		var icon := Vector2(ICON_SIZE, ICON_SIZE) * ART_SCALE
+		var block_h := icon.y + 4.0 + label_dim.y
+		var centre := c + _dir(mid) * ICON_R
+		var icon_at := (centre - Vector2(icon.x * 0.5, block_h * 0.5)).round()
+		ring.draw_texture_rect_region(icon_tex, Rect2(icon_at, icon), Rect2(i * ICON_SIZE, 0, ICON_SIZE, ICON_SIZE),
+			ICON_HOT if hot else Color(0.86, 0.84, 0.8))
+		var base := Vector2(centre.x - label_dim.x * 0.5, icon_at.y + icon.y + 4.0 + font.get_ascent(LABEL_SIZE)).round()
+		ring.draw_string(font, base + Vector2(0, 2), label, HORIZONTAL_ALIGNMENT_LEFT, -1, LABEL_SIZE, Color(0, 0, 0, 0.7))
+		ring.draw_string(font, base, label, HORIZONTAL_ALIGNMENT_LEFT, -1, LABEL_SIZE, COL_LABEL_HOT if hot else COL_LABEL)
+	# The hub names the lit section and says what it is for. The name shrinks to fit; the subtitle wraps.
+	var name_text := str(SECTIONS[highlight]["name"])
+	var name_size := 20
+	while name_size > 14 and font.get_string_size(name_text, HORIZONTAL_ALIGNMENT_LEFT, -1, name_size).x > HUB_TEXT_W:
+		name_size -= 1
+	var name_dim := font.get_string_size(name_text, HORIZONTAL_ALIGNMENT_LEFT, -1, name_size)
+	var sub := str(SECTIONS[highlight]["subtitle"])
+	var sub_dim := font.get_multiline_string_size(sub, HORIZONTAL_ALIGNMENT_CENTER, HUB_TEXT_W, 12)
+	var top := c.y - (name_dim.y + 4.0 + sub_dim.y) * 0.5
+	var left := c.x - HUB_TEXT_W * 0.5
+	ring.draw_string(font, Vector2(left, top + font.get_ascent(name_size) + 2), name_text, HORIZONTAL_ALIGNMENT_CENTER, HUB_TEXT_W, name_size, Color(0, 0, 0, 0.7))
+	ring.draw_string(font, Vector2(left, top + font.get_ascent(name_size)), name_text, HORIZONTAL_ALIGNMENT_CENTER, HUB_TEXT_W, name_size, COL_NAME)
+	ring.draw_multiline_string(font, Vector2(left, top + name_dim.y + 4.0 + font.get_ascent(12)), sub, HORIZONTAL_ALIGNMENT_CENTER, HUB_TEXT_W, 12, -1, COL_SUB)
+	# Above the dial: below it they would sit on the hotbar at 1280 x 720.
+	_draw_prompts(font, Vector2(c.x, c.y - dial.y * 0.5 - 34.0))
+
+
+# The button prompts over the wheel, in boxed glyphs for whichever device was used last.
+func _draw_prompts(font: Font, centre_top: Vector2) -> void:
+	var prompts: Array = [["L stick", "Choose"], ["A", "Open"], ["B", "Close"]]
+	if not pad_prompts:
+		prompts = [["Mouse", "Point"], ["Arrows", "Choose"], ["Enter", "Open"], ["Esc", "Close"]]
+	var fs := 13
+	var pieces: Array = []
+	var total := 0.0
+	for p in prompts:
+		var gw := font.get_string_size(str(p[0]), HORIZONTAL_ALIGNMENT_LEFT, -1, fs).x + 14.0
+		var tw := font.get_string_size(str(p[1]), HORIZONTAL_ALIGNMENT_LEFT, -1, fs).x
+		pieces.append([gw, tw])
+		total += gw + 6.0 + tw
+	total += 18.0 * (prompts.size() - 1)
+	var x := roundf(centre_top.x - total * 0.5)
+	var h := 22.0
+	for k in prompts.size():
+		var gw: float = pieces[k][0]
+		var box := Rect2(x, centre_top.y, gw, h)
+		ring.draw_rect(box, COL_GLYPH_BG)
+		ring.draw_rect(box, COL_GLYPH_EDGE, false, 2.0)
+		var base_y := roundf(centre_top.y + (h - font.get_height(fs)) * 0.5 + font.get_ascent(fs))
+		ring.draw_string(font, Vector2(x, base_y), str(prompts[k][0]), HORIZONTAL_ALIGNMENT_CENTER, gw, fs, COL_TEXT)
+		x += gw + 6.0
+		ring.draw_string(font, Vector2(x, base_y + 1), str(prompts[k][1]), HORIZONTAL_ALIGNMENT_LEFT, -1, fs, Color(0, 0, 0, 0.7))
+		ring.draw_string(font, Vector2(x, base_y), str(prompts[k][1]), HORIZONTAL_ALIGNMENT_LEFT, -1, fs, COL_MUTED.lightened(0.2))
+		x += float(pieces[k][1]) + 18.0
+
+
+# The ring as drawn before Phase 6, kept for when the art is missing.
+func _draw_ring_flat() -> void:
 	var size_now := ring.get_rect().size
 	ring.draw_rect(Rect2(Vector2.ZERO, size_now), COL_DIM)
 	var c := size_now * 0.5

@@ -25,7 +25,9 @@ extends SceneTree
 #   built           build the cellar, smokehouse, furnace and woodshed (the workshop goes by the farmhouse)
 #   workshop=X,Y    with built, put the workshop's top-left corner on this farm tile (layout coordinates)
 #   diary           find the diary in the desk and open it
-#   wheel           open the section wheel (wheel=N highlights section N, counting from 0)
+#   wheel           open the section wheel (wheel=N highlights section N, counting from 0); wpad shows the controller's
+#                   prompts; wcycle (with hold=) from 2.4 s closes it, opens it, steps right three times, steps back
+#                   three times and closes it, 0.45 s apart, by injected key presses
 #   bag             open the bag
 #   title           stay on the title menu instead of starting a game
 #   pack            UI checks: put a mix of crops, fish, eggs, milk, a bandage and a crow charm in the pack
@@ -421,8 +423,14 @@ func _initialize() -> void:
 		if opt["wheel"] != "1":
 			main.wheel.highlight = int(opt["wheel"])
 			main.wheel.ring.queue_redraw()
-		await process_frame
-		await process_frame
+		if opt.has("wpad"):
+			main.wheel.pad_prompts = true
+			main.wheel.ring.queue_redraw()
+		if opt.has("wcycle"):
+			_wheel_cycle()
+		# Phase 6: past the wheel's open fade (SectionWheel.fade_seconds), so the shot shows it whole.
+		for i in 16:
+			await process_frame
 	if opt.has("bag"):
 		main._toggle_bag()
 		await process_frame
@@ -533,6 +541,19 @@ func _save(opt: Dictionary) -> void:
 
 
 # For a motion clip of the diary: forward, forward, back, back, a section jump and back, 1.1 s apart.
+func _wheel_cycle() -> void:
+	await create_timer(2.4).timeout   # past the 90 warm-up frames
+	for key in [KEY_ESCAPE, KEY_SHIFT, KEY_RIGHT, KEY_RIGHT, KEY_RIGHT, KEY_LEFT, KEY_LEFT, KEY_LEFT, KEY_ESCAPE]:
+		await create_timer(0.45).timeout
+		for pressed in [true, false]:
+			var ev := InputEventKey.new()
+			ev.keycode = key
+			ev.physical_keycode = key
+			ev.pressed = pressed
+			Input.parse_input_event(ev)
+			await process_frame
+
+
 func _diary_cycle(ab: ActionBar) -> void:
 	var start := ab.book_section
 	await create_timer(2.4).timeout   # past the 90 warm-up frames, so the clip starts on the open book

@@ -132,7 +132,7 @@ class PageTurn extends Control:
 	signal cue(sound: String)   # page_lift, page_rustle, page_settle, book_section: ActionBar plays them
 
 	const STRIPS := 40
-	const CAMERA := 6.0          # the camera's height over the book, in sheet widths: the perspective's strength
+	const CAMERA := 6.5          # the camera's height over the book, in sheet widths: the perspective's strength
 	const RIFFLE_GAP := 0.085    # seconds between riffled leaves
 	const WARM_FRAMES := 2       # frames the snapshots take to lay out and render before the sheet shows
 
@@ -336,7 +336,13 @@ class PageTurn extends Control:
 	# stands up over the spine, falls, and settles. BENDS is how far the outer edge leads (+, lifting) or
 	# trails (-, settling), in radians. Both are eased between the keys by a smooth cubic (no stops at keys).
 	const ANGLES := [[0.0, 0.0], [0.15, 22.0], [0.3, 56.0], [0.5, 90.0], [0.7, 126.0], [0.85, 160.0], [1.0, 180.0]]
-	const BENDS := [[0.0, 0.0], [0.1, 0.7], [0.25, 0.9], [0.45, 0.35], [0.55, -0.15], [0.75, -0.55], [0.9, -0.3], [1.0, 0.0]]
+	# Finishing pass: the free edge leads while it is lifted, then lags behind the body from just before upright
+	# until it lands, so the sheet is never a flat board standing on the spine.
+	const BENDS := [[0.0, 0.0], [0.1, 0.75], [0.22, 0.85], [0.36, 0.25], [0.5, -0.5], [0.68, -0.68], [0.86, -0.34], [1.0, 0.0]]
+	const ROOT := 0.42           # how far the bound end lags the body toward the side it lies on (radians at most)
+	const ROOT_LEN := 0.3        # the share of the leaf that curves up out of the binding
+	const LIGHT := Vector2(0.3, 0.14)    # the cast shadow's slide per unit of height (light from the upper left)
+	const PAPER_BACK := Color("bba67c")  # plain parchment under strips seen too obliquely to read
 
 	static func _curve(keys: Array, q: float, settle: bool) -> float:
 		q = clampf(q, 0.0, 1.0)
@@ -376,6 +382,9 @@ class PageTurn extends Control:
 		var bottom := _right.end.y
 		var cy := (top + bottom) * 0.5
 		var cam := CAMERA * length
+		# The bound end rolls out of the binding: it lags the body toward whichever side the leaf is nearer
+		# (sin 2θ), so the root curves like paper held at the spine instead of hinging there.
+		var root := -ROOT * sin(2.0 * theta)
 		var pts: Array = []
 		var x := 0.0
 		var z := 0.0
@@ -383,55 +392,80 @@ class PageTurn extends Control:
 			var u := float(j) / STRIPS
 			var k := cam / maxf(cam - z, 1.0)
 			# Lifted strips sit nearer the camera, so they draw larger about the book's centre.
-			var a := clampf(theta + bend * pow(u, 1.6), 0.0, PI)
-			pts.append([spine_x + dir * x * k, cy + (top - cy) * k, cy + (bottom - cy) * k, a, z, u * length - half])
-			var mid_u := (float(j) + 0.5) / STRIPS
-			var am := clampf(theta + bend * pow(mid_u, 1.6), 0.0, PI)
+			var a := _angle_at(u, theta, bend, root)
+			# [0 screen x, 1 top y, 2 bottom y, 3 angle, 4 height, 5 distance from the spine, 6 ground x]
+			pts.append([spine_x + dir * x * k, cy + (top - cy) * k, cy + (bottom - cy) * k, a, z, u * length - half, x])
+			var am := _angle_at((float(j) + 0.5) / STRIPS, theta, bend, root)
 			x += cos(am) * length / STRIPS
 			z += sin(am) * length / STRIPS
 		return pts
 
-	# A stepped shadow on the pages beyond the leaf's outer edge (wider and darker the higher it rides), and a
-	# darkening either side of the spine while the leaf stands up there.
+	# A strip's angle along the leaf: the body's angle, the root's lag near the binding (eased out over
+	# ROOT_LEN), and the free edge's lead or lag spread over the whole length, so the sheet bows evenly.
+	static func _angle_at(u: float, theta: float, bend: float, root: float) -> float:
+		var held := 1.0 - smoothstep(0.0, ROOT_LEN, u)
+		return clampf(theta + root * held + bend * pow(u, 1.3), 0.0, PI)
+
+	# The leaf's shadow on the pages under it: each strip's footprint on the book, slid away from the light by
+	# its height, in two hard steps (a dark core and a lighter fringe), fading as the leaf rises. Clipped to the
+	# page block. Then a darkening either side of the spine while the leaf stands up there.
 	func _draw_shadow(pts: Array, q: float) -> void:
-		var outer: Array = pts[pts.size() - 1]
+		var dir := 1.0 if forward else -1.0
+		var spine_x := _spine.get_center().x
+		var top := _right.position.y
+		var bottom := _right.end.y
+		var h := _right.size.y
+		var area := Rect2(_left.position.x, top, _right.end.x - _left.position.x, h)
+		var reach := _right.size.x * 0.5
 		var height := 0.0
 		for p in pts:
 			height = maxf(height, float(p[4]))
-		var spine_x := _spine.get_center().x
-		var top := _right.position.y
-		var h := _right.size.y
-		var lift := clampf(height / (_right.size.x * 0.5), 0.0, 1.0)
-		var side := signf(float(outer[0]) - spine_x)
-		if side == 0.0:
-			side = 1.0
-		var width := 6.0 + 30.0 * lift
-		var steps := [0.34, 0.24, 0.15, 0.07]
-		var limit := _right.end.x if side > 0.0 else _left.position.x
-		for i in steps.size():
-			var x0 := float(outer[0]) + side * width * i / steps.size()
-			var x1 := float(outer[0]) + side * width * (i + 1) / steps.size()
-			x0 = minf(x0, limit) if side > 0.0 else maxf(x0, limit)
-			x1 = minf(x1, limit) if side > 0.0 else maxf(x1, limit)
-			var r := Rect2(minf(x0, x1), top, absf(x1 - x0), h)
-			if r.size.x > 0.0:
-				draw_rect(r, Color(0.08, 0.05, 0.02, steps[i] * lift))
+		var lift := clampf(height / reach, 0.0, 1.0)
+		if lift <= 0.01:
+			return
+		for layer in 2:
+			var grow := 0.0 if layer == 0 else 5.0 + 7.0 * lift
+			var alpha := (0.16 if layer == 0 else 0.07) * (0.55 + 0.45 * lift) * (1.0 - 0.35 * lift)
+			var col := Color(0.08, 0.05, 0.02, alpha)
+			for j in pts.size() - 1:
+				var a: Array = pts[j]
+				var b: Array = pts[j + 1]
+				if float(b[5]) <= 0.0:
+					continue
+				var za := float(a[4])
+				var zb := float(b[4])
+				var xa := spine_x + dir * float(a[6]) + LIGHT.x * za + grow
+				var xb := spine_x + dir * float(b[6]) + LIGHT.x * zb + grow
+				var ya := LIGHT.y * za
+				var yb := LIGHT.y * zb
+				var quad := PackedVector2Array([
+					_clip(Vector2(xa, top + ya - grow * 0.5), area), _clip(Vector2(xb, top + yb - grow * 0.5), area),
+					_clip(Vector2(xb, bottom + yb + grow), area), _clip(Vector2(xa, bottom + ya + grow), area)])
+				if absf(quad[1].x - quad[0].x) >= 0.5 and absf(quad[3].y - quad[0].y) >= 0.5:
+					draw_colored_polygon(quad, col)
 		# The leaf upright at the spine shades the gutter on both pages.
 		var upright := sin(_theta(q))
 		var gutter := 0.16 * _right.size.x * upright
 		for i in 3:
 			var w := gutter * (3 - i) / 3.0
-			var a := 0.1 * upright
-			draw_rect(Rect2(spine_x - w, top, w * 2.0, h), Color(0.08, 0.05, 0.02, a))
+			draw_rect(Rect2(spine_x - w, top, w * 2.0, h), Color(0.08, 0.05, 0.02, 0.09 * upright))
 
-	# The leaf's strips: textured from the snapshot of whichever face is toward the camera, shaded by angle.
-	# A riffled leaf with no page of its own (front or back null) is plain parchment.
+	static func _clip(p: Vector2, r: Rect2) -> Vector2:
+		return Vector2(clampf(p.x, r.position.x, r.end.x), clampf(p.y, r.position.y, r.end.y))
+
+	# The leaf's strips: textured from the snapshot of whichever face is toward the camera, lit by the strip's
+	# angle to a light at the upper left (in even steps, as the art is shaded). A strip seen very obliquely
+	# fades its writing into plain parchment, so squeezed text never shows as a smear. A riffled leaf with no page
+	# of its own (front or back null) is plain parchment. The edges are outlined, and the sheet's thickness shows
+	# as a paper-edge band along its lower edge and its free end.
 	func _draw_leaf(pts: Array, front: Texture2D, back: Texture2D) -> void:
 		var dir := 1.0 if forward else -1.0
 		var src_inner := _right.position.x if forward else _left.end.x   # the front page's spine edge
 		var dst_inner := _left.end.x if forward else _right.position.x   # the back page's spine edge
 		var v0 := _right.position.y / _logical.y
 		var v1 := _right.end.y / _logical.y
+		var step := (_right.size.x + _spine.size.x * 0.5) / STRIPS
+		var light := Vector2(-0.45, 0.89)   # (screen x, up off the book), toward the light
 		var top_line := PackedVector2Array()
 		var bottom_line := PackedVector2Array()
 		for j in STRIPS:
@@ -442,9 +476,10 @@ class PageTurn extends Control:
 				continue
 			var da := maxf(float(a[5]), 0.0)
 			var db := float(b[5])
-			var ax := float(a[0]) if float(a[5]) >= 0.0 else lerpf(float(a[0]), float(b[0]), -float(a[5]) / (db - float(a[5])))
-			var at := float(a[1]) if float(a[5]) >= 0.0 else lerpf(float(a[1]), float(b[1]), -float(a[5]) / (db - float(a[5])))
-			var ab := float(a[2]) if float(a[5]) >= 0.0 else lerpf(float(a[2]), float(b[2]), -float(a[5]) / (db - float(a[5])))
+			var cut := 0.0 if float(a[5]) >= 0.0 else -float(a[5]) / (db - float(a[5]))
+			var ax := lerpf(float(a[0]), float(b[0]), cut)
+			var at := lerpf(float(a[1]), float(b[1]), cut)
+			var ab := lerpf(float(a[2]), float(b[2]), cut)
 			var quad := PackedVector2Array([Vector2(ax, at), Vector2(float(b[0]), float(b[1])),
 				Vector2(float(b[0]), float(b[2])), Vector2(ax, ab)])
 			if top_line.is_empty():
@@ -454,30 +489,40 @@ class PageTurn extends Control:
 			bottom_line.append(quad[2])
 			var angle := (float(a[3]) + float(b[3])) * 0.5
 			var facing := (float(b[0]) - ax) * dir > 0.0
-			var shade := 0.0
-			var texture: Texture2D
-			var u0 := 0.0
-			var u1 := 0.0
-			if facing:
-				shade = 0.7 + 0.3 * pow(maxf(cos(angle), 0.0), 0.6)
-				texture = front
-				u0 = (src_inner + dir * da) / _logical.x
-				u1 = (src_inner + dir * db) / _logical.x
-			else:
-				shade = 0.6 + 0.4 * pow(maxf(-cos(angle), 0.0), 0.6)
-				texture = back
-				u0 = (dst_inner - dir * da) / _logical.x
-				u1 = (dst_inner - dir * db) / _logical.x
-			shade = snappedf(shade, 0.04)   # in steps, as the art's shading is
-			var tint := Color(shade, shade * 0.985, shade * 0.95)
-			if texture != null:
+			# The face's normal in (screen x, up): the front's tilts away from the spine as the leaf lifts.
+			var normal := Vector2(-sin(angle) * dir, cos(angle))
+			if not facing:
+				normal = -normal
+			var lit := clampf(normal.dot(light), -0.2, 1.0)
+			var shade := snappedf(0.8 + 0.2 * lit, 0.03)
+			var tint := Color(shade, shade * 0.99, shade * 0.965)
+			var texture: Texture2D = front if facing else back
+			var u0 := (src_inner + dir * da) / _logical.x if facing else (dst_inner - dir * da) / _logical.x
+			var u1 := (src_inner + dir * db) / _logical.x if facing else (dst_inner - dir * db) / _logical.x
+			# How wide the strip draws against its width lying flat: under about a third, its writing fades.
+			var seen := clampf(absf(float(b[0]) - ax) / maxf(step * (1.0 - cut), 0.01), 0.0, 1.5)
+			var ink := snappedf(smoothstep(0.1, 0.38, seen), 0.25)
+			if texture == null or ink < 1.0:
+				draw_colored_polygon(quad, PAPER_BACK * tint)
+			if texture != null and ink > 0.0:
+				var c := Color(tint, ink)
 				var uvs := PackedVector2Array([Vector2(u0, v0), Vector2(u1, v0), Vector2(u1, v1), Vector2(u0, v1)])
-				draw_polygon(quad, PackedColorArray([tint, tint, tint, tint]), uvs, texture)
-			else:
-				draw_colored_polygon(quad, PAPER * tint)
+				draw_polygon(quad, PackedColorArray([c, c, c, c]), uvs, texture)
 		if top_line.size() < 2:
 			return
+		# Thickness: the paper's edge shows as a light band just inside the lower outline, and the free end is
+		# drawn 3 px wide, so a sheet seen edge-on is still a sheet and not a line.
+		var thick := PackedVector2Array()
+		for p in bottom_line:
+			thick.append(p + Vector2(0, -2))
+		draw_polyline(thick, Color("a08a62"), 2.0)
+		var end_top := top_line[top_line.size() - 1]
+		var end_bottom := bottom_line[bottom_line.size() - 1]
+		var out := signf(end_top.x - top_line[top_line.size() - 2].x)
+		if out == 0.0:
+			out = dir
+		draw_line(end_top + Vector2(out * 1.0, 0), end_bottom + Vector2(out * 1.0, 0), Color("a08a62"), 3.0)
 		# The leaf's edges: a dark pixel line round the paper, as the art outlines everything.
 		draw_polyline(top_line, EDGE_DARK, 2.0)
 		draw_polyline(bottom_line, EDGE_DARK, 2.0)
-		draw_line(top_line[top_line.size() - 1], bottom_line[bottom_line.size() - 1], EDGE_DARK, 2.0)
+		draw_line(end_top + Vector2(out * 2.5, 0), end_bottom + Vector2(out * 2.5, 0), EDGE_DARK, 2.0)
