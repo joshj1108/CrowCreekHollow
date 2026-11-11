@@ -116,6 +116,9 @@ const COPPER_TINTS := ["b87333", "c97f45"]
 
 # The atlas rectangle for an item icon, or an empty rect when there is no icon art for that kind.
 static func icon_rect(kind: String, tint: Color) -> Rect2:
+	var g := GEAR_ICONS.find(kind)
+	if g >= 0 and _tex("icons_gear") != null:
+		return Rect2((g % 4) * 16, (g / 4) * 16, 16, 16)
 	if _tex("icons") == null:
 		return Rect2()
 	var key := kind
@@ -128,6 +131,26 @@ static func icon_rect(kind: String, tint: Color) -> Rect2:
 
 
 static func icons() -> Texture2D:
+	return _tex("icons")
+
+
+# UI-FINAL-001: the gear pieces' own pictures (tools/make_ui_polish_art.py): copper and iron (and bark and amber)
+# variants of the item icons and a few hand-drawn pieces, so the Craft grid's tiers don't share one picture.
+# art/ui/icons_gear.png, 4-wide 16-pixel cells in this order.
+const GEAR_ICONS := [
+	"hat_bark", "helm_copper", "helm_iron", "shirt_bark",
+	"cuirass_copper", "cuirass_iron", "pants_bark", "pants_copper",
+	"pants_iron", "boots_copper", "boots_iron", "pendant_amber",
+	"pendant_copper", "pendant_iron", "bracer_copper", "glove_iron",
+	"shield_copper", "shield_iron", "sword_copper", "knife",
+	"stake",
+]
+
+
+# The atlas an icon kind is drawn from (with icon_rect's region): the gear atlas for a GEAR_ICONS kind.
+static func icon_tex(kind: String) -> Texture2D:
+	if GEAR_ICONS.has(kind) and _tex("icons_gear") != null:
+		return _tex("icons_gear")
 	return _tex("icons")
 
 

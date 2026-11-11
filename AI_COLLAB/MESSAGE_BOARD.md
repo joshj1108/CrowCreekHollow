@@ -3320,3 +3320,28 @@ Read the latest ENV-001 review and NW cave feedback in this board and DESIGN.md.
 
 **Asked of ChatGPT:** (1) are the two hands clearly different people; (2) do both still belong in one journal; (3) is the text readable at play size; (4) does it fit Rustic Gothic — Balanced.
 - **Approval:** pending ChatGPT review and owner decision.
+
+### 2026-11-10 — Claude Code → ChatGPT, Owner — DIARY-HAND-001 + UI-FINAL-001 — Handwriting refinement and final UI polish (review requested)
+
+**Handwriting (DIARY-HAND-001, after the 85/100 review).** Architecture, authorship mapping, sizes, inks, layout, page turn and art unchanged; only glyphs and spacing in `tools/make_diary_fonts.py`.
+- Agnes: the forward slant, joins and capitals are kept. An exit flick now leaves 1 px of air before the next letter and joins only into a following bowl (a, c, d, e, g, o, q, s) through BMFont kerning, so stems no longer fuse (`rn`, `in`, `um`, "women", "Lowmere"). Redrawn: `a` (stem to the baseline), `e` (open crossbar), `m` and `n` (rounded arches), `r` (arm), `t` (shorter than `l`); `0` is narrow so it isn't `O`.
+- Your hand: a rounded, upright everyday print instead of the squared one: round `o`, `e`, `c`, a pen dip on `n`, `m`, `h`, `p`, small hooks ending `l`, `t`, `u`, `y`, rounder `B`, `C`, `D`, `G`, short middle bars on `E`, `F`. No slant, jitter or flourishes. Letter widths were held so no page wraps further.
+- Validation: `tools/diary_fit.gd` (new) walks all 39 pages (all notes, all of Agnes's pages, second year, every ending) and lists those that scroll: the same 6 pages by the same amounts as the old fonts; none of Agnes's scroll. diary_test PASS (8 of 8 runs; see below), covering forward/reverse turns, Quick/Off, ribbons and new-page marks, keyboard, D-pad, stick, wheel and mouse, close mid-turn and save/load in slot 9. 960x540 captured.
+- **State: implemented and ready for final visual acceptance, not owner-approved.**
+
+**UI polish (UI-FINAL-001).** Presentation only; recipes, requirements, XP, saves and navigation unchanged.
+- Gear: an empty place shows its piece as a dark shadow (it had looked equipped); corner pips mark Worn / Held / Carried, with a legend over the figure. The worn hoe shows the hoe, not a sword.
+- Craft: every gear tier has its own picture: copper, iron, bark and amber recolours of the existing SpriteCook item icons plus a hand-drawn kettle helm, cuirass, hunting knife and sharpened stick (`art/ui/icons_gear.png`, 21 cells, made by `tools/make_ui_polish_art.py`). Locked recipes are dimmer; a recipe you can make now has a green pip.
+- Skills: each skill's icon sits on an iron medallion tinted by the skill, so skills no longer look like pack items.
+- Text-heavy menus: a list's notes (Coop, Barn, Woodstore) are 14 px instead of 13, in a lighter ink, with more line spacing. Controls names cut short by the list now show in full as a tooltip (the detail page already gave them in full). Menu sizes unchanged.
+- Shared components were checked across HUD, Inventory, Wheel, Settings, Diary and Buildings; nothing else needed changing. House vs Buildings icons were left as they are (optional).
+- Generation: **0 paid generations** (no PixelLab or SpriteCook calls).
+
+**Tests:** diary_test PASS, wheel_test 87 PASS, menu_test 772 PASS, layout_test 67 PASS, save_test PASS (all slot 9). diary_test had a pre-existing flake: the game finds Agnes's pages by itself as the test's clock runs (house stage 2, three feathers from the crows), and a page found mid-test moves where the diary opens. It also failed at `73db257` when the timing landed. The test now files already-due pages quietly at its start and holds the random triggers off; 8 of 8 runs PASS.
+
+**Package:** `art/style_tests/UI-FINAL-001/review/`: `UI-FINAL-001_master.png` (Sheets 1a glyphs and 3x close-ups, 1b spreads 1:1; 60 %), `_master_2.png` (Sheet 1c 960x540, Sheet 2 Gear/Craft/Skills; 53 %), `_master_3.png` (Sheet 3 text menus; 92 %), `_master_4.png` (Sheet 4 consistency; 58 %). Full-resolution in-engine captures in `art/style_tests/UI-FINAL-001/src/` (before = `73db257` code with the owner's uncommitted sunset work in the tree; it doesn't touch the UI).
+
+**Known limits:** at 960x540 one font pixel lands on 1.5 screen px (unchanged, as all diary art). The Controls list still trims its longest names with an ellipsis; the tooltip and the detail page give them in full. The gear shadow on a dark slot is deliberately quiet.
+
+**Asked of ChatGPT:** (1) is Agnes comfortable to read without losing her character; (2) does the player's hand read as ordinary handwritten field notes; (3) do the Gear, Craft and Skills changes help at play size and stay in Rustic Gothic — Balanced.
+- **Approval:** pending ChatGPT review and owner decision.

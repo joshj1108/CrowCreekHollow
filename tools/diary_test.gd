@@ -42,6 +42,9 @@ func _run() -> void:
 	for i in 2:
 		m.mystery.found[m.mystery.PAGES[i]["id"]] = true
 	m.mystery.found[m.mystery.TREK_PAGES[0]["id"]] = true
+	# Pages already due (the house's stage, say) are filed now, quietly, so none turns up new part way through.
+	m.mystery._check(true)
+	_hold_pages()
 	GameSettings.page_turns = 0
 	ab = m.action_bar
 	await _frames(3)
@@ -342,16 +345,34 @@ func _close_all() -> void:
 func _check(label: String, ok: bool) -> void:
 	if not ok:
 		failures += 1
+		# What the diary was doing: a page turned new mid-test moves where it opens.
+		print("      at %d (section %d, spread %d), new pages %s, day %d" % [_place(), ab.book_section, ab.book_spread, m.diary_new, m.day])
 	print("%s  %s" % ["PASS" if ok else "FAIL", label])
 
 
 func _frames(n: int) -> void:
 	for i in n:
 		await process_frame
+		_hold_pages()
+
+
+# The game finds Agnes's pages by itself as the clock runs, and a page found mid-test is new, so the diary opens
+# at it and the place checks failed now and then. Pages already due are filed quietly at the start (above); the
+# random ones are held off here: three feathers (the crows and the daily happenings hand them out) and the
+# night's events (a knock, the field, the crows' gifts, a sighting, the Hollow).
+func _hold_pages() -> void:
+	if m == null:
+		return
+	m.materials["feathers"] = 0
+	m.inventory["crow_charm"] = 0
+	for event in ["knock", "field", "crows", "sighting", "hollow"]:
+		m.mystery._events.erase(event)
 
 
 func _wait(seconds: float) -> void:
-	await create_timer(seconds).timeout
+	var until := Time.get_ticks_msec() + int(seconds * 1000.0)
+	while Time.get_ticks_msec() < until:
+		await _frames(1)
 	await _frames(1)
 
 

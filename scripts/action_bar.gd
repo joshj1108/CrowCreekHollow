@@ -69,6 +69,7 @@ const COL_BUTTON_DISABLED := Color("241b14")
 const COL_TRACK := Color("120d09")
 const COL_TEXT := Color("e8dcc0")
 const COL_MUTED := Color("9a8a6a")
+const COL_NOTE := Color("b8a888")   # UI-FINAL-001: a list's notes, between muted and body text
 const COL_ACCENT := Color("d8b050")
 const COL_SHORT := Color("d0705a")   # a cost or level the player does not meet yet
 
@@ -834,9 +835,26 @@ func _build_slot(recipe: Dictionary) -> Control:
 	icon.offset_right = SLOT_ICON / 2
 	icon.offset_bottom = SLOT_ICON / 2 - 3
 	icon.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	# An unavailable item is dimmed and greyed a little, but stays easy to make out.
-	icon.modulate = Color.WHITE if usable or selected else Color(0.78, 0.74, 0.68, 0.62)
+	# An unavailable item is dimmed and greyed a little, but stays easy to make out. UI-FINAL-001: a recipe you
+	# can't make yet is dimmed further, so the ones you can make stand out across the grid.
+	var recipe_tile := not (recipe.get("costs", []) as Array).is_empty()
+	icon.modulate = Color.WHITE if usable or selected else (LOCKED_RECIPE if recipe_tile else Color(0.78, 0.74, 0.68, 0.62))
+	# UI-FINAL-001: an empty Gear place shows the piece that goes there as a shadow (its outline filled dark), so
+	# an empty slot reads as empty and still says what it holds.
+	if bool(recipe.get("ghost", false)):
+		icon.modulate = GHOST
+	# UI-FINAL-001: a skill's picture sits on its medallion (an iron rim round a disc in the skill's tint), so the
+	# skills read as emblems rather than as the items in the pack.
+	if bool(recipe.get("medallion", false)):
+		tile.add_child(_medallion(Color(str(recipe.get("tint", "6b4a3a")))))
 	tile.add_child(icon)
+	# UI-FINAL-001: a small pip in the corner: on a Gear place, which kind it is (worn, held, carried); on a
+	# recipe, that you have all it needs and can make it now.
+	var pip := KIND_PIPS.get(str(recipe.get("kind", "")), Color(0, 0, 0, 0)) as Color
+	if recipe_tile and usable:
+		pip = READY_PIP
+	if pip.a > 0.0:
+		tile.add_child(_pip(pip, not recipe_tile))
 	if recipe.has("count") or recipe.has("corner"):
 		var count := Label.new()
 		count.theme_type_variation = "SlotCount"
@@ -858,6 +876,51 @@ func _build_slot(recipe: Dictionary) -> Control:
 	tile.focus_exited.connect(_show_caption.bind(""))
 	tile.mouse_exited.connect(_show_caption.bind(""))
 	return tile
+
+
+# UI-FINAL-001: the slot marks. A ghost is an empty place's piece drawn as a dark shadow; a locked recipe is
+# dimmer than a locked item; the pips are 6 px squares with a dark edge (2 native px at 3x).
+const GHOST := Color(0.16, 0.13, 0.11, 0.7)
+const LOCKED_RECIPE := Color(0.62, 0.58, 0.54, 0.45)
+const READY_PIP := Color("8fae5a")
+const KIND_PIPS := {"worn": Color("7f95ab"), "held": Color("b0623a"), "carried": Color("c0a050")}
+const KIND_NAMES := [["worn", "Worn"], ["held", "Held"], ["carried", "Carried"]]
+const MEDALLION_SCALE := 3
+
+
+func _pip(color: Color, top_left: bool) -> Control:
+	var pip := Panel.new()
+	var sb := StyleBoxFlat.new()
+	sb.bg_color = color
+	sb.border_color = Color("1d1611")
+	sb.set_border_width_all(1)
+	pip.add_theme_stylebox_override("panel", sb)
+	pip.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	pip.size = Vector2(8, 8)
+	pip.position = Vector2(7, 7) if top_left else Vector2(SLOT_SIZE - 15, 7)
+	return pip
+
+
+func _medallion(tint: Color) -> Control:
+	var holder := Control.new()
+	holder.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	holder.set_anchors_preset(Control.PRESET_FULL_RECT)
+	for part in ["disc", "rim"]:
+		var tex: Texture2D = load("res://art/ui/skill_medallion_%s.png" % part) if ResourceLoader.exists("res://art/ui/skill_medallion_%s.png" % part) else null
+		if tex == null:
+			continue
+		var art := TextureRect.new()
+		art.texture = tex
+		art.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+		art.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		art.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+		var side := tex.get_width() * MEDALLION_SCALE
+		art.size = Vector2(side, side)
+		art.position = Vector2((SLOT_SIZE - side) / 2.0, (SLOT_SIZE - side) / 2.0 - 3.0)
+		if part == "disc":
+			art.modulate = tint
+		holder.add_child(art)
+	return holder
 
 
 # "Egg  ·  4 in the pack": the item's name without its count, then what its count means.
@@ -890,6 +953,24 @@ func _build_figure(recipes: Array) -> Control:
 	var tile_size := float(SLOT_SIZE) if _themed else float(FIGURE_TILE)
 	var column := VBoxContainer.new()
 	column.add_theme_constant_override("separation", 10)
+	# UI-FINAL-001: what the corner pips mean, over the figure (it scrolls).
+	if _themed:
+		var legend := HBoxContainer.new()
+		legend.add_theme_constant_override("separation", 14)
+		for pair in KIND_NAMES:
+			var item := HBoxContainer.new()
+			item.add_theme_constant_override("separation", 5)
+			var swatch := _pip(KIND_PIPS[pair[0]], true)
+			swatch.position = Vector2.ZERO
+			swatch.custom_minimum_size = Vector2(8, 8)
+			swatch.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+			item.add_child(swatch)
+			var word := Label.new()
+			word.theme_type_variation = "NumberLabel"
+			word.text = str(pair[1])
+			item.add_child(word)
+			legend.add_child(item)
+		column.add_child(legend)
 	var figure := Control.new()
 	figure.custom_minimum_size = Vector2(3 * tile_size + 2 * FIGURE_GAP, 5 * tile_size + 4 * FIGURE_GAP)
 	var loose: Array = []
@@ -1380,11 +1461,17 @@ func _build_ledger(panel_name: String, rows: Array) -> void:
 		list_box.add_child(_build_entry(only, 0))
 		_ledger_entries.append(only)
 		notes = []
-	# The tab's notes sit under its entries, small, instead of between them.
+	# The tab's notes sit under its entries, small, instead of between them. UI-FINAL-001: a size up, a lighter
+	# ink and more air between lines, since the longer ones (Coop, Barn, Woodstore) are a paragraph long; the
+	# muted ink was hard to read on the dark wood.
 	for text in notes:
 		var spaced := MarginContainer.new()
-		spaced.add_theme_constant_override("margin_top", 6)
-		spaced.add_child(_detail_text(str(text), COL_MUTED, 13))
+		spaced.add_theme_constant_override("margin_top", 10)
+		spaced.add_theme_constant_override("margin_left", 4)
+		spaced.add_theme_constant_override("margin_right", 4)
+		var note := _detail_text(str(text), COL_NOTE, 14)
+		note.add_theme_constant_override("line_spacing", 3)
+		spaced.add_child(note)
 		list_box.add_child(spaced)
 	_wrap_entries()
 	_ledger_pick = clampi(_ledger_pick, 0, maxi(0, _ledger_entries.size() - 1))
@@ -1435,6 +1522,10 @@ func _build_entry(row: Dictionary, index: int) -> Control:
 	name_label.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	name_label.add_theme_font_size_override("font_size", 16)
 	name_label.add_theme_color_override("font_color", COL_MUTED if str(status[1]) == "done" else COL_TEXT)
+	# UI-FINAL-001: a name long enough to be cut short (the Controls' longer actions) shows whole under the
+	# mouse; with a keyboard or gamepad the detail page beside the list already gives it in full.
+	if name_label.text.length() > 40:
+		entry.tooltip_text = name_label.text
 	line.add_child(name_label)
 	if str(status[0]) != "":
 		var chip := Label.new()
@@ -2401,7 +2492,7 @@ class RecipeIcon extends Control:
 		if art.size != Vector2.ZERO:
 			var scale_px := maxf(1.0, floorf(_sz / 16.0))
 			var side := 16.0 * scale_px
-			draw_texture_rect_region(UiSkin.icons(), Rect2(_org + Vector2(_sz - side, _sz - side) * 0.5, Vector2(side, side)), art)
+			draw_texture_rect_region(UiSkin.icon_tex(kind), Rect2(_org + Vector2(_sz - side, _sz - side) * 0.5, Vector2(side, side)), art)
 			return
 		var light := tint.lightened(0.3)
 		var dark := tint.darkened(0.45)

@@ -12,7 +12,7 @@ func _gear_tiles() -> Array:
 	var tiles: Array = []
 	var bag_name := "Pack" if m.bag_tier == 0 else str(m.BAG_TIERS[m.bag_tier - 1]["name"])
 	tiles.append({
-		"key": "slot:back", "name": bag_name, "icon": "pack", "tint": "7a5a3a", "enabled": true,
+		"key": "slot:back", "name": bag_name, "icon": "pack", "tint": "7a5a3a", "enabled": true, "kind": "carried",
 		"desc": "Your bag. Upgrade it from the Inventory panel.", "level_text": "%d pack slots" % m.stall._pack_capacity(),
 		"level_ok": true, "costs": [], "action": "",
 	})
@@ -20,12 +20,14 @@ func _gear_tiles() -> Array:
 	tiles.append(_gear_slot_tile("neck", "Neck", "pendant"))
 	var lantern := {
 		"key": "slot:belt", "name": "Belt", "icon": "lantern", "tint": "8a7a2a", "enabled": false, "level_ok": true,
+		"ghost": true, "kind": "carried",
 		"desc": "No lantern yet. Build one in the Craft panel, under Other.", "level_text": "", "costs": [], "action": "",
 	}
 	if m.lantern_tier > 0:
 		var current: Dictionary = m.LANTERN_TIERS[m.lantern_tier - 1]
 		lantern["name"] = str(current["name"])
 		lantern["enabled"] = true
+		lantern["ghost"] = false
 		lantern["desc"] = "Lights a ring %.1f tiles across. It hangs from your belt." % float(current["radius"])
 	tiles.append(lantern)
 	tiles.append(_gear_slot_tile("offhand", "Off hand", "shield"))
@@ -43,34 +45,59 @@ func _gear_tiles() -> Array:
 		if spots.has(t["key"]):
 			t["pos"] = spots[t["key"]]
 	tiles.append({
-		"key": "tool:hoe", "name": "Hoe", "icon": "hoe", "tint": "8a6a3a", "enabled": true,
+		"key": "tool:hoe", "kind": "carried", "name": "Hoe", "icon": "hoe", "tint": "8a6a3a", "enabled": true,
 		"desc": "Tills the soil so you can plant.", "level_text": "", "level_ok": true, "costs": [], "action": "",
 	})
 	tiles.append({
-		"key": "tool:axe", "name": _tool_name("hatchet") if int(m.tool_tier["hatchet"]) > 0 else "Axe", "icon": "axe", "tint": m.TINT_TOOL, "enabled": int(m.tool_tier["hatchet"]) > 0,
+		"key": "tool:axe", "ghost": int(m.tool_tier["hatchet"]) == 0, "kind": "carried", "name": _tool_name("hatchet") if int(m.tool_tier["hatchet"]) > 0 else "Axe", "icon": "axe", "tint": m.TINT_TOOL, "enabled": int(m.tool_tier["hatchet"]) > 0,
 		"desc": "Chops trees. Upgrade it in the Craft panel, under Tools.", "level_text": "", "level_ok": true, "costs": [], "action": "",
 	})
 	tiles.append({
-		"key": "tool:rod", "name": _tool_name("rod") if int(m.tool_tier["rod"]) > 0 else "Fishing rod", "icon": "rod", "tint": m.TINT_TOOL,
+		"key": "tool:rod", "ghost": int(m.tool_tier["rod"]) == 0, "kind": "carried", "name": _tool_name("rod") if int(m.tool_tier["rod"]) > 0 else "Fishing rod", "icon": "rod", "tint": m.TINT_TOOL,
 		"enabled": int(m.tool_tier["rod"]) > 0, "level_ok": true, "costs": [], "action": "",
 		"desc": "Adds to your catch chance when you fish. Make better rods in the Craft panel, under Tools.", "level_text": "",
 	})
 	tiles.append({
-		"key": "tool:pick", "name": _tool_name("pick") if int(m.tool_tier["pick"]) > 0 else "Pickaxe", "icon": "pick", "tint": m.TINT_TOOL, "enabled": int(m.tool_tier["pick"]) > 0,
+		"key": "tool:pick", "ghost": int(m.tool_tier["pick"]) == 0, "kind": "carried", "name": _tool_name("pick") if int(m.tool_tier["pick"]) > 0 else "Pickaxe", "icon": "pick", "tint": m.TINT_TOOL, "enabled": int(m.tool_tier["pick"]) > 0,
 		"desc": "Breaks rocks and ore. Upgrade it in the Craft panel, under Tools.", "level_text": "", "level_ok": true, "costs": [], "action": "",
 	})
 	return tiles
 
 
-# One worn slot: the piece in it, or a dim empty tile that points to the Craft panel.
+# UI-FINAL-001: each gear piece's own picture (UiSkin.GEAR_ICONS) where its slot's picture would be shared by
+# several tiers; any piece not named here keeps its slot's picture (main._slot_icon).
+const GEAR_ICON := {
+	"hoe": "hoe", "sharpened_stick": "stake", "hunting_knife": "knife", "copper_sword": "sword_copper",
+	"bark_wrap": "shirt_bark", "copper_cuirass": "cuirass_copper", "iron_cuirass": "cuirass_iron",
+	"copper_helm": "helm_copper", "iron_helm": "helm_iron",
+	"bark_greaves": "pants_bark", "copper_greaves": "pants_copper", "iron_greaves": "pants_iron",
+	"copper_boots": "boots_copper", "iron_sabatons": "boots_iron",
+	"resin_amulet": "pendant_amber", "copper_torc": "pendant_copper", "iron_torc": "pendant_iron",
+	"copper_bracers": "bracer_copper", "iron_gauntlets": "glove_iron",
+	"copper_shield": "shield_copper", "iron_shield": "shield_iron",
+}
+# The Gear figure's three kinds of place, marked by a small pip in each slot's corner: what you wear, what you
+# hold, and what you carry.
+const GEAR_KIND := {
+	"head": "worn", "chest": "worn", "legs": "worn", "feet": "worn", "wrist": "worn", "neck": "worn",
+	"hand_r": "held", "offhand": "held", "back": "carried", "belt": "carried",
+}
+
+
+func gear_icon(id: String) -> String:
+	return str(GEAR_ICON.get(id, m._slot_icon(m.GEAR_ITEMS[id])))
+
+
+# One worn slot: the piece in it, or an empty slot showing the piece's outline in shadow (its "ghost"), which
+# points to the Craft panel.
 func _gear_slot_tile(slot: String, label: String, icon: String) -> Dictionary:
 	var id := str(m.equipment[slot])
 	var tint := "4a4036"
 	if id == "":
 		return {
-			"key": "slot:" + slot, "name": label, "icon": icon, "tint": tint, "enabled": false,
+			"key": "slot:" + slot, "name": label, "icon": icon, "tint": tint, "enabled": false, "ghost": true,
 			"desc": "Nothing worn here. Craft a piece for this slot in the Craft panel.", "level_text": "Empty", "level_ok": true,
-			"costs": [], "action": "open_craft", "button": "Craft",
+			"costs": [], "action": "open_craft", "button": "Craft", "kind": GEAR_KIND.get(slot, ""),
 		}
 	var item: Dictionary = m.GEAR_ITEMS[id]
 	tint = m.TINT_WEAPON if slot == "hand_r" else (m.TINT_ACCESSORY if slot == "neck" or slot == "wrist" else m.TINT_ARMOR)
@@ -81,8 +108,9 @@ func _gear_slot_tile(slot: String, label: String, icon: String) -> Dictionary:
 		parts.append("Armor %d" % int(item["def"]))
 	var desc := ", ".join(parts) if not parts.is_empty() else "No damage or armor."
 	return {
-		"key": "slot:" + slot, "name": str(item["name"]), "icon": icon, "tint": tint, "enabled": true,
+		"key": "slot:" + slot, "name": str(item["name"]), "icon": gear_icon(id), "tint": tint, "enabled": true,
 		"desc": desc + ".", "level_text": "Worn now", "level_ok": true, "costs": [], "action": "open_craft", "button": "Craft",
+		"kind": GEAR_KIND.get(slot, ""),
 	}
 
 
@@ -146,7 +174,7 @@ func _recipes_gear() -> Array:
 		elif str(item["slot"]) in ["neck", "wrist"]:
 			tint = m.TINT_ACCESSORY
 		out.append({
-			"key": "gear:" + str(id), "name": str(item["name"]), "icon": m._slot_icon(item), "tint": tint,
+			"key": "gear:" + str(id), "name": str(item["name"]), "icon": gear_icon(str(id)), "tint": tint,
 			"desc": desc, "costs": m._cost_lines(item["cost"]), "level_text": m._level_text(skill, level),
 			"level_ok": m.progression._level(skill) >= level, "enabled": _can_craft(str(id)), "action": "craft:" + str(id),
 			"button": "Worn" if worn else "Make",
