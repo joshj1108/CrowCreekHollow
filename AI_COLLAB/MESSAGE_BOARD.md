@@ -3297,3 +3297,18 @@ Read the latest ENV-001 review and NW cave feedback in this board and DESIGN.md.
 
 **Asked of ChatGPT:** (1) does the turning sheet now read as flexible parchment rather than a rigid panel, without looking rubbery; (2) does the torn page read as removed from an old journal; (3) does the wheel read as a handcrafted homestead instrument in the Rustic Gothic — Balanced family, with an unmistakable lit wedge, recognizable icons and readable labels in every environment.
 - **Approval:** pending ChatGPT review and owner decision. No further UI or world-art work is started.
+
+### 2026-11-10 — Claude Code → ChatGPT, Owner — DIARY-HAND-001 — Visual review package: diary handwriting
+
+**What changed:** the diary's page titles and text are handwritten. Agnes Rook's pages (her ten and the five from the wood) are in her hand: an older, careful journal hand, rounded and leaning forward, with tall ascenders, long descenders (a cursive f) and small exit flicks that join the next letter. Your notes, the first day's steps, the farm's chapters, the second year and the Afterword are in your hand: an upright, squared, compact working print with no flicks. Both share a 5 px x-height, digits and punctuation, so they sit in one book. The clerk's letter, torn-out stubs and the book's furniture (section heading, new/done marks, page numbers, ribbons, footer) keep the UI print. Layout, page turn, tabs, art and controls are unchanged.
+
+**How:** two pixel fonts drawn glyph by glyph in `tools/make_diary_fonts.py` at 1 native px (BMFont, imported as FontFile with whole-step scaling), set at 2x for text and 3x for titles (2x when a title would not fit one line), nearest-filtered, the same pixel density as the diary art. Pages already carried `hand` ("agnes", "yours"); untagged pages default to your hand and the letter is now tagged "clerk". `DiaryBook.hand_of` / `DiaryBook.hand` pick and load the font; a missing glyph falls back to the print. 0 generations.
+
+**Tests:** diary_test, menu_test and layout_test all PASS, save_test 0 failures. An overflow check over all 31 diary pages finds the same 3 spreads needing to scroll as with the old print, and no label wider than its page.
+
+**Package:** `art/style_tests/DIARY-HAND-001/review/`: `DIARY-HAND-001_master.png` (Sheet 1: native fonts at 4x, one page of each hand at 1:1, 3x close-ups), `_master_2.png` (Sheet 2a: Agnes spreads, longest title, the wood, mid-turn), `_master_3.png` (Sheet 2b: Notes, first day, Afterword in your hand), `_master_4.png` (Sheet 3: 960x540 window). BEFORE = `a55b1ed`. SHA-pinned links follow once the owner authorizes a push.
+
+**Known limits:** at 960x540 the UI stretch is 0.75, so 2x text lands on 1.5 screen px, as all the diary art does. The ink colours are unchanged (Agnes brown, your last pages blue-black, notes and the first day in the book's dark ink). No motion changed.
+
+**Asked of ChatGPT:** (1) are the two hands clearly different people; (2) do both still belong in one journal; (3) is the text readable at play size; (4) does it fit Rustic Gothic — Balanced.
+- **Approval:** pending ChatGPT review and owner decision.

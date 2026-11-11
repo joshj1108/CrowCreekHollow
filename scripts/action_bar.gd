@@ -2046,7 +2046,15 @@ func _build_page(section: Dictionary, page: Dictionary, index: int, side: int) -
 	else:
 		var title_line := HBoxContainer.new()
 		title_line.add_theme_constant_override("separation", 10)
+		# DIARY-HAND-001: a page's title and text are in its writer's hand (DiaryBook.hand); torn-out stubs, the
+		# clerk's letter and the book's furniture (heading, marks, page numbers) keep the print.
+		var hand: Font = null if gap else DiaryBook.hand(DiaryBook.hand_of(page))
 		var title := _book_text(str(page["title"]), COL_MUTED if gap else ink, 18 if small else 21)
+		if hand != null:
+			# A title is 3x when it fits on one line of the page (about 300 px on the full-size menu), else 2x.
+			var room := 300.0 * menu_frame.custom_minimum_size.x / 1000.0
+			var big := not small and hand.get_string_size(title.text, HORIZONTAL_ALIGNMENT_LEFT, -1, DiaryBook.HAND_TITLE).x <= room
+			_in_hand(title, hand, DiaryBook.HAND_TITLE if big else DiaryBook.HAND_SIZE)
 		title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		title_line.add_child(title)
 		# The "new" or "done" mark stays on one line beside the title.
@@ -2083,6 +2091,8 @@ func _build_page(section: Dictionary, page: Dictionary, index: int, side: int) -
 		bar.add_theme_stylebox_override("grabber_highlight", grip_hot)
 		bar.add_theme_stylebox_override("grabber_pressed", grip_hot)
 		var body := _book_text(str(page["text"]), COL_MUTED if gap else ink, 14 if small else 16)
+		if hand != null:
+			_in_hand(body, hand, DiaryBook.HAND_SIZE)
 		body.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		body_scroll.add_child(body)
 		column.add_child(body_scroll)
@@ -2110,6 +2120,15 @@ func _build_page(section: Dictionary, page: Dictionary, index: int, side: int) -
 	foot.add_child(number)
 	foot.add_child(balance if side == 0 else arrow)
 	return holder
+
+
+# Sets a page's words in a handwriting font at its own whole-pixel size, nearest-filtered so it stays crisp.
+func _in_hand(label: Label, font: Font, font_size: int) -> void:
+	label.add_theme_font_override("font", font)
+	label.add_theme_font_size_override("font_size", font_size)
+	# The hands carry a row of air under every line already, so they need less spacing than the print.
+	label.add_theme_constant_override("line_spacing", 1)
+	label.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 
 
 func _book_text(text: String, color: Color, font_size: int) -> Label:

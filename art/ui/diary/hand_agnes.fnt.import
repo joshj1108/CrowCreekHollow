@@ -1,0 +1,17 @@
+[remap]
+
+importer="font_data_bmfont"
+type="FontFile"
+uid="uid://601mjxal607x"
+path="res://.godot/imported/hand_agnes.fnt-a9927513da05797c19146ca96142b682.fontdata"
+
+[deps]
+
+source_file="res://art/ui/diary/hand_agnes.fnt"
+dest_files=["res://.godot/imported/hand_agnes.fnt-a9927513da05797c19146ca96142b682.fontdata"]
+
+[params]
+
+fallbacks=[]
+compress=true
+scaling_mode=1

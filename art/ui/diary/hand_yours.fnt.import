@@ -1,0 +1,17 @@
+[remap]
+
+importer="font_data_bmfont"
+type="FontFile"
+uid="uid://dpeikniget8ev"
+path="res://.godot/imported/hand_yours.fnt-8667fae9c31fdb135a8be450bd6e8a48.fontdata"
+
+[deps]
+
+source_file="res://art/ui/diary/hand_yours.fnt"
+dest_files=["res://.godot/imported/hand_yours.fnt-8667fae9c31fdb135a8be450bd6e8a48.fontdata"]
+
+[params]
+
+fallbacks=[]
+compress=true
+scaling_mode=1

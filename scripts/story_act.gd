@@ -409,7 +409,7 @@ func _lines(id: String) -> Array:
 func _year_pages(is_new: Callable) -> Array:
 	var out: Array = []
 	if _lived("letter"):
-		out.append({"title": LETTER["title"], "text": LETTER["text"], "new": is_new.call("act_letter")})
+		out.append({"title": LETTER["title"], "text": LETTER["text"], "hand": "clerk", "new": is_new.call("act_letter")})
 	if _lived("orchard"):
 		out.append({"title": "The eleventh row", "hand": "yours", "new": is_new.call("act_orchard"),
 			"text": "I walked Davy to the orchard. The water has risen to Elias's last row, and nothing walks there now. His lantern was hanging on a branch, cold, and dry as if it had never been near water. Davy says the man has stopped walking and is looking at the farm. I believe him."})

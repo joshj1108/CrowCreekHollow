@@ -24,6 +24,35 @@ static func tex(name: String) -> Texture2D:
 	return _tex[name]
 
 
+# DIARY-HAND-001: the handwriting a page is written in, by its "hand": Agnes Rook's ("agnes") or your own (every
+# other page: your notes, the first day, the farm's chapters and your last pages). A page in someone else's hand
+# (the clerk's letter, "clerk") and torn-out stubs keep the book's print, so this returns null for them, as it
+# does if the font is missing. Pixel fonts from tools/make_diary_fonts.py, 1 native px at size 8: ask for them at
+# HAND_SIZE (2x) for text and HAND_TITLE (3x) for titles; they scale by whole steps only, so they stay crisp.
+const HAND_SIZE := 16
+const HAND_TITLE := 24
+const HAND_FILES := {"agnes": "hand_agnes", "yours": "hand_yours"}
+static var _hands := {}
+
+
+static func hand_of(page: Dictionary) -> String:
+	var hand := str(page.get("hand", "yours"))
+	return hand if HAND_FILES.has(hand) else ""
+
+
+static func hand(name: String) -> Font:
+	if not HAND_FILES.has(name):
+		return null
+	if not _hands.has(name):
+		var path: String = DIR + str(HAND_FILES[name]) + ".fnt"
+		var font: FontFile = load(path) if ResourceLoader.exists(path) else null
+		if font != null:
+			# A character the hand has no glyph for is set in the book's print rather than left out.
+			font.fallbacks = [ThemeDB.fallback_font]
+		_hands[name] = font
+	return _hands[name]
+
+
 static func _tiled(t: Texture2D, left: float, top: float, right: float, bottom: float) -> StyleBoxTexture:
 	var sb := StyleBoxTexture.new()
 	sb.texture = t
