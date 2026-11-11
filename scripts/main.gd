@@ -169,7 +169,7 @@ const SEASON_EVENTS := [
 	{"id": "harvest_moon", "title": "Harvest Moon", "month": "September", "day": 22, "span": 1, "effect": "supper",
 		"text": "The neighbours leave a supper on your step. Two meals go in your pack, and the evening feels warmer."},
 	{"id": "first_frost", "title": "First Frost", "month": "November", "day": 10, "span": 3, "effect": "frost",
-		"text": "The grass is white at dawn. The cold bites harder outside for three days, so keep your warmth up."},
+		"text": "The grass is white at dawn. The cold bites harder outside for three days, so keep your comfort up."},
 	{"id": "longest_night", "title": "The Longest Night", "month": "December", "day": 21, "span": 1, "effect": "dread",
 		"text": "The shortest day of the year. The dark comes early and stays late, and whatever watches the field is closer tonight."},
 	{"id": "spring_thaw", "title": "Spring Thaw", "month": "March", "day": 1, "span": 2, "effect": "thaw",
@@ -244,7 +244,7 @@ const TIPS := [
 	{"id": "goats", "title": "Goats", "text": "Order goats from the catalog at the desk, then stand beside the barn, facing it, and press {hand} to feed them. A grown goat that is fed gives milk each morning. Goats are grown after ten days."},
 	{"id": "cellar", "title": "Storing crops", "text": "Stand beside the root cellar and press {hand} to store or take crops. Nothing spoils in the cellar."},
 	{"id": "smelt", "title": "Smelting and preserving", "text": "Stand beside the furnace and press {hand} to smelt ore into bars. The smokehouse preserves food, and the cooler keeps fish fresh."},
-	{"id": "needs", "title": "Food, water, and warmth", "text": "Food and water drain through the day, and warmth drops outside on cold days. Eat from the bag ({bag}), drink from the pond, and warm up in the house. Sleep to be fully warm again, but only with a fire lit: feed the hearth from the firewood store at the workshop."},
+	{"id": "needs", "title": "Hunger, thirst, and comfort", "text": "Hunger and thirst drain through the day, and comfort drops outside on cold days. Eat from the bag ({bag}), drink from the pond, and warm up in the house. Sleep to be fully comfortable again, but only with a fire lit: feed the hearth from the firewood store at the workshop."},
 	{"id": "cave", "title": "The mine", "text": "The cave is at the west edge of the farm. Each day it lays out differently, with ore to mine and creatures to watch for."},
 	{"id": "wood", "title": "The Rookery Wood", "text": "People from the lane wait at the east gate to be walked through the wood: from day 14, about one morning in three, Old Maren to her sister's mill. Press {hand} beside a walker to hear where, and again to set out. In the wood your lantern burns a flask of lamp oil (the catalog, 8 coins) a little over a minute, and goes out without one. The walker's nerve falls in the dark, off the trail, and when you get far ahead; a word ({hand} beside them) or a trail ration (Cooking, at the fire) brings it back, and at 0 they run home. The tall one walks the deep wood: lift the lantern at it ({hand}, close by) before it reaches them. Each walk keeps the wood, and the nights, back a little."},
 ]
@@ -2180,51 +2180,26 @@ func _build_hud() -> void:
 
 	perf_label = _make_label(hud_root, Vector2(16, 120), 14)
 	perf_label.visible = false
-	# UI-OVERHAUL-001 Phase 3: two thin plates in the shared theme. The survival plate (top-left) has a meter per
-	# need, each an icon, a bar and its value, with coins and the diary at its foot. The clock plate (top middle)
-	# shows the weather, the time and the temperature over the day and the date.
+	# HUD-REDESIGN-002 (Minimal Corner Cards): two small separate cards in the shared theme, with no headings.
+	# Health and Sanity sit top left, with coins and the diary at the card's foot; Hunger, Thirst and Comfort sit
+	# top right beside the minimap, with the Hale note at that card's foot. Each row is the stat's icon, its name,
+	# a meter in its colour and its value. Hunger, Thirst and Comfort are only the names shown for the food, water
+	# and warmth needs: the needs themselves are unchanged. On a trek the walker's nerve gets its own small card
+	# under the left one. The clock plate (top middle) shows the weather, the time and the temperature over the
+	# day and the date.
 	var hud_theme := UiTheme.get_theme()
-	hud_panel = PanelContainer.new()
-	hud_panel.theme = hud_theme
-	hud_panel.theme_type_variation = "HudPlate"
-	hud_panel.position = Vector2(12, 10)
-	hud_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	hud_root.add_child(hud_panel)
-	var stack := VBoxContainer.new()
-	stack.add_theme_constant_override("separation", 4)
-	stack.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	hud_panel.add_child(stack)
-	needs_box = VBoxContainer.new()
-	needs_box.add_theme_constant_override("separation", 4)
-	needs_box.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	stack.add_child(needs_box)
-	hp_bar = _hud_meter(needs_box, "heart", "health", "Health")
+	var left_col := VBoxContainer.new()
+	left_col.position = Vector2(12, 10)
+	left_col.add_theme_constant_override("separation", 6)
+	left_col.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	hud_root.add_child(left_col)
+	hud_panel = _hud_card(hud_theme)
+	left_col.add_child(hud_panel)
+	var stack: VBoxContainer = hud_panel.get_child(0)
+	hp_bar = _hud_meter(stack, "heart", "health", "Health", 50)
 	hud_hp_label = hp_bar.get_meta("label")
-	sanity_bar = _hud_meter(needs_box, "moon", "sanity", "Sanity")
+	sanity_bar = _hud_meter(stack, "moon", "sanity", "Sanity", 50)
 	hud_sanity_label = sanity_bar.get_meta("label")
-	food_bar = _hud_meter(needs_box, "food", "food", "Food")
-	water_bar = _hud_meter(needs_box, "water", "water", "Water")
-	warmth_bar = _hud_meter(needs_box, "warmth", "warmth", "Warmth")
-	# The walker's nerve, shown only on a trek: its name over its meter.
-	var nerve_col := VBoxContainer.new()
-	nerve_col.add_theme_constant_override("separation", 0)
-	nerve_col.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	needs_box.add_child(nerve_col)
-	var nerve_name := Label.new()
-	nerve_name.theme_type_variation = "HudNote"
-	nerve_name.text = "%s's nerve" % TrekSystem.ROUTES["mill"]["short"]
-	nerve_col.add_child(nerve_name)
-	trek.nerve_bar = _hud_meter(nerve_col, "nerve", "nerve", "Nerve")
-	trek.nerve_col = nerve_col
-	trek.nerve_col.visible = false
-	hale_label = Label.new()
-	hale_label.theme_type_variation = "HudNote"
-	hale_label.add_theme_color_override("font_color", UiTheme.GOLD)
-	hale_label.text = "Hale  +20% XP"
-	hale_label.mouse_filter = Control.MOUSE_FILTER_PASS
-	hale_label.tooltip_text = "Food, water and warmth are all at %d or more, so skills train faster." % int(HomesteadRewards.HALE_NEED)
-	hale_label.visible = false
-	stack.add_child(hale_label)
 	# The foot: coins on the left, the diary (a small leather journal, with a wax seal and "New" while a page is
 	# unread) on the right, under a faint brass rule.
 	stack.add_child(_hud_rule())
@@ -2250,6 +2225,40 @@ func _build_hud() -> void:
 	diary_label.theme_type_variation = "HudValue"
 	diary_label.add_theme_color_override("font_color", UiTheme.GOLD)
 	diary_chip.add_child(diary_label)
+	# The walker's nerve, shown only on a trek: a small card of its own, the walker's name over the meter.
+	var nerve_card := _hud_card(hud_theme)
+	left_col.add_child(nerve_card)
+	var nerve_stack: VBoxContainer = nerve_card.get_child(0)
+	var nerve_name := Label.new()
+	nerve_name.theme_type_variation = "HudNote"
+	nerve_name.text = "%s's nerve" % TrekSystem.ROUTES["mill"]["short"]
+	nerve_stack.add_child(nerve_name)
+	nerve_card.set_meta("name", nerve_name)
+	trek.nerve_bar = _hud_meter(nerve_stack, "nerve", "nerve", "Nerve", 50)
+	trek.nerve_col = nerve_card
+	trek.nerve_col.visible = false
+
+	# The needs card, top right, in from the minimap's frame (the minimap is built below at the same inset).
+	var mini_w := float(MAP_W) * Minimap.PX_PER_TILE
+	var needs_card := _hud_card(hud_theme)
+	needs_card.set_anchors_preset(Control.PRESET_TOP_RIGHT)
+	needs_card.grow_horizontal = Control.GROW_DIRECTION_BEGIN
+	needs_card.offset_left = 0
+	needs_card.offset_right = -(mini_w + (12.0 + Minimap.FRAME_RAIL) * 2.0 + 4.0)
+	needs_card.offset_top = 10
+	hud_root.add_child(needs_card)
+	needs_box = needs_card.get_child(0)
+	food_bar = _hud_meter(needs_box, "food", "food", "Hunger", 28)
+	water_bar = _hud_meter(needs_box, "water", "water", "Thirst", 28)
+	warmth_bar = _hud_meter(needs_box, "warmth", "warmth", "Comfort", 28)
+	hale_label = Label.new()
+	hale_label.theme_type_variation = "HudNote"
+	hale_label.add_theme_color_override("font_color", UiTheme.GOLD)
+	hale_label.text = "Hale  +20% XP"
+	hale_label.mouse_filter = Control.MOUSE_FILTER_PASS
+	hale_label.tooltip_text = "Hunger, thirst and comfort are all at %d or more, so skills train faster." % int(HomesteadRewards.HALE_NEED)
+	hale_label.visible = false
+	needs_box.add_child(hale_label)
 
 	hud_clock_panel = PanelContainer.new()
 	hud_clock_panel.theme = hud_theme
@@ -2349,20 +2358,26 @@ func _make_label(parent: Node, pos: Vector2, font_size: int) -> Label:
 	return label
 
 
-# One HUD meter (UI-OVERHAUL-001 Phase 3): the need's icon, a thin bar in its colour and its value, in a row.
-# Returns the bar; its value label is the bar's "label" meta. _set_meter() fills it and shows its warning state.
-func _hud_meter(parent: Node, icon_kind: String, fill: String, title: String) -> ProgressBar:
+# One HUD meter (HUD-REDESIGN-002): the stat's icon, its name, a thin bar in its colour and its value, in a row.
+# Returns the bar; its value and name labels are the bar's "label" and "name" metas. _set_meter() fills it and
+# shows its warning state. value_w keeps the bars of one card in line.
+func _hud_meter(parent: Node, icon_kind: String, fill: String, title: String, value_w := 50) -> ProgressBar:
 	var row := HBoxContainer.new()
 	row.add_theme_constant_override("separation", 6)
 	row.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	parent.add_child(row)
 	row.add_child(_hud_icon(icon_kind))
+	var name_label := Label.new()
+	name_label.theme_type_variation = "HudName"
+	name_label.text = title
+	name_label.custom_minimum_size.x = 62
+	row.add_child(name_label)
 	var bar := ProgressBar.new()
 	bar.theme_type_variation = "HudMeter"
 	bar.show_percentage = false
 	bar.min_value = 0.0
 	bar.max_value = 100.0
-	bar.custom_minimum_size = Vector2(84, 8)
+	bar.custom_minimum_size = Vector2(72, 8)
 	bar.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	bar.mouse_filter = Control.MOUSE_FILTER_PASS
 	bar.tooltip_text = title
@@ -2370,11 +2385,26 @@ func _hud_meter(parent: Node, icon_kind: String, fill: String, title: String) ->
 	row.add_child(bar)
 	var value := Label.new()
 	value.theme_type_variation = "HudValue"
-	value.custom_minimum_size.x = 50
+	value.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	value.custom_minimum_size.x = value_w
 	row.add_child(value)
 	bar.set_meta("label", value)
+	bar.set_meta("name", name_label)
 	bar.set_meta("warn", false)
 	return bar
+
+
+# A survival card: the HUD plate around a column for its rows (the column is the card's only child).
+func _hud_card(hud_theme: Theme) -> PanelContainer:
+	var card := PanelContainer.new()
+	card.theme = hud_theme
+	card.theme_type_variation = "HudCard"
+	card.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var col := VBoxContainer.new()
+	col.add_theme_constant_override("separation", 3)
+	col.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	card.add_child(col)
+	return card
 
 
 # Fills a HUD meter and writes its value; in the warning state its rim and value turn rust (no flashing).
@@ -2386,10 +2416,15 @@ func _set_meter(bar: ProgressBar, value: float, top: float, text: String, warn: 
 	if bool(bar.get_meta("warn")) != warn:
 		bar.set_meta("warn", warn)
 		bar.add_theme_stylebox_override("background", UiTheme.hud_meter_back(warn))
+		var name_label: Label = bar.get_meta("name", null)
 		if warn:
 			label.add_theme_color_override("font_color", UiTheme.HUD_WARN)
+			if name_label != null:
+				name_label.add_theme_color_override("font_color", UiTheme.HUD_WARN)
 		else:
 			label.remove_theme_color_override("font_color")
+			if name_label != null:
+				name_label.remove_theme_color_override("font_color")
 
 
 func _hud_icon(icon_kind: String) -> HudIcon:
@@ -4504,14 +4539,14 @@ func _food_stats_text(f: Dictionary) -> String:
 	if bool(f.get("inedible", false)):
 		return "Not eaten as it is; it goes into a remedy."
 	var sanity := int(Foods.sanity_restore(f))
-	var text := "Restores %d food, %s, %d HP." % [int(Foods.food_restore(f)),
+	var text := "Restores %d hunger, %s, %d HP." % [int(Foods.food_restore(f)),
 		("%d sanity" % sanity) if sanity >= 0 else ("costs %d sanity" % -sanity), Foods.hp_restore(f)]
 	var fx: Dictionary = f.get("effect", {})
 	var extra: Array = []
 	if fx.has("warm"):
-		extra.append("+%d warmth" % int(fx["warm"]))
+		extra.append("+%d comfort" % int(fx["warm"]))
 	if fx.has("water"):
-		extra.append("+%d water" % int(fx["water"]))
+		extra.append("+%d thirst" % int(fx["water"]))
 	if fx.has("nerve"):
 		extra.append("+%d nerve to a walker on a trek" % int(fx["nerve"]))
 	if not extra.is_empty():

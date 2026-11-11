@@ -386,7 +386,7 @@ const WORKS := {
 		"about": "A boardwalk over the wet ground: the orchard is one clearing shorter.",
 		"built": "The orchard is a clearing shorter."},
 	"waystation": {"name": "The waystation hut", "route": "chapel", "cost": {"coins": 1200, "wood": 30, "hardwood": 10},
-		"about": "A hut halfway along the long routes (%d clearings or more): a half-hour rest, nerve and warmth full, no oil burned." % WAYSTATION_MIN,
+		"about": "A hut halfway along the long routes (%d clearings or more): a half-hour rest, nerve and comfort full, no oil burned." % WAYSTATION_MIN,
 		"built": "Rest halfway on the long routes."},
 	"chapel_steps": {"name": "The chapel steps", "route": "chapel", "cost": {"coins": 1800, "stone": 30, "iron_bar": 4},
 		"about": "Stone steps up the hill, with iron rails. The chapel by night without the doubled sanity drain.",
@@ -707,7 +707,7 @@ func _start(id := "mill") -> void:
 	route = _steps(id)["marked"]
 	events = (plan["marked"] as Array).duplicate()
 	if nerve_col != null:
-		(nerve_col.get_child(0) as Label).text = "%s's nerve" % _cap(str(ROUTES[id]["short"]))
+		(nerve_col.get_meta("name") as Label).text = "%s's nerve" % _cap(str(ROUTES[id]["short"]))
 	_enter_clearing()
 	var by_night := " The sky is dark already; the wood is darker." if night else ""
 	if id == "edge":
@@ -1264,7 +1264,7 @@ func _cross_flood() -> void:
 	var now := Time.get_ticks_msec() / 1000.0
 	if now > _confirm_until:
 		_confirm_until = now + CONFIRM_SECONDS
-		m._show_message(_w("You have no rope to tie across. Wade it, with {w} on your back? The water is %s: -%d warmth, and {she} hates it. Space again to wade.") % [
+		m._show_message(_w("You have no rope to tie across. Wade it, with {w} on your back? The water is %s: -%d comfort, and {she} hates it. Space again to wade.") % [
 			"freezing" if _winter() else "cold", int(cost)])
 		return
 	m.warmth = maxf(0.0, m.warmth - cost)
@@ -1274,7 +1274,7 @@ func _cross_flood() -> void:
 	event_done = true
 	_unblock()
 	m.play_sfx("water", 0.04)
-	m._show_message(_w("You wade the hollow to the waist with {w} on your back, and set {her} down on the far side, shaking. -%d warmth, nerve -%d.") % [int(cost), int(nerve_cost)])
+	m._show_message(_w("You wade the hollow to the waist with {w} on your back, and set {her} down on the far side, shaking. -%d comfort, nerve -%d.") % [int(cost), int(nerve_cost)])
 
 
 func _wade_warmth() -> float:

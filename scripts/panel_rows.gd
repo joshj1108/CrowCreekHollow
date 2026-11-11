@@ -216,12 +216,12 @@ func _inventory_rows() -> Array:
 	rows.append({"note": "Crops, fish, meals, and preserved goods fill the pack. Seeds have their own pouch, and materials are uncapped for now."})
 	rows.append({"section": "Body"})
 	# Meters are rounded so the panel only rebuilds when a shown number changes.
-	rows.append({"name": "Food", "progress": roundi(m.food) / 100.0})
-	rows.append({"name": "Water", "progress": roundi(m.water) / 100.0})
-	rows.append({"name": "Warmth", "progress": roundi(m.warmth) / 100.0})
+	rows.append({"name": "Hunger", "progress": roundi(m.food) / 100.0})
+	rows.append({"name": "Thirst", "progress": roundi(m.water) / 100.0})
+	rows.append({"name": "Comfort", "progress": roundi(m.warmth) / 100.0})
 	rows.append({"name": "Fire", "value": ("lit, about %d hours left" % ceili(m.fire_hours)) if m.firewood._fire_lit() else "out. Feed the hearth from the house with firewood."})
 	rows.append({"name": "Outside", "value": "%d°F, %s" % [roundi(m._temperature()), str(m.WEATHER_NAMES.get(m.weather_kind, "Overcast")).to_lower()]})
-	rows.append({"note": "Food and water drain through the day. Drink from the pond or the pump to refill water. Warmth drains outdoors on cold days, refills in the house, and is full again after a night's sleep. An empty need costs HP."})
+	rows.append({"note": "Hunger and thirst drain through the day: eat to fill hunger, and drink from the pond or the pump to fill thirst. Comfort drains outdoors on cold days, refills in the house, and is full again after a night's sleep. An empty meter costs HP."})
 	rows.append({"section": "Planting"})
 	rows.append({"name": "Planting with", "value": "%s (grows in %s)" % [m.farm._seed_label(m.selected_seed), m.farm._seasons_text(m.selected_seed)]})
 	var growing := m.crops.size()
@@ -955,7 +955,7 @@ func _well_rows() -> Array:
 	rows.append({"note": "The tank refills each morning. Drinking from the pump costs nothing."})
 	rows.append({
 		"name": "Drink from the pump",
-		"value": "+%d water" % int(m.DRINK_WELL),
+		"value": "+%d thirst" % int(m.DRINK_WELL),
 		"button": "Drink",
 		"action": "drink_well",
 		"enabled": m.water < 100.0,

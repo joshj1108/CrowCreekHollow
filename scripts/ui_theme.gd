@@ -338,6 +338,11 @@ static func build() -> Theme:
 	_label(t, "HudTime", numbers, 18, IVORY, 3)
 	_label(t, "HudDay", display, SIZE_SMALL, GOLD, 3)
 	_label(t, "HudNote", body, 13, MUTED, 3)
+	# HUD-REDESIGN-002: the corner cards are tighter than the old plate (7 px across, 6 down inside the frame's
+	# 10 px rail), and each row names its stat in warm ivory body text.
+	t.set_type_variation("HudCard", "PanelContainer")
+	t.set_stylebox("panel", "HudCard", hud_plate(9, 7))
+	_label(t, "HudName", body, 13, IVORY, 3)
 	_label(t, "HudToolName", body, 15, Color("f2d27a"), 4)
 	_label(t, "HudKey", numbers, 11, MUTED, 3)
 
