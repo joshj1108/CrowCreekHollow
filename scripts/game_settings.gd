@@ -17,6 +17,8 @@ static var fullscreen := false
 static var window_size := 0        # an index into WINDOW_SIZES
 static var screen_shake := true
 static var message_speed := 1      # an index into MESSAGE_SPEEDS
+const PAGE_TURNS := ["Full", "Quick", "Off"]   # the diary's page-turn animation: full, half length, or none
+static var page_turns := 0         # an index into PAGE_TURNS
 
 
 static func load_settings() -> void:
@@ -28,6 +30,7 @@ static func load_settings() -> void:
 		window_size = clampi(int(cfg.get_value("display", "window_size", window_size)), 0, WINDOW_SIZES.size() - 1)
 		screen_shake = bool(cfg.get_value("game", "screen_shake", screen_shake))
 		message_speed = clampi(int(cfg.get_value("game", "message_speed", message_speed)), 0, MESSAGE_SPEEDS.size() - 1)
+		page_turns = clampi(int(cfg.get_value("game", "page_turns", page_turns)), 0, PAGE_TURNS.size() - 1)
 	elif FileAccess.file_exists(OLD_PATH):
 		# The old file only knew on or off. Off becomes silent, and the new file takes over.
 		var parsed: Variant = JSON.parse_string(FileAccess.get_file_as_string(OLD_PATH))
@@ -47,6 +50,7 @@ static func save_settings() -> void:
 	cfg.set_value("display", "window_size", window_size)
 	cfg.set_value("game", "screen_shake", screen_shake)
 	cfg.set_value("game", "message_speed", message_speed)
+	cfg.set_value("game", "page_turns", page_turns)
 	cfg.save(PATH)
 
 
@@ -100,6 +104,7 @@ static func change(action: String) -> bool:
 		"set_window": window_size = (window_size + 1) % WINDOW_SIZES.size()
 		"set_shake": screen_shake = not screen_shake
 		"set_messages": message_speed = (message_speed + 1) % MESSAGE_SPEEDS.size()
+		"set_page_turns": page_turns = (page_turns + 1) % PAGE_TURNS.size()
 		_: return false
 	save_settings()
 	apply(action == "set_fullscreen" or action == "set_window")
@@ -121,6 +126,7 @@ static func rows() -> Array:
 		{"name": "Screen", "value": "Fullscreen" if fullscreen else "Windowed", "button": "Change", "action": "set_fullscreen"},
 		{"name": "Window size", "value": _window_text() + (" (when windowed)" if fullscreen else ""), "button": "Change", "action": "set_window"},
 		{"name": "Screen shake", "value": "On" if screen_shake else "Off", "button": "Change", "action": "set_shake"},
+		{"name": "Diary page turns", "value": PAGE_TURNS[page_turns], "button": "Change", "action": "set_page_turns"},
 		{"section": "Messages"},
 		{"name": "How long messages stay", "value": MESSAGE_SPEEDS[message_speed], "button": "Change", "action": "set_messages"},
 	]

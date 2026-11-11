@@ -1055,7 +1055,8 @@ const SFX_NAMES := ["chop", "pick", "hoe", "tree_fall", "rock_break", "step", "p
 	"drip", "drip_low", "cave_rumble", "skitter", "cave_moan", "pebbles", "cave_in",
 	"swing", "hit", "hurt", "block", "foe_die", "growl", "screech", "hiss",
 	"cast", "splash", "reel",
-	"fire_feed", "split", "smelt", "craft", "cloth", "cook", "feed", "sweep", "cleanse", "sleep", "collapse"]
+	"fire_feed", "split", "smelt", "craft", "cloth", "cook", "feed", "sweep", "cleanse", "sleep", "collapse",
+	"page_lift", "page_rustle", "page_settle", "book_section"]
 # The sound each kind of foe makes when it notices you.
 const FOE_SOUNDS := {"bat": "screech", "lizard": "hiss", "snake": "hiss", "dog": "growl"}
 
@@ -1078,6 +1079,8 @@ const SFX_VOLUME := {"step": -24.0}
 # Playback pitch for sounds that sound brighter than they should. Below 1.0 is warmer and softer.
 const SFX_PITCH := {"step": 0.82}
 const SFX_DEFAULT_VOLUME := -4.0
+# The diary's paper sounds and how loud each plays: a lift, the rustle across, the settle, and a section's riffle.
+const PAGE_SOUNDS := {"page_lift": -9.0, "page_rustle": -7.0, "page_settle": -9.0, "book_section": -7.0}
 
 
 func play_sfx(name: String, jitter: float = 0.0) -> void:
@@ -3369,6 +3372,10 @@ func _on_bag_slot(index: int) -> void:
 func _on_panel_action(action_id: String) -> void:
 	if action_id == "page_turn":
 		play_sfx_at("panel", -8.0, 0.1)
+		return
+	# The diary's page turn plays its sounds as the paper moves (UI-OVERHAUL-001 Phase 5).
+	if PAGE_SOUNDS.has(action_id):
+		play_sfx_at(action_id, float(PAGE_SOUNDS[action_id]), 0.06)
 		return
 	if action_id.begins_with("decor:"):
 		projects._start_place(action_id.trim_prefix("decor:"))

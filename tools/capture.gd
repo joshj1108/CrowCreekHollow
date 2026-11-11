@@ -88,6 +88,10 @@ extends SceneTree
 #   notes           every note is written in the diary (show them with diary)
 #   epilogue        the bell's and the grove's last pages are written too (show them with diary)
 #   dpage=S,P       with diary, turn to section S's page P (counting from 0; the tabs top to bottom)
+#   dturn=1|-1      with diary, turn a page forward or back (djump=N: jump to section N, riffling); dprog=F holds
+#                   the turn at F (0 to 1) for the shot; diarymotion=Q|O sets the page-turn setting (Quick, Off);
+#                   dnew=N marks note N unread (the diary opens at it, its ribbon dotted);
+#                   dcycle (with hold=) from 3.5 s, turns forward twice, back twice, jumps a section and back, 1.1 s apart
 #   sound           print how loud each ambience loop is playing when the shot is taken
 #   hold=S          for recording (tools/trailer.ps1): instead of a shot, run S more seconds at 30 fps and quit,
 #                   with the music stopped (the trailer lays one track over every shot); out= isn't needed
@@ -385,12 +389,33 @@ func _initialize() -> void:
 		main.mystery.found["bell"] = true
 		main.mystery.found["grove"] = true
 	if opt.has("diary"):
+		if opt.has("diarymotion"):
+			GameSettings.page_turns = 1 if opt["diarymotion"] == "Q" else 2
+		if opt.has("dnew"):
+			main.diary_new.append(str(main.TIPS[int(opt["dnew"])]["id"]))
 		main._find_diary()
 		await process_frame
 		if opt.has("dpage"):
 			var at: PackedStringArray = opt["dpage"].split(",")
 			main.action_bar.open_book_at(int(at[0]), int(at[1]) if at.size() > 1 else 0)
 		await process_frame
+		# dturn=1 or -1 turns a page forward or back, djump=N jumps to section N instead (riffled leaves), and
+		# dprog=F holds the turn at F (0 to 1) for the shot. Without dprog the turn plays out (for hold= clips).
+		if opt.has("dcycle"):
+			_diary_cycle(main.action_bar)
+		if opt.has("dturn") or opt.has("djump"):
+			await process_frame
+			await process_frame
+			var ab: ActionBar = main.action_bar
+			if opt.has("dprog"):
+				ab.page_turn.hold = float(opt["dprog"])
+			if opt.has("djump"):
+				ab._open_book_section(int(opt["djump"]))
+			else:
+				ab._turn_page(int(opt["dturn"]))
+			# past the snapshots' warm-up, so the shot shows the turn
+			for i in 10:
+				await process_frame
 	if opt.has("wheel"):
 		main._toggle_wheel()
 		if opt["wheel"] != "1":
@@ -505,3 +530,17 @@ func _save(opt: Dictionary) -> void:
 	img.save_png("res://" + opt["out"])
 	print("saved ", opt["out"])
 	quit()
+
+
+# For a motion clip of the diary: forward, forward, back, back, a section jump and back, 1.1 s apart.
+func _diary_cycle(ab: ActionBar) -> void:
+	var start := ab.book_section
+	await create_timer(2.4).timeout   # past the 90 warm-up frames, so the clip starts on the open book
+	for step in [1, 1, -1, -1, "jump", "back"]:
+		await create_timer(1.1).timeout
+		if str(step) == "jump":
+			ab._open_book_section(mini(start + 1, ab.book_sections.size() - 1))
+		elif str(step) == "back":
+			ab._open_book_section(start)
+		else:
+			ab._turn_page(int(step))

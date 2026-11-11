@@ -136,6 +136,12 @@ var book_tabs: VBoxContainer
 var book_sections: Array = []
 var book_section := 0
 var book_spread := 0
+var header_rule: HSeparator         # the rule under the title; the Diary hides it and the subtitle, so the book has the room
+var book_cover: Control              # DiaryBook.Cover: the leather, brass and page edges behind the spread
+var page_turn: DiaryBook.PageTurn    # the turning sheet over the spread, while a page turns
+# Each page-turn setting's seconds for one page and for a section jump (riffled leaves), from GameSettings.
+const PAGE_TURN_SECS := [[0.6, 0.55], [0.3, 0.3]]
+const RIFFLE_LEAVES := [3, 1]
 
 
 func _ready() -> void:
@@ -213,7 +219,8 @@ func _build_menu() -> Control:
 	subtitle_label.add_theme_font_size_override("font_size", 14)
 	subtitle_label.add_theme_color_override("font_color", COL_MUTED)
 	titles.add_child(subtitle_label)
-	main.add_child(HSeparator.new())
+	header_rule = HSeparator.new()
+	main.add_child(header_rule)
 
 	# A grid panel's tab strip stays put above the list.
 	grid_top = VBoxContainer.new()
@@ -330,6 +337,10 @@ func show_panel(tab: String, rows: Array) -> void:
 		if row is Dictionary and row.has("book"):
 			book_row = row
 	book.visible = not book_row.is_empty()
+	if not book.visible:
+		page_turn.finish()
+	subtitle_label.visible = not book.visible
+	header_rule.visible = not book.visible
 	if book.visible:
 		grid_body.visible = false
 		ledger.visible = false
@@ -1879,28 +1890,36 @@ func _input(event: InputEvent) -> void:
 # --- The diary's book ------------------------------------------------------------
 
 # The leather cover holding two pages either side of the spine, and the tab markers down its right edge.
+# UI-OVERHAUL-001 Phase 5: the cover is DiaryBook.Cover (leather, brass, stacked page edges) and a
+# DiaryBook.PageTurn lies over the spread to show each turn; the pages themselves are built here as before.
 func _build_book_frame() -> Control:
 	book = HBoxContainer.new()
 	book.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	book.add_theme_constant_override("separation", 0)
 	book.visible = false
-	var cover := PanelContainer.new()
-	cover.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	cover.add_theme_stylebox_override("panel", _box(LEATHER, COL_BORDER, 2, 8, 10))
-	book.add_child(cover)
+	book_cover = DiaryBook.Cover.new()
+	book_cover.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	book.add_child(book_cover)
 	book_spread_box = HBoxContainer.new()
 	book_spread_box.add_theme_constant_override("separation", 0)
-	cover.add_child(book_spread_box)
+	book_cover.add_child(book_spread_box)
+	page_turn = DiaryBook.PageTurn.new()
+	page_turn.cue.connect(_on_action_pressed)
+	page_turn.reveal = _build_book
+	book_cover.add_child(page_turn)
 	book_tabs = VBoxContainer.new()
-	book_tabs.add_theme_constant_override("separation", 6)
+	book_tabs.add_theme_constant_override("separation", 4)
 	var top := Control.new()
-	top.custom_minimum_size = Vector2(0, 14)
+	top.custom_minimum_size = Vector2(0, 24)
 	book_tabs.add_child(top)
 	book.add_child(book_tabs)
 	return book
 
 
 func _show_book(sections: Array, opening: bool) -> void:
+	# A rebuild mid-turn (the rows changed) lets the turn play on over the rebuilt spread.
+	if opening:
+		page_turn.finish()
 	book_sections = sections
 	_ledger_tab_count = sections.size()
 	# Opening the diary turns to the first page not read yet; otherwise it stays where it was left.
@@ -1918,6 +1937,7 @@ func _show_book(sections: Array, opening: bool) -> void:
 
 # Turns to the spread holding a section's page, e.g. for the capture tool.
 func open_book_at(section: int, page: int) -> void:
+	page_turn.finish()
 	book_section = section
 	book_spread = page / 2
 	if book.visible:
@@ -1933,18 +1953,8 @@ func _build_book() -> void:
 		return
 	book_section = clampi(book_section, 0, book_sections.size() - 1)
 	book_spread = clampi(book_spread, 0, _spreads(book_section) - 1)
-	var section: Dictionary = book_sections[book_section]
-	var pages: Array = section["pages"]
 	_clear(book_spread_box)
-	for side in 2:
-		var index := book_spread * 2 + side
-		var page: Dictionary = pages[index] if index < pages.size() else {"blank": true}
-		book_spread_box.add_child(_build_page(section, page, index, side))
-		if side == 0:
-			var spine := ColorRect.new()
-			spine.color = Color("1e130b")
-			spine.custom_minimum_size = Vector2(6, 0)
-			book_spread_box.add_child(spine)
+	_fill_spread(book_spread_box)
 	# The tab markers, after the spacer that lines them up with the pages' tops.
 	while book_tabs.get_child_count() > 1:
 		var old := book_tabs.get_child(1)
@@ -1955,6 +1965,31 @@ func _build_book() -> void:
 	_refresh_prompts()
 
 
+# The open spread's two pages and the sewn spine between them, into box (the live spread, or a page turn's
+# snapshot of it).
+func _fill_spread(box: Control) -> void:
+	var section: Dictionary = book_sections[book_section]
+	var pages: Array = section["pages"]
+	for side in 2:
+		var index := book_spread * 2 + side
+		var page: Dictionary = pages[index] if index < pages.size() else {"blank": true}
+		box.add_child(_build_page(section, page, index, side))
+		if side == 0:
+			var spine_tex := DiaryBook.tex("spine")
+			if spine_tex != null:
+				var sewn := TextureRect.new()
+				sewn.texture = spine_tex
+				sewn.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+				sewn.stretch_mode = TextureRect.STRETCH_TILE
+				sewn.custom_minimum_size = Vector2(8, 0)
+				box.add_child(sewn)
+			else:
+				var spine := ColorRect.new()
+				spine.color = Color("1e130b")
+				spine.custom_minimum_size = Vector2(6, 0)
+				box.add_child(spine)
+
+
 # One page: the section's heading (left page only), the title with "new" or "done", a rule, the text, and
 # the page number with a turn arrow at the outer corner. A torn-out page shows its stub and a faded number.
 func _build_page(section: Dictionary, page: Dictionary, index: int, side: int) -> Control:
@@ -1962,23 +1997,29 @@ func _build_page(section: Dictionary, page: Dictionary, index: int, side: int) -
 	var gap := bool(page.get("gap", false))
 	var holder := PanelContainer.new()
 	holder.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	var sheet := _box(PAPER, PAPER_EDGE, 0, 0, 0)
-	# Rounded on the outer corners only, so the two pages meet at the spine.
-	for corner in ([CORNER_TOP_LEFT, CORNER_BOTTOM_LEFT] if side == 0 else [CORNER_TOP_RIGHT, CORNER_BOTTOM_RIGHT]):
-		sheet.set_corner_radius(corner, 4)
-	sheet.border_width_bottom = 3
+	# Phase 5: hand-drawn parchment (deckled outer edge, worn corners, the gutter's shade toward the spine).
+	var sheet: StyleBox = DiaryBook.page_style(side)
+	if sheet == null:
+		var flat := _box(PAPER, PAPER_EDGE, 0, 0, 0)
+		for corner in ([CORNER_TOP_LEFT, CORNER_BOTTOM_LEFT] if side == 0 else [CORNER_TOP_RIGHT, CORNER_BOTTOM_RIGHT]):
+			flat.set_corner_radius(corner, 4)
+		flat.border_width_bottom = 3
+		sheet = flat
 	if gap:
-		sheet.draw_center = false
-		sheet.border_width_bottom = 0
+		sheet = StyleBoxEmpty.new()
 		holder.add_child(TornPage.new(side, PAPER, PAPER_EDGE))
 	holder.add_theme_stylebox_override("panel", sheet)
 	var margin := MarginContainer.new()
-	for side_name in ["margin_left", "margin_top", "margin_right"]:
-		margin.add_theme_constant_override(side_name, 18 if small else 24)
-	margin.add_theme_constant_override("margin_bottom", 6)
+	# The words keep clear of the gutter's shade at the spine, more than of the outer edge.
+	var outer := 20 if small else 26
+	var inner := 28 if small else 34
+	margin.add_theme_constant_override("margin_left", outer if side == 0 else inner)
+	margin.add_theme_constant_override("margin_right", inner if side == 0 else outer)
+	margin.add_theme_constant_override("margin_top", 16 if small else 22)
+	margin.add_theme_constant_override("margin_bottom", 10)
 	# A torn-out page's words keep clear of the stub at the spine.
 	if gap:
-		margin.add_theme_constant_override("margin_right" if side == 0 else "margin_left", 48)
+		margin.add_theme_constant_override("margin_right" if side == 0 else "margin_left", 52)
 	holder.add_child(margin)
 	var column := VBoxContainer.new()
 	column.add_theme_constant_override("separation", 6 if small else 10)
@@ -1990,26 +2031,57 @@ func _build_page(section: Dictionary, page: Dictionary, index: int, side: int) -
 		var filler := Control.new()
 		filler.size_flags_vertical = Control.SIZE_EXPAND_FILL
 		column.add_child(filler)
+		# A blank page keeps a small sketch in faded ink: a crow's feather.
+		var sketch_tex := DiaryBook.tex("feather")
+		if sketch_tex != null:
+			var sketch := TextureRect.new()
+			sketch.texture = sketch_tex
+			sketch.stretch_mode = TextureRect.STRETCH_KEEP_CENTERED
+			sketch.modulate = Color(1, 1, 1, 0.85)
+			sketch.mouse_filter = Control.MOUSE_FILTER_IGNORE
+			column.add_child(sketch)
+			var under := Control.new()
+			under.size_flags_vertical = Control.SIZE_EXPAND_FILL
+			column.add_child(under)
 	else:
 		var title_line := HBoxContainer.new()
 		title_line.add_theme_constant_override("separation", 10)
 		var title := _book_text(str(page["title"]), COL_MUTED if gap else ink, 18 if small else 21)
 		title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		title_line.add_child(title)
+		# The "new" or "done" mark stays on one line beside the title.
+		var mark: Label = null
 		if bool(page.get("new", false)):
-			title_line.add_child(_book_text("new", INK_RED, 13))
+			mark = _book_text("new", INK_RED, 13)
 		elif bool(page.get("done", false)):
-			title_line.add_child(_book_text("done", INK_FADED, 13))
+			mark = _book_text("done", INK_FADED, 13)
+		if mark != null:
+			mark.autowrap_mode = TextServer.AUTOWRAP_OFF
+			mark.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+			title_line.add_child(mark)
 		column.add_child(title_line)
 		if not gap:
-			var rule := ColorRect.new()
-			rule.color = Color(PAPER_EDGE, 0.7)
-			rule.custom_minimum_size = Vector2(0, 1)
-			column.add_child(rule)
+			column.add_child(BookRule.new())
 		# Long text scrolls rather than running off the page on a small window.
 		var body_scroll := ScrollContainer.new()
 		body_scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
 		body_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+		# Phase 5: a thin ink scrollbar on the parchment, not the default grey one.
+		var bar := body_scroll.get_v_scroll_bar()
+		var track := StyleBoxFlat.new()
+		track.bg_color = Color(PAPER_EDGE, 0.25)
+		track.content_margin_left = 2
+		track.content_margin_right = 2
+		var grip := StyleBoxFlat.new()
+		grip.bg_color = Color(PAPER_EDGE, 0.9)
+		grip.content_margin_left = 2
+		grip.content_margin_right = 2
+		var grip_hot := grip.duplicate() as StyleBoxFlat
+		grip_hot.bg_color = Color(INK_FADED, 1.0)
+		bar.add_theme_stylebox_override("scroll", track)
+		bar.add_theme_stylebox_override("grabber", grip)
+		bar.add_theme_stylebox_override("grabber_highlight", grip_hot)
+		bar.add_theme_stylebox_override("grabber_pressed", grip_hot)
 		var body := _book_text(str(page["text"]), COL_MUTED if gap else ink, 14 if small else 16)
 		body.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		body_scroll.add_child(body)
@@ -2057,20 +2129,35 @@ func _build_marker(i: int) -> Control:
 	marker.alignment = HORIZONTAL_ALIGNMENT_LEFT
 	marker.focus_mode = Control.FOCUS_NONE
 	marker.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
-	marker.custom_minimum_size = Vector2(136 if open else 120, 38)
+	marker.custom_minimum_size = Vector2(142 if open else 124, 38)
 	marker.add_theme_font_size_override("font_size", 14)
-	marker.add_theme_color_override("font_color", COL_TEXT if open else Color(COL_TEXT, 0.7))
+	marker.add_theme_color_override("font_color", COL_TEXT if open else Color(COL_TEXT, 0.72))
 	marker.add_theme_color_override("font_hover_color", COL_TEXT)
 	marker.add_theme_color_override("font_pressed_color", COL_TEXT)
+	marker.add_theme_color_override("font_shadow_color", Color(0.05, 0.03, 0.02, 0.8))
+	marker.add_theme_constant_override("shadow_offset_x", 1)
+	marker.add_theme_constant_override("shadow_offset_y", 1)
+	# Phase 5: a woven ribbon with a swallowtail end, tinted with the section's colour; the open one sticks out
+	# further, a shade lighter, with a brass eyelet. No glow.
 	for state in ["normal", "hover", "pressed"]:
-		var fill: Color = ribbon.lightened(0.12) if open or state != "normal" else ribbon.darkened(0.35)
-		var sb := _box(fill, COL_ACCENT if open else ribbon.darkened(0.5), 2 if open else 1, 0, 0)
-		sb.border_width_left = 0
-		sb.set_corner_radius(CORNER_TOP_RIGHT, 6)
-		sb.set_corner_radius(CORNER_BOTTOM_RIGHT, 6)
-		sb.content_margin_left = 12
-		sb.content_margin_right = 22
+		var fill: Color = ribbon.lightened(0.18) if open else (ribbon.lightened(0.08) if state != "normal" else ribbon.darkened(0.12))
+		var sb: StyleBox = DiaryBook.ribbon_style(fill)
+		if sb == null:
+			var flat := _box(fill, COL_ACCENT if open else ribbon.darkened(0.5), 2 if open else 1, 0, 0)
+			flat.border_width_left = 0
+			flat.set_corner_radius(CORNER_TOP_RIGHT, 6)
+			flat.set_corner_radius(CORNER_BOTTOM_RIGHT, 6)
+			flat.content_margin_left = 12
+			flat.content_margin_right = 22
+			sb = flat
 		marker.add_theme_stylebox_override(state, sb)
+	var eyelet := DiaryBook.tex("grommet")
+	if open and eyelet != null:
+		var ring := TextureRect.new()
+		ring.texture = eyelet
+		ring.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		ring.position = Vector2(4, 14)
+		marker.add_child(ring)
 	marker.pressed.connect(_open_book_section.bind(i))
 	var fresh := false
 	for page in section["pages"]:
@@ -2080,8 +2167,8 @@ func _build_marker(i: int) -> Control:
 		dot.add_theme_stylebox_override("panel", _box(COL_SHORT, Color("f0c0a0"), 1, 4, 0))
 		dot.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		dot.set_anchors_preset(Control.PRESET_CENTER_RIGHT)
-		dot.offset_left = -16
-		dot.offset_right = -8
+		dot.offset_left = -30
+		dot.offset_right = -22
 		dot.offset_top = -4
 		dot.offset_bottom = 4
 		marker.add_child(dot)
@@ -2091,10 +2178,11 @@ func _build_marker(i: int) -> Control:
 func _open_book_section(index: int) -> void:
 	if index == book_section:
 		return
+	var forward := index > book_section
+	var animate := _turn_starts()
 	book_section = index
 	book_spread = 0
-	_on_action_pressed("page_turn")
-	_build_book()
+	_turn_to(forward, true, animate)
 
 
 # Whether a turn that way has anywhere to go: another spread, or the next (or previous) section.
@@ -2108,6 +2196,7 @@ func _can_turn(step: int) -> bool:
 func _turn_page(step: int) -> void:
 	if book_sections.is_empty() or not _can_turn(step):
 		return
+	var animate := _turn_starts()
 	book_spread += step
 	if book_spread < 0:
 		book_section -= 1
@@ -2115,13 +2204,60 @@ func _turn_page(step: int) -> void:
 	elif book_spread >= _spreads(book_section):
 		book_section += 1
 		book_spread = 0
-	_on_action_pressed("page_turn")
-	_build_book()
+	_turn_to(step > 0, false, animate)
+
+
+# Before the place moves: ends any turn still playing (so presses never stack or get lost), and when the turn
+# will be shown, snapshots the spread as it is now for the turning page's front. Returns whether to animate.
+func _turn_starts() -> bool:
+	page_turn.finish()
+	var animate := GameSettings.page_turns < 2 and book.is_visible_in_tree() \
+		and book_spread_box.get_child_count() == 3 and book_spread_box.size.x > 0.0
+	if animate:
+		var kids := book_spread_box.get_children()
+		var scale := get_viewport().get_final_transform().get_scale().x \
+			* book_spread_box.get_global_transform_with_canvas().get_scale().x
+		page_turn.prepare(book_spread_box.size, (kids[0] as Control).get_rect(), (kids[1] as Control).get_rect(),
+			(kids[2] as Control).get_rect(), clampf(scale, 1.0, 4.0))
+		_fill_spread(page_turn.old_root)
+	return animate
+
+
+# After the place has moved: shows the turn over the new spread, or (page turns off) just the new spread.
+# A section jump riffles a few blank leaves over, quickly, rather than turning every page between.
+func _turn_to(forward: bool, jump: bool, animate: bool) -> void:
+	if not animate:
+		_on_action_pressed("book_section" if jump else "page_rustle")
+		_build_book()
+		return
+	book_section = clampi(book_section, 0, book_sections.size() - 1)
+	book_spread = clampi(book_spread, 0, _spreads(book_section) - 1)
+	_fill_spread(page_turn.new_root)
+	var mode := clampi(GameSettings.page_turns, 0, 1)
+	page_turn.start(forward, RIFFLE_LEAVES[mode] if jump else 1, PAGE_TURN_SECS[mode][1 if jump else 0])
+
+
+# The rule under a page's title: a pixel ink line with a small fleuron, drawn in the paper's edge colour.
+class BookRule extends Control:
+	func _init() -> void:
+		custom_minimum_size = Vector2(0, 10)
+		mouse_filter = Control.MOUSE_FILTER_IGNORE
+
+	func _draw() -> void:
+		var y := 4.0
+		var ink := Color("8f7a54")
+		var orn := DiaryBook.tex("fleuron")
+		var mid := floorf(size.x * 0.5 / 2.0) * 2.0
+		var gap := 14.0 if orn != null else 0.0
+		draw_rect(Rect2(0, y, mid - gap, 2), Color(ink, 0.75))
+		draw_rect(Rect2(mid + gap, y, size.x - mid - gap, 2), Color(ink, 0.75))
+		if orn != null:
+			draw_texture(orn, Vector2(mid - orn.get_width() * 0.5, y + 1 - orn.get_height() * 0.5))
 
 
 # A page torn out of the diary: the stub left at the spine, its edge ragged, over the bare inside cover.
 class TornPage extends Control:
-	const RAGGED := [0.0, 7.0, 3.0, 9.0, 1.0, 6.0]
+	const RAGGED := [0.0, 6.0, 2.0, 8.0, 2.0, 6.0, 4.0]
 	var side := 0
 	var paper: Color
 	var edge: Color
@@ -2133,22 +2269,35 @@ class TornPage extends Control:
 		mouse_filter = Control.MOUSE_FILTER_IGNORE
 
 	func _draw() -> void:
-		draw_rect(Rect2(Vector2.ZERO, size), Color("2a1a10"))
+		# Phase 5: the inside cover a torn page leaves bare is marbled endpaper, tiled.
+		var endpaper := DiaryBook.tex("endpaper")
+		if endpaper != null:
+			draw_texture_rect(endpaper, Rect2(Vector2.ZERO, size), true)
+		else:
+			draw_rect(Rect2(Vector2.ZERO, size), Color("2a1a10"))
 		var spine_x := size.x if side == 0 else 0.0
 		var dir := -1.0 if side == 0 else 1.0
+		# The stub's torn edge, stepped on the art's 2 px grid.
 		var torn := PackedVector2Array()
 		var y := 0.0
 		var i := 0
 		while y < size.y:
-			torn.append(Vector2(spine_x + dir * (24.0 + RAGGED[i % RAGGED.size()]), y))
-			y += 11.0
+			var x: float = spine_x + dir * (24.0 + float(RAGGED[i % RAGGED.size()]))
+			torn.append(Vector2(x, y))
+			torn.append(Vector2(x, minf(y + 10.0, size.y)))
+			y += 10.0
 			i += 1
-		torn.append(Vector2(spine_x + dir * 24.0, size.y))
 		var stub := PackedVector2Array([Vector2(spine_x, 0.0)])
 		stub.append_array(torn)
 		stub.append(Vector2(spine_x, size.y))
-		draw_colored_polygon(stub, paper.darkened(0.1))
-		draw_polyline(torn, edge, 1.0)
+		draw_colored_polygon(stub, paper.darkened(0.06))
+		# the stub's shadow on the endpaper, its dark torn edge, and the gutter's shade on the stub
+		var shade := PackedVector2Array()
+		for p in torn:
+			shade.append(p + Vector2(dir * 3.0, 0.0))
+		draw_polyline(shade, Color(0.05, 0.03, 0.02, 0.5), 4.0)
+		draw_polyline(torn, Color("5a4632"), 2.0)
+		draw_rect(Rect2(spine_x - (8.0 if side == 0 else 0.0), 0.0, 8.0, size.y), Color(0.25, 0.18, 0.1, 0.35))
 
 
 func _on_menu_pressed() -> void:

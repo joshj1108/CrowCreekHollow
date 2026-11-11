@@ -7,6 +7,7 @@ The sounds are built from filtered noise, wood and metal partials, plucked strin
 short room or outdoor reverb. Each sound is levelled to the loudness the game was balanced around (LOUDNESS below).
 """
 import os
+import sys
 import zlib
 
 import numpy as np
@@ -27,6 +28,8 @@ LOUDNESS = {
     "creak": -12.0, "creak_high": -13.0, "settle": -11.0, "thunder_in": -8.0,
     "drip": -14.0, "drip_low": -14.0, "cave_rumble": -10.0, "skitter": -14.0, "cave_moan": -12.0,
     "pebbles": -14.0, "cave_in": -11.0,
+    # The diary's paper (UI-OVERHAUL-001 Phase 5): quiet, close, dry.
+    "page_lift": -24.0, "page_rustle": -21.0, "page_settle": -24.0, "book_section": -19.0,
     "swing": -14.0, "hit": -10.0, "hurt": -10.0, "block": -11.0, "foe_die": -11.0,
     "growl": -10.0, "screech": -14.0, "hiss": -15.0,
     "cast": -13.0, "splash": -12.0, "reel": -18.0,
@@ -281,6 +284,46 @@ def panel():
     flick = hp(noise(0.012), 1800) * env(int(0.012 * SR), 0.001, 300)
     out = place(np.concatenate([swish, silence(0.05)]), flick, 0.17, 0.25)
     return reverb(out, 0.2, 0.08, 3500)
+
+
+def page_lift():
+    # The page's corner coming off the one under it: a tiny dry tick, then a short rising breath of paper.
+    length = 0.16
+    n = int(length * SR)
+    swell = bp(noise(length), np.linspace(1800, 3600, n), 1.1) * env(n, 0.05, 22)
+    tick_ = hp(noise(0.006), 2500) * env(int(0.006 * SR), 0.0005, 500)
+    out = place(swell * 0.8, tick_, 0.0, 0.5)
+    return reverb(out, 0.12, 0.05, 4000)
+
+
+def page_rustle():
+    # The sheet sweeping over the spine: band-limited air, crackled by the paper's fibres, rising then falling.
+    length = 0.3
+    n = int(length * SR)
+    t = np.arange(n) / n
+    sweep = 1100 + 1900 * np.sin(np.pi * t)
+    air = bp(noise(length), sweep, 0.8) * np.sin(np.pi * t) ** 1.5
+    crackle = hp(noise(length), 2200) * grains(length, 140, 0.004) * np.sin(np.pi * t)
+    return reverb(air * 0.85 + crackle * 0.35, 0.15, 0.06, 3800)
+
+
+def page_settle():
+    # The sheet landing: a soft low pat, and the air pushed out from under it.
+    pat = lp(noise(0.06), 420) * env(int(0.06 * SR), 0.003, 55)
+    puff = bp(noise(0.12), 1600, 0.7) * env(int(0.12 * SR), 0.004, 35)
+    return reverb(mix(pat * 1.2, puff * 0.4), 0.14, 0.06, 3000)
+
+
+def book_section():
+    # Thumbing to a ribbon: a quick riffle of leaves, then the heavier pat of the book falling open there.
+    out = silence(0.5)
+    for i, at in enumerate((0.0, 0.07, 0.13, 0.2, 0.26)):
+        m = int(0.05 * SR)
+        flick = bp(noise(0.05), 2600 - 200 * i, 1.2) * env(m, 0.004, 70)
+        place(out, flick, at, 0.7 - 0.08 * i)
+    pat = lp(noise(0.09), 300) * env(int(0.09 * SR), 0.004, 40)
+    place(out, pat, 0.33, 1.3)
+    return reverb(out, 0.18, 0.08, 3200)
 
 
 def tick():
@@ -892,6 +935,7 @@ def rock_break():
 
 
 SOUNDS = {
+    "page_lift": page_lift, "page_rustle": page_rustle, "page_settle": page_settle, "book_section": book_section,
     "chop": chop, "pick": pick, "hoe": hoe, "tree_fall": tree_fall, "rock_break": rock_break,
     "step": step, "plant": plant, "harvest": harvest, "water": water, "eat": eat, "drink": drink,
     "repair": repair, "coin": coin, "panel": panel, "tick": tick, "chime": chime, "bleat": bleat,
@@ -1083,11 +1127,17 @@ def write(name, samples, folder=OUT_DIR):
 def main():
     global RNG
     os.makedirs(OUT_DIR, exist_ok=True)
+    # Named sounds only (python tools/make_sfx.py page_lift page_settle) leave every other file untouched.
+    only = set(sys.argv[1:])
     for name, make in SOUNDS.items():
+        if only and name not in only:
+            continue
         RNG = np.random.default_rng(zlib.crc32(name.encode()))
         samples = level(finish(make()), LOUDNESS[name])
         path, seconds = write(name, samples)
         print("wrote %s (%.2f s)" % (path, seconds))
+    if only:
+        return
     os.makedirs(AMBIENCE_DIR, exist_ok=True)
     for name, make in LOOPS.items():
         RNG = np.random.default_rng(zlib.crc32(("loop_" + name).encode()))
