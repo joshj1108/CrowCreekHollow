@@ -9,10 +9,14 @@ extends RefCounted
 # The house is 24 by 14 tiles, side by side so every room's back wall is the house's north wall:
 #   rows 0-2   the north wall's face (three tiles: beam, plaster between timber posts, wainscot), with a window
 #              in the bedroom, the hall and the wash room (parlor)
-#   x 1-6      the bedroom: bed, bedside table, the desk under the window, the dresser, a chest at the bed's foot
+#   x 1-6      the bedroom (CCH-CONSOLIDATED-003 Phase C): the desk and its chair in the west corner, the bedside
+#              cabinet, the bed under the window with its headboard against the wall, the dresser beside it, the
+#              chest at the bed's foot, the braided rug before it and a reading candle stand
 #   x 7        a partition with the bedroom's doorway near the bottom
-#   x 8-17     the hall: the clock corner, cooler, crockery shelf, window, the stone hearth (x 12-14, matching the
-#              chimney on the right of the outside), log basket, armchair and side table, the dining set, the rug
+#   x 8-17     the hall: the clock corner, the crockery shelf, the cooler under the window, the stone hearth
+#              (x 12-14, matching the chimney on the right of the outside), the log basket, armchair and side
+#              table beside it, the rug before it with a fireside chair; the dining set; the
+#              pantry corner (barrel and sack, firewood once restored) by the front wall
 #   x 18       a partition with doorways to the wash room (top) and the study (bottom)
 #   x 19-22    the wash room (rows 3-5, open when Patched) over a wall (rows 6-9) and the study (rows 10-12,
 #              open when Restored). A room not open yet is seen through the cutaway, derelict, its doorway
@@ -39,37 +43,57 @@ const WINDOWS := [
 # The front windows in the south wall, seen from above (left tile of two).
 const FRONT_WINDOWS := [5, 16]
 
-# Props: standing art on a tile (bottom edge on the tile's bottom, centred over `tiles`), art pixel offset `off`,
-# from house stage `from` to `to`. `block` makes the tile solid (a TABLE tile: Space does nothing there).
-# `floor` props lie flat and are drawn with the floor, under everything.
+# Props: standing art on a tile (bottom edge on the tile's bottom, centred over `tiles`), from house stage `from`
+# to `to`. `block` makes the tile solid (a TABLE tile: Space does nothing there). `floor` props lie flat and are
+# drawn with the floor, under everything. `on` props stand on another piece (art pixel offset `off` from where
+# they would stand on the tile) and add nothing solid. An art name with a folder ("fc/...") is that file; a bare
+# name is FARMHOUSE-INTERIOR-001's (fi/). CCH-CONSOLIDATED-003 Phase C: the furniture family is fc/
+# (tools/cch003_furniture.py); the house's own pieces are grouped as rooms (see the plan at the top).
 const PROPS := [
-	{"art": "bedside", "at": Vector2i(3, 3), "from": 0, "block": true},
-	{"art": "chest", "at": Vector2i(2, 6), "from": 1, "block": true},
-	{"art": "barrel", "at": Vector2i(10, 3), "from": 0, "block": true},
+	# bedroom: the desk's chair, the bedside cabinet, the chest at the bed's foot, the reading stand
+	{"art": "fc/chair_back", "at": Vector2i(2, 4), "from": 1, "block": true},
+	{"art": "fc/bedside", "at": Vector2i(3, 3), "from": 0, "block": true},
+	{"art": "chest", "at": Vector2i(5, 5), "from": 1, "block": true},
+	{"art": "fc/sidetable", "at": Vector2i(1, 6), "from": 2, "block": true},
+	{"art": "crates", "at": Vector2i(6, 9), "from": 0, "to": 1, "block": true},
+	# hall: the log basket beside the hearth, the side table by the armchair, the fireside
+	# chair facing the fire, the pantry corner by the door (barrel and sack, a crock on it, and the firewood stacked
+	# where it comes in, when restored)
 	{"art": "logbasket", "at": Vector2i(15, 3), "from": 1, "block": true},
-	{"art": "sidetable", "at": Vector2i(17, 3), "from": 1, "block": true},
+	{"art": "fc/sidetable", "at": Vector2i(17, 3), "from": 1, "block": true},
+	{"art": "fc/chair_back", "at": Vector2i(14, 8), "from": 2, "block": true},
+	{"art": "barrel", "at": Vector2i(9, 12), "from": 0, "block": true},
+	{"art": "fc/crock", "at": Vector2i(9, 12), "from": 3, "on": true, "off": Vector2(4, -20)},
+	{"art": "crates", "at": Vector2i(10, 12), "from": 0, "to": 1, "block": true},
+	{"art": "fc/firewood", "at": Vector2i(11, 12), "from": 3, "block": true},
+	# wash room (parlor): the linen press and the washtub (the washstand is the STATION)
 	{"art": "wardrobe", "at": Vector2i(22, 3), "from": 0, "block": true},
-	{"art": "washtub", "at": Vector2i(22, 5), "from": 0, "block": true},
-	{"art": "crates", "at": Vector2i(8, 12), "from": 0, "to": 1, "block": true},
+	{"art": "washtub", "at": Vector2i(21, 5), "from": 0, "block": true},
+	# study: a reading chair and candle stand beside the bookshelf, books stacked in the corner
+	{"art": "fc/chair_front", "at": Vector2i(21, 10), "from": 3, "block": true},
+	{"art": "fc/sidetable", "at": Vector2i(22, 10), "from": 3, "block": true},
+	{"art": "fc/books", "at": Vector2i(22, 12), "from": 3, "block": true},
 	{"art": "crates", "at": Vector2i(21, 11), "from": 0, "to": 2, "block": true},
-	{"art": "sidetable", "at": Vector2i(22, 10), "from": 3, "block": true},
-	{"art": "chair_front", "at": Vector2i(22, 11), "from": 3, "block": true},
+	# the derelict house's litter, and a floor cushion on the hearth rug once it is a home
 	{"art": "debris", "at": Vector2i(4, 11), "from": 0, "to": 0, "floor": true},
 	{"art": "debris", "at": Vector2i(14, 10), "from": 0, "to": 0, "floor": true},
 	{"art": "debris", "at": Vector2i(20, 12), "from": 0, "to": 2, "floor": true},
 	{"art": "brokenchair", "at": Vector2i(10, 11), "from": 0, "to": 0, "floor": true},
 	{"art": "brokenchair", "at": Vector2i(20, 4), "from": 0, "to": 1, "floor": true},
-	{"art": "debris", "at": Vector2i(15, 6), "from": 0, "to": 0, "floor": true},
+	{"art": "debris", "at": Vector2i(16, 6), "from": 0, "to": 0, "floor": true},
 	{"art": "brokenchair", "at": Vector2i(12, 8), "from": 0, "to": 0, "floor": true},
-	{"art": "debris", "at": Vector2i(5, 7), "from": 0, "to": 0, "floor": true},
-	{"art": "crates", "at": Vector2i(6, 9), "from": 0, "to": 1, "block": true},
-	{"art": "sidetable", "at": Vector2i(6, 6), "from": 2, "block": true},
+	{"art": "debris", "at": Vector2i(2, 8), "from": 0, "to": 0, "floor": true},
+	{"art": "fc/cushion", "at": Vector2i(12, 6), "from": 3, "floor": true},
 ]
 # Wall decor hung on the north wall's face: centre x in tiles, top y in art pixels from the face's top.
 const WALL_DECOR := [
 	{"art": "shelf", "cx": 9.0, "y": 6, "from": 1},
 	{"art": "herbs", "cx": 15.5, "y": 7, "from": 1},
+	{"art": "fc/sampler", "cx": 2.0, "y": 8, "from": 3},
+	{"art": "fc/wreath", "cx": 21.6, "y": 5, "from": 3},
 ]
+# The bedroom's braided rug (Patched) lies at the bed's foot, its top-left on this tile.
+const BED_RUG_AT := Vector2i(3, 6)
 # Floor damage (cells of floor_dmg.png: 0 hole, 1 crack, 2 patch, 3 stain, 4 dust). A hole is patched with new
 # boards at Boarded; at Patched two patches remain, darker; at Restored the boards are all finished.
 const DAMAGE := [
@@ -100,10 +124,16 @@ const NIGHT_FLOOR := [Color(0.34, 0.36, 0.46), Color(0.33, 0.34, 0.43), Color(0.
 const HEARTH_SIZE := Vector2(34, 60)
 const FIREBOX := Rect2(7, 40, 20, 13)
 const MANTEL_Y := 30
-const BEDSIDE_WICK := Vector2(7, 1)
-const SIDETABLE_WICK := Vector2(9, 1)
-const CLOCK_PIVOT := Vector2(9, 17)
-const CLOCK_BOB := Vector2(9, 30)
+# The furniture family's details, measured by tools/cch003_furniture.py (art/farm/fc/props.json).
+const BEDSIDE_WICK := Vector2(7, 2)
+const SIDETABLE_WICK := Vector2(4, 1)
+const CLOCK_SIZE := Vector2(17, 42)
+const CLOCK_PIVOT := Vector2(8, 17)
+const CLOCK_BOB := Vector2(8, 31)
+const BED_HEADBOARD := 8     # the bed sprite's top rows: the headboard, standing against the wall's face
+const BEDROOM_SIDE := Vector2i(1, 6)
+const HALL_SIDE := Vector2i(17, 3)
+const STUDY_SIDE := Vector2i(22, 10)
 const WALL_ART_W := 128
 const WIN_SIZE := Vector2(32, 30)
 const WIN_TOP := 4          # art pixels down the face to the window's top
@@ -168,7 +198,7 @@ func _cell(pos: Vector2i) -> Rect2:
 
 
 func _tex(name: String) -> Texture2D:
-	return FarmSprites.tex("fi/" + name)
+	return FarmSprites.tex(name if "/" in name else "fi/" + name)
 
 
 func _sprite(ci: CanvasItem, art: String, at: Vector2, src := Rect2(), tint := Color.WHITE) -> void:
@@ -229,19 +259,19 @@ func draw_floor(ci: CanvasItem) -> void:
 	_draw_hearth_slab(ci)
 	# The hall rug from Boarded, the bedroom's braided rug from Patched.
 	if s >= 1:
+		# The hearth rug, centred on RUG_RECT (it lies within it, so it never runs under a wall or the hearth).
 		var rr: Rect2i = m.RUG_RECT
-		for ry in rr.size.y:
-			for rx in rr.size.x:
-				ci.draw_texture_rect_region(FarmSprites.tex("int_rug"), _cell(rr.position + Vector2i(rx, ry)),
-					Rect2(rx * 16, ry * 16, 16, 16), Color(1, 1, 1) if s >= 3 else Color(0.82, 0.78, 0.76))
+		var area := Rect2(_cell(rr.position).position, Vector2(rr.size) * m.PX)
+		var rug := _tex("fc/rug").get_size() * m.SCALE
+		_sprite(ci, "fc/rug", area.get_center() - rug * 0.5, Rect2(), Color(1, 1, 1) if s >= 3 else Color(0.82, 0.78, 0.76))
 	if s >= 2:
-		_sprite(ci, "rug_bed", _cell(Vector2i(2, 8)).position)
+		_sprite(ci, "rug_bed", _cell(BED_RUG_AT).position)
 	for p in PROPS:
 		if p.get("floor", false) and _prop_shown(p):
 			var at: Vector2i = p["at"]
 			var cell := _cell(at)
 			var size := _tex(str(p["art"])).get_size() * m.SCALE
-			_sprite(ci, str(p["art"]), cell.get_center() - size * 0.5, Rect2(), STAGE_TINT[0])
+			_sprite(ci, str(p["art"]), cell.get_center() - size * 0.5, Rect2(), STAGE_TINT[0] if int(p.get("from", 0)) == 0 else Color.WHITE)
 	# Shadow where the floor meets a wall's face or a side wall: two art pixels, soft.
 	var shade := Color(0, 0, 0, 0.32)
 	for y in H:
@@ -292,10 +322,6 @@ func draw_rows(ci: CanvasItem, front: bool, player_row: int) -> void:
 			if m.interior[y][x] == MainGame.Tile.WALL and _face_row(pos) >= 0:
 				_draw_paper(ci, pos)
 			m.estate._draw_furniture(ci, _cell(pos), pos)
-			if m.interior[y][x] == MainGame.Tile.COOLER:
-				var cell := _cell(pos)
-				ci.draw_rect(cell, Color(1, 1, 1, 0.8), false, 2.0)
-				ci.draw_string(ThemeDB.fallback_font, cell.position + Vector2(2, m.PX * 0.6), "Cooler", HORIZONTAL_ALIGNMENT_LEFT, -1, 11, Color(0.05, 0.03, 0.02))
 		_draw_row_decor(ci, y)
 
 
@@ -333,28 +359,36 @@ func _draw_piece(ci: CanvasItem, pos: Vector2i, kind: int) -> void:
 		MainGame.Tile.WALL:
 			_draw_wall(ci, pos)
 		MainGame.Tile.BED:
+			# Drawn from its foot row, so its headboard (the sprite's top rows) rises against the wall's face.
 			if pos == m.BED_INTERIOR:
-				m._draw_standing(ci, _cell(pos), "int_beds", Rect2(s * 32, 0, 32, 47), m.BED_RECT.size.x)
+				_stand(ci, pos, bed_art(), m.BED_RECT.size.x)
 		MainGame.Tile.DESK:
 			if pos == m.DESK_IX:
-				m._draw_standing(ci, _cell(pos), "int_furniture", m.INT_FURNITURE["desk"], 2)
+				_stand(ci, pos, "fc/desk", 2, tint)
 		MainGame.Tile.STATION:
-			m._draw_standing(ci, _cell(pos), "int_furniture", m.INT_FURNITURE["wash_fine" if s >= 3 else "wash"])
+			_stand(ci, pos, "fc/wash_fine" if s >= 3 else "fc/wash", 1, tint)
 		MainGame.Tile.COOLER:
-			m._draw_standing(ci, _cell(pos), "int_furniture", m.INT_FURNITURE["cooler"])
+			_stand(ci, pos, "fc/cooler")
 		MainGame.Tile.FIREPLACE:
 			if pos == m.FIREPLACE_IX:
 				_stand(ci, pos, "hearth_%d" % s, 3)
+				if s >= 3:
+					# a pewter plate stood on the mantel, between its candles
+					var plate := _tex("fc/plate").get_size()
+					_sprite(ci, "fc/plate", hearth_origin() + Vector2(roundf((HEARTH_SIZE.x - plate.x) * 0.5), MANTEL_Y - plate.y + 1) * m.SCALE)
 		MainGame.Tile.TABLE:
 			_draw_table_piece(ci, pos, tint)
 	# Props standing on this tile (solid or not), and the dining set's candle.
 	for p in PROPS:
 		if p["at"] == pos and not p.get("floor", false) and _prop_shown(p):
-			var art := str(p["art"])
-			if art == "chair_front":
-				m._draw_standing(ci, _cell(pos), "int_chairs", Rect2(0, 0, 16, 24))
-			else:
-				_stand(ci, pos, art, 1, tint)
+			_stand(ci, pos, str(p["art"]), 1, tint, p.get("off", Vector2.ZERO))
+
+
+# The bed for the stage, or the bought feather bed (from Boarded, when its room's stage is reached).
+func bed_art() -> String:
+	if m.estate.furniture.has("feather_bed") and _stage() >= int(m.estate.FURNITURE["feather_bed"]["stage"]):
+		return "fc/bed_feather"
+	return "fc/bed_%d" % _stage()
 
 
 func _draw_table_piece(ci: CanvasItem, pos: Vector2i, tint: Color) -> void:
@@ -364,16 +398,20 @@ func _draw_table_piece(ci: CanvasItem, pos: Vector2i, tint: Color) -> void:
 	var r := pos - d.position
 	var end_seat := r.x == 0 or r.x == d.size.x - 1
 	if r.y == 0 and end_seat:
-		m._draw_standing(ci, _cell(pos), "int_chairs", Rect2(0, 0, 16, 24))
+		_stand(ci, pos, "fc/chair_front", 1, tint)
 	elif r.y == 2 and r.x == 0:
-		m._draw_standing(ci, _cell(pos), "int_table", Rect2(0, 0, 48, 32), d.size.x)
+		_stand(ci, pos, "fc/table", d.size.x, tint)
+		if _stage() >= 3:
+			# the stoneware jug beside the candle, once the house is a home
+			var jug := _tex("fc/jug").get_size() * m.SCALE
+			_sprite(ci, "fc/jug", table_candle() + Vector2(m.SCALE * 7, m.SCALE * 6 - jug.y))
 		# A candle in a saucer in the middle of the table (InteriorFX lights it).
 		var c := table_candle()
 		ci.draw_rect(Rect2(c + Vector2(-2, 3) * m.SCALE, Vector2(5, 1) * m.SCALE), Color("8a8070"))
 		ci.draw_rect(Rect2(c + Vector2(-1, 0) * m.SCALE, Vector2(3, 3) * m.SCALE), Color("1d1611"))
 		ci.draw_rect(Rect2(c + Vector2(0, 0) * m.SCALE, Vector2(1, 3) * m.SCALE), Color("e8dcc0") if _stage() >= 1 else Color("b8ac90"))
 	elif r.y == 3 and end_seat:
-		m._draw_standing(ci, _cell(pos), "int_chairs", Rect2(16, 0, 16, 24))
+		_stand(ci, pos, "fc/chair_back", 1, tint)
 
 
 # The dining candle's wick, world position.
@@ -450,11 +488,11 @@ func hearth_origin() -> Vector2:
 
 
 func bedside_wick() -> Vector2:
-	return _stand_origin(Vector2i(3, 3), "bedside") + BEDSIDE_WICK * m.SCALE
+	return _stand_origin(Vector2i(3, 3), "fc/bedside") + BEDSIDE_WICK * m.SCALE
 
 
 func sidetable_wick(pos: Vector2i) -> Vector2:
-	return _stand_origin(pos, "sidetable") + SIDETABLE_WICK * m.SCALE
+	return _stand_origin(pos, "fc/sidetable") + SIDETABLE_WICK * m.SCALE
 
 
 func _stand_origin(pos: Vector2i, art: String) -> Vector2:
@@ -463,18 +501,74 @@ func _stand_origin(pos: Vector2i, art: String) -> Vector2:
 	return Vector2(cell.position.x + (m.PX - size.x) * 0.5, cell.end.y - size.y).snapped(Vector2(m.SCALE, m.SCALE))
 
 
-# The candles, each lit from dusk while it stands: world position of the wick and the stage it appears.
+# The candles, each lit from dusk while it stands: world position of the wick, and `row`, the house row of the
+# piece it stands on (tools/interior_test.gd checks each wick is on that piece). Every candle stands on a piece that is there at that stage (the bedside cabinet from Decrepit, the
+# hall's side table from Boarded, the bedroom's stand from Patched, the study's from Restored).
 func candles() -> Array:
 	var s := _stage()
-	var out: Array = [{"p": table_candle(), "id": "table"}]
+	var d: Rect2i = m.DINING_RECT
+	var out: Array = [{"p": table_candle(), "id": "table", "row": d.position.y + 2}]
 	if s >= 1:
-		out.append({"p": bedside_wick(), "id": "bedside"})
-		out.append({"p": sidetable_wick(Vector2i(17, 3)), "id": "side"})
+		out.append({"p": bedside_wick(), "id": "bedside", "row": 3})
+		out.append({"p": sidetable_wick(HALL_SIDE), "id": "side", "row": HALL_SIDE.y})
 	if s >= 2:
-		out.append({"p": sidetable_wick(Vector2i(6, 6)), "id": "bedroom_side"})
+		out.append({"p": sidetable_wick(BEDROOM_SIDE), "id": "bedroom_side", "row": BEDROOM_SIDE.y})
 		var h := hearth_origin()
-		out.append({"p": h + Vector2(5, MANTEL_Y - 4) * m.SCALE, "id": "mantel_l", "stick": true})
-		out.append({"p": h + Vector2(HEARTH_SIZE.x - 6, MANTEL_Y - 4) * m.SCALE, "id": "mantel_r", "stick": true})
+		out.append({"p": h + Vector2(5, MANTEL_Y - 4) * m.SCALE, "id": "mantel_l", "stick": true, "row": m.FIREPLACE_IX.y})
+		out.append({"p": h + Vector2(HEARTH_SIZE.x - 6, MANTEL_Y - 4) * m.SCALE, "id": "mantel_r", "stick": true, "row": m.FIREPLACE_IX.y})
 	if s >= 3:
-		out.append({"p": sidetable_wick(Vector2i(22, 10)), "id": "study"})
+		out.append({"p": sidetable_wick(STUDY_SIDE), "id": "study", "row": STUDY_SIDE.y})
 	return out
+
+
+# --- The clipping audit's view of the layout (tools/interior_test.gd) -----------------------------------------
+
+# Every standing sprite drawn at the current stage with what is bought: its art, its tile row, and its rectangle
+# in art pixels from the house's top-left (x along the house, y down from the top of the north wall's face).
+func standing_rects() -> Array:
+	var out: Array = []
+	var s := _stage()
+	var dr: Rect2i = m.DINING_RECT
+	for y in H:
+		for x in W:
+			var pos := Vector2i(x, y)
+			match m.interior[y][x]:
+				MainGame.Tile.BED:
+					if pos == m.BED_INTERIOR:
+						out.append(_rect_of(pos, bed_art(), m.BED_RECT.size.x))
+				MainGame.Tile.DESK:
+					if pos == m.DESK_IX:
+						out.append(_rect_of(pos, "fc/desk", 2))
+				MainGame.Tile.STATION:
+					out.append(_rect_of(pos, "fc/wash_fine" if s >= 3 else "fc/wash", 1))
+				MainGame.Tile.COOLER:
+					out.append(_rect_of(pos, "fc/cooler", 1))
+				MainGame.Tile.FIREPLACE:
+					if pos == m.FIREPLACE_IX:
+						out.append(_rect_of(pos, "hearth_%d" % s, 3))
+			if dr.has_point(pos):
+				var r := pos - dr.position
+				var end_seat := r.x == 0 or r.x == dr.size.x - 1
+				if r.y == 0 and end_seat:
+					out.append(_rect_of(pos, "fc/chair_front", 1))
+				elif r.y == 2 and r.x == 0:
+					out.append(_rect_of(pos, "fc/table", dr.size.x))
+				elif r.y == 3 and end_seat:
+					out.append(_rect_of(pos, "fc/chair_back", 1))
+			for p in PROPS:
+				if p["at"] == pos and not p.get("floor", false) and not p.get("on", false) and _prop_shown(p):
+					out.append(_rect_of(pos, str(p["art"]), 1))
+	for id in m.estate.furniture:
+		var f: Dictionary = m.estate.FURNITURE[id]
+		if id in ["painting", "feather_bed"] or s < int(f["stage"]):
+			continue
+		out.append(_rect_of(f["spot"], m.estate._furniture_art(str(id)), int(m.estate.E4_TILES.get(id, 1))))
+	return out
+
+
+# A standing sprite's rectangle as _stand draws it (the art pixel grid; the screen snaps to the same grid).
+func _rect_of(pos: Vector2i, art: String, tiles: int) -> Dictionary:
+	var size := _tex(art).get_size()
+	var x := pos.x * 16.0 + (16.0 * tiles - size.x) * 0.5
+	var y := (pos.y + 1) * 16.0 - size.y
+	return {"art": art, "row": pos.y, "at": pos, "tiles": tiles, "rect": Rect2(Vector2(roundf(x), y), size)}

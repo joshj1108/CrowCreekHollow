@@ -34,10 +34,11 @@ const EXTENSION_VALUE := 0.15     # each extension adds this much to the propert
 # room: the house stage that opens the room it stands in. spot: interior tile (FARMHOUSE-INTERIOR-001 layout: the
 # dresser by the bedroom's desk, the armchair by the hearth under the painting, the clock in the hall's corner, the
 # bookshelf against the study's wall). Each stands solid on its tiles (_furniture_tiles); the painting hangs on the
-# wall face (row 2) over the armchair, between tiles 16 and 17.
+# wall face (row 2) over the armchair, between tiles 16 and 17. The feather bed is the bed itself, at the bed's
+# foot-left tile (InteriorArt draws it in place of the stage's bed, CCH-CONSOLIDATED-003 Phase C).
 const FURNITURE := {
 	"dresser": {"name": "Oak dresser", "stage": 0, "spot": Vector2i(6, 3), "cost": {"coins": 150, "hardwood": 12, "copper_bar": 2}, "about": "Drawers for the bedroom, with copper handles."},
-	"feather_bed": {"name": "Feather bed", "stage": 1, "spot": Vector2i(1, 5), "cost": {"coins": 250, "hardwood": 6, "feathers": 40}, "about": "A deep mattress of crow down on the old bed. They are only feathers."},
+	"feather_bed": {"name": "Feather bed", "stage": 1, "spot": Vector2i(4, 4), "cost": {"coins": 250, "hardwood": 6, "feathers": 40}, "about": "A deep mattress of crow down on the old bed. They are only feathers."},
 	"armchair": {"name": "Armchair", "stage": 1, "spot": Vector2i(16, 3), "cost": {"coins": 200, "hardwood": 8, "feathers": 20}, "about": "A wing chair by the hearth."},
 	"clock": {"name": "Long-case clock", "stage": 1, "spot": Vector2i(8, 3), "cost": {"coins": 350, "hardwood": 10, "copper_bar": 8, "iron_bar": 2}, "about": "A tall clock in the hall, with a copper face. It ticks through the night."},
 	"painting": {"name": "A painting of the farm", "stage": 2, "spot": Vector2i(16, 2), "cost": {"coins": 400}, "about": "The farm as it was in Agnes's day, bought from a carter. Someone stands in the field."},
@@ -407,9 +408,18 @@ const E4_ART := true
 const E4_TILES := {"bookshelf": 2, "feather_bed": 2}
 
 
+# CCH-CONSOLIDATED-003 Phase C: the bought pieces are drawn from the farmhouse furniture family (art/farm/fc/,
+# tools/cch003_furniture.py), the clock as its case without the pendulum, which InteriorFX swings. The E4 sprites
+# remain the fallback.
+func _furniture_art(id: String) -> String:
+	var fc := "fc/clock_case" if id == "clock" else "fc/" + id
+	if FarmSprites.has(fc):
+		return fc
+	return "fi/clock_case" if id == "clock" and FarmSprites.has("fi/clock_case") else "e4/" + id
+
+
 func _draw_furniture_sprite(ci: CanvasItem, cell: Rect2, id: String) -> void:
-	# The clock's case without its pendulum, which InteriorFX swings (FARMHOUSE-INTERIOR-001).
-	var art := "fi/clock_case" if id == "clock" and FarmSprites.has("fi/clock_case") else "e4/" + id
+	var art := _furniture_art(id)
 	var tex := FarmSprites.tex(art)
 	var src := Rect2(Vector2.ZERO, tex.get_size())
 	if id == "painting":
@@ -441,6 +451,8 @@ func _draw_furniture(ci: CanvasItem, cell: Rect2, pos: Vector2i) -> void:
 		var f: Dictionary = FURNITURE[id]
 		if m.house_stage < int(f["stage"]):
 			continue
+		if id == "feather_bed" and FarmSprites.has("fc/bed_feather"):
+			continue   # InteriorArt draws it as the bed
 		var art := E4_ART and FarmSprites.has("e4/" + str(id))
 		# The painting spans two wall tiles, so its sprite is drawn with the second, after both walls.
 		var spot: Vector2i = f["spot"] + (Vector2i(1, 0) if art and id == "painting" else Vector2i.ZERO)

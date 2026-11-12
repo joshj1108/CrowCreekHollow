@@ -2677,5 +2677,457 @@
     "game_file": "art/farm/mailbox.png"
    }
   ]
+ },
+ "CCH-CONSOLIDATED-003/C": {
+  "tool": "tools/cch003_furniture.py",
+  "sources": "art/style_tests/CCH-003/C/raw/ (style.png = FARMHOUSE-INTERIOR-001 hearth_3, chest, bedside, wardrobe, barrel, shelf, logbasket, washtub; ref_*.png = old sprites used as framing references only; jobs.txt, fetch.py, <key>/NN.png candidates, sheets and mosaics)",
+  "note": "Phase C: the farmhouse furniture family, art/farm/fc/. create_image_pro with style image raw/style.png (upload 1d5d4411-816c-4882-8eb8-86c72f193855, all four style aspects); some jobs with the old sprite as a camera-angle reference. Wide pieces first came back turned at an angle and were redone straight-on with a reference; oversize picks were rejected or trimmed in repeated parts by the script (desk, clock, dresser, cooler, chairs, armchair, fine washstand). Two further submissions (chair_front seeds 3307, 3336) were refused by the policy filter before running and cost nothing. 37 jobs, 370 subscription generations, USD 0 (3174 generations before, 2804 after, credits USD 0).",
+  "generations": 370,
+  "jobs": [
+   {
+    "key": "bed",
+    "tool": "create_image_pro",
+    "job_id": "59aa5f71-f15e-4ce9-a731-849f547b3c5e",
+    "size": [
+     32,
+     64
+    ],
+    "seed": 3301,
+    "generations": 10,
+    "result": "rejected: single bed, 19 px wide, too narrow for the 2-tile bed"
+   },
+   {
+    "key": "desk",
+    "tool": "create_image_pro",
+    "job_id": "6cfa9e4a-9bf4-4f96-9e25-03450821e4d8",
+    "size": [
+     48,
+     48
+    ],
+    "seed": 3302,
+    "generations": 10,
+    "pick": "desk/00"
+   },
+   {
+    "key": "wash",
+    "tool": "create_image_pro",
+    "job_id": "b49bd656-b8f8-47d6-a78d-1ac678da4efd",
+    "size": [
+     32,
+     48
+    ],
+    "seed": 3303,
+    "generations": 10,
+    "pick": "wash/03"
+   },
+   {
+    "key": "wash_fine",
+    "tool": "create_image_pro",
+    "job_id": "dbd4b700-a8d8-4e50-9820-deb3981c537f",
+    "size": [
+     32,
+     48
+    ],
+    "seed": 3304,
+    "generations": 10,
+    "pick": "wash_fine/01"
+   },
+   {
+    "key": "cooler",
+    "tool": "create_image_pro",
+    "job_id": "a64311d0-10c6-458d-9ac9-d81b3629edda",
+    "size": [
+     32,
+     48
+    ],
+    "seed": 3305,
+    "generations": 10,
+    "pick": "cooler/08"
+   },
+   {
+    "key": "table",
+    "tool": "create_image_pro",
+    "job_id": "44a6bf69-f11a-4b3c-8b22-a4fae0d5747b",
+    "size": [
+     64,
+     48
+    ],
+    "seed": 3306,
+    "generations": 10,
+    "result": "rejected: turned at an angle (not straight-on)"
+   },
+   {
+    "key": "chair_back",
+    "tool": "create_image_pro",
+    "job_id": "4f35211f-1633-4f7d-b465-359a6679af21",
+    "size": [
+     32,
+     48
+    ],
+    "seed": 3308,
+    "generations": 10,
+    "result": "rejected: turned at an angle"
+   },
+   {
+    "key": "dresser",
+    "tool": "create_image_pro",
+    "job_id": "90eab6fd-c7aa-4479-a329-fee62465b5c7",
+    "size": [
+     32,
+     32
+    ],
+    "seed": 3309,
+    "generations": 10,
+    "result": "rejected: turned at an angle"
+   },
+   {
+    "key": "armchair",
+    "tool": "create_image_pro",
+    "job_id": "251d9876-a97c-4bdc-b7e2-170c24fd248b",
+    "size": [
+     32,
+     32
+    ],
+    "seed": 3310,
+    "generations": 10,
+    "result": "rejected: turned at an angle"
+   },
+   {
+    "key": "clock",
+    "tool": "create_image_pro",
+    "job_id": "a4a8c15b-2833-4253-b05f-1ab9d14e72c0",
+    "size": [
+     32,
+     64
+    ],
+    "seed": 3311,
+    "generations": 10,
+    "pick": "clock/00"
+   },
+   {
+    "key": "painting",
+    "tool": "create_image_pro",
+    "job_id": "27513a9b-886c-422b-a41f-c8f7ff8e0df5",
+    "size": [
+     32,
+     32
+    ],
+    "seed": 3312,
+    "generations": 10,
+    "pick": "painting/01"
+   },
+   {
+    "key": "bookshelf",
+    "tool": "create_image_pro",
+    "job_id": "33693401-a480-4152-9932-ac65f70edd46",
+    "size": [
+     48,
+     48
+    ],
+    "seed": 3313,
+    "generations": 10,
+    "result": "rejected: turned at an angle"
+   },
+   {
+    "key": "sidetable",
+    "tool": "create_image_pro",
+    "job_id": "44923cd6-71eb-4821-8a29-5d70b6ac80a3",
+    "size": [
+     32,
+     32
+    ],
+    "seed": 3314,
+    "generations": 10,
+    "result": "rejected: 26 px wide, too big beside the house props"
+   },
+   {
+    "key": "bedside",
+    "tool": "create_image_pro",
+    "job_id": "0c4f96f9-4f96-4308-9c30-2b384a67c0d6",
+    "size": [
+     32,
+     32
+    ],
+    "seed": 3315,
+    "generations": 10,
+    "pick": "bedside/04"
+   },
+   {
+    "key": "chair_front2",
+    "tool": "create_image_pro",
+    "job_id": "3dd30756-4521-4a89-80d9-2ff2f674658d",
+    "size": [
+     32,
+     48
+    ],
+    "seed": 3316,
+    "generations": 10,
+    "pick": "chair_front2/00"
+   },
+   {
+    "key": "bed2",
+    "tool": "create_image_pro",
+    "job_id": "5a395b1e-c787-4ad7-8bf9-958adcad7e23",
+    "size": [
+     48,
+     64
+    ],
+    "seed": 3317,
+    "generations": 10,
+    "pick": "bed/bed_feather (bed2/00)"
+   },
+   {
+    "key": "table2",
+    "tool": "create_image_pro",
+    "job_id": "07f8c841-867c-4b48-bd5b-10dc3c6a62fd",
+    "size": [
+     64,
+     48
+    ],
+    "seed": 3318,
+    "generations": 10,
+    "result": "rejected: straight-on but 62 px wide, too big"
+   },
+   {
+    "key": "chair_front3",
+    "tool": "create_image_pro",
+    "job_id": "036ae225-d9d5-49b7-9731-f515181d9dc4",
+    "size": [
+     32,
+     32
+    ],
+    "seed": 3319,
+    "generations": 10,
+    "result": "rejected: candidates split across cells"
+   },
+   {
+    "key": "chair_back2",
+    "tool": "create_image_pro",
+    "job_id": "1c842f57-8431-4a62-a2dc-0468718afc20",
+    "size": [
+     32,
+     32
+    ],
+    "seed": 3320,
+    "generations": 10,
+    "result": "rejected: candidates split across cells"
+   },
+   {
+    "key": "pottery",
+    "tool": "create_image_pro",
+    "job_id": "e858bb99-12f0-4836-b135-db19d24cf87e",
+    "size": [
+     32,
+     32
+    ],
+    "seed": 3321,
+    "generations": 10,
+    "result": "rejected: 28 px, too big for tabletop decor"
+   },
+   {
+    "key": "books",
+    "tool": "create_image_pro",
+    "job_id": "3f2c8e24-9143-4f07-9626-856b892520b7",
+    "size": [
+     32,
+     32
+    ],
+    "seed": 3322,
+    "generations": 10,
+    "result": "rejected: 28 px, too big"
+   },
+   {
+    "key": "textiles",
+    "tool": "create_image_pro",
+    "job_id": "20f27a79-211c-4ab3-b9ac-8207530121b0",
+    "size": [
+     32,
+     32
+    ],
+    "seed": 3323,
+    "generations": 10,
+    "result": "rejected: too big, not used"
+   },
+   {
+    "key": "firewood",
+    "tool": "create_image_pro",
+    "job_id": "cc6ad889-b33f-4409-8d32-180a3c78bc3c",
+    "size": [
+     32,
+     32
+    ],
+    "seed": 3324,
+    "generations": 10,
+    "pick": "firewood/25"
+   },
+   {
+    "key": "wallorn",
+    "tool": "create_image_pro",
+    "job_id": "41f318d7-9a0c-461e-a6a4-fb59344f4c56",
+    "size": [
+     32,
+     32
+    ],
+    "seed": 3325,
+    "generations": 10,
+    "pick": "wallorn/01 (sampler), 03 (wreath)"
+   },
+   {
+    "key": "rug",
+    "tool": "create_image_pro",
+    "job_id": "d1877c1b-fa3f-4c74-bc29-d00f533828a8",
+    "size": [
+     96,
+     48
+    ],
+    "seed": 3326,
+    "generations": 10,
+    "pick": "rug/01"
+   },
+   {
+    "key": "armchair2",
+    "tool": "create_image_pro",
+    "job_id": "95d87f84-6c41-4f22-8bec-e2ae0c8b10bd",
+    "size": [
+     32,
+     48
+    ],
+    "seed": 3327,
+    "generations": 10,
+    "pick": "armchair2/01"
+   },
+   {
+    "key": "dresser2",
+    "tool": "create_image_pro",
+    "job_id": "6a4cf338-7ee4-48c9-bd89-16ce2288a102",
+    "size": [
+     32,
+     48
+    ],
+    "seed": 3328,
+    "generations": 10,
+    "pick": "dresser2/01"
+   },
+   {
+    "key": "bookshelf2",
+    "tool": "create_image_pro",
+    "job_id": "b4860ca0-67d8-48f4-a3b6-0b708e344831",
+    "size": [
+     48,
+     48
+    ],
+    "seed": 3329,
+    "generations": 10,
+    "pick": "bookshelf2/01"
+   },
+   {
+    "key": "table3",
+    "tool": "create_image_pro",
+    "job_id": "8f20b53f-b6ec-4867-9086-7eeae1ca54ff",
+    "size": [
+     48,
+     40
+    ],
+    "seed": 3330,
+    "generations": 10,
+    "pick": "table3/00"
+   },
+   {
+    "key": "chair_back3",
+    "tool": "create_image_pro",
+    "job_id": "21123f65-0c8a-4d3f-8994-ccd1e96a9cfe",
+    "size": [
+     32,
+     48
+    ],
+    "seed": 3331,
+    "generations": 10,
+    "pick": "chair_back3/04"
+   },
+   {
+    "key": "pottery16",
+    "tool": "create_image_pro",
+    "job_id": "12cb3575-46f5-4e36-831a-23accf4f9e08",
+    "size": [
+     16,
+     16
+    ],
+    "seed": 3332,
+    "generations": 10,
+    "pick": "pottery16/01 (crock), 26 (jug)"
+   },
+   {
+    "key": "books16",
+    "tool": "create_image_pro",
+    "job_id": "871365c7-4c0c-41a1-ac92-b4fb2443e39c",
+    "size": [
+     16,
+     16
+    ],
+    "seed": 3333,
+    "generations": 10,
+    "pick": "books16/16"
+   },
+   {
+    "key": "cushion16",
+    "tool": "create_image_pro",
+    "job_id": "48d89aaf-fe88-400d-babb-cb689aaf090d",
+    "size": [
+     16,
+     16
+    ],
+    "seed": 3334,
+    "generations": 10,
+    "pick": "cushion16/12"
+   },
+   {
+    "key": "mantel16",
+    "tool": "create_image_pro",
+    "job_id": "821b3f0b-f6a5-4d28-b251-b72aa928a539",
+    "size": [
+     16,
+     16
+    ],
+    "seed": 3335,
+    "generations": 10,
+    "pick": "mantel16/00 (plate)"
+   },
+   {
+    "key": "chair_b",
+    "tool": "create_image_pro",
+    "job_id": "86621437-baaa-4a55-9907-6b6fa20ef17e",
+    "size": [
+     24,
+     28
+    ],
+    "seed": 3337,
+    "generations": 10,
+    "result": "rejected: wide and turned"
+   },
+   {
+    "key": "candlestand",
+    "tool": "create_image_pro",
+    "job_id": "5d2742c6-c0a8-44cc-9043-612bb5558f24",
+    "size": [
+     20,
+     28
+    ],
+    "seed": 3338,
+    "generations": 10,
+    "pick": "candlestand/12"
+   },
+   {
+    "key": "chair_f2",
+    "tool": "create_image_pro",
+    "job_id": "69affc8e-da15-4e73-b06e-27fdadde7ac3",
+    "size": [
+     24,
+     28
+    ],
+    "seed": 3339,
+    "generations": 10,
+    "result": "rejected: side views"
+   }
+  ]
  }
 }

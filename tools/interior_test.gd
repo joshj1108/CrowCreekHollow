@@ -198,6 +198,9 @@ func _run() -> void:
 	_set_stage(1)
 	_window("Boarded: one board, never open", 244, 12.0, "sunny", func(st: Dictionary) -> bool: return st["stage"] == 1 and not st["open"])
 
+	# CCH-CONSOLIDATED-003 Phase C: the clipping audit, the bed against the wall, the sprites themselves.
+	_audit()
+
 	# Candles and the fire's light.
 	var counts := []
 	for s in 4:
@@ -225,6 +228,130 @@ func _run() -> void:
 	m.inside = false
 	fx._process(0.016)
 	_check("lights: all off outside the house", not fx.fire_light.enabled and _lit_candles(fx) == 0)
+
+
+# The rooms' floors along the house (tile x ranges), for "no sprite draws through a side wall".
+func _room_span(t: Vector2i) -> Vector2i:
+	for r in [InteriorArt.BEDROOM, InteriorArt.HALL, InteriorArt.PARLOR, InteriorArt.STUDY]:
+		if (r as Rect2i).has_point(t):
+			return Vector2i((r as Rect2i).position.x, (r as Rect2i).end.x)
+	return Vector2i(-1, -1)
+
+
+# The top of the wall's face behind a piece: three tiles above the nearest wall row over its tile.
+func _face_top(t: Vector2i) -> float:
+	var y := t.y - 1
+	while y >= 0 and m.interior[y][t.x] != MainGame.Tile.WALL:
+		y -= 1
+	return float(maxi(y - (m.INT_FACE_ROWS - 1), 0)) * 16.0
+
+
+func _audit() -> void:
+	var fc := FileAccess.open("res://art/farm/fc/props.json", FileAccess.READ)
+	var meta: Dictionary = JSON.parse_string(fc.get_as_text())
+	fc.close()
+	# Every piece of the furniture family: present, the size its tool measured, pixel-art clean (alpha 0 or 255),
+	# nothing wider than its footprint allows.
+	var bad_art: Array = []
+	for key in meta:
+		var name := "fc/" + str(key)
+		if not FarmSprites.has(name):
+			bad_art.append(name + " missing")
+			continue
+		var img := FarmSprites.tex(name).get_image()
+		var want: Array = meta[key]["size"]
+		if img.get_width() != int(want[0]) or img.get_height() != int(want[1]):
+			bad_art.append("%s is %dx%d, not %s" % [name, img.get_width(), img.get_height(), str(want)])
+		var opaque := 0
+		var soft := 0
+		for y in img.get_height():
+			for x in img.get_width():
+				var a := img.get_pixel(x, y).a
+				if a > 0.99:
+					opaque += 1
+				elif a > 0.01:
+					soft += 1
+		if opaque == 0 or soft > 0:
+			bad_art.append("%s: %d opaque, %d half-transparent pixels" % [name, opaque, soft])
+		# its content touches all four edges: cropped to the art, nothing cut off by a wrong region
+		var used := img.get_used_rect()
+		if used.size != img.get_size():
+			bad_art.append("%s: used rect %s inside %s" % [name, str(used), str(img.get_size())])
+	_check("sprites: every furniture-family frame is present, measured, pixel-clean and tightly cropped", bad_art.is_empty(), str(bad_art))
+	var clock: Dictionary = meta["clock_case"]
+	_check("sprites: the clock's case is the size InteriorFX swings the pendulum in",
+		Vector2(clock["size"][0], clock["size"][1]) == InteriorArt.CLOCK_SIZE and Vector2(clock["pivot"][0], clock["pivot"][1]) == InteriorArt.CLOCK_PIVOT and Vector2(clock["bob"][0], clock["bob"][1]) == InteriorArt.CLOCK_BOB)
+	_check("sprites: the candle wicks are where the candles are", Vector2(meta["bedside"]["wick"][0], meta["bedside"]["wick"][1]) == InteriorArt.BEDSIDE_WICK and Vector2(meta["sidetable"]["wick"][0], meta["sidetable"]["wick"][1]) == InteriorArt.SIDETABLE_WICK)
+	# The legacy SpriteCook and E4 furniture is no longer what the house draws.
+	for id in m.estate.FURNITURE:
+		_check("sprites: the bought %s is drawn from the new family" % id, id == "feather_bed" or m.estate._furniture_art(str(id)).begins_with("fc/"), m.estate._furniture_art(str(id)))
+
+	# Each stage, with nothing bought and with everything bought (and the cooler built).
+	for bought in [false, true]:
+		for id in m.estate.FURNITURE:
+			if bought:
+				m.estate.furniture[id] = true
+			else:
+				m.estate.furniture.erase(id)
+		for s in 4:
+			_set_stage(s)
+			var tag := "stage %d, %s" % [s, "all furniture" if bought else "none bought"]
+			var rects: Array = m.interior_art.standing_rects()
+			var overlaps: Array = []
+			var through: Array = []
+			var above: Array = []
+			var unsolid: Array = []
+			for i in rects.size():
+				var a: Dictionary = rects[i]
+				var ra: Rect2 = a["rect"]
+				var at: Vector2i = a["at"]
+				for j in range(i + 1, rects.size()):
+					var b: Dictionary = rects[j]
+					var rb: Rect2 = b["rect"]
+					# side by side on one row: they must not overlap (one would cut into the other)
+					if int(a["row"]) == int(b["row"]) and ra.position.x < rb.end.x and rb.position.x < ra.end.x:
+						overlaps.append("%s@%s / %s@%s" % [a["art"], str(at), b["art"], str(b["at"])])
+				var span := _room_span(at)
+				if ra.position.x < span.x * 16.0 or ra.end.x > span.y * 16.0:
+					through.append("%s@%s x %d-%d, room %d-%d" % [a["art"], str(at), int(ra.position.x), int(ra.end.x), span.x * 16, span.y * 16])
+				if ra.position.y < _face_top(at):
+					above.append("%s@%s top %d over the face's top %d" % [a["art"], str(at), int(ra.position.y), int(_face_top(at))])
+				for k in int(a["tiles"]):
+					var t: Vector2i = at + Vector2i(k, 0)
+					if _free(t):
+						unsolid.append("%s@%s" % [a["art"], str(t)])
+			_check("clipping %s: no two pieces on a row overlap" % tag, overlaps.is_empty(), str(overlaps))
+			_check("clipping %s: nothing draws through a side wall or partition" % tag, through.is_empty(), str(through))
+			_check("clipping %s: nothing rises above its wall's face" % tag, above.is_empty(), str(above))
+			_check("collision %s: every standing piece is solid where it stands" % tag, unsolid.is_empty(), str(unsolid))
+			# The bed: its headboard against the north wall, no floor between them.
+			var bed: Dictionary = {}
+			for r in rects:
+				if str(r["art"]).begins_with("fc/bed_"):
+					bed = r
+			var wall_behind := true
+			for k in m.BED_RECT.size.x:
+				wall_behind = wall_behind and m.interior[m.BED_RECT.position.y - 1][m.BED_RECT.position.x + k] == MainGame.Tile.WALL
+			var head_foot: float = (bed["rect"] as Rect2).position.y + InteriorArt.BED_HEADBOARD if not bed.is_empty() else -1.0
+			var floor_top := m.BED_RECT.position.y * 16.0
+			_check("bed %s: drawn once, its headboard against the wall (no gap behind it)" % tag,
+				not bed.is_empty() and wall_behind and head_foot >= floor_top and head_foot <= floor_top + 2.0, "headboard foot %s, floor %s" % [head_foot, floor_top])
+			_check("bed %s: the feather bed shows only once bought" % tag, (str(bed.get("art", "")) == "fc/bed_feather") == (bought and s >= 1))
+			# Every candle's wick stands on a piece on its row.
+			var loose: Array = []
+			for c in m.interior_art.candles():
+				var p: Vector2 = (c["p"] as Vector2) / m.SCALE - Vector2(m.INT_ORIGIN) * 16.0
+				var on := false
+				for r in rects:
+					var rr: Rect2 = r["rect"]
+					if int(r["row"]) == int(c["row"]) and p.x >= rr.position.x and p.x < rr.end.x and p.y >= rr.position.y - 1 and p.y < rr.end.y:
+						on = true
+				if not on and str(c["id"]) != "table":
+					loose.append(str(c["id"]))
+			_check("candles %s: each stands on its piece, on that piece's row" % tag, loose.is_empty(), str(loose))
+	# The furniture is left bought, as the next checks expect.
+	for id in m.estate.FURNITURE:
+		m.estate.furniture[id] = true
 
 
 func _dump() -> void:

@@ -59,11 +59,11 @@ const INT_EXIT := Vector2i(12, 13)               # the mat in the south wall, ba
 const INT_ENTRY := Vector2i(12, 12)              # where you stand on coming in
 const FIREPLACE_IX := Vector2i(12, 3)            # the hearth's left tile; it is three wide, on the hall's north wall
 const STATION_IX := Vector2i(21, 3)              # the washstand, in the wash room (parlor)
-const BED_RECT := Rect2i(1, 3, 2, 3)             # the bed against the bedroom's north wall, headboard at the top
+const BED_RECT := Rect2i(4, 3, 2, 2)             # the bed under the bedroom window, its headboard against the north wall
 const DINING_RECT := Rect2i(8, 6, 3, 4)          # the table on the middle two rows, a chair above and below each end
 const TABLE_TILES := [Vector2i(8, 7), Vector2i(9, 7), Vector2i(10, 7), Vector2i(8, 8), Vector2i(9, 8), Vector2i(10, 8)]
 const CHAIR_TILES := [Vector2i(8, 6), Vector2i(10, 6), Vector2i(8, 9), Vector2i(10, 9)]
-const RUG_RECT := Rect2i(11, 5, 6, 3)            # the hall rug in front of the hearth, laid from the Boarded stage
+const RUG_RECT := Rect2i(11, 5, 5, 3)            # the hall rug in front of the hearth (centred on it), laid from the Boarded stage
 const INT_WALLS := [Color("221c18"), Color("4e4236"), Color("7a6a54"), Color("9a8a6a")]
 const INT_FLOORS := [Color("3e2e22"), Color("5a4430"), Color("6e5438"), Color("7f6244")]
 const QUILTS := [Color("6a5a4a"), Color("3e5a80"), Color("3f6b4a"), Color("8a2e3a")]
@@ -218,7 +218,7 @@ const START_HOUR := 6.0
 const DAY_END_HOUR := 27.0  # 03:00. Missing bed by then means collapsing.
 const DUSK_HOUR := 19.0
 const SLEEP_HOUR := 18.0    # the bed can be used from 18:00 onward
-const BED_INTERIOR := Vector2i(1, 5)  # the bed's bottom-left tile (see BED_RECT); you wake on the tile below it
+const BED_INTERIOR := Vector2i(4, 4)  # the bed's bottom-left tile (see BED_RECT); you wake on the tile below it
 const EVENT_HOUR := 22.0
 
 const MAX_STAGE := 3        # 0 = seed, 3 = ready to harvest
@@ -362,7 +362,7 @@ const WORKSHOP_DOOR_AT := Vector2i(3, 5)
 # Where the workshop stood before it could be placed (layout tiles). Saves from then keep it there.
 const WORKSHOP_OLD_IX := FarmLayout.WORKSHOP_RECT.position
 const COOP_SIZE := Vector2i(3, 2)            # the coop is 3 wide and 2 deep, on open grass; its hen door is one tile
-const COOLER_INTERIOR := Vector2i(9, 3)     # in the hall, against its north wall
+const COOLER_INTERIOR := Vector2i(10, 3)    # in the hall, against its north wall under the window
 const FURNACE_COST := {"wood": 6, "stone": 4, "coins": 80, "level": 5}
 const WOODSHED_COST := {"wood": 4, "fiber": 2, "coins": 40, "level": 2}
 const WOODSTORE_CAP := 30
@@ -415,7 +415,7 @@ const TAX_MONTHS := [0, 3, 6, 9]    # January, April, July, October: the bill co
 const TAX_GRACE_DAYS := 14          # days to pay a bill after it arrives
 const TAX_FINAL_DAYS := 7           # days overdue before the final notice
 const TAX_EVICT_DAYS := 14          # days overdue before the land is lost
-const DESK_IX := Vector2i(4, 3)     # the desk's left tile (it is two wide), in the bedroom
+const DESK_IX := Vector2i(1, 3)     # the desk's left tile (it is two wide), in the bedroom's west corner
 # Seed prices and pack sizes are in CROPS (seed_price, pack).
 
 const XP_HIT := 4
@@ -6358,10 +6358,8 @@ func _draw_interior_tile(cell: Rect2, pos: Vector2i, kind: int) -> void:
 			draw_rect(cell, TILE_COLORS[kind])
 
 
-# The house's SpriteCook pieces (art/farm/int_*.png), drawn by InteriorArt with the FARMHOUSE-INTERIOR-001 art.
-# Cells in int_furniture.png. The bed (32×47 a stage), hearth (32×57 a frame), table (48×32) and chairs
-# (16×24, facing you then from behind) have their own sheets.
-const INT_FURNITURE := {"desk": Rect2(0, 0, 27, 29), "wash": Rect2(30, 0, 18, 29), "wash_fine": Rect2(52, 0, 18, 29), "cooler": Rect2(73, 0, 22, 29)}
+# The house's furniture is CCH-CONSOLIDATED-003's family (art/farm/fc/), drawn by InteriorArt; the SpriteCook
+# int_*.png pieces it replaced are no longer drawn.
 
 
 # A sprite standing on its footprint: centred across its width in tiles from this cell, bottom edge on

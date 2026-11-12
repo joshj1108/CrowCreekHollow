@@ -411,7 +411,7 @@ func _draw_pendulum() -> void:
 	if not m.estate.furniture.has("clock") or m.house_stage < int(m.estate.FURNITURE["clock"]["stage"]):
 		return
 	var cell := art._cell(m.estate._furniture_spot("clock"))
-	var size := Vector2(18, 42) * m.SCALE
+	var size := InteriorArt.CLOCK_SIZE * m.SCALE
 	var o := Vector2(cell.position.x + (m.PX - size.x) * 0.5, cell.end.y - size.y).snapped(Vector2(m.SCALE, m.SCALE))
 	var pivot := InteriorArt.CLOCK_PIVOT
 	var length := InteriorArt.CLOCK_BOB.y - pivot.y

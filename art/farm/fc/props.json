@@ -1,0 +1,229 @@
+{
+ "desk": {
+  "size": [
+   32,
+   30
+  ],
+  "pick": "desk/00"
+ },
+ "wash": {
+  "size": [
+   18,
+   30
+  ],
+  "pick": "wash/03"
+ },
+ "wash_fine": {
+  "size": [
+   18,
+   30
+  ],
+  "pick": "wash_fine/01"
+ },
+ "cooler": {
+  "size": [
+   20,
+   29
+  ],
+  "pick": "cooler/08"
+ },
+ "table": {
+  "size": [
+   44,
+   29
+  ],
+  "pick": "table3/00"
+ },
+ "chair_front": {
+  "size": [
+   17,
+   25
+  ],
+  "pick": "chair_front2/00"
+ },
+ "chair_back": {
+  "size": [
+   16,
+   23
+  ],
+  "pick": "chair_back3/04"
+ },
+ "dresser": {
+  "size": [
+   16,
+   26
+  ],
+  "pick": "dresser2/01"
+ },
+ "armchair": {
+  "size": [
+   17,
+   26
+  ],
+  "pick": "armchair2/01"
+ },
+ "clock_case": {
+  "size": [
+   17,
+   42
+  ],
+  "pick": "clock/00",
+  "pivot": [
+   8,
+   17
+  ],
+  "bob": [
+   8,
+   31
+  ],
+  "glass": [
+   2,
+   16,
+   13,
+   18
+  ]
+ },
+ "painting": {
+  "size": [
+   23,
+   22
+  ],
+  "pick": "painting/01"
+ },
+ "bookshelf": {
+  "size": [
+   31,
+   35
+  ],
+  "pick": "bookshelf2/01",
+  "wick": [
+   4,
+   2
+  ]
+ },
+ "bedside": {
+  "size": [
+   15,
+   26
+  ],
+  "pick": "bedside/04",
+  "wick": [
+   7,
+   2
+  ]
+ },
+ "sidetable": {
+  "size": [
+   10,
+   20
+  ],
+  "pick": "candlestand/12",
+  "wick": [
+   4,
+   1
+  ]
+ },
+ "rug": {
+  "size": [
+   69,
+   36
+  ],
+  "pick": "rug/01"
+ },
+ "firewood": {
+  "size": [
+   26,
+   20
+  ],
+  "pick": "firewood/25"
+ },
+ "crock": {
+  "size": [
+   12,
+   15
+  ],
+  "pick": "pottery16/01"
+ },
+ "jug": {
+  "size": [
+   12,
+   15
+  ],
+  "pick": "pottery16/26"
+ },
+ "books": {
+  "size": [
+   15,
+   12
+  ],
+  "pick": "books16/16"
+ },
+ "cushion": {
+  "size": [
+   14,
+   14
+  ],
+  "pick": "cushion16/12"
+ },
+ "plate": {
+  "size": [
+   14,
+   15
+  ],
+  "pick": "mantel16/00"
+ },
+ "sampler": {
+  "size": [
+   22,
+   21
+  ],
+  "pick": "wallorn/01"
+ },
+ "wreath": {
+  "size": [
+   24,
+   26
+  ],
+  "pick": "wallorn/03"
+ },
+ "bed_3": {
+  "size": [
+   27,
+   39
+  ],
+  "pick": "bed2/00",
+  "headboard": 8
+ },
+ "bed_2": {
+  "size": [
+   27,
+   39
+  ],
+  "pick": "bed2/00",
+  "headboard": 8
+ },
+ "bed_1": {
+  "size": [
+   27,
+   39
+  ],
+  "pick": "bed2/00",
+  "headboard": 8
+ },
+ "bed_0": {
+  "size": [
+   27,
+   39
+  ],
+  "pick": "bed2/00",
+  "headboard": 8
+ },
+ "bed_feather": {
+  "size": [
+   27,
+   39
+  ],
+  "pick": "bed2/00",
+  "headboard": 8
+ }
+}
