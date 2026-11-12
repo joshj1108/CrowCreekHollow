@@ -110,7 +110,8 @@ extends SceneTree
 #                   with the music stopped (the trailer lays one track over every shot); out= isn't needed
 #   walk=D:S,...    with hold, walk direction D (up, down, left, right, or two joined by +) for S seconds, then
 #                   the next; "wait" stands still, "use" swings the tool in hand once, "hand" presses the hand action
-#                   (closing any panel it opens), and "letter" puts an unread letter in the mailbox
+#                   (closing any panel it opens), and "letter" puts an unread letter in the mailbox; with debug,
+#                   "dw-KIND" forces the weather, "dh-H" jumps the clock to hour H and "dclear" clears every override
 #   quiet           with hold, keep the message line empty
 #   face=DIR        turn the farmer: up, down, left or right (after tile=)
 #   mail=N          N unread letters in the mailbox by the gate, so its flag is up (0: one read letter, flag down)
@@ -607,6 +608,15 @@ func _hold(main, opt: Dictionary) -> void:
 			main._close_panel()
 		if part[0] == "letter":
 			main.mail._add_letter("A letter", "Delivered for the recording.")
+		# CCH-CONSOLIDATED-003 Phase F: the developer panel's buttons, as a leg (debug builds): dw-KIND forces the
+		# weather, dh-H jumps the clock to hour H (e.g. dh-21.5), dclear clears every override.
+		if main.debug_menu != null:
+			if part[0].begins_with("dw-"):
+				main.debug_menu.force_weather(part[0].substr(3))
+			elif part[0].begins_with("dh-"):
+				main.debug_menu.set_hour(float(part[0].substr(3)))
+			elif part[0] == "dclear":
+				main.debug_menu.clear_all()
 		var keys: Array = []
 		for d in part[0].split("+"):
 			if d in ["up", "down", "left", "right"]:
