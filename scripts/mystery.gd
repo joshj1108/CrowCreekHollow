@@ -14,7 +14,7 @@ var m: MainGame
 
 # Each page: its number, title, text, and where it turns up (shown when found).
 const PAGES := [
-	{"id": "p1", "title": "The first spring", "found": "A torn page came through the mail slot, with no envelope.",
+	{"id": "p1", "title": "The first spring", "found": "A torn page was left in the mailbox, with no envelope.",
 		"text": "We bought the farm from the town for almost nothing. Elias says the crows are a good sign. I counted forty in the great tree tonight, and every one of them was looking at the house."},
 	{"id": "p2", "title": "On the knocking", "found": "After the knocking, a torn page is lying on the doormat.",
 		"text": "Three knocks again. Elias opened the door and there was nobody, only wet prints going back to the field. He laughed. I did not."},

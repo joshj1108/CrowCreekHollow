@@ -12,8 +12,6 @@ func _read_desk() -> void:
 	if not m.diary_found:
 		m._find_diary()
 		return
-	for letter in m.desk_mail:
-		letter["unread"] = false
 	m._toggle_tab("Desk")
 
 
@@ -25,8 +23,6 @@ func _desk_action(action_id: String) -> void:
 	elif action_id == "diary":
 		m._open_diary()
 		return
-	elif action_id == "mail_clear":
-		_clear_read_mail()
 	elif action_id.begins_with("pastime:"):
 		_play_pastime(action_id.trim_prefix("pastime:"))
 	elif action_id.begins_with("order:"):
@@ -146,7 +142,7 @@ func _order(id: String) -> void:
 	m._show_message("You order %s for %d coins. It comes with the morning post." % [str(item["name"]).to_lower(), price])
 
 
-# Opens the morning's parcels. Returns what came, or an empty string.
+# Opens the morning's parcels (they come with the post, to the mailbox by the gate). Returns what came, or an empty string.
 func _deliver_orders() -> String:
 	if m.desk_orders.is_empty():
 		return ""
@@ -169,36 +165,8 @@ func _deliver_orders() -> String:
 				if str(other).begins_with("seeds_") and m.CROPS.has(kind):
 					m.inventory[m.CROPS[kind]["seed"]] += int(m.CROPS[kind]["pack"])
 	m.desk_orders = []
-	_add_letter("Delivery", "Your catalog order came: %s. Any animals are already in their pens." % list)
+	m.mail._add_letter("Delivery", "Your catalog order came: %s. Any animals are already in their pens." % list)
 	return " Your catalog order came: %s." % list
-
-
-func _add_letter(title: String, text: String) -> void:
-	m.desk_mail.append({"title": title, "text": text, "unread": true})
-
-
-func _unread_count() -> int:
-	var n := 0
-	for letter in m.desk_mail:
-		if bool(letter["unread"]):
-			n += 1
-	return n
-
-
-func _has_read_mail() -> bool:
-	for letter in m.desk_mail:
-		if not bool(letter["unread"]):
-			return true
-	return false
-
-
-func _clear_read_mail() -> void:
-	var kept: Array = []
-	for letter in m.desk_mail:
-		if bool(letter["unread"]):
-			kept.append(letter)
-	m.desk_mail = kept
-	m._show_message("You put the read letters away in the drawer.")
 
 
 func _date_text(day_number: int) -> String:
@@ -259,18 +227,18 @@ func _mail_day() -> String:
 			m.tax_stage = 0
 		var bill := _property_value()
 		m.tax_owed += bill
-		_add_letter("Property tax bill", "Your quarterly property tax is %d coins, based on the value of the farm. Pay it at this desk by %s, or the land will be taken." % [bill, _date_text(m.tax_due_day)])
-		note += " Post came through the mail slot, and a property tax bill is on the desk."
+		m.mail._add_letter("Property tax bill", "Your quarterly property tax is %d coins, based on the value of the farm. Pay it at the desk in the house by %s, or the land will be taken." % [bill, _date_text(m.tax_due_day)])
+		note += " The mailbox flag is up: a property tax bill has come."
 	if m.tax_owed > 0:
 		var late := m.day - m.tax_due_day
 		if late >= m.TAX_FINAL_DAYS and m.tax_stage < 2:
 			m.tax_stage = 2
-			_add_letter("Final notice", "You still owe %d coins in property tax. Pay within %d days or the land will be taken." % [m.tax_owed, m.TAX_EVICT_DAYS - late])
-			note += " A final notice is on the desk."
+			m.mail._add_letter("Final notice", "You still owe %d coins in property tax. Pay within %d days or the land will be taken." % [m.tax_owed, m.TAX_EVICT_DAYS - late])
+			note += " A final notice is in the mailbox."
 		elif late >= 1 and m.tax_stage < 1:
 			m.tax_stage = 1
-			_add_letter("Payment overdue", "The property tax of %d coins was due %s. Please pay at this desk." % [m.tax_owed, _date_text(m.tax_due_day)])
-			note += " A payment reminder is on the desk."
+			m.mail._add_letter("Payment overdue", "The property tax of %d coins was due %s. Please pay at the desk in the house." % [m.tax_owed, _date_text(m.tax_due_day)])
+			note += " A payment reminder is in the mailbox."
 	return note
 
 
@@ -286,7 +254,7 @@ func _pay_tax() -> void:
 	m.tax_owed = 0
 	m.tax_due_day = 0
 	m.tax_stage = 0
-	_add_letter("Receipt", "Property tax of %d coins paid in full. The land is yours for another quarter." % paid)
+	m.mail._add_letter("Receipt", "Property tax of %d coins paid in full. The land is yours for another quarter." % paid)
 	m._show_message("You pay the property tax of %d coins." % paid)
 
 
@@ -295,14 +263,3 @@ func _evict() -> void:
 	SaveSystem.delete_save(m._save_path())
 	TitleMenu.notice = "The farm was taken. The property tax went unpaid, and you lost the land."
 	m._quit_to_title()
-
-
-# Blinks red once a second while the player is in the house and there is unread post, or the diary
-# is still in the drawer.
-func _update_desk_light() -> void:
-	if m.desk_light == null:
-		return
-	var blinking := m.inside and (_unread_count() > 0 or not m.diary_found)
-	m.desk_light.enabled = blinking
-	if blinking:
-		m.desk_light.energy = 1.4 if fmod(Time.get_ticks_msec() / 1000.0, 1.0) < 0.5 else 0.0

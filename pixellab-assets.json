@@ -2633,5 +2633,49 @@
     "game_file": "art/farm/fi/wardrobe.png"
    }
   ]
+ },
+ "CCH-CONSOLIDATED-003/B": {
+  "tool": "tools/cch003_mailbox.py",
+  "sources": "art/style_tests/CCH-003/B/raw/ (style.png = prop_stall + old w3c_props_mailbox + prop_well; gen1/NN.png, gen2/NN.png candidates; gen1_sheet.png, gen2_sheet.png)",
+  "note": "The outdoor mailbox (Phase B). create_image_pro with style image raw/style.png (all four style aspects). gen1 (32x32) came back too small with the post cut off and was rejected; gen2 (32x48) gave one family of dark-iron mailboxes: 19 (flag down), 18 (flag up), 17 (door open) were combined into the five-frame strip, with the half-raised flag, the ajar door and a brass latch drawn by the script. 2 jobs, 20 subscription generations, USD 0 (3194 generations before, credits USD 0).",
+  "generations": 20,
+  "jobs": [
+   {
+    "key": "mailbox_32",
+    "tool": "create_image_pro",
+    "job_id": "cd513399-5c16-4bc7-a0b1-5d187bbab73f",
+    "asset_id": "df946bee-1c27-578a-a21e-5bf875eb839c",
+    "size": [
+     32,
+     32
+    ],
+    "seed": 2203,
+    "generations": 10,
+    "pick": null,
+    "settings": {
+     "style_image": "raw/style.png (upload b8bb5302-c50a-4488-a54e-d43085d5cc3d)"
+    },
+    "prompt": "A single rustic rural farm mailbox standing on a sturdy weathered wooden post, straight-on front 3/4 view ... muted rust-red flag folded DOWN ... dark outline, muted desaturated palette, no glow, no text.",
+    "result": "rejected: too small, posts cut off by the canvas"
+   },
+   {
+    "key": "mailbox_32x48",
+    "tool": "create_image_pro",
+    "job_id": "ad30b269-0a9b-4007-9f86-bf41ecc6478f",
+    "asset_id": "b1399b2f-a6c7-5be2-ac83-44c7587b4a0c",
+    "size": [
+     32,
+     48
+    ],
+    "seed": 2204,
+    "generations": 10,
+    "pick": "gen2/19 (flag down), gen2/18 (flag up), gen2/17 (door open)",
+    "settings": {
+     "style_image": "raw/style.png (upload b8bb5302-c50a-4488-a54e-d43085d5cc3d)"
+    },
+    "prompt": "One complete rural mailbox prop ... rounded-top weathered dark iron mailbox box with a few brass rivets and a small brass latch on its front door, a muted rust-red signal flag lowered flat along its right side, mounted on a thick square weathered wooden post ... Side 3/4 view seen slightly from above, for a top-down farming RPG ... Dark outline, muted desaturated palette, no glow, no text.",
+    "game_file": "art/farm/mailbox.png"
+   }
+  ]
  }
 }

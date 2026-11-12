@@ -415,7 +415,7 @@ const TAX_MONTHS := [0, 3, 6, 9]    # January, April, July, October: the bill co
 const TAX_GRACE_DAYS := 14          # days to pay a bill after it arrives
 const TAX_FINAL_DAYS := 7           # days overdue before the final notice
 const TAX_EVICT_DAYS := 14          # days overdue before the land is lost
-const DESK_IX := Vector2i(4, 3)     # the desk's left tile (it is two wide), in the bedroom: post lands here
+const DESK_IX := Vector2i(4, 3)     # the desk's left tile (it is two wide), in the bedroom
 # Seed prices and pack sizes are in CROPS (seed_price, pack).
 
 const XP_HIT := 4
@@ -510,7 +510,7 @@ const STORY := [
 	{"id": "act_letter", "title": "The Town Writes",
 		"story": "Agnes Rook's last page asks whoever comes next to hang her bell again. The town took the first one down, and the lane talks. By early summer the town will know what you mean to do, and it will write.",
 		"text": "Show the town's letter to a neighbour.",
-		"prompt": "The letter comes through the mail slot in early summer (from day 240). When a neighbour comes by the farm, stand beside them and press {hand}.",
+		"prompt": "The letter comes to the mailbox by the gate in early summer (from day 240). When a neighbour comes by the farm, stand beside them and press {hand}.",
 		"stat": "act_shown", "goal": 1, "reward": {"skill": "Bushcrafting", "xp": 60}},
 	{"id": "act_orchard", "title": "The Water Rises",
 		"story": "Davy says the water in Elias's orchard has come up a row since spring, and the dogs won't go near it. The man in the rows has stopped walking.",
@@ -645,9 +645,9 @@ var diary_icon: HudIcon            # the diary by the vitals, with a dot while a
 var diary_label: Label
 
 
-enum Tile { TREE, GRASS, SOIL, PATH, WATER, HOUSE, DOOR, FLOOR, WALL, EXIT, BED, STATION, DESK, FALLOW, STALL, CELLAR, COOLER, SMOKEHOUSE, FURNACE, CAVE_MOUTH, CAVE_EXIT, ORE_COPPER, ORE_IRON, COOP, BARN, TABLE, FIREPLACE, WELL, PORCH, WOODSTORE, CHOPLOG, FENCE, ROCK, ROOF, SCARECROW }
+enum Tile { TREE, GRASS, SOIL, PATH, WATER, HOUSE, DOOR, FLOOR, WALL, EXIT, BED, STATION, DESK, FALLOW, STALL, CELLAR, COOLER, SMOKEHOUSE, FURNACE, CAVE_MOUTH, CAVE_EXIT, ORE_COPPER, ORE_IRON, COOP, BARN, TABLE, FIREPLACE, WELL, PORCH, WOODSTORE, CHOPLOG, FENCE, ROCK, ROOF, SCARECROW, MAILBOX }
 
-const BLOCKING := [Tile.TREE, Tile.WATER, Tile.HOUSE, Tile.WALL, Tile.BED, Tile.STATION, Tile.DESK, Tile.STALL, Tile.CELLAR, Tile.COOLER, Tile.SMOKEHOUSE, Tile.FURNACE, Tile.ORE_COPPER, Tile.ORE_IRON, Tile.COOP, Tile.BARN, Tile.TABLE, Tile.FIREPLACE, Tile.WELL, Tile.WOODSTORE, Tile.CHOPLOG, Tile.FENCE, Tile.ROCK, Tile.SCARECROW]
+const BLOCKING := [Tile.TREE, Tile.WATER, Tile.HOUSE, Tile.WALL, Tile.BED, Tile.STATION, Tile.DESK, Tile.STALL, Tile.CELLAR, Tile.COOLER, Tile.SMOKEHOUSE, Tile.FURNACE, Tile.ORE_COPPER, Tile.ORE_IRON, Tile.COOP, Tile.BARN, Tile.TABLE, Tile.FIREPLACE, Tile.WELL, Tile.WOODSTORE, Tile.CHOPLOG, Tile.FENCE, Tile.ROCK, Tile.SCARECROW, Tile.MAILBOX]
 
 const TILE_COLORS := {
 	Tile.TREE: Color("2f4f2f"),
@@ -682,6 +682,7 @@ const TILE_COLORS := {
 	Tile.ROCK: Color("7f7f80"),
 	Tile.ROOF: Color("905636"),
 	Tile.SCARECROW: Color("7a6a4a"),
+	Tile.MAILBOX: Color("4a4038"),
 	Tile.TABLE: Color("7a5230"),
 	Tile.FIREPLACE: Color("5a5650"),
 	Tile.PORCH: Color("8a6a46"),
@@ -880,8 +881,7 @@ var firewood_store := 0
 var tax_owed := 0                   # property tax owed, 0 when paid up
 var tax_due_day := 0                # the day the oldest unpaid bill is due
 var tax_stage := 0                  # 0 none sent, 1 overdue reminder sent, 2 final notice sent
-var desk_mail: Array = []           # letters on the desk: {"title", "text", "unread"}
-var desk_light: PointLight2D        # red light on the desk while post is unread
+var desk_mail: Array = []           # letters in the mailbox by the gate: {"title", "text", "unread"} (saved under its old name)
 var fire_hours := 0.0
 var cellar := {}              # pack key -> crops in the root cellar (only crops that keep)
 var cooler := {}              # pack key -> fish in the cooler
@@ -970,6 +970,7 @@ var firewood: FirewoodSystem
 var farm: FarmSystem
 var animals: AnimalSystem
 var desk: DeskSystem
+var mail: MailSystem
 var forage: ForageSystem
 var night_boost := 1.0           # how much stronger outdoor lights burn against the dark night (see NIGHT_LIGHT_BOOST)
 var lantern_light: PointLight2D
@@ -995,6 +996,7 @@ func _ready() -> void:
 	TitleMenu.migrate_old_folder()
 	panels = PanelRows.new(self)
 	desk = DeskSystem.new(self)
+	mail = MailSystem.new(self)
 	forage = ForageSystem.new(self)
 	animals = AnimalSystem.new(self)
 	farm = FarmSystem.new(self)
@@ -1238,6 +1240,7 @@ func _process(delta: float) -> void:
 	player.held_item = str(equipment["hand_r"]) if _active_tool() == "sword" else ""
 	player.set_loop(_loop_action())
 	_update_diary_icon()
+	mail._update(delta)   # before any pause: the prompt hides under a menu, the door stays open while reading
 	if player.paused:
 		# The debug panel holds the day and takes the keys itself (the frame it closes on is ignored too, so its
 		# Esc doesn't reach the farm); the HUD still follows its changes.
@@ -1282,7 +1285,6 @@ func _process(delta: float) -> void:
 		clock += delta * trek._time_scale()   # the clock runs slow in the Rookery Wood
 	_update_hens(delta)
 	_update_goats(delta)
-	desk._update_desk_light()
 	current_hour = START_HOUR + clock / DAY_LENGTH * (DAY_END_HOUR - START_HOUR)
 	if sim_on:
 		_update_needs(delta * trek._time_scale() * (DAY_END_HOUR - START_HOUR) / DAY_LENGTH)
@@ -1625,7 +1627,7 @@ func _build_ambience() -> void:
 	blink.set_color(blink.get_point_count() - 1, Color(1, 1, 1, 0.0))
 	fireflies_fx.color_ramp = blink
 	_build_window_lights()
-	_build_desk_light()
+	mail._build_prompt()
 	interior_fx = InteriorFX.new()
 	add_child(interior_fx)
 	move_child(interior_fx, 0)   # over the house's art (main's own drawing), under the farmer
@@ -1825,6 +1827,7 @@ func _build_map() -> void:
 				t = TERRAIN_CODES[FarmLayout.TERRAIN[iy].substr(ix, 1)]
 			row.append(t)
 		map.append(row)
+	mail._stamp()
 
 
 # Terrain codes from farm_layout.gd, one per tile.
@@ -2571,7 +2574,7 @@ func _draw_sprite_ground(t: Vector2i, kind: int, cell: Rect2) -> bool:
 				_draw_grass(t, cell)
 				return true
 			name = "rock_%d" % v
-		Tile.HOUSE, Tile.DOOR, Tile.ROOF, Tile.PORCH, Tile.STALL, Tile.WELL:
+		Tile.HOUSE, Tile.DOOR, Tile.ROOF, Tile.PORCH, Tile.STALL, Tile.WELL, Tile.MAILBOX:
 			# The house, stall and well are sprites drawn over their footprints, and the porch is path laid over
 			# grass by _draw_dual_ground, so all of these start as grass.
 			_draw_grass(t, cell)
@@ -3474,8 +3477,11 @@ func _on_panel_action(action_id: String) -> void:
 		estate._repaper(action_id.trim_prefix("paper:"))
 		_refresh_panel()
 		return
-	if action_id.begins_with("pastime:") or action_id.begins_with("order:") or action_id == "pay_tax" or action_id == "pay_deed" or action_id == "mail_clear" or action_id == "diary":
+	if action_id.begins_with("pastime:") or action_id.begins_with("order:") or action_id == "pay_tax" or action_id == "pay_deed" or action_id == "diary":
 		desk._desk_action(action_id)
+		return
+	if action_id == "mail_clear":
+		mail._action(action_id)
 		return
 	if action_id.begins_with("cook:"):
 		stall._make_food(action_id.trim_prefix("cook:"))
@@ -3694,6 +3700,8 @@ func _refresh_panel() -> void:
 			rows = panels._woodstore_rows()
 		"Desk":
 			rows = panels._desk_rows()
+		"Mailbox":
+			rows = panels._mailbox_rows()
 		"House":
 			rows = panels._house_rows()
 		"Buildings":
@@ -4175,6 +4183,9 @@ func _interact() -> void:
 		return
 	if kind == Tile.STALL:
 		stall._open_stall()
+		return
+	if kind == Tile.MAILBOX:
+		mail._open_mailbox()
 		return
 	if kind == Tile.COOP:
 		_toggle_tab("Coop")
@@ -5689,20 +5700,6 @@ func _apply_weather() -> void:
 
 func _light_tint() -> Color:
 	return WEATHER_LIGHT.get(weather_kind, WEATHER_LIGHT["cloudy"])
-
-
-# --- Post, property tax, and the desk light ---
-# Post comes through the mail slot in the front door and lands on the desk. Unread post turns
-# on a red light at the desk. The property tax comes quarterly and must be paid, or the land is lost.
-
-
-func _build_desk_light() -> void:
-	desk_light = PointLight2D.new()
-	desk_light.color = Color("ff2a2a")
-	desk_light.position = _tile_center(INT_ORIGIN.x + DESK_IX.x, INT_ORIGIN.y + DESK_IX.y) + Vector2(PX * 0.5, 0)   # between its two tiles
-	_glow(desk_light, 0.45)
-	desk_light.enabled = false
-	add_child(desk_light)
 
 
 # --- Animal ages: young animals do not lay or give until they are grown ---

@@ -794,20 +794,27 @@ func _as_tabs(rows: Array) -> Array:
 	return out
 
 
-# The desk, in tabs: the post and the diary, the property tax, pastimes, and the catalog.
-func _desk_rows() -> Array:
+# The mailbox by the east gate: every letter that came by post, newest last. Opening it reads them all.
+func _mailbox_rows() -> Array:
 	var rows: Array = [{"tab": "Post", "icon": "post"}]
-	var diary_new := not m.diary_new.is_empty()
-	rows.append({"name": "Your diary", "status": "New page" if diary_new else "", "status_kind": "ok",
-		"value": "a new page to read" if diary_new else "what you have learned, and what to do next",
-		"button": "Read", "action": "diary", "enabled": true})
 	for letter in m.desk_mail:
 		rows.append({"name": str(letter["title"]), "status": "New" if bool(letter["unread"]) else "Read",
 			"status_kind": "ok" if bool(letter["unread"]) else "done", "value": str(letter["text"])})
 	if m.desk_mail.is_empty():
-		rows.append({"note": "No post. The mail slot in the front door drops letters here."})
+		rows.append({"note": "The mailbox is empty. The post comes in the morning, with any catalog orders."})
 	else:
-		rows.append({"name": "Put letters away", "value": "read letters go in the drawer", "button": "Clear", "action": "mail_clear", "enabled": m.desk._has_read_mail()})
+		rows.append({"name": "Take out the read letters", "value": "keeps the mailbox tidy", "button": "Clear", "action": "mail_clear", "enabled": m.mail._has_read_mail()})
+	return rows
+
+
+# The desk, in tabs: the diary, the property tax, pastimes, and the catalog. The post is at the mailbox.
+func _desk_rows() -> Array:
+	var rows: Array = [{"tab": "Diary", "icon": "post"}]
+	var diary_new := not m.diary_new.is_empty()
+	rows.append({"name": "Your diary", "status": "New page" if diary_new else "", "status_kind": "ok",
+		"value": "a new page to read" if diary_new else "what you have learned, and what to do next",
+		"button": "Read", "action": "diary", "enabled": true})
+	rows.append({"note": "The post comes to the mailbox by the east gate, beside the farm stand."})
 
 	rows.append({"tab": "Tax", "icon": "coins"})
 	rows.append({"name": "Property value", "status": "%d a quarter" % m.desk._property_value(), "value": m.desk._property_text()})

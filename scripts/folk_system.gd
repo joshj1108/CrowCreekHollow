@@ -64,7 +64,7 @@ const FOLK := {
 			"neutral": "\"Kind of you.\" He finds a pocket for it.",
 			"disliked": "\"I won't have it in the house, I'm afraid.\" He gives it back to you, gently."}},
 	"post": {"name": "The postman", "short": "the postman", "from": 6, "spot": "door", "where": "waiting by your door with his satchel",
-		"about": "Thirty years on the lane's round. It was he who brought the torn page through your mail slot on your third morning. Every autumn he carries a letter for Agnes Rook.",
+		"about": "Thirty years on the lane's round. It was he who left the torn page in your mailbox on your third morning. Every autumn he carries a letter for Agnes Rook.",
 		"loved": ["corn_chowder", "smoked_lamprey", "hearty_stew"],
 		"liked": ["potatoes", "garlic_trout", "yellowfoot", "morels", "roast_roots", "eggs", "colcannon"],
 		"disliked": ["bramble_jam", "rosehip_tea", "strawberries", "ghost_pipe"],

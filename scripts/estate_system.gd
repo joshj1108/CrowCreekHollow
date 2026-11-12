@@ -297,10 +297,10 @@ func _mail_day() -> String:
 	if deed_offered or not _deed_open():
 		return ""
 	deed_offered = true
-	m.desk._add_letter("From the town clerk", "Madam or sir. We hear the Rook house is lived in again. The farm is held from the town on the quarter's tax, as it was in Mrs Rook's day. "
+	m.mail._add_letter("From the town clerk", "Madam or sir. We hear the Rook house is lived in again. The farm is held from the town on the quarter's tax, as it was in Mrs Rook's day. "
 		+ "When she fell behind, in her last year, the town took her bell in lieu, and would have taken the land after. "
 		+ "The council will sell the deed outright, for %d coins, paid at your desk as you can (%d at a time). Once paid, no tax is owed on the farm again." % [DEED_PRICE, DEED_STEP])
-	return " A letter from the town clerk is on the desk."
+	return " A letter from the town clerk is in the mailbox."
 
 
 func _deed_step() -> int:
@@ -331,7 +331,7 @@ func _pay_deed() -> void:
 	if not _deed_owned():
 		m._show_message("You pay %d coins toward the land deed. %d of %d paid." % [n, deed_paid, DEED_PRICE])
 		return
-	m.desk._add_letter("The deed to the Rook farm", "Received in full. The land, the house and all that stands on it are yours, and no tax is owed on them again. "
+	m.mail._add_letter("The deed to the Rook farm", "Received in full. The land, the house and all that stands on it are yours, and no tax is owed on them again. "
 		+ "The clerk adds, in his own hand: the bell we took from Mrs Rook was sold for its iron. I am sorry for it. She asked us to keep it hung.")
 	m._show_message("The land deed is yours. No more property tax, ever.")
 	m.progression._check_story()

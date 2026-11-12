@@ -360,7 +360,7 @@ func _load_game() -> bool:
 	m.tax_due_day = int(data.get("tax_due_day", 0))
 	m.tax_stage = int(data.get("tax_stage", 0))
 	m.clean_nights = int(data.get("clean_nights", 0))
-	m.desk_mail = data.get("desk_mail", [])
+	m.desk_mail = MailSystem.migrate(data.get("desk_mail", []))   # the mailbox's letters, under their old key
 	m.card_games = int(data.get("card_games", m.START_CARD_GAMES))
 	m.sudoku_puzzles = int(data.get("sudoku_puzzles", 0))
 	m.desk_orders = data.get("desk_orders", [])

@@ -99,6 +99,14 @@ const SEASON_GRASS := {"Spring": [0.02, 1.1, 1.06, 0.0], "Summer": [0.0, 1.06, 1
 const SEASON_LITTER := {"Spring": [1.0, Color(0.22, 0.33, 0.17)], "Summer": [1.0, Color(0.2, 0.3, 0.16)],
 	"Autumn": [0.0, Color.BLACK], "Winter": [0.85, Color(0.33, 0.28, 0.23)]}
 const SNOW_COVER := 0.75
+# CCH-CONSOLIDATED-003 Phase B: the mailbox by the east gate takes the post (MailSystem). Its sprite replaces the
+# concept's decorative one at the same foot, sorted and tinted like every other piece. MAILBOX_FRAMES is a strip of
+# MAILBOX_FRAME_COUNT frames: 0 flag down, 1 flag half up, 2 flag up, 3 the door half open, 4 the door open.
+const OLD_MAILBOX := "w3c_props_mailbox.png"
+const MAILBOX_FRAMES := "res://art/farm/mailbox.png"
+const MAILBOX_FRAME_COUNT := 5
+const MAILBOX_FOOT_X := 11.0    # art pixels from a frame's left edge to the middle of the post
+var mailbox: Sprite2D
 var seasonal: Array = []          # [Sprite2D, base name, autumn texture]
 var windfalls: Array = []         # Sprite2D
 var ground_mat: ShaderMaterial
@@ -163,6 +171,8 @@ func build() -> void:
 			_build_house(r)
 			continue
 		var s := _sprite(str(r["t"]), r)
+		if str(r["t"]) == OLD_MAILBOX and ResourceLoader.exists(MAILBOX_FRAMES):
+			_make_mailbox(s, r)
 		if str(r["t"]).ends_with("prop_well.png"):
 			well_piece = s
 			well_rec = r
@@ -316,6 +326,30 @@ func _update_e3() -> void:
 
 
 # The FARM-001R cave pieces that CAVE_EXT_V2 replaces.
+# The new mailbox, standing where the old one stood: the post's foot on the same spot.
+func _make_mailbox(s: Sprite2D, r: Dictionary) -> void:
+	var old := s.texture
+	var foot := s.position + Vector2(old.get_width() * 0.5, old.get_height()) * float(r["s"])
+	s.texture = load(MAILBOX_FRAMES)
+	s.hframes = MAILBOX_FRAME_COUNT
+	var h := float(s.texture.get_height())
+	s.position = foot - Vector2(MAILBOX_FOOT_X, h) * float(r["s"])
+	mailbox = s
+
+
+# The flag follows MailSystem.flag; the door opens for a moment when the mailbox is checked.
+func _update_mailbox() -> void:
+	if mailbox == null:
+		return
+	var mail: MailSystem = m.mail
+	if mail._lid_open():
+		var left: float = mail.lid_left
+		var opened: float = MailSystem.LID_TIME - left
+		mailbox.frame = 3 if opened < 0.1 or left < 0.14 else 4
+	else:
+		mailbox.frame = clampi(roundi(mail.flag * 2.0), 0, 2)
+
+
 func _old_cave(r: Dictionary) -> bool:
 	var t := str(r["t"])
 	return t.ends_with("hillside.png") or t == "cave_mouth_natural.png" or t == "hill_foot.png" 		or (bool(r.get("farm001r", false)) and t.begins_with("fern_"))
@@ -345,6 +379,7 @@ func _process(_delta: float) -> void:
 		gate_lamp.visible = m.trek._has_work("gate_lamp")
 	_update_e3()
 	_update_season()
+	_update_mailbox()
 	for w in groves:
 		var up := not m.grove_felled.has(w)
 		for s in groves[w]:

@@ -480,7 +480,7 @@ func _build(main, night: bool) -> void:
 	for l in [main.house_roof_layer, main.stall_layer, main.well_layer, main.big_tree_layer, main.tree_front_layer, main.goat_layer]:
 		if l != null:
 			l.modulate = Color(1, 1, 1, 0)
-	for l in main.window_lights + [main.porch_light, main.cave_mouth_light, main.desk_light] + main.roost_lights:
+	for l in main.window_lights + [main.porch_light, main.cave_mouth_light] + main.roost_lights:
 		if l != null:
 			# Hidden and moved far off-screen, so they can't take a share of the 15 lights a canvas item shows.
 			(l as PointLight2D).visible = false

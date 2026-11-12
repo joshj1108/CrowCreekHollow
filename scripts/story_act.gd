@@ -39,7 +39,7 @@ const KNOCK := {"id": "hollow", "where": "door", "sound": "heartbeat", "act": "k
 	"ignore": "It knocked until morning, patiently, the way you knock for someone you know is in. Something in your mind gave way.",
 	"ignore_sanity": 30, "limit": 5}
 
-# The town's letter (FROM): it comes through the mail slot, in the clerk's hand.
+# The town's letter (FROM): it comes to the mailbox, in the clerk's hand.
 const LETTER := {"title": "From the parish meeting",
 	"text": "To the tenant at Rook's farm. It has come to the meeting's notice that you have been asking after Agnes Rook's bell. The meeting voted that bell down thirty-one hands to four, and the vote stands. No bell is to be hung on that farm. We have kept the peace thirty years by letting it be. Let it be. For the meeting, E. Pell, clerk."}
 
@@ -155,7 +155,7 @@ func _morning() -> String:
 		_done("letter")
 		m._diary_page("act_letter")
 		m.play_sfx("chime", 0.0)
-		note += " A letter has come through the mail slot, from the parish meeting. It's in your diary. %s" % SHOWN_HINT
+		note += " A letter came in the mailbox, from the parish meeting. It's in your diary. %s" % SHOWN_HINT
 	# The town meets on the night of the Harvest Moon whether you come or not.
 	if _has("letter") and not _has("meeting") and m.day > maxi(HARVEST_MOON, int(beats["letter"]) + 10):
 		_hold_meeting(false)

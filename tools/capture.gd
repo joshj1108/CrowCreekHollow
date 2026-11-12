@@ -105,8 +105,12 @@ extends SceneTree
 #   hold=S          for recording (tools/trailer.ps1): instead of a shot, run S more seconds at 30 fps and quit,
 #                   with the music stopped (the trailer lays one track over every shot); out= isn't needed
 #   walk=D:S,...    with hold, walk direction D (up, down, left, right, or two joined by +) for S seconds, then
-#                   the next; "wait" stands still, and "use" swings the tool in hand once
+#                   the next; "wait" stands still, "use" swings the tool in hand once, "hand" presses the hand action
+#                   (closing any panel it opens), and "letter" puts an unread letter in the mailbox
 #   quiet           with hold, keep the message line empty
+#   face=DIR        turn the farmer: up, down, left or right (after tile=)
+#   mail=N          N unread letters in the mailbox by the gate, so its flag is up (0: one read letter, flag down)
+#   mailopen        check the mailbox (its door held open for the shot); mailpanel keeps the Mailbox panel open
 
 func _initialize() -> void:
 	var opt := {"frames": "90", "scale": "0.5"}
@@ -319,6 +323,22 @@ func _initialize() -> void:
 	elif opt.has("tile"):
 		var t: PackedStringArray = opt["tile"].split(",")
 		main.player.position = main._tile_center(int(t[0]) + main.BORDER_X, int(t[1]) + main.BORDER_Y)
+	if opt.has("face"):
+		main.player.facing = {"up": Vector2.UP, "down": Vector2.DOWN, "left": Vector2.LEFT, "right": Vector2.RIGHT}.get(opt["face"], Vector2.DOWN)
+	if opt.has("mail"):
+		# CCH-CONSOLIDATED-003 Phase B: N unread letters in the mailbox (0: one letter, already read), the flag set at once.
+		main.desk_mail = []
+		for i in maxi(1, int(opt["mail"])):
+			main.mail._add_letter("Letter %d" % (i + 1), "A letter for the capture.")
+		if int(opt["mail"]) == 0:
+			main.desk_mail[0]["unread"] = false
+		main.mail.flag = 1.0 if main.mail._flag_up() else 0.0
+	if opt.has("mailopen"):
+		# Check the mailbox: its door stays open for the shot; mailpanel keeps the Mailbox panel open too.
+		main.mail._open_mailbox()
+		main.mail.lid_left = 3600.0
+		if not opt.has("mailpanel"):
+			main._close_panel()
 	if opt.has("decor"):
 		var at: Vector2i = main._player_tile() + Vector2i(-2, 2)
 		for kind in opt["decor"].split(","):
@@ -558,6 +578,12 @@ func _hold(main, opt: Dictionary) -> void:
 			main._tool_press = true
 			main._swing()
 			main._tool_press = false
+		if part[0] == "hand":
+			# The hand action on what the farmer faces; a panel it opens is shut again so the scene stays in view.
+			main._interact()
+			main._close_panel()
+		if part[0] == "letter":
+			main.mail._add_letter("A letter", "Delivered for the recording.")
 		var keys: Array = []
 		for d in part[0].split("+"):
 			if d in ["up", "down", "left", "right"]:
