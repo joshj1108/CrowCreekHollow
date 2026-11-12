@@ -1,0 +1,1077 @@
+{
+  "group_id": "345e6050-3b22-4169-bcbd-24f0ee369709",
+  "states": [
+    {
+      "character": {
+        "id": "7beee8bd-88d0-471a-b9e9-5d29ba9695c6",
+        "name": "Idle",
+        "prompt": "rustic modern farmer: faded olive-green baseball cap, short dark brown hair, light stubble, open tan canvas work jacket over a brick-red plaid flannel shirt, dark brown leather belt, dark charcoal-brown work jeans, dark brown leather work boots",
+        "size": {
+          "width": 48,
+          "height": 48
+        },
+        "template_id": "mannequin",
+        "directions": 4,
+        "view": "low top-down",
+        "created_at": "2026-11-12T04:54:10.431195+00:00"
+      },
+      "folder": "Idle",
+      "frames": {
+        "rotations": {
+          "south": "Idle/rotations/south.png",
+          "west": "Idle/rotations/west.png",
+          "east": "Idle/rotations/east.png",
+          "north": "Idle/rotations/north.png"
+        },
+        "animations": {
+          "idle": {
+            "south": [
+              "Idle/animations/idle/south/frame_000.png",
+              "Idle/animations/idle/south/frame_001.png",
+              "Idle/animations/idle/south/frame_002.png",
+              "Idle/animations/idle/south/frame_003.png"
+            ],
+            "north": [
+              "Idle/animations/idle/north/frame_000.png",
+              "Idle/animations/idle/north/frame_001.png",
+              "Idle/animations/idle/north/frame_002.png",
+              "Idle/animations/idle/north/frame_003.png"
+            ],
+            "east": [
+              "Idle/animations/idle/east/frame_000.png",
+              "Idle/animations/idle/east/frame_001.png",
+              "Idle/animations/idle/east/frame_002.png",
+              "Idle/animations/idle/east/frame_003.png"
+            ]
+          },
+          "hurt": {
+            "east": [
+              "Idle/animations/hurt/east/frame_000.png",
+              "Idle/animations/hurt/east/frame_001.png",
+              "Idle/animations/hurt/east/frame_002.png",
+              "Idle/animations/hurt/east/frame_003.png",
+              "Idle/animations/hurt/east/frame_004.png",
+              "Idle/animations/hurt/east/frame_005.png"
+            ],
+            "south": [
+              "Idle/animations/hurt/south/frame_000.png",
+              "Idle/animations/hurt/south/frame_001.png",
+              "Idle/animations/hurt/south/frame_002.png",
+              "Idle/animations/hurt/south/frame_003.png",
+              "Idle/animations/hurt/south/frame_004.png",
+              "Idle/animations/hurt/south/frame_005.png"
+            ],
+            "north": [
+              "Idle/animations/hurt/north/frame_000.png",
+              "Idle/animations/hurt/north/frame_001.png",
+              "Idle/animations/hurt/north/frame_002.png",
+              "Idle/animations/hurt/north/frame_003.png",
+              "Idle/animations/hurt/north/frame_004.png",
+              "Idle/animations/hurt/north/frame_005.png"
+            ]
+          },
+          "walk": {
+            "east": [
+              "Idle/animations/walk/east/frame_000.png",
+              "Idle/animations/walk/east/frame_001.png",
+              "Idle/animations/walk/east/frame_002.png",
+              "Idle/animations/walk/east/frame_003.png",
+              "Idle/animations/walk/east/frame_004.png",
+              "Idle/animations/walk/east/frame_005.png",
+              "Idle/animations/walk/east/frame_006.png",
+              "Idle/animations/walk/east/frame_007.png"
+            ],
+            "south": [
+              "Idle/animations/walk/south/frame_000.png",
+              "Idle/animations/walk/south/frame_001.png",
+              "Idle/animations/walk/south/frame_002.png",
+              "Idle/animations/walk/south/frame_003.png",
+              "Idle/animations/walk/south/frame_004.png",
+              "Idle/animations/walk/south/frame_005.png",
+              "Idle/animations/walk/south/frame_006.png",
+              "Idle/animations/walk/south/frame_007.png"
+            ],
+            "north": [
+              "Idle/animations/walk/north/frame_000.png",
+              "Idle/animations/walk/north/frame_001.png",
+              "Idle/animations/walk/north/frame_002.png",
+              "Idle/animations/walk/north/frame_003.png",
+              "Idle/animations/walk/north/frame_004.png",
+              "Idle/animations/walk/north/frame_005.png",
+              "Idle/animations/walk/north/frame_006.png",
+              "Idle/animations/walk/north/frame_007.png"
+            ]
+          },
+          "walk_v3": {
+            "south": [
+              "Idle/animations/walk_v3/south/frame_000.png",
+              "Idle/animations/walk_v3/south/frame_001.png",
+              "Idle/animations/walk_v3/south/frame_002.png",
+              "Idle/animations/walk_v3/south/frame_003.png",
+              "Idle/animations/walk_v3/south/frame_004.png",
+              "Idle/animations/walk_v3/south/frame_005.png",
+              "Idle/animations/walk_v3/south/frame_006.png",
+              "Idle/animations/walk_v3/south/frame_007.png"
+            ],
+            "north": [
+              "Idle/animations/walk_v3/north/frame_000.png",
+              "Idle/animations/walk_v3/north/frame_001.png",
+              "Idle/animations/walk_v3/north/frame_002.png",
+              "Idle/animations/walk_v3/north/frame_003.png",
+              "Idle/animations/walk_v3/north/frame_004.png",
+              "Idle/animations/walk_v3/north/frame_005.png",
+              "Idle/animations/walk_v3/north/frame_006.png",
+              "Idle/animations/walk_v3/north/frame_007.png"
+            ]
+          },
+          "idle2": {
+            "east": [
+              "Idle/animations/idle2/east/frame_000.png",
+              "Idle/animations/idle2/east/frame_001.png",
+              "Idle/animations/idle2/east/frame_002.png",
+              "Idle/animations/idle2/east/frame_003.png",
+              "Idle/animations/idle2/east/frame_004.png"
+            ],
+            "north": [
+              "Idle/animations/idle2/north/frame_000.png",
+              "Idle/animations/idle2/north/frame_001.png",
+              "Idle/animations/idle2/north/frame_002.png",
+              "Idle/animations/idle2/north/frame_003.png",
+              "Idle/animations/idle2/north/frame_004.png"
+            ],
+            "south": [
+              "Idle/animations/idle2/south/frame_000.png",
+              "Idle/animations/idle2/south/frame_001.png",
+              "Idle/animations/idle2/south/frame_002.png",
+              "Idle/animations/idle2/south/frame_003.png",
+              "Idle/animations/idle2/south/frame_004.png"
+            ]
+          },
+          "walk_e2": {
+            "east": [
+              "Idle/animations/walk_e2/east/frame_000.png",
+              "Idle/animations/walk_e2/east/frame_001.png",
+              "Idle/animations/walk_e2/east/frame_002.png",
+              "Idle/animations/walk_e2/east/frame_003.png",
+              "Idle/animations/walk_e2/east/frame_004.png",
+              "Idle/animations/walk_e2/east/frame_005.png",
+              "Idle/animations/walk_e2/east/frame_006.png",
+              "Idle/animations/walk_e2/east/frame_007.png"
+            ]
+          },
+          "gather": {
+            "east": [
+              "Idle/animations/gather/east/frame_000.png",
+              "Idle/animations/gather/east/frame_001.png",
+              "Idle/animations/gather/east/frame_002.png",
+              "Idle/animations/gather/east/frame_003.png",
+              "Idle/animations/gather/east/frame_004.png"
+            ],
+            "north": [
+              "Idle/animations/gather/north/frame_000.png",
+              "Idle/animations/gather/north/frame_001.png",
+              "Idle/animations/gather/north/frame_002.png",
+              "Idle/animations/gather/north/frame_003.png",
+              "Idle/animations/gather/north/frame_004.png"
+            ],
+            "south": [
+              "Idle/animations/gather/south/frame_000.png",
+              "Idle/animations/gather/south/frame_001.png",
+              "Idle/animations/gather/south/frame_002.png",
+              "Idle/animations/gather/south/frame_003.png",
+              "Idle/animations/gather/south/frame_004.png"
+            ]
+          },
+          "gather2": {
+            "east": [
+              "Idle/animations/gather2/east/frame_000.png",
+              "Idle/animations/gather2/east/frame_001.png",
+              "Idle/animations/gather2/east/frame_002.png",
+              "Idle/animations/gather2/east/frame_003.png",
+              "Idle/animations/gather2/east/frame_004.png",
+              "Idle/animations/gather2/east/frame_005.png",
+              "Idle/animations/gather2/east/frame_006.png"
+            ],
+            "north": [
+              "Idle/animations/gather2/north/frame_000.png",
+              "Idle/animations/gather2/north/frame_001.png",
+              "Idle/animations/gather2/north/frame_002.png",
+              "Idle/animations/gather2/north/frame_003.png",
+              "Idle/animations/gather2/north/frame_004.png",
+              "Idle/animations/gather2/north/frame_005.png",
+              "Idle/animations/gather2/north/frame_006.png"
+            ],
+            "south": [
+              "Idle/animations/gather2/south/frame_000.png",
+              "Idle/animations/gather2/south/frame_001.png",
+              "Idle/animations/gather2/south/frame_002.png",
+              "Idle/animations/gather2/south/frame_003.png",
+              "Idle/animations/gather2/south/frame_004.png",
+              "Idle/animations/gather2/south/frame_005.png",
+              "Idle/animations/gather2/south/frame_006.png"
+            ]
+          },
+          "hurt2": {
+            "east": [
+              "Idle/animations/hurt2/east/frame_000.png",
+              "Idle/animations/hurt2/east/frame_001.png",
+              "Idle/animations/hurt2/east/frame_002.png",
+              "Idle/animations/hurt2/east/frame_003.png",
+              "Idle/animations/hurt2/east/frame_004.png",
+              "Idle/animations/hurt2/east/frame_005.png",
+              "Idle/animations/hurt2/east/frame_006.png"
+            ],
+            "north": [
+              "Idle/animations/hurt2/north/frame_000.png",
+              "Idle/animations/hurt2/north/frame_001.png",
+              "Idle/animations/hurt2/north/frame_002.png",
+              "Idle/animations/hurt2/north/frame_003.png",
+              "Idle/animations/hurt2/north/frame_004.png",
+              "Idle/animations/hurt2/north/frame_005.png",
+              "Idle/animations/hurt2/north/frame_006.png"
+            ],
+            "south": [
+              "Idle/animations/hurt2/south/frame_000.png",
+              "Idle/animations/hurt2/south/frame_001.png",
+              "Idle/animations/hurt2/south/frame_002.png",
+              "Idle/animations/hurt2/south/frame_003.png",
+              "Idle/animations/hurt2/south/frame_004.png",
+              "Idle/animations/hurt2/south/frame_005.png",
+              "Idle/animations/hurt2/south/frame_006.png"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "character": {
+        "id": "31d2696b-ab46-4888-a34b-373ccfcabc12",
+        "name": "Lantern",
+        "prompt": "rustic modern farmer: faded olive-green baseball cap, short dark brown hair, light stubble, open tan canvas work jacket over a brick-red plaid flannel shirt, dark brown leather belt, dark charcoal-brown work jeans, dark brown leather work boots",
+        "size": {
+          "width": 64,
+          "height": 64
+        },
+        "template_id": "mannequin",
+        "directions": 4,
+        "view": "low top-down",
+        "created_at": "2026-11-12T04:57:41.534551+00:00"
+      },
+      "folder": "Lantern",
+      "frames": {
+        "rotations": {
+          "south": "Lantern/rotations/south.png",
+          "west": "Lantern/rotations/west.png",
+          "east": "Lantern/rotations/east.png",
+          "north": "Lantern/rotations/north.png"
+        },
+        "animations": {
+          "walk_lantern_e2": {
+            "east": [
+              "Lantern/animations/walk_lantern_e2/east/frame_000.png",
+              "Lantern/animations/walk_lantern_e2/east/frame_001.png",
+              "Lantern/animations/walk_lantern_e2/east/frame_002.png",
+              "Lantern/animations/walk_lantern_e2/east/frame_003.png",
+              "Lantern/animations/walk_lantern_e2/east/frame_004.png",
+              "Lantern/animations/walk_lantern_e2/east/frame_005.png",
+              "Lantern/animations/walk_lantern_e2/east/frame_006.png",
+              "Lantern/animations/walk_lantern_e2/east/frame_007.png"
+            ]
+          },
+          "walk_lantern": {
+            "north": [
+              "Lantern/animations/walk_lantern/north/frame_000.png",
+              "Lantern/animations/walk_lantern/north/frame_001.png",
+              "Lantern/animations/walk_lantern/north/frame_002.png",
+              "Lantern/animations/walk_lantern/north/frame_003.png",
+              "Lantern/animations/walk_lantern/north/frame_004.png",
+              "Lantern/animations/walk_lantern/north/frame_005.png",
+              "Lantern/animations/walk_lantern/north/frame_006.png",
+              "Lantern/animations/walk_lantern/north/frame_007.png"
+            ],
+            "east": [
+              "Lantern/animations/walk_lantern/east/frame_000.png",
+              "Lantern/animations/walk_lantern/east/frame_001.png",
+              "Lantern/animations/walk_lantern/east/frame_002.png",
+              "Lantern/animations/walk_lantern/east/frame_003.png",
+              "Lantern/animations/walk_lantern/east/frame_004.png",
+              "Lantern/animations/walk_lantern/east/frame_005.png",
+              "Lantern/animations/walk_lantern/east/frame_006.png",
+              "Lantern/animations/walk_lantern/east/frame_007.png"
+            ],
+            "south": [
+              "Lantern/animations/walk_lantern/south/frame_000.png",
+              "Lantern/animations/walk_lantern/south/frame_001.png",
+              "Lantern/animations/walk_lantern/south/frame_002.png",
+              "Lantern/animations/walk_lantern/south/frame_003.png",
+              "Lantern/animations/walk_lantern/south/frame_004.png",
+              "Lantern/animations/walk_lantern/south/frame_005.png",
+              "Lantern/animations/walk_lantern/south/frame_006.png",
+              "Lantern/animations/walk_lantern/south/frame_007.png"
+            ]
+          },
+          "idle_lantern": {
+            "north": [
+              "Lantern/animations/idle_lantern/north/frame_000.png",
+              "Lantern/animations/idle_lantern/north/frame_001.png",
+              "Lantern/animations/idle_lantern/north/frame_002.png",
+              "Lantern/animations/idle_lantern/north/frame_003.png",
+              "Lantern/animations/idle_lantern/north/frame_004.png"
+            ],
+            "south": [
+              "Lantern/animations/idle_lantern/south/frame_000.png",
+              "Lantern/animations/idle_lantern/south/frame_001.png",
+              "Lantern/animations/idle_lantern/south/frame_002.png",
+              "Lantern/animations/idle_lantern/south/frame_003.png",
+              "Lantern/animations/idle_lantern/south/frame_004.png"
+            ],
+            "east": [
+              "Lantern/animations/idle_lantern/east/frame_000.png",
+              "Lantern/animations/idle_lantern/east/frame_001.png",
+              "Lantern/animations/idle_lantern/east/frame_002.png",
+              "Lantern/animations/idle_lantern/east/frame_003.png",
+              "Lantern/animations/idle_lantern/east/frame_004.png"
+            ]
+          },
+          "walk_lantern_v3": {
+            "south": [
+              "Lantern/animations/walk_lantern_v3/south/frame_000.png",
+              "Lantern/animations/walk_lantern_v3/south/frame_001.png",
+              "Lantern/animations/walk_lantern_v3/south/frame_002.png",
+              "Lantern/animations/walk_lantern_v3/south/frame_003.png",
+              "Lantern/animations/walk_lantern_v3/south/frame_004.png",
+              "Lantern/animations/walk_lantern_v3/south/frame_005.png",
+              "Lantern/animations/walk_lantern_v3/south/frame_006.png",
+              "Lantern/animations/walk_lantern_v3/south/frame_007.png"
+            ],
+            "north": [
+              "Lantern/animations/walk_lantern_v3/north/frame_000.png",
+              "Lantern/animations/walk_lantern_v3/north/frame_001.png",
+              "Lantern/animations/walk_lantern_v3/north/frame_002.png",
+              "Lantern/animations/walk_lantern_v3/north/frame_003.png",
+              "Lantern/animations/walk_lantern_v3/north/frame_004.png",
+              "Lantern/animations/walk_lantern_v3/north/frame_005.png",
+              "Lantern/animations/walk_lantern_v3/north/frame_006.png",
+              "Lantern/animations/walk_lantern_v3/north/frame_007.png"
+            ],
+            "east": [
+              "Lantern/animations/walk_lantern_v3/east/frame_000.png",
+              "Lantern/animations/walk_lantern_v3/east/frame_001.png",
+              "Lantern/animations/walk_lantern_v3/east/frame_002.png",
+              "Lantern/animations/walk_lantern_v3/east/frame_003.png",
+              "Lantern/animations/walk_lantern_v3/east/frame_004.png",
+              "Lantern/animations/walk_lantern_v3/east/frame_005.png",
+              "Lantern/animations/walk_lantern_v3/east/frame_006.png",
+              "Lantern/animations/walk_lantern_v3/east/frame_007.png"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "character": {
+        "id": "156240f6-30bd-461d-aec7-dde53db35256",
+        "name": "Axe",
+        "prompt": "rustic modern farmer: faded olive-green baseball cap, short dark brown hair, light stubble, open tan canvas work jacket over a brick-red plaid flannel shirt, dark brown leather belt, dark charcoal-brown work jeans, dark brown leather work boots",
+        "size": {
+          "width": 64,
+          "height": 64
+        },
+        "template_id": "mannequin",
+        "directions": 4,
+        "view": "low top-down",
+        "created_at": "2026-11-12T04:57:41.845418+00:00"
+      },
+      "folder": "Axe",
+      "frames": {
+        "rotations": {
+          "south": "Axe/rotations/south.png",
+          "west": "Axe/rotations/west.png",
+          "east": "Axe/rotations/east.png",
+          "north": "Axe/rotations/north.png"
+        },
+        "animations": {
+          "chop": {
+            "east": [
+              "Axe/animations/chop/east/frame_000.png",
+              "Axe/animations/chop/east/frame_001.png",
+              "Axe/animations/chop/east/frame_002.png",
+              "Axe/animations/chop/east/frame_003.png",
+              "Axe/animations/chop/east/frame_004.png",
+              "Axe/animations/chop/east/frame_005.png",
+              "Axe/animations/chop/east/frame_006.png",
+              "Axe/animations/chop/east/frame_007.png",
+              "Axe/animations/chop/east/frame_008.png"
+            ],
+            "south": [
+              "Axe/animations/chop/south/frame_000.png",
+              "Axe/animations/chop/south/frame_001.png",
+              "Axe/animations/chop/south/frame_002.png",
+              "Axe/animations/chop/south/frame_003.png",
+              "Axe/animations/chop/south/frame_004.png",
+              "Axe/animations/chop/south/frame_005.png",
+              "Axe/animations/chop/south/frame_006.png",
+              "Axe/animations/chop/south/frame_007.png",
+              "Axe/animations/chop/south/frame_008.png"
+            ],
+            "north": [
+              "Axe/animations/chop/north/frame_000.png",
+              "Axe/animations/chop/north/frame_001.png",
+              "Axe/animations/chop/north/frame_002.png",
+              "Axe/animations/chop/north/frame_003.png",
+              "Axe/animations/chop/north/frame_004.png",
+              "Axe/animations/chop/north/frame_005.png",
+              "Axe/animations/chop/north/frame_006.png",
+              "Axe/animations/chop/north/frame_007.png",
+              "Axe/animations/chop/north/frame_008.png"
+            ]
+          },
+          "chop2": {
+            "north": [
+              "Axe/animations/chop2/north/frame_000.png",
+              "Axe/animations/chop2/north/frame_001.png",
+              "Axe/animations/chop2/north/frame_002.png",
+              "Axe/animations/chop2/north/frame_003.png",
+              "Axe/animations/chop2/north/frame_004.png",
+              "Axe/animations/chop2/north/frame_005.png",
+              "Axe/animations/chop2/north/frame_006.png",
+              "Axe/animations/chop2/north/frame_007.png",
+              "Axe/animations/chop2/north/frame_008.png"
+            ],
+            "south": [
+              "Axe/animations/chop2/south/frame_000.png",
+              "Axe/animations/chop2/south/frame_001.png",
+              "Axe/animations/chop2/south/frame_002.png",
+              "Axe/animations/chop2/south/frame_003.png",
+              "Axe/animations/chop2/south/frame_004.png",
+              "Axe/animations/chop2/south/frame_005.png",
+              "Axe/animations/chop2/south/frame_006.png",
+              "Axe/animations/chop2/south/frame_007.png",
+              "Axe/animations/chop2/south/frame_008.png"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "character": {
+        "id": "31e6f060-3319-4b25-9d57-c978baa044e1",
+        "name": "Pickaxe",
+        "prompt": "rustic modern farmer: faded olive-green baseball cap, short dark brown hair, light stubble, open tan canvas work jacket over a brick-red plaid flannel shirt, dark brown leather belt, dark charcoal-brown work jeans, dark brown leather work boots",
+        "size": {
+          "width": 64,
+          "height": 64
+        },
+        "template_id": "mannequin",
+        "directions": 4,
+        "view": "low top-down",
+        "created_at": "2026-11-12T04:57:42.222943+00:00"
+      },
+      "folder": "Pickaxe",
+      "frames": {
+        "rotations": {
+          "south": "Pickaxe/rotations/south.png",
+          "west": "Pickaxe/rotations/west.png",
+          "east": "Pickaxe/rotations/east.png",
+          "north": "Pickaxe/rotations/north.png"
+        },
+        "animations": {
+          "mine": {
+            "south": [
+              "Pickaxe/animations/mine/south/frame_000.png",
+              "Pickaxe/animations/mine/south/frame_001.png",
+              "Pickaxe/animations/mine/south/frame_002.png",
+              "Pickaxe/animations/mine/south/frame_003.png",
+              "Pickaxe/animations/mine/south/frame_004.png",
+              "Pickaxe/animations/mine/south/frame_005.png",
+              "Pickaxe/animations/mine/south/frame_006.png",
+              "Pickaxe/animations/mine/south/frame_007.png",
+              "Pickaxe/animations/mine/south/frame_008.png"
+            ],
+            "east": [
+              "Pickaxe/animations/mine/east/frame_000.png",
+              "Pickaxe/animations/mine/east/frame_001.png",
+              "Pickaxe/animations/mine/east/frame_002.png",
+              "Pickaxe/animations/mine/east/frame_003.png",
+              "Pickaxe/animations/mine/east/frame_004.png",
+              "Pickaxe/animations/mine/east/frame_005.png",
+              "Pickaxe/animations/mine/east/frame_006.png",
+              "Pickaxe/animations/mine/east/frame_007.png",
+              "Pickaxe/animations/mine/east/frame_008.png"
+            ],
+            "north": [
+              "Pickaxe/animations/mine/north/frame_000.png",
+              "Pickaxe/animations/mine/north/frame_001.png",
+              "Pickaxe/animations/mine/north/frame_002.png",
+              "Pickaxe/animations/mine/north/frame_003.png",
+              "Pickaxe/animations/mine/north/frame_004.png",
+              "Pickaxe/animations/mine/north/frame_005.png",
+              "Pickaxe/animations/mine/north/frame_006.png",
+              "Pickaxe/animations/mine/north/frame_007.png",
+              "Pickaxe/animations/mine/north/frame_008.png"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "character": {
+        "id": "d4f44b7d-413f-4801-bba2-c831a82a9e76",
+        "name": "Hoe",
+        "prompt": "rustic modern farmer: faded olive-green baseball cap, short dark brown hair, light stubble, open tan canvas work jacket over a brick-red plaid flannel shirt, dark brown leather belt, dark charcoal-brown work jeans, dark brown leather work boots",
+        "size": {
+          "width": 64,
+          "height": 64
+        },
+        "template_id": "mannequin",
+        "directions": 4,
+        "view": "low top-down",
+        "created_at": "2026-11-12T04:57:42.536123+00:00"
+      },
+      "folder": "Hoe",
+      "frames": {
+        "rotations": {
+          "south": "Hoe/rotations/south.png",
+          "west": "Hoe/rotations/west.png",
+          "east": "Hoe/rotations/east.png",
+          "north": "Hoe/rotations/north.png"
+        },
+        "animations": {
+          "hoe2": {
+            "south": [
+              "Hoe/animations/hoe2/south/frame_000.png",
+              "Hoe/animations/hoe2/south/frame_001.png",
+              "Hoe/animations/hoe2/south/frame_002.png",
+              "Hoe/animations/hoe2/south/frame_003.png",
+              "Hoe/animations/hoe2/south/frame_004.png",
+              "Hoe/animations/hoe2/south/frame_005.png",
+              "Hoe/animations/hoe2/south/frame_006.png",
+              "Hoe/animations/hoe2/south/frame_007.png",
+              "Hoe/animations/hoe2/south/frame_008.png"
+            ]
+          },
+          "hoe": {
+            "east": [
+              "Hoe/animations/hoe/east/frame_000.png",
+              "Hoe/animations/hoe/east/frame_001.png",
+              "Hoe/animations/hoe/east/frame_002.png",
+              "Hoe/animations/hoe/east/frame_003.png",
+              "Hoe/animations/hoe/east/frame_004.png",
+              "Hoe/animations/hoe/east/frame_005.png",
+              "Hoe/animations/hoe/east/frame_006.png",
+              "Hoe/animations/hoe/east/frame_007.png",
+              "Hoe/animations/hoe/east/frame_008.png"
+            ],
+            "south": [
+              "Hoe/animations/hoe/south/frame_000.png",
+              "Hoe/animations/hoe/south/frame_001.png",
+              "Hoe/animations/hoe/south/frame_002.png",
+              "Hoe/animations/hoe/south/frame_003.png",
+              "Hoe/animations/hoe/south/frame_004.png",
+              "Hoe/animations/hoe/south/frame_005.png",
+              "Hoe/animations/hoe/south/frame_006.png",
+              "Hoe/animations/hoe/south/frame_007.png",
+              "Hoe/animations/hoe/south/frame_008.png"
+            ],
+            "north": [
+              "Hoe/animations/hoe/north/frame_000.png",
+              "Hoe/animations/hoe/north/frame_001.png",
+              "Hoe/animations/hoe/north/frame_002.png",
+              "Hoe/animations/hoe/north/frame_003.png",
+              "Hoe/animations/hoe/north/frame_004.png",
+              "Hoe/animations/hoe/north/frame_005.png",
+              "Hoe/animations/hoe/north/frame_006.png",
+              "Hoe/animations/hoe/north/frame_007.png",
+              "Hoe/animations/hoe/north/frame_008.png"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "character": {
+        "id": "fca76e1b-c894-486a-9dec-7674479f4565",
+        "name": "Hose",
+        "prompt": "rustic modern farmer: faded olive-green baseball cap, short dark brown hair, light stubble, open tan canvas work jacket over a brick-red plaid flannel shirt, dark brown leather belt, dark charcoal-brown work jeans, dark brown leather work boots",
+        "size": {
+          "width": 64,
+          "height": 64
+        },
+        "template_id": "mannequin",
+        "directions": 4,
+        "view": "low top-down",
+        "created_at": "2026-11-12T04:57:42.853037+00:00"
+      },
+      "folder": "Hose",
+      "frames": {
+        "rotations": {
+          "south": "Hose/rotations/south.png",
+          "west": "Hose/rotations/west.png",
+          "east": "Hose/rotations/east.png",
+          "north": "Hose/rotations/north.png"
+        },
+        "animations": {
+          "water": {
+            "south": [
+              "Hose/animations/water/south/frame_000.png",
+              "Hose/animations/water/south/frame_001.png",
+              "Hose/animations/water/south/frame_002.png",
+              "Hose/animations/water/south/frame_003.png",
+              "Hose/animations/water/south/frame_004.png",
+              "Hose/animations/water/south/frame_005.png",
+              "Hose/animations/water/south/frame_006.png",
+              "Hose/animations/water/south/frame_007.png",
+              "Hose/animations/water/south/frame_008.png"
+            ],
+            "east": [
+              "Hose/animations/water/east/frame_000.png",
+              "Hose/animations/water/east/frame_001.png",
+              "Hose/animations/water/east/frame_002.png",
+              "Hose/animations/water/east/frame_003.png",
+              "Hose/animations/water/east/frame_004.png",
+              "Hose/animations/water/east/frame_005.png",
+              "Hose/animations/water/east/frame_006.png",
+              "Hose/animations/water/east/frame_007.png",
+              "Hose/animations/water/east/frame_008.png"
+            ],
+            "north": [
+              "Hose/animations/water/north/frame_000.png",
+              "Hose/animations/water/north/frame_001.png",
+              "Hose/animations/water/north/frame_002.png",
+              "Hose/animations/water/north/frame_003.png",
+              "Hose/animations/water/north/frame_004.png",
+              "Hose/animations/water/north/frame_005.png",
+              "Hose/animations/water/north/frame_006.png",
+              "Hose/animations/water/north/frame_007.png",
+              "Hose/animations/water/north/frame_008.png"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "character": {
+        "id": "12a590e8-7820-4984-86f7-f62ac6dd9457",
+        "name": "Trowel",
+        "prompt": "rustic modern farmer: faded olive-green baseball cap, short dark brown hair, light stubble, open tan canvas work jacket over a brick-red plaid flannel shirt, dark brown leather belt, dark charcoal-brown work jeans, dark brown leather work boots",
+        "size": {
+          "width": 64,
+          "height": 64
+        },
+        "template_id": "mannequin",
+        "directions": 4,
+        "view": "low top-down",
+        "created_at": "2026-11-12T04:57:43.183550+00:00"
+      },
+      "folder": "Trowel",
+      "frames": {
+        "rotations": {
+          "south": "Trowel/rotations/south.png",
+          "west": "Trowel/rotations/west.png",
+          "east": "Trowel/rotations/east.png",
+          "north": "Trowel/rotations/north.png"
+        },
+        "animations": {
+          "plant": {
+            "south": [
+              "Trowel/animations/plant/south/frame_000.png",
+              "Trowel/animations/plant/south/frame_001.png",
+              "Trowel/animations/plant/south/frame_002.png",
+              "Trowel/animations/plant/south/frame_003.png",
+              "Trowel/animations/plant/south/frame_004.png",
+              "Trowel/animations/plant/south/frame_005.png",
+              "Trowel/animations/plant/south/frame_006.png",
+              "Trowel/animations/plant/south/frame_007.png",
+              "Trowel/animations/plant/south/frame_008.png"
+            ],
+            "north": [
+              "Trowel/animations/plant/north/frame_000.png",
+              "Trowel/animations/plant/north/frame_001.png",
+              "Trowel/animations/plant/north/frame_002.png",
+              "Trowel/animations/plant/north/frame_003.png",
+              "Trowel/animations/plant/north/frame_004.png",
+              "Trowel/animations/plant/north/frame_005.png",
+              "Trowel/animations/plant/north/frame_006.png",
+              "Trowel/animations/plant/north/frame_007.png",
+              "Trowel/animations/plant/north/frame_008.png"
+            ],
+            "east": [
+              "Trowel/animations/plant/east/frame_000.png",
+              "Trowel/animations/plant/east/frame_001.png",
+              "Trowel/animations/plant/east/frame_002.png",
+              "Trowel/animations/plant/east/frame_003.png",
+              "Trowel/animations/plant/east/frame_004.png",
+              "Trowel/animations/plant/east/frame_005.png",
+              "Trowel/animations/plant/east/frame_006.png",
+              "Trowel/animations/plant/east/frame_007.png",
+              "Trowel/animations/plant/east/frame_008.png"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "character": {
+        "id": "f056eabc-d42e-42f2-a7e0-d7c1463ada42",
+        "name": "Rod",
+        "prompt": "rustic modern farmer: faded olive-green baseball cap, short dark brown hair, light stubble, open tan canvas work jacket over a brick-red plaid flannel shirt, dark brown leather belt, dark charcoal-brown work jeans, dark brown leather work boots",
+        "size": {
+          "width": 64,
+          "height": 64
+        },
+        "template_id": "mannequin",
+        "directions": 4,
+        "view": "low top-down",
+        "created_at": "2026-11-12T04:57:43.489321+00:00"
+      },
+      "folder": "Rod",
+      "frames": {
+        "rotations": {
+          "south": "Rod/rotations/south.png",
+          "west": "Rod/rotations/west.png",
+          "east": "Rod/rotations/east.png",
+          "north": "Rod/rotations/north.png"
+        },
+        "animations": {
+          "cast": {
+            "east": [
+              "Rod/animations/cast/east/frame_000.png",
+              "Rod/animations/cast/east/frame_001.png",
+              "Rod/animations/cast/east/frame_002.png",
+              "Rod/animations/cast/east/frame_003.png",
+              "Rod/animations/cast/east/frame_004.png",
+              "Rod/animations/cast/east/frame_005.png",
+              "Rod/animations/cast/east/frame_006.png",
+              "Rod/animations/cast/east/frame_007.png",
+              "Rod/animations/cast/east/frame_008.png"
+            ],
+            "north": [
+              "Rod/animations/cast/north/frame_000.png",
+              "Rod/animations/cast/north/frame_001.png",
+              "Rod/animations/cast/north/frame_002.png",
+              "Rod/animations/cast/north/frame_003.png",
+              "Rod/animations/cast/north/frame_004.png",
+              "Rod/animations/cast/north/frame_005.png",
+              "Rod/animations/cast/north/frame_006.png",
+              "Rod/animations/cast/north/frame_007.png",
+              "Rod/animations/cast/north/frame_008.png"
+            ],
+            "south": [
+              "Rod/animations/cast/south/frame_000.png",
+              "Rod/animations/cast/south/frame_001.png",
+              "Rod/animations/cast/south/frame_002.png",
+              "Rod/animations/cast/south/frame_003.png",
+              "Rod/animations/cast/south/frame_004.png",
+              "Rod/animations/cast/south/frame_005.png",
+              "Rod/animations/cast/south/frame_006.png",
+              "Rod/animations/cast/south/frame_007.png",
+              "Rod/animations/cast/south/frame_008.png"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "character": {
+        "id": "ab6a21b9-d7fe-4d62-a649-83bb3e518976",
+        "name": "Iron sword",
+        "prompt": "rustic modern farmer: faded olive-green baseball cap, short dark brown hair, light stubble, open tan canvas work jacket over a brick-red plaid flannel shirt, dark brown leather belt, dark charcoal-brown work jeans, dark brown leather work boots",
+        "size": {
+          "width": 64,
+          "height": 64
+        },
+        "template_id": "mannequin",
+        "directions": 4,
+        "view": "low top-down",
+        "created_at": "2026-11-12T04:57:44.341401+00:00"
+      },
+      "folder": "Iron_sword",
+      "frames": {
+        "rotations": {
+          "south": "Iron_sword/rotations/south.png",
+          "west": "Iron_sword/rotations/west.png",
+          "east": "Iron_sword/rotations/east.png",
+          "north": "Iron_sword/rotations/north.png"
+        },
+        "animations": {
+          "block": {
+            "east": [
+              "Iron_sword/animations/block/east/frame_000.png",
+              "Iron_sword/animations/block/east/frame_001.png",
+              "Iron_sword/animations/block/east/frame_002.png",
+              "Iron_sword/animations/block/east/frame_003.png",
+              "Iron_sword/animations/block/east/frame_004.png"
+            ],
+            "north": [
+              "Iron_sword/animations/block/north/frame_000.png",
+              "Iron_sword/animations/block/north/frame_001.png",
+              "Iron_sword/animations/block/north/frame_002.png",
+              "Iron_sword/animations/block/north/frame_003.png",
+              "Iron_sword/animations/block/north/frame_004.png"
+            ],
+            "south": [
+              "Iron_sword/animations/block/south/frame_000.png",
+              "Iron_sword/animations/block/south/frame_001.png",
+              "Iron_sword/animations/block/south/frame_002.png",
+              "Iron_sword/animations/block/south/frame_003.png",
+              "Iron_sword/animations/block/south/frame_004.png"
+            ]
+          },
+          "block2": {
+            "north": [
+              "Iron_sword/animations/block2/north/frame_000.png",
+              "Iron_sword/animations/block2/north/frame_001.png",
+              "Iron_sword/animations/block2/north/frame_002.png",
+              "Iron_sword/animations/block2/north/frame_003.png",
+              "Iron_sword/animations/block2/north/frame_004.png"
+            ]
+          },
+          "attack2": {
+            "south": [
+              "Iron_sword/animations/attack2/south/frame_000.png",
+              "Iron_sword/animations/attack2/south/frame_001.png",
+              "Iron_sword/animations/attack2/south/frame_002.png",
+              "Iron_sword/animations/attack2/south/frame_003.png",
+              "Iron_sword/animations/attack2/south/frame_004.png",
+              "Iron_sword/animations/attack2/south/frame_005.png",
+              "Iron_sword/animations/attack2/south/frame_006.png",
+              "Iron_sword/animations/attack2/south/frame_007.png",
+              "Iron_sword/animations/attack2/south/frame_008.png"
+            ]
+          },
+          "attack": {
+            "east": [
+              "Iron_sword/animations/attack/east/frame_000.png",
+              "Iron_sword/animations/attack/east/frame_001.png",
+              "Iron_sword/animations/attack/east/frame_002.png",
+              "Iron_sword/animations/attack/east/frame_003.png",
+              "Iron_sword/animations/attack/east/frame_004.png",
+              "Iron_sword/animations/attack/east/frame_005.png",
+              "Iron_sword/animations/attack/east/frame_006.png",
+              "Iron_sword/animations/attack/east/frame_007.png",
+              "Iron_sword/animations/attack/east/frame_008.png"
+            ],
+            "south": [
+              "Iron_sword/animations/attack/south/frame_000.png",
+              "Iron_sword/animations/attack/south/frame_001.png",
+              "Iron_sword/animations/attack/south/frame_002.png",
+              "Iron_sword/animations/attack/south/frame_003.png",
+              "Iron_sword/animations/attack/south/frame_004.png",
+              "Iron_sword/animations/attack/south/frame_005.png",
+              "Iron_sword/animations/attack/south/frame_006.png",
+              "Iron_sword/animations/attack/south/frame_007.png",
+              "Iron_sword/animations/attack/south/frame_008.png"
+            ],
+            "north": [
+              "Iron_sword/animations/attack/north/frame_000.png",
+              "Iron_sword/animations/attack/north/frame_001.png",
+              "Iron_sword/animations/attack/north/frame_002.png",
+              "Iron_sword/animations/attack/north/frame_003.png",
+              "Iron_sword/animations/attack/north/frame_004.png",
+              "Iron_sword/animations/attack/north/frame_005.png",
+              "Iron_sword/animations/attack/north/frame_006.png",
+              "Iron_sword/animations/attack/north/frame_007.png",
+              "Iron_sword/animations/attack/north/frame_008.png"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "character": {
+        "id": "0ad50ccf-b211-4fcc-b81d-26331e912127",
+        "name": "Knife",
+        "prompt": "rustic modern farmer: faded olive-green baseball cap, short dark brown hair, light stubble, open tan canvas work jacket over a brick-red plaid flannel shirt, dark brown leather belt, dark charcoal-brown work jeans, dark brown leather work boots",
+        "size": {
+          "width": 64,
+          "height": 64
+        },
+        "template_id": "mannequin",
+        "directions": 4,
+        "view": "low top-down",
+        "created_at": "2026-11-12T04:57:44.679445+00:00"
+      },
+      "folder": "Knife",
+      "frames": {
+        "rotations": {
+          "south": "Knife/rotations/south.png",
+          "west": "Knife/rotations/west.png",
+          "east": "Knife/rotations/east.png",
+          "north": "Knife/rotations/north.png"
+        },
+        "animations": {
+          "attack2": {
+            "east": [
+              "Knife/animations/attack2/east/frame_000.png",
+              "Knife/animations/attack2/east/frame_001.png",
+              "Knife/animations/attack2/east/frame_002.png",
+              "Knife/animations/attack2/east/frame_003.png",
+              "Knife/animations/attack2/east/frame_004.png",
+              "Knife/animations/attack2/east/frame_005.png",
+              "Knife/animations/attack2/east/frame_006.png",
+              "Knife/animations/attack2/east/frame_007.png",
+              "Knife/animations/attack2/east/frame_008.png"
+            ]
+          },
+          "block": {
+            "east": [
+              "Knife/animations/block/east/frame_000.png",
+              "Knife/animations/block/east/frame_001.png",
+              "Knife/animations/block/east/frame_002.png",
+              "Knife/animations/block/east/frame_003.png",
+              "Knife/animations/block/east/frame_004.png"
+            ],
+            "south": [
+              "Knife/animations/block/south/frame_000.png",
+              "Knife/animations/block/south/frame_001.png",
+              "Knife/animations/block/south/frame_002.png",
+              "Knife/animations/block/south/frame_003.png",
+              "Knife/animations/block/south/frame_004.png"
+            ],
+            "north": [
+              "Knife/animations/block/north/frame_000.png",
+              "Knife/animations/block/north/frame_001.png",
+              "Knife/animations/block/north/frame_002.png",
+              "Knife/animations/block/north/frame_003.png",
+              "Knife/animations/block/north/frame_004.png"
+            ]
+          },
+          "attack": {
+            "north": [
+              "Knife/animations/attack/north/frame_000.png",
+              "Knife/animations/attack/north/frame_001.png",
+              "Knife/animations/attack/north/frame_002.png",
+              "Knife/animations/attack/north/frame_003.png",
+              "Knife/animations/attack/north/frame_004.png",
+              "Knife/animations/attack/north/frame_005.png",
+              "Knife/animations/attack/north/frame_006.png",
+              "Knife/animations/attack/north/frame_007.png",
+              "Knife/animations/attack/north/frame_008.png"
+            ],
+            "south": [
+              "Knife/animations/attack/south/frame_000.png",
+              "Knife/animations/attack/south/frame_001.png",
+              "Knife/animations/attack/south/frame_002.png",
+              "Knife/animations/attack/south/frame_003.png",
+              "Knife/animations/attack/south/frame_004.png",
+              "Knife/animations/attack/south/frame_005.png",
+              "Knife/animations/attack/south/frame_006.png",
+              "Knife/animations/attack/south/frame_007.png",
+              "Knife/animations/attack/south/frame_008.png"
+            ],
+            "east": [
+              "Knife/animations/attack/east/frame_000.png",
+              "Knife/animations/attack/east/frame_001.png",
+              "Knife/animations/attack/east/frame_002.png",
+              "Knife/animations/attack/east/frame_003.png",
+              "Knife/animations/attack/east/frame_004.png",
+              "Knife/animations/attack/east/frame_005.png",
+              "Knife/animations/attack/east/frame_006.png",
+              "Knife/animations/attack/east/frame_007.png",
+              "Knife/animations/attack/east/frame_008.png"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "character": {
+        "id": "cd501832-d3eb-4d00-9f8d-fdf5f9cfc8d7",
+        "name": "Stick",
+        "prompt": "rustic modern farmer: faded olive-green baseball cap, short dark brown hair, light stubble, open tan canvas work jacket over a brick-red plaid flannel shirt, dark brown leather belt, dark charcoal-brown work jeans, dark brown leather work boots",
+        "size": {
+          "width": 64,
+          "height": 64
+        },
+        "template_id": "mannequin",
+        "directions": 4,
+        "view": "low top-down",
+        "created_at": "2026-11-12T04:57:45.053640+00:00"
+      },
+      "folder": "Stick",
+      "frames": {
+        "rotations": {
+          "south": "Stick/rotations/south.png",
+          "west": "Stick/rotations/west.png",
+          "east": "Stick/rotations/east.png",
+          "north": "Stick/rotations/north.png"
+        },
+        "animations": {
+          "block": {
+            "east": [
+              "Stick/animations/block/east/frame_000.png",
+              "Stick/animations/block/east/frame_001.png",
+              "Stick/animations/block/east/frame_002.png",
+              "Stick/animations/block/east/frame_003.png",
+              "Stick/animations/block/east/frame_004.png"
+            ],
+            "south": [
+              "Stick/animations/block/south/frame_000.png",
+              "Stick/animations/block/south/frame_001.png",
+              "Stick/animations/block/south/frame_002.png",
+              "Stick/animations/block/south/frame_003.png",
+              "Stick/animations/block/south/frame_004.png"
+            ],
+            "north": [
+              "Stick/animations/block/north/frame_000.png",
+              "Stick/animations/block/north/frame_001.png",
+              "Stick/animations/block/north/frame_002.png",
+              "Stick/animations/block/north/frame_003.png",
+              "Stick/animations/block/north/frame_004.png"
+            ]
+          },
+          "attack": {
+            "north": [
+              "Stick/animations/attack/north/frame_000.png",
+              "Stick/animations/attack/north/frame_001.png",
+              "Stick/animations/attack/north/frame_002.png",
+              "Stick/animations/attack/north/frame_003.png",
+              "Stick/animations/attack/north/frame_004.png",
+              "Stick/animations/attack/north/frame_005.png",
+              "Stick/animations/attack/north/frame_006.png",
+              "Stick/animations/attack/north/frame_007.png",
+              "Stick/animations/attack/north/frame_008.png"
+            ],
+            "east": [
+              "Stick/animations/attack/east/frame_000.png",
+              "Stick/animations/attack/east/frame_001.png",
+              "Stick/animations/attack/east/frame_002.png",
+              "Stick/animations/attack/east/frame_003.png",
+              "Stick/animations/attack/east/frame_004.png",
+              "Stick/animations/attack/east/frame_005.png",
+              "Stick/animations/attack/east/frame_006.png",
+              "Stick/animations/attack/east/frame_007.png",
+              "Stick/animations/attack/east/frame_008.png"
+            ],
+            "south": [
+              "Stick/animations/attack/south/frame_000.png",
+              "Stick/animations/attack/south/frame_001.png",
+              "Stick/animations/attack/south/frame_002.png",
+              "Stick/animations/attack/south/frame_003.png",
+              "Stick/animations/attack/south/frame_004.png",
+              "Stick/animations/attack/south/frame_005.png",
+              "Stick/animations/attack/south/frame_006.png",
+              "Stick/animations/attack/south/frame_007.png",
+              "Stick/animations/attack/south/frame_008.png"
+            ]
+          },
+          "attack2": {
+            "south": [
+              "Stick/animations/attack2/south/frame_000.png",
+              "Stick/animations/attack2/south/frame_001.png",
+              "Stick/animations/attack2/south/frame_002.png",
+              "Stick/animations/attack2/south/frame_003.png",
+              "Stick/animations/attack2/south/frame_004.png",
+              "Stick/animations/attack2/south/frame_005.png",
+              "Stick/animations/attack2/south/frame_006.png",
+              "Stick/animations/attack2/south/frame_007.png",
+              "Stick/animations/attack2/south/frame_008.png"
+            ]
+          }
+        }
+      }
+    }
+  ],
+  "export_version": "3.1",
+  "export_date": "2026-11-12T05:29:35.146596"
+}

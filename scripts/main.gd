@@ -6058,9 +6058,15 @@ func _lantern_texture(radius: float) -> GradientTexture2D:
 func _update_lantern(darkness: float) -> void:
 	# In the Rookery Wood the lantern burns lamp oil, and goes out without it.
 	lantern_light.enabled = lantern_tier > 0 and darkness > 0.05 and not (trek.active and not trek.lit)
+	# The farmer shows the lantern while it is lit (in the hand, or on the belt during a tool or a fight), and the light
+	# comes from where it hangs (CCH-CONSOLIDATED-003 Phase D). Radius and strength are unchanged.
+	player.lantern_on = lantern_light.enabled
+	var lamp_at: Vector2 = player.lantern_offset()
 	# The lantern's pool steps across the art-pixel grid as you walk, rather than sliding under it.
 	if LIGHTING_V2 and not LANTERN_SMOOTH:
-		lantern_light.position = _light_snap(player.global_position) - player.global_position
+		lantern_light.position = _light_snap(player.global_position + lamp_at) - player.global_position
+	else:
+		lantern_light.position = lamp_at
 	var energy := LANTERN_ENERGY * ((TREK_LANTERN_BOOST if trek.active else CAVE_LANTERN_BOOST) if in_cave else night_boost)
 	if lantern_tier >= LANTERN_FLICKER_TIER:
 		var t := Time.get_ticks_msec() / 1000.0

@@ -3129,5 +3129,394 @@
     "result": "rejected: side views"
    }
   ]
+ },
+ "CCH-CONSOLIDATED-003/D": {
+  "tool": "tools/cch003_farmer.py (picks: art/style_tests/CCH-003/D/picks.json)",
+  "sources": "art/style_tests/CCH-003/D/raw/ (ref1 and ref2 candidates, the canonical reference; group/ is the character group, downloaded by raw/pull.py, not committed)",
+  "note": "CCH-CONSOLIDATED-003 Phase D: the farmer redesigned as one PixelLab character: canonical south reference, then a v3 character in 4 directions, one state per held thing, and every animation from those states. The copper sword is the iron sword's frames recoloured in the build (no generation). West mirrors east in the game.",
+  "generations": 200,
+  "balance_after": 2604,
+  "game_files": [
+   "art/player/d/*.png (60 sheets and lantern.png)",
+   "scripts/farmer_frames.gd"
+  ],
+  "jobs": [
+   {
+    "key": "ref1",
+    "tool": "create_image_pro",
+    "job_id": "aa16f398-2956-4133-ac97-3690c5c0393d",
+    "asset_id": "448b4349-5179-5169-ba53-eb970916988f",
+    "size": [
+     24,
+     36
+    ],
+    "seed": 4101,
+    "cost": 10,
+    "settings": {
+     "style_image": "raw/style_old_farmer.png (the old farmer's idles: outline, detail, shading)",
+     "references": [
+      "raw/ref_old_front.png: camera angle, body size and proportions only"
+     ]
+    },
+    "prompt": "farmer facing the viewer, 16x32: weathered olive-brown cap, flannel under an open waxed canvas jacket, leather belt, earth-brown jeans, work boots",
+    "note": "rejected: everything one khaki tone"
+   },
+   {
+    "key": "ref2",
+    "tool": "create_image_pro",
+    "job_id": "563f9243-09a9-4b58-8b81-c17314148f6c",
+    "asset_id": "2de4a1ab-7d17-5416-8511-e09da569d394",
+    "size": [
+     24,
+     36
+    ],
+    "seed": 4102,
+    "cost": 10,
+    "settings": "as ref1",
+    "prompt": "as ref1 with clear colour separation: dark olive-green cap, open tan canvas jacket over brick-red plaid flannel, dark brown belt, dark charcoal-brown jeans, near-black boots",
+    "note": "kept 16 -> raw/canon_south.png (17x32), canon_south_48.png"
+   },
+   {
+    "key": "character",
+    "tool": "create_character v3 (reference, 4 directions, low top-down)",
+    "character_id": "7beee8bd-88d0-471a-b9e9-5d29ba9695c6",
+    "group_id": "345e6050-3b22-4169-bcbd-24f0ee369709",
+    "size": [
+     48,
+     48
+    ],
+    "cost": 1,
+    "prompt": "rustic modern farmer: faded olive-green baseball cap, short dark brown hair, light stubble, open tan canvas work jacket over a brick-red plaid flannel shirt, dark brown leather belt, dark charcoal-brown work jeans, dark brown leather work boots",
+    "note": "the side views' teal pocket patch is painted jacket tan in the build"
+   },
+   {
+    "key": "state_lantern",
+    "tool": "create_character_state (64x64)",
+    "character_id": "31d2696b-ab46-4888-a34b-373ccfcabc12",
+    "cost": 10,
+    "seed": 4201,
+    "prompt": "holding a small lit tin lantern by its bail in the left hand"
+   },
+   {
+    "key": "state_axe",
+    "tool": "create_character_state (64x64)",
+    "character_id": "156240f6-30bd-461d-aec7-dde53db35256",
+    "cost": 10,
+    "seed": 4202,
+    "prompt": "holding a woodcutter's axe in both hands"
+   },
+   {
+    "key": "state_pickaxe",
+    "tool": "create_character_state (64x64)",
+    "character_id": "31e6f060-3319-4b25-9d57-c978baa044e1",
+    "cost": 10,
+    "seed": 4203,
+    "prompt": "holding a miner's pickaxe in both hands"
+   },
+   {
+    "key": "state_hoe",
+    "tool": "create_character_state (64x64)",
+    "character_id": "d4f44b7d-413f-4801-bba2-c831a82a9e76",
+    "cost": 10,
+    "seed": 4204,
+    "prompt": "holding a long-handled garden hoe"
+   },
+   {
+    "key": "state_hose",
+    "tool": "create_character_state (64x64)",
+    "character_id": "fca76e1b-c894-486a-9dec-7674479f4565",
+    "cost": 10,
+    "seed": 4205,
+    "prompt": "holding a dark green garden hose with a brass nozzle"
+   },
+   {
+    "key": "state_trowel",
+    "tool": "create_character_state (64x64)",
+    "character_id": "12a590e8-7820-4984-86f7-f62ac6dd9457",
+    "cost": 10,
+    "seed": 4206,
+    "prompt": "holding a small hand trowel"
+   },
+   {
+    "key": "state_rod",
+    "tool": "create_character_state (64x64)",
+    "character_id": "f056eabc-d42e-42f2-a7e0-d7c1463ada42",
+    "cost": 10,
+    "seed": 4207,
+    "prompt": "holding a long wooden fishing rod"
+   },
+   {
+    "key": "state_iron_sword",
+    "tool": "create_character_state (64x64)",
+    "character_id": "ab6a21b9-d7fe-4d62-a649-83bb3e518976",
+    "cost": 10,
+    "seed": 4208,
+    "prompt": "holding a plain steel arming sword"
+   },
+   {
+    "key": "state_knife",
+    "tool": "create_character_state (64x64)",
+    "character_id": "0ad50ccf-b211-4fcc-b81d-26331e912127",
+    "cost": 10,
+    "seed": 4209,
+    "prompt": "holding a short hunting knife"
+   },
+   {
+    "key": "state_stick",
+    "tool": "create_character_state (64x64)",
+    "character_id": "cd501832-d3eb-4d00-9f8d-fdf5f9cfc8d7",
+    "cost": 10,
+    "seed": 4210,
+    "prompt": "holding a long sharpened wooden stick"
+   },
+   {
+    "key": "anim_idle_walk",
+    "tool": "animate_character template walking-8-frames",
+    "character_id": "7beee8bd-88d0-471a-b9e9-5d29ba9695c6",
+    "animation_group_id": "245ec2d4-f1d8-4ec6-bfe3-da010dfe0f94",
+    "cost": "1 per facing (cast east and north 2)",
+    "note": "used for south and north"
+   },
+   {
+    "key": "anim_idle_idle",
+    "tool": "animate_character template breathing-idle",
+    "character_id": "7beee8bd-88d0-471a-b9e9-5d29ba9695c6",
+    "animation_group_id": "08ad998f-eed3-499c-9d6d-7e1ae6c691c9",
+    "cost": "1 per facing (cast east and north 2)",
+    "note": "rejected: colour drift on the east face"
+   },
+   {
+    "key": "anim_idle_walk_v3",
+    "tool": "animate_character v3 8 frames",
+    "character_id": "7beee8bd-88d0-471a-b9e9-5d29ba9695c6",
+    "animation_group_id": "6e6dbbae-c4dc-4cc8-9b98-d49d9cc81c6b",
+    "cost": "1 per facing (cast east and north 2)",
+    "note": "rejected: the south walk turned diagonal"
+   },
+   {
+    "key": "anim_idle_idle2",
+    "tool": "animate_character v3 4 frames",
+    "character_id": "7beee8bd-88d0-471a-b9e9-5d29ba9695c6",
+    "animation_group_id": "7a106301-2a3d-4f54-bd76-687403114099",
+    "cost": "1 per facing (cast east and north 2)",
+    "note": "used: frames 0,0,1,1 (south, north), 0,1,2,1 (east); later frames spread the arms"
+   },
+   {
+    "key": "anim_idle_walk_e2",
+    "tool": "animate_character v3 8 frames, east",
+    "character_id": "7beee8bd-88d0-471a-b9e9-5d29ba9695c6",
+    "animation_group_id": "93467b40-c891-4643-b690-b23c0d9e5c58",
+    "cost": "1 per facing (cast east and north 2)",
+    "note": "used for east (west mirrors); the template east walk drifted"
+   },
+   {
+    "key": "anim_idle_hurt",
+    "tool": "animate_character template taking-punch",
+    "character_id": "7beee8bd-88d0-471a-b9e9-5d29ba9695c6",
+    "animation_group_id": "0c92e2d3-2a7e-4214-a0d3-e0ee02b6e659",
+    "cost": "1 per facing (cast east and north 2)",
+    "note": "rejected: colour drift"
+   },
+   {
+    "key": "anim_idle_hurt2",
+    "tool": "animate_character v3 6 frames",
+    "character_id": "7beee8bd-88d0-471a-b9e9-5d29ba9695c6",
+    "animation_group_id": "f12a68c5-346d-4c35-9720-261c1fc1754f",
+    "cost": "1 per facing (cast east and north 2)",
+    "note": "used; impact flashes taken out"
+   },
+   {
+    "key": "anim_idle_gather",
+    "tool": "animate_character template picking-up",
+    "character_id": "7beee8bd-88d0-471a-b9e9-5d29ba9695c6",
+    "animation_group_id": "9d70cf1b-8f41-4885-b962-0dd4dfc93fb3",
+    "cost": "1 per facing (cast east and north 2)",
+    "note": "rejected: a squashed frame"
+   },
+   {
+    "key": "anim_idle_gather2",
+    "tool": "animate_character v3 6 frames",
+    "character_id": "7beee8bd-88d0-471a-b9e9-5d29ba9695c6",
+    "animation_group_id": "b8731240-617c-4710-8b7a-e8a12b2ac92f",
+    "cost": "1 per facing (cast east and north 2)",
+    "note": "used"
+   },
+   {
+    "key": "anim_lantern_walk_lantern",
+    "tool": "animate_character template walking-8-frames",
+    "character_id": "31d2696b-ab46-4888-a34b-373ccfcabc12",
+    "animation_group_id": "5fe2784a-db35-4ddd-92bf-5d5047327304",
+    "cost": "1 per facing (cast east and north 2)",
+    "note": "rejected: dropped the lantern"
+   },
+   {
+    "key": "anim_lantern_walk_lantern_v3",
+    "tool": "animate_character v3 8 frames",
+    "character_id": "31d2696b-ab46-4888-a34b-373ccfcabc12",
+    "animation_group_id": "f15dfaa8-5f97-45e3-bc53-00bd37cd6d4b",
+    "cost": "1 per facing (cast east and north 2)",
+    "note": "used for south and north (north nudged up 1 px)"
+   },
+   {
+    "key": "anim_lantern_walk_lantern_e2",
+    "tool": "animate_character v3 8 frames, east",
+    "character_id": "31d2696b-ab46-4888-a34b-373ccfcabc12",
+    "animation_group_id": "43a959df-5349-4a13-89db-60244508c5a3",
+    "cost": "1 per facing (cast east and north 2)",
+    "note": "used for east"
+   },
+   {
+    "key": "anim_lantern_idle_lantern",
+    "tool": "animate_character v3 4 frames",
+    "character_id": "31d2696b-ab46-4888-a34b-373ccfcabc12",
+    "animation_group_id": "e5bd950f-735e-40c7-bcd2-777235621b71",
+    "cost": "1 per facing (cast east and north 2)",
+    "note": "used: frames 0,1,2,1"
+   },
+   {
+    "key": "anim_axe_chop",
+    "tool": "animate_character v3 8 frames",
+    "character_id": "156240f6-30bd-461d-aec7-dde53db35256",
+    "animation_group_id": "d7b11548-161e-4e6c-80ce-cb87fccebdb5",
+    "cost": "1 per facing (cast east and north 2)",
+    "note": "used for east, and north without frame 3 (a stray block)"
+   },
+   {
+    "key": "anim_axe_chop2",
+    "tool": "animate_character v3 8 frames",
+    "character_id": "156240f6-30bd-461d-aec7-dde53db35256",
+    "animation_group_id": "f95320b9-1032-4867-9eae-55634bfd87f3",
+    "cost": "1 per facing (cast east and north 2)",
+    "note": "used for south (the first south drew a log)"
+   },
+   {
+    "key": "anim_pickaxe_mine",
+    "tool": "animate_character v3 8 frames",
+    "character_id": "31e6f060-3319-4b25-9d57-c978baa044e1",
+    "animation_group_id": "537d1feb-886f-4271-acab-5ef106a967d0",
+    "cost": "1 per facing (cast east and north 2)",
+    "note": "used; white motion arcs taken out"
+   },
+   {
+    "key": "anim_hoe_hoe",
+    "tool": "animate_character v3 8 frames",
+    "character_id": "d4f44b7d-413f-4801-bba2-c831a82a9e76",
+    "animation_group_id": "caec80a3-1f17-4bd1-ae99-03ad5aff3fa8",
+    "cost": "1 per facing (cast east and north 2)",
+    "note": "used for east and north"
+   },
+   {
+    "key": "anim_hoe_hoe2",
+    "tool": "animate_character v3 8 frames",
+    "character_id": "d4f44b7d-413f-4801-bba2-c831a82a9e76",
+    "animation_group_id": "8ac9ecc1-9915-4726-abc5-081e5c00bfb1",
+    "cost": "1 per facing (cast east and north 2)",
+    "note": "used for south"
+   },
+   {
+    "key": "anim_hose_water",
+    "tool": "animate_character v3 8 frames",
+    "character_id": "fca76e1b-c894-486a-9dec-7674479f4565",
+    "animation_group_id": "f4b84f57-8c0e-45e4-a710-4642764ad47c",
+    "cost": "1 per facing (cast east and north 2)",
+    "note": "used; its white water recoloured water blue"
+   },
+   {
+    "key": "anim_trowel_plant",
+    "tool": "animate_character v3 8 frames",
+    "character_id": "12a590e8-7820-4984-86f7-f62ac6dd9457",
+    "animation_group_id": "d6266fa4-e139-4abf-a9ad-ddeba62206e1",
+    "cost": "1 per facing (cast east and north 2)",
+    "note": "used"
+   },
+   {
+    "key": "anim_rod_cast",
+    "tool": "animate_character v3 8 frames",
+    "character_id": "f056eabc-d42e-42f2-a7e0-d7c1463ada42",
+    "animation_group_id": "44fb0871-adfb-4bef-843a-327347b465b5",
+    "cost": "1 per facing (cast east and north 2)",
+    "note": "used; its drawn line taken out (the game draws the line)"
+   },
+   {
+    "key": "anim_iron_sword_attack",
+    "tool": "animate_character v3 8 frames",
+    "character_id": "ab6a21b9-d7fe-4d62-a649-83bb3e518976",
+    "animation_group_id": "f31445a8-4ef3-40e2-9169-9f0d8234c02d",
+    "cost": "1 per facing (cast east and north 2)",
+    "note": "used for east and north"
+   },
+   {
+    "key": "anim_iron_sword_attack2",
+    "tool": "animate_character v3 8 frames, south",
+    "character_id": "ab6a21b9-d7fe-4d62-a649-83bb3e518976",
+    "animation_group_id": "7af976d8-9bcf-445b-a3dc-f2744f3a3d84",
+    "cost": "1 per facing (cast east and north 2)",
+    "note": "used for south (the first thrust sideways)"
+   },
+   {
+    "key": "anim_iron_sword_block",
+    "tool": "animate_character v3 4 frames",
+    "character_id": "ab6a21b9-d7fe-4d62-a649-83bb3e518976",
+    "animation_group_id": "60e43b58-e872-4731-920b-fc30cce74c75",
+    "cost": "1 per facing (cast east and north 2)",
+    "note": "used for south and east"
+   },
+   {
+    "key": "anim_iron_sword_block2",
+    "tool": "animate_character v3 4 frames, north",
+    "character_id": "ab6a21b9-d7fe-4d62-a649-83bb3e518976",
+    "animation_group_id": "6af48ebe-d271-49d2-a284-735b6f6ea878",
+    "cost": "1 per facing (cast east and north 2)",
+    "note": "used for north (the first hid the blade)"
+   },
+   {
+    "key": "anim_knife_attack",
+    "tool": "animate_character v3 8 frames",
+    "character_id": "0ad50ccf-b211-4fcc-b81d-26331e912127",
+    "animation_group_id": "6b914974-46bf-4652-b043-fbe165272335",
+    "cost": "1 per facing (cast east and north 2)",
+    "note": "used for south and north"
+   },
+   {
+    "key": "anim_knife_attack2",
+    "tool": "animate_character v3 8 frames, east",
+    "character_id": "0ad50ccf-b211-4fcc-b81d-26331e912127",
+    "animation_group_id": "0405a70b-0d5d-4c0b-8123-376c45c8dad1",
+    "cost": "1 per facing (cast east and north 2)",
+    "note": "used for east (the first changed the shirt)"
+   },
+   {
+    "key": "anim_knife_block",
+    "tool": "animate_character v3 4 frames",
+    "character_id": "0ad50ccf-b211-4fcc-b81d-26331e912127",
+    "animation_group_id": "17f2b2ed-c0e8-4020-bc2e-14ab081064c1",
+    "cost": "1 per facing (cast east and north 2)",
+    "note": "used"
+   },
+   {
+    "key": "anim_stick_attack",
+    "tool": "animate_character v3 8 frames",
+    "character_id": "cd501832-d3eb-4d00-9f8d-fdf5f9cfc8d7",
+    "animation_group_id": "4364c4e3-0592-423e-bf43-9d146708112a",
+    "cost": "1 per facing (cast east and north 2)",
+    "note": "used for east and north; sparks and arcs taken out"
+   },
+   {
+    "key": "anim_stick_attack2",
+    "tool": "animate_character v3 8 frames, south",
+    "character_id": "cd501832-d3eb-4d00-9f8d-fdf5f9cfc8d7",
+    "animation_group_id": "6f01b5a8-b225-4d1c-a83f-b4d0380590e9",
+    "cost": "1 per facing (cast east and north 2)",
+    "note": "used for south without frame 5 (the stick lost in a smear)"
+   },
+   {
+    "key": "anim_stick_block",
+    "tool": "animate_character v3 4 frames",
+    "character_id": "cd501832-d3eb-4d00-9f8d-fdf5f9cfc8d7",
+    "animation_group_id": "21047504-ba99-49c7-b5d8-62ed45601985",
+    "cost": "1 per facing (cast east and north 2)",
+    "note": "used"
+   }
+  ]
  }
 }

@@ -91,12 +91,14 @@ func _foe_attack(foe: Dictionary) -> void:
 	if m.blocking and (foe["pos"] - m.player.position).normalized().dot(m.player.facing) > 0.3:
 		m.invuln = m.INVULN_TIME * 0.5
 		m.play_sfx("block", 0.06)
+		m.player.guard_hit()
 		return
 	var st: Dictionary = m.FOES[foe["kind"]]
 	var dmg := maxi(1, int(st["dmg"]) - m._defense())
 	m.hp -= dmg
 	m.invuln = m.INVULN_TIME
 	m.play_sfx("hurt", 0.06)
+	m.player.hurt()
 	# Knock the player back a little, if there's room.
 	var away: Vector2 = (m.player.position - foe["pos"]).normalized()
 	var np: Vector2 = m.player.position + away * m.PX * 0.5

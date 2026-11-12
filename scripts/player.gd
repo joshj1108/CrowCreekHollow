@@ -1,6 +1,7 @@
 extends Node2D
 
-## The player: the SpriteCook farmer from art/player/, or a simple drawn figure if the sheets are missing.
+## The player: the PixelLab farmer from art/player/d/ (CCH-CONSOLIDATED-003 Phase D), or a simple drawn figure if
+## the sheets are missing.
 ## main.gd sets min_pos, max_pos, and is_blocked. Trees, water, the house,
 ## and brush piles block movement; the player slides along walls.
 ## The figure holds the selected hotbar tool and plays its action: one-shot actions when the
@@ -33,6 +34,12 @@ var held := ""                # hotbar tool: sword, axe, pick, hoe, trowel, hose
 var held_item := ""           # the weapon in the sword slot, or ""
 var blocking := false         # a sword raised in guard
 var loop_kind := ""           # a looping action from the world: chop, mine, fish, or ""
+var hold_loop := ""           # tools only (capture.gd): keep this loop running whatever the world says
+var lantern_on := false       # set by main: the lantern is lit and shown (night, a cave, a lit trek)
+var lamp_hand := 1.0          # 1 while the lantern is in the hand, 0 on the belt; it moves between them in LAMP_SWAP
+var hurt_t := 0.0             # seconds left of the flinch after a blow lands
+var guard_t := 0.0            # seconds left of the guard's jolt after a blow is turned aside
+var block_t := 0.0            # seconds the guard has been up, for raising it
 
 # A one-shot action, played when the player uses a tool or swings.
 var act := ""
@@ -107,28 +114,39 @@ const KEYS := {
 }
 
 
-# The farmer's SpriteCook sheets in art/player/: 8 frames of 36×36 in a row, drawn at 3× with the feet on
-# the bottom row. Facing left mirrors the right-facing sheets. If the sheets are missing, the figure is
-# drawn in code as before.
-const SHEET_DIR := "res://art/player/"
-const SHEETS := ["idle", "idle_up", "idle_right", "walk_down", "walk_up", "walk_right"]
-const FRAME := 36
-const FRAMES := 8
+# The farmer's PixelLab sheets in art/player/d/ (CCH-CONSOLIDATED-003 Phase D; tools/cch003_farmer.py): one strip
+# per animation and facing, FarmerFrames.CELL square frames, the boots' lowest row on FarmerFrames.FEET, drawn at 3x.
+# Facing left mirrors the right-facing (east) sheets. If any is missing, the figure is drawn in code as before.
+const SHEET_DIR := "res://art/player/d/"
 const ART_SCALE := 3.0
-const GROUND_Y := 18.0      # where the sheet's bottom row (the feet) sits, in local units
-const IDLE_FPS := 6.0
-# Tool actions have their own sheets, farmer_<action>_<down|up|right>.png, and play once across the action
-# (or once per cycle for chop and mine). The tool is only seen while it is used. An action without a sheet
-# (a raised guard) still draws the held tool in code, scaled up to suit the sprite, from a
-# shoulder at TOOL_ORIGIN.
-const ACTION_SHEETS := ["hoe", "water", "chop", "mine", "plant", "swing", "cast"]
-# The generated swings start from the empty-handed idle pose, so the looping ones play from this frame on.
-const LOOP_FIRST_FRAME := {"chop": 2, "mine": 2}
-# Waiting for a bite holds the end of the cast, with the rod out.
+const GROUND_Y := 18.0      # where the boots' lowest row sits, in local units
+const IDLE_FPS := 4.0
+# Tool actions play their sheet once across the action, or once per cycle for chop and mine. Waiting for a bite holds
+# the cast's last frame, with a line drawn from the rod's tip to a bobber.
+const ACTION_SHEETS := ["hoe", "water", "chop", "mine", "plant", "cast", "gather"]
 const SHEET_FOR := {"fish": "cast"}
-const TOOL_SCALE := 2.5
-const TOOL_ORIGIN := Vector2(0, -29)
+# The weapon in the sword slot -> its attack and block sheets (attack_<w>_<dir>, block_<w>_<dir>).
+const WEAPON_SHEET := {"sharpened_stick": "stick", "hunting_knife": "knife", "copper_sword": "copper", "iron_sword": "sword"}
+# The swing's damage lands the moment it is pressed (main._swing) and the foe flashes for 0.2 s, so the drawn strike
+# comes at once: the grip and wind-up frames up to STRIKE_FRAME (the weapon at full reach, per sheet) play in the first
+# STRIKE_AT of the 0.3 s swing (0.1 s, inside the flash), then the follow-through and the recovery to the ready pose.
+const STRIKE_FRAME := {
+	"sword_south": 4, "sword_east": 3, "sword_north": 4,
+	"copper_south": 4, "copper_east": 3, "copper_north": 4,
+	"knife_south": 4, "knife_east": 6, "knife_north": 4,
+	"stick_south": 5, "stick_east": 4, "stick_north": 5,
+}
+const STRIKE_AT := 0.33
+# The guard comes up over BLOCK_RAISE seconds and is then held on its last frame (blocking works from the first frame).
+const BLOCK_RAISE := 0.1
+const GUARD_JOLT := 0.18    # the guard's jolt when it turns a blow aside
+const HURT_TIME := 0.35     # the flinch when a blow lands (within the 0.9 s of safety after it)
+const LAMP_SWAP := 0.1      # seconds for the lantern to go from hand to belt or back; actions never wait for it
+# The lantern hung on the belt, per facing: the flame's centre in a cell (art pixels). Facing right it hangs at the
+# back hip, behind the body.
+const BELT_LAMP := {"south": Vector2(54.5, 57.0), "north": Vector2(41.5, 57.0), "east": Vector2(44.5, 57.0)}
 var sheets := {}
+var lamp_tex: Texture2D
 var idle_t := 0.0
 
 
@@ -143,18 +161,14 @@ func ground_y() -> float:
 
 
 func _ready() -> void:
-	for s in SHEETS:
-		var path: String = SHEET_DIR + "farmer_%s.png" % s
-		if ResourceLoader.exists(path):
-			sheets[s] = load(path)
-	if sheets.size() < SHEETS.size():
-		sheets.clear()
-		return
-	for a in ACTION_SHEETS:
-		for d in ["down", "up", "right"]:
-			var path: String = SHEET_DIR + "farmer_%s_%s.png" % [a, d]
-			if ResourceLoader.exists(path):
-				sheets["%s_%s" % [a, d]] = load(path)
+	for key in FarmerFrames.FRAMES:
+		var path: String = SHEET_DIR + "%s.png" % key
+		if not ResourceLoader.exists(path):
+			sheets.clear()
+			return
+		sheets[key] = load(path)
+	if ResourceLoader.exists(SHEET_DIR + "lantern.png"):
+		lamp_tex = load(SHEET_DIR + "lantern.png")
 
 
 func _dpad_vertical() -> bool:
@@ -192,6 +206,7 @@ func _process(delta: float) -> void:
 
 # Starts a one-shot action such as a chop, a swing or a cast. It plays once, then the held pose returns.
 func play_act(kind: String, dur: float) -> void:
+	hurt_t = 0.0
 	act = kind
 	act_dur = maxf(dur, 0.05)
 	act_t = 0.0
@@ -200,20 +215,36 @@ func play_act(kind: String, dur: float) -> void:
 
 # Sets the looping action (chop, mine, fish, or "" for none). Changing it restarts the cycle.
 func set_loop(kind: String) -> void:
+	if hold_loop != "":
+		kind = hold_loop
 	if kind != loop_kind:
 		loop_kind = kind
 		loop_t = 0.0
 		loop_prev = 0.0
 
 
+# A blow landed (CombatSystem): the farmer flinches. Purely visual; the 0.9 s of safety is main's.
+func hurt() -> void:
+	hurt_t = HURT_TIME
+
+
+# A blow was turned aside by the guard (CombatSystem): the guard jolts back.
+func guard_hit() -> void:
+	guard_t = GUARD_JOLT
+
+
 func _advance_anim(delta: float) -> void:
 	idle_t += delta
+	hurt_t = maxf(0.0, hurt_t - delta)
+	guard_t = maxf(0.0, guard_t - delta)
+	block_t = block_t + delta if _kind() == "block" else 0.0
+	lamp_hand = move_toward(lamp_hand, 1.0 if _kind() == "idle" else 0.0, delta / LAMP_SWAP)
 	if act != "":
 		act_t += delta
 		var p := clampf(act_t / act_dur, 0.0, 1.0)
 		if STRIKE.has(act) and act_prev < float(STRIKE[act]) and p >= float(STRIKE[act]):
 			_strike(act)
-		if act == "water" and randf() < 0.8:
+		if act == "water" and sheets.is_empty() and randf() < 0.8:
 			_spray()
 		act_prev = p
 		if act_t >= act_dur:
@@ -316,64 +347,152 @@ func _draw() -> void:
 		draw_rect(Rect2((pt["p"] as Vector2) - Vector2(s, s) * 0.5, Vector2(s, s)), pt["col"])
 
 
-# The farmer from the sprite sheets. A tool action plays its own sheet, frame by frame through the action.
-# Walking steps through the cycle with walk_t, so the stride matches the footsteps. Otherwise the idle plays.
-# An action without a sheet dips the sprite by its crouch, in whole art pixels, and draws the tool in code.
-func _draw_sprite() -> void:
-	var dir := "down"
+# The sheet facing: down, up and right have sheets; left mirrors right.
+func _sheet_dir() -> String:
 	if facing == Vector2.UP:
-		dir = "up"
-	elif facing.x != 0.0:
-		dir = "right"
+		return "north"
+	if facing.x != 0.0:
+		return "east"
+	return "south"
+
+
+# The sheet and frame for this moment: [key, frame]. A tool action plays its sheet across the action (a loop once
+# per cycle); a swing reaches its strike frame early, because the hit lands on the press; the guard rises and holds;
+# a blow's flinch plays once; walking steps with walk_t so the stride matches the footsteps; otherwise the idle
+# breathes. While the lantern is lit and in the hand, the walk and idle are the lantern-carrying sheets.
+func _sheet_frame() -> Array:
+	var dir := _sheet_dir()
 	var kind := _kind()
-	# Only tool actions have action sheets; "idle" must not pick up the idle sheets here, or walking would freeze.
-	var action := str(SHEET_FOR.get(kind, kind)) if ACTION_SHEETS.has(SHEET_FOR.get(kind, kind)) else ""
-	var action_key := "%s_%s" % [action, dir]
-	var sheet: Texture2D = sheets["walk_%s" % dir]
-	var frame := 0
-	var dip := 0.0
-	var code_tool := false
-	if sheets.has(action_key):
-		sheet = sheets[action_key]
-		var first: int = LOOP_FIRST_FRAME.get(kind, 0)
-		frame = first + mini(int(_phase().x * (FRAMES - first)), FRAMES - first - 1)
+	var action := str(SHEET_FOR.get(kind, kind))
+	if ACTION_SHEETS.has(action):
+		var key := "%s_%s" % [action, dir]
+		var n: int = FarmerFrames.FRAMES[key]
 		if SHEET_FOR.has(kind):
-			frame = FRAMES - 1
-	elif moving:
-		frame = int(fposmod(walk_t, TAU) / TAU * FRAMES) % FRAMES
-	elif kind == "idle":
-		sheet = sheets["idle" if dir == "down" else "idle_%s" % dir]
-		frame = int(idle_t * IDLE_FPS) % FRAMES
-	else:
-		dip = snappedf(float(_pose()[3]), ART_SCALE)
-		code_tool = true
-	var size := Vector2(FRAME, FRAME) * ART_SCALE
+			return [key, n - 1]
+		return [key, mini(int(_phase().x * n), n - 1)]
+	if kind == "swing":
+		var w: String = WEAPON_SHEET.get(held_item, "sword")
+		var key := "attack_%s_%s" % [w, dir]
+		var n: int = FarmerFrames.FRAMES[key]
+		var strike: int = mini(STRIKE_FRAME.get("%s_%s" % [w, dir], 4), n - 1)
+		var p := _phase().x
+		var f := 0
+		if p < STRIKE_AT:
+			f = int(p / STRIKE_AT * (strike + 1))
+		else:
+			f = strike + 1 + int((p - STRIKE_AT) / (1.0 - STRIKE_AT) * (n - strike - 1))
+		return [key, clampi(f, 0, n - 1)]
+	if kind == "block":
+		var w: String = WEAPON_SHEET.get(held_item, "sword")
+		var key := "block_%s_%s" % [w, dir]
+		var n: int = FarmerFrames.FRAMES[key]
+		return [key, mini(int(block_t / BLOCK_RAISE * (n - 1)), n - 1)]
+	if kind == "hurt":
+		var key := "hurt_%s" % dir
+		var n: int = FarmerFrames.FRAMES[key]
+		return [key, mini(int((1.0 - hurt_t / HURT_TIME) * n), n - 1)]
+	var carry := lantern_on and lamp_hand >= 1.0
+	if moving:
+		var key := ("walk_lantern_%s" if carry else "walk_%s") % dir
+		var n: int = FarmerFrames.FRAMES[key]
+		return [key, int(fposmod(walk_t, TAU) / TAU * n) % n]
+	var key := ("idle_lantern_%s" if carry else "idle_%s") % dir
+	var n: int = FarmerFrames.FRAMES[key]
+	return [key, int(idle_t * IDLE_FPS) % n]
+
+
+# A point in a sheet's cell (art pixels) in the figure's own space, mirrored when facing left.
+func _cell_to_local(p: Vector2) -> Vector2:
+	var v := (p - Vector2(FarmerFrames.CELL * 0.5, FarmerFrames.FEET + 1.0)) * ART_SCALE + Vector2(0, GROUND_Y)
+	if facing == Vector2.LEFT:
+		v.x = -v.x
+	return v
+
+
+# Where the lantern is now, in a cell (art pixels): in the carrying sheets' hand, on the belt (dropping with a crouch),
+# or part of the way between while it moves.
+func _lamp_cell(key: String, frame: int) -> Vector2:
+	var dir := _sheet_dir()
+	if FarmerFrames.LANTERN.has(key):
+		return FarmerFrames.LANTERN[key][frame]
+	var belt: Vector2 = BELT_LAMP[dir]
+	var drops: Array = FarmerFrames.BELT_DROP.get(key, [])
+	if frame < drops.size():
+		belt.y += float(drops[frame])
+	if lamp_hand <= 0.0:
+		return belt
+	var hand: Vector2 = FarmerFrames.LANTERN["idle_lantern_%s" % dir][0]
+	return belt.lerp(hand, lamp_hand)
+
+
+# The lantern's flame in the figure's own space, for the light (main moves its PointLight2D here). Without the sheets
+# the light stays on the figure as before.
+func lantern_offset() -> Vector2:
+	if sheets.is_empty():
+		return Vector2.ZERO
+	var sf := _sheet_frame()
+	return _cell_to_local(_lamp_cell(sf[0], sf[1]))
+
+
+# The farmer from the sheets, with the lantern on the belt (or moving to or from the hand) drawn over or, facing
+# right, behind the body; a turned-aside blow jolts the guard back one art pixel.
+func _draw_sprite() -> void:
+	var sf := _sheet_frame()
+	var key: String = sf[0]
+	var frame: int = sf[1]
+	var sheet: Texture2D = sheets[key]
+	var cell := float(FarmerFrames.CELL)
+	var size := Vector2(cell, cell) * ART_SCALE
+	var jolt := Vector2.ZERO
+	if _kind() == "block" and guard_t > 0.0:
+		jolt = -facing * ART_SCALE
+	var loose_lamp := lantern_on and lamp_tex != null and not FarmerFrames.LANTERN.has(key)
+	var behind := _sheet_dir() == "east" and lamp_hand < 0.5
+	if loose_lamp and behind:
+		_draw_lamp(key, frame)
 	if facing == Vector2.LEFT:
 		draw_set_transform(Vector2.ZERO, 0.0, Vector2(-1, 1))
-	draw_texture_rect_region(sheet, Rect2(Vector2(-size.x * 0.5, GROUND_Y - size.y + dip), size), Rect2(frame * FRAME, 0, FRAME, FRAME))
+	var top := Vector2(-size.x * 0.5, GROUND_Y - (FarmerFrames.FEET + 1.0) * ART_SCALE)
+	if facing == Vector2.LEFT:
+		jolt.x = -jolt.x
+	draw_texture_rect_region(sheet, Rect2(top + jolt, size), Rect2(frame * cell, 0, cell, cell))
 	draw_set_transform(Vector2.ZERO, 0.0)
-	if kind == "fish" and sheets.has(action_key):
-		_draw_fishing_line(dir)
-	var side_view := facing.x != 0.0
-	if held != "" and code_tool:
-		draw_set_transform(TOOL_ORIGIN + Vector2(0, dip), _lean(), Vector2(TOOL_SCALE, TOOL_SCALE))
-		var pose := _pose()
-		var tool_angle := float(pose[0]) + float(pose[1])
-		var hand := _shoulder(0.0, side_view) + _reach(float(pose[0]), side_view)
-		draw_circle(hand, 1.6, skin)
-		_draw_tool(hand, side_view, tool_angle)
-	draw_set_transform(Vector2.ZERO, 0.0)
+	if loose_lamp and not behind:
+		_draw_lamp(key, frame)
+	if _kind() == "block" and guard_t > 0.0:
+		_draw_guard_spark()
+	if _kind() == "fish":
+		_draw_fishing_line(_sheet_dir())
 
 
-# While waiting for a bite, a line runs from the rod's tip to a bobber on the water ahead. The tips are the
-# rod's last pixel in the cast sheets' final frames (down 31,34; up 32,4; right 35,21), in local units.
-const ROD_TIP := {"down": Vector2(40.5, 13.5), "up": Vector2(43.5, -76.5), "right": Vector2(52.5, -25.5)}
-const BOBBER_FROM_TIP := {"down": Vector2(-6, 30), "up": Vector2(-6, -24), "right": Vector2(26, 34)}
+func _draw_lamp(key: String, frame: int) -> void:
+	var at := _cell_to_local(_lamp_cell(key, frame))
+	var tl := at - FarmerFrames.LAMP_FLAME * ART_SCALE
+	tl = Vector2(roundf(tl.x / ART_SCALE), roundf(tl.y / ART_SCALE)) * ART_SCALE
+	draw_texture_rect(lamp_tex, Rect2(tl, FarmerFrames.LAMP_SIZE * ART_SCALE), false)
+
+
+# A few pale chips where the blow met the guard, in front of the farmer, for the jolt's length.
+func _draw_guard_spark() -> void:
+	var c := Vector2(0, -24) + facing * 30.0
+	var k := guard_t / GUARD_JOLT
+	var col := Color(1.0, 0.95, 0.8, k)
+	for i in 4:
+		var a := TAU * float(i) / 4.0 + 0.6
+		var p := c + Vector2.from_angle(a) * (4.0 + (1.0 - k) * 9.0)
+		draw_rect(Rect2(p.snapped(Vector2(ART_SCALE, ART_SCALE)), Vector2(ART_SCALE, ART_SCALE)), col)
+
+
+# While waiting for a bite, a line runs from the rod's tip (FarmerFrames.ROD_TIP, the cast's last frame) to a bobber
+# on the water ahead.
+const BOBBER_FROM_TIP := {"south": Vector2(-6, 30), "north": Vector2(-6, -24), "east": Vector2(26, 34)}
 
 
 func _draw_fishing_line(dir: String) -> void:
+	if not FarmerFrames.ROD_TIP.has(dir):
+		return
 	var side := -1.0 if facing == Vector2.LEFT else 1.0
-	var tip: Vector2 = ROD_TIP[dir] * Vector2(side, 1)
+	var tip: Vector2 = _cell_to_local(FarmerFrames.ROD_TIP[dir])
 	var bob := Vector2(0, sin(loop_t * 3.0) * 1.5)
 	var bobber: Vector2 = tip + (BOBBER_FROM_TIP[dir] as Vector2) * Vector2(side, 1) + bob
 	draw_line(tip, bobber, LINE, 1.5)
@@ -564,6 +683,8 @@ func _bob() -> float:
 func _kind() -> String:
 	if act != "":
 		return act
+	if hurt_t > 0.0 and not sheets.is_empty():
+		return "hurt"
 	if loop_kind != "":
 		return loop_kind
 	if blocking and held == "sword":
@@ -592,7 +713,7 @@ func _pose() -> Array:
 		"idle":
 			out = [0.25 + (sin(walk_t) * 0.2 if moving else 0.0), -0.15, 0.0, 0.0]
 		_:
-			out = _sample(KEYS[k], ph.x)
+			out = _sample(KEYS[k], ph.x) if KEYS.has(k) else [0.3, 0.0, 0.0, 0.0]
 	if k == "water":
 		out[0] = float(out[0]) + 0.05 * sin(ph.y * 26.0)
 	return out
@@ -658,8 +779,10 @@ func _elbow(s: Vector2, t: Vector2, side_view: bool) -> Vector2:
 func _hand_pos() -> Vector2:
 	var side_view := facing.x != 0.0
 	if not sheets.is_empty():
-		var tool_hand := _shoulder(0.0, side_view) + _reach(float(_pose()[0]), side_view)
-		return TOOL_ORIGIN + (tool_hand * TOOL_SCALE).rotated(_lean())
+		# Where the sheets' tools meet the ground or the tree: just in front of the boots.
+		if side_view:
+			return Vector2(facing.x * 33.0, 6.0)
+		return Vector2(6.0, -36.0) if facing == Vector2.UP else Vector2(6.0, 24.0)
 	var hand := _shoulder(_bob(), side_view) + _reach(float(_pose()[0]), side_view)
 	return hand.rotated(_lean())
 

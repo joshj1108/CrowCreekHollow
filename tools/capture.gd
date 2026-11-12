@@ -111,6 +111,11 @@ extends SceneTree
 #   face=DIR        turn the farmer: up, down, left or right (after tile=)
 #   mail=N          N unread letters in the mailbox by the gate, so its flag is up (0: one read letter, flag down)
 #   mailopen        check the mailbox (its door held open for the shot); mailpanel keeps the Mailbox panel open
+#   weapon=ID       CCH-CONSOLIDATED-003 Phase D: equip this weapon (sharpened_stick, hunting_knife, copper_sword,
+#                   iron_sword) and hold the weapon slot
+#   slot=N          hold hotbar tool N (0 weapon, 1 axe, 2 pick, 3 hoe, ...); with hold, walk legs "use" play its action,
+#                   "block:S" holds the guard for S seconds, "blow:S" lands a creature's blow from the front
+#                   (a hit; "block+blow:S" guards and the blow is turned aside), "chop:S" / "mine:S" / "fish:S" run that loop for S seconds
 
 func _initialize() -> void:
 	var opt := {"frames": "90", "scale": "0.5"}
@@ -325,6 +330,11 @@ func _initialize() -> void:
 		main.player.position = main._tile_center(int(t[0]) + main.BORDER_X, int(t[1]) + main.BORDER_Y)
 	if opt.has("face"):
 		main.player.facing = {"up": Vector2.UP, "down": Vector2.DOWN, "left": Vector2.LEFT, "right": Vector2.RIGHT}.get(opt["face"], Vector2.DOWN)
+	if opt.has("weapon"):
+		main.equipment["hand_r"] = opt["weapon"]
+		main.active_slot = 0
+	if opt.has("slot"):
+		main.active_slot = int(opt["slot"])
 	if opt.has("mail"):
 		# CCH-CONSOLIDATED-003 Phase B: N unread letters in the mailbox (0: one letter, already read), the flag set at once.
 		main.desk_mail = []
@@ -578,6 +588,13 @@ func _hold(main, opt: Dictionary) -> void:
 			main._tool_press = true
 			main._swing()
 			main._tool_press = false
+			if main._active_tool() != "sword":
+				main._play_use_anim()
+		if "hold_loop" in main.player:
+			main.player.hold_loop = part[0] if part[0] in ["chop", "mine", "fish"] else ""
+		var tokens: PackedStringArray = part[0].split("+")
+		if "block" in tokens:
+			Input.action_press("block")
 		if part[0] == "hand":
 			# The hand action on what the farmer faces; a panel it opens is shut again so the scene stays in view.
 			main._interact()
@@ -590,12 +607,27 @@ func _hold(main, opt: Dictionary) -> void:
 				keys.append("move_" + d)
 				Input.action_press("move_" + d)
 		for i in mini(frames, left):
+			if i == 2 and "blow" in tokens:
+				_blow(main)
 			await _hold_frame(main, opt)
 		for k in keys:
 			Input.action_release(k)
+		if "block" in tokens:
+			Input.action_release("block")
 		left -= frames
 	for i in maxi(left, 0):
 		await _hold_frame(main, opt)
+
+
+# A creature's blow from straight in front (Phase D): the real combat code decides whether the guard turns it.
+func _blow(main) -> void:
+	var foe: Dictionary = main.combat_sys._new_foe("bat", Vector2i.ZERO)
+	foe["pos"] = main.player.position + main.player.facing * main.PX
+	main.invuln = 0.0
+	main.hp = maxi(main.hp, 5)
+	var keep: Vector2 = main.player.position
+	main.combat_sys._foe_attack(foe)
+	main.player.position = keep
 
 
 # One recorded frame; with quiet, the message line stays empty so setup messages don't fill the shot.

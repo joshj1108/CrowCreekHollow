@@ -10,6 +10,7 @@ func _init(main: MainGame) -> void:
 
 func _gather(tile: Vector2i) -> void:
 	m.play_sfx("gather", 0.05)
+	m.player.play_act("gather", 0.4)   # the farmer stoops for it (CCH-CONSOLIDATED-003 Phase D)
 	m.brush.erase(tile)
 	m.materials["sticks"] += 1
 	m.materials["fiber"] += 1

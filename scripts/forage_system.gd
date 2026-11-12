@@ -188,6 +188,7 @@ func _pick(id: String) -> bool:
 	var xp := XP_BASE + XP_PER_LEVEL * int(_spec(id)["level"])
 	m.progression._grant_xp("Bushcrafting", xp)
 	m.play_sfx("gather", 0.06)
+	m.player.play_act("gather", 0.4)   # the farmer stoops for it (CCH-CONSOLIDATED-003 Phase D)
 	m._show_message("You pick %s. +%d Bushcrafting XP" % [str(f["name"]).to_lower(), xp])
 	return true
 

@@ -1,0 +1,151 @@
+{
+ "_about": "CCH-CONSOLIDATED-003 Phase D: which generated animation each game sheet uses, where it differs from tools/cch003_farmer.py's defaults: [state, animation, frames kept]. Reasons in DESIGN.md (Art). A fourth entry nudges the sheet up (negative) or down in art pixels.",
+ "walk_south": [
+  "Idle",
+  "walk"
+ ],
+ "walk_east": [
+  "Idle",
+  "walk_e2"
+ ],
+ "walk_north": [
+  "Idle",
+  "walk"
+ ],
+ "walk_lantern_east": [
+  "Lantern",
+  "walk_lantern_e2"
+ ],
+ "chop_south": [
+  "Axe",
+  "chop2"
+ ],
+ "chop_north": [
+  "Axe",
+  "chop",
+  [
+   0,
+   1,
+   2,
+   4,
+   5,
+   6,
+   7,
+   8
+  ]
+ ],
+ "hoe_south": [
+  "Hoe",
+  "hoe2"
+ ],
+ "attack_sword_south": [
+  "Iron_sword",
+  "attack2"
+ ],
+ "attack_knife_east": [
+  "Knife",
+  "attack2"
+ ],
+ "attack_stick_south": [
+  "Stick",
+  "attack2",
+  [
+   0,
+   1,
+   2,
+   3,
+   4,
+   6,
+   7,
+   8
+  ]
+ ],
+ "block_sword_north": [
+  "Iron_sword",
+  "block2"
+ ],
+ "walk_lantern_north": [
+  "Lantern",
+  "walk_lantern_v3",
+  null,
+  -1
+ ],
+ "idle_south": [
+  "Idle",
+  "idle2",
+  [
+   0,
+   0,
+   1,
+   1
+  ]
+ ],
+ "idle_north": [
+  "Idle",
+  "idle2",
+  [
+   0,
+   0,
+   1,
+   1
+  ]
+ ],
+ "idle_east": [
+  "Idle",
+  "idle2",
+  [
+   0,
+   1,
+   2,
+   1
+  ]
+ ],
+ "idle_lantern_south": [
+  "Lantern",
+  "idle_lantern",
+  [
+   0,
+   1,
+   2,
+   1
+  ]
+ ],
+ "idle_lantern_east": [
+  "Lantern",
+  "idle_lantern",
+  [
+   0,
+   1,
+   2,
+   1
+  ]
+ ],
+ "idle_lantern_north": [
+  "Lantern",
+  "idle_lantern",
+  [
+   0,
+   1,
+   2,
+   1
+  ]
+ ],
+ "block_sword_east": [
+  "Iron_sword",
+  "block",
+  [
+   0,
+   1,
+   2
+  ]
+ ],
+ "block_knife_east": [
+  "Knife",
+  "block",
+  [
+   0,
+   1,
+   2
+  ]
+ ]
+}

@@ -131,6 +131,7 @@ func _harvest(tile: Vector2i) -> void:
 		m._show_message("Your pack is full. Store crops in the root cellar, or sell them.")
 		return
 	m.play_sfx("harvest", 0.06)
+	m.player.play_act("gather", 0.4)   # the farmer stoops for it (CCH-CONSOLIDATED-003 Phase D)
 	m.inventory[held_key] += yield_count
 	# A crop that regrows stays in the ground and goes back a few watered days; the rest come up.
 	var again := ""
