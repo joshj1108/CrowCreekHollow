@@ -44,7 +44,7 @@ func _save_pos() -> Array:
 func _save_game() -> void:
 	var data := {
 		"day": m.day,
-		"weather_kind": m.weather_kind,
+		"weather_kind": m.debug_menu.saved_weather() if m.debug_menu != null else m.weather_kind,   # never a debug-forced sky
 		"food": m.food,
 		"water": m.water,
 		"warmth": m.warmth,
@@ -175,6 +175,9 @@ func _load_game() -> bool:
 	if data.is_empty():
 		return false
 
+	# Debug overrides (scripts/debug_menu.gd) never outlive a load: the save's own state is the truth.
+	if m.debug_menu != null:
+		m.debug_menu.forget()
 	m.day = int(data.get("day", 1))
 	m.weather_kind = str(data.get("weather_kind", ""))
 	m.food = float(data.get("food", 100.0))

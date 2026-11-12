@@ -34,6 +34,8 @@ extends SceneTree
 #                   prompts; wcycle (with hold=) from 2.4 s closes it, opens it, steps right three times, steps back
 #                   three times and closes it, 0.45 s apart, by injected key presses
 #   bag             open the bag
+#   debug           open the developer's world-state panel (debug builds); dweather=KIND, dtemp=F and dpause set
+#                   its overrides first (CCH-CONSOLIDATED-003)
 #   title           stay on the title menu instead of starting a game
 #   pack            UI checks: put a mix of crops, fish, eggs, milk, a bandage and a crow charm in the pack
 #   ipick=KEY       the Inventory item whose details show, e.g. ipick=pack:egg or ipick=mat:wood
@@ -443,6 +445,19 @@ func _initialize() -> void:
 			_wheel_cycle()
 		# Phase 6: past the wheel's open fade (SectionWheel.fade_seconds), so the shot shows it whole.
 		for i in 16:
+			await process_frame
+	# CCH-CONSOLIDATED-003: the developer's world-state panel (debug builds). dweather=KIND forces the weather and
+	# dtemp=F the temperature through it, dpause stops the clock; debug opens the panel itself for the shot.
+	if main.debug_menu != null:
+		if opt.has("dweather"):
+			main.debug_menu.force_weather(str(opt["dweather"]))
+		if opt.has("dtemp"):
+			main.debug_menu.set_temperature(float(opt["dtemp"]))
+		if opt.has("dpause"):
+			main.debug_menu.set_paused(true)
+		if opt.has("debug"):
+			main.debug_menu.open()
+		for i in 4:
 			await process_frame
 	if opt.has("bag"):
 		main._toggle_bag()

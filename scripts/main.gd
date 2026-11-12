@@ -986,6 +986,8 @@ var blocking := false                # held block: LT or right click, with a wea
 var tree_sprites: Dictionary = {}   # "variant:seed" -> Texture2D, filled in once at start
 var tree_bake_started := false
 var perf_was_down := false
+var debug_menu: DebugMenu   # the developer's world-state panel (debug builds only), see scripts/debug_menu.gd
+var dbg_was_down := false
 var dev_was_down := false       # F4 held last frame, so one press unlocks once
 
 
@@ -1128,6 +1130,9 @@ func _on_title_start(mode: String, slot: int) -> void:
 	_build_interior()
 	_build_world()
 	_build_hud()
+	if DebugMenu.allowed():
+		debug_menu = DebugMenu.new(self)
+		add_child(debug_menu)
 	_build_fade()
 	_build_bag()
 	_build_wheel()
@@ -1194,6 +1199,12 @@ func _process(delta: float) -> void:
 		else:
 			_dev_unlock_all()
 	dev_was_down = dev_down
+	# The backquote key opens the developer's world-state panel (DebugMenu), in debug builds only.
+	if debug_menu != null:
+		var dbg_down := Input.is_physical_key_pressed(DebugMenu.TOGGLE_KEY)
+		if dbg_down and not dbg_was_down and not transitioning:
+			debug_menu.toggle()
+		dbg_was_down = dbg_down
 	if transitioning:
 		return
 	if not tree_bake_started:
@@ -1212,7 +1223,8 @@ func _process(delta: float) -> void:
 		if layer != null:
 			layer.visible = not in_cave
 	# Any open menu pauses the day: the clock stops, foes stand still, and only the menu responds.
-	player.paused = open_tab != "" or _bag_open() or _wheel_open() or folk._in_scene() or act.playing()
+	var dbg_open := debug_menu != null and debug_menu.is_open()
+	player.paused = open_tab != "" or _bag_open() or _wheel_open() or folk._in_scene() or act.playing() or dbg_open
 	# The bag's corner button only shows when no section or wheel covers the farm.
 	if bag != null:
 		bag.toggle_button.visible = open_tab == "" and not _wheel_open()
@@ -1227,6 +1239,11 @@ func _process(delta: float) -> void:
 	player.set_loop(_loop_action())
 	_update_diary_icon()
 	if player.paused:
+		# The debug panel holds the day and takes the keys itself (the frame it closes on is ignored too, so its
+		# Esc doesn't reach the farm); the HUD still follows its changes.
+		if dbg_open or (debug_menu != null and Engine.get_process_frames() - debug_menu.swallow_frame <= 1):
+			_update_hud()
+			return
 		# A walker's scene (FolkSystem) holds the day while its pages are turned.
 		if folk._in_scene() and open_tab == "":
 			folk._scene_keys()
@@ -1259,12 +1276,16 @@ func _process(delta: float) -> void:
 		progression._bump("walked")
 	last_walk_tile = walk_tile
 	_update_tips(delta)
-	clock += delta * trek._time_scale()   # the clock runs slow in the Rookery Wood
+	# The debug menu can stop the clock (and the needs with it) for testing: debug builds only.
+	var sim_on := debug_menu == null or not debug_menu.time_paused
+	if sim_on:
+		clock += delta * trek._time_scale()   # the clock runs slow in the Rookery Wood
 	_update_hens(delta)
 	_update_goats(delta)
 	desk._update_desk_light()
 	current_hour = START_HOUR + clock / DAY_LENGTH * (DAY_END_HOUR - START_HOUR)
-	_update_needs(delta * trek._time_scale() * (DAY_END_HOUR - START_HOUR) / DAY_LENGTH)
+	if sim_on:
+		_update_needs(delta * trek._time_scale() * (DAY_END_HOUR - START_HOUR) / DAY_LENGTH)
 
 	if current_hour >= DAY_END_HOUR:
 		_collapse()
@@ -1318,31 +1339,7 @@ func _process(delta: float) -> void:
 	_update_crows(delta)
 	combat_sys._update_foes(delta)
 
-	var shown_hour := madness._clock_hour(current_hour)   # at the lowest sanity, the clock lies now and then
-	var minutes := int(fmod(shown_hour, 1.0) * 60.0)
-	var low := food < 25.0 or water < 25.0 or warmth < 25.0
-	# The same thresholds as before (needs under 25); health warns at 30% and sanity under LOW_SANITY.
-	_set_meter(food_bar, food, 100.0, "%d" % roundi(food), low and food < 25.0)
-	_set_meter(water_bar, water, 100.0, "%d" % roundi(water), low and water < 25.0)
-	_set_meter(warmth_bar, warmth, 100.0, "%d" % roundi(warmth), low and warmth < 25.0)
-	if trek.nerve_col != null and trek.nerve_col.visible:
-		_set_meter(trek.nerve_bar, trek.nerve, 100.0, "%d" % roundi(trek.nerve), trek.nerve < 25.0)
-	needs_temp.text = "%d°F" % roundi(_temperature())
-	hale_label.visible = rewards._is_hale()
-	var date := _calendar_date(day)
-	var event_name := ""
-	for ev in sanity_sys._active_events():
-		event_name = " · %s" % ev["title"]
-		break
-	hud_day_label.text = "Day %d" % day
-	hud_date_label.text = "%s %d · %s%s" % [MONTH_NAMES[date["month"]].substr(0, 3), date["day"], _season_of(date["month"]), event_name]
-	hud_time_label.text = "%02d:%02d" % [int(shown_hour), minutes]
-	hud_weather_label.text = WEATHER_NAMES.get(weather_kind, "Overcast")
-	hud_weather_icon.kind = {"sunny": "sun", "snow": "snow", "fog": "fog"}.get(weather_kind, "rain" if weather_kind in WATER_RAIN_KINDS else "cloud")
-	hud_weather_icon.queue_redraw()
-	_set_meter(hp_bar, hp, max_hp(), "%d/%d" % [hp, max_hp()], hp <= max_hp() * 0.3)
-	_set_meter(sanity_bar, sanity, sanity_sys._sanity_max(), "%d/%d" % [int(sanity), sanity_sys._sanity_max()], sanity < LOW_SANITY)
-	hud_coins_label.text = "%d" % money
+	_update_hud()
 
 	_handle_keys()
 
@@ -2179,8 +2176,8 @@ func _build_hud() -> void:
 	perf_label.visible = false
 	# HUD-REDESIGN-002 (Minimal Corner Cards): two small separate cards in the shared theme, with no headings.
 	# Health and Sanity sit top left, with coins and the diary at the card's foot; Hunger, Thirst and Comfort sit
-	# top right beside the minimap, with the Hale note at that card's foot. Each row is the stat's icon, its name,
-	# a meter in its colour and its value. Hunger, Thirst and Comfort are only the names shown for the food, water
+	# top right beside the minimap, with the Hale note at that card's foot. Each row is the stat's icon, its name
+	# and a meter in its colour (no numbers). Hunger, Thirst and Comfort are only the names shown for the food, water
 	# and warmth needs: the needs themselves are unchanged. On a trek the walker's nerve gets its own small card
 	# under the left one. The clock plate (top middle) shows the weather, the time and the temperature over the
 	# day and the date.
@@ -2193,9 +2190,9 @@ func _build_hud() -> void:
 	hud_panel = _hud_card(hud_theme)
 	left_col.add_child(hud_panel)
 	var stack: VBoxContainer = hud_panel.get_child(0)
-	hp_bar = _hud_meter(stack, "heart", "health", "Health", 50)
+	hp_bar = _hud_meter(stack, "heart", "health", "Health")
 	hud_hp_label = hp_bar.get_meta("label")
-	sanity_bar = _hud_meter(stack, "moon", "sanity", "Sanity", 50)
+	sanity_bar = _hud_meter(stack, "moon", "sanity", "Sanity")
 	hud_sanity_label = sanity_bar.get_meta("label")
 	# The foot: coins on the left, the diary (a small leather journal, with a wax seal and "New" while a page is
 	# unread) on the right, under a faint brass rule.
@@ -2231,7 +2228,7 @@ func _build_hud() -> void:
 	nerve_name.text = "%s's nerve" % TrekSystem.ROUTES["mill"]["short"]
 	nerve_stack.add_child(nerve_name)
 	nerve_card.set_meta("name", nerve_name)
-	trek.nerve_bar = _hud_meter(nerve_stack, "nerve", "nerve", "Nerve", 50)
+	trek.nerve_bar = _hud_meter(nerve_stack, "nerve", "nerve", "Nerve")
 	trek.nerve_col = nerve_card
 	trek.nerve_col.visible = false
 
@@ -2245,9 +2242,9 @@ func _build_hud() -> void:
 	needs_card.offset_top = 10
 	hud_root.add_child(needs_card)
 	needs_box = needs_card.get_child(0)
-	food_bar = _hud_meter(needs_box, "food", "food", "Hunger", 28)
-	water_bar = _hud_meter(needs_box, "water", "water", "Thirst", 28)
-	warmth_bar = _hud_meter(needs_box, "warmth", "warmth", "Comfort", 28)
+	food_bar = _hud_meter(needs_box, "food", "food", "Hunger")
+	water_bar = _hud_meter(needs_box, "water", "water", "Thirst")
+	warmth_bar = _hud_meter(needs_box, "warmth", "warmth", "Comfort")
 	hale_label = Label.new()
 	hale_label.theme_type_variation = "HudNote"
 	hale_label.add_theme_color_override("font_color", UiTheme.GOLD)
@@ -2333,6 +2330,36 @@ func _build_hud() -> void:
 	layer.add_child(minimap)
 
 
+
+# The HUD's meters, clock plate and coins, from the current state (also called by the debug menu after a change).
+func _update_hud() -> void:
+	var shown_hour := madness._clock_hour(current_hour)   # at the lowest sanity, the clock lies now and then
+	var minutes := int(fmod(shown_hour, 1.0) * 60.0)
+	var low := food < 25.0 or water < 25.0 or warmth < 25.0
+	# The same thresholds as before (needs under 25); health warns at 30% and sanity under LOW_SANITY.
+	_set_meter(food_bar, food, 100.0, "%d" % roundi(food), low and food < 25.0)
+	_set_meter(water_bar, water, 100.0, "%d" % roundi(water), low and water < 25.0)
+	_set_meter(warmth_bar, warmth, 100.0, "%d" % roundi(warmth), low and warmth < 25.0)
+	if trek.nerve_col != null and trek.nerve_col.visible:
+		_set_meter(trek.nerve_bar, trek.nerve, 100.0, "%d" % roundi(trek.nerve), trek.nerve < 25.0)
+	needs_temp.text = "%d°F" % roundi(_temperature())
+	hale_label.visible = rewards._is_hale()
+	var date := _calendar_date(day)
+	var event_name := ""
+	for ev in sanity_sys._active_events():
+		event_name = " · %s" % ev["title"]
+		break
+	hud_day_label.text = "Day %d" % day
+	hud_date_label.text = "%s %d · %s%s" % [MONTH_NAMES[date["month"]].substr(0, 3), date["day"], _season_of(date["month"]), event_name]
+	hud_time_label.text = "%02d:%02d" % [int(shown_hour), minutes]
+	hud_weather_label.text = WEATHER_NAMES.get(weather_kind, "Overcast")
+	hud_weather_icon.kind = {"sunny": "sun", "snow": "snow", "fog": "fog"}.get(weather_kind, "rain" if weather_kind in WATER_RAIN_KINDS else "cloud")
+	hud_weather_icon.queue_redraw()
+	_set_meter(hp_bar, hp, max_hp(), "%d/%d" % [hp, max_hp()], hp <= max_hp() * 0.3)
+	_set_meter(sanity_bar, sanity, sanity_sys._sanity_max(), "%d/%d" % [int(sanity), sanity_sys._sanity_max()], sanity < LOW_SANITY)
+	hud_coins_label.text = "%d" % money
+
+
 func _build_action_bar() -> void:
 	action_bar = ActionBar.new()
 	add_child(action_bar)
@@ -2355,10 +2382,12 @@ func _make_label(parent: Node, pos: Vector2, font_size: int) -> Label:
 	return label
 
 
-# One HUD meter (HUD-REDESIGN-002): the stat's icon, its name, a thin bar in its colour and its value, in a row.
-# Returns the bar; its value and name labels are the bar's "label" and "name" metas. _set_meter() fills it and
-# shows its warning state. value_w keeps the bars of one card in line.
-func _hud_meter(parent: Node, icon_kind: String, fill: String, title: String, value_w := 50) -> ProgressBar:
+# One HUD meter (HUD-REDESIGN-002, numbers removed in CCH-CONSOLIDATED-003): the stat's icon, its name and a bar
+# in its colour, in a row. Every survival bar is the same length, so both cards line up and read at a glance.
+# Returns the bar; its (hidden) value and name labels are the bar's "label" and "name" metas. _set_meter() fills it
+# and shows its warning state.
+const HUD_METER_W := 96
+func _hud_meter(parent: Node, icon_kind: String, fill: String, title: String) -> ProgressBar:
 	var row := HBoxContainer.new()
 	row.add_theme_constant_override("separation", 6)
 	row.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -2374,7 +2403,7 @@ func _hud_meter(parent: Node, icon_kind: String, fill: String, title: String, va
 	bar.show_percentage = false
 	bar.min_value = 0.0
 	bar.max_value = 100.0
-	bar.custom_minimum_size = Vector2(72, 8)
+	bar.custom_minimum_size = Vector2(HUD_METER_W, 10)
 	bar.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	bar.mouse_filter = Control.MOUSE_FILTER_PASS
 	bar.tooltip_text = title
@@ -2383,7 +2412,8 @@ func _hud_meter(parent: Node, icon_kind: String, fill: String, title: String, va
 	var value := Label.new()
 	value.theme_type_variation = "HudValue"
 	value.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
-	value.custom_minimum_size.x = value_w
+	# The survival HUD shows no numbers: the value label is kept (hidden) so the meter code stays one path.
+	value.visible = false
 	row.add_child(value)
 	bar.set_meta("label", value)
 	bar.set_meta("name", name_label)
@@ -4686,6 +4716,8 @@ func _empty_need_text() -> String:
 # Temperature in Fahrenheit: the season's average, a daily swing that is coldest near dawn and warmest
 # in the evening, and the day's weather.
 func _temperature() -> float:
+	if debug_menu != null and debug_menu.temp_on:
+		return debug_menu.temp_value
 	var season := _season_of(_calendar_date(day)["month"])
 	var base: float = SEASON_TEMP[season]
 	var swing := sin((current_hour - 12.0) / 24.0 * TAU)
@@ -5621,6 +5653,8 @@ func _roll_weather() -> void:
 	if sanity_sys._event_active("heat"):
 		weather_kind = "sunny"
 		_apply_weather()
+		if debug_menu != null:
+			debug_menu.after_roll()
 		return
 	var season := _season_of(_calendar_date(day)["month"])
 	var weights: Dictionary = WEATHER_WEIGHTS[season]
@@ -5634,6 +5668,8 @@ func _roll_weather() -> void:
 			weather_kind = str(k)
 			break
 	_apply_weather()
+	if debug_menu != null:
+		debug_menu.after_roll()
 
 
 # Shows the day's weather and lights the farm to match.
