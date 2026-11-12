@@ -1,0 +1,5 @@
+﻿COMBAT frame 2: blow from the front, guard up -> turned aside
+COMBAT frame 44: blow from behind, guard up -> landed, 1 damage
+COMBAT frame 84: swing pressed (attack frame 0 shows at once, the swing sound plays)
+COMBAT frame 86: blow from the front, guard down -> landed, 1 damage
+COMBAT frame 86: contact frame ["attack_sword_east", 3] shown 0.100 s into the swing; hit resolved on it: a miss

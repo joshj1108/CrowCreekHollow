@@ -33,7 +33,7 @@ New-Item -ItemType Directory -Force $work | Out-Null
 $gargs = @('--path', $Root, '--write-movie', "$work/f.png", '--fixed-fps', '30', '-s', 'tools/capture.gd', '--', "hold=$Secs", 'quiet') + ($Opts -split ' ')
 # Godot writes warnings to stderr, which Windows PowerShell would turn into a stopping error.
 $ErrorActionPreference = 'Continue'
-& $Godot @gargs 2>&1 | Out-Null
+& $Godot @gargs 2>&1 | ForEach-Object { "$_" } | Where-Object { $_ -like 'COMBAT*' }   # timing lines (capture.gd combatlog) pass through
 $ErrorActionPreference = 'Stop'
 if (-not (Test-Path "$work/f$('{0:D8}' -f $Skip).png")) { throw "recorded too few frames in $work" }
 

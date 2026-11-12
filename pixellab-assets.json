@@ -3847,5 +3847,52 @@
     "note": "kept: art/farm/cave_foes/snake_move.png"
    }
   ]
- }
+ },
+  "CCH-CONSOLIDATED-003/FP": {
+    "about": "Final Polish (November 2026): no new generations. Pixel edits of earlier PixelLab assets by script; the untouched files are kept in art/style_tests/CCH-003-FP/before/.",
+    "edits": [
+      {
+        "file": "art/farm/cave_foes/bat_attack.png",
+        "from": "CCH-CONSOLIDATED-003/E bat_attack (job c5abc684)",
+        "tool": "tools/cchfp_creatures.py",
+        "note": "frame 0 replaced by frame 4 moved down to frame 0's height"
+      },
+      {
+        "file": "art/farm/cave_foes/snake_move.png",
+        "from": "CCH-CONSOLIDATED-003/E snake_move",
+        "tool": "tools/cchfp_creatures.py",
+        "note": "frames reordered 0,1,5,4,5,1"
+      },
+      {
+        "file": "art/farm/cave_foes/lizard_*.png",
+        "from": "CCH-CONSOLIDATED-003/E lizard_* (6 sheets)",
+        "tool": "tools/cchfp_creatures.py",
+        "note": "dorsal highlight, darker warmer mid-tones and underside"
+      },
+      {
+        "file": "art/farm/mailbox.png",
+        "from": "CCH-CONSOLIDATED-003/B mailbox_32x48 (job ad30b269)",
+        "tool": "tools/cchfp_mailbox.py",
+        "note": "galvanised steel body, lid highlight, door seam, brighter flag"
+      },
+      {
+        "file": "art/player/d/water_south.png",
+        "from": "CCH-CONSOLIDATED-003/D water (south)",
+        "tool": "tools/cchfp_water.py",
+        "note": "stream pixels recoloured from jacket tan to water blue"
+      },
+      {
+        "file": "art/farm/fi/rug_bed.png",
+        "from": "FARMHOUSE-INTERIOR-001 braided rug (scripted, tools/fi001_art.py)",
+        "tool": "tools/cchfp_interior.py",
+        "note": "blue and green rings warmed"
+      },
+      {
+        "file": "art/farm/fc/shelf_books.png",
+        "from": "new, scripted",
+        "tool": "tools/cchfp_interior.py",
+        "note": "wall shelf with four books and a ledger, colours from fc/books.png"
+      }
+    ]
+  }
 }

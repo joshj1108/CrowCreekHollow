@@ -102,6 +102,38 @@ func _sheets() -> void:
 		# The lowest pixel is the feet, or in the lizard's first frame the tip of its curled tail, so allow 3 rows.
 		_check("%s idle stays on the ground line in every frame" % kind,
 			bottoms.all(func(b: int) -> bool: return b <= CaveFoeArt.FEET and b >= CaveFoeArt.FEET - 3), str(bottoms))
+	# Anchors (Final Polish): in every state but the fall, the lizard and snake keep their lowest pixel on the ground
+	# line (within 3 rows) and every creature keeps its horizontal centre within 4 art px of its idle's; no frame
+	# changes its drawn size by more than half against the idle (the bat's tucked attack frame did).
+	for kind in CaveFoeArt.KINDS:
+		var idle_img: Image = FarmSprites.tex("cave_foes/%s_idle" % kind).get_image()
+		var ref := idle_img.get_region(Rect2i(0, 0, c, c)).get_used_rect()
+		var ref_px := _opaque(idle_img.get_region(Rect2i(0, 0, c, c)))
+		var bad := ""
+		for state in CaveFoeArt.STATES:
+			if state == "death":
+				continue
+			var img: Image = FarmSprites.tex("cave_foes/%s_%s" % [kind, state]).get_image()
+			for f in CaveFoeArt.FRAMES[kind][state]:
+				var cell := img.get_region(Rect2i(f * c, 0, c, c))
+				var used := cell.get_used_rect()
+				var ratio := float(_opaque(cell)) / float(ref_px)
+				if absf(used.get_center().x - ref.get_center().x) > 4.0:
+					bad += "%s %d centre %.1f; " % [state, f, used.get_center().x]
+				if kind != "bat" and (used.end.y - 1 > CaveFoeArt.FEET or used.end.y - 1 < CaveFoeArt.FEET - 3):
+					bad += "%s %d bottom %d; " % [state, f, used.end.y - 1]
+				if ratio < 0.75 or ratio > 1.5:
+					bad += "%s %d size x%.2f; " % [state, f, ratio]
+		_check("%s: anchors and drawn size steady across states" % kind, bad == "", bad)
+
+
+func _opaque(img: Image) -> int:
+	var n := 0
+	for y in img.get_height():
+		for x in img.get_width():
+			if img.get_pixel(x, y).a > 0.5:
+				n += 1
+	return n
 
 
 func _glowing(img: Image) -> String:
@@ -253,6 +285,7 @@ func _other_states() -> void:
 		m._tool_press = true
 		m._swing()
 		m._tool_press = false
+		_to_contact()
 		var pk: Array = CaveFoeArt.pick(foe, 0.0)
 		_check("%s: a hit shows the flinch at once, with the flash" % kind, pk[0] == "hurt" and pk[1] == 0 and float(foe["flash"]) > 0.0)
 		_step(int(CaveFoeArt.HURT_T / STEP) + 1)
@@ -264,6 +297,7 @@ func _other_states() -> void:
 		m._tool_press = true
 		m._swing()
 		m._tool_press = false
+		_to_contact()
 		_check("%s: a kill removes the foe at once" % kind, not m.foes.has(foe) and m.foes.is_empty())
 		_check("%s: the body falls (death sheet)" % kind, m.combat_sys.dying.size() == 1 and m.combat_sys.dying[0]["kind"] == kind)
 		var hp0: int = m.hp
@@ -276,6 +310,7 @@ func _other_states() -> void:
 	m._tool_press = true
 	m._swing()
 	m._tool_press = false
+	_to_contact()
 	m.saver._save_game()
 	var data := SaveSystem.read_save(path)
 	var text := JSON.stringify(data)
@@ -284,6 +319,14 @@ func _other_states() -> void:
 	m.combat_sys._update_foes(STEP)
 	_check("leaving the cave clears the bodies", m.combat_sys.dying.is_empty())
 	m.in_cave = true
+
+
+# Plays the farmer's swing up to its contact frame, where the hit lands (Final Polish: no longer on the press).
+func _to_contact() -> void:
+	var guard := 0
+	while m.swing_pending and guard < 60:
+		m.player._advance_anim(STEP)
+		guard += 1
 
 
 func _fallback() -> void:

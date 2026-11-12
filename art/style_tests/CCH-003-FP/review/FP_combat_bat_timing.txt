@@ -1,0 +1,6 @@
+﻿COMBAT frame 48: swing pressed (attack frame 0 shows at once, the swing sound plays)
+COMBAT frame 50: contact frame ["attack_copper_east", 3] shown 0.100 s into the swing; hit resolved on it: bat hit, hp now 5
+COMBAT frame 64: swing pressed (attack frame 0 shows at once, the swing sound plays)
+COMBAT frame 66: contact frame ["attack_copper_east", 3] shown 0.100 s into the swing; hit resolved on it: a miss
+COMBAT frame 80: swing pressed (attack frame 0 shows at once, the swing sound plays)
+COMBAT frame 82: contact frame ["attack_copper_east", 3] shown 0.100 s into the swing; hit resolved on it: bat hit, hp now 1

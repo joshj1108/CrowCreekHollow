@@ -89,11 +89,15 @@ const PROPS := [
 const WALL_DECOR := [
 	{"art": "shelf", "cx": 9.0, "y": 6, "from": 1},
 	{"art": "herbs", "cx": 15.5, "y": 7, "from": 1},
-	{"art": "fc/sampler", "cx": 2.0, "y": 8, "from": 3},
+	# Final Polish: the study corner over the desk: a shelf of books and the ledger (Patched), the sampler beside it
+	{"art": "fc/shelf_books", "cx": 1.7, "y": 16, "from": 2},
+	{"art": "fc/sampler", "cx": 3.15, "y": 8, "from": 3},
 	{"art": "fc/wreath", "cx": 21.6, "y": 5, "from": 3},
 ]
-# The bedroom's braided rug (Patched) lies at the bed's foot, its top-left on this tile.
-const BED_RUG_AT := Vector2i(3, 6)
+# The bedroom's braided rug (Patched) lies at the bed's foot, its top-left on this tile; the chest at the foot of the
+# bed stands on its edge (Final Polish: it lay a tile lower, alone on the bare floor).
+const BED_RUG_AT := Vector2i(3, 5)
+const CHAIR_TUCK := 8.0   # art px the dining chairs north of the table are drawn lower, to sit at it
 # Floor damage (cells of floor_dmg.png: 0 hole, 1 crack, 2 patch, 3 stain, 4 dust). A hole is patched with new
 # boards at Boarded; at Patched two patches remain, darker; at Restored the boards are all finished.
 const DAMAGE := [
@@ -398,7 +402,9 @@ func _draw_table_piece(ci: CanvasItem, pos: Vector2i, tint: Color) -> void:
 	var r := pos - d.position
 	var end_seat := r.x == 0 or r.x == d.size.x - 1
 	if r.y == 0 and end_seat:
-		_stand(ci, pos, "fc/chair_front", 1, tint)
+		# Pulled in to the table's far edge (Final Polish: they stood a tile away); the table, drawn after, hides
+		# their legs. The tiles are the dining set's either way.
+		_stand(ci, pos, "fc/chair_front", 1, tint, Vector2(0, CHAIR_TUCK))
 	elif r.y == 2 and r.x == 0:
 		_stand(ci, pos, "fc/table", d.size.x, tint)
 		if _stage() >= 3:
@@ -550,7 +556,9 @@ func standing_rects() -> Array:
 				var r := pos - dr.position
 				var end_seat := r.x == 0 or r.x == dr.size.x - 1
 				if r.y == 0 and end_seat:
-					out.append(_rect_of(pos, "fc/chair_front", 1))
+					var chair := _rect_of(pos, "fc/chair_front", 1)
+					chair["rect"] = (chair["rect"] as Rect2).grow_individual(0, -CHAIR_TUCK, 0, CHAIR_TUCK)
+					out.append(chair)
 				elif r.y == 2 and r.x == 0:
 					out.append(_rect_of(pos, "fc/table", dr.size.x))
 				elif r.y == 3 and end_seat:

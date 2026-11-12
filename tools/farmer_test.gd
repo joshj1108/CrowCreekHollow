@@ -13,8 +13,9 @@ extends SceneTree
 #   - lantern: lit and idle or walking, it is in the hand (the carrying sheets) and the light sits on its flame; a
 #     tool or a weapon puts it on the belt within LAMP_SWAP while the action's own frame shows at once; it comes
 #     back to the hand after; unlit, nothing is drawn and the light stays off; main's light follows the lantern;
-#   - combat: the swing reaches its strike frame within STRIKE_AT of SWING_TIME (inside the foe's 0.2 s flash, as the
-#     damage lands on the press) and never steps back, the guard rises
+#   - combat: the swing shows its contact frame at STRIKE_AT of SWING_TIME and the hit event fires on that frame (a real
+#     foe loses HP, flashes and flinches only then, never on the press; cooldown unchanged), it never steps back;
+#     the guard is down while a swing plays and back up after it; the guard rises
 #     in BLOCK_RAISE and holds, a blow from the front is still turned aside (same safety, no damage) and jolts the
 #     guard, one from behind still lands and starts the flinch, and the combat and movement numbers are unchanged.
 # Prints PASS or FAIL per case and a total; the exit code is the number of failures.
@@ -299,6 +300,94 @@ func _lantern() -> void:
 	_check("lantern: by day it is off and not shown", not p.lantern_on and not m.lantern_light.enabled)
 
 
+# Lantern swaps (Final Polish): through a swing, a hoe, the guard, watering and a chop, and back to idle, in every
+# facing, the lantern (and the light on its flame) never moves more than 3.5 art px in one 60 Hz frame: no teleport
+# between hand and belt, and it is always somewhere (never a frame without it).
+func _lamp_swaps() -> void:
+	var bad := ""
+	for fname in FACINGS:
+		for seq in [["act", "swing", 0.3], ["act", "hoe", 0.4], ["block", "", 0.5], ["act", "water", 0.5], ["loop", "chop", 1.4]]:
+			_reset()
+			p.facing = FACINGS[fname]
+			p.lantern_on = true
+			p.held = "sword"
+			p.held_item = "iron_sword"
+			p.lamp_hand = 1.0
+			_step(0.5)
+			var prev: Vector2 = p.lantern_offset()
+			if seq[0] == "act":
+				p.play_act(seq[1], seq[2])
+			elif seq[0] == "block":
+				p.blocking = true
+			else:
+				p.set_loop(seq[1])
+			var t := 0.0
+			while t < float(seq[2]) + 0.4:
+				if t >= float(seq[2]):
+					p.blocking = false
+					p.loop_kind = ""
+				p._advance_anim(1.0 / 60.0)
+				t += 1.0 / 60.0
+				var o: Vector2 = p.lantern_offset()
+				if o.distance_to(prev) / p.ART_SCALE > 3.5:
+					bad += "%s %s %.2fs %.1f; " % [fname, seq[1], t, o.distance_to(prev) / p.ART_SCALE]
+				prev = o
+	p.lantern_on = false
+	_check("lantern: hand and belt swaps move smoothly (<= 3.5 art px a frame) in every facing", bad == "", bad)
+
+
+# A real swing at a lizard: nothing on the press; the HP, the flash and the flinch all come on the contact frame.
+func _swing_sync() -> void:
+	_reset()
+	m._enter_cave()
+	m.set_process(false)
+	m.foes = []
+	p.facing = Vector2.DOWN
+	m.active_slot = 0
+	m.equipment["hand_r"] = "iron_sword"
+	p.held = "sword"
+	p.held_item = "iron_sword"
+	var foe: Dictionary = m.combat_sys._new_foe("lizard", Vector2i.ZERO)
+	foe["pos"] = p.position + Vector2.DOWN * m.PX
+	foe["hp"] = 99
+	m.foes.append(foe)
+	m.swing_cool = 0.0
+	m._tool_press = true
+	m._swing()
+	m._tool_press = false
+	_check("sync: the press starts the swing and its cooldown, the foe is untouched", p.act == "swing" and m.swing_cool == m.SWING_COOLDOWN and int(foe["hp"]) == 99 and float(foe["flash"]) == 0.0 and m.swing_pending)
+	var t := 0.0
+	while m.swing_pending and t < 1.0:
+		p._advance_anim(1.0 / 60.0)
+		t += 1.0 / 60.0
+	var key: String = p._sheet_frame()[0]
+	var strike: int = p.STRIKE_FRAME["sword_south"]
+	_check("sync: the hit lands at %.3f s, on the contact frame %d" % [t, p._sheet_frame()[1]], int(foe["hp"]) < 99 and float(foe["flash"]) > 0.0 and absf(t - p.STRIKE_AT * m.SWING_TIME) <= 1.0 / 60.0 + 0.001 and p._sheet_frame()[1] == strike and key == "attack_sword_south")
+	_check("sync: the foe flinches with it", CaveFoeArt.pick(foe, 0.0)[0] == "hurt")
+	# Out of reach at contact: nothing, and the swing still finishes on time.
+	foe["hp"] = 99
+	foe["flash"] = 0.0
+	foe["pos"] = p.position + Vector2.DOWN * m.PX * 3.0
+	m.swing_cool = 0.0
+	m._tool_press = true
+	m._swing()
+	m._tool_press = false
+	_step(m.SWING_TIME + 0.02)
+	_check("sync: a miss does nothing and the swing ends after SWING_TIME", int(foe["hp"]) == 99 and p.act == "" and not m.swing_pending)
+	# The guard and the swing: held block drops while the swing plays and comes back up after.
+	Input.action_press("block")
+	m.swing_cool = 0.0
+	m._tool_press = true
+	m._swing()
+	m._tool_press = false
+	var down_mid := not m._guard_up()
+	_step(m.SWING_TIME + 0.02)
+	_check("sync: the guard is down during the swing and up again after it", down_mid and m._guard_up())
+	Input.action_release("block")
+	m.foes = []
+	m.in_cave = false
+
+
 func _combat() -> void:
 	# The swing: frame 0 at the press, the strike frame by STRIKE_AT, never stepping back, the last at the end.
 	for w in p.WEAPON_SHEET:
@@ -313,7 +402,13 @@ func _combat() -> void:
 			var strike: int = mini(p.STRIKE_FRAME["%s_%s" % [p.WEAPON_SHEET[w], p._sheet_dir()]], n - 1)
 			var frames := []
 			var strike_at := -1.0
+			var event_at := [-1.0]
 			var t := 0.0
+			var clock := [0.0]
+			var on_struck := func(k: String) -> void:
+				if k == "swing" and event_at[0] < 0.0:
+					event_at[0] = clock[0]
+			p.struck.connect(on_struck)
 			while p.act != "":
 				var f: int = p._sheet_frame()[1]
 				frames.append(f)
@@ -321,11 +416,17 @@ func _combat() -> void:
 					strike_at = t
 				p._advance_anim(1.0 / 60.0)
 				t += 1.0 / 60.0
+				clock[0] = t
+			p.struck.disconnect(on_struck)
+			# The contact frame is first drawn on the step the hit event fires (one 60 Hz frame apart at most).
+			_check("attack %s %s: hit event on the contact frame (event %.3f s, frame %.3f s)" % [w, fname, event_at[0], strike_at], event_at[0] >= 0.0 and absf(event_at[0] + 1.0 / 60.0 - strike_at) <= 1.0 / 60.0 + 0.001 and absf(strike_at - p.STRIKE_AT * m.SWING_TIME) <= 1.0 / 60.0 + 0.001)
 			var mono := true
 			for i in range(1, frames.size()):
 				if frames[i] < frames[i - 1]:
 					mono = false
 			_check("attack %s %s: strike frame by %.2f s (at %.3f), in order, all %d frames" % [w, fname, p.STRIKE_AT * m.SWING_TIME, strike_at, n], frames[0] == 0 and strike_at >= 0.0 and strike_at <= p.STRIKE_AT * m.SWING_TIME + 0.02 and strike_at <= 0.2 and mono and frames.max() == n - 1, str(frames))
+	_swing_sync()
+	_lamp_swaps()
 	# The guard: up within BLOCK_RAISE, then held.
 	_reset()
 	p.held = "sword"

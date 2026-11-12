@@ -127,9 +127,10 @@ const ACTION_SHEETS := ["hoe", "water", "chop", "mine", "plant", "cast", "gather
 const SHEET_FOR := {"fish": "cast"}
 # The weapon in the sword slot -> its attack and block sheets (attack_<w>_<dir>, block_<w>_<dir>).
 const WEAPON_SHEET := {"sharpened_stick": "stick", "hunting_knife": "knife", "copper_sword": "copper", "iron_sword": "sword"}
-# The swing's damage lands the moment it is pressed (main._swing) and the foe flashes for 0.2 s, so the drawn strike
-# comes at once: the grip and wind-up frames up to STRIKE_FRAME (the weapon at full reach, per sheet) play in the first
-# STRIKE_AT of the 0.3 s swing (0.1 s, inside the flash), then the follow-through and the recovery to the ready pose.
+# The swing (Final Polish): the grip and wind-up frames before STRIKE_FRAME (the weapon at full reach, per sheet) play
+# in the first STRIKE_AT of the 0.3 s swing (0.1 s); the contact frame shows exactly at STRIKE_AT, and that is when
+# the hit lands (_advance_anim emits struck("swing") and main._land_swing resolves it), then the follow-through and
+# the recovery to the ready pose. Cooldown, reach, arc and damage are main's and unchanged.
 const STRIKE_FRAME := {
 	"sword_south": 4, "sword_east": 3, "sword_north": 4,
 	"copper_south": 4, "copper_east": 3, "copper_north": 4,
@@ -242,7 +243,9 @@ func _advance_anim(delta: float) -> void:
 	if act != "":
 		act_t += delta
 		var p := clampf(act_t / act_dur, 0.0, 1.0)
-		if STRIKE.has(act) and act_prev < float(STRIKE[act]) and p >= float(STRIKE[act]):
+		# The swing's contact frame is its strike marker: main lands the hit on it (struck "swing").
+		var mark: float = STRIKE_AT if act == "swing" else float(STRIKE.get(act, -1.0))
+		if mark >= 0.0 and act_prev < mark and p >= mark:
 			_strike(act)
 		if act == "water" and sheets.is_empty() and randf() < 0.8:
 			_spray()
@@ -270,6 +273,10 @@ func _advance_anim(delta: float) -> void:
 
 # Debris thrown off where the tool strikes: chips from wood, sparks from stone, dirt from the soil.
 func _strike(kind: String) -> void:
+	# The weapon reaching full extension: no debris, only the event (main resolves the hit and its effects).
+	if kind == "swing":
+		struck.emit(kind)
+		return
 	var hand := _hand_pos()
 	var col_a := Color("b07a48")
 	var col_b := Color("e0b070")
@@ -357,7 +364,7 @@ func _sheet_dir() -> String:
 
 
 # The sheet and frame for this moment: [key, frame]. A tool action plays its sheet across the action (a loop once
-# per cycle); a swing reaches its strike frame early, because the hit lands on the press; the guard rises and holds;
+# per cycle); a swing shows its contact frame at STRIKE_AT, when the hit lands; the guard rises and holds;
 # a blow's flinch plays once; walking steps with walk_t so the stride matches the footsteps; otherwise the idle
 # breathes. While the lantern is lit and in the hand, the walk and idle are the lantern-carrying sheets.
 func _sheet_frame() -> Array:
@@ -378,9 +385,9 @@ func _sheet_frame() -> Array:
 		var p := _phase().x
 		var f := 0
 		if p < STRIKE_AT:
-			f = int(p / STRIKE_AT * (strike + 1))
+			f = int(p / STRIKE_AT * strike)
 		else:
-			f = strike + 1 + int((p - STRIKE_AT) / (1.0 - STRIKE_AT) * (n - strike - 1))
+			f = strike + int((p - STRIKE_AT) / (1.0 - STRIKE_AT) * (n - strike))
 		return [key, clampi(f, 0, n - 1)]
 	if kind == "block":
 		var w: String = WEAPON_SHEET.get(held_item, "sword")

@@ -1,0 +1,6 @@
+﻿COMBAT frame 39: swing pressed (attack frame 0 shows at once, the swing sound plays)
+COMBAT frame 41: contact frame ["attack_sword_east", 3] shown 0.100 s into the swing; hit resolved on it: lizard hit, hp now 7
+COMBAT frame 55: swing pressed (attack frame 0 shows at once, the swing sound plays)
+COMBAT frame 57: contact frame ["attack_sword_east", 3] shown 0.100 s into the swing; hit resolved on it: lizard hit, hp now 1
+COMBAT frame 71: swing pressed (attack frame 0 shows at once, the swing sound plays)
+COMBAT frame 73: contact frame ["attack_sword_east", 3] shown 0.100 s into the swing; hit resolved on it: 1 killed

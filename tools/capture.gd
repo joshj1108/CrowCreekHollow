@@ -120,7 +120,10 @@ extends SceneTree
 #                   iron_sword) and hold the weapon slot
 #   slot=N          hold hotbar tool N (0 weapon, 1 axe, 2 pick, 3 hoe, ...); with hold, walk legs "use" play its action,
 #                   "block:S" holds the guard for S seconds, "blow:S" lands a creature's blow from the front
-#                   (a hit; "block+blow:S" guards and the blow is turned aside), "chop:S" / "mine:S" / "fish:S" run that loop for S seconds
+#                   (a hit; "block+blow:S" guards and the blow is turned aside; "block+blowback:S" brings it from behind,
+#                   so it lands; "use+block+blow:S" swings while holding the guard, which is down during the swing),
+#                   "chop:S" / "mine:S" / "fish:S" run that loop for S seconds
+#   combatlog       with hold, print COMBAT lines: each swing's press, its contact frame and hit, each blow and the guard
 
 func _initialize() -> void:
 	var opt := {"frames": "90", "scale": "0.5"}
@@ -588,20 +591,26 @@ func _perf() -> void:
 func _hold(main, opt: Dictionary) -> void:
 	AudioServer.set_bus_mute(AudioServer.get_bus_index("Music"), true)
 	var left := int(float(opt["hold"]) * 30.0)
+	if opt.has("combatlog"):
+		_combatlog = true
+		main.player.struck.connect(_log_contact.bind(main))
 	for leg in opt.get("walk", "").split(",", false):
 		var part: PackedStringArray = leg.split(":")
 		var frames := int(float(part[1]) * 30.0) if part.size() > 1 else 1
-		if part[0] == "use":
+		var tokens: PackedStringArray = part[0].split("+")
+		if "block" in tokens:
+			Input.action_press("block")
+		if "use" in tokens:
 			main._tool_press = true
+			if opt.has("combatlog") and main._active_tool() == "sword":
+				_defeated0 = int(main.stats["defeated"])
+				print("COMBAT frame %d: swing pressed (attack frame 0 shows at once, the swing sound plays)" % _rec_frame)
 			main._swing()
 			main._tool_press = false
 			if main._active_tool() != "sword":
 				main._play_use_anim()
 		if "hold_loop" in main.player:
 			main.player.hold_loop = part[0] if part[0] in ["chop", "mine", "fish"] else ""
-		var tokens: PackedStringArray = part[0].split("+")
-		if "block" in tokens:
-			Input.action_press("block")
 		if part[0] == "hand":
 			# The hand action on what the farmer faces; a panel it opens is shut again so the scene stays in view.
 			main._interact()
@@ -625,6 +634,8 @@ func _hold(main, opt: Dictionary) -> void:
 		for i in mini(frames, left):
 			if i == 2 and "blow" in tokens:
 				_blow(main)
+			if i == 2 and "blowback" in tokens:
+				_blow(main, -1.0)
 			await _hold_frame(main, opt)
 		for k in keys:
 			Input.action_release(k)
@@ -678,14 +689,20 @@ func _creatures(main, opt: Dictionary) -> void:
 
 
 # A creature's blow from straight in front (Phase D): the real combat code decides whether the guard turns it.
-func _blow(main) -> void:
+# Final Polish: side -1 brings it from behind (the guard can't turn it).
+func _blow(main, side := 1.0) -> void:
 	var foe: Dictionary = main.combat_sys._new_foe("bat", Vector2i.ZERO)
-	foe["pos"] = main.player.position + main.player.facing * main.PX
+	foe["pos"] = main.player.position + main.player.facing * main.PX * side
+	var hp0: int = main.hp
 	main.invuln = 0.0
 	main.hp = maxi(main.hp, 5)
 	var keep: Vector2 = main.player.position
 	main.combat_sys._foe_attack(foe)
 	main.player.position = keep
+	if _combatlog:
+		print("COMBAT frame %d: blow from %s, guard %s -> %s" % [_rec_frame,
+			"the front" if side > 0.0 else "behind", "up" if main.blocking else "down",
+			"turned aside" if main.hp == hp0 else "landed, %d damage" % (hp0 - main.hp)])
 
 
 # One recorded frame; with quiet, the message line stays empty so setup messages don't fill the shot.
@@ -693,6 +710,29 @@ func _hold_frame(main, opt: Dictionary) -> void:
 	if opt.has("quiet"):
 		main.message_label.text = ""
 	await process_frame
+	_rec_frame += 1
+
+
+# combatlog (Final Polish): with hold, print each swing's press, its contact frame and what it hit, by recorded frame
+# (1/30 s of game time each), and each blow and whether the guard turned it, as timing evidence for a review.
+var _rec_frame := 0
+var _combatlog := false
+var _defeated0 := 0
+
+
+func _log_contact(kind: String, main) -> void:
+	if kind != "swing":
+		return
+	# Runs after main._land_swing (connected first): a foe hit this frame has a fresh 0.2 s flash.
+	var hits := []
+	for foe in main.foes:
+		if float(foe["flash"]) >= 0.19:
+			hits.append("%s hit, hp now %d" % [foe["kind"], int(foe["hp"])])
+	var killed: int = int(main.stats["defeated"]) - _defeated0
+	if killed > 0:
+		hits.append("%d killed" % killed)
+	print("COMBAT frame %d: contact frame %s shown %.3f s into the swing; hit resolved on it: %s" % [_rec_frame,
+		str(main.player._sheet_frame()), main.player.act_t, ", ".join(hits) if not hits.is_empty() else "a miss"])
 
 
 func _save(opt: Dictionary) -> void:

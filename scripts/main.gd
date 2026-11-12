@@ -53,7 +53,7 @@ const INT_STUDY := InteriorArt.STUDY
 const INT_PARLOR := InteriorArt.PARLOR
 const INT_HALL := InteriorArt.HALL
 const INT_PAD_TOP := 2.4                         # camera margin above the house, in tiles (the north wall clears the HUD cards)
-const INT_PAD_BOTTOM := 1.0                      # and below it (clear of the hotbar)
+const INT_PAD_BOTTOM := 2.6                      # and below it: the exit mat and the farmer on it clear the hotbar (Final Polish; was 1.0)
 const INT_FACE_ROWS := 3                         # a wall facing a room shows this many tiles of face
 const INT_EXIT := Vector2i(12, 13)               # the mat in the south wall, back out to the farm
 const INT_ENTRY := Vector2i(12, 12)              # where you stand on coming in
@@ -889,6 +889,7 @@ var hp := BASE_HP
 var foes: Array = []           # creatures in the cave or dogs on a trek, rebuilt on each visit
 var swing_cool := 0.0
 var swing_dir := Vector2.DOWN
+var swing_pending := false   # a swing has been pressed and its contact frame has not come yet
 var invuln := 0.0
 var equipment := {"hand_r": "hoe", "offhand": "", "head": "", "neck": "", "chest": "", "wrist": "", "legs": "", "feet": ""}
 
@@ -1260,7 +1261,7 @@ func _process(delta: float) -> void:
 		if _bag_open():
 			bag.set_items(_bag_items())
 		return
-	blocking = Input.is_action_pressed("block") and _active_tool() == "sword" and _has_weapon()
+	blocking = _guard_up()
 	player.blocking = blocking
 	# Scrolling runs through the tools only; the number keys can still reach any slot.
 	var slot_before := active_slot
@@ -5213,6 +5214,18 @@ func _swing() -> void:
 	player.play_act("swing", SWING_TIME)
 	play_sfx("swing", 0.08)
 	swing_dir = player.facing
+	swing_pending = true
+
+
+# The swing's contact frame (Player.STRIKE_AT of SWING_TIME, 0.1 s after the press): the hit lands here, against the
+# foes in reach and in the arc of the direction the swing was aimed, so the damage, the foe's flash and flinch and
+# the hit sound all come with the blade at full reach. Reach, arc, damage and cooldown are unchanged.
+func _land_swing() -> void:
+	if not swing_pending:
+		return
+	swing_pending = false
+	if not in_cave:
+		return
 	var dmg := combat_sys._weapon_damage()
 	var combat := progression._level("Combat")
 	var hit_any := false
@@ -5236,6 +5249,12 @@ func _swing() -> void:
 	else:
 		_show_message("You swing at empty air.")
 	queue_redraw()
+
+
+# The guard: block held with a weapon out. It is down while a swing plays (the swing is drawn, so it can't also be
+# turning blows aside); still held, it comes back up when the swing ends.
+func _guard_up() -> bool:
+	return Input.is_action_pressed("block") and _active_tool() == "sword" and _has_weapon() and player.act != "swing"
 
 
 func _defense() -> int:
@@ -5902,6 +5921,9 @@ const STRIKE_SOUNDS := {"chop": "chop", "mine": "pick", "hoe": "hoe"}
 
 
 func _on_player_struck(kind: String) -> void:
+	if kind == "swing":
+		_land_swing()
+		return
 	_shake_camera(0.12, 1.6 if kind == "mine" else 1.2)
 	if STRIKE_SOUNDS.has(kind):
 		play_sfx(STRIKE_SOUNDS[kind], 0.06)
