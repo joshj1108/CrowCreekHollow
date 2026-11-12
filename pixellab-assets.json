@@ -3518,5 +3518,334 @@
     "note": "used"
    }
   ]
+ },
+ "CCH-CONSOLIDATED-003/E": {
+  "tool": "tools/cch003_creatures.py",
+  "sources": "art/style_tests/CCH-003/E/raw/ (fetch.py, fetch_anims.py, anim_jobs.json; candidates and animation frames) and E/refs/ (style, old sprites, picks and the padded bases)",
+  "note": "CCH-CONSOLIDATED-003 Phase E: the cave's bat, lizard and snake redrawn as real cave animals (no glowing eyes, muted hides) at their old size, each with idle, move, alert, attack, hurt and death. Two rounds of create_image_pro (the first came out ~1.4x the old size and became the reference for a smaller second), then one animate_image per state; four states redone. The build drops effect pixels, mutes eyes and mouths, and lifts body tones (LIFT).",
+  "generations": 82,
+  "usd": 0,
+  "balance_after": 2522,
+  "game_files": [
+   "art/farm/cave_foes/*.png (18 sheets)",
+   "scripts/cave_foe_art.gd"
+  ],
+  "jobs": [
+   {
+    "key": "bat",
+    "tool": "create_image_pro",
+    "job_id": "7595c6b8-04f6-4ab0-89e6-3937b860c974",
+    "asset_id": "f3416d2e-6bde-511c-b380-52880ab5fc7a",
+    "size": [
+     24,
+     24
+    ],
+    "seed": 5501,
+    "cost": 10,
+    "settings": {
+     "style_image": "refs/style.png (the new farmer's east walk frame and the trek dog)",
+     "references": [
+      "refs/old_bat.png: camera angle, pose and body size only"
+     ]
+    },
+    "prompt": "a real cave bat seen from the front and slightly above, wings spread wide, thin leathery wing membranes with visible finger bones, small furry brown-grey body, small pointed ears, tiny dark eyes (not glowing), muted dusty brown and grey with a little pale mineral dust on the wings",
+    "note": "kept 11 as the reference for bat2 (24x14 was ~1.4x the old bat)"
+   },
+   {
+    "key": "lizard",
+    "tool": "create_image_pro",
+    "job_id": "105df572-a19d-40d8-acc6-5e890dcfa4ea",
+    "asset_id": "8e4cd022-28ea-553b-b21c-68a33663f023",
+    "size": [
+     24,
+     24
+    ],
+    "seed": 5502,
+    "cost": 10,
+    "settings": "as bat, reference refs/old_lizard.png",
+    "prompt": "a real cave lizard seen from the side facing right, low to the ground on four splayed legs with clawed toes, long tapering tail, flat head with small dark eyes (not glowing), rough bumpy grey-brown hide with dull ochre and pale lichen-green mottling and a few darker mineral stains",
+    "note": "kept 02 as the reference for lizard2 (too big)"
+   },
+   {
+    "key": "snake",
+    "tool": "create_image_pro",
+    "job_id": "cc25c112-cc5d-4667-8efa-2aab7b6c212a",
+    "asset_id": "e1ba65fe-55e9-5561-b469-4e6d2d2b7f1a",
+    "size": [
+     24,
+     24
+    ],
+    "seed": 5503,
+    "cost": 10,
+    "settings": "as bat, reference refs/old_snake.png",
+    "prompt": "a real cave snake seen from the side facing right, coiled low on the ground with its front third raised in an S-curve ready to strike, head held level with small dark eyes (not glowing), dull earthy grey-brown scales with darker brown saddle blotches and faint pale mineral dust, pale belly",
+    "note": "kept 13 as the reference for snake2 (24x20, too big)"
+   },
+   {
+    "key": "bat2",
+    "tool": "create_image_pro",
+    "job_id": "79f314dd-a0bd-4ab0-8ec7-01a9deb47af2",
+    "asset_id": "ee5cf832-1184-5a3d-995e-17d3bd330103",
+    "size": [
+     18,
+     18
+    ],
+    "seed": 5511,
+    "cost": 10,
+    "settings": "style image and reference refs/pick_bat.png (bat/11)",
+    "prompt": "the same cave bat, smaller, wings spread wide, seen from the front and slightly above, fills the canvas width",
+    "note": "kept 39 (17x11) -> refs/base_bat.png"
+   },
+   {
+    "key": "lizard2",
+    "tool": "create_image_pro",
+    "job_id": "4d84c93b-a53f-4338-b9a0-0007fd236d9e",
+    "asset_id": "5e637d83-f2e5-52c3-91fc-33d95e2fc622",
+    "size": [
+     20,
+     16
+    ],
+    "seed": 5512,
+    "cost": 10,
+    "settings": "style image and reference refs/pick_lizard.png (lizard/02)",
+    "prompt": "the same cave lizard, smaller, side view facing right, low on four splayed legs, long tail, fills the canvas width",
+    "note": "kept 20 (20x12) -> refs/base_lizard.png"
+   },
+   {
+    "key": "snake2",
+    "tool": "create_image_pro",
+    "job_id": "0952e4b2-2f06-409d-8bd6-be9a06d32b80",
+    "asset_id": "66479940-a1eb-5e51-9e92-c304e371c397",
+    "size": [
+     18,
+     18
+    ],
+    "seed": 5513,
+    "cost": 10,
+    "settings": "style image and reference refs/pick_snake.png (snake/13)",
+    "prompt": "the same cave snake, smaller, side view facing right, coiled with its front raised in an S-curve, fills the canvas",
+    "note": "kept 47 (18x18) -> refs/base_snake.png"
+   },
+   {
+    "key": "bat_idle",
+    "tool": "animate_image",
+    "job_id": "ea17e9be-6ae4-4e48-8691-ee5f4f603fa1",
+    "seed": 5521,
+    "cost": 1,
+    "settings": "4 frames on refs/base_bat.png (32x32, feet on row 30)",
+    "prompt": "bat hovering in place, wings beating slowly up and down, body bobbing slightly",
+    "note": "kept: art/farm/cave_foes/bat_idle.png"
+   },
+   {
+    "key": "bat_move",
+    "tool": "animate_image",
+    "job_id": "b2490edc-5cc2-4a74-91a3-3eb70e41e1e6",
+    "seed": 5522,
+    "cost": 1,
+    "settings": "6 frames on refs/base_bat.png (32x32, feet on row 30)",
+    "prompt": "bat flying fast, wings flapping hard in a full stroke from fully raised to fully lowered",
+    "note": "kept: art/farm/cave_foes/bat_move.png"
+   },
+   {
+    "key": "bat_alert",
+    "tool": "animate_image",
+    "job_id": "11c89599-b674-4b73-b7bf-5e0a0a475966",
+    "seed": 5523,
+    "cost": 1,
+    "settings": "4 frames on refs/base_bat.png (32x32, feet on row 30)",
+    "prompt": "bat startled, jerks upward and flares its wings wide, ears up, mouth opening to screech, then hangs in the air",
+    "note": "kept: art/farm/cave_foes/bat_alert.png"
+   },
+   {
+    "key": "bat_attack",
+    "tool": "animate_image",
+    "job_id": "c5abc684-8248-4672-b3e3-3217e9a77162",
+    "seed": 5524,
+    "cost": 1,
+    "settings": "6 frames on refs/base_bat.png (32x32, feet on row 30)",
+    "prompt": "bat attacks: pulls its wings up high, dives down toward the viewer with jaws open to bite, then beats back up to where it started",
+    "note": "kept: art/farm/cave_foes/bat_attack.png"
+   },
+   {
+    "key": "bat_hurt",
+    "tool": "animate_image",
+    "job_id": "8609fe6b-9463-4353-af3f-94d6793240eb",
+    "seed": 5525,
+    "cost": 1,
+    "settings": "4 frames on refs/base_bat.png (32x32, feet on row 30)",
+    "prompt": "bat struck: knocked backward and tilted, wings crumple inward for a moment, then it recovers and spreads them again",
+    "note": "kept: art/farm/cave_foes/bat_hurt.png"
+   },
+   {
+    "key": "bat_death",
+    "tool": "animate_image",
+    "job_id": "6e94c45c-b721-4555-aba7-51ce678d9e6c",
+    "seed": 5526,
+    "cost": 1,
+    "settings": "6 frames on refs/base_bat.png (32x32, feet on row 30)",
+    "prompt": "bat killed: wings fold limp, it tumbles and drops straight down to the ground and lies still on its back, crumpled",
+    "note": "kept: art/farm/cave_foes/bat_death.png"
+   },
+   {
+    "key": "lizard_idle",
+    "tool": "animate_image",
+    "job_id": "0b9b238b-b463-4ba9-a51f-09e4b501551e",
+    "seed": 5531,
+    "cost": 1,
+    "settings": "4 frames on refs/base_lizard.png (32x32, feet on row 30)",
+    "prompt": "lizard resting in place, breathing, throat pulsing, head turning a little, tail tip twitching",
+    "note": "kept: art/farm/cave_foes/lizard_idle.png"
+   },
+   {
+    "key": "lizard_move",
+    "tool": "animate_image",
+    "job_id": "a0653a3d-4d42-45d9-8ba5-9700c387d2af",
+    "seed": 5532,
+    "cost": 1,
+    "settings": "6 frames on refs/base_lizard.png (32x32, feet on row 30)",
+    "prompt": "lizard crawling forward to the right in place, legs stepping in a diagonal gait, body and tail swinging side to side",
+    "note": "kept: art/farm/cave_foes/lizard_move.png"
+   },
+   {
+    "key": "lizard_alert",
+    "tool": "animate_image",
+    "job_id": "03c23b0e-6d35-4f25-80e3-707e501f6051",
+    "seed": 5533,
+    "cost": 1,
+    "settings": "4 frames on refs/base_lizard.png (32x32, feet on row 30)",
+    "prompt": "lizard notices something: pushes up on its front legs, raises its head high and stiffens, tail lifting",
+    "note": "rejected: sits up like a cat, draws a \"!\" mark"
+   },
+   {
+    "key": "lizard_attack",
+    "tool": "animate_image",
+    "job_id": "83e75d52-7e9d-4c47-ace9-a3a432cfe2e6",
+    "seed": 5534,
+    "cost": 1,
+    "settings": "6 frames on refs/base_lizard.png (32x32, feet on row 30)",
+    "prompt": "lizard attacks: crouches back, then lunges forward to the right with jaws wide open in a snapping bite, then pulls back to its starting pose",
+    "note": "rejected: the lunge barely reads"
+   },
+   {
+    "key": "lizard_hurt",
+    "tool": "animate_image",
+    "job_id": "fb98a5f3-df78-453a-968d-09d933126958",
+    "seed": 5535,
+    "cost": 1,
+    "settings": "4 frames on refs/base_lizard.png (32x32, feet on row 30)",
+    "prompt": "lizard struck: flinches backward to the left, body curling and head jerking away, then settles back down",
+    "note": "rejected: sits up, draws hit marks"
+   },
+   {
+    "key": "lizard_death",
+    "tool": "animate_image",
+    "job_id": "77780c8c-32a1-4def-a54b-425e98b8d95a",
+    "seed": 5536,
+    "cost": 1,
+    "settings": "6 frames on refs/base_lizard.png (32x32, feet on row 30)",
+    "prompt": "lizard killed: legs give way, it slumps flat to the ground, rolls onto its side with legs curled and lies still",
+    "note": "kept: art/farm/cave_foes/lizard_death.png"
+   },
+   {
+    "key": "snake_idle",
+    "tool": "animate_image",
+    "job_id": "d7c3e059-1c51-46a0-a6d0-8df6bf9d1f6b",
+    "seed": 5541,
+    "cost": 1,
+    "settings": "4 frames on refs/base_snake.png (32x32, feet on row 30)",
+    "prompt": "snake coiled in place, slowly swaying its raised head and neck, tongue flicking in and out",
+    "note": "kept: art/farm/cave_foes/snake_idle.png"
+   },
+   {
+    "key": "snake_move",
+    "tool": "animate_image",
+    "job_id": "e3dd6f85-b289-4dc4-b24c-e9088047195c",
+    "seed": 5542,
+    "cost": 1,
+    "settings": "6 frames on refs/base_snake.png (32x32, feet on row 30)",
+    "prompt": "snake slithering forward to the right in place, body rippling in S-waves along the ground, head held low and level",
+    "note": "rejected: almost no motion"
+   },
+   {
+    "key": "snake_alert",
+    "tool": "animate_image",
+    "job_id": "dc37eacc-7b54-4492-a084-cdf6486c7bc4",
+    "seed": 5543,
+    "cost": 1,
+    "settings": "4 frames on refs/base_snake.png (32x32, feet on row 30)",
+    "prompt": "snake alarmed: rears its head and neck up higher, pulls back into a tight S-coil, mouth opening to hiss",
+    "note": "kept: art/farm/cave_foes/snake_alert.png"
+   },
+   {
+    "key": "snake_attack",
+    "tool": "animate_image",
+    "job_id": "fb5cd73b-4d38-4665-acf9-1332aa01043b",
+    "seed": 5544,
+    "cost": 1,
+    "settings": "6 frames on refs/base_snake.png (32x32, feet on row 30)",
+    "prompt": "snake strikes: draws its head back, then shoots its head and neck straight forward to the right with jaws open to bite, then recoils back into its coil",
+    "note": "kept: art/farm/cave_foes/snake_attack.png"
+   },
+   {
+    "key": "snake_hurt",
+    "tool": "animate_image",
+    "job_id": "d7ef5e69-65c9-49e3-ba55-705f50a682cb",
+    "seed": 5545,
+    "cost": 1,
+    "settings": "4 frames on refs/base_snake.png (32x32, feet on row 30)",
+    "prompt": "snake struck: head jerks back and away to the left, body writhes, then settles back into its coil",
+    "note": "kept: art/farm/cave_foes/snake_hurt.png"
+   },
+   {
+    "key": "snake_death",
+    "tool": "animate_image",
+    "job_id": "86922e02-8800-4a2d-ab68-f958fb1fdd62",
+    "seed": 5546,
+    "cost": 1,
+    "settings": "6 frames on refs/base_snake.png (32x32, feet on row 30)",
+    "prompt": "snake killed: raised head and neck sag and collapse to the ground, coil loosens and the body lies limp and still, stretched out flat",
+    "note": "kept: art/farm/cave_foes/snake_death.png"
+   },
+   {
+    "key": "lizard_alert2",
+    "tool": "animate_image",
+    "job_id": "41bc5953-5968-4eb4-abff-b32adb1ed6dc",
+    "seed": 5537,
+    "cost": 1,
+    "settings": "4 frames on refs/base_lizard.png (32x32, feet on row 30)",
+    "prompt": "lizard stays flat and low on all four legs, freezes, lifts only its head and neck a little and holds still, tail stiff along the ground. Body never sits up.",
+    "note": "kept: art/farm/cave_foes/lizard_alert.png"
+   },
+   {
+    "key": "lizard_attack2",
+    "tool": "animate_image",
+    "job_id": "63d53b5d-6f2b-4608-8a79-a0490e1728f2",
+    "seed": 5538,
+    "cost": 1,
+    "settings": "6 frames on refs/base_lizard.png (32x32, feet on row 30)",
+    "prompt": "lizard stays low on all four legs: crouches, then darts its head and front body forward to the right with jaws snapping open, then pulls back",
+    "note": "kept: art/farm/cave_foes/lizard_attack.png"
+   },
+   {
+    "key": "lizard_hurt2",
+    "tool": "animate_image",
+    "job_id": "b2ca2059-02d3-4347-8bca-7c1598dffe17",
+    "seed": 5539,
+    "cost": 1,
+    "settings": "4 frames on refs/base_lizard.png (32x32, feet on row 30)",
+    "prompt": "lizard stays low on all four legs: body jolts sideways, head ducks down and tail whips, then it steadies again",
+    "note": "kept: art/farm/cave_foes/lizard_hurt.png"
+   },
+   {
+    "key": "snake_move2",
+    "tool": "animate_image",
+    "job_id": "4a117c89-d404-4113-82ba-cd057c247e04",
+    "seed": 5547,
+    "cost": 1,
+    "settings": "6 frames on refs/base_snake.png (32x32, feet on row 30)",
+    "prompt": "snake gliding along: its coils ripple and shift in a travelling wave, the loops sliding and changing shape, raised neck swaying forward and back with each wave",
+    "note": "kept: art/farm/cave_foes/snake_move.png"
+   }
+  ]
  }
 }

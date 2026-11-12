@@ -43,6 +43,10 @@ extends SceneTree
 #   tab=NAME        open a section, e.g. tab=Craft
 #   page=N          with tab, open the section's Nth ledger tab (counting from 0)
 #   fight           put a creature in front of the player and swing at it, so it is hurt
+#   creatures=S     with cave: the bat, lizard and snake in a row right of the farmer (use ctile=16,19) in state S (idle, move, alert,
+#                   attack, hurt, death), the game frozen with the animation at cprog=F (0-1); "live" leaves them as
+#                   real foes for hold= clips (chp=N sets their HP); ckinds=A,B picks the creatures, cface=left turns
+#                   them; oldfoes draws the old SpriteCook sheets (CCH-CONSOLIDATED-003 Phase E BEFORE shots)
 #   fish            stand below a fishing spot and cast at it
 #   visitor=ID      bring tonight's night visitor now: field, knock, quiet, crows, pond, watcher, footsteps
 #                   or hollow (use with hour=22 or later)
@@ -540,6 +544,8 @@ func _initialize() -> void:
 				buttons[i].grab_focus()
 			for f in 3:
 				await process_frame
+	if opt.has("creatures"):
+		await _creatures(main, opt)
 	if opt.has("lit"):
 		# Diagnostic only, never a gameplay view: freeze the game and lift the darkness, to judge art the lantern hides.
 		main.set_process(false)
@@ -617,6 +623,48 @@ func _hold(main, opt: Dictionary) -> void:
 		left -= frames
 	for i in maxi(left, 0):
 		await _hold_frame(main, opt)
+
+
+# CCH-CONSOLIDATED-003 Phase E: the cave creatures (ckinds, default bat,lizard,snake) in a row right of the farmer, in
+# one state. Still states freeze the game for the shot, the animation held at cprog (0-1): idle, move, alert,
+# attack, hurt or death. "live" leaves them as real foes (for hold= clips): they notice, chase and strike as in
+# play; chp=N sets their HP so a few swings kill them. cface=left turns them left.
+func _creatures(main, opt: Dictionary) -> void:
+	if opt.has("oldfoes"):
+		CaveFoeArt.enabled = false
+	var state: String = opt["creatures"]
+	var kinds: PackedStringArray = opt.get("ckinds", "bat,lizard,snake").split(",")
+	var prog := float(opt.get("cprog", "0.5"))
+	var left: bool = opt.get("cface", "right") == "left"
+	main.foes = []
+	main.combat_sys.dying = []
+	var base: Vector2 = main.player.position
+	for i in kinds.size():
+		var at: Vector2 = base + Vector2(1.4 * (i + 1) + (0.75 if state == "live" else 0.0), -0.1) * main.PX
+		var foe: Dictionary = main.combat_sys._new_foe(kinds[i], Vector2i.ZERO)
+		foe["pos"] = at
+		foe["home"] = at
+		foe["face"] = -1.0 if left else 1.0
+		if opt.has("chp"):
+			foe["hp"] = int(opt["chp"])
+		match state:
+			"move":
+				foe["moving"] = true
+			"alert":
+				foe["alert_t"] = CaveFoeArt.ALERT_T * (1.0 - prog)
+			"attack":
+				foe["atk_t"] = CaveFoeArt.ATTACK_T * (1.0 - prog)
+			"hurt":
+				foe["flash"] = CaveFoeArt.HURT_T * (1.0 - prog)
+		if state == "death":
+			main.combat_sys.dying.append({"kind": kinds[i], "pos": at, "face": foe["face"], "t": CaveFoeArt.DEATH_T * prog})
+		else:
+			main.foes.append(foe)
+	if state != "live":
+		main.set_process(false)
+		main.queue_redraw()
+	for f in 3:
+		await process_frame
 
 
 # A creature's blow from straight in front (Phase D): the real combat code decides whether the guard turns it.

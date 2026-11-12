@@ -1,0 +1,134 @@
+{
+ "bat_idle": [
+  "ea17e9be-6ae4-4e48-8691-ee5f4f603fa1",
+  5521,
+  4,
+  "bat hovering in place, wings beating slowly up and down, body bobbing slightly"
+ ],
+ "bat_move": [
+  "b2490edc-5cc2-4a74-91a3-3eb70e41e1e6",
+  5522,
+  6,
+  "bat flying fast, wings flapping hard in a full stroke from fully raised to fully lowered"
+ ],
+ "bat_alert": [
+  "11c89599-b674-4b73-b7bf-5e0a0a475966",
+  5523,
+  4,
+  "bat startled, jerks upward and flares its wings wide, ears up, mouth opening to screech, then hangs in the air"
+ ],
+ "bat_attack": [
+  "c5abc684-8248-4672-b3e3-3217e9a77162",
+  5524,
+  6,
+  "bat attacks: pulls its wings up high, dives down toward the viewer with jaws open to bite, then beats back up to where it started"
+ ],
+ "bat_hurt": [
+  "8609fe6b-9463-4353-af3f-94d6793240eb",
+  5525,
+  4,
+  "bat struck: knocked backward and tilted, wings crumple inward for a moment, then it recovers and spreads them again"
+ ],
+ "bat_death": [
+  "6e94c45c-b721-4555-aba7-51ce678d9e6c",
+  5526,
+  6,
+  "bat killed: wings fold limp, it tumbles and drops straight down to the ground and lies still on its back, crumpled"
+ ],
+ "lizard_idle": [
+  "0b9b238b-b463-4ba9-a51f-09e4b501551e",
+  5531,
+  4,
+  "lizard resting in place, breathing, throat pulsing, head turning a little, tail tip twitching"
+ ],
+ "lizard_move": [
+  "a0653a3d-4d42-45d9-8ba5-9700c387d2af",
+  5532,
+  6,
+  "lizard crawling forward to the right in place, legs stepping in a diagonal gait, body and tail swinging side to side"
+ ],
+ "lizard_alert": [
+  "03c23b0e-6d35-4f25-80e3-707e501f6051",
+  5533,
+  4,
+  "lizard notices something: pushes up on its front legs, raises its head high and stiffens, tail lifting"
+ ],
+ "lizard_attack": [
+  "83e75d52-7e9d-4c47-ace9-a3a432cfe2e6",
+  5534,
+  6,
+  "lizard attacks: crouches back, then lunges forward to the right with jaws wide open in a snapping bite, then pulls back to its starting pose"
+ ],
+ "lizard_hurt": [
+  "fb98a5f3-df78-453a-968d-09d933126958",
+  5535,
+  4,
+  "lizard struck: flinches backward to the left, body curling and head jerking away, then settles back down"
+ ],
+ "lizard_death": [
+  "77780c8c-32a1-4def-a54b-425e98b8d95a",
+  5536,
+  6,
+  "lizard killed: legs give way, it slumps flat to the ground, rolls onto its side with legs curled and lies still"
+ ],
+ "snake_idle": [
+  "d7c3e059-1c51-46a0-a6d0-8df6bf9d1f6b",
+  5541,
+  4,
+  "snake coiled in place, slowly swaying its raised head and neck, tongue flicking in and out"
+ ],
+ "snake_move": [
+  "e3dd6f85-b289-4dc4-b24c-e9088047195c",
+  5542,
+  6,
+  "snake slithering forward to the right in place, body rippling in S-waves along the ground, head held low and level"
+ ],
+ "snake_alert": [
+  "dc37eacc-7b54-4492-a084-cdf6486c7bc4",
+  5543,
+  4,
+  "snake alarmed: rears its head and neck up higher, pulls back into a tight S-coil, mouth opening to hiss"
+ ],
+ "snake_attack": [
+  "fb5cd73b-4d38-4665-acf9-1332aa01043b",
+  5544,
+  6,
+  "snake strikes: draws its head back, then shoots its head and neck straight forward to the right with jaws open to bite, then recoils back into its coil"
+ ],
+ "snake_hurt": [
+  "d7ef5e69-65c9-49e3-ba55-705f50a682cb",
+  5545,
+  4,
+  "snake struck: head jerks back and away to the left, body writhes, then settles back into its coil"
+ ],
+ "snake_death": [
+  "86922e02-8800-4a2d-ab68-f958fb1fdd62",
+  5546,
+  6,
+  "snake killed: raised head and neck sag and collapse to the ground, coil loosens and the body lies limp and still, stretched out flat"
+ ],
+ "lizard_alert2": [
+  "41bc5953-5968-4eb4-abff-b32adb1ed6dc",
+  5537,
+  4,
+  "lizard stays flat and low on all four legs, freezes, lifts only its head and neck a little and holds still, tail stiff along the ground. Body never sits up."
+ ],
+ "lizard_attack2": [
+  "63d53b5d-6f2b-4608-8a79-a0490e1728f2",
+  5538,
+  6,
+  "lizard stays low on all four legs: crouches, then darts its head and front body forward to the right with jaws snapping open, then pulls back"
+ ],
+ "lizard_hurt2": [
+  "b2ca2059-02d3-4347-8bca-7c1598dffe17",
+  5539,
+  4,
+  "lizard stays low on all four legs: body jolts sideways, head ducks down and tail whips, then it steadies again"
+ ],
+ "snake_move2": [
+  "4a117c89-d404-4113-82ba-cd057c247e04",
+  5547,
+  6,
+  "snake gliding along: its coils ripple and shift in a travelling wave, the loops sliding and changing shape, raised neck swaying forward and back with each wave"
+ ]
+}

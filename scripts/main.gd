@@ -5138,14 +5138,16 @@ func _cave_is(x: int, y: int, kinds: Array) -> bool:
 	return kinds.has(cave[y][x])
 
 
-# Creatures with SpriteCook sheets (art/farm/foe_<kind>.png, facing right). The trek dogs keep their
-# drawn shapes.
+# Creatures with SpriteCook sheets (art/farm/foe_<kind>.png, facing right): since CCH-CONSOLIDATED-003 Phase E only
+# the fallback when the PixelLab sheets in art/farm/cave_foes/ are missing. The trek dogs keep their own drawing.
 const FOE_ANIMATED := ["bat", "lizard", "snake"]
 const FOE_FPS := 8.0
 
 
 # Foes in the cave.
 func _draw_combat() -> void:
+	for d in combat_sys.dying:
+		CaveFoeArt.draw_dying(self, d)
 	for foe in foes:
 		var pos: Vector2 = foe["pos"]
 		var st: Dictionary = FOES[foe["kind"]]
@@ -5154,7 +5156,11 @@ func _draw_combat() -> void:
 		if flashing:
 			body = Color("e8e0d0")
 		var kind := str(foe["kind"])
-		if FARM_SPRITES and FOE_ANIMATED.has(kind):
+		if FARM_SPRITES and CaveFoeArt.has_art(kind):
+			# CCH-CONSOLIDATED-003 Phase E: idle, move, alert, attack, hurt and death sheets (scripts/cave_foe_art.gd).
+			var pick: Array = CaveFoeArt.pick(foe, Time.get_ticks_msec() * 0.001)
+			CaveFoeArt.draw(self, kind, str(pick[0]), int(pick[1]), pos, float(foe.get("face", 1.0)) < 0.0, Color(2.2, 2.1, 2.0) if flashing else Color.WHITE)
+		elif FARM_SPRITES and FOE_ANIMATED.has(kind):
 			# A creature's sheet (four 20×20 frames at 3×) standing on its position. It steps through its frames
 			# while it moves (a bat flaps all the time), faces the way it last moved, and turns pale when hit.
 			var size := Vector2(20, 20) * SCALE

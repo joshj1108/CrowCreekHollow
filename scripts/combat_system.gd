@@ -2,6 +2,9 @@ class_name CombatSystem
 extends RefCounted
 
 var m: MainGame
+# CCH-CONSOLIDATED-003 Phase E: bodies of cave creatures just killed, drawn falling and fading (display only: they
+# are out of m.foes, so nothing can hit them, they hit nothing and they are never saved).
+var dying: Array = []
 
 
 func _init(main: MainGame) -> void:
@@ -19,6 +22,7 @@ func _new_foe(kind: String, tile: Vector2i) -> Dictionary:
 
 func _spawn_foes() -> void:
 	m.foes = []
+	dying = []
 	if m.in_cave:
 		for spawn in m.cave_spawns:
 			m.foes.append(_new_foe(str(spawn["kind"]), spawn["tile"]))
@@ -30,12 +34,20 @@ func _update_foes(delta: float) -> void:
 	m.invuln = maxf(0.0, m.invuln - delta)
 	if not m.in_cave:
 		m.player.modulate = Color.WHITE
+		dying = []
 		return
 	m.player.modulate = Color(1.0, 0.55, 0.55) if m.invuln > 0.0 else Color.WHITE
+	for d in dying.duplicate():
+		d["t"] = float(d["t"]) + delta
+		if float(d["t"]) >= CaveFoeArt.DEATH_T + CaveFoeArt.FADE_T:
+			dying.erase(d)
 	for foe in m.foes:
 		var st: Dictionary = m.FOES[foe["kind"]]
 		foe["cool"] = maxf(0.0, float(foe["cool"]) - delta)
 		foe["flash"] = maxf(0.0, float(foe["flash"]) - delta)
+		# Display timers (Phase E): they only choose which animation shows.
+		foe["alert_t"] = maxf(0.0, float(foe.get("alert_t", 0.0)) - delta)
+		foe["atk_t"] = maxf(0.0, float(foe.get("atk_t", 0.0)) - delta)
 		var pos: Vector2 = foe["pos"]
 		var to_player: Vector2 = m.player.position - pos
 		var dist := to_player.length()
@@ -43,6 +55,7 @@ func _update_foes(delta: float) -> void:
 			# A foe calls out once when it notices you, and again if you lose it and it finds you again.
 			if not foe.get("noticed", false):
 				foe["noticed"] = true
+				foe["alert_t"] = CaveFoeArt.ALERT_T
 				m.play_sfx(str(m.FOE_SOUNDS.get(foe["kind"], "growl")), 0.12)
 			_move_foe(foe, to_player.normalized() * float(st["chase"]) * delta)
 			if dist < m.PX * 0.6 and float(foe["cool"]) <= 0.0:
@@ -85,6 +98,8 @@ func _foe_free(p: Vector2) -> bool:
 
 
 func _foe_attack(foe: Dictionary) -> void:
+	# The strike shows whenever the attack fires (its cooldown has just restarted), landed, blocked or not.
+	foe["atk_t"] = CaveFoeArt.ATTACK_T
 	if m.invuln > 0.0:
 		return
 	# A held block turns aside a blow from the front.
@@ -113,6 +128,8 @@ func _foe_attack(foe: Dictionary) -> void:
 func _kill_foe(foe: Dictionary) -> void:
 	var st: Dictionary = m.FOES[foe["kind"]]
 	m.foes.erase(foe)
+	if m.in_cave and CaveFoeArt.KINDS.has(str(foe["kind"])):
+		dying.append({"kind": foe["kind"], "pos": foe["pos"], "face": foe.get("face", 1.0), "t": 0.0})
 	m.play_sfx("foe_die", 0.1)
 	m.stats["defeated"] += 1
 	m.progression._grant_xp("Combat", int(st["xp"]))
