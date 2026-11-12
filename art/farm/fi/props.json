@@ -1,0 +1,122 @@
+{
+ "bedside": {
+  "size": [
+   11,
+   23
+  ],
+  "pick": "bedside/00",
+  "wick": [
+   7,
+   1
+  ]
+ },
+ "chest": {
+  "size": [
+   19,
+   20
+  ],
+  "pick": "chest/04"
+ },
+ "shelf": {
+  "size": [
+   27,
+   14
+  ],
+  "pick": "shelf/08"
+ },
+ "logbasket": {
+  "size": [
+   16,
+   15
+  ],
+  "pick": "logbasket/05"
+ },
+ "barrel": {
+  "size": [
+   22,
+   22
+  ],
+  "pick": "barrel/00"
+ },
+ "sidetable": {
+  "size": [
+   11,
+   22
+  ],
+  "pick": "sidetable/01",
+  "wick": [
+   9,
+   1
+  ]
+ },
+ "debris": {
+  "size": [
+   20,
+   13
+  ],
+  "pick": "debris/01"
+ },
+ "brokenchair": {
+  "size": [
+   14,
+   16
+  ],
+  "pick": "brokenchair/03"
+ },
+ "washtub": {
+  "size": [
+   20,
+   16
+  ],
+  "pick": "washtub/03"
+ },
+ "herbs": {
+  "size": [
+   14,
+   15
+  ],
+  "pick": "herbs/00"
+ },
+ "crates": {
+  "size": [
+   10,
+   20
+  ],
+  "pick": "crates/00"
+ },
+ "wardrobe": {
+  "size": [
+   14,
+   30
+  ],
+  "pick": "wardrobe/00"
+ },
+ "hearth": {
+  "size": [
+   34,
+   60
+  ],
+  "pick": "fireplace/00",
+  "firebox": [
+   7,
+   40,
+   20,
+   13
+  ],
+  "mantel_y": 30
+ },
+ "clock": {
+  "size": [
+   18,
+   42
+  ],
+  "pivot": [
+   9,
+   17
+  ],
+  "bob": [
+   9,
+   30
+  ]
+ }
+}

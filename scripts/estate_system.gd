@@ -31,14 +31,17 @@ const STOREY_NIGHT_MULT := 0.9
 const EXTENSION_VALUE := 0.15     # each extension adds this much to the property value
 
 # Furniture, each bought once and drawn in its room. Each piece gives +1 sanity every morning (comfort).
-# room: the house stage that opens the room it stands in. spot: interior tile.
+# room: the house stage that opens the room it stands in. spot: interior tile (FARMHOUSE-INTERIOR-001 layout: the
+# dresser by the bedroom's desk, the armchair by the hearth under the painting, the clock in the hall's corner, the
+# bookshelf against the study's wall). Each stands solid on its tiles (_furniture_tiles); the painting hangs on the
+# wall face (row 2) over the armchair, between tiles 16 and 17.
 const FURNITURE := {
 	"dresser": {"name": "Oak dresser", "stage": 0, "spot": Vector2i(6, 3), "cost": {"coins": 150, "hardwood": 12, "copper_bar": 2}, "about": "Drawers for the bedroom, with copper handles."},
 	"feather_bed": {"name": "Feather bed", "stage": 1, "spot": Vector2i(1, 5), "cost": {"coins": 250, "hardwood": 6, "feathers": 40}, "about": "A deep mattress of crow down on the old bed. They are only feathers."},
-	"armchair": {"name": "Armchair", "stage": 1, "spot": Vector2i(19, 14), "cost": {"coins": 200, "hardwood": 8, "feathers": 20}, "about": "A wing chair by the hearth."},
-	"clock": {"name": "Long-case clock", "stage": 1, "spot": Vector2i(8, 13), "cost": {"coins": 350, "hardwood": 10, "copper_bar": 8, "iron_bar": 2}, "about": "A tall clock in the hall, with a copper face. It ticks through the night."},
-	"painting": {"name": "A painting of the farm", "stage": 2, "spot": Vector2i(14, 12), "cost": {"coins": 400}, "about": "The farm as it was in Agnes's day, bought from a carter. Someone stands in the field."},
-	"bookshelf": {"name": "Bookshelf", "stage": 3, "spot": Vector2i(12, 3), "cost": {"coins": 300, "hardwood": 16}, "about": "Shelves for the study, for almanacs and the diary."},
+	"armchair": {"name": "Armchair", "stage": 1, "spot": Vector2i(16, 3), "cost": {"coins": 200, "hardwood": 8, "feathers": 20}, "about": "A wing chair by the hearth."},
+	"clock": {"name": "Long-case clock", "stage": 1, "spot": Vector2i(8, 3), "cost": {"coins": 350, "hardwood": 10, "copper_bar": 8, "iron_bar": 2}, "about": "A tall clock in the hall, with a copper face. It ticks through the night."},
+	"painting": {"name": "A painting of the farm", "stage": 2, "spot": Vector2i(16, 2), "cost": {"coins": 400}, "about": "The farm as it was in Agnes's day, bought from a carter. Someone stands in the field."},
+	"bookshelf": {"name": "Bookshelf", "stage": 3, "spot": Vector2i(19, 10), "cost": {"coins": 300, "hardwood": 16}, "about": "Shelves for the study, for almanacs and the diary."},
 }
 const COMFORT_SANITY := 1.0
 
@@ -198,6 +201,7 @@ func _buy_furniture(id: String) -> void:
 	_spend(f["cost"])
 	furniture[id] = true
 	m.play_sfx("repair", 0.05)
+	m._build_interior()   # it stands solid where it stands
 	m.queue_redraw()
 	m._show_message("The %s is in the house. +%d sanity each morning while it stands." % [str(f["name"]).to_lower(), int(COMFORT_SANITY)])
 
@@ -404,14 +408,32 @@ const E4_TILES := {"bookshelf": 2, "feather_bed": 2}
 
 
 func _draw_furniture_sprite(ci: CanvasItem, cell: Rect2, id: String) -> void:
-	var tex := FarmSprites.tex("e4/" + id)
+	# The clock's case without its pendulum, which InteriorFX swings (FARMHOUSE-INTERIOR-001).
+	var art := "fi/clock_case" if id == "clock" and FarmSprites.has("fi/clock_case") else "e4/" + id
+	var tex := FarmSprites.tex(art)
 	var src := Rect2(Vector2.ZERO, tex.get_size())
 	if id == "painting":
+		# On the north wall's face, centred on the tile's east edge, its middle 18 art pixels down the face.
 		var size := src.size * m.SCALE
-		var centre := cell.position + Vector2(-cell.size.x * 0.1, cell.size.y * 0.65)   # drawn from the tile east of its spot
+		var centre := Vector2(cell.position.x, cell.end.y - cell.size.y * 3.0 + 18.0 * m.SCALE)   # drawn from the tile east of its spot
 		ci.draw_texture_rect_region(tex, Rect2((centre - size * 0.5).snapped(Vector2(m.SCALE, m.SCALE)), size), src)
 		return
-	m._draw_standing(ci, cell, "e4/" + id, src, int(E4_TILES.get(id, 1)))
+	m._draw_standing(ci, cell, art, src, int(E4_TILES.get(id, 1)))
+
+
+func _furniture_spot(id: String) -> Vector2i:
+	return FURNITURE[id]["spot"]
+
+
+# The floor tiles a bought piece stands on (none for the painting, on the wall, or the feather bed, on the bed).
+func _furniture_tiles(id: String) -> Array:
+	if not FURNITURE.has(id) or m.house_stage < int(FURNITURE[id]["stage"]) or id in ["painting", "feather_bed"]:
+		return []
+	var spot: Vector2i = FURNITURE[id]["spot"]
+	var out := [spot]
+	for k in range(1, int(E4_TILES.get(id, 1))):
+		out.append(spot + Vector2i(k, 0))
+	return out
 
 
 func _draw_furniture(ci: CanvasItem, cell: Rect2, pos: Vector2i) -> void:

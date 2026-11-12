@@ -1,0 +1,14 @@
+# FARMHOUSE-INTERIOR-001 PixelLab create_image_pro jobs (style image raw/int_style.png = int_beds, int_hearth, e4 dresser/clock/armchair, int_table)
+fireplace 48x64 seed1101 ac572bdf-28e5-440c-92e2-96345484a872 asset ee12142c-1fc5-5f2d-85b4-0230de68dd3a 10gen
+bedside 16x24 seed1102 77bb0da1-9881-4cbe-97d1-dec1038c9a7e asset bb2a5433-d1d6-541f-aa34-76d516cd02ce 10gen
+chest 24x20 seed1103 4aecb9e3-a645-43ab-ab06-c7d00498af69 asset 9101d872-5288-57b8-bf59-42d46564c022 10gen
+shelf 32x16 seed1104 001779b0-9640-4017-b228-5c22f7f2618e asset 6bdb92a7-aec0-522a-99b7-2f5911149173 10gen
+logbasket 16x16 seed1105 78f96ae2-4c67-41bb-80ad-db168aa10dc7 asset 587489d0-3030-54e2-81bc-11efd338e99d 10gen
+barrel 24x24 seed1106 599c7fd5-1b0a-46f7-8097-1af2e0b4cc3a asset 7895c0f7-593a-5834-a3fc-3889d9325312 10gen
+sidetable 16x24 seed1107 7ca3a264-cc47-44e3-bb86-fb3dafeb2fc7 asset f1cd5212-3706-5712-a31d-28cb3d790145 10gen
+debris 32x16 seed1108 4c5e3bb1-8498-43ef-9f63-7afd60cd9bd0 asset 3583493d-00ba-5c77-ae3b-3cdb54e5cc65 10gen
+brokenchair 24x16 seed1109 051492d6-2d24-4a43-8e50-1e10eb8bcdee asset 084086a8-3723-53db-8175-1db1cc2b3a19 10gen
+washtub 24x16 seed1110 7c92a9f3-10f6-422f-a240-c302831337c0 asset 16ebc895-04de-55eb-9467-e2a62f497fc4 10gen
+herbs 24x16 seed1111 1eea42cd-3aeb-45cb-b69c-c8be4d4e1d77 asset 15e40152-b3f0-5bcc-8e5a-5bb656577d42 10gen
+crates 16x24 seed1112 44a11895-6ee8-40c2-8c89-2367dd6f096d asset 46608968-1945-5b84-91a8-1b8f0d41d227 10gen
+wardrobe 24x40 seed1113 f35e82c3-8414-40be-912b-e4e759074c82 asset 41532222-89c6-51fc-9ce8-a87c6ba0d350 10gen

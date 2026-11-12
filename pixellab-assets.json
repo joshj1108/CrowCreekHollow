@@ -2443,5 +2443,195 @@
     "tool": "edit"
    }
   ]
+ },
+ "FARMHOUSE-INTERIOR-001": {
+  "tool": "tools/fi001_props.py (props, hearth stages, clock case); tools/fi001_art.py (scripted architecture, windows, fire, cobwebs, rugs: no generations)",
+  "sources": "art/style_tests/FARMHOUSE-INTERIOR-001/raw/ (jobs.txt, fetch.py, int_style.png = style image built from int_beds, int_hearth, e4 dresser/clock/armchair and int_table; <key>/NN.png candidates, <key>_sheet.png, mosaic1.png, mosaic2.png)",
+  "note": "The farmhouse interior's props and stone hearth: create_image_pro with style image raw/int_style.png (all four style aspects), prompts in the jobs' descriptions (straight-on front view for a top-down 3/4 RPG, dark outline, muted warm palette). 13 jobs, 130 subscription generations, USD 0 (balance 3324 generations before, credits USD 0). Several candidates came back split across a half cell; the picks are whole ones. The hearth's four stages are painted onto the one pick by fi001_props.py (soot, a split mantel and a crack at Decrepit), its chimney carried up 7 rows to the ceiling beam.",
+  "generations": 130,
+  "jobs": [
+   {
+    "key": "fireplace",
+    "tool": "create_image_pro",
+    "job_id": "ac572bdf-28e5-440c-92e2-96345484a872",
+    "asset_id": "ee12142c-1fc5-5f2d-85b4-0230de68dd3a",
+    "size": [
+     48,
+     64
+    ],
+    "seed": 1101,
+    "generations": 10,
+    "pick": "fireplace/00",
+    "game_file": "art/farm/fi/hearth_0..3.png"
+   },
+   {
+    "key": "bedside",
+    "tool": "create_image_pro",
+    "job_id": "77bb0da1-9881-4cbe-97d1-dec1038c9a7e",
+    "asset_id": "bb2a5433-d1d6-541f-aa34-76d516cd02ce",
+    "size": [
+     16,
+     24
+    ],
+    "seed": 1102,
+    "generations": 10,
+    "pick": "bedside/00",
+    "game_file": "art/farm/fi/bedside.png"
+   },
+   {
+    "key": "chest",
+    "tool": "create_image_pro",
+    "job_id": "4aecb9e3-a645-43ab-ab06-c7d00498af69",
+    "asset_id": "9101d872-5288-57b8-bf59-42d46564c022",
+    "size": [
+     24,
+     20
+    ],
+    "seed": 1103,
+    "generations": 10,
+    "pick": "chest/04",
+    "game_file": "art/farm/fi/chest.png"
+   },
+   {
+    "key": "shelf",
+    "tool": "create_image_pro",
+    "job_id": "001779b0-9640-4017-b228-5c22f7f2618e",
+    "asset_id": "6bdb92a7-aec0-522a-99b7-2f5911149173",
+    "size": [
+     32,
+     16
+    ],
+    "seed": 1104,
+    "generations": 10,
+    "pick": "shelf/08",
+    "game_file": "art/farm/fi/shelf.png"
+   },
+   {
+    "key": "logbasket",
+    "tool": "create_image_pro",
+    "job_id": "78f96ae2-4c67-41bb-80ad-db168aa10dc7",
+    "asset_id": "587489d0-3030-54e2-81bc-11efd338e99d",
+    "size": [
+     16,
+     16
+    ],
+    "seed": 1105,
+    "generations": 10,
+    "pick": "logbasket/05",
+    "game_file": "art/farm/fi/logbasket.png"
+   },
+   {
+    "key": "barrel",
+    "tool": "create_image_pro",
+    "job_id": "599c7fd5-1b0a-46f7-8097-1af2e0b4cc3a",
+    "asset_id": "7895c0f7-593a-5834-a3fc-3889d9325312",
+    "size": [
+     24,
+     24
+    ],
+    "seed": 1106,
+    "generations": 10,
+    "pick": "barrel/00",
+    "game_file": "art/farm/fi/barrel.png"
+   },
+   {
+    "key": "sidetable",
+    "tool": "create_image_pro",
+    "job_id": "7ca3a264-cc47-44e3-bb86-fb3dafeb2fc7",
+    "asset_id": "f1cd5212-3706-5712-a31d-28cb3d790145",
+    "size": [
+     16,
+     24
+    ],
+    "seed": 1107,
+    "generations": 10,
+    "pick": "sidetable/01",
+    "game_file": "art/farm/fi/sidetable.png"
+   },
+   {
+    "key": "debris",
+    "tool": "create_image_pro",
+    "job_id": "4c5e3bb1-8498-43ef-9f63-7afd60cd9bd0",
+    "asset_id": "3583493d-00ba-5c77-ae3b-3cdb54e5cc65",
+    "size": [
+     32,
+     16
+    ],
+    "seed": 1108,
+    "generations": 10,
+    "pick": "debris/01",
+    "game_file": "art/farm/fi/debris.png"
+   },
+   {
+    "key": "brokenchair",
+    "tool": "create_image_pro",
+    "job_id": "051492d6-2d24-4a43-8e50-1e10eb8bcdee",
+    "asset_id": "084086a8-3723-53db-8175-1db1cc2b3a19",
+    "size": [
+     24,
+     16
+    ],
+    "seed": 1109,
+    "generations": 10,
+    "pick": "brokenchair/03",
+    "game_file": "art/farm/fi/brokenchair.png"
+   },
+   {
+    "key": "washtub",
+    "tool": "create_image_pro",
+    "job_id": "7c92a9f3-10f6-422f-a240-c302831337c0",
+    "asset_id": "16ebc895-04de-55eb-9467-e2a62f497fc4",
+    "size": [
+     24,
+     16
+    ],
+    "seed": 1110,
+    "generations": 10,
+    "pick": "washtub/03",
+    "game_file": "art/farm/fi/washtub.png"
+   },
+   {
+    "key": "herbs",
+    "tool": "create_image_pro",
+    "job_id": "1eea42cd-3aeb-45cb-b69c-c8be4d4e1d77",
+    "asset_id": "15e40152-b3f0-5bcc-8e5a-5bb656577d42",
+    "size": [
+     24,
+     16
+    ],
+    "seed": 1111,
+    "generations": 10,
+    "pick": "herbs/00",
+    "game_file": "art/farm/fi/herbs.png"
+   },
+   {
+    "key": "crates",
+    "tool": "create_image_pro",
+    "job_id": "44a11895-6ee8-40c2-8c89-2367dd6f096d",
+    "asset_id": "46608968-1945-5b84-91a8-1b8f0d41d227",
+    "size": [
+     16,
+     24
+    ],
+    "seed": 1112,
+    "generations": 10,
+    "pick": "crates/00",
+    "game_file": "art/farm/fi/crates.png"
+   },
+   {
+    "key": "wardrobe",
+    "tool": "create_image_pro",
+    "job_id": "f35e82c3-8414-40be-912b-e4e759074c82",
+    "asset_id": "41532222-89c6-51fc-9ce8-a87c6ba0d350",
+    "size": [
+     24,
+     40
+    ],
+    "seed": 1113,
+    "generations": 10,
+    "pick": "wardrobe/00",
+    "game_file": "art/farm/fi/wardrobe.png"
+   }
+  ]
  }
 }

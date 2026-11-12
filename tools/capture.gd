@@ -22,6 +22,11 @@ extends SceneTree
 #   scale=F         shrink the saved image (default 0.5, so it's cheap to look at; 1 for full size)
 #   crops=A,B       plant every stage of each crop kind in a row on the first plot, e.g. crops=turnip,corn
 #   lantern=N       lantern tier 0-3 (0 = none)
+#   fire=H          the hearth burning with H hours of fuel (FARMHOUSE-INTERIOR-001; 0.5 is a low fire)
+#   shutters        place the window shutters and bar them tonight (the house windows show them shut)
+#   clock           buy the long-case clock (its pendulum swings)
+#   perf            before the shot, time 300 frames with vsync off and print "PERF" lines (mean and 95th
+#                   percentile frame time, and the CPU's process time), for checking a change's cost
 #   built           build the cellar, smokehouse, furnace and woodshed (the workshop goes by the farmhouse)
 #   workshop=X,Y    with built, put the workshop's top-left corner on this farm tile (layout coordinates)
 #   diary           find the diary in the desk and open it
@@ -177,6 +182,14 @@ func _initialize() -> void:
 		else:
 			main._relocate_building("workshop")
 		main._apply_storage_tiles()
+	if opt.has("fire"):
+		main.fire_hours = float(opt["fire"])
+	if opt.has("clock"):
+		main.estate.furniture["clock"] = true
+		main._build_interior()
+	if opt.has("shutters"):
+		main.projects.decor[Vector2i(-50, -50)] = "shutters"   # off the map: only the count matters here
+		main.projects.barred_day = main.day
 	if opt.has("lantern"):
 		main.lantern_tier = int(opt["lantern"])
 		main._apply_lantern_radius()
@@ -492,7 +505,31 @@ func _initialize() -> void:
 		await _hold(main, opt)
 		quit()
 		return
+	if opt.has("perf"):
+		await _perf()
 	_save(opt)
+
+
+func _perf() -> void:
+	DisplayServer.window_set_vsync_mode(DisplayServer.VSYNC_DISABLED)
+	Engine.max_fps = 0
+	for i in 60:
+		await process_frame
+	var frames: Array = []
+	var proc := 0.0
+	var last := Time.get_ticks_usec()
+	for i in 300:
+		await process_frame
+		var now := Time.get_ticks_usec()
+		frames.append((now - last) / 1000.0)
+		last = now
+		proc += Performance.get_monitor(Performance.TIME_PROCESS) * 1000.0
+	frames.sort()
+	var mean := 0.0
+	for f in frames:
+		mean += f
+	mean /= frames.size()
+	print("PERF frame_ms_mean=%.2f frame_ms_p95=%.2f process_ms_mean=%.2f fps=%.0f" % [mean, frames[int(frames.size() * 0.95)], proc / 300.0, 1000.0 / mean])
 
 
 # Runs the recording's seconds, walking the path in walk= first. Frames are 1/30 s under --fixed-fps 30.
