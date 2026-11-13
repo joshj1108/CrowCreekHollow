@@ -148,12 +148,12 @@ func _check(force := false) -> void:
 	m.music.sting("sting_achievement")
 	# Several at once (an old save re-checking on load) share one message.
 	if earned.size() == 1:
-		m._show_message("Achievement: %s. %s" % [earned[0]["title"], earned[0]["text"]])
+		m._show_message("Achievement: %s. %s" % [earned[0]["title"], earned[0]["text"]], true)
 	else:
 		var titles: Array = []
 		for a in earned:
 			titles.append(str(a["title"]))
-		m._show_message("Achievements: %s." % ", ".join(titles))
+		m._show_message("Achievements: %s." % ", ".join(titles), true)
 
 
 func _goal(a: Dictionary) -> int:

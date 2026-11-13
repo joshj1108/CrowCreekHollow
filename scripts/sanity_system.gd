@@ -119,15 +119,35 @@ func _tidy_house() -> void:
 
 
 # Cleansing offers crops to the house to lift the permanent sanity penalty.
+# The first cleanse needs no lost limit: it is the chapter "Clear the Stain", which a careful player who never lost
+# any limit must still be able to finish (PLAY-04). Later cleanses only lift a lost limit.
 func _can_cleanse() -> bool:
-	return m.sanity_penalty > 0 and m.cleanse_day != m.day \
-		and m.progression._level("Cleaning") >= m.CLEANSE_LEVEL \
-		and m.farm._crop_total() >= m.CLEANSE_CROPS
+	return _cleanse_blocker() == ""
+
+
+func _cleanse_has_purpose() -> bool:
+	return m.sanity_penalty > 0 or int(m.stats["cleansed"]) == 0
+
+
+# What stands in the way of a cleanse, in words; empty when it can be done.
+func _cleanse_blocker() -> String:
+	var missing: Array = []
+	if m.progression._level("Cleaning") < m.CLEANSE_LEVEL:
+		missing.append("Cleaning %d" % m.CLEANSE_LEVEL)
+	if m.farm._crop_total() < m.CLEANSE_CROPS:
+		missing.append("%d crops to offer" % m.CLEANSE_CROPS)
+	if missing.size() > 0:
+		return "Cleansing needs %s." % " and ".join(missing)
+	if m.cleanse_day == m.day:
+		return "You have already cleansed the house today."
+	if not _cleanse_has_purpose():
+		return "The house is clean. Cleansing only lifts a sanity limit you have lost."
+	return ""
 
 
 func _cleanse_house() -> void:
 	if not _can_cleanse():
-		m._show_message("Cleansing needs Cleaning %d, %d crops, and one try a day." % [m.CLEANSE_LEVEL, m.CLEANSE_CROPS])
+		m._show_message(_cleanse_blocker())
 		return
 	m.farm._spend_crops(m.CLEANSE_CROPS)
 	m.cleanse_day = m.day

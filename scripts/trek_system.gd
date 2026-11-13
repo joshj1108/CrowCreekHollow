@@ -53,6 +53,7 @@ const FOLLOW_GAP := 1.3               # tiles the walker keeps behind you
 const WALKER_SPEED := 2.6             # tiles a second: slower than you, so you wait for them
 const FREEZE_BELOW := 25.0            # under this nerve the walker stops and won't go on without a ration
 const UNFREEZE_AT := 35.0
+const EDGE_WORD_CALMS := true          # PLAY-09: on the edge route a word unfreezes the walker (see _interact)
 const SANITY_DRAIN := 0.1             # sanity lost a second in the wood, twice that unlit
 const FAIL_SANITY := 10.0             # sanity lost when the walker breaks and runs
 const CROW_RADIUS := 3.0              # tiles around the crows' spot where they first find the walker
@@ -651,8 +652,8 @@ func _ask(id: String) -> void:
 		_confirm_until = now + CONFIRM_SECONDS
 		_confirm_id = id
 		if id == "edge":
-			m._show_message("\"Only as far as the edge of the wood, by daylight. Two clearings, no more.\"%s Her nerve will show beside your needs: keep her in your lantern's light and on the trail, and a word (Space beside her) steadies her. You have %d lamp oil. Press Space again to set out." % [
-				oil_note, int(m.materials["lamp_oil"])])
+			m._show_message("\"Only as far as the edge of the wood, by daylight. Two clearings, no more.\"%s Her nerve will show beside your needs: keep her in your lantern's light and on the trail, and a word (Space beside her) steadies her. If she stops dead, a word calms her enough to go on, or walk back the way you came to turn home.%s You have %d lamp oil. Press Space again to set out." % [
+				oil_note, _low_sanity_warning(), int(m.materials["lamp_oil"])])
 			return
 		var steps := _steps(id)
 		var rations := int(m.inventory["trail_ration"])
@@ -971,7 +972,9 @@ func _update(delta: float) -> void:
 		nerve_bar.value = nerve
 	if not frozen and nerve < FREEZE_BELOW:
 		frozen = true
-		m._show_message(_w("{W} stops dead and won't take another step. \"I can't. I can't.\" Give {her} a trail ration."))
+		m._show_message(_w("{W} stops dead and won't take another step. \"I can't. I can't.\" %s") % _frozen_help(), true)
+		if route_id == "edge" and EDGE_WORD_CALMS:
+			spoke = false   # PLAY-09: on the first trek a word can always reach her once she has stopped
 	if frozen and nerve >= UNFREEZE_AT:
 		frozen = false
 	if nerve <= 0.0:
@@ -1216,6 +1219,11 @@ func _interact(tile: Vector2i) -> void:
 		elif not spoke:
 			spoke = true
 			nerve = minf(100.0, nerve + WORD_NERVE)
+			# PLAY-09: the edge is the first trek and a week-one farmer has no ration, so there a word to a walker
+			# who has stopped calms her just enough to walk on. Other routes keep needing a ration.
+			if frozen and route_id == "edge" and EDGE_WORD_CALMS:
+				nerve = maxf(nerve, UNFREEZE_AT)
+				frozen = false
 			m.folk._say_trek(route_id, _talk(), nerve)
 		else:
 			m.folk._say_trek(route_id, "\"I'm all right. Keep going.\"" if nerve >= 50.0 else _w("\"Is it much further?\" {She} is pale."), nerve)
@@ -1366,6 +1374,24 @@ func _follow_lights() -> void:
 		_place_at(m._tile_center(int(pts[0][0]), int(pts[0][1]) - 2))
 		m._show_message(_w("The lights go out all at once, and you are deep in the trees with no path. It's an hour before you find the trail again, back where the clearing began. {W} hasn't said a word. Nerve -%d, -%d sanity.") % [int(LOST_NERVE), int(LOST_SANITY)])
 	layer.queue_redraw()
+
+
+# What the player can do for a walker who has stopped dead, from what is to hand (PLAY-09).
+func _frozen_help() -> String:
+	var options: Array = []
+	if int(m.inventory["trail_ration"]) > 0 or int(m.inventory["bread"]) > 0:
+		options.append("give {her} a trail ration or bread")
+	if route_id == "edge" and EDGE_WORD_CALMS:
+		options.append("say a word beside {her} (Space)")
+	if options.is_empty():
+		return _w("Without a trail ration (Cooking, at the fire) {his} nerve won't come back here: walk back the way you came to turn home.")
+	return _w(_cap(" or ".join(options)) + ", or walk back the way you came to turn home.")
+
+
+func _low_sanity_warning() -> String:
+	if m.sanity < 40.0:
+		return " You are frayed yourself (sanity %d): beside you her nerve will fail faster." % int(m.sanity)
+	return ""
 
 
 # Stepping on the way on, or the way back.

@@ -104,6 +104,10 @@ func _diary_sections() -> Array:
 			page = {"title": str(chapter["title"]), "text": "%s\n\n%s" % [str(chapter.get("story", "")), m._prompt_text(chapter)],
 				"new": is_new.call("story")}
 		sections.append({"name": "The farm asks", "heading": "What the farm asks", "pages": [page]})
+	# What the day said (PLAY-03): this morning's report and the notices since, to read again.
+	var said := _said_pages()
+	if not said.is_empty():
+		sections.append({"name": "The day", "heading": "What the day said", "pages": said})
 	# Notes, in the order they were written.
 	var notes: Array = []
 	for id in m.tips_seen.keys():
@@ -113,6 +117,27 @@ func _diary_sections() -> Array:
 	if not notes.is_empty():
 		sections.append({"name": "Notes", "heading": "Notes", "pages": notes})
 	return sections + m.mystery._sections(is_new)
+
+
+func _said_pages() -> Array:
+	var pages: Array = []
+	if m.morning_report != "" and m.morning_report_day == m.day:
+		pages.append({"title": "This morning, day %d" % m.day, "text": m.morning_report})
+	var lines: Array = []
+	for i in range(m.message_log.size() - 1, -1, -1):
+		var e: Dictionary = m.message_log[i]
+		if str(e["text"]).strip_edges() == m.morning_report:
+			continue
+		var h := int(e["hour"]) % 24
+		var mins := int((float(e["hour"]) - floorf(float(e["hour"]))) * 60.0)
+		lines.append("Day %d, %02d:%02d. %s" % [int(e["day"]), h, mins, str(e["text"])])
+		if lines.size() >= 8:
+			break
+	if not lines.is_empty():
+		pages.append({"title": "Lately", "text": "
+
+".join(lines)})
+	return pages
 
 
 # The tab strip over Inventory, Gear and Skills, so LB/RB or Q/E step between them.
@@ -377,14 +402,17 @@ func _house_rows() -> Array:
 		"note": "The house wears a little each night. Mending, tidying, and repairs bring it down. At %d wear, rain ruins a crop overnight. At %d, foxes and worse come to the coop and barn more often at night. The fourth field opens at Farming %d once the house is Patched." % [m.WEAR_RUNDOWN, m.WEAR_FOX, m.PLOT_FOUR_LEVEL]})
 	rows.append({"name": "Sanity limit", "status": "%d / %d" % [m.sanity_sys._sanity_max(), int(m.SANITY_MAX)],
 		"progress": float(m.sanity_sys._sanity_max()) / float(m.SANITY_MAX),
-		"note": "The bed is in the bedroom. Walk there and press Space from 18:00 to save and end the day. If you aren't in bed by 03:00 you collapse, and your sanity limit drops permanently."})
+		"note": "The bed is in the bedroom. Walk there and press Space (A) from 18:00 to save and end the day. If you aren't in bed by 03:00 you collapse, and your sanity limit drops permanently."})
 	var cleanse_needs := _needs({"crops": m.CLEANSE_CROPS, "level": m.CLEANSE_LEVEL}, "Cleaning")
 	cleanse_needs.append({"text": "Once a day", "ok": m.cleanse_day != m.day})
-	cleanse_needs.append({"text": "Some of the limit lost", "ok": m.sanity_penalty > 0})
+	var first_cleanse := int(m.stats["cleansed"]) == 0
+	if not first_cleanse:
+		cleanse_needs.append({"text": "Some of the limit lost", "ok": m.sanity_penalty > 0})
 	rows.append({
 		"name": "Cleanse the house",
 		"value": "%d crops, Cleaning %d, once a day: +%d limit" % [m.CLEANSE_CROPS, m.CLEANSE_LEVEL, m.CLEANSE_RELIEF],
-		"about": "Burn an offering of crops to win back %d of the sanity limit." % m.CLEANSE_RELIEF,
+		"about": ("Burn an offering of crops to win back %d of the sanity limit." % m.CLEANSE_RELIEF)
+			+ (" The first cleanse clears the house's stain even if no limit has been lost." if first_cleanse else ""),
 		"needs": cleanse_needs,
 		"button": "Cleanse",
 		"action": "cleanse",
@@ -429,7 +457,7 @@ func _house_rows() -> Array:
 
 	rows.append({"tab": "Storage", "icon": "storage"})
 	if m.cellar_built:
-		rows.append({"name": "Root cellar", "status": "Built", "status_kind": "done", "value": "built, holds %d crops. Stand beside it, facing it, and press Space." % m.estate._cellar_cap()})
+		rows.append({"name": "Root cellar", "status": "Built", "status_kind": "done", "value": "built, holds %d crops. Stand beside it, facing it, and press Space (A)." % m.estate._cellar_cap()})
 	else:
 		rows.append({
 			"name": "Build a root cellar",
@@ -441,7 +469,7 @@ func _house_rows() -> Array:
 			"enabled": m._can_afford(m.CELLAR_COST),
 		})
 	if m.cooler_built:
-		rows.append({"name": "Cooler", "status": "Built", "status_kind": "done", "value": "built, keeps %d fish fresh. Stand beside it, facing it, and press Space." % m.COOLER_CAP})
+		rows.append({"name": "Cooler", "status": "Built", "status_kind": "done", "value": "built, keeps %d fish fresh. Stand beside it, facing it, and press Space (A)." % m.COOLER_CAP})
 	else:
 		rows.append({
 			"name": "Build a cooler",
@@ -546,9 +574,9 @@ func _buildings_rows() -> Array:
 		shop["status"] = "Placed"
 		rows.append(shop)
 	rows.append(_build_row("smokehouse", "Smokehouse", m.smokehouse_built, m.SMOKEHOUSE_COST,
-		"Smokes and preserves food.", "built. Stand beside it, facing it, and press Space to preserve food.", true))
+		"Smokes and preserves food.", "built. Stand beside it, facing it, and press Space (A) to preserve food.", true))
 	rows.append(_build_row("furnace", "Furnace", m.furnace_built, m.FURNACE_COST,
-		"Smelts ore into bars.", "built. Stand beside it, facing it, and press Space to smelt ore.", true))
+		"Smelts ore into bars.", "built. Stand beside it, facing it, and press Space (A) to smelt ore.", true))
 	var wood_row := _build_row("woodshed", "Firewood store and chopping log", m.woodshed_built, m.WOODSHED_COST,
 		"Stores firewood, and a log to split wood on.", "built in the workshop. Stand beside them to store firewood or split wood.", m.smokehouse_built or m.furnace_built)
 	if not m.woodshed_built:
@@ -599,7 +627,7 @@ func _buildings_rows() -> Array:
 		row["action"] = "decor:" + kind
 		row["enabled"] = p._can_place(kind)
 		rows.append(row)
-	rows.append({"note": "Face something you placed and press Space twice to take it down and get its materials back."})
+	rows.append({"note": "Face something you placed and press Space (A) twice to take it down and get its materials back."})
 
 	if not p._has_bell():
 		rows.append({"tab": "Crow bell", "icon": "bell"})
@@ -911,7 +939,7 @@ func _sell_row(f: Dictionary, held: int) -> Dictionary:
 func _smokehouse_rows() -> Array:
 	var rows: Array = [
 		{"tab": "Smokehouse"},
-		{"note": "Preserved goods keep in your pack, so nothing spoils. Stand beside the smokehouse, facing it, and press Space to open this panel."},
+		{"note": "Preserved goods keep in your pack, so nothing spoils. Stand beside the smokehouse, facing it, and press Space (A) to open this panel."},
 	]
 	var held: Array = []
 	for r in Foods.RECIPES:
@@ -969,7 +997,7 @@ func _well_rows() -> Array:
 	})
 	rows.append({"tab": "Hose"})
 	if m.hose_attached:
-		rows.append({"name": "Hose", "status": "Attached", "status_kind": "done", "value": "Attached. It reaches every plot on the farm. Face a crop and press Space to water it."})
+		rows.append({"name": "Hose", "status": "Attached", "status_kind": "done", "value": "Attached. It reaches every plot on the farm. Face a crop and press Space (A) to water it."})
 	else:
 		rows.append({
 			"name": "Attach the hose",
@@ -1142,7 +1170,7 @@ func _furnace_rows() -> Array:
 		{"name": "Bars left today", "status": "%d of %d" % [m.mining._smelts_left(), m.SMELT_DAILY_LIMIT], "status_kind": "info" if m.mining._smelts_left() > 0 else "short",
 			"progress": float(m.mining._smelts_left()) / float(m.SMELT_DAILY_LIMIT),
 			"value": "The furnace makes %d bars a day before it must cool; %d left today." % [m.SMELT_DAILY_LIMIT, m.mining._smelts_left()]},
-		{"note": "Smelting turns ore into bars, with wood as fuel. Bars make metal tools and gear. The furnace makes %d bars a day before it must cool; %d left today. Stand beside the furnace, facing it, and press Space to open this panel." % [m.SMELT_DAILY_LIMIT, m.mining._smelts_left()]},
+		{"note": "Smelting turns ore into bars, with wood as fuel. Bars make metal tools and gear. The furnace makes %d bars a day before it must cool; %d left today. Stand beside the furnace, facing it, and press Space (A) to open this panel." % [m.SMELT_DAILY_LIMIT, m.mining._smelts_left()]},
 	]
 	for kind in ["copper", "iron"]:
 		rows.append({

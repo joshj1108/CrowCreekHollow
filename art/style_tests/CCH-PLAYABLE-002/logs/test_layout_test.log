@@ -1,0 +1,70 @@
+Godot Engine v4.7.2.stable.steam.ed1daf0bf - https://godotengine.org
+
+PASS  reach: every tile of field one
+PASS  reach: every tile of field two
+PASS  reach: every tile of field three
+PASS  reach: every tile of field four
+PASS  reach: the well
+PASS  reach: the stand's front
+PASS  reach: the cave approach
+PASS  reach: the whole dock
+PASS  reach: fishing spots on the pond
+PASS  reach: walker spot for edge
+PASS  reach: walker spot for mill
+PASS  reach: walker spot for orchard
+PASS  reach: walker spot for chapel
+PASS  reach: walker spot for post
+PASS  reach: walker spot for grove
+PASS  reach: home from a trek
+PASS  reach: the pedlar's spot
+PASS  reach: grove tree (58, 2)
+PASS  reach: grove tree (28, 3)
+PASS  reach: grove tree (60, 9)
+PASS  reach: grove tree (2, 12)
+PASS  reach: grove tree (62, 16)
+PASS  reach: grove tree (4, 18)
+PASS  reach: grove tree (2, 25)
+PASS  reach: grove tree (29, 36)
+PASS  reach: grove tree (38, 36)
+PASS  reach: grove tree (14, 37)
+PASS  reach: grove tree (51, 37)
+PASS  reach: grove tree (22, 38)
+PASS  reach: all six orchard trees
+PASS  reach: brush, rock and thicket spots
+PASS  the east gate is closed (nothing reachable past it or the border)
+reach: 1573 tiles from the porch
+PASS  walk: porch -> field one
+PASS  walk: field one -> road by the gate
+PASS  walk: road -> the stand's front
+PASS  walk: stand -> the dock's end
+PASS  walk: dock -> the cave approach
+PASS  walking up to the cave approach doesn't enter the cave
+PASS  the stand is in front of the farmer
+PASS  the stand opens Trade at 10:00
+PASS  the well opens its panel
+PASS  the cave mouth enters the mining cave
+PASS  leaving the cave lands on the approach
+PASS  cave art: the mouth is still the C tile at (11, 8)
+PASS  cave art: (11, 9) below it is walkable
+PASS  cave art: walking north from (11, 9) onto (11, 8) enters the cave
+PASS  cave art: leaving the cave puts the farmer back on (11, 9)
+PASS  the door enters the farmhouse
+PASS  leaving the house lands on the porch
+PASS  field one is soil from the start
+PASS  fields two to four start fallow
+PASS  planting on field one
+PASS  watering on field one
+PASS  field two opens at Farming 2
+PASS  field three opens at Farming 5
+PASS  field four waits for the house to be Patched
+PASS  field four opens at Farming 9 with the house Patched
+PASS  water off the dock's end
+PASS  a cast from the dock
+PASS  Maren waits at the gate on day 4
+PASS  talking to the walker at the gate
+PASS  the trek starts
+PASS  home from the trek on the road inside the gate
+PASS  autumn windfalls under the orchard trees
+PASS  picking a windfall apple
+PASS  chopping a grove tree
+PASS: 0 failure(s)

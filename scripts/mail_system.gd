@@ -13,6 +13,8 @@ const MAILBOX_IX := Vector2i(53, 32)    # inner farm tile, where the concept far
 const FLAG_TIME := 0.32                  # seconds for the flag to swing up or down
 const LID_TIME := 0.9                    # seconds the lid stays open after the mailbox is checked
 const PROMPT_TEXT := "{hand}  Check the mail"
+const DESK_FIRST_PROMPT := "{hand}  Open the desk drawer"
+const DESK_PROMPT := "{hand}  The desk: catalog, accounts, pastimes"
 
 var flag := 0.0          # 0 down, 1 up: drawn by FarmScenery from the mailbox frames
 var lid_left := 0.0      # seconds until the door shuts again
@@ -112,15 +114,25 @@ func _update(delta: float) -> void:
 	flag = move_toward(flag, target, delta / FLAG_TIME)
 	if prompt == null:
 		return
-	var show: bool = not m.inside and not m.in_cave and m.open_tab == "" and not m.player.paused and m.placing == "" and m._tile_in_front() == _tile()
-	prompt.visible = show
+	var free: bool = not m.in_cave and m.open_tab == "" and not m.player.paused and m.placing == ""
+	var front: Vector2i = m._tile_in_front()
+	var show: bool = free and not m.inside and front == _tile()
+	# The same prompt over the desk in the bedroom (PLAY-07, PLAY-08): it names what the desk holds.
+	var at_desk: bool = free and m.inside and m._kind_at(front) == MainGame.Tile.DESK
+	prompt.visible = show or at_desk
 	if show:
-		prompt.text = m._fill_controls(PROMPT_TEXT)
-		prompt.reset_size()
-		var top := m._tile_center(_tile().x, _tile().y) + Vector2(0, -m.PX * 1.9)
-		var xf := m.get_viewport().get_canvas_transform()
-		var at := xf * top
-		prompt.position = (at - Vector2(prompt.size.x * 0.5, prompt.size.y)).round()
+		_place_prompt(PROMPT_TEXT, _tile())
+	elif at_desk:
+		_place_prompt(DESK_PROMPT if m.diary_found else DESK_FIRST_PROMPT, front)
+
+
+func _place_prompt(text: String, tile: Vector2i) -> void:
+	prompt.text = m._fill_controls(text)
+	prompt.reset_size()
+	var top: Vector2 = m._tile_center(tile.x, tile.y) + Vector2(0, -m.PX * 1.9)
+	var xf := m.get_viewport().get_canvas_transform()
+	var at := xf * top
+	prompt.position = (at - Vector2(prompt.size.x * 0.5, prompt.size.y)).round()
 
 
 func _build_prompt() -> void:

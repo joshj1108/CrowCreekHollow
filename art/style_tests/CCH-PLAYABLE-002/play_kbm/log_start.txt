@@ -1,0 +1,18 @@
+[title] OBS: hardware pad buttons isolated: 21 action bindings pinned to the bot's device
+[title] SHOT: art/style_tests/CCH-PLAYABLE-002/play_kbm/01_title.png
+[title] OBS: title buttons: (Continue) | New Game | (Load Game) | Settings | Quit
+[title] OBS: title focus on open: New Game
+[title] SHOT: art/style_tests/CCH-PLAYABLE-002/play_kbm/02_title_slots.png
+[title] OBS: slot page buttons: Slot 1: empty | Slot 2: empty | Slot 3: empty | Back
+[title] SHOT: art/style_tests/CCH-PLAYABLE-002/play_kbm/03_title_name.png
+[title] OBS: name page buttons: Begin | Back
+[D1 06:00] MSG: A new season begins. Day 1. Rain. WASD or the arrow keys to walk; walk into the farmhouse door to go in.
+[D1 06:03] OBS: world started=true day=1 slot=1 coins=0 hp=10 food=99 water=99 warmth=99 sanity=100 tool=hoe inside=false tile=(59, 20) pack={"firewood":4,"seeds":5} mats={}
+[D1 06:03] OBS: joypads the engine reports connected: ["XInput Controller", "(Standard system devices) Legion-Controller 1-F6", "(Standard system devices) Legion-Controller 1-F6", "(Standard system devices) Legion-Controller 1-F6", "(Standard system devices) Legion-Controller 1-F6", "(Standard system devices) Legion-Controller 1-F6"]
+[D1 06:05] SHOT: art/style_tests/CCH-PLAYABLE-002/play_kbm/04_first_frame.png
+[D1 06:21] MSG: Your diary is in the desk drawer, in the farmhouse bedroom. WASD or the arrow keys to walk in at the front door, face the desk and press Space.
+[D1 07:05] SHOT: art/style_tests/CCH-PLAYABLE-002/play_kbm/05_after_20s.png
+[D1 10:51] MSG: Your diary is in the desk drawer, in the farmhouse bedroom. WASD or the arrow keys to walk in at the front door, face the desk and press Space.
+[D1 11:05] SHOT: art/style_tests/CCH-PLAYABLE-002/play_kbm/06_after_100s.png
+[D1 11:05] OBS: coins=0 hp=10 food=87 water=84 warmth=90 sanity=100 tool=hoe inside=false tile=(59, 20) pack={"firewood":4,"seeds":5} mats={}
+[D1 11:05] END: problems=0 shots=6

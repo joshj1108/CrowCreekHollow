@@ -1937,7 +1937,8 @@ func _input(event: InputEvent) -> void:
 		_pointer_last = false
 	# The prompts follow whichever of keyboard or gamepad was used last.
 	var pad := event is InputEventJoypadButton or (event is InputEventJoypadMotion and absf(event.axis_value) > 0.5)
-	if (pad or event is InputEventKey) and pad != _pad_glyphs:
+	var pointer: bool = event is InputEventMouseButton and event.pressed
+	if (pad or pointer or event is InputEventKey) and pad != _pad_glyphs:
 		_pad_glyphs = pad
 		if panel.visible and prompt_bar.visible:
 			_swap_glyphs(panel)

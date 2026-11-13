@@ -61,6 +61,12 @@ func _load_file() -> void:
 	g._on_title_start("load", load_slot)
 	print("LOAD slot %d: loaded=%s day %d coins %d house stage %d lantern %d inside=%s tile=%s open_tab=\"%s\"" % [load_slot, g.world_started,
 		g.day, g.money, g.house_stage, g.lantern_tier, g.inside, g._player_tile(), g.open_tab])
+	# CCH-PLAYABLE-002 (PLAY-11): the notes said while loading wait for the HUD and are shown, in order.
+	var shown: Array = []
+	if g.notice_text != "":
+		shown.append(g.notice_text)
+	shown.append_array(g.notice_queue)
+	print("MSG slot %d: notices after load: %s; on screen: \"%s\"; act beats %s" % [load_slot, str(shown), g.message_label.text, str(g.act.beats)])
 	var t: Vector2i = g._player_tile()
 	if g._is_blocked_world(g.player.position + Vector2(0, 8)):
 		print("DIFF slot %d: the loaded farmer stands inside something solid at %s" % [load_slot, t])

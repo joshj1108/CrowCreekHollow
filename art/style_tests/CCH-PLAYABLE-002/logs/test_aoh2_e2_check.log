@@ -1,0 +1,65 @@
+Godot Engine v4.7.2.stable.steam.ed1daf0bf - https://godotengine.org
+
+PASS trek art loads
+PASS tall exists
+PASS tall native size 20x41 in its class ([12, 24, 38, 48])
+PASS tall alpha is binary
+PASS tall stands on its bottom row
+PASS stake exists
+PASS stake native size 22x29 in its class ([6, 24, 12, 32])
+PASS stake alpha is binary
+PASS stake stands on its bottom row
+PASS rope exists
+PASS rope native size 32x5 in its class ([16, 48, 2, 8])
+PASS rope alpha is binary
+PASS steps exists
+PASS steps native size 29x30 in its class ([16, 48, 16, 40])
+PASS steps alpha is binary
+PASS steps stands on its bottom row
+PASS tins exists
+PASS tins native size 22x21 in its class ([8, 24, 8, 24])
+PASS tins alpha is binary
+PASS tins stands on its bottom row
+PASS hut exists
+PASS hut native size 54x51 in its class ([40, 72, 40, 72])
+PASS hut alpha is binary
+PASS hut stands on its bottom row
+PASS walker_mill exists
+PASS walker_mill is 3 facings x 7 frames of 32 px
+PASS walker_mill alpha is binary
+PASS walker_mill has every facing and walk frame
+PASS walker_mill: every frame's feet on the foot line (21 of 21)
+PASS walker_mill stands 30 px tall (farmer 32; allowed [26, 32])
+PASS walker_orchard exists
+PASS walker_orchard is 3 facings x 7 frames of 32 px
+PASS walker_orchard alpha is binary
+PASS walker_orchard has every facing and walk frame
+PASS walker_orchard: every frame's feet on the foot line (21 of 21)
+PASS walker_orchard stands 25 px tall (farmer 32; allowed [22, 27])
+PASS walker_chapel exists
+PASS walker_chapel is 3 facings x 7 frames of 32 px
+PASS walker_chapel alpha is binary
+PASS walker_chapel has every facing and walk frame
+PASS walker_chapel: every frame's feet on the foot line (21 of 21)
+PASS walker_chapel stands 30 px tall (farmer 32; allowed [27, 32])
+PASS walker_post exists
+PASS walker_post is 3 facings x 7 frames of 32 px
+PASS walker_post alpha is binary
+PASS walker_post has every facing and walk frame
+PASS walker_post: every frame's feet on the foot line (21 of 21)
+PASS walker_post stands 30 px tall (farmer 32; allowed [27, 32])
+PASS walker_grove exists
+PASS walker_grove is 3 facings x 7 frames of 32 px
+PASS walker_grove alpha is binary
+PASS walker_grove has every facing and walk frame
+PASS walker_grove: every frame's feet on the foot line (21 of 21)
+PASS walker_grove stands 29 px tall (farmer 32; allowed [27, 32])
+PASS dog sheet is 7 frames of 32 x 24
+PASS dog alpha is binary
+PASS dog stands 24x15 (a third to a half the farmer's height)
+PASS trail works placed in the wood (9 of 9)
+PASS placed works keep off the trail and open ground []
+PASS the blocking grid is unchanged by the works (0 changed)
+PASS day gloom: edge 0.12 < forest 0.24 < dark trail 0.60
+PASS the darkest day gloom stays lighter than night
+e2 check: 0 failure(s)

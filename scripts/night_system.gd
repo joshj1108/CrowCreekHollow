@@ -26,7 +26,7 @@ const HINTS := {
 	"knock": "Stand by the door inside and hold it shut each time the latch rattles.",
 	"knock_out": "It is at your door. Hold it in your light until it goes.",
 	"crows": "They drop onto your crops one at a time. Get each into your light before it pecks.",
-	"pond": "Stand on the bank, face the lights and press Space as they swell brightest, three times.",
+	"pond": "Stand on the bank, face the lights and press {hand} as they swell brightest, three times.",
 	"watcher": "Hold it in your light until it fades, but don't let it reach you: back away as it comes.",
 	"footsteps": "Get inside, or stand in a lamp post's light until they pass. Don't stay in the dark.",
 	"hollow": "Hold it in your light until it breaks apart, and keep out of its reach.",
@@ -286,8 +286,8 @@ func _begin(force := "") -> void:
 	_start_play()
 	var hint := "knock_out" if mode == "hold" and visitor["id"] == "knock" else str(visitor["id"])
 	if _hinting(str(visitor["id"])) and HINTS.has(hint):
-		note += " " + str(HINTS[hint])
-	m._show_message(str(visitor["appear"]) + note)
+		note += " " + m._fill_controls(str(HINTS[hint]))
+	m._show_message(str(visitor["appear"]) + note, true)
 	_show_visitor()
 	_roll_raid()
 	if visitor["id"] == "quiet":
@@ -311,7 +311,7 @@ func _begin_first() -> void:
 	first_beat = 1
 	_start_play()
 	m.ambience.night_event("hush")
-	m._show_message(str(FIRST["appear"]))
+	m._show_message(str(FIRST["appear"]), true)
 	_show_visitor()
 
 
@@ -336,7 +336,7 @@ func _update_first() -> void:
 			m.ambience.night_event("sting")
 			_show_visitor()
 			if out:
-				m._show_message("Something stands at the edge of the field, facing the house. " + str(HINTS["first"]))
+				m._show_message("Something stands at the edge of the field, facing the house. " + str(HINTS["first"]), true)
 			else:
 				m._show_message("Through the window: something is standing at the edge of the field, facing the house.")
 		elif beat == 3:
@@ -366,7 +366,7 @@ func _begin_sighting() -> void:
 	sight_beat = 1
 	_start_play()
 	m.ambience.night_event("crow")
-	m._show_message(str(SIGHTING["appear"]))
+	m._show_message(str(SIGHTING["appear"]), true)
 	_show_visitor()
 
 
@@ -762,7 +762,7 @@ func _try_face(tile: Vector2i) -> bool:
 func _on_leave_house() -> void:
 	if _active() and mode == "door":
 		_hold_at_door()
-		m._show_message("It is standing at your door." + (" " + str(HINTS["knock_out"]) if _hinting("knock") else ""))
+		m._show_message("It is standing at your door." + (" " + str(HINTS["knock_out"]) if _hinting("knock") else ""), true)
 		_show_visitor()
 
 
@@ -968,6 +968,11 @@ func _resolve(faced: bool, show := true, key := "") -> String:
 		else:
 			shadow_steps = maxi(0, shadow_steps - int(v.get("push", 0)))
 	else:
+		# Left alone: counted for the diary's "What the night takes" (PLAY-02), and said in the morning's report.
+		if loss >= 1.0:
+			m.progression._bump("left_alone")
+			if not show:
+				text += " Sanity -%d." % roundi(loss)
 		if v["id"] == "crows":
 			text += " " + _crows_left()
 		if v["id"] == "hollow":

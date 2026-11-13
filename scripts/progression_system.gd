@@ -48,7 +48,7 @@ func _check_story() -> void:
 			break
 		m.quests_done[q["id"]] = true
 		_grant_reward(q["reward"])
-		m._show_message("Chapter complete: %s. Reward: %s" % [q["title"], _reward_text(q["reward"])])
+		m._show_message("Chapter complete: %s. Reward: %s" % [q["title"], _reward_text(q["reward"])], true)
 		finished = true
 	# The next chapter is announced straight away, so the player always knows what to do next.
 	if finished:

@@ -1,0 +1,111 @@
+Godot Engine v4.7.2.stable.steam.ed1daf0bf - https://godotengine.org
+
+mode=earlybed days=400
+day date   coins san/max fea  Fa Ca Cl Bu Fo Mi Sm steps shd tax  grow wood fib wear kept night  hearts M/D/V/P
+  1 Oct 1     9 100/100   0   1  1  1  2  2  1  1     1   0    0    5    7   0    0    0 -  0/0/0/0
+ 21 Oct 21   240  44/100   7   5  3  2  6  5  4  1     5   7    0   40   46   8    0    7 -  0/0/0/0
+ 41 Nov 10   578  86/100  32   7  5  4  8  6  6  2     8   5    0   40   15  31    0   27 -  4/0/0/0
+ 61 Nov 30   840  89/100  16   8  6  5  9  6  7  4     8   4    0   40    2  74    0   47 -  7/0/1/0
+ 81 Dec 20  1266  48/100  57   9  7  5  9  7  7  6    10   5    0   40    2 110    0   67 -  10/0/1/0
+101 Jan 9  1042  43/100  91   9  7  6  9  7  8  6    10   5    0   40   20 145    0    1 -  10/0/1/1
+121 Jan 29   983  45/100  90  10  7  6 10  8  8  7    11   6    0   40   29 171    0    1 -  10/0/1/1
+141 Feb 18   290  21/100  91  10  8  7 10  8  8  7    11   8    0   40   37 186    0    1 -  10/0/2/1
+161 Mar 10   668 100/100  90  10  8  7 10  8  9  8    12   5    0   64   30 192    0    0 -  10/0/2/1
+181 Mar 30  1075  74/100  93  10  8  7 10  8  9  8    12   5    0   64    8 212    0   14 -  10/2/2/1
+201 Apr 19   981 100/100  94  10  8  7 10  8  9  8    12   4    0   64    0 254    0   34 -  10/6/2/1
+221 May 9  1043 100/100  98  10  8  7 10  9  9  8    12   3    0   64    2 299    0   54 -  10/9/2/1
+241 May 29   970 100/100 102  10  9  8 10  9  9  8    12   4    0   64    4 345    0   74 -  10/10/2/1
+261 Jun 18  1626 100/100  94  10  9  8 10  9 10  9    13   4    0   60   19 382    0   94 -  10/10/7/1
+281 Jul 8  1515 100/100  90  10  9  8 10  9 10  9    13   6    0   64   28 381    0  114 -  10/10/9/1
+301 Jul 28   546 100/100  93  10  9  8 10  9 10  9    13   7    0   64    8 388    0    6 -  10/10/10/1
+321 Aug 17  1333 100/100  90  10  9  8 10  9 10  9    13   5    0   64    3 392    0   26 -  10/10/10/1
+341 Sep 6  2082 100/100 107  10  9  8 10  9 10  9    13   4    0   64    4 422    0   46 -  10/10/10/4
+361 Sep 26  2144 100/100  92  10  9  8 10  9 10  9    13   6    0   64   17 449    0    1 -  10/10/10/6
+381 Oct 16  1226 100/100 106  10  9  8 10  9 10  9    13   3    0   64   17 469    0    7 -  10/10/10/8
+400 Nov 4  1676  86/100  82  10  9  8 10 10 10  9    14   0    0   64   25 499    0    8 -  10/10/10/10
+--- milestones (first day)
+Bushcrafting 2=1  Forestry 2=1  step: boarded=1  Forestry 3=2  Bushcrafting 3=4  pedlar seen=4  trek: edge=4  
+Carpentry 2=5  hose attached=5  well repaired=5  Farming 2=6  step: plot_two=6  Bushcrafting 4=7  step: coop=7  
+Bushcrafting 5=10  Farming 3=11  Carpentry 3=13  Farming 4=13  Forestry 4=13  cellar_room waits: Carpentry=13  
+cellar_room waits: coins=13  cellar_room waits: copper_bar=13  cellar_room waits: hardwood=13  cellar_room waits: stone=13  
+porch waits: Carpentry=13  porch waits: coins=13  porch waits: copper_bar=13  porch waits: hardwood=13  
+porch waits: wood=13  step: patched=13  Mining 2=15  Bushcrafting 6=16  Mining 3=16  step: hollow_lantern=16  
+150 coins held=17  Farming 5=17  Cleaning 2=18  root cellar=18  Forestry 5=21  Mining 4=21  work: waymarks=22  
+Carpentry 4=23  Farming 6=23  step: smokehouse=23  step: woodshed=23  Bushcrafting 7=26  Cleaning 3=26  
+wallpaper=27  Mining 5=28  trek: mill=28  Farming 7=29  work: footbridge=29  furniture: painting=32  
+Carpentry 5=35  Forestry 6=35  step: furnace=35  Cleaning 4=36  Smithing 2=36  coop hopper=36  Mining 6=39  
+Bushcrafting 8=40  furniture: armchair=42  Farming 8=43  Smithing 3=43  copper nozzle=43  decor: birdbath=43  
+page t1=43  Carpentry 6=49  bell: coins=49  bell: feathers=49  page t2=49  furniture: feather_bed=51  
+Cleaning 5=53  Mining 7=56  Smithing 4=57  decor: bench=57  sprinklers 1=57  Bushcrafting 9=58  work: gate_lamp=58  
+Smithing 5=63  Forestry 7=64  Farming 9=69  step: plot_three=69  furniture: dresser=77  Smithing 6=78  
+bell: bell_metal=78  got bell_metal=78  Carpentry 7=79  step: barn=79  Cleaning 6=84  Mining 8=88  tax paid=93  
+barn hopper=99  Bushcrafting 10=102  deed begun=113  spray head=113  Smithing 7=114  step: lamp=114  
+Forestry 8=119  Farming 10=121  sprinklers 5=121  furniture: clock=127  decor: weathervane=128  Carpentry 8=129  
+Cleaning 7=141  ext: cellar_room=141  Smithing 8=149  Mining 9=153  bell: bell_frame=153  got bell_frame=153  
+step: flowers=153  got storm_oak=157  cistern=161  sprinklers 8=163  trek: orchard=175  page t3=184  
+Forestry 9=211  work: boardwalk=211  Carpentry 9=232  act: letter=240  Cleaning 8=241  act: shown=244  
+bell: bell_clapper=245  furniture: bookshelf=245  got bell_clapper=245  step: restored=245  trek: chapel=245  
+page t4=246  got flax=247  paint=251  page t5=252  Smithing 9=260  Mining 10=261  got bell_rope=268  
+ENDING: hollow=283  work: waystation=295  act at orchard=329  act: orchard=329  trek: post=336  act at mill=343  
+act: meeting=343  act: davy=371  Forestry 10=385  step: bell=396  act: knock=397  ENDING: bell=400  trek: grove=400  
+--- totals: nights { "faced": 0, "ignored": 0, "lost": 0, "skipped": 400, "hollow": 31, "raids_won": 0, "blessed": 4 }, min sanity 3, days under 30 sanity 46, sanity limit 100, HP lost to needs 0, hours empty { "food": 0.0, "water": 0.0, "warmth": 0.0 }, hours fished 1
+--- madness: days under 60 / 40 / 20 sanity: 117 / 71 / 20; raids 376 (won 0); blight on the ground now 22 tiles; hens 3
+--- coins earned { "crops": 8180, "eggs_milk": 2408, "fish": 0, "forage": 3679, "cooked": 6187 }, spent { "seeds": 4225, "animals": 2592, "tax": 2513, "pedlar": 1141, "cards": 190, "estate": 10700 }; hens 3 goats 3; property value 809; tax owed 0
+--- materials: {"apple_sapling":6,"bell_clapper":0,"bell_frame":0,"bell_metal":0,"bell_rope":0,"copper_bar":87,"copper_ore":1139,"feathers":82,"fiber":499,"flax":29,"flour":78,"hardwood":258,"iron_bar":365,"iron_ore":0,"lamp_oil":0,"resin":408,"rope":2,"sticks":912,"stone":375,"storm_oak":10,"wood":25}
+--- harvested {"blueberry":438,"corn":520,"garlic":148,"kale":693,"parsnip":150,"peas":1358,"potato":252,"pumpkin":412,"turnip":770}; withered 117
+--- foraged 2242, fish caught 2 (0 at night), cooked by _cook {"baked_potato":50,"bramble_jam":146,"dried_mushrooms":146,"ghost_tincture":20,"nettle_soup":20,"pea_soup":84,"pumpkin_soup":102,"rosehip_tea":56}
+--- chores over 400 days: { "water_presses": 4073, "hand_feeds": 150, "hopper_fills": 93, "tidies": 387, "mends": 703 }; sprinklers 8
+--- treks: { "edge": 4, "mill": 39, "orchard": 28, "chapel": 22, "post": 7, "grove": 1, "dark": 47, "floods": 25, "dogs": 38, "skipped": 75, "oil_coins": 992, "works_coins": 2750, "trade_coins": 1552, "short eggs/milk": 6, "short crops": 143, "short wood": 10, "grove short crops": 1 }, trail works done 5: ["waymarks", "footbridge", "gate_lamp", "boardwalk", "waystation"]
+--- cave: 5.9 copper and 2.2 iron nodes a day on average, over 386 visits
+--- folk: 75 visits, 619 words, 84 gifts (27 loved), 3 requests done; hearts Maren 10, Davy 10, vicar 10, postman 10
+--- scenes seen (day): maren_lamp 29, maren_hens 43, maren_hands 58, vicar_names 129, maren_book 163, davy_notes 180, davy_rows 202, davy_man 220, act_shown 244, davy_turn 253, vicar_ladder 259, vicar_struck 275, vicar_register 300, post_round 342, post_crate 353, post_dead 371, post_hand 382
+--- second year: beats {"davy":371,"knock":-1,"letter":240,"meeting":343,"orchard":329,"shown":244}, meeting won (there), Davy home, Hollow left at the door 0; endings reached (day) {"bell":400,"hollow":282}
+--- crow charms made 150
+--- estate: extensions ["cellar_room"], furniture ["painting", "armchair", "feather_bed", "dresser", "clock", "bookshelf"], paint sage, paper damask, deed 8000/12000; fences 120; stand glut {"cooked":18.0,"forage":3.0,"milk":1.0}
+--- next step: all done
+--- achievements earned 28 of 60 by day 401: FIRST_YEAR=247, MEETING=344, END_BELL=401, END_HOLLOW=283, EDGE=5, DARK_TRAIL=30, ALL_ROUTES=337, WOOD_PAGES=253, GROVE=401, DREAD=43, FIRST_NIGHT=2, SIGHTING=5, BACK=30, FRIEND=31, REQUEST=68, MAREN=164, DAVY_SCENE=254, VICAR=301, POST=383, HEARTS=398, FIRST_HARVEST=11, FIRST_CATCH=3, FIRST_MEAL=3, LANTERN=2, RESTORED=246, HOLLOW_LANTERN=17, YARD=83, FORTY=73
+--- achievements not earned (value/goal): HOUSE_PAGES 8/10, KNOCK 0/1, DAVY 0/1, ALL_CHAPTERS 17/17, END_ELIAS 0/1, END_ALL 2/3, NIGHT_TREK 0/1, BARE 0/1, DARK_NIGHT 0/1, FACE_FIELD 0/1, FACE_KNOCK 0/1, FACE_CROWS 0/1, FACE_POND 0/1, FACE_WATCHER 0/1, FACE_STEPS 0/1, HOLLOW 0/1, RAID 0/1, WINTER 0/1, CLEAN_SEASON 0/1, FACED_50 0/50, REQUESTS_ALL 3/12, ALL_CROPS 9/11, ALL_FISH 0/8, ALL_RECIPES 9/31, EXTENDED 1/3, DEED 0/1, MASTER 4/10, PALE_CARP 0/1, COLLAPSE 0/1, WADE 0/1, LIGHTS 0/1, CAIRN 0/1
+=== PROBE: first day each thing was reached (mode=earlybed, 401 days, treks=3) ===
+PROBE building: well_repaired=5, hose_attached=5, coop_built=7, cellar_built=18, hens kept=18, smokehouse_built=23, woodshed_built=23, furnace_built=35, barn_built=79, goats kept=80, cistern_built=161
+PROBE chapter: bed=2, light=2, edge=5, first_crop=11, second_plot=11, winter_store=13, first_sale=13, pumpkin=22, stain=27, home=246, act_letter=246, act_orchard=330, act_knock=397, act_meeting=397, act_davy=397, act_bell=397
+PROBE deed: offered=14
+PROBE extension: cellar_room=141
+PROBE furniture: painting=32, armchair=42, feather_bed=51, dresser=77, clock=127, bookshelf=245
+PROBE gear worn: hoe=1
+PROBE hearts: mill 1=27, mill 2=28, mill 3=29, mill 4=30, mill 5=43, mill 6=50, mill 7=57, chapel 1=61, mill 8=64, mill 9=67, mill 10=71, post 1=89, chapel 2=129, orchard 1=171, orchard 2=175, orchard 3=182, orchard 4=183, orchard 5=189, orchard 6=196, orchard 7=203, orchard 8=206, orchard 9=218, orchard 10=225, chapel 3=245, chapel 4=246, chapel 5=246, chapel 6=247, chapel 7=255, chapel 8=266, chapel 9=276, chapel 10=285, post 2=336, post 3=337, post 4=338, post 5=350, post 6=351, post 7=363, post 8=374, post 9=386, post 10=397
+PROBE house stage: 1=1, 2=13, 3=245
+PROBE lantern tier: 1=1, 2=7, 3=16
+PROBE letter: Delivery=3, From the town clerk=14, Property tax bill=93, Receipt=93
+PROBE material: wood=1, sticks=1, resin=1, stone=1, feathers=3, fiber=4, lamp_oil=4, hardwood=13, copper_ore=15, flour=29, iron_ore=37, copper_bar=42, iron_bar=57, bell_metal=78, bell_frame=153, storm_oak=157, apple_sapling=182, bell_clapper=245, flax=247, bell_rope=268, rope=336
+PROBE night: first=2, quiet=3, knock=4, sighting=5, field=6, pond=8, crows=9, watcher=12, hollow=23, raid=24
+PROBE pack item: firewood=1, seeds=6, rosehips=9, crops=10, kale=10, chanterelles=10, kale_seeds=17, corn_seeds=17, corn=18, crow_charm=21, pumpkins=21, apples=24, eggs=25, garlic=29, ghost_pipe=31, blackberries=35, pumpkin_seeds=56, yellowfoot=62, oyster_mushrooms=63, milk=91, bandage=93, fish_meal=93, dried_mushrooms=108, morels=165, pea_seeds=165, parsnip_seeds=166, potato_seeds=170, peas=171, fiddleheads=171, salmonberries=172, pea_soup=178, baked_potato=180, potatoes=186, nettle_soup=190, parsnips=198, bramble_jam=203, nettles=207, huckleberries=244, pumpkin_soup=254, blueberries=255, rosehip_tea=343, ghost_tincture=344, garlic_seeds=351, bread=357, pears=364, turnip_hash=366
+PROBE page: p5=2, p1=3, p2=4, p7=5, p4=9, p6=14, p9=23, t1=43, t2=49, t3=184, p10=246, t4=246, t5=252, bell=397
+PROBE paint: plain=1, sage=251
+PROBE paper: plain=1, damask=27
+PROBE recipe makeable: gear/gear:sharpened_stick=4, gear/gear:resin_cap=4, gear/gear:fiber_wraps=4, gear/gear:bark_wrap=4, gear/gear:bark_boots=4, gear/gear:twine_collar=4, gear/gear:reed_leggings=4, other/bandage=4, other/rope=4, gear/gear:hunting_knife=7, gear/gear:bark_greaves=10, gear/gear:resin_amulet=10, cooking/cook:turnip_hash=13, other/crow_charm=13, gear/gear:wood_shield=19, cooking/cook:trail_ration=32, gear/gear:copper_shield=50, gear/gear:copper_boots=50, gear/gear:copper_greaves=50, gear/gear:copper_bracers=50, gear/gear:copper_sword=50, gear/gear:copper_cuirass=50, gear/gear:copper_torc=50, gear/gear:copper_helm=50, cooking/cook:rosehip_tea=60, cooking/cook:ghost_tincture=60, gear/gear:iron_helm=63, gear/gear:iron_torc=63, gear/gear:iron_sword=63, gear/gear:iron_gauntlets=63, gear/gear:iron_shield=78, gear/gear:iron_sabatons=78, gear/gear:iron_greaves=78, gear/gear:iron_cuirass=78, cooking/cook:bread=108, cooking/cook:pea_soup=178, cooking/cook:baked_potato=186, cooking/cook:apple_crumble=196, cooking/cook:berry_cobbler=202, cooking/cook:fiddlehead_fry=231, cooking/cook:pumpkin_soup=254, cooking/cook:pumpkin_pie=255
+PROBE recipe seen: cooking/cook:turnip_hash=1, cooking/cook:baked_potato=1, cooking/cook:rosehip_tea=1, cooking/cook:nettle_soup=1, cooking/cook:pea_soup=1, cooking/cook:fiddlehead_fry=1, cooking/cook:pumpkin_soup=1, cooking/cook:fish_stew=1, cooking/cook:colcannon=1, cooking/cook:leek_soup=1, cooking/cook:roast_roots=1, cooking/cook:bullhead_fry=1, cooking/cook:corn_chowder=1, cooking/cook:forager_stew=1, cooking/cook:garlic_trout=1, cooking/cook:apple_crumble=1, cooking/cook:hearty_stew=1, cooking/cook:pumpkin_pie=1, cooking/cook:berry_cobbler=1, cooking/cook:ghost_tincture=1, cooking/cook:sturgeon_steak=1, tools/tool:hatchet=1, tools/tool:pick=1, tools/tool:rod=1, tools/tool:hose=1, other/lantern=1, other/bandage=1, other/rope=1, other/crow_charm=1, gear/gear:sharpened_stick=1, gear/gear:hunting_knife=1, gear/gear:resin_cap=1, gear/gear:fiber_wraps=1, gear/gear:bark_wrap=1, gear/gear:bark_boots=1, gear/gear:twine_collar=1, gear/gear:resin_amulet=1, gear/gear:reed_leggings=1, gear/gear:bark_greaves=1, gear/gear:copper_helm=1, gear/gear:copper_torc=1, gear/gear:copper_cuirass=1, gear/gear:copper_sword=1, gear/gear:copper_bracers=1, gear/gear:copper_greaves=1, gear/gear:copper_boots=1, gear/gear:iron_helm=1, gear/gear:iron_torc=1, gear/gear:iron_cuirass=1, gear/gear:iron_sword=1, gear/gear:iron_gauntlets=1, gear/gear:iron_greaves=1, gear/gear:iron_sabatons=1, gear/gear:wood_shield=1, gear/gear:copper_shield=1, gear/gear:iron_shield=1, cooking/cook:fish_meal=1, cooking/cook:trail_ration=1, cooking/cook:bread=1
+PROBE request: maren_eggs=67, maren_tea=357, maren_garlic=390
+PROBE season: Autumn (year 1)=1, Winter (year 1)=62, Spring (year 1)=152, Summer (year 1)=244
+PROBE tool: hatchet 1=1, hatchet 2=1, pick 1=1, hatchet 3=36, pick 2=36, hose 1=43, hatchet 4=63, pick 3=63, hose 2=113
+PROBE trail work: waymarks=22, footbridge=29, gate_lamp=58, boardwalk=211, waystation=295
+PROBE trek: edge=4, mill=28, orchard=175, chapel=245, post=336, grove=400, grove (walked)=400
+PROBE weather: drizzle=1, rain=2, sunny=4, fog=5, downpour=7, cloudy=8, snow=74
+=== PROBE: never reached in this run ===
+NEVER chapter (1 of 17): act_grove
+NEVER page (2 of 15): p3, p8
+NEVER extension (2 of 3): porch, second_storey
+NEVER furniture (0 of 6): 
+NEVER paint (4 of 6): whitewash, barn_red, slate, ochre
+NEVER paper (3 of 5): rose, stripe, toile
+NEVER trek (0 of 6): 
+NEVER trail work (4 of 9): chapel_steps, handcart, oil_cache, post_lamps
+NEVER material (0 of 21): 
+NEVER house stage (0 of 3): 
+NEVER lantern tier (0 of 3): 
+NEVER tool (2 of 11): rod 1, rod 2
+NEVER bag tier (2 of 2): 1, 2
+NEVER night (1 of 9): footsteps
+NEVER request (9 of 12): davy_fish, davy_berries, davy_rope, vicar_pumpkins, vicar_oil, vicar_sturgeon, post_potatoes, post_firewood, post_lamprey
+NEVER hearts (0 of 4): 
+NEVER recipe makeable (17 of 59 listed): cooking/cook:bullhead_fry, cooking/cook:colcannon, cooking/cook:corn_chowder, cooking/cook:fish_meal, cooking/cook:fish_stew, cooking/cook:forager_stew, cooking/cook:garlic_trout, cooking/cook:hearty_stew, cooking/cook:leek_soup, cooking/cook:nettle_soup, cooking/cook:roast_roots, cooking/cook:sturgeon_steak, other/lantern, tools/tool:hatchet, tools/tool:hose, tools/tool:pick, tools/tool:rod
+NEVER homestead step (0): 

@@ -1,0 +1,40 @@
+Godot Engine v4.7.2.stable.steam.ed1daf0bf - https://godotengine.org
+
+RESULT starve on the farm           ok | day 1 06:00 area=farm tile=(69, 42) kind=3 hp=10/10 food=0 water=99 sanity=90/100 foes=0 trek=false moved=60px | no save yet | msg="You collapse. You wake at the homestead, shaken. Sanity -10.
+
+You haven't eaten in too long. You feel weaker. "
+RESULT starve inside the house      ok | day 1 06:00 area=farm tile=(69, 42) kind=3 hp=10/10 food=0 water=99 sanity=90/100 foes=0 trek=false moved=60px | no save yet | msg="You collapse. You wake at the homestead, shaken. Sanity -10.
+
+You haven't eaten in too long. You feel weaker. "
+RESULT   ...after Unstick           ok | day 1 06:00 area=farm tile=(60, 20) kind=1 hp=10/10 food=0 water=99 sanity=90/100 foes=0 trek=false moved=60px | no save yet | msg="You collapse. You wake at the homestead, shaken. Sanity -10.
+
+You step back onto open ground."
+RESULT   ...after waiting to 03:00  ok | day 2 06:00 area=farm tile=(60, 20) kind=1 hp=10/10 food=0 water=98 sanity=81/95 foes=0 trek=false moved=60px | save: day 2.0 inside=false pos=[2898.0, 984.0] | msg="The crows have stopped calling. The whole farm has gone quiet.
+
+Your diary is in the desk drawer, in the farmh"
+RESULT starve in the cave           ok | day 1 06:00 area=farm tile=(69, 42) kind=3 hp=10/10 food=0 water=99 sanity=90/100 foes=0 trek=false moved=60px | save: day 2.0 inside=false pos=[2898.0, 984.0] | msg="You collapse. You wake at the homestead, shaken. Sanity -10.
+
+You haven't eaten in too long. You feel weaker. "
+RESULT starve on a trek             ok | day 1 06:00 area=farm tile=(69, 42) kind=3 hp=10/10 food=0 water=99 sanity=89/100 foes=0 trek=false moved=60px | save: day 2.0 inside=false pos=[2898.0, 984.0] | msg="You collapse. You wake at the homestead, shaken. Sanity -10.
+
+You haven't eaten in too long. You feel weaker. "
+RESULT killed by a cave creature    ok | day 1 06:00 area=farm tile=(69, 42) kind=3 hp=10/10 food=99 water=99 sanity=90/100 foes=0 trek=false moved=60px | save: day 2.0 inside=false pos=[2898.0, 984.0] | msg="Pinned under a stone at the cave mouth, a torn page. It's in your diary: "The bell" (1 of 10).
+
+You step into "
+note: with food and water left at 0 after the first fall, one more real minute (3 game hours) brought 1 more falls; lowest hp 9; food 0 water 0
+RESULT 03:00 on the farm            ok | day 2 06:00 area=farm tile=(59, 20) kind=28 hp=10/10 food=99 water=99 sanity=91/95 foes=0 trek=false moved=60px | save: day 2.0 inside=false pos=[2856.0, 984.0] | msg="The crows have stopped calling. The whole farm has gone quiet.
+
+Something walked the farm in the night. There "
+RESULT 03:00 inside the house       ok | day 2 06:00 area=farm tile=(59, 20) kind=28 hp=10/10 food=99 water=99 sanity=91/95 foes=0 trek=false moved=60px | save: day 2.0 inside=false pos=[2856.0, 984.0] | msg="The crows have stopped calling. The whole farm has gone quiet.
+
+Something walked the farm in the night. There "
+RESULT 03:00 in the cave            ok | day 2 06:00 area=farm tile=(69, 42) kind=3 hp=10/10 food=99 water=99 sanity=91/95 foes=0 trek=false moved=60px | save: day 2.0 inside=false pos=[3336.0, 2040.0] | msg="The crows have stopped calling. The whole farm has gone quiet.
+
+Something walked the farm in the night. There "
+RESULT 03:00 on a trek              ok | day 2 06:00 area=farm tile=(69, 42) kind=3 hp=10/10 food=99 water=99 sanity=91/95 foes=0 trek=false moved=60px | save: day 2.0 inside=false pos=[3336.0, 2040.0] | msg="Achievement: Tin Light. Build a Tin Lantern.
+
+Something walked the farm in the night. There are prints at the "
+RESULT load of the cave-collapse save ok | day 2 06:00 area=farm tile=(69, 42) kind=3 hp=10/10 food=99 water=99 sanity=91/95 foes=0 trek=false moved=60px | save: day 2.0 inside=false pos=[3336.0, 2040.0] | msg="Achievements: Something Walks This Farm, Where You Stand.
+
+Welcome back. Day 2."
+state probe: 0 suspect

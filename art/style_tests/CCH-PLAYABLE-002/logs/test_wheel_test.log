@@ -1,0 +1,89 @@
+Godot Engine v4.7.2.stable.steam.ed1daf0bf - https://godotengine.org
+
+PASS  art: the dial, the lit frames and the icons load
+PASS  art: one lit frame per section
+PASS  art: one icon per section
+PASS  art: drawn at a whole scale
+PASS  art: the dial sits on whole pixels
+PASS  art: the dial fits the screen
+PASS  art: the drawn face lies inside the hit ring
+PASS  open: Shift opens it
+PASS  open: the clock stops
+PASS  close: Esc closes it
+PASS  close: it is gone once the fade is done
+PASS  Esc: the farm is back
+PASS  Esc: the player moves again
+PASS  open: L3 opens it
+PASS  close: B closes it
+PASS  B: the farm is back
+PASS  B: the player moves again
+PASS  close: Shift again closes it
+PASS  Shift: the farm is back
+PASS  Shift: the player moves again
+PASS  fade: a press while it fades in still moves the highlight
+PASS  fade: the fade finishes fully opaque
+PASS  choose: Enter opens the lit section
+PASS  choose: the wheel is hidden at once
+PASS  back: Esc from a section returns to the wheel
+PASS  back: a second Esc closes it
+PASS  section and back: the farm is back
+PASS  section and back: the player moves again
+PASS  cancel: B opens no section
+PASS  cancel: the press doesn't reach the farm
+PASS  keys: left from the first section wraps to the last
+PASS  keys: right wraps back to the first
+PASS  keys: down steps clockwise
+PASS  keys: up steps back
+PASS  keys: D steps through every section
+PASS  keys: A steps all the way back
+PASS  pad: D-pad right steps clockwise
+PASS  pad: D-pad left wraps
+PASS  pad: the stick lights every segment it points at
+PASS  pad: the stick inside the deadzone moves nothing
+PASS  pad: A opens the lit section
+PASS  pad: the farm is back
+PASS  pad: the player moves again
+PASS  mouse: hovering lights every segment
+PASS  mouse: just inside the outer edge counts
+PASS  mouse: just outside the hub counts
+PASS  mouse: a hover over the hub changes nothing
+PASS  mouse: a click opens that section
+PASS  mouse: a click off the ring closes it
+PASS  mouse: the farm is back
+PASS  mouse: the player moves again
+PASS  boundary: the mouse either side of every boundary lights the right segment
+PASS  boundary: the stick either side of every boundary lights the right segment
+PASS  repeat: eleven presses in a frame step eleven times
+PASS  repeat: and open nothing
+PASS  repeat: a held key repeats
+PASS  repeat: four Shifts leave it closed
+PASS  repeat: the farm is back
+PASS  repeat: the player moves again
+PASS  Skills: chosen from the wheel
+PASS  Skills: back to the wheel
+PASS  Gear: chosen from the wheel
+PASS  Gear: back to the wheel
+PASS  Craft: chosen from the wheel
+PASS  Craft: back to the wheel
+PASS  Quests: chosen from the wheel
+PASS  Quests: back to the wheel
+PASS  Diary: chosen from the wheel
+PASS  Diary: back to the wheel
+PASS  House: chosen from the wheel
+PASS  House: back to the wheel
+PASS  Buildings: chosen from the wheel
+PASS  Buildings: back to the wheel
+PASS  Achievements: chosen from the wheel
+PASS  Achievements: back to the wheel
+PASS  every section: the farm is back
+PASS  every section: the player moves again
+PASS  prompts: the keyboard's names after a key
+PASS  prompts: the controller's names after a button
+PASS  prompts: back to the keyboard's
+PASS  prompts: opened by L3, the wheel shows the controller's names
+PASS  no fade: it shows whole at once
+PASS  no fade: Esc hides it at once
+PASS  no fade: Enter opens the lit section
+PASS  no fade: the farm is back
+PASS  no fade: the player moves again
+PASS: 0 failure(s)

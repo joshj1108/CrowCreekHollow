@@ -245,11 +245,15 @@ const TIPS := [
 	{"id": "cellar", "title": "Storing crops", "text": "Stand beside the root cellar and press {hand} to store or take crops. Nothing spoils in the cellar."},
 	{"id": "smelt", "title": "Smelting and preserving", "text": "Stand beside the furnace and press {hand} to smelt ore into bars. The smokehouse preserves food, and the cooler keeps fish fresh."},
 	{"id": "needs", "title": "Hunger, thirst, and comfort", "text": "Hunger and thirst drain through the day, and comfort drops outside on cold days. Eat from the bag ({bag}), drink from the pond, and warm up in the house. Sleep to be fully comfortable again, but only with a fire lit: feed the hearth from the firewood store at the workshop."},
-	{"id": "cave", "title": "The mine", "text": "The cave is at the west edge of the farm. Each day it lays out differently, with ore to mine and creatures to watch for."},
+	{"id": "cave", "title": "The mine", "text": "The cave is at the west edge of the farm. Each day it lays out differently, with ore to mine and creatures to watch for. Ore needs a pick and the creatures a weapon: both are made from the Craft section ({wheel}). Hold {guard} to guard against a blow."},
+	{"id": "night", "title": "What the night takes", "text": "Something comes to the farm most nights after 22:00. Left alone while you sleep, it takes sanity, which is why you can wake with less than you went to bed with, and it creeps the field's shadow toward the house. Facing it, in your lantern's light, costs far less and pushes the shadow back. You need not face every night, but each one you leave adds up. Sanity comes back with sleep, time indoors, a well-kept house, a good meal and a pastime at the desk; when it runs very low, the vicar comes to bless the house. Below 40 a walker's nerve fails faster beside you in the wood, and below 30 the farm starts to play tricks on you."},
+	{"id": "seeds", "title": "Seeds and supplies", "text": "Seeds, lamp oil and other supplies are ordered from the Catalog: face the desk in the bedroom, press {hand}, and open the Catalog tab. Orders are paid in coins and come with the morning post, so they are in your pack when you wake. Coins come from selling at the farm stand by the gate."},
 	{"id": "wood", "title": "The Rookery Wood", "text": "People from the lane wait at the east gate to be walked through the wood: from day 14, about one morning in three, Old Maren to her sister's mill. Press {hand} beside a walker to hear where, and again to set out. In the wood your lantern burns a flask of lamp oil (the catalog, 8 coins) a little over a minute, and goes out without one. The walker's nerve falls in the dark, off the trail, and when you get far ahead; a word ({hand} beside them) or a trail ration (Cooking, at the fire) brings it back, and at 0 they run home. The tall one walks the deep wood: lift the lantern at it ({hand}, close by) before it reaches them. Each walk keeps the wood, and the nights, back a little."},
 ]
-# How often, in seconds, the player is reminded that the diary waits in the desk until it is found.
+# How often, in seconds, the player is reminded that the diary waits in the desk until it is found (PLAY-07: the
+# reminder names the controls it needs).
 const DIARY_HINT_EVERY := 90.0
+const DIARY_HINT := "Your diary is in the desk drawer, in the farmhouse bedroom. Walk in at the front door with {move}, face the desk and press {hand}."
 # The guided first day: steps written in the diary in order. Each one stays up until it is done
 # (or skipped), then the next follows. "stat" and "goal" say when a step is done, see _guide_done.
 const GUIDE := [
@@ -493,14 +497,14 @@ const STORY := [
 		"story": "One crop will not last. Harvest enough to keep a store against the long nights.",
 		"text": "Harvest 10 crops.", "stat": "harvested", "goal": 10, "reward": {"skill": "Farming", "xp": 60}},
 	{"id": "first_sale", "title": "Coin for Seed",
-		"story": "The farm stand on the path buys what the land gives you. Coins buy seeds, bags, and the rooms the homestead will need. Sell five items to learn how it works.",
+		"story": "The farm stand on the path buys what the land gives you. Coins buy seeds and supplies from the Catalog at the desk in the bedroom, and pay for the rooms the homestead will need. Sell five items to learn how it works.",
 		"text": "Sell 5 items at the farm stand.", "stat": "sold", "goal": 5, "reward": {"coins": 30}},
 	{"id": "pumpkin", "title": "Something Sweeter",
 		"story": "Pumpkins need more skill than turnips. Reach Farming level 3 and bring one in from the field.",
 		"text": "Harvest a pumpkin.", "stat": "pumpkins", "goal": 1, "reward": {"pumpkin_seeds": 2}},
 	{"id": "stain", "title": "Clear the Stain",
 		"story": "Something in the house has stained the air. Burn an offering of crops and open the windows.",
-		"text": "Cleanse the house once.", "stat": "cleansed", "goal": 1, "reward": {"skill": "Cleaning", "xp": 40}},
+		"text": "Cleanse the house once (Cleaning 3 and 2 crops, from the House panel).", "stat": "cleansed", "goal": 1, "reward": {"skill": "Cleaning", "xp": 40}},
 	{"id": "home", "title": "A Home Worth Keeping",
 		"story": "The house is not finished yet, but it could be. Restore it fully and it will hold against the dark.",
 		"text": "Restore the farmhouse fully.", "stat": "house_stage", "goal": 3, "reward": {"skill": "Cleaning", "xp": 60}},
@@ -785,6 +789,12 @@ const HOTBAR_TOOLS := [
 	{"id": "hose", "name": "Watering hose", "icon": "hose", "tint": "3f6b8a"},
 	{"id": "rod", "name": "Fishing pole", "icon": "rod", "tint": "6b5a3a"},
 ]
+# How to come by a tool the player has not made yet, for _need_tool.
+const TOOL_MAKE := {
+	"axe": "You need a hatchet for that. Make a crude hatchet in the Craft section of the section wheel ({wheel}).",
+	"pick": "You need a pick for that. Make a stone pick in the Craft section of the section wheel ({wheel}).",
+	"sword": "You need a weapon for that. Make one in the Craft section of the section wheel ({wheel}) and equip it from Gear.",
+}
 const TOOL_LABELS := {"sword": "weapon", "axe": "axe", "pick": "pickaxe", "hoe": "hoe", "trowel": "trowel", "hose": "watering hose", "rod": "fishing pole"}
 
 var tool_tier := {"hatchet": 0, "pick": 0, "rod": 0, "hose": 0}     # 0 = none (the bare hose); higher tiers come from TOOL_TIERS
@@ -870,6 +880,19 @@ var event_fired_day := 0            # the day the night event last happened
 var tonight_shadow := Vector2i(-1, -1)
 var shadow_tile := Vector2i.ZERO    # where the field shadow sits
 var message_timer := 0.0
+# PLAY-03: notices (the morning report, chapters, new diary pages, a collapse) are held on screen long enough to
+# read, and wait their turn instead of replacing one another; everyday lines (watering, "you step inside") show
+# beneath a held notice instead of over it. Notices are also written to the diary's "What the day said" pages.
+var notice_text := ""               # the notice on screen, above the everyday line
+var notice_timer := 0.0             # how long it stays
+var notice_hold := 0.0              # how long before a waiting notice may replace it
+var notice_queue: Array = []        # notices waiting their turn
+var chatter_text := ""              # the everyday line
+var message_log: Array = []         # [{"day", "hour", "text"}], the newest last; not saved
+var morning_report := ""            # saved: this morning's report, for the diary
+var morning_report_day := 0         # saved
+const NOTICE_QUEUE_MAX := 6
+const MESSAGE_LOG_MAX := 24
 var money := 0
 var bag_tier := 0               # bag upgrades bought
 var cellar_built := false
@@ -1164,9 +1187,11 @@ func _on_title_start(mode: String, slot: int) -> void:
 	folk._start_day(false)
 	if loaded:
 		_restore_saved_state()
+		if act._closed():
+			act._close()   # older saves hung the bell before Davy's beat could close (PLAY-05)
 		_show_message("Welcome back. Day %d." % day)
 	else:
-		_show_message("A new season begins. Day 1. %s." % WEATHER_NAMES.get(weather_kind, "Overcast"))
+		_show_message(_fill_controls("A new season begins. Day 1. %s. Walk with {move}, and into the farmhouse door to go in." % WEATHER_NAMES.get(weather_kind, "Overcast")))
 	world_started = true
 	title_menu.queue_free()
 	title_menu = null
@@ -1376,10 +1401,7 @@ func _process(delta: float) -> void:
 	_update_minimap()
 	_update_ambience()
 
-	if message_timer > 0.0:
-		message_timer -= delta
-		if message_timer <= 0.0:
-			message_label.text = ""
+	_update_messages(delta)
 
 
 func _draw() -> void:
@@ -2311,6 +2333,8 @@ func _build_hud() -> void:
 	message_label.offset_top = -124
 	message_label.offset_bottom = -24
 	message_label.vertical_alignment = VERTICAL_ALIGNMENT_BOTTOM
+	# A long notice (the morning report) grows upward from the bottom edge instead of running off the screen.
+	message_label.grow_vertical = Control.GROW_DIRECTION_BEGIN
 
 	hotbar = Hotbar.new()
 	hotbar.set_anchors_preset(Control.PRESET_CENTER_BOTTOM)
@@ -2366,6 +2390,7 @@ func _update_hud() -> void:
 
 func _build_action_bar() -> void:
 	action_bar = ActionBar.new()
+	action_bar._pad_glyphs = title_pad   # the device that pressed Begin
 	add_child(action_bar)
 	action_bar.menu_pressed.connect(_toggle_wheel)
 	action_bar.action_pressed.connect(_on_panel_action)
@@ -3065,6 +3090,10 @@ func _tip_ready(id: String) -> bool:
 			return day >= 3
 		"cave":
 			return day >= 4
+		"night":
+			return int(stats.get("left_alone", 0)) >= 1
+		"seeds":
+			return day >= 2 and (int(stats.get("sold", 0)) >= 1 or int(inventory["seeds"]) + int(inventory["pumpkin_seeds"]) <= 2)
 		"hens":
 			return coop_built
 		"goats":
@@ -3107,7 +3136,7 @@ func _update_tips(delta: float) -> void:
 		diary_hint_timer -= 1.0
 		if diary_hint_timer <= 0.0:
 			diary_hint_timer = DIARY_HINT_EVERY
-			_show_message("Your diary is in the desk drawer, in the farmhouse bedroom.")
+			_show_message(_fill_controls(DIARY_HINT))
 	# Tips met before the diary is found are written in quietly, ready for when it is.
 	for tip in TIPS:
 		var id: String = tip["id"]
@@ -3115,7 +3144,7 @@ func _update_tips(delta: float) -> void:
 			tips_seen[id] = true
 			if diary_found:
 				_diary_page(id)
-				_show_message("A new page in your diary: %s." % str(tip["title"]))
+				_show_message("A new page in your diary: %s." % str(tip["title"]), true)
 	var step := _guide_step()
 	var step_id := str(step.get("id", ""))
 	if step_id == diary_step:
@@ -3128,10 +3157,10 @@ func _update_tips(delta: float) -> void:
 	play_sfx("chime")
 	if step.is_empty():
 		_diary_page("story")
-		_show_message("Done: %s. That's the first day. Your diary has what the farm asks next." % str(_tip_data(was)["title"]))
+		_show_message("Done: %s. That's the first day. Your diary has what the farm asks next." % str(_tip_data(was)["title"]), true)
 	else:
 		_diary_page(step_id)
-		_show_message("Done: %s. Your diary has the next step." % str(_tip_data(was)["title"]))
+		_show_message("Done: %s. Your diary has the next step." % str(_tip_data(was)["title"]), true)
 
 
 # Marks a diary page as new, so the dot lights until the diary is opened.
@@ -3154,7 +3183,7 @@ func _show_quest_prompt() -> void:
 	if current.is_empty() or not _guide_step().is_empty():
 		return
 	_diary_page("story")
-	_show_message("Next: %s. It's in your diary and the Quests section." % str(current["title"]))
+	_show_message("Next: %s. It's in your diary and the Quests section." % str(current["title"]), true)
 
 
 # A chapter's prompt, with the control names filled in for a keyboard or a gamepad.
@@ -3165,12 +3194,14 @@ func _prompt_text(q: Dictionary) -> String:
 # Fills in the control names in a tip or prompt for the device in use.
 # {tool} uses the tool in hand and {hand} is the hand action (gather, open, drink, place).
 func _fill_controls(text: String) -> String:
-	var pad := not Input.get_connected_joypads().is_empty()
+	var pad := _pad_prompts()
 	text = text.replace("{move}", "the left stick" if pad else "WASD or the arrow keys")
 	text = text.replace("{use}", "RT or A" if pad else "left click or Space")
 	text = text.replace("{tool}", "RT" if pad else "left click")
 	text = text.replace("{hand}", "A" if pad else "Space")
 	text = text.replace("{back}", "B" if pad else "Esc")
+	text = text.replace("{pause}", "Start" if pad else "Esc")
+	text = text.replace("{guard}", "LT" if pad else "the right mouse button")
 	text = text.replace("{bag}", "Y" if pad else "Tab")
 	text = text.replace("{wheel}", "a left stick click" if pad else "Shift")
 	text = text.replace("{switch}", "LB and RB" if pad else "the number keys 1 to 0 or the mouse wheel")
@@ -3187,6 +3218,34 @@ func _fill_controls(text: String) -> String:
 	return text
 
 
+# Older lines name Space and B outright; they are put in the words of the device in use (PLAY-06).
+func _device_words(text: String) -> String:
+	if _pad_prompts():
+		return text.replace("press Space", "press A").replace("Press Space", "Press A")
+	return text.replace("B cancels", "Esc cancels").replace("or B to stop", "or Esc to stop")
+
+
+# The device used on the title menu, so the first hints of a game name the right buttons.
+var title_pad := false
+
+
+func _input(event: InputEvent) -> void:
+	if action_bar != null:
+		return
+	if event is InputEventJoypadButton or (event is InputEventJoypadMotion and absf(event.axis_value) > 0.5):
+		title_pad = true
+	elif event is InputEventKey or (event is InputEventMouseButton and event.pressed):
+		title_pad = false
+
+
+# Whether hints name the gamepad: the device used last, as the panel footers do (PLAY-06). A plugged-in pad alone
+# does not count; until the first press, hints name the keyboard.
+func _pad_prompts() -> bool:
+	if action_bar != null:
+		return action_bar._pad_glyphs
+	return false
+
+
 func _tip_data(id: String) -> Dictionary:
 	for tip in TIPS + GUIDE:
 		if str(tip["id"]) == id:
@@ -3199,7 +3258,7 @@ func _find_diary() -> void:
 	diary_found = true
 	diary_step = str(_guide_step().get("id", ""))
 	play_sfx("panel")
-	_show_message(_fill_controls("You find a diary in the desk drawer. Open it again with {diary}."))
+	_show_message(_fill_controls("You find a diary in the desk drawer. Open it again with {diary}. {pause} pauses the day and lists every control."), true)
 	_toggle_tab("Diary")
 
 
@@ -4016,7 +4075,7 @@ func _hotbar_unlocked(id: String) -> bool:
 		"pick":
 			return int(tool_tier["pick"]) > 0
 		"rod":
-			return int(tool_tier["rod"]) > 0
+			return true   # the bare pole casts; a made rod only bites better (PLAY-12)
 	return true
 
 
@@ -4044,8 +4103,12 @@ var world_presses := 0   # hand and tool presses that reached the farm; tools/me
 
 
 func _need_tool(id: String) -> bool:
+	# A tool not yet made: say how to make it, not which slot to pick (PLAY-17).
+	if not _hotbar_unlocked(id):
+		_show_message(_fill_controls(str(TOOL_MAKE.get(id, "You don't have a %s yet." % str(TOOL_LABELS.get(id, id))))))
+		return false
 	if not _tool_press:
-		_show_message("Press RT or click to use the %s." % str(TOOL_LABELS.get(id, id)))
+		_show_message(_fill_controls("Press {tool} to use the %s." % str(TOOL_LABELS.get(id, id))))
 		return false
 	if _active_tool() == id:
 		return true
@@ -4137,6 +4200,10 @@ func _interact() -> void:
 		return
 
 	if fish_spots.has(tile):
+		# The hand action drinks, even where fish are biting; only the tool press casts (PLAY-10).
+		if not _tool_press and map[tile.y][tile.x] == Tile.WATER:
+			_drink_pond()
+			return
 		if _need_tool("rod"):
 			fishing._start_fishing(tile)
 		return
@@ -5193,10 +5260,17 @@ func _fallen() -> void:
 	in_cave = false
 	foes = []
 	fishing._stop_fishing("")
+	# Waking at the gate means waking outdoors: a fall in the house leaves it too, or the house's bounds would
+	# clamp the farmer into its furniture (PLAY-01).
+	var was_inside := inside
+	inside = false
 	player.position = _tile_center(HOMESTEAD_ARRIVE.x, HOMESTEAD_ARRIVE.y)
 	_set_bounds()
 	queue_redraw()
-	_show_message("You collapse. You wake at the homestead, shaken. Sanity -10.")
+	_show_message("You collapse. You wake at the homestead, shaken. Sanity -10.", true)
+	if was_inside:
+		nights._on_leave_house()
+		happenings._on_leave_house()
 
 
 func _swing() -> void:
@@ -5379,8 +5453,14 @@ func _can_build(kind: String) -> bool:
 func _unstick() -> void:
 	placing = ""
 	_close_panel()
-	if inside or in_cave:
-		_show_message("Unstick works on the farm. Leave the house or the cave first.")
+	if inside:
+		# In the house, back to the mat inside the door, which is always open floor.
+		player.position = _tile_center(INT_ORIGIN.x + INT_ENTRY.x, INT_ORIGIN.y + INT_ENTRY.y)
+		_set_bounds()
+		_show_message("You step back to the door.")
+		return
+	if in_cave:
+		_show_message("Unstick works on the farm and in the house. Leave the cave first.")
 		return
 	var start := Vector2i(BORDER_X + HOUSE_DOOR_IX, BORDER_Y + HOUSE_DOOR_IY + 1)
 	var free := _nearest_open_tile(start)
@@ -5563,10 +5643,10 @@ func _relocate_building(kind: String) -> void:
 		else:
 			coop_built = false
 			coop_tile = Vector2i(-1, -1)
-		_show_message("There was no room left for the %s after the farm changed, so it was taken down and its materials returned." % kind)
+		_show_message("There was no room left for the %s after the farm changed, so it was taken down and its materials returned." % kind, true)
 		return
 	_set_placed_tile(kind, best + Vector2i(BORDER_X, BORDER_Y))
-	_show_message("The %s was moved to a clear spot on the farm." % kind)
+	_show_message("The %s was moved to a clear spot on the farm." % kind, true)
 
 
 # A spot fits when all of its tiles are open grass, clear of crops, rocks, brush, fishing spots, and you.
@@ -6138,6 +6218,12 @@ func _end_day(base: String, leave_house: bool = true) -> void:
 	var night_note := nights._end_night()
 	if inside and leave_house:
 		_leave_house()
+	# A collapse in the cave wakes at the gate, as the save already has it (PLAY-13).
+	if in_cave and leave_house:
+		in_cave = false
+		foes = []
+		player.position = _tile_center(HOMESTEAD_ARRIVE.x, HOMESTEAD_ARRIVE.y)
+		_set_bounds()
 	# Fish left in the pack spoil overnight. The cooler keeps them.
 	var spoiled := 0
 	for key in Foods.group("any_fish"):
@@ -6179,7 +6265,7 @@ func _end_day(base: String, leave_house: bool = true) -> void:
 	_update_shadow_tile()
 	var happening_note := happenings._start_day(true) + folk._start_day(true)
 	var mail_note := desk._mail_day() + estate._mail_day() + act._morning()
-	_show_message("%s Your crops grew overnight.%s%s The morning is %s.%s" % [
+	_show_morning_report("%s Your crops grew overnight.%s%s The morning is %s.%s" % [
 		base, spoil_note, upkeep_note, str(WEATHER_NAMES.get(weather_kind, "overcast")).to_lower(), event_note + happening_note + trek._morning_note() + mail_note])
 	if desk._tax_evicts():
 		desk._evict()
@@ -6284,9 +6370,130 @@ func _cost_text(cost: Dictionary) -> String:
 	return ", ".join(parts)
 
 
-func _show_message(text: String) -> void:
-	message_label.text = text
+# Shows a line. A notice (keep = true) is held long enough to read and waits behind another notice instead of
+# replacing it; an everyday line shows under a held notice. Lines said before the HUD exists (an old save's
+# migration notes, PLAY-11) wait and show once it does.
+func _show_message(text: String, keep: bool = false) -> void:
+	if text.strip_edges() == "":
+		return
+	text = _device_words(text)
+	if keep:
+		_log_message(text)
+		if text == notice_text or notice_queue.has(text):
+			return
+		if notice_text != "" and notice_hold > 0.0 or message_label == null:
+			notice_queue.append(text)
+			while notice_queue.size() > NOTICE_QUEUE_MAX:
+				notice_queue.pop_front()
+			return
+		_show_notice(text)
+		return
+	if message_label == null:
+		chatter_text = text
+		return
+	# An everyday line ends a notice that has been read (its hold is over), unless more notices wait.
+	if notice_text != "" and notice_hold <= 0.0 and notice_queue.is_empty():
+		notice_text = ""
+	chatter_text = text
 	message_timer = (MESSAGE_SECONDS + text.length() / 30.0) * GameSettings.message_scale()
+	_refresh_message_label()
+
+
+func _show_notice(text: String) -> void:
+	notice_text = text
+	var scale := GameSettings.message_scale()
+	notice_timer = (MESSAGE_SECONDS + text.length() / 30.0) * scale
+	notice_hold = clampf(2.0 + text.length() / 40.0, 3.0, 10.0) * scale
+	_refresh_message_label()
+
+
+func _refresh_message_label() -> void:
+	if message_label == null:
+		return
+	if notice_text != "" and chatter_text != "":
+		message_label.text = notice_text + "\n\n" + chatter_text
+	else:
+		message_label.text = notice_text + chatter_text
+
+
+# Each frame of play: the everyday line fades on its timer; a notice gives way to the next once held long enough.
+func _update_messages(delta: float) -> void:
+	if message_label == null:
+		return
+	var changed := false
+	if notice_text == "" and not notice_queue.is_empty():
+		_show_notice(str(notice_queue.pop_front()))
+		changed = true
+	if notice_text != "":
+		notice_hold -= delta
+		notice_timer -= delta
+		if notice_hold <= 0.0 and not notice_queue.is_empty():
+			_show_notice(str(notice_queue.pop_front()))
+			changed = true
+		elif notice_timer <= 0.0:
+			notice_text = ""
+			changed = true
+	if message_timer > 0.0:
+		message_timer -= delta
+		if message_timer <= 0.0:
+			chatter_text = ""
+			changed = true
+	if changed:
+		_refresh_message_label()
+
+
+func _log_message(text: String) -> void:
+	if not message_log.is_empty() and str(message_log[-1]["text"]) == text:
+		return
+	message_log.append({"day": day, "hour": current_hour, "text": text})
+	while message_log.size() > MESSAGE_LOG_MAX:
+		message_log.pop_front()
+
+
+# The morning report, held as a notice and kept for the diary until the next morning.
+# A long report is shown in parts of at most REPORT_PART characters, cut between sentences, so it fits on the screen;
+# the parts play in order through the notice queue. The whole report is in the diary.
+const REPORT_PART := 240
+
+
+func _show_morning_report(text: String) -> void:
+	morning_report = text.strip_edges()
+	morning_report_day = day
+	var parts: Array = []
+	var cur := ""
+	for sentence in _sentences(morning_report):
+		if cur != "" and cur.length() + 1 + sentence.length() > REPORT_PART:
+			parts.append(cur)
+			cur = sentence
+		else:
+			cur = sentence if cur == "" else cur + " " + sentence
+	if cur != "":
+		parts.append(cur)
+	_log_message(morning_report)
+	for i in parts.size():
+		var part: String = parts[i]
+		if parts.size() > 1:
+			part += " (%d of %d)" % [i + 1, parts.size()]
+		_show_message(part, true)
+	# The parts are on screen; the log keeps the report whole, not in pieces.
+	while message_log.size() > 1 and str(message_log[-1]["text"]) != morning_report:
+		message_log.pop_back()
+
+
+func _sentences(text: String) -> Array:
+	var out: Array = []
+	var start := 0
+	for i in text.length():
+		var c := text[i]
+		if (c == "." or c == "!" or c == "?") and (i + 1 >= text.length() or text[i + 1] == " "):
+			var piece := text.substr(start, i + 1 - start).strip_edges()
+			if piece != "":
+				out.append(piece)
+			start = i + 1
+	var rest := text.substr(start).strip_edges()
+	if rest != "":
+		out.append(rest)
+	return out
 
 
 func _tile_in_front() -> Vector2i:

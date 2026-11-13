@@ -1,0 +1,65 @@
+Godot Engine v4.7.2.stable.steam.ed1daf0bf - https://godotengine.org
+
+PASS  open: J opens the diary as a book
+PASS  open: no turn is playing
+PASS  open: the book has its cover, spread and turn layer
+PASS  art: every diary texture loads
+PASS  forward: the place moves on at once
+PASS  forward: a turn plays
+PASS  forward: the turn is 550-650 ms
+PASS  forward: the snapshots hold both spreads
+PASS  forward: the turn ends on its own
+PASS  forward: the snapshots are cleared after
+PASS  forward: the live spread is rebuilt (two pages and the spine)
+PASS  reverse: the place moves back at once
+PASS  reverse: a reverse turn plays
+PASS  reverse: the turn ends cleanly
+PASS  first page: left does nothing
+PASS  last page: right does nothing
+PASS  section run-on: past a section's end opens the next
+PASS  sections: E jumps to the next section
+PASS  sections: the jump riffles leaves, briefly
+PASS  sections: LB jumps back
+PASS  sections: the jump back riffles the other way
+PASS  bookmark: a click on a ribbon opens its section
+PASS  bookmark: the open ribbon has its eyelet
+PASS  repeat: press 1 leaves one turn and two snapshots at most
+PASS  repeat: press 2 leaves one turn and two snapshots at most
+PASS  repeat: press 3 leaves one turn and two snapshots at most
+PASS  repeat: press 4 leaves one turn and two snapshots at most
+PASS  repeat: four quick presses turn exactly four spreads
+PASS  repeat: everything settles
+PASS  repeat: three wheel steps turn three spreads
+PASS  controller: the D-pad turns forward
+PASS  controller: the stick turns back
+PASS  keyboard: D turns forward
+PASS  keyboard: A turns back
+PASS  mouse: the > arrow turns forward
+PASS  mouse: the < arrow turns back
+PASS  close: a turn is playing
+PASS  close: Esc mid-turn closes the diary
+PASS  close: the turn ends with it
+PASS  close: its snapshots are cleared
+PASS  reopen: the diary opens again
+PASS  reopen: it opens where it was left
+PASS  reopen: pages still turn
+PASS  new page: the diary opens at the page not read yet
+PASS  new page: its ribbon carries the red dot
+PASS  new page: closing marks it read
+PASS  torn: Agnes Rook has a section
+PASS  torn: the missing page shows its stub
+PASS  torn: a turn over torn pages plays
+PASS  save: slot 9 is written
+PASS  load: slot 9 loads
+PASS  load: the diary is found
+PASS  load: the diary's pages are kept
+PASS  load: the diary opens and keeps its place
+PASS  load: pages turn after loading
+PASS  quick: a turn is half length
+PASS  quick: a section jump is one quick leaf
+PASS  off: the page turns with no animation
+PASS  off: the new spread shows at once
+PASS  off: turning back works
+PASS  settings: Diary page turns is in the settings
+PASS  all content: every page of every section can be reached by turning
+PASS: 0 failure(s)

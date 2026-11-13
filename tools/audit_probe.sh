@@ -4,7 +4,7 @@
 GODOT="${GODOT:-C:/Program Files (x86)/Steam/steamapps/common/Godot Engine/godot.windows.opt.tools.64.exe}"
 SCRATCH="${AUDIT_SCRATCH:-${TMP:-/tmp}/cch_audit_profiles}"
 DAYS="${1:-400}"; TREKS="${2:-3}"
-OUT=art/style_tests/CCH-PLAYABLE-001/logs
+OUT="${OUT:-art/style_tests/CCH-PLAYABLE-001/logs}"
 mkdir -p "$OUT"
 for mode in engaged ignore earlybed; do
   prof="$SCRATCH/probe_${mode}_$DAYS"; mkdir -p "$prof"

@@ -1,0 +1,96 @@
+## copy of C:\Users\joshu\AppData\Roaming/Godot/app_userdata/Crow Creek Hollow/hallowvale_save_1.json ("save_version":16, 7180 bytes)
+LOAD slot 1: file version ?, day 6.0, name "Farm 1", 120 keys; after migration version ?, 120 keys
+LOAD slot 1: loaded=true day 6 coins 100252 house stage 3 lantern 3 inside=true tile=(4, 65) open_tab=""
+MSG slot 1: notices after load: []; on screen: "Welcome back. Day 6."; act beats {  }
+DIFF slot 1: key "morning_report" appears only after load and save ("")
+DIFF slot 1: key "morning_report_day" appears only after load and save (0.0)
+DIFF slot 1: "player_pos" changed: [72.0,3192.0] -> [216.0,3144.0]
+save probe: 3 difference(s)
+ERROR: 6 resources still in use at exit (run with --verbose for details).
+## copy of C:\Users\joshu\AppData\Roaming/Godot/app_userdata/Crow Creek Hollow/hallowvale_save_2.json ("save_version":16, 13561 bytes)
+LOAD slot 1: file version ?, day 7.0, name "Farm 2", 120 keys; after migration version ?, 120 keys
+LOAD slot 1: loaded=true day 7 coins 95193 house stage 3 lantern 3 inside=true tile=(4, 65) open_tab=""
+MSG slot 1: notices after load: []; on screen: "Welcome back. Day 7."; act beats {  }
+DIFF slot 1: key "morning_report" appears only after load and save ("")
+DIFF slot 1: key "morning_report_day" appears only after load and save (0.0)
+save probe: 2 difference(s)
+ERROR: 6 resources still in use at exit (run with --verbose for details).
+## copy of C:\Users\joshu\AppData\Roaming/Godot/app_userdata/Crow Creek Hollow/hallowvale_save_8.json (, 2801 bytes)
+LOAD slot 1: file version ?, day 3.0, name "", 88 keys; after migration version ?, 95 keys
+LOAD slot 1: loaded=true day 3 coins 0 house stage 0 lantern 0 inside=false tile=(59, 20) open_tab=""
+MSG slot 1: notices after load: ["The farm was redrawn since this save. Plantings, brush and felled trees were reset."]; on screen: "Welcome back. Day 3."; act beats {  }
+DIFF slot 1: "act" changed: {} -> {"beats":{},"davy":"","davy_day":-1.0,"endings":{},"hollow_left":0.0,"knock_from":-1.0,"meeting":"","meeting_there":false,"pending":""}
+DIFF slot 1: key "barn_hopper" appears only after load and save (0.0)
+DIFF slot 1: key "barn_hopper_built" appears only after load and save (false)
+DIFF slot 1: key "bless_day" appears only after load and save (-100.0)
+DIFF slot 1: key "bless_offer_day" appears only after load and save (-1.0)
+DIFF slot 1: key "broken_fences" appears only after load and save ([])
+DIFF slot 1: "brush" changed: [[62.0,28.0],[33.0,10.0],[43.0,38.0],[75.0,33.0],[56.0,10.0],[49.0,13.0],[57.0,31.0]] -> [[45.0,13.0],[66.0,14.0],[38.0,17.0],[71.0,17.0],[73.0,24.0],[48.0,34.0],[39.0,35.0]]
+DIFF slot 1: "cellar" changed: {"crops":0} -> {}
+DIFF slot 1: key "cellar_stock" is in the save but gone after load and save
+## copy of C:\Users\joshu\AppData\Roaming/Godot/app_userdata/Crow Creek Hollow/old_saves_2026-11-06/from_hallowvale_folder/hallowvale_save_1.json (, 6195 bytes)
+LOAD slot 1: file version ?, day 15.0, name "Farm 1", 91 keys; after migration version ?, 98 keys
+LOAD slot 1: loaded=true day 15 coins 37 house stage 3 lantern 1 inside=true tile=(4, 65) open_tab=""
+MSG slot 1: notices after load: ["The farm was redrawn since this save. Plantings, brush and felled trees were reset.", "The coop was moved to a clear spot on the farm."]; on screen: "Welcome back. Day 15."; act beats {  }
+DIFF slot 1: "act" changed: {} -> {"beats":{},"davy":"","davy_day":-1.0,"endings":{},"hollow_left":0.0,"knock_from":-1.0,"meeting":"","meeting_there":false,"pending":""}
+DIFF slot 1: key "barn_hopper" appears only after load and save (0.0)
+DIFF slot 1: key "barn_hopper_built" appears only after load and save (false)
+DIFF slot 1: key "bless_day" appears only after load and save (-100.0)
+DIFF slot 1: key "bless_offer_day" appears only after load and save (-1.0)
+DIFF slot 1: key "broken_fences" appears only after load and save ([])
+DIFF slot 1: "brush" changed: [[62.0,28.0],[33.0,10.0],[43.0,38.0],[75.0,33.0],[56.0,10.0],[49.0,13.0],[57.0,31.0]] -> [[45.0,13.0],[66.0,14.0],[38.0,17.0],[71.0,17.0],[73.0,24.0],[48.0,34.0],[39.0,35.0]]
+DIFF slot 1: key "cellar_stock" is in the save but gone after load and save
+DIFF slot 1: key "cistern_built" appears only after load and save (false)
+## copy of C:\Users\joshu\AppData\Roaming/Godot/app_userdata/Crow Creek Hollow/old_saves_2026-11-06/from_hallowvale_folder/hallowvale_save_2.json (, 3357 bytes)
+LOAD slot 1: file version ?, day 4.0, name "Farm 2", 89 keys; after migration version ?, 96 keys
+LOAD slot 1: loaded=true day 4 coins 0 house stage 1 lantern 0 inside=true tile=(4, 65) open_tab=""
+MSG slot 1: notices after load: ["The farm was redrawn since this save. Plantings, brush and felled trees were reset."]; on screen: "Welcome back. Day 4."; act beats {  }
+DIFF slot 1: "act" changed: {} -> {"beats":{},"davy":"","davy_day":-1.0,"endings":{},"hollow_left":0.0,"knock_from":-1.0,"meeting":"","meeting_there":false,"pending":""}
+DIFF slot 1: key "barn_hopper" appears only after load and save (0.0)
+DIFF slot 1: key "barn_hopper_built" appears only after load and save (false)
+DIFF slot 1: key "bless_day" appears only after load and save (-100.0)
+DIFF slot 1: key "bless_offer_day" appears only after load and save (-1.0)
+DIFF slot 1: key "broken_fences" appears only after load and save ([])
+DIFF slot 1: "brush" changed: [[33.0,10.0],[56.0,10.0],[49.0,13.0],[57.0,31.0]] -> [[45.0,13.0],[66.0,14.0],[38.0,17.0],[71.0,17.0],[73.0,24.0],[48.0,34.0],[39.0,35.0]]
+DIFF slot 1: "cellar" changed: {"crops":0} -> {}
+DIFF slot 1: key "cellar_stock" is in the save but gone after load and save
+## copy of C:\Users\joshu\AppData\Roaming/Godot/app_userdata/Crow Creek Hollow/old_saves_2026-11-06/hallowvale_save_2.json ("save_version":16, 6930 bytes)
+LOAD slot 1: file version ?, day 19.0, name "Farm 2", 118 keys; after migration version ?, 118 keys
+LOAD slot 1: loaded=true day 19 coins 55 house stage 1 lantern 1 inside=true tile=(4, 65) open_tab=""
+MSG slot 1: notices after load: ["The farm was redrawn since this save. Plantings, brush and felled trees were reset."]; on screen: "Welcome back. Day 19."; act beats {  }
+DIFF slot 1: key "broken_fences" appears only after load and save ([])
+DIFF slot 1: "brush" changed: [] -> [[45.0,13.0],[66.0,14.0],[38.0,17.0],[71.0,17.0],[73.0,24.0],[48.0,34.0],[39.0,35.0]]
+DIFF slot 1: "crops" changed: [{"days":4.0,"kind":"turnip","stage":1.0,"watered_day":18.0,"x":31.0,"y":27.0},{"days":4.0,"kind":"turnip","stage":1.0,"watered_day":18.0,"x":29.0,"y":27.0},... -> []
+DIFF slot 1: "felled" changed: [[44.0,10.0],[52.0,15.0],[46.0,19.0],[39.0,29.0],[24.0,23.0],[28.0,15.0],[36.0,37.0],[40.0,41.0],[31.0,46.0],[48.0,40.0],[52.0,45.0],[56.0,37.0],[60.0,32.0],... -> []
+DIFF slot 1: "inventory" changed: {"apple_crumble":0.0,"apples":0.0,"baked_potato":0.0,"bandage":0.0,"berry_cobbler":0.0,"blackberries":0.0,"blueberries":0.0,"blueberry_seeds":0.0,"bluegill":... -> {"apple_crumble":0.0,"apples":0.0,"baked_potato":0.0,"bandage":0.0,"berry_cobbler":0.0,"blackberries":0.0,"blueberries":0.0,"blueberry_seeds":0.0,"bluegill":...
+DIFF slot 1: "layout" changed: "61ea46f7" -> "18496244"
+DIFF slot 1: key "morning_report" appears only after load and save ("")
+DIFF slot 1: key "morning_report_day" appears only after load and save (0.0)
+DIFF slot 1: "player_pos" changed: [72.0,3192.0] -> [216.0,3144.0]
+## copy of C:\Users\joshu\AppData\Roaming/Godot/app_userdata/Crow Creek Hollow/old_saves_2026-11-06/hallowvale_save_3.json ("save_version":16, 13141 bytes)
+LOAD slot 1: file version ?, day 13.0, name "Farm 3", 120 keys; after migration version ?, 120 keys
+LOAD slot 1: loaded=true day 13 coins 100104 house stage 3 lantern 3 inside=true tile=(4, 65) open_tab=""
+MSG slot 1: notices after load: ["The farm was redrawn since this save. Plantings, brush and felled trees were reset.", "The coop was moved to a clear spot on the farm.", "The barn was moved to a clear spot on the farm.", "The workshop was moved to a clear spot on the farm."]; on screen: "Welcome back. Day 13."; act beats {  }
+DIFF slot 1: "barn_x" changed: 52.0 -> 60.0
+DIFF slot 1: "brush" changed: [[75.0,33.0],[56.0,10.0]] -> [[45.0,13.0],[66.0,14.0],[38.0,17.0],[71.0,17.0],[73.0,24.0],[48.0,34.0],[39.0,35.0],[60.0,11.0]]
+DIFF slot 1: "coop_y" changed: 26.0 -> 28.0
+DIFF slot 1: "crops" changed: [{"days":5.0,"kind":"corn","stage":1.0,"watered_day":12.0,"x":43.0,"y":31.0},{"days":5.0,"kind":"corn","stage":1.0,"watered_day":12.0,"x":44.0,"y":31.0},{"da... -> []
+DIFF slot 1: "felled" changed: [[48.0,40.0],[56.0,37.0],[52.0,45.0],[44.0,10.0],[53.0,9.0],[65.0,30.0],[73.0,26.0],[73.0,36.0],[75.0,45.0]] -> []
+DIFF slot 1: "inventory" changed: {"apple_crumble":0.0,"apples":0.0,"baked_potato":0.0,"bandage":0.0,"berry_cobbler":0.0,"blackberries":0.0,"blueberries":0.0,"blueberry_seeds":0.0,"bluegill":... -> {"apple_crumble":0.0,"apples":0.0,"baked_potato":0.0,"bandage":0.0,"berry_cobbler":0.0,"blackberries":0.0,"blueberries":0.0,"blueberry_seeds":0.0,"bluegill":...
+DIFF slot 1: "layout" changed: "61ea46f7" -> "18496244"
+DIFF slot 1: key "morning_report" appears only after load and save ("")
+DIFF slot 1: key "morning_report_day" appears only after load and save (0.0)
+## copy of C:\Users\joshu\AppData\Roaming/Godot/app_userdata/hallowvale/hallowvale_save_8.json (, 2801 bytes)
+LOAD slot 1: file version ?, day 3.0, name "", 88 keys; after migration version ?, 95 keys
+LOAD slot 1: loaded=true day 3 coins 0 house stage 0 lantern 0 inside=false tile=(59, 20) open_tab=""
+MSG slot 1: notices after load: ["The farm was redrawn since this save. Plantings, brush and felled trees were reset."]; on screen: "Welcome back. Day 3."; act beats {  }
+DIFF slot 1: "act" changed: {} -> {"beats":{},"davy":"","davy_day":-1.0,"endings":{},"hollow_left":0.0,"knock_from":-1.0,"meeting":"","meeting_there":false,"pending":""}
+DIFF slot 1: key "barn_hopper" appears only after load and save (0.0)
+DIFF slot 1: key "barn_hopper_built" appears only after load and save (false)
+DIFF slot 1: key "bless_day" appears only after load and save (-100.0)
+DIFF slot 1: key "bless_offer_day" appears only after load and save (-1.0)
+DIFF slot 1: key "broken_fences" appears only after load and save ([])
+DIFF slot 1: "brush" changed: [[62.0,28.0],[33.0,10.0],[43.0,38.0],[75.0,33.0],[56.0,10.0],[49.0,13.0],[57.0,31.0]] -> [[45.0,13.0],[66.0,14.0],[38.0,17.0],[71.0,17.0],[73.0,24.0],[48.0,34.0],[39.0,35.0]]
+DIFF slot 1: "cellar" changed: {"crops":0} -> {}
+DIFF slot 1: key "cellar_stock" is in the save but gone after load and save
+files: 8

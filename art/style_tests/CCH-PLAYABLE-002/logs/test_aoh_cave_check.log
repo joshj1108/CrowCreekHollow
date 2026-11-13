@@ -1,0 +1,9 @@
+Godot Engine v4.7.2.stable.steam.ed1daf0bf - https://godotengine.org
+
+PASS cave art loads (25 tiles, 3 sets)
+PASS slowest picture build 18.2 ms (under 60)
+PASS front pieces stand on rock and reach at most 3 px onto the floor (0 bad)
+PASS hung and ore pieces sit on rock tiles (0 bad)
+PASS mined copper at (18, 1): floor, its ore piece gone
+PASS mined iron at (18, 9): floor, its ore piece gone
+aoh_cave_check: 0 failures

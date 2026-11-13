@@ -1,0 +1,94 @@
+Godot Engine v4.7.2.stable.steam.ed1daf0bf - https://godotengine.org
+
+PASS  PLAY-01 fall indoors (food empty): woken outdoors  (inside=false tile=(69, 42))
+PASS  PLAY-01 fall indoors (food empty): on open ground
+PASS  PLAY-01 fall indoors (food empty): can walk  (60 px)
+PASS  PLAY-01 fall indoors (food empty): the fall still costs sanity, not the limit  (sanity 100 -> 90)
+PASS  PLAY-01 fall indoors (food empty): full health
+PASS  PLAY-01 save and load after the fall: outdoors, free  (tile (69, 42) inside=false)
+PASS  PLAY-01 fall indoors (water empty): woken outdoors  (inside=false tile=(69, 42))
+PASS  PLAY-01 fall indoors (water empty): on open ground
+PASS  PLAY-01 fall indoors (water empty): can walk  (60 px)
+PASS  PLAY-01 fall indoors (water empty): the fall still costs sanity, not the limit  (sanity 100 -> 90)
+PASS  PLAY-01 fall indoors (water empty): full health
+PASS  PLAY-01 fall indoors (warmth empty): woken outdoors  (inside=false tile=(69, 42))
+PASS  PLAY-01 fall indoors (warmth empty): on open ground
+PASS  PLAY-01 fall indoors (warmth empty): can walk  (60 px)
+PASS  PLAY-01 fall indoors (warmth empty): the fall still costs sanity, not the limit  (sanity 100 -> 90)
+PASS  PLAY-01 fall indoors (warmth empty): full health
+PASS  Unstick in the house: back at the door mat
+PASS  Unstick on the farm: still works
+PASS  PLAY-13 03:00 in the cave: wakes on the farm  (in_cave=false tile=(69, 42))
+PASS  PLAY-13 03:00 in the cave: can walk
+PASS  PLAY-04 no limit lost: first cleanse allowed
+PASS  PLAY-04 no limit lost: cleanse done, 2 crops spent
+PASS  PLAY-04 the cleanse itself gives no skill XP
+PASS  PLAY-04 limit not raised above the maximum
+PASS  PLAY-04 chapter 9 completes
+PASS  PLAY-04 chapter 9 gives its reward XP (40, with any skill bonus)  (300 -> 348)
+PASS  PLAY-04 later cleanse with no limit lost: refused
+PASS  PLAY-04 refusal says why  (Chapter complete: Clear the Stain. Reward: 40 Cleaning XP
+
+The house is clean. Cleansing only lifts a sanity limit you have lost.)
+PASS  PLAY-04 limit lost: cleanse lifts it by 5
+PASS  PLAY-04 limit lost: chapter 9 completes
+PASS  PLAY-04 once a day still holds  (Chapter complete: Clear the Stain. Reward: 40 Cleaning XP
+
+You have already cleansed the house today.)
+PASS  PLAY-04 refusal names Cleaning and crops  (Cleansing needs Cleaning 3 and 2 crops to offer.)
+PASS  PLAY-04 chapter text names the needs  (Cleanse the house once (Cleaning 3 and 2 crops, from the House panel).)
+PASS  PLAY-05 Davy found: chapter 15 completes
+PASS  PLAY-05 bell first: Davy's beat closed quietly
+PASS  PLAY-05 bell first: no Davy diary page
+PASS  PLAY-05 bell first: chapters 15 and 16 complete
+PASS  PLAY-05 bell first: chapter 17 and every chapter complete  (17 of 17)
+PASS  PLAY-05 the All Chapters achievement
+PASS  PLAY-05 old save past the bell: Davy closed on load
+PASS  PLAY-05 old save past the bell: the chapter list finishes  (17 of 17)
+PASS  PLAY-05 no bell: Davy's night still comes
+PASS  PLAY-03 the morning report stays while other lines come  (You sleep through the night. Your crops grew overnight. A long report about the farm.
+
+Watered from the bucket. 6 left.)
+PASS  PLAY-03 an everyday line shows under it  (You sleep through the night. Your crops grew overnight. A long report about the farm.
+
+Watered from the bucket. 6 left.)
+PASS  PLAY-03 a second notice waits its turn
+PASS  PLAY-03 the next notice follows once the report was held (4.1 s)  (A new page in your diary: Testing.)
+PASS  PLAY-03 the report was held at least 3 s  (248 frames)
+PASS  PLAY-03 the diary keeps this morning's report
+PASS  PLAY-03 the diary keeps recent notices
+PASS  PLAY-11 notes before the HUD are kept, not lost
+PASS  PLAY-03 after a night's sleep the report is on screen two seconds later  (You sleep through the night. Your crops grew overnight. Something walked the far)
+PASS  PLAY-06 keyboard used: hints name keys  (Space Tab)
+PASS  PLAY-06 pad used: hints name buttons  (A Y)
+PASS  PLAY-06 pad used: old 'press Space' lines say A
+PASS  PLAY-06 back on the keyboard: keys again
+PASS  PLAY-06 a mouse click counts as keyboard and mouse
+PASS  PLAY-07 the first line says how to walk and go in  (A new season begins. Day 1. Rain. Walk with WASD or the arrow keys, and into the farmhouse door to go in.)
+PASS  PLAY-07 the diary hint says how to use the desk
+PASS  PLAY-07 the house has a desk
+PASS  PLAY-07 facing the desk shows a prompt  (Space  Open the desk drawer)
+PASS  PLAY-08 after the diary, the desk prompt names the catalog  (Space  The desk: catalog, accounts, pastimes)
+PASS  PLAY-08 the seeds page comes when seed runs low
+PASS  PLAY-08 the seeds page names the desk and Catalog
+PASS  PLAY-02 no night page before a night is left
+PASS  PLAY-02 a night left alone is counted  ( Something walked the farm in the night. There are prints at the field's edge, and they lead to the house. Sanity -9.)
+PASS  PLAY-02 the morning says what it cost  ( Something walked the farm in the night. There are prints at the field's edge, and they lead to the house. Sanity -9.)
+PASS  PLAY-02 the night page is then ready
+PASS  PLAY-12 the bare fishing pole is not locked
+PASS  PLAY-10 the hand action at a fishing spot drinks  (39 -> 79 You drink from the pond. Cold and muddy, but it helps. Water 79/100.)
+PASS  PLAY-17 no pick: says how to make one  (You need a pick for that. Make a stone pick in the Craft section of the section wheel (Shift).)
+PASS  PLAY-17 no hatchet: says how to make one  (You need a hatchet for that. Make a crude hatchet in the Craft section of the section wheel (Shift).)
+PASS  PLAY-17 the cave page names the pick and a weapon
+PASS  PLAY-09 the edge trek starts
+PASS  PLAY-09 she freezes
+PASS  PLAY-09 the frozen line offers a word and turning back  (Maren stops dead and won't take another step. "I can't. I can't." Say a word beside her (Space), or walk back the way you came to turn home.)
+PASS  PLAY-09 the frozen line does not ask for a ration the player lacks  (Maren stops dead and won't take another step. "I can't. I can't." Say a word beside her (Space), or walk back the way you came to turn home.)
+PASS  PLAY-09 a word calms her enough to go on  (nerve 34 frozen false)
+PASS  PLAY-09 on other routes a word alone does not unfreeze  (nerve 33)
+PASS  PLAY-09 a frayed farmer is warned before setting out
+playable002: 0 failure(s)
+WARNING: 30 ObjectDB instances were leaked at exit (run with `--verbose` for details).
+   at: cleanup (core/object/object.cpp:2536)
+ERROR: 14 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:822)

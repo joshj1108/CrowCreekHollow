@@ -132,7 +132,9 @@ func _closed() -> bool:
 
 # Beats closed this way hold -1, so the diary has no page for them.
 func _close() -> void:
-	for id in ["letter", "shown", "orchard", "knock", "meeting"]:
+	# Davy's night too (PLAY-05): it needs the orchard, so with the bell hung first it can never come, and the
+	# chapters after "Keeping Company" would wait behind it for good. Saves already past the bell close it on load.
+	for id in ["letter", "shown", "orchard", "knock", "meeting", "davy"]:
 		if not beats.has(id):
 			beats[id] = -1
 	if meeting == "":
@@ -192,7 +194,7 @@ func _on_scene(sc: Dictionary) -> void:
 			m.folk.visitor = ""
 			m._diary_page("act_davy")
 			m.play_sfx("chime", 0.0)
-			m._show_message("You walk Davy home down the lane. Mrs Tull doesn't say anything. She holds on to him. It's in your diary.")
+			m._show_message("You walk Davy home down the lane. Mrs Tull doesn't say anything. She holds on to him. It's in your diary.", true)
 
 
 func _next_title() -> String:
@@ -292,7 +294,7 @@ func _update() -> void:
 		elif m.current_hour >= DAVY_UNTIL:
 			_lose_davy()
 			m.folk.visitor = ""
-			m._show_message("Under the great tree the roots shift, once, like something settling. Davy has gone in.")
+			m._show_message("Under the great tree the roots shift, once, like something settling. Davy has gone in.", true)
 	if pending != "" and not playing() and not m.trek.active and not m.folk._in_scene() and m.open_tab == "" and not m.transitioning:
 		_play_ending(pending)
 

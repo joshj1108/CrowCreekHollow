@@ -129,6 +129,8 @@ func _save_game() -> void:
 		"cave_mined": m._tiles_to_array(m.cave_mined),
 		"cave_mined_day": m.cave_mined_day,
 		"wear": m.wear,
+		"morning_report": m.morning_report,
+		"morning_report_day": m.morning_report_day,
 		"coop_built": m.coop_built,
 		"layout": m.LAYOUT_VERSION,
 		"coop_x": m.coop_tile.x,
@@ -326,6 +328,8 @@ func _load_game() -> bool:
 		m._fill_rocks()
 	m.cave_mined_day = int(data.get("cave_mined_day", -1))
 	m.wear = int(data.get("wear", 0))
+	m.morning_report = str(data.get("morning_report", ""))
+	m.morning_report_day = int(data.get("morning_report_day", 0))
 	m.coop_built = bool(data.get("coop_built", false))
 	m.coop_tile = Vector2i(int(data.get("coop_x", -1)), int(data.get("coop_y", -1)))
 	m.barn_built = bool(data.get("barn_built", false))
@@ -333,7 +337,7 @@ func _load_game() -> bool:
 	m.workshop_tile = Vector2i(int(data.get("workshop_x", -1)), int(data.get("workshop_y", -1)))
 	if not same_layout:
 		# The saved spots belong to the old farm, so each building is placed again.
-		m._show_message("The farm was redrawn since this save. Plantings, brush and felled trees were reset.")
+		m._show_message("The farm was redrawn since this save. Plantings, brush and felled trees were reset.", true)
 		if m.coop_built:
 			m._relocate_building("coop")
 		if m.barn_built:

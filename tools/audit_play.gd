@@ -52,6 +52,7 @@ func _initialize() -> void:
 
 func _main() -> void:
 	await frames(40)
+	_isolate_hardware()
 	await call("_sc_" + str(opt["scenario"]))
 	note("END", "problems=%d shots=%d" % [problems, shots])
 	logf.close()
@@ -105,6 +106,33 @@ func shot(name: String) -> void:
 	note("SHOT", path)
 
 
+# CCH-PLAYABLE-002: this machine's built-in controller sends button presses of its own while the bot plays (Start,
+# then A, B, X and Y together, every few seconds; seen with a spy script). So the bot's buttons come from their own
+# device id, every action's pad buttons are pinned to it, and pad buttons from any other device are dropped before
+# the game sees them. Stick axes stay on device 0 (the hardware's sticks rest at zero and the wheel reads pad 0).
+const BOT_PAD := 7
+
+
+class HardwareFilter extends Node:
+	func _input(e: InputEvent) -> void:
+		if e is InputEventJoypadButton and e.device != 7:
+			get_viewport().set_input_as_handled()
+
+
+func _isolate_hardware() -> void:
+	var pinned := 0
+	for action in InputMap.get_actions():
+		for ev in InputMap.action_get_events(action):
+			if ev is InputEventJoypadButton:
+				InputMap.action_erase_event(action, ev)
+				var mine: InputEventJoypadButton = ev.duplicate()
+				mine.device = BOT_PAD
+				InputMap.action_add_event(action, mine)
+				pinned += 1
+	root.add_child(HardwareFilter.new())
+	note("OBS", "hardware pad buttons isolated: %d action bindings pinned to the bot's device" % pinned)
+
+
 # --- Raw input --------------------------------------------------------------------------------------
 
 func key_set(k: int, down: bool) -> void:
@@ -117,6 +145,7 @@ func key_set(k: int, down: bool) -> void:
 
 func pad_set(b: int, down: bool) -> void:
 	var ev := InputEventJoypadButton.new()
+	ev.device = BOT_PAD
 	ev.button_index = b
 	ev.pressed = down
 	Input.parse_input_event(ev)

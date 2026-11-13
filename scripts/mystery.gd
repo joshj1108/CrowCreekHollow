@@ -136,13 +136,13 @@ func _find(id: String, lead := "") -> void:
 	m.play_sfx("chime", 0.0)
 	m.music.sting("sting_bell" if id == "bell" else "sting_page", id == "bell")
 	if id == "bell":
-		m._show_message("The bell rings out over the field, and something under the great tree answers. A last page is in your diary.")
+		m._show_message("The bell rings out over the field, and something under the great tree answers. A last page is in your diary.", true)
 		return
 	if id == "grove":
-		m._show_message("You write down what happened at the grove. It's in your diary: \"%s\"." % GROVE_PAGE["title"])
+		m._show_message("You write down what happened at the grove. It's in your diary: \"%s\"." % GROVE_PAGE["title"], true)
 		return
 	var how := str(SIGHTING_FOUND if id == "p7" and _events.has("sighting") else p["found"])
-	m._show_message("%s%s It's in your diary: \"%s\" (%d of %d)." % [lead, how, p["title"], _count(), PAGES.size()])
+	m._show_message("%s%s It's in your diary: \"%s\" (%d of %d)." % [lead, how, p["title"], _count(), PAGES.size()], true)
 
 
 func _count(pages := PAGES) -> int:
@@ -169,7 +169,7 @@ func _find_trek_page(id: String) -> void:
 	m.play_sfx("chime", 0.0)
 	m.music.sting("sting_page")
 	m._show_message("Inside, folded small and dry, a page in Agnes Rook's hand. It's in your diary: \"%s\" (%d of %d from the wood)." % [
-		p["title"], _count(TREK_PAGES), TREK_PAGES.size()])
+		p["title"], _count(TREK_PAGES), TREK_PAGES.size()], true)
 
 
 # The diary's sections for her pages, as book pages (see PanelRows._diary_rows): her ten, in page order,
