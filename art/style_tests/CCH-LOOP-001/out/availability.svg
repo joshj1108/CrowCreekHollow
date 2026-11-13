@@ -1,0 +1,86 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1100" height="580" font-family="Segoe UI, Arial" font-size="13">
+<rect width="100%" height="100%" fill="#fcfcfb"/>
+<text x="70" y="30" font-size="18" fill="#0b0b0b" font-weight="600">Worthwhile things on offer at 07:00, 13:00 and 19:00 (simulated)</text>
+<text x="70" y="52" fill="#52514e">Average count per day, by style and stage. After the sim has done its work for the block.</text>
+<line x1="70" x2="900" y1="470.0" y2="470.0" stroke="#e4e2dc"/>
+<text x="64" y="474.0" text-anchor="end" fill="#52514e">0</text>
+<line x1="70" x2="900" y1="420.0" y2="420.0" stroke="#e4e2dc"/>
+<text x="64" y="424.0" text-anchor="end" fill="#52514e">1</text>
+<line x1="70" x2="900" y1="370.0" y2="370.0" stroke="#e4e2dc"/>
+<text x="64" y="374.0" text-anchor="end" fill="#52514e">2</text>
+<line x1="70" x2="900" y1="320.0" y2="320.0" stroke="#e4e2dc"/>
+<text x="64" y="324.0" text-anchor="end" fill="#52514e">3</text>
+<line x1="70" x2="900" y1="270.0" y2="270.0" stroke="#e4e2dc"/>
+<text x="64" y="274.0" text-anchor="end" fill="#52514e">4</text>
+<line x1="70" x2="900" y1="220.0" y2="220.0" stroke="#e4e2dc"/>
+<text x="64" y="224.0" text-anchor="end" fill="#52514e">5</text>
+<line x1="70" x2="900" y1="170.0" y2="170.0" stroke="#e4e2dc"/>
+<text x="64" y="174.0" text-anchor="end" fill="#52514e">6</text>
+<line x1="70" x2="900" y1="120.0" y2="120.0" stroke="#e4e2dc"/>
+<text x="64" y="124.0" text-anchor="end" fill="#52514e">7</text>
+<line x1="70" x2="900" y1="70.0" y2="70.0" stroke="#e4e2dc"/>
+<text x="64" y="74.0" text-anchor="end" fill="#52514e">8</text>
+<rect x="74.0" y="216.4" width="13.8" height="253.6" rx="2" fill="#2a78d6"/>
+<rect x="89.8" y="348.6" width="13.8" height="121.4" rx="2" fill="#eb6834"/>
+<rect x="105.6" y="441.4" width="13.8" height="28.6" rx="2" fill="#1baf7a"/>
+<text x="97.7" y="484" text-anchor="end" fill="#52514e" font-size="11" transform="rotate(-40 97.7 484)">relax 1-14</text>
+<rect x="129.3" y="120.4" width="13.8" height="349.6" rx="2" fill="#2a78d6"/>
+<rect x="145.1" y="359.2" width="13.8" height="110.8" rx="2" fill="#eb6834"/>
+<rect x="160.9" y="451.7" width="13.8" height="18.3" rx="2" fill="#1baf7a"/>
+<text x="153.0" y="484" text-anchor="end" fill="#52514e" font-size="11" transform="rotate(-40 153.0 484)">relax 61-180</text>
+<rect x="184.7" y="133.5" width="13.8" height="336.5" rx="2" fill="#2a78d6"/>
+<rect x="200.4" y="353.0" width="13.8" height="117.0" rx="2" fill="#eb6834"/>
+<rect x="216.2" y="416.5" width="13.8" height="53.5" rx="2" fill="#1baf7a"/>
+<text x="208.3" y="484" text-anchor="end" fill="#52514e" font-size="11" transform="rotate(-40 208.3 484)">relax 301-400</text>
+<rect x="240.0" y="209.3" width="13.8" height="260.7" rx="2" fill="#2a78d6"/>
+<rect x="255.8" y="348.6" width="13.8" height="121.4" rx="2" fill="#eb6834"/>
+<rect x="271.6" y="441.4" width="13.8" height="28.6" rx="2" fill="#1baf7a"/>
+<text x="263.7" y="484" text-anchor="end" fill="#52514e" font-size="11" transform="rotate(-40 263.7 484)">explo 1-14</text>
+<rect x="295.3" y="132.9" width="13.8" height="337.1" rx="2" fill="#2a78d6"/>
+<rect x="311.1" y="375.0" width="13.8" height="95.0" rx="2" fill="#eb6834"/>
+<rect x="326.9" y="467.5" width="13.8" height="2.5" rx="2" fill="#1baf7a"/>
+<text x="319.0" y="484" text-anchor="end" fill="#52514e" font-size="11" transform="rotate(-40 319.0 484)">explo 61-180</text>
+<rect x="350.7" y="134.0" width="13.8" height="336.0" rx="2" fill="#2a78d6"/>
+<rect x="366.4" y="374.5" width="13.8" height="95.5" rx="2" fill="#eb6834"/>
+<rect x="382.2" y="447.5" width="13.8" height="22.5" rx="2" fill="#1baf7a"/>
+<text x="374.3" y="484" text-anchor="end" fill="#52514e" font-size="11" transform="rotate(-40 374.3 484)">explo 301-400</text>
+<rect x="406.0" y="209.3" width="13.8" height="260.7" rx="2" fill="#2a78d6"/>
+<rect x="421.8" y="348.6" width="13.8" height="121.4" rx="2" fill="#eb6834"/>
+<rect x="437.6" y="441.4" width="13.8" height="28.6" rx="2" fill="#1baf7a"/>
+<text x="429.7" y="484" text-anchor="end" fill="#52514e" font-size="11" transform="rotate(-40 429.7 484)">progr 1-14</text>
+<rect x="461.3" y="128.8" width="13.8" height="341.2" rx="2" fill="#2a78d6"/>
+<rect x="477.1" y="364.2" width="13.8" height="105.8" rx="2" fill="#eb6834"/>
+<rect x="492.9" y="457.1" width="13.8" height="12.9" rx="2" fill="#1baf7a"/>
+<text x="485.0" y="484" text-anchor="end" fill="#52514e" font-size="11" transform="rotate(-40 485.0 484)">progr 61-180</text>
+<rect x="516.7" y="138.5" width="13.8" height="331.5" rx="2" fill="#2a78d6"/>
+<rect x="532.4" y="361.5" width="13.8" height="108.5" rx="2" fill="#eb6834"/>
+<rect x="548.2" y="430.5" width="13.8" height="39.5" rx="2" fill="#1baf7a"/>
+<text x="540.3" y="484" text-anchor="end" fill="#52514e" font-size="11" transform="rotate(-40 540.3 484)">progr 301-400</text>
+<rect x="572.0" y="209.3" width="13.8" height="260.7" rx="2" fill="#2a78d6"/>
+<rect x="587.8" y="348.6" width="13.8" height="121.4" rx="2" fill="#eb6834"/>
+<rect x="603.6" y="441.4" width="13.8" height="28.6" rx="2" fill="#1baf7a"/>
+<text x="595.7" y="484" text-anchor="end" fill="#52514e" font-size="11" transform="rotate(-40 595.7 484)">balan 1-14</text>
+<rect x="627.3" y="119.6" width="13.8" height="350.4" rx="2" fill="#2a78d6"/>
+<rect x="643.1" y="361.7" width="13.8" height="108.3" rx="2" fill="#eb6834"/>
+<rect x="658.9" y="454.2" width="13.8" height="15.8" rx="2" fill="#1baf7a"/>
+<text x="651.0" y="484" text-anchor="end" fill="#52514e" font-size="11" transform="rotate(-40 651.0 484)">balan 61-180</text>
+<rect x="682.7" y="132.0" width="13.8" height="338.0" rx="2" fill="#2a78d6"/>
+<rect x="698.4" y="368.0" width="13.8" height="102.0" rx="2" fill="#eb6834"/>
+<rect x="714.2" y="435.5" width="13.8" height="34.5" rx="2" fill="#1baf7a"/>
+<text x="706.3" y="484" text-anchor="end" fill="#52514e" font-size="11" transform="rotate(-40 706.3 484)">balan 301-400</text>
+<rect x="738.0" y="220.0" width="13.8" height="250.0" rx="2" fill="#2a78d6"/>
+<rect x="753.8" y="345.0" width="13.8" height="125.0" rx="2" fill="#eb6834"/>
+<rect x="769.6" y="441.4" width="13.8" height="28.6" rx="2" fill="#1baf7a"/>
+<text x="761.7" y="484" text-anchor="end" fill="#52514e" font-size="11" transform="rotate(-40 761.7 484)">early 1-14</text>
+<rect x="793.3" y="122.1" width="13.8" height="347.9" rx="2" fill="#2a78d6"/>
+<rect x="809.1" y="355.8" width="13.8" height="114.2" rx="2" fill="#eb6834"/>
+<rect x="824.9" y="448.3" width="13.8" height="21.7" rx="2" fill="#1baf7a"/>
+<text x="817.0" y="484" text-anchor="end" fill="#52514e" font-size="11" transform="rotate(-40 817.0 484)">early 61-180</text>
+<rect x="848.7" y="129.5" width="13.8" height="340.5" rx="2" fill="#2a78d6"/>
+<rect x="864.4" y="368.0" width="13.8" height="102.0" rx="2" fill="#eb6834"/>
+<rect x="880.2" y="437.5" width="13.8" height="32.5" rx="2" fill="#1baf7a"/>
+<text x="872.3" y="484" text-anchor="end" fill="#52514e" font-size="11" transform="rotate(-40 872.3 484)">early 301-400</text>
+<rect x="920" y="80" width="14" height="14" rx="3" fill="#2a78d6"/><text x="940" y="92" fill="#0b0b0b">07:00</text>
+<rect x="920" y="102" width="14" height="14" rx="3" fill="#eb6834"/><text x="940" y="114" fill="#0b0b0b">13:00</text>
+<rect x="920" y="124" width="14" height="14" rx="3" fill="#1baf7a"/><text x="940" y="136" fill="#0b0b0b">19:00</text>
+</svg>

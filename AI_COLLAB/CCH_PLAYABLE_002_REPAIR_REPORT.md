@@ -2,7 +2,7 @@
 
 **Status:** repairs done and tested, stopped for owner and ChatGPT review (2026-11-13). Prepared by Claude Code.
 Companion: `AI_COLLAB/CCH_LOOP_001_IDLE_TIME_AUDIT.md` (Part B, run on this repaired build).
-**Build:** `main` at `cbacc9c` plus the repairs below. The owner's uncommitted sunset experiment (`LONG_DUSK`, `SUNSET_*`,
+**Build:** `main` at `cbacc9c` plus the repairs below (committed as `2a4748f`). The owner's uncommitted sunset experiment (`LONG_DUSK`, `SUNSET_*`,
 the grade's `glow`, `project.godot`, `scenes/main.tscn`) was left untouched and is not in the repair commit.
 **Evidence:** `art/style_tests/CCH-PLAYABLE-002/` (`logs/` tests, probes, old saves; `play_kbm/`, `play_pad/` the
 input-driven replays with screenshots; `review/` the review sheets).
@@ -160,7 +160,7 @@ times, prices and XP are as they were.
 | --- | --- |
 | `tools/playable002_test.gd` (new, 79 cases) | **79 PASS, 0 FAIL** |
 | `tools/audit_state_probe.gd` (deaths and collapses everywhere) | **0 suspect** (was 1: indoors) |
-| Regression suite (`tools/audit_run_tests.sh`, 16 tests) | save 0 failures, menu **785/785**, interior 136, mail 42, debug_menu 40, diary 63, wheel 87, layout 67, farmer 79, creature 74, aoh2_e2 62, aoh2_e3 208, aoh2_e5 209, aoh_cave 6, diary_fit unchanged. `aoh_trek_check` 6 of 7 under load (its 50 ms build-time case read 103 ms with 16 tests and 5 sims running; it is the same timing case the last audit saw flake) |
+| Regression suite (`tools/audit_run_tests.sh`, 16 tests; menu, diary, save, wheel and the focused test rerun after the last change) | save 0 failures, menu **785/785**, interior 136, mail 42, debug_menu 40, diary 63, wheel 87, layout 67, farmer 79, creature 74, aoh2_e2 62, aoh2_e3 208, aoh2_e5 209, aoh_cave 6, diary_fit unchanged. `aoh_trek_check` 6 of 7 under load (its 50 ms build-time case read 103 ms with 16 tests and 5 sims running; it is the same timing case the last audit saw flake) |
 | Old saves (copies of 8 files) | loaded, no script error, migration notes shown |
 | Story probes, 400 days x 3 modes (`audit_probe.gd`) | engaged 17/17 chapters; endings as before |
 
@@ -233,4 +233,7 @@ Re-checked against the current code (2026-11-13). They are **active, purchasable
 
 ## Commits
 
-COMMITS_PLACEHOLDER
+- `2a4748f` CCH-PLAYABLE-002: gameplay repairs, tests and evidence.
+- The follow-up commit with the review master and CCH-LOOP-001 is listed on the message board.
+- Not committed (owner's work in progress): the sunset experiment in `main.gd`, `grade.gdshader`, `project.godot`,
+  `scenes/main.tscn`.
