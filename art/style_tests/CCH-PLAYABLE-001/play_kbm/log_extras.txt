@@ -1,0 +1,67 @@
+[title] OBS: title buttons: Continue | New Game | Load Game | Settings | Quit
+[D8 06:00] MSG: Welcome back. Day 8.
+[D8 06:06] OBS: continued: world=true day=8 coins=162 hp=10 food=55 water=81 warmth=100 sanity=2 tool=hoe inside=true tile=(4, 65) pack={"blackberries":3,"chanterelles":1,"firewood":2} mats={"feathers":1,"fiber":7,"lamp_oil":1,"resin":6,"sticks":20,"wood":23}
+[D8 06:06] SHOT: art/style_tests/CCH-PLAYABLE-001/play_kbm/01_continue_first_frame.png
+[D8 06:06] UI: Pause menu [tab=Pause]: =resume  =open_settings  =open_controls  =unstick  =quit_title  =quit_game  =dev_unlock  =dev_trek_edge  =dev_trek_mill  =dev_trek_orchard  =dev_trek_chapel  =dev_trek_post  =dev_trek_grove
+[D8 06:06] SHOT: art/style_tests/CCH-PLAYABLE-001/play_kbm/02_pause_menu.png
+[D8 06:06] SHOT: art/style_tests/CCH-PLAYABLE-001/play_kbm/03_pause_controls.png
+[D8 06:06] UI: Controls [tab=Controls]: 
+[D8 06:10] OBS: desk opened tab=Desk
+[D8 06:10] UI: Desk first tab [tab=Desk]: =diary
+[D8 06:10] SHOT: art/style_tests/CCH-PLAYABLE-001/play_kbm/04_desk_tab1.png
+[D8 06:10] UI: Desk tab 2 [tab=Desk]: =pay_tax  =pay_deed
+[D8 06:10] UI: Desk tab 3 [tab=Desk]: =pastime:solitaire  =pastime:sudoku
+[D8 06:10] UI: Desk tab 4 [tab=Desk]: =order:cards  =order:sudoku  =order:oil  =order:seeds_turnip  =order:seeds_kale  =order:seeds_peas  =order:seeds_corn  =order:seeds_potato  =order:seeds_leek  =order:seeds_pumpkin  =order:seeds_parsnip  =order:seeds_strawberry  =order:seeds_garlic  =order:seeds_blueberry  =order:hen  =order:goat
+[D8 06:10] SHOT: art/style_tests/CCH-PLAYABLE-001/play_kbm/05_desk_catalog.png
+[D8 06:10] MSG: You order 5 turnip seeds for 15 coins. It comes with the morning post.
+[D8 06:10] ACT: ordered turnip seeds: coins 162 -> 147 ("You order 5 turnip seeds for 15 coins. It comes with the morning post.")
+[D8 06:27] MSG: Bright things still lie under the great tree.
+[D8 06:29] OBS: rod tier 0; hotbar shows the fishing pole unlocked=false
+[D8 07:09] SHOT: art/style_tests/CCH-PLAYABLE-001/play_kbm/06_fishing_locked_slot.png
+[D8 07:11] OBS: cast with rod tier 0: "" fishing=false
+[D8 07:11] OBS: after 0 s at the spot: caught 0 (""), Fishing level 1
+[D8 07:11] ACT: walking to the cave at the west edge
+[D8 07:37] MSG: You step into the cave. It smells of damp stone, and something skitters in the dark.
+[D8 07:40] SHOT: art/style_tests/CCH-PLAYABLE-001/play_kbm/07_cave_entry_d8.png
+[D8 07:40] OBS: in the cave: lantern tier 1, 7 foes (bat, bat, bat, lizard, lizard, snake, snake), 8 ore nodes, weapon=hoe, pick tier 0
+[D8 07:49] MSG: Select the pickaxe on the hotbar to do that.
+[D8 07:51] OBS: ore with no pick: "Select the pickaxe on the hotbar to do that."
+[D8 07:51] OBS: no weapon equipped; swinging says: 
+[D8 07:52] OBS: "Select the pickaxe on the hotbar to do that."
+[D8 07:56] MSG: The fire has gone out.
+[D8 08:02] MSG: You step back out into the light.
+[D8 08:05] OBS: after the cave: in_cave=false coins=147 hp=10 food=50 water=75 warmth=97 sanity=2 tool=sword inside=false tile=(25, 17) pack={"blackberries":3,"chanterelles":1,"firewood":2} mats={"feathers":1,"fiber":7,"lamp_oil":1,"resin":6,"sticks":20,"wood":23}
+[D8 08:05] SHOT: art/style_tests/CCH-PLAYABLE-001/play_kbm/08_craft_sharpened_stick.png
+[D8 08:05] MSG: You fashion a Sharpened stick and equip it. +10 Bushcrafting XP, +8 Carpentry XP
+[D8 08:05] ACT: made a weapon: hand_r=sharpened_stick ("You fashion a Sharpened stick and equip it. +10 Bushcrafting XP, +8 Carpentry XP")
+[D8 08:06] OBS: bag holds: ?, ?, ?, ?, ?, ?, ?, ?, ? (hunger 50)
+[D8 08:06] MSG: You eat the blackberries. Food 75/100, HP 10/10
+[D8 08:06] ACT: ate from bag slot 0: hunger 50 -> 75 ("You eat the blackberries. Food 75/100, HP 10/10")
+[D8 08:06] ACT: walking to the cave at the west edge
+[D8 08:07] MSG: You step into the cave. It smells of damp stone, and something skitters in the dark.
+[D8 08:10] SHOT: art/style_tests/CCH-PLAYABLE-001/play_kbm/09_cave_entry_d8.png
+[D8 08:10] OBS: in the cave: lantern tier 1, 7 foes (bat, bat, bat, lizard, lizard, snake, snake), 8 ore nodes, weapon=sharpened_stick, pick tier 0
+[D8 08:19] MSG: Select the pickaxe on the hotbar to do that.
+[D8 08:21] OBS: ore with no pick: "Select the pickaxe on the hotbar to do that."
+[D8 08:29] OBS: guard turned a blow from the lizard (hp stays 10)
+[D8 08:33] OBS: guard turned a blow from the lizard (hp stays 10)
+[D8 08:33] SHOT: art/style_tests/CCH-PLAYABLE-001/play_kbm/10_cave_fight_d8.png
+[D8 08:34] MSG: You swing at empty air.
+[D8 08:36] MSG: You hit the lizard for 2.
+[D8 08:37] MSG: The Lizard strikes you for 2. HP 8/10
+[D8 08:37] MSG: You hit the lizard for 2.
+[D8 08:39] MSG: You swing at empty air.
+[D8 08:41] MSG: You hit the lizard for 2.
+[D8 08:41] MSG: The Lizard strikes you for 2. HP 6/10
+[D8 08:42] MSG: The lizard falls. +18 Combat XP, 1 resin
+[D8 08:51] MSG: The Bat strikes you for 1. HP 5/10
+[D8 08:53] MSG: You hit the bat for 2.
+[D8 08:54] MSG: The Bat strikes you for 1. HP 4/10
+[D8 08:54] MSG: The bat falls. +12 Combat XP, 1 fiber
+[D8 08:59] MSG: The Snake strikes you for 2. HP 2/10
+[D8 09:00] MSG: You hit the snake for 2.
+[D8 09:02] MSG: You collapse. You wake at the homestead, shaken. Sanity -10.
+[D8 09:04] OBS: fight: 11 swings, 8 hit, 2 blows blocked, 0 blows taken with the guard up, kills 2, hp 10/10, foes left 0, in_cave=false ("You collapse. You wake at the homestead, shaken. Sanity -10.")
+[D8 09:04] OBS: after the cave: in_cave=false coins=147 hp=10 food=73 water=72 warmth=96 sanity=0 tool=sword inside=false tile=(69, 42) pack={"blackberries":2,"chanterelles":1,"firewood":2} mats={"feathers":1,"fiber":7,"lamp_oil":1,"resin":7,"sticks":20,"wood":21}
+[D8 09:04] OBS: extras over: coins=147 hp=10 food=73 water=72 warmth=96 sanity=0 tool=sword inside=false tile=(69, 42) pack={"blackberries":2,"chanterelles":1,"firewood":2} mats={"feathers":1,"fiber":7,"lamp_oil":1,"resin":7,"sticks":20,"wood":21}
+[D8 09:04] END: problems=0 shots=10

@@ -1,0 +1,21 @@
+Godot Engine v4.7.2.stable.steam.ed1daf0bf - https://godotengine.org
+
+save round trips: mode=engaged days=400 at=[2, 5, 9, 14, 30, 62, 93, 150, 246, 300, 397, 400]
+checkpoint day 2: 120 keys, 5610 bytes, 0 difference(s); coins 9, stage 1, quests 2, pages 1, furniture 0
+checkpoint day 5: 120 keys, 6723 bytes, 0 difference(s); coins 34, stage 1, quests 3, pages 5, furniture 0
+checkpoint day 9: 120 keys, 8243 bytes, 0 difference(s); coins 20, stage 1, quests 3, pages 6, furniture 0
+checkpoint day 14: 120 keys, 10507 bytes, 0 difference(s); coins 23, stage 2, quests 7, pages 7, furniture 0
+checkpoint day 30: 120 keys, 13603 bytes, 0 difference(s); coins 308, stage 2, quests 8, pages 7, furniture 1
+checkpoint day 62: 120 keys, 17344 bytes, 0 difference(s); coins 960, stage 2, quests 8, pages 9, furniture 3
+checkpoint day 93: 120 keys, 20566 bytes, 0 difference(s); coins 1183, stage 2, quests 8, pages 9, furniture 4
+checkpoint day 150: 120 keys, 24572 bytes, 0 difference(s); coins 414, stage 2, quests 8, pages 9, furniture 5
+DIFF day 246: "cellar" changed: {"parsnips":0.0,"peas":0.0,"potatoes":0.0} -> {}
+checkpoint day 246: 120 keys, 34427 bytes, 1 difference(s); coins 1255, stage 3, quests 8, pages 11, furniture 5
+DIFF day 300: "cellar" changed: {"corn":0.0,"parsnips":0.0,"peas":0.0,"potatoes":0.0,"pumpkins":0.0} -> {}
+DIFF day 300: "hen_ages" changed: [284.0,283.0,85.0] -> [284.0,283.0,85.0,0.0]
+checkpoint day 300: 120 keys, 38477 bytes, 2 difference(s); coins 2081, stage 3, quests 13, pages 14, furniture 6
+DIFF day 397: "cellar" changed: {"corn":0.0,"kale":0.0,"parsnips":0.0,"peas":0.0,"potatoes":0.0,"pumpkins":0.0} -> {}
+checkpoint day 397: 120 keys, 42603 bytes, 1 difference(s); coins 575, stage 3, quests 16, pages 15, furniture 6
+DIFF day 400: "cellar" changed: {"corn":0.0,"kale":2.0,"parsnips":0.0,"peas":0.0,"potatoes":0.0,"pumpkins":0.0} -> {"kale":2.0}
+checkpoint day 400: 120 keys, 42973 bytes, 1 difference(s); coins 783, stage 3, quests 17, pages 16, furniture 6
+save probe: 5 difference(s) over 12 checkpoints

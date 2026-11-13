@@ -1,0 +1,145 @@
+Godot Engine v4.7.2.stable.steam.ed1daf0bf - https://godotengine.org
+
+ok    first save has no backup
+ok    second save keeps the first as backup
+ok    no temp file left after a save
+ok    save records its version
+ok    loads day 6
+ok    truncated: restored from backup
+ok    truncated: damaged file kept aside
+Unicode parsing error, some characters were replaced with � (U+FFFD): Invalid UTF-8 leading byte (80)
+Unicode parsing error, some characters were replaced with � (U+FFFD): Invalid UTF-8 leading byte (ad)
+Unicode parsing error: Byte e0 is not a correct continuation byte after ec
+Unicode parsing error: Byte 32 is not a correct continuation byte after e0
+Unicode parsing error, some characters were replaced with � (U+FFFD): Invalid UTF-8 leading byte (8d)
+Unicode parsing error, some characters were replaced with � (U+FFFD): Invalid UTF-8 leading byte (b3)
+Unicode parsing error, some characters were replaced with � (U+FFFD): Invalid UTF-8 leading byte (b1)
+Unicode parsing error, some characters were replaced with � (U+FFFD): Invalid UTF-8 leading byte (9a)
+Unicode parsing error: Byte 17 is not a correct continuation byte after d6
+Unicode parsing error, some characters were replaced with � (U+FFFD): Invalid UTF-8 leading byte (8a)
+Unicode parsing error: Byte f is not a correct continuation byte after d8
+Unicode parsing error: Byte c3 is not a correct continuation byte after f3
+Unicode parsing error: Byte 78 is not a correct continuation byte after de
+Unicode parsing error, some characters were replaced with � (U+FFFD): Invalid UTF-8 leading byte (82)
+Unicode parsing error: Byte 13 is not a correct continuation byte after c4
+Unicode parsing error, some characters were replaced with � (U+FFFD): Invalid UTF-8 leading byte (98)
+Unicode parsing error, some characters were replaced with � (U+FFFD): Invalid UTF-8 leading byte (9d)
+Unicode parsing error, some characters were replaced with � (U+FFFD): Invalid UTF-8 leading byte (9e)
+Unicode parsing error: Byte 44 is not a correct continuation byte after f7
+Unicode parsing error, some characters were replaced with � (U+FFFD): Invalid UTF-8 leading byte (9a)
+Unicode parsing error, some characters were replaced with � (U+FFFD): Invalid UTF-8 leading byte (f9)
+Unicode parsing error: Byte d5 is not a correct continuation byte after ed
+Unicode parsing error: Byte 6 is not a correct continuation byte after d5
+Unicode parsing error, some characters were replaced with � (U+FFFD): Invalid UTF-8 leading byte (9d)
+Unicode parsing error, some characters were replaced with � (U+FFFD): Invalid UTF-8 leading byte (99)
+Unicode parsing error, some characters were replaced with � (U+FFFD): Invalid UTF-8 leading byte (b0)
+Unicode parsing error, some characters were replaced with � (U+FFFD): Invalid UTF-8 leading byte (88)
+Unicode parsing error: Byte 11 is not a correct continuation byte after e9
+Unicode parsing error, some characters were replaced with � (U+FFFD): Invalid UTF-8 leading byte (ba)
+Unicode parsing error, some characters were replaced with � (U+FFFD): Invalid UTF-8 leading byte (80)
+Unicode parsing error: Byte 3b is not a correct continuation byte after dc
+Unicode parsing error: Byte 60 is not a correct continuation byte after c3
+Unicode parsing error, some characters were replaced with � (U+FFFD): Invalid UTF-8 leading byte (a6)
+Unicode parsing error, some characters were replaced with � (U+FFFD): Invalid UTF-8 leading byte (98)
+Unicode parsing error: Overlong encoding (c1 9b)
+Unicode parsing error, some characters were replaced with � (U+FFFD): Invalid UTF-8 leading byte (9b)
+Unicode parsing error, some characters were replaced with � (U+FFFD): Invalid UTF-8 leading byte (84)
+Unicode parsing error: Byte dd is not a correct continuation byte after eb
+Unicode parsing error: Byte dd is not a correct continuation byte after dd
+Unicode parsing error: Byte 1c is not a correct continuation byte after dd
+Unicode parsing error, some characters were replaced with � (U+FFFD): Invalid UTF-8 leading byte (93)
+Unicode parsing error, some characters were replaced with � (U+FFFD): Invalid UTF-8 leading byte (af)
+Unicode parsing error: Byte d8 is not a correct continuation byte after d7
+Unicode parsing error: Byte 5e is not a correct continuation byte after d8
+Unicode parsing error, some characters were replaced with � (U+FFFD): Invalid UTF-8 leading byte (85)
+Unicode parsing error: Byte e7 is not a correct continuation byte after c8
+Unicode parsing error: Byte 23 is not a correct continuation byte after e7
+Unicode parsing error: Byte 3b is not a correct continuation byte after e1 bd
+Unicode parsing error, some characters were replaced with � (U+FFFD): Invalid UTF-8 leading byte (8f)
+Unicode parsing error, some characters were replaced with � (U+FFFD): Invalid UTF-8 leading byte (99)
+Unicode parsing error, some characters were replaced with � (U+FFFD): Invalid UTF-8 leading byte (97)
+Unicode parsing error: Byte 7 is not a correct continuation byte after e6
+Unicode parsing error: Byte 44 is not a correct continuation byte after c4
+Unicode parsing error: Byte ef is not a correct continuation byte after cf
+Unicode parsing error: Byte 7c is not a correct continuation byte after ef
+Unicode parsing error, some characters were replaced with � (U+FFFD): Invalid UTF-8 leading byte (bf)
+Unicode parsing error: Byte 1c is not a correct continuation byte after d7
+Unicode parsing error: Byte 6c is not a correct continuation byte after f6
+Unicode parsing error: Byte 3f is not a correct continuation byte after c5
+Unicode parsing error, some characters were replaced with � (U+FFFD): Invalid UTF-8 leading byte (b3)
+Unicode parsing error: Byte 64 is not a correct continuation byte after c5
+Unicode parsing error: Byte 5e is not a correct continuation byte after d9
+Unicode parsing error, some characters were replaced with � (U+FFFD): Invalid UTF-8 leading byte (8e)
+Unicode parsing error, some characters were replaced with � (U+FFFD): Invalid UTF-8 leading byte (aa)
+Unicode parsing error, some characters were replaced with � (U+FFFD): Invalid UTF-8 leading byte (8f)
+Unicode parsing error, some characters were replaced with � (U+FFFD): Invalid UTF-8 leading byte (aa)
+Unicode parsing error, some characters were replaced with � (U+FFFD): Invalid UTF-8 leading byte (fb)
+Unicode parsing error, some characters were replaced with � (U+FFFD): Invalid UTF-8 leading byte (be)
+Unicode parsing error, some characters were replaced with � (U+FFFD): Invalid UTF-8 leading byte (92)
+Unicode parsing error, some characters were replaced with � (U+FFFD): Invalid UTF-8 leading byte (95)
+Unicode parsing error, some characters were replaced with � (U+FFFD): Invalid UTF-8 leading byte (a1)
+Unicode parsing error, some characters were replaced with � (U+FFFD): Invalid UTF-8 leading byte (a9)
+Unicode parsing error, some characters were replaced with � (U+FFFD): Invalid UTF-8 leading byte (b1)
+Unicode parsing error: Byte c4 is not a correct continuation byte after f2 88 a8
+Unicode parsing error: Byte 21 is not a correct continuation byte after c4
+Unicode parsing error, some characters were replaced with � (U+FFFD): Invalid UTF-8 leading byte (be)
+Unicode parsing error, some characters were replaced with � (U+FFFD): Invalid UTF-8 leading byte (83)
+ok    garbage bytes: restored from backup
+ok    empty file: restored from backup
+ok    JSON array: restored from backup
+ok    inventory of the wrong type: restored from backup
+ok    day 0: restored from backup
+ok    load falls back to backup without the start screen
+ok    missing save: restored from backup
+ok    missing save with a whole temp file: temp is used
+ok    missing save with a whole temp file: backup untouched
+ok    good save: stale temp cleared
+ok    saving over a damaged file keeps the good backup
+ok    damaged, no backup: lost
+ok    damaged, no backup: won't load
+ok    old save: loads
+ok    old save: bell not begun, no treks
+ok    old save: no trail works
+ok    old save: new materials and items present
+ok    old save: migrated version
+ok    old save: a null material loads
+ok    new fields round-trip
+ok    trail works round-trip
+ok    clapper and trek pages round-trip
+ok    last trek day and standing round-trip
+ok    version 5 save: wood counts from the save's day, no standing
+ok    version 4 save with the bell's parts: gets the clapper
+ok    version 4 save without them: no clapper
+ok    workshop spot round-trips
+ok    version 6 save: workshop stays where it stood
+ok    version 6 save without a workshop: none placed
+ok    hose head, cistern, hoppers and sprinkler round-trip
+ok    version 8 save: no hose head, cistern, hoppers or sprinklers
+ok    seasonal items, stores by kind and forage round-trip
+ok    version 9 save: cellar turnips and cooler perch carried over
+ok    estate, deed and stand demand round-trip
+ok    version 10 save: no extensions, deed or glut; only keepers in the cellar
+ok    edge walk and sighting round-trip
+ok    version 11 save past day 4: edge walk, sighting and chapter done
+ok    version 11 save on day 3: edge walk and sighting still to come
+ok    night prompts, blight and blessing round-trip
+ok    version 12 save: visitors met, no blight, no blessing
+ok    friendship, scenes, tastes, requests and visit round-trip
+ok    version 13 save: walks become friendship, standing kept
+ok    second year and endings round-trip
+ok    version 14 save past the grove: act closed, the bell's ending reached
+ok    version 14 save at day 380 without the bell: the act plays from here
+ok    achievements and new counters round-trip
+ok    version 15 save: old achievements mapped, the unmatched dropped
+ok    cave save records the homestead
+ok    version 7 world save: world keys dropped
+ok    version 7 world save: loads
+ok    version 7 world save: bank comes home
+ok    version 7 world save: crossbow refunded, ammo gone
+ok    version 7 world save: wakes at the homestead
+ok    version 7 world save: no bank panel
+ok    day end during a trek: trek over, out of the cave
+ok    day end during a trek: saved and loads
+ok    eviction: every file gone
+ok    eviction: nothing to recover
+PASS: 0 failure(s)

@@ -1,0 +1,216 @@
+Godot Engine v4.7.2.stable.steam.ed1daf0bf - https://godotengine.org
+
+PASS E4 dresser exists
+PASS E4 dresser native size 18x20 in its class [14, 24, 16, 28]
+PASS E4 dresser alpha is binary
+PASS E4 dresser stands on its bottom row
+PASS E4 armchair exists
+PASS E4 armchair native size 19x20 in its class [14, 24, 16, 28]
+PASS E4 armchair alpha is binary
+PASS E4 armchair stands on its bottom row
+PASS E4 clock exists
+PASS E4 clock native size 18x42 in its class [12, 20, 34, 46]
+PASS E4 clock alpha is binary
+PASS E4 clock stands on its bottom row
+PASS E4 painting exists
+PASS E4 painting native size 25x25 in its class [16, 28, 12, 28]
+PASS E4 painting alpha is binary
+PASS E4 painting stands on its bottom row
+PASS E4 bookshelf exists
+PASS E4 bookshelf native size 27x25 in its class [24, 32, 20, 34]
+PASS E4 bookshelf alpha is binary
+PASS E4 bookshelf stands on its bottom row
+PASS E4 feather_bed exists
+PASS E4 feather_bed native size 32x47 in its class [32, 32, 47, 47]
+PASS E4 feather_bed alpha is binary
+PASS E4 feather_bed stands on its bottom row
+PASS the interior map is unchanged with all furniture bought
+PASS E5 gen_833b1e3652 has its autumn source
+PASS E5 gen_833b1e3652 spring exists
+PASS E5 gen_833b1e3652 spring keeps the native size (192.0, 192.0)
+PASS E5 gen_833b1e3652 spring alpha is binary
+PASS E5 gen_833b1e3652 summer exists
+PASS E5 gen_833b1e3652 summer keeps the native size (192.0, 192.0)
+PASS E5 gen_833b1e3652 summer alpha is binary
+PASS E5 gen_833b1e3652 winter exists
+PASS E5 gen_833b1e3652 winter keeps the native size (192.0, 192.0)
+PASS E5 gen_833b1e3652 winter alpha is binary
+PASS E5 src_maple has its autumn source
+PASS E5 src_maple spring exists
+PASS E5 src_maple spring keeps the native size (64.0, 80.0)
+PASS E5 src_maple spring alpha is binary
+PASS E5 src_maple summer exists
+PASS E5 src_maple summer keeps the native size (64.0, 80.0)
+PASS E5 src_maple summer alpha is binary
+PASS E5 src_maple winter exists
+PASS E5 src_maple winter keeps the native size (64.0, 80.0)
+PASS E5 src_maple winter alpha is binary
+PASS E5 w4_orchard_pear_a has its autumn source
+PASS E5 w4_orchard_pear_a spring exists
+PASS E5 w4_orchard_pear_a spring keeps the native size (48.0, 64.0)
+PASS E5 w4_orchard_pear_a spring alpha is binary
+PASS E5 w4_orchard_pear_a summer exists
+PASS E5 w4_orchard_pear_a summer keeps the native size (48.0, 64.0)
+PASS E5 w4_orchard_pear_a summer alpha is binary
+PASS E5 w4_orchard_pear_a winter exists
+PASS E5 w4_orchard_pear_a winter keeps the native size (48.0, 64.0)
+PASS E5 w4_orchard_pear_a winter alpha is binary
+PASS E5 w4_orchard_pear_b has its autumn source
+PASS E5 w4_orchard_pear_b spring exists
+PASS E5 w4_orchard_pear_b spring keeps the native size (48.0, 64.0)
+PASS E5 w4_orchard_pear_b spring alpha is binary
+PASS E5 w4_orchard_pear_b summer exists
+PASS E5 w4_orchard_pear_b summer keeps the native size (48.0, 64.0)
+PASS E5 w4_orchard_pear_b summer alpha is binary
+PASS E5 w4_orchard_pear_b winter exists
+PASS E5 w4_orchard_pear_b winter keeps the native size (48.0, 64.0)
+PASS E5 w4_orchard_pear_b winter alpha is binary
+PASS E5 w4_orchard_apple_a has its autumn source
+PASS E5 w4_orchard_apple_a spring exists
+PASS E5 w4_orchard_apple_a spring keeps the native size (48.0, 64.0)
+PASS E5 w4_orchard_apple_a spring alpha is binary
+PASS E5 w4_orchard_apple_a summer exists
+PASS E5 w4_orchard_apple_a summer keeps the native size (48.0, 64.0)
+PASS E5 w4_orchard_apple_a summer alpha is binary
+PASS E5 w4_orchard_apple_a winter exists
+PASS E5 w4_orchard_apple_a winter keeps the native size (48.0, 64.0)
+PASS E5 w4_orchard_apple_a winter alpha is binary
+PASS E5 w4_orchard_apple_b has its autumn source
+PASS E5 w4_orchard_apple_b spring exists
+PASS E5 w4_orchard_apple_b spring keeps the native size (48.0, 64.0)
+PASS E5 w4_orchard_apple_b spring alpha is binary
+PASS E5 w4_orchard_apple_b summer exists
+PASS E5 w4_orchard_apple_b summer keeps the native size (48.0, 64.0)
+PASS E5 w4_orchard_apple_b summer alpha is binary
+PASS E5 w4_orchard_apple_b winter exists
+PASS E5 w4_orchard_apple_b winter keeps the native size (48.0, 64.0)
+PASS E5 w4_orchard_apple_b winter alpha is binary
+PASS E5 src_undergrowth has its autumn source
+PASS E5 src_undergrowth spring exists
+PASS E5 src_undergrowth spring keeps the native size (48.0, 32.0)
+PASS E5 src_undergrowth spring alpha is binary
+PASS E5 src_undergrowth summer exists
+PASS E5 src_undergrowth summer keeps the native size (48.0, 32.0)
+PASS E5 src_undergrowth summer alpha is binary
+PASS E5 src_undergrowth winter exists
+PASS E5 src_undergrowth winter keeps the native size (48.0, 32.0)
+PASS E5 src_undergrowth winter alpha is binary
+PASS E5 bramble_0 has its autumn source
+PASS E5 bramble_0 spring exists
+PASS E5 bramble_0 spring keeps the native size (28.0, 28.0)
+PASS E5 bramble_0 spring alpha is binary
+PASS E5 bramble_0 summer exists
+PASS E5 bramble_0 summer keeps the native size (28.0, 28.0)
+PASS E5 bramble_0 summer alpha is binary
+PASS E5 bramble_0 winter exists
+PASS E5 bramble_0 winter keeps the native size (28.0, 28.0)
+PASS E5 bramble_0 winter alpha is binary
+PASS E5 bramble_1 has its autumn source
+PASS E5 bramble_1 spring exists
+PASS E5 bramble_1 spring keeps the native size (28.0, 28.0)
+PASS E5 bramble_1 spring alpha is binary
+PASS E5 bramble_1 summer exists
+PASS E5 bramble_1 summer keeps the native size (28.0, 28.0)
+PASS E5 bramble_1 summer alpha is binary
+PASS E5 bramble_1 winter exists
+PASS E5 bramble_1 winter keeps the native size (28.0, 28.0)
+PASS E5 bramble_1 winter alpha is binary
+PASS E5 ivy_0 has its autumn source
+PASS E5 ivy_0 spring exists
+PASS E5 ivy_0 spring keeps the native size (28.0, 28.0)
+PASS E5 ivy_0 spring alpha is binary
+PASS E5 ivy_0 summer exists
+PASS E5 ivy_0 summer keeps the native size (28.0, 28.0)
+PASS E5 ivy_0 summer alpha is binary
+PASS E5 ivy_0 winter exists
+PASS E5 ivy_0 winter keeps the native size (28.0, 28.0)
+PASS E5 ivy_0 winter alpha is binary
+PASS E5 ivy_1 has its autumn source
+PASS E5 ivy_1 spring exists
+PASS E5 ivy_1 spring keeps the native size (28.0, 21.0)
+PASS E5 ivy_1 spring alpha is binary
+PASS E5 ivy_1 summer exists
+PASS E5 ivy_1 summer keeps the native size (28.0, 21.0)
+PASS E5 ivy_1 summer alpha is binary
+PASS E5 ivy_1 winter exists
+PASS E5 ivy_1 winter keeps the native size (28.0, 21.0)
+PASS E5 ivy_1 winter alpha is binary
+PASS E5 litter_0 has its autumn source
+PASS E5 litter_0 spring exists
+PASS E5 litter_0 spring keeps the native size (26.0, 21.0)
+PASS E5 litter_0 spring alpha is binary
+PASS E5 litter_0 summer exists
+PASS E5 litter_0 summer keeps the native size (26.0, 21.0)
+PASS E5 litter_0 summer alpha is binary
+PASS E5 litter_0 winter exists
+PASS E5 litter_0 winter keeps the native size (26.0, 21.0)
+PASS E5 litter_0 winter alpha is binary
+PASS E5 litter_1 has its autumn source
+PASS E5 litter_1 spring exists
+PASS E5 litter_1 spring keeps the native size (25.0, 21.0)
+PASS E5 litter_1 spring alpha is binary
+PASS E5 litter_1 summer exists
+PASS E5 litter_1 summer keeps the native size (25.0, 21.0)
+PASS E5 litter_1 summer alpha is binary
+PASS E5 litter_1 winter exists
+PASS E5 litter_1 winter keeps the native size (25.0, 21.0)
+PASS E5 litter_1 winter alpha is binary
+PASS E5 litter_2 has its autumn source
+PASS E5 litter_2 spring exists
+PASS E5 litter_2 spring keeps the native size (32.0, 25.0)
+PASS E5 litter_2 spring alpha is binary
+PASS E5 litter_2 summer exists
+PASS E5 litter_2 summer keeps the native size (32.0, 25.0)
+PASS E5 litter_2 summer alpha is binary
+PASS E5 litter_2 winter exists
+PASS E5 litter_2 winter keeps the native size (32.0, 25.0)
+PASS E5 litter_2 winter alpha is binary
+PASS the farm tracks 190 seasonal pieces
+PASS the farm tracks 13 windfalls
+PASS day 20 is Autumn
+PASS Autumn: litter_2 shows its original art
+PASS Autumn: every seasonal piece shows its autumn art
+PASS Autumn: windfalls shown true
+PASS Autumn: ground grass shift -0.035
+PASS Autumn: no snow on a sunny day
+PASS day 75 is Winter
+PASS Winter: litter_2 shows litter_2_winter.png
+PASS Winter: every seasonal piece shows its winter art
+PASS Winter: windfalls shown false
+PASS Winter: ground grass shift -0.020
+PASS Winter: no snow on a sunny day
+PASS day 170 is Spring
+PASS Spring: litter_2 shows litter_2_spring.png
+PASS Spring: every seasonal piece shows its spring art
+PASS Spring: windfalls shown false
+PASS Spring: ground grass shift 0.020
+PASS Spring: no snow on a sunny day
+PASS day 260 is Summer
+PASS Summer: litter_2 shows litter_2_summer.png
+PASS Summer: every seasonal piece shows its summer art
+PASS Summer: windfalls shown true
+PASS Summer: ground grass shift 0.000
+PASS Summer: no snow on a sunny day
+PASS Summer with snow weather (forced): the snow dusting shows
+PASS the farm map is unchanged by the seasonal art
+PASS trek atlas spring at the autumn atlas's size
+PASS trek ground forest spring at its size
+PASS trek ground pasture spring at its size
+PASS trek ground hollow spring at its size
+PASS trek atlas summer at the autumn atlas's size
+PASS trek ground forest summer at its size
+PASS trek ground pasture summer at its size
+PASS trek ground hollow summer at its size
+PASS trek atlas winter at the autumn atlas's size
+PASS trek ground forest winter at its size
+PASS trek ground pasture winter at its size
+PASS trek ground hollow winter at its size
+PASS trek art swaps to the winter atlas
+PASS trek art goes back to the autumn atlas
+PASS a winter save loads back on its winter day
+PASS after loading, the farm shows winter art
+aoh2_e5_check done: 0 failures
+WARNING: 24 ObjectDB instances were leaked at exit (run with `--verbose` for details).
+   at: cleanup (core/object/object.cpp:2536)
+ERROR: 12 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:822)

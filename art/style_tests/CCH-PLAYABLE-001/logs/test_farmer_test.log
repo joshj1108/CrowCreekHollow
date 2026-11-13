@@ -1,0 +1,81 @@
+Godot Engine v4.7.2.stable.steam.ed1daf0bf - https://godotengine.org
+
+PASS  sheets: the farmer uses the PixelLab sheets
+PASS  sheets: 60 sheets load at CELL x frames
+PASS  sheets: no empty frame
+PASS  sheets: walk and idle boots on FEET in every frame
+PASS  sheets: walk and idle heads steady (within 3 art px)
+PASS  sheets: no old SpriteCook frame is loaded
+PASS  sheets: the belt lantern loads
+PASS  states: every state and facing has its sheet and frame
+PASS  states: facing left mirrors the right-facing sheets
+PASS  states: every action ends back at idle
+PASS  states: a swing during the flinch shows at once
+PASS  states: a blow that lands through the guard shows the flinch
+PASS  states: the guard is back after the flinch while still held
+PASS  lantern down: idle carries it in the hand (idle_lantern_south)
+PASS  lantern down: walking carries it in the hand (walk_lantern_south)
+PASS  lantern down: a tool shows its own frame at once (not delayed)
+PASS  lantern down: on the belt within LAMP_SWAP during a tool
+PASS  lantern down: back in the hand after
+PASS  lantern down: on the belt while guarding
+PASS  lantern down: going to the belt for a swing
+PASS  lantern up: idle carries it in the hand (idle_lantern_north)
+PASS  lantern up: walking carries it in the hand (walk_lantern_north)
+PASS  lantern up: a tool shows its own frame at once (not delayed)
+PASS  lantern up: on the belt within LAMP_SWAP during a tool
+PASS  lantern up: back in the hand after
+PASS  lantern up: on the belt while guarding
+PASS  lantern up: going to the belt for a swing
+PASS  lantern right: idle carries it in the hand (idle_lantern_east)
+PASS  lantern right: walking carries it in the hand (walk_lantern_east)
+PASS  lantern right: a tool shows its own frame at once (not delayed)
+PASS  lantern right: on the belt within LAMP_SWAP during a tool
+PASS  lantern right: back in the hand after
+PASS  lantern right: on the belt while guarding
+PASS  lantern right: going to the belt for a swing
+PASS  lantern: unlit, the plain idle (no lantern drawn)
+PASS  lantern: lit in the dark, the farmer shows it
+PASS  lantern: the light sits on the lantern's flame
+PASS  lantern: the light follows it to the belt
+PASS  lantern: radius unchanged by where it hangs
+PASS  lantern: by day it is off and not shown
+PASS  attack sharpened_stick down: hit event on the contact frame (event 0.083 s, frame 0.100 s)
+PASS  attack sharpened_stick down: strike frame by 0.10 s (at 0.100), in order, all 8 frames
+PASS  attack sharpened_stick up: hit event on the contact frame (event 0.083 s, frame 0.100 s)
+PASS  attack sharpened_stick up: strike frame by 0.10 s (at 0.100), in order, all 9 frames
+PASS  attack sharpened_stick right: hit event on the contact frame (event 0.083 s, frame 0.100 s)
+PASS  attack sharpened_stick right: strike frame by 0.10 s (at 0.100), in order, all 9 frames
+PASS  attack hunting_knife down: hit event on the contact frame (event 0.083 s, frame 0.100 s)
+PASS  attack hunting_knife down: strike frame by 0.10 s (at 0.100), in order, all 9 frames
+PASS  attack hunting_knife up: hit event on the contact frame (event 0.083 s, frame 0.100 s)
+PASS  attack hunting_knife up: strike frame by 0.10 s (at 0.100), in order, all 9 frames
+PASS  attack hunting_knife right: hit event on the contact frame (event 0.083 s, frame 0.100 s)
+PASS  attack hunting_knife right: strike frame by 0.10 s (at 0.100), in order, all 9 frames
+PASS  attack copper_sword down: hit event on the contact frame (event 0.083 s, frame 0.100 s)
+PASS  attack copper_sword down: strike frame by 0.10 s (at 0.100), in order, all 9 frames
+PASS  attack copper_sword up: hit event on the contact frame (event 0.083 s, frame 0.100 s)
+PASS  attack copper_sword up: strike frame by 0.10 s (at 0.100), in order, all 9 frames
+PASS  attack copper_sword right: hit event on the contact frame (event 0.083 s, frame 0.100 s)
+PASS  attack copper_sword right: strike frame by 0.10 s (at 0.100), in order, all 9 frames
+PASS  attack iron_sword down: hit event on the contact frame (event 0.083 s, frame 0.100 s)
+PASS  attack iron_sword down: strike frame by 0.10 s (at 0.100), in order, all 9 frames
+PASS  attack iron_sword up: hit event on the contact frame (event 0.083 s, frame 0.100 s)
+PASS  attack iron_sword up: strike frame by 0.10 s (at 0.100), in order, all 9 frames
+PASS  attack iron_sword right: hit event on the contact frame (event 0.083 s, frame 0.100 s)
+PASS  attack iron_sword right: strike frame by 0.10 s (at 0.100), in order, all 9 frames
+PASS  sync: the press starts the swing and its cooldown, the foe is untouched
+PASS  sync: the hit lands at 0.100 s, on the contact frame 4
+PASS  sync: the foe flinches with it
+PASS  sync: a miss does nothing and the swing ends after SWING_TIME
+PASS  sync: the guard is down during the swing and up again after it
+PASS  lantern: hand and belt swaps move smoothly (<= 3.5 art px a frame) in every facing
+PASS  block: raised within BLOCK_RAISE and held
+PASS  block: a blow from the front does no harm and gives half the safety
+PASS  block: the guard jolts
+PASS  block: a blow from behind still lands and the farmer flinches
+PASS  numbers: swing 0.3 s, cooldown 0.5 s, reach 1.5 tiles
+PASS  numbers: 0.9 s of safety after a hit
+PASS  numbers: walking speed and the feet's box
+PASS  numbers: the farmer's feet stay where props sort against them
+PASS: 0 failure(s)

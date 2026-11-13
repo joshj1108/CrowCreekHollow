@@ -1,0 +1,215 @@
+Godot Engine v4.7.2.stable.steam.ed1daf0bf - https://godotengine.org
+
+PASS house_stage_0 exists
+PASS house_stage_0 native size 384x320 in its class ([384, 384, 320, 320])
+PASS house_stage_0 alpha is binary
+PASS house_stage_0 stands on its bottom row
+PASS house_stage_1 exists
+PASS house_stage_1 native size 384x320 in its class ([384, 384, 320, 320])
+PASS house_stage_1 alpha is binary
+PASS house_stage_1 stands on its bottom row
+PASS house_stage_2 exists
+PASS house_stage_2 native size 384x320 in its class ([384, 384, 320, 320])
+PASS house_stage_2 alpha is binary
+PASS house_stage_2 stands on its bottom row
+PASS house_stage_2_night exists
+PASS house_stage_2_night native size 384x320 in its class ([384, 384, 320, 320])
+PASS house_stage_2_night alpha is binary
+PASS house_stage_2_night stands on its bottom row
+PASS well_broken exists
+PASS well_broken native size 28x32 in its class ([20, 32, 24, 48])
+PASS well_broken alpha is binary
+PASS well_broken stands on its bottom row
+PASS cistern exists
+PASS cistern native size 27x31 in its class ([16, 32, 16, 32])
+PASS cistern alpha is binary
+PASS cistern stands on its bottom row
+PASS hose exists
+PASS hose native size 14x11 in its class ([8, 16, 8, 16])
+PASS hose alpha is binary
+PASS hose stands on its bottom row
+PASS flowers_a exists
+PASS flowers_a native size 14x14 in its class ([8, 16, 8, 24])
+PASS flowers_a alpha is binary
+PASS flowers_a stands on its bottom row
+PASS flowers_b exists
+PASS flowers_b native size 15x11 in its class ([8, 16, 8, 24])
+PASS flowers_b alpha is binary
+PASS flowers_b stands on its bottom row
+PASS flowers_c exists
+PASS flowers_c native size 15x13 in its class ([8, 16, 8, 24])
+PASS flowers_c alpha is binary
+PASS flowers_c stands on its bottom row
+PASS flowers_winter exists
+PASS flowers_winter native size 15x11 in its class ([8, 16, 8, 24])
+PASS flowers_winter alpha is binary
+PASS flowers_winter stands on its bottom row
+PASS sprinkler exists
+PASS sprinkler native size 13x16 in its class ([8, 16, 8, 24])
+PASS sprinkler alpha is binary
+PASS sprinkler stands on its bottom row
+PASS sprinkler_big exists
+PASS sprinkler_big native size 12x23 in its class ([8, 16, 8, 24])
+PASS sprinkler_big alpha is binary
+PASS sprinkler_big stands on its bottom row
+PASS bench exists
+PASS bench native size 15x14 in its class ([8, 16, 8, 24])
+PASS bench alpha is binary
+PASS bench stands on its bottom row
+PASS birdbath exists
+PASS birdbath native size 13x22 in its class ([8, 16, 8, 24])
+PASS birdbath alpha is binary
+PASS birdbath stands on its bottom row
+PASS torch exists
+PASS torch native size 13x16 in its class ([8, 16, 8, 24])
+PASS torch alpha is binary
+PASS torch stands on its bottom row
+PASS snare exists
+PASS snare native size 14x15 in its class ([8, 16, 8, 24])
+PASS snare alpha is binary
+PASS snare stands on its bottom row
+PASS shutters exists
+PASS shutters native size 13x14 in its class ([8, 16, 8, 24])
+PASS shutters alpha is binary
+PASS shutters stands on its bottom row
+PASS fence_broken exists
+PASS fence_broken native size 14x15 in its class ([8, 16, 8, 24])
+PASS fence_broken alpha is binary
+PASS fence_broken stands on its bottom row
+PASS weathervane exists
+PASS weathervane native size 16x41 in its class ([8, 20, 32, 48])
+PASS weathervane alpha is binary
+PASS weathervane stands on its bottom row
+PASS bell exists
+PASS bell native size 18x39 in its class ([12, 24, 32, 48])
+PASS bell alpha is binary
+PASS bell stands on its bottom row
+PASS apple_bare exists
+PASS apple_bare native size 18x30 in its class ([12, 32, 24, 48])
+PASS apple_bare alpha is binary
+PASS apple_bare stands on its bottom row
+PASS pedlar exists
+PASS pedlar native size 26x30 in its class ([14, 28, 26, 32])
+PASS pedlar alpha is binary
+PASS pedlar stands on its bottom row
+PASS figure exists
+PASS figure native size 18x31 in its class ([12, 20, 28, 32])
+PASS figure alpha is binary
+PASS figure stands on its bottom row
+PASS fox exists
+PASS fox native size 22x11 in its class ([16, 24, 8, 16])
+PASS fox alpha is binary
+PASS fox stands on its bottom row
+PASS barnthing exists
+PASS barnthing native size 27x22 in its class ([16, 32, 12, 24])
+PASS barnthing alpha is binary
+PASS barnthing stands on its bottom row
+PASS branch exists
+PASS branch native size 34x22 in its class ([24, 48, 12, 24])
+PASS branch alpha is binary
+PASS branch stands on its bottom row
+PASS storm_oak exists
+PASS storm_oak native size 35x21 in its class ([24, 48, 12, 24])
+PASS storm_oak alpha is binary
+PASS storm_oak stands on its bottom row
+PASS flax exists
+PASS flax native size 14x15 in its class ([8, 16, 8, 16])
+PASS flax alpha is binary
+PASS flax stands on its bottom row
+PASS mushring exists
+PASS mushring native size 29x25 in its class ([16, 32, 12, 28])
+PASS mushring alpha is binary
+PASS mushring stands on its bottom row
+PASS ext_porch exists with binary alpha
+PASS ext_storey exists with binary alpha
+PASS ext_cellar exists with binary alpha
+PASS the cabin is built from the E3 stage set
+PASS stage 0 shows house_stage_0.png
+PASS stage 0 keeps the P1 cabin's footprint, door and windows
+PASS stage 0 windows lit at night: false (lit from Patched)
+PASS stage 1 shows house_stage_1.png
+PASS stage 1 keeps the P1 cabin's footprint, door and windows
+PASS stage 1 windows lit at night: false (lit from Patched)
+PASS stage 2 shows house_stage_2.png
+PASS stage 2 keeps the P1 cabin's footprint, door and windows
+PASS stage 2 windows lit at night: true (lit from Patched)
+PASS stage 3 shows gen_be4b3d8247.png
+PASS stage 3 keeps the P1 cabin's footprint, door and windows
+PASS stage 3 windows lit at night: true (lit from Patched)
+PASS the farm map is unchanged across the stages
+PASS the paint tint reaches the cabin
+PASS cellar_room overlay placed
+PASS cellar_room shows only once built
+PASS cellar_room sits on the cabin
+PASS porch overlay placed
+PASS porch shows only once built
+PASS porch sits on the cabin
+PASS second_storey overlay placed
+PASS second_storey shows only once built
+PASS second_storey sits on the cabin
+PASS the well, cistern and hose are placed
+PASS unrepaired: the broken well, no cistern or hose
+PASS repaired: the concept well
+PASS the cistern and hose show once built
+PASS decor lamp has art (concept/src_lantern_post)
+PASS decor lamp has art in winter (concept/src_lantern_post)
+PASS decor flowers has art (e3/flowers_b)
+PASS decor flowers has art in winter (e3/flowers_winter)
+PASS decor apple_tree has art (concept/w4_orchard_apple_b)
+PASS decor apple_tree has art in winter (e3/apple_bare)
+PASS decor sprinkler has art (e3/sprinkler)
+PASS decor sprinkler has art in winter (e3/sprinkler)
+PASS decor sprinkler_big has art (e3/sprinkler_big)
+PASS decor sprinkler_big has art in winter (e3/sprinkler_big)
+PASS decor bench has art (e3/bench)
+PASS decor bench has art in winter (e3/bench)
+PASS decor birdbath has art (e3/birdbath)
+PASS decor birdbath has art in winter (e3/birdbath)
+PASS decor weathervane has art (e3/weathervane)
+PASS decor weathervane has art in winter (e3/weathervane)
+PASS decor torch has art (e3/torch)
+PASS decor torch has art in winter (e3/torch)
+PASS decor snare has art (e3/snare)
+PASS decor snare has art in winter (e3/snare)
+PASS decor scarecrow has art (scarecrow)
+PASS decor scarecrow has art in winter (scarecrow)
+PASS decor shutters has art (e3/shutters)
+PASS decor shutters has art in winter (e3/shutters)
+PASS decor bell has art (e3/bell)
+PASS decor bell has art in winter (e3/bell)
+PASS fence piece concept/gen_f4c74269c8 exists
+PASS fence piece concept/gen_94981ce7b3 exists
+PASS fence piece concept/gen_355545383f exists
+PASS fence piece e3/fence_broken exists
+PASS fence piece concept/gen_e2fce52b5a exists
+PASS fence piece concept/gen_653dc29112 exists
+PASS forage nettles has art
+PASS forage fiddleheads has art
+PASS forage salmonberries has art
+PASS forage blackberries has art
+PASS forage rosehips has art
+PASS forage chanterelles has art
+PASS forage yellowfoot has art
+PASS forage huckleberries has art
+PASS forage oyster_mushrooms has art
+PASS forage morels has art
+PASS forage ghost_pipe has art
+PASS windfall apple has art
+PASS windfall pear has art
+PASS happening pedlar has art
+PASS happening branch has art
+PASS happening storm_oak has art
+PASS happening flax has art
+PASS happening mushrooms has art
+PASS night/madness art crow_perch exists
+PASS night/madness art e3/fox exists
+PASS night/madness art e3/barnthing exists
+PASS night/madness art e3/figure exists
+PASS night/madness art crop_pumpkin exists
+PASS decor layer drew
+PASS happenings, forage, raiders and madness drew
+e3 check: 0 failure(s)
+WARNING: 12 ObjectDB instances were leaked at exit (run with `--verbose` for details).
+   at: cleanup (core/object/object.cpp:2536)
+ERROR: 6 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:822)

@@ -1,0 +1,252 @@
+[title] OBS: title buttons: Continue | New Game | Load Game | Settings | Quit
+[D8 06:00] MSG: Welcome back. Day 8.
+[D8 06:06] OBS: continued: world=true day=8 coins=162 hp=10 food=55 water=81 warmth=100 sanity=2 tool=hoe inside=true tile=(4, 65) pack={"blackberries":3,"chanterelles":1,"firewood":2} mats={"feathers":1,"fiber":7,"lamp_oil":1,"resin":6,"sticks":20,"wood":23}
+[D8 06:06] OBS: --- day 8: walker waiting=true lantern=1 edge_done=false coins=162 hp=10 food=55 water=81 warmth=100 sanity=2 tool=hoe inside=true tile=(4, 65) pack={"blackberries":3,"chanterelles":1,"firewood":2} mats={"feathers":1,"fiber":7,"lamp_oil":1,"resin":6,"sticks":20,"wood":23}
+[D8 06:19] MSG: Bright things still lie under the great tree.
+[D8 06:21] OBS: bag holds: ?, ?, ?, ?, ?, ?, ?, ?, ? (hunger 54)
+[D8 06:21] MSG: You eat the blackberries. Food 79/100, HP 10/10
+[D8 06:21] ACT: ate from bag slot 0: hunger 54 -> 79 ("You eat the blackberries. Food 79/100, HP 10/10")
+[D8 06:21] ACT: a walker waits (edge) at (72, 42); walking over
+[D8 06:57] SHOT: art/style_tests/CCH-PLAYABLE-001/play_kbm/01_trek_edge_gate.png
+[D8 06:57] MSG: "Only as far as the edge of the wood, by daylight. Two clearings, no more." She takes 1 flask of lamp oil from her basket and gives it to you: "I'm not daft enough to go in there without." A flask burns little more than a minute in the wood; more comes from the catalog, 8 coins. Her nerve will show beside your needs: keep her in your lantern's light and on the trail, and a word (Space beside her) steadies her. You have 2 lamp oil. Press Space again to set out.
+[D8 06:59] OBS: walker says: ""Only as far as the edge of the wood, by daylight. Two clearings, no more." She takes 1 flask of lamp oil from her basket and gives it to you: "I'm not daft enough to go in there without." A flask burns little more than a minute in the wood; more comes from the catalog, 8 coins. Her nerve will show beside your needs: keep her in your lantern's light and on the trail, and a word (Space beside her) steadies her. You have 2 lamp oil. Press Space again to set out."
+[D8 06:59] MSG: You lead Maren out through the east gate and into the trees. The light goes green, then grey, and your lantern burns oil in here. Her nerve shows by your needs: keep her close, in your light and on the path.
+[D8 07:01] OBS: trek started: route=edge nerve=68 oil=1 clearings=2 events=["tree", ""]
+[D8 07:01] SHOT: art/style_tests/CCH-PLAYABLE-001/play_kbm/02_trek_edge_start.png
+[D8 07:01] OBS: clearing 1 of 2: event=tree nerve=68 sanity=4 lit=true
+[D8 07:02] MSG: "Stay on the path!" Maren hangs back, her eyes on the trees. Off the trail her nerve goes.
+[D8 07:23] MSG: Maren stops dead and won't take another step. "I can't. I can't." Give her a trail ration.
+[D8 07:25] OBS: walker frozen (nerve 32): "Maren stops dead and won't take another step. "I can't. I can't." Give her a trail ration."
+[D8 07:26] OBS: walker frozen (nerve 31): "Maren stops dead and won't take another step. "I can't. I can't." Give her a trail ration."
+[D8 07:27] OBS: walker frozen (nerve 30): "Maren stops dead and won't take another step. "I can't. I can't." Give her a trail ration."
+[D8 07:28] OBS: walker frozen (nerve 29): "Maren stops dead and won't take another step. "I can't. I can't." Give her a trail ration."
+[D8 07:29] OBS: walker frozen (nerve 28): "Maren stops dead and won't take another step. "I can't. I can't." Give her a trail ration."
+[D8 07:30] OBS: walker frozen (nerve 27): "Maren stops dead and won't take another step. "I can't. I can't." Give her a trail ration."
+[D8 07:31] OBS: walker frozen (nerve 26): ""
+[D8 07:32] OBS: walker frozen (nerve 24): ""
+[D8 07:33] OBS: walker frozen (nerve 23): ""
+[D8 07:34] OBS: walker frozen (nerve 22): ""
+[D8 07:35] OBS: walker frozen (nerve 21): ""
+[D8 07:36] OBS: walker frozen (nerve 20): ""
+[D8 07:37] OBS: walker frozen (nerve 19): ""
+[D8 07:38] OBS: walker frozen (nerve 18): ""
+[D8 07:39] OBS: walker frozen (nerve 17): ""
+[D8 07:40] OBS: walker frozen (nerve 16): ""
+[D8 07:41] OBS: walker frozen (nerve 15): ""
+[D8 07:42] OBS: walker frozen (nerve 13): ""
+[D8 07:43] OBS: walker frozen (nerve 12): ""
+[D8 07:44] OBS: walker frozen (nerve 11): ""
+[D8 07:45] OBS: walker frozen (nerve 10): ""
+[D8 07:46] OBS: walker frozen (nerve 9): ""
+[D8 07:47] OBS: walker frozen (nerve 8): ""
+[D8 07:48] OBS: walker frozen (nerve 7): ""
+[D8 07:49] OBS: walker frozen (nerve 6): ""
+[D8 07:50] OBS: walker frozen (nerve 5): ""
+[D8 07:51] OBS: walker frozen (nerve 4): ""
+[D8 07:52] OBS: walker frozen (nerve 3): ""
+[D8 07:53] OBS: walker frozen (nerve 2): ""
+[D8 07:54] OBS: walker frozen (nerve 1): ""
+[D8 07:55] OBS: walker frozen (nerve 0): ""
+[D8 07:55] MSG: Maren breaks and runs, screaming, back the way you came. You find her at the farm's edge, white and shaking. The trek is over. -10 sanity.
+[D8 07:56] MSG: The fire has gone out.
+[D8 07:57] OBS: walker frozen (nerve 0): "The fire has gone out."
+[D8 07:57] OBS: trek over: active=false in_cave=false "The fire has gone out."
+[D8 07:57] OBS: coins=162 hp=10 food=76 water=76 warmth=97 sanity=0 tool=hoe inside=false tile=(69, 42) pack={"blackberries":2,"chanterelles":1,"firewood":2} mats={"feathers":1,"fiber":7,"lamp_oil":1,"resin":6,"sticks":20,"wood":23}
+[D8 08:03] SHOT: art/style_tests/CCH-PLAYABLE-001/play_kbm/03_trek_edge_home.png
+[D8 08:03] OBS: trek finished=true edge_done=false treks_done=0 chapter now=To the Wood's Edge
+[D8 08:53] MSG: You pick blackberries. +11 Bushcrafting XP
+[D8 09:36] MSG: You pick pear. +8 Bushcrafting XP
+[D8 10:01] MSG: You pick blackberries. +11 Bushcrafting XP
+[D8 10:34] MSG: You pick pear. +8 Bushcrafting XP
+[D8 10:56] MSG: You pick chanterelles. +14 Bushcrafting XP
+[D8 10:58] OBS: picked 5 forage
+[D8 10:59] MSG: You drink from the pond. Cold and muddy, but it helps. Water 100/100.
+[D8 13:15] MSG: Weren't you holding the hoe? It's the axe in your hand.
+[D8 18:59] MSG: You step inside. The air is cold and smells of old wood.
+[D8 19:14] MSG: The fire is out. Nothing warms the house through the night, and you wake chilled.
+[D9 19:14] MSG: You sleep through the night. Your crops grew overnight. The crows came down in the night. 2 crops pecked back a stage. 1 fence rail tore loose in the night. Mend them before something finds the gap. 2 crops went thirsty and didn't grow. The morning is drizzle. The vicar has walked up from the chapel: someone told him you haven't been sleeping. He waits at the gate today to bless the house (House section). A ring of pale mushrooms has come up at the edge of the wood overnight. Old Maren is waiting at the east gate, wanting walking to the wood's edge, before three.
+[D9 19:14] CARD: Night settles over the farm.
+[D9 19:14] CARD: Day 9. The morning is drizzle.
+[D9 06:00] MSG: The crows have left a torn page among their gifts. It's in your diary: "What the crows bring" (5 of 10).
+[D9 06:00] OBS: --- day 9: walker waiting=true lantern=1 edge_done=false coins=162 hp=10 food=48 water=75 warmth=99 sanity=0 tool=axe inside=true tile=(4, 65) pack={"blackberries":4,"chanterelles":2,"firewood":2,"pears":2} mats={"feathers":1,"fiber":7,"lamp_oil":1,"resin":6,"sticks":20,"wood":23}
+[D9 06:13] MSG: The mushroom ring is still at the edge of the wood.
+[D9 06:15] OBS: bag holds: ?, ?, ?, ?, ?, ?, ?, ?, ?, ? (hunger 48)
+[D9 06:15] MSG: You eat the pear. Food 73/100, HP 10/10
+[D9 06:15] ACT: ate from bag slot 0: hunger 48 -> 73 ("You eat the pear. Food 73/100, HP 10/10")
+[D9 06:16] ACT: a walker waits (edge) at (72, 42); walking over
+[D9 06:51] SHOT: art/style_tests/CCH-PLAYABLE-001/play_kbm/04_trek_edge_gate.png
+[D9 06:51] MSG: "Only as far as the edge of the wood, by daylight. Two clearings, no more." She takes 1 flask of lamp oil from her basket and gives it to you: "I'm not daft enough to go in there without." A flask burns little more than a minute in the wood; more comes from the catalog, 8 coins. Her nerve will show beside your needs: keep her in your lantern's light and on the trail, and a word (Space beside her) steadies her. You have 2 lamp oil. Press Space again to set out.
+[D9 06:54] OBS: walker says: ""Only as far as the edge of the wood, by daylight. Two clearings, no more." She takes 1 flask of lamp oil from her basket and gives it to you: "I'm not daft enough to go in there without." A flask burns little more than a minute in the wood; more comes from the catalog, 8 coins. Her nerve will show beside your needs: keep her in your lantern's light and on the trail, and a word (Space beside her) steadies her. You have 2 lamp oil. Press Space again to set out."
+[D9 06:54] MSG: You lead Maren out through the east gate and into the trees. The light goes green, then grey, and your lantern burns oil in here. Her nerve shows by your needs: keep her close, in your light and on the path.
+[D9 06:55] OBS: trek started: route=edge nerve=68 oil=1 clearings=2 events=["tree", ""]
+[D9 06:55] SHOT: art/style_tests/CCH-PLAYABLE-001/play_kbm/05_trek_edge_start.png
+[D9 06:55] OBS: clearing 1 of 2: event=tree nerve=68 sanity=2 lit=true
+[D9 06:57] MSG: "Stay on the path!" Maren hangs back, her eyes on the trees. Off the trail her nerve goes.
+[D9 07:17] MSG: Maren stops dead and won't take another step. "I can't. I can't." Give her a trail ration.
+[D9 07:19] OBS: walker frozen (nerve 32): "Maren stops dead and won't take another step. "I can't. I can't." Give her a trail ration."
+[D9 07:20] OBS: walker frozen (nerve 31): "Maren stops dead and won't take another step. "I can't. I can't." Give her a trail ration."
+[D9 07:21] OBS: walker frozen (nerve 30): "Maren stops dead and won't take another step. "I can't. I can't." Give her a trail ration."
+[D9 07:22] OBS: walker frozen (nerve 29): "Maren stops dead and won't take another step. "I can't. I can't." Give her a trail ration."
+[D9 07:23] OBS: walker frozen (nerve 28): "Maren stops dead and won't take another step. "I can't. I can't." Give her a trail ration."
+[D9 07:24] OBS: walker frozen (nerve 27): "Maren stops dead and won't take another step. "I can't. I can't." Give her a trail ration."
+[D9 07:25] OBS: walker frozen (nerve 26): ""
+[D9 07:26] OBS: walker frozen (nerve 24): ""
+[D9 07:28] OBS: walker frozen (nerve 23): ""
+[D9 07:29] OBS: walker frozen (nerve 22): ""
+[D9 07:29] OBS: walker frozen (nerve 21): ""
+[D9 07:30] OBS: walker frozen (nerve 20): ""
+[D9 07:31] OBS: walker frozen (nerve 19): ""
+[D9 07:32] OBS: walker frozen (nerve 18): ""
+[D9 07:33] OBS: walker frozen (nerve 17): ""
+[D9 07:34] OBS: walker frozen (nerve 16): ""
+[D9 07:36] OBS: walker frozen (nerve 15): ""
+[D9 07:37] OBS: walker frozen (nerve 13): ""
+[D9 07:38] OBS: walker frozen (nerve 12): ""
+[D9 07:39] OBS: walker frozen (nerve 11): ""
+[D9 07:40] OBS: walker frozen (nerve 10): ""
+[D9 07:41] OBS: walker frozen (nerve 9): ""
+[D9 07:42] OBS: walker frozen (nerve 8): ""
+[D9 07:43] OBS: walker frozen (nerve 7): ""
+[D9 07:44] OBS: walker frozen (nerve 6): ""
+[D9 07:45] OBS: walker frozen (nerve 5): ""
+[D9 07:46] OBS: walker frozen (nerve 4): ""
+[D9 07:47] OBS: walker frozen (nerve 3): ""
+[D9 07:48] OBS: walker frozen (nerve 2): ""
+[D9 07:49] OBS: walker frozen (nerve 1): ""
+[D9 07:50] OBS: walker frozen (nerve 0): ""
+[D9 07:50] MSG: Maren breaks and runs, screaming, back the way you came. You find her at the farm's edge, white and shaking. The trek is over. -10 sanity.
+[D9 07:52] OBS: walker frozen (nerve 0): "Maren breaks and runs, screaming, back the way you came. You find her at the farm's edge, white and shaking. The trek is over. -10 sanity."
+[D9 07:52] OBS: trek over: active=false in_cave=false "Maren breaks and runs, screaming, back the way you came. You find her at the farm's edge, white and shaking. The trek is over. -10 sanity."
+[D9 07:52] OBS: coins=162 hp=10 food=69 water=69 warmth=96 sanity=0 tool=axe inside=false tile=(69, 42) pack={"blackberries":4,"chanterelles":2,"firewood":2,"pears":1} mats={"feathers":1,"fiber":7,"lamp_oil":1,"resin":6,"sticks":20,"wood":23}
+[D9 07:58] SHOT: art/style_tests/CCH-PLAYABLE-001/play_kbm/06_trek_edge_home.png
+[D9 07:58] OBS: trek finished=true edge_done=false treks_done=0 chapter now=To the Wood's Edge
+[D9 08:15] MSG: You pick rose hips. +11 Bushcrafting XP
+[D9 08:26] MSG: You pick blackberries. +11 Bushcrafting XP
+[D9 08:51] MSG: You pick pear. +8 Bushcrafting XP
+[D9 08:56] MSG: You pick apple. +8 Bushcrafting XP
+[D9 08:57] OBS: picked 4 forage
+[D9 09:18] MSG: You drink from the pond. Cold and muddy, but it helps. Water 100/100.
+[D9 16:48] MSG: Weren't you holding the axe? It's the hoe in your hand.
+[D9 18:54] MSG: You step inside. The air is cold and smells of old wood.
+[D9 19:09] MSG: The fire is out. Nothing warms the house through the night, and you wake chilled.
+[D10 19:09] MSG: You sleep through the night. Your crops grew overnight. In the night every crow in the great tree went up at once; you heard them in your sleep. At first light the grass at the field's far edge is pressed flat in a wide ring, wider than a man would leave. 1 chore left undone, so the house wears faster. 1 fence rail tore loose in the night. Mend them before something finds the gap. The morning is downpour. The vicar has walked up from the chapel: someone told him you haven't been sleeping. He waits at the gate today to bless the house (House section). The crows were busy at dawn. Small bright things lie under the great tree. Old Maren is waiting at the east gate, wanting walking to the wood's edge, before three.
+[D10 19:09] CARD: Night settles over the farm.
+[D10 19:09] CARD: Day 10. The morning is downpour.
+[D10 06:00] MSG: Achievement: Hundreds of Them. See the Hollow at the far edge of the field.
+[D10 06:00] OBS: --- day 10: walker waiting=true lantern=1 edge_done=false coins=162 hp=10 food=42 water=70 warmth=99 sanity=14 tool=hoe inside=true tile=(4, 65) pack={"apples":1,"blackberries":5,"chanterelles":2,"firewood":2,"pears":2,"rosehips":1} mats={"feathers":1,"fiber":7,"lamp_oil":1,"resin":6,"sticks":20,"wood":23}
+[D10 06:13] MSG: Bright things still lie under the great tree.
+[D10 06:15] OBS: bag holds: ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ? (hunger 41)
+[D10 06:15] MSG: You eat the apple. Food 87/100, HP 10/10
+[D10 06:15] ACT: ate from bag slot 0: hunger 41 -> 87 ("You eat the apple. Food 87/100, HP 10/10")
+[D10 06:16] ACT: a walker waits (edge) at (72, 42); walking over
+[D10 06:51] SHOT: art/style_tests/CCH-PLAYABLE-001/play_kbm/07_trek_edge_gate.png
+[D10 06:51] MSG: "Only as far as the edge of the wood, by daylight. Two clearings, no more." She takes 1 flask of lamp oil from her basket and gives it to you: "I'm not daft enough to go in there without." A flask burns little more than a minute in the wood; more comes from the catalog, 8 coins. Her nerve will show beside your needs: keep her in your lantern's light and on the trail, and a word (Space beside her) steadies her. You have 2 lamp oil. Press Space again to set out.
+[D10 06:54] OBS: walker says: ""Only as far as the edge of the wood, by daylight. Two clearings, no more." She takes 1 flask of lamp oil from her basket and gives it to you: "I'm not daft enough to go in there without." A flask burns little more than a minute in the wood; more comes from the catalog, 8 coins. Her nerve will show beside your needs: keep her in your lantern's light and on the trail, and a word (Space beside her) steadies her. You have 2 lamp oil. Press Space again to set out."
+[D10 06:54] MSG: You lead Maren out through the east gate and into the trees. The light goes green, then grey, and your lantern burns oil in here. Her nerve shows by your needs: keep her close, in your light and on the path.
+[D10 06:55] OBS: trek started: route=edge nerve=68 oil=1 clearings=2 events=["tree", ""]
+[D10 06:55] SHOT: art/style_tests/CCH-PLAYABLE-001/play_kbm/08_trek_edge_start.png
+[D10 06:55] OBS: clearing 1 of 2: event=tree nerve=68 sanity=19 lit=true
+[D10 06:57] MSG: "Stay on the path!" Maren hangs back, her eyes on the trees. Off the trail her nerve goes.
+[D10 07:17] MSG: Maren stops dead and won't take another step. "I can't. I can't." Give her a trail ration.
+[D10 07:19] OBS: walker frozen (nerve 32): "Maren stops dead and won't take another step. "I can't. I can't." Give her a trail ration."
+[D10 07:20] OBS: walker frozen (nerve 31): "Maren stops dead and won't take another step. "I can't. I can't." Give her a trail ration."
+[D10 07:21] OBS: walker frozen (nerve 30): "Maren stops dead and won't take another step. "I can't. I can't." Give her a trail ration."
+[D10 07:22] OBS: walker frozen (nerve 29): "Maren stops dead and won't take another step. "I can't. I can't." Give her a trail ration."
+[D10 07:23] OBS: walker frozen (nerve 28): "Maren stops dead and won't take another step. "I can't. I can't." Give her a trail ration."
+[D10 07:24] OBS: walker frozen (nerve 27): "Maren stops dead and won't take another step. "I can't. I can't." Give her a trail ration."
+[D10 07:25] OBS: walker frozen (nerve 26): ""
+[D10 07:26] OBS: walker frozen (nerve 24): ""
+[D10 07:28] OBS: walker frozen (nerve 23): ""
+[D10 07:29] OBS: walker frozen (nerve 22): ""
+[D10 07:29] OBS: walker frozen (nerve 21): ""
+[D10 07:30] OBS: walker frozen (nerve 20): ""
+[D10 07:31] OBS: walker frozen (nerve 19): ""
+[D10 07:32] OBS: walker frozen (nerve 18): ""
+[D10 07:33] OBS: walker frozen (nerve 17): ""
+[D10 07:34] OBS: walker frozen (nerve 16): ""
+[D10 07:36] OBS: walker frozen (nerve 15): ""
+[D10 07:37] OBS: walker frozen (nerve 13): ""
+[D10 07:38] OBS: walker frozen (nerve 12): ""
+[D10 07:39] OBS: walker frozen (nerve 11): ""
+[D10 07:40] OBS: walker frozen (nerve 10): ""
+[D10 07:41] OBS: walker frozen (nerve 9): ""
+[D10 07:42] OBS: walker frozen (nerve 8): ""
+[D10 07:43] OBS: walker frozen (nerve 7): ""
+[D10 07:44] OBS: walker frozen (nerve 6): ""
+[D10 07:45] OBS: walker frozen (nerve 5): ""
+[D10 07:46] OBS: walker frozen (nerve 4): ""
+[D10 07:47] OBS: walker frozen (nerve 3): ""
+[D10 07:48] OBS: walker frozen (nerve 2): ""
+[D10 07:49] OBS: walker frozen (nerve 1): ""
+[D10 07:50] OBS: walker frozen (nerve 0): ""
+[D10 07:50] MSG: Maren breaks and runs, screaming, back the way you came. You find her at the farm's edge, white and shaking. The trek is over. -10 sanity.
+[D10 07:52] OBS: walker frozen (nerve 0): "Maren breaks and runs, screaming, back the way you came. You find her at the farm's edge, white and shaking. The trek is over. -10 sanity."
+[D10 07:52] OBS: trek over: active=false in_cave=false "Maren breaks and runs, screaming, back the way you came. You find her at the farm's edge, white and shaking. The trek is over. -10 sanity."
+[D10 07:52] OBS: coins=162 hp=10 food=83 water=64 warmth=94 sanity=5 tool=hoe inside=false tile=(69, 42) pack={"blackberries":5,"chanterelles":2,"firewood":2,"pears":2,"rosehips":1} mats={"feathers":1,"fiber":7,"lamp_oil":1,"resin":6,"sticks":20,"wood":23}
+[D10 07:58] SHOT: art/style_tests/CCH-PLAYABLE-001/play_kbm/09_trek_edge_home.png
+[D10 07:58] OBS: trek finished=true edge_done=false treks_done=0 chapter now=To the Wood's Edge
+[D10 08:44] MSG: You pick blackberries. +11 Bushcrafting XP
+[D10 09:08] MSG: You pick chanterelles. +14 Bushcrafting XP
+[D10 09:45] MSG: You pick apple. +8 Bushcrafting XP
+[D10 09:49] MSG: You pick pear. +8 Bushcrafting XP
+[D10 09:50] OBS: picked 5 forage
+[D10 10:02] MSG: Press RT or click to use the fishing pole.
+[D10 10:04] OBS: hand action at pond tile (28, 37) (fish spot=true) did not drink: "Press RT or click to use the fishing pole."
+[D10 10:06] MSG: You drink from the pond. Cold and muddy, but it helps. Water 98/100.
+[D10 17:37] MSG: Weren't you holding the hoe? It's the watering hose in your hand.
+[D10 18:51] MSG: You step inside. The air is cold and smells of old wood.
+[D10 19:06] MSG: The fire is out. Nothing warms the house through the night, and you wake chilled.
+[D11 19:06] MSG: You sleep through the night. Your crops grew overnight. The lights in the pond went out one by one. 1 chore left undone, so the house wears faster. Rain came through the roof and ruined a crop. 3 fence rails tore loose in the night. Mend them before something finds the gap. The morning is overcast. The vicar has walked up from the chapel: someone told him you haven't been sleeping. He waits at the gate today to bless the house (House section). A ring of pale mushrooms has come up at the edge of the wood overnight. Old Maren is waiting at the east gate, wanting walking to the wood's edge, before three.
+[D11 19:06] CARD: Night settles over the farm.
+[D11 19:06] CARD: Day 11. The morning is overcast.
+[D11 06:00] OBS: --- day 11: walker waiting=true lantern=1 edge_done=false coins=162 hp=10 food=56 water=71 warmth=99 sanity=1 tool=hose inside=true tile=(4, 65) pack={"apples":1,"blackberries":6,"chanterelles":4,"firewood":2,"pears":3,"rosehips":1} mats={"feathers":1,"fiber":7,"lamp_oil":1,"resin":6,"sticks":20,"wood":23}
+[D11 06:13] MSG: The mushroom ring is still at the edge of the wood.
+[D11 06:15] ACT: a walker waits (edge) at (72, 42); walking over
+[D11 06:50] SHOT: art/style_tests/CCH-PLAYABLE-001/play_kbm/10_trek_edge_gate.png
+[D11 06:50] MSG: "Only as far as the edge of the wood, by daylight. Two clearings, no more." She takes 1 flask of lamp oil from her basket and gives it to you: "I'm not daft enough to go in there without." A flask burns little more than a minute in the wood; more comes from the catalog, 8 coins. Her nerve will show beside your needs: keep her in your lantern's light and on the trail, and a word (Space beside her) steadies her. You have 2 lamp oil. Press Space again to set out.
+[D11 06:53] OBS: walker says: ""Only as far as the edge of the wood, by daylight. Two clearings, no more." She takes 1 flask of lamp oil from her basket and gives it to you: "I'm not daft enough to go in there without." A flask burns little more than a minute in the wood; more comes from the catalog, 8 coins. Her nerve will show beside your needs: keep her in your lantern's light and on the trail, and a word (Space beside her) steadies her. You have 2 lamp oil. Press Space again to set out."
+[D11 06:53] MSG: You lead Maren out through the east gate and into the trees. The light goes green, then grey, and your lantern burns oil in here. Her nerve shows by your needs: keep her close, in your light and on the path.
+[D11 06:55] OBS: trek started: route=edge nerve=68 oil=1 clearings=2 events=["tree", ""]
+[D11 06:55] SHOT: art/style_tests/CCH-PLAYABLE-001/play_kbm/11_trek_edge_start.png
+[D11 06:55] OBS: clearing 1 of 2: event=tree nerve=68 sanity=1 lit=true
+[D11 06:56] MSG: "Stay on the path!" Maren hangs back, her eyes on the trees. Off the trail her nerve goes.
+[D11 07:16] MSG: Maren stops dead and won't take another step. "I can't. I can't." Give her a trail ration.
+[D11 07:19] OBS: walker frozen (nerve 32): "Maren stops dead and won't take another step. "I can't. I can't." Give her a trail ration."
+[D11 07:20] OBS: walker frozen (nerve 31): "Maren stops dead and won't take another step. "I can't. I can't." Give her a trail ration."
+[D11 07:21] OBS: walker frozen (nerve 30): "Maren stops dead and won't take another step. "I can't. I can't." Give her a trail ration."
+[D11 07:22] OBS: walker frozen (nerve 29): "Maren stops dead and won't take another step. "I can't. I can't." Give her a trail ration."
+[D11 07:23] OBS: walker frozen (nerve 28): "Maren stops dead and won't take another step. "I can't. I can't." Give her a trail ration."
+[D11 07:24] OBS: walker frozen (nerve 27): "Maren stops dead and won't take another step. "I can't. I can't." Give her a trail ration."
+[D11 07:25] OBS: walker frozen (nerve 26): ""
+[D11 07:26] OBS: walker frozen (nerve 24): ""
+[D11 07:27] OBS: walker frozen (nerve 23): ""
+[D11 07:28] OBS: walker frozen (nerve 22): ""
+[D11 07:29] OBS: walker frozen (nerve 21): ""
+[D11 07:30] OBS: walker frozen (nerve 20): ""
+[D11 07:31] OBS: walker frozen (nerve 19): ""
+[D11 07:32] OBS: walker frozen (nerve 18): ""
+[D11 07:33] OBS: walker frozen (nerve 17): ""
+[D11 07:34] OBS: walker frozen (nerve 16): ""
+[D11 07:35] OBS: walker frozen (nerve 15): ""
+[D11 07:36] OBS: walker frozen (nerve 13): ""
+[D11 07:37] OBS: walker frozen (nerve 12): ""
+[D11 07:38] OBS: walker frozen (nerve 11): ""
+[D11 07:39] OBS: walker frozen (nerve 10): ""
+[D11 07:40] OBS: walker frozen (nerve 9): ""
+[D11 07:41] OBS: walker frozen (nerve 8): ""
+[D11 07:42] OBS: walker frozen (nerve 7): ""
+[D11 07:43] OBS: walker frozen (nerve 6): ""
+[D11 07:44] OBS: walker frozen (nerve 5): ""
+[D11 07:45] OBS: walker frozen (nerve 4): ""
+[D11 07:46] OBS: walker frozen (nerve 3): ""
+[D11 07:47] OBS: walker frozen (nerve 2): ""
+[D11 07:48] OBS: walker frozen (nerve 1): ""
+[D11 07:49] OBS: walker frozen (nerve 0): ""
+[D11 07:49] MSG: Maren breaks and runs, screaming, back the way you came. You find her at the farm's edge, white and shaking. The trek is over. -10 sanity.
+[D11 07:51] OBS: walker frozen (nerve 0): "Maren breaks and runs, screaming, back the way you came. You find her at the farm's edge, white and shaking. The trek is over. -10 sanity."
+[D11 07:51] OBS: trek over: active=false in_cave=false "Maren breaks and runs, screaming, back the way you came. You find her at the farm's edge, white and shaking. The trek is over. -10 sanity."
+[D11 07:51] OBS: coins=162 hp=10 food=52 water=65 warmth=98 sanity=0 tool=hose inside=false tile=(69, 42) pack={"apples":1,"blackberries":6,"chanterelles":4,"firewood":2,"pears":3,"rosehips":1} mats={"feathers":1,"fiber":7,"lamp_oil":1,"resin":6,"sticks":20,"wood":23}
+[D11 07:57] SHOT: art/style_tests/CCH-PLAYABLE-001/play_kbm/12_trek_edge_home.png
+[D11 07:57] OBS: trek finished=true edge_done=false treks_done=0 chapter now=To the Wood's Edge
+[D11 08:45] MSG: You pick rose hips. +11 Bushcrafting XP
+[D11 09:43] MSG: You pick chanterelles. +14 Bushcrafting XP

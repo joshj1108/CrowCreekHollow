@@ -1,0 +1,9 @@
+farm_night_rain 1280x720: PERF frame_ms_mean=3.95 frame_ms_p95=5.26 process_ms_mean=17.79 fps=253 
+house_restored_fire 1280x720: ERROR: Condition "err != OK" is true. ERROR: Condition "err != OK" is true. ERROR: Condition "err != OK" is true. PERF frame_ms_mean=4.28 frame_ms_p95=5.94 process_ms_mean=18.81 fps=234 
+cave_fight 1280x720: ERROR: Condition "err != OK" is true. ERROR: Condition "err != OK" is true. ERROR: Condition "err != OK" is true. PERF frame_ms_mean=5.13 frame_ms_p95=9.92 process_ms_mean=26.14 fps=195 
+farm_night_rain 960x540: ERROR: Condition "err != OK" is true. ERROR: Condition "err != OK" is true. ERROR: Condition "err != OK" is true. PERF frame_ms_mean=4.41 frame_ms_p95=8.00 process_ms_mean=19.03 fps=227 
+house_restored_fire 960x540: ERROR: Condition "err != OK" is true. ERROR: Condition "err != OK" is true. ERROR: Condition "err != OK" is true. PERF frame_ms_mean=4.33 frame_ms_p95=5.94 process_ms_mean=19.20 fps=231 
+cave_fight 960x540: ERROR: Condition "err != OK" is true. ERROR: Condition "err != OK" is true. ERROR: Condition "err != OK" is true. PERF frame_ms_mean=3.74 frame_ms_p95=4.73 process_ms_mean=17.34 fps=267 
+farm_night_rain 1920x1080: ERROR: Condition "err != OK" is true. ERROR: Condition "err != OK" is true. ERROR: Condition "err != OK" is true. PERF frame_ms_mean=8.55 frame_ms_p95=10.66 process_ms_mean=29.40 fps=117 
+house_restored_fire 1920x1080: ERROR: Condition "err != OK" is true. ERROR: Condition "err != OK" is true. ERROR: Condition "err != OK" is true. PERF frame_ms_mean=9.80 frame_ms_p95=12.13 process_ms_mean=19.50 fps=102 
+cave_fight 1920x1080: ERROR: Condition "err != OK" is true. ERROR: Condition "err != OK" is true. ERROR: Condition "err != OK" is true. PERF frame_ms_mean=9.12 frame_ms_p95=10.90 process_ms_mean=24.72 fps=110 

@@ -1,0 +1,24 @@
+Godot Engine v4.7.2.stable.steam.ed1daf0bf - https://godotengine.org
+
+save round trips: mode=ignore days=400 at=[2, 5, 9, 14, 30, 62, 93, 150, 246, 300, 397, 400]
+checkpoint day 2: 120 keys, 5569 bytes, 0 difference(s); coins 9, stage 1, quests 2, pages 1, furniture 0
+checkpoint day 5: 120 keys, 6829 bytes, 0 difference(s); coins 34, stage 1, quests 3, pages 4, furniture 0
+checkpoint day 9: 120 keys, 8172 bytes, 0 difference(s); coins 20, stage 1, quests 3, pages 5, furniture 0
+checkpoint day 14: 120 keys, 9790 bytes, 0 difference(s); coins 26, stage 2, quests 5, pages 6, furniture 0
+DIFF day 30: "hen_ages" changed: [12.0,11.0,3.0] -> [12.0,11.0,3.0,0.0]
+checkpoint day 30: 120 keys, 14750 bytes, 1 difference(s); coins 127, stage 2, quests 8, pages 7, furniture 0
+checkpoint day 62: 120 keys, 20010 bytes, 0 difference(s); coins 863, stage 2, quests 8, pages 9, furniture 3
+DIFF day 93: "hen_ages" changed: [75.0,74.0,1.0] -> [75.0,74.0,1.0,0.0]
+checkpoint day 93: 120 keys, 25136 bytes, 1 difference(s); coins 1593, stage 2, quests 9, pages 9, furniture 4
+checkpoint day 150: 120 keys, 31644 bytes, 0 difference(s); coins 184, stage 2, quests 9, pages 9, furniture 5
+DIFF day 246: "cellar" changed: {"parsnips":0.0,"peas":80.0} -> {"peas":80.0}
+checkpoint day 246: 120 keys, 42314 bytes, 1 difference(s); coins 1087, stage 3, quests 11, pages 11, furniture 5
+DIFF day 300: "cellar" changed: {"blueberries":0.0,"parsnips":0.0,"peas":0.0} -> {}
+DIFF day 300: "hen_ages" changed: [132.0,129.0] -> [132.0,129.0,0.0]
+checkpoint day 300: 120 keys, 48517 bytes, 2 difference(s); coins 666, stage 3, quests 12, pages 13, furniture 6
+DIFF day 397: "cellar" changed: {"blueberries":0.0,"parsnips":0.0,"peas":0.0} -> {}
+checkpoint day 397: 120 keys, 57377 bytes, 1 difference(s); coins 842, stage 3, quests 16, pages 14, furniture 6
+DIFF day 400: "cellar" changed: {"blueberries":0.0,"parsnips":0.0,"peas":0.0} -> {}
+DIFF day 400: "hen_ages" changed: [232.0,47.0,7.0] -> [232.0,47.0,7.0,0.0]
+checkpoint day 400: 120 keys, 57863 bytes, 2 difference(s); coins 277, stage 3, quests 16, pages 14, furniture 6
+save probe: 8 difference(s) over 12 checkpoints

@@ -1,6 +1,6 @@
 # CCH-PLAYABLE-001 — Full Playable-Build Audit: plan
 
-**Status:** PROPOSED — plan only, not started. Prepared by Claude Code, 2026-11-12, at the close of CCH-CONSOLIDATED-003
+**Status:** APPROVED by the owner 2026-11-12; audit begun. Prepared by Claude Code, 2026-11-12, at the close of CCH-CONSOLIDATED-003
 Final Polish. The owner approves the plan before the audit begins; ChatGPT reviews the findings.
 
 **Question the audit answers:** can a new player start Crow Creek Hollow and progress through every existing gameplay
