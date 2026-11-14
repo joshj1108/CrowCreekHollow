@@ -152,3 +152,17 @@ Approval: owner explicitly approves a *specific brief*; this roadmap merely queu
 ## CCH-SKILLS-001 design expansion (2026-11-14)
 
 A source-grounded, design-only skill mastery plan is now recorded in [SKILL_MASTERY_DESIGN.md](SKILL_MASTERY_DESIGN.md). Preserve the existing ten skills and level-10 cap for v1.0 unless an audit justifies change. Prioritize meaningful unlocks rather than repetitive XP; use Farming/Cooking/Orders and Carpentry/Lowmere repairs as first synergistic prototypes. Keep current XP thresholds, save keys, chapter gates and Hale interactions intact. **CCH-SKILLS-001A (source/XP audit)** is the next approval gate; broader implementation remains unapproved.
+
+
+## 2026-11-14 — Skill roster reassessment + maritime future (design-only)
+
+**Owner changed the planning assumption:** a skill does not automatically survive into 1.0 simply because the current game has ten. The current ten-skill roster and cap remain the *code baseline* until a source, unlock and save audit proves a safe revision. This **supersedes** earlier master-roadmap language to preserve all ten as a design goal. See [SKILL_ROSTER_AND_MARITIME_DESIGN.md](SKILL_ROSTER_AND_MARITIME_DESIGN.md).
+
+- **CCH-SKILLS-REVIEW-001 P1:** evaluate redundant/low-payoff skills, initially Cleaning (candidate retire from skill panel; preserve tidying/cleanse) and Forestry (candidate merge into Bushcrafting/Carpentry). Keep story gates, level thresholds, XP saves and benefits intact until explicit migration approval. Do not treat proposal as approved deletion.
+- **CCH-MARITIME-001 P2:** possible future NPC-led voyages from Lowmere docks: join fishermen, help work a nearshore ground, decide return/risk, make discoveries. Prototype one short boat trip after harbor district.
+- **CCH-MARITIME-002 P2:** discover one or two grounds, fish species and local maritime supply needs.
+- **CCH-COASTAL-TRADE-001 P2/P3:** supply runs to **off-map** seaside towns using existing delivery/contract framework; only later consider physically accessible towns.
+- **CCH-SEAMANSHIP-001 P3 CONDITIONAL:** add a distinct maritime skill only if real piloting/deck tasks justify mastery; preserve Fishing as catch skill. No open ocean or elaborate boat management needed for 1.0.
+- **CCH-MARITIME-MYSTERY-001 P3:** optional dread in permanent fog, preserving balanced cozy working trips and existing supernatural lore.
+
+**1.0 scope gate:** Voyages remain *candidate/stretch scope*, not mandatory for release. An optional one-route voyage may be promoted only after a tested Lowmere district and feasibility audit. Other seaside town maps are not 1.0 requirements. Restored town, inn and existing mystery remain priority over speculative ocean systems.
