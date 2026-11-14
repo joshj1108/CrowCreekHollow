@@ -1,5 +1,7 @@
 # Collaborative Tasks
 
+**Prioritized future gameplay backlog:** [`AI_COLLAB/DEVELOPMENT_ROADMAP.md`](DEVELOPMENT_ROADMAP.md) — P0–P3 priority, independent implementation statuses, 20 ranked tasks. Next design task: `CCH-FOOD-001` (food economy and cooking; design only). The roadmap is not blanket permission to implement.
+
 | ID | Task | Owner | Reviewer | State | Approval gate |
 | --- | --- | --- | --- | --- | --- |
 | VIS-001 | Audit farm visuals, sprite consistency and current Godot lighting; propose a single-scene visual vertical slice | Claude Code | ChatGPT | review requested (implementation `cb2661b`, 2026-11-01; not visually accepted; audit in `AI_COLLAB/VIS-001_audit.md`) | Owner approves audit; separately approves implementation |
