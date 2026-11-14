@@ -110,3 +110,8 @@ Crow Creek Hollow is a top-down 3/4 cozy folk-horror farming/survival game. **Ho
 **High-leverage integration:** the farm supplies inland produce, wood, preserved goods and cooked provisions to a stressed fishing village; Lowmere may supply fish and coastal goods. Orders should feel like local needs, not just random generic delivery targets. The town can support atmospheric contrasts: farm as last refuge before wilderness, coastal village as civilization that is itself failing. Treks remain staged at the farm. The permanent fog must look and behave as a geographic landmark without indiscriminately darkening the entire farm or changing approved balanced lighting.
 
 **Next design task:** combine CCH-FOOD-001 and CCH-ORDERS-001 into an *economy design exercise*, then determine the smallest viable Lowmere town slice and its relationship to the road. Still no code implementation authorization.
+
+
+## 2026-11-14 — Lowmere first-district design draft
+
+A concrete **design-only** first district, farm-to-town exchange, order categories, first-visit storyboard, dependencies and unresolved decisions is now stored at [`AI_COLLAB/LOWMERE_FIRST_DISTRICT_DESIGN.md`](LOWMERE_FIRST_DISTRICT_DESIGN.md). This refines CCH-LOWMERE-001 and CCH-ORDERS-001 without authorizing construction. Recommended sequence: CCH-FOOD-001 economy audit/design → CCH-ORDERS-001 farm dispatch prototype → CCH-SKILLS-001 interlocking skill progression audit → CCH-LOWMERE-001 small town district feasibility/prototype. Existing town-vote lore and farm-stage trek logic must be preserved.
