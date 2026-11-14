@@ -1,0 +1,77 @@
+# Crow Creek Hollow — Prioritized Development Roadmap
+
+**Established:** 2026-11-14  
+**Authority:** Owner and ChatGPT design direction. This file records plans; **it is not blanket implementation approval**. Claude implements only an explicitly owner-approved brief.  
+**Companions:** `AI_COLLAB/TASKS.md`, `AI_COLLAB/MESSAGE_BOARD.md`, `AI_COLLAB/CCH_LOOP_001_IDLE_TIME_AUDIT.md`, `DESIGN.md`.
+
+## Vision and scope guardrails
+
+Crow Creek Hollow is a top-down 3/4 cozy folk-horror farming/survival game. **Homestead, mystery, and survival reinforce each other.** A thriving home is worth protecting; exploration reveals knowledge and useful resources; survival gives preparation and shelter meaning.
+
+- **Balanced survival:** Hunger, Thirst, and Comfort matter initially; infrastructure progressively reduces routine maintenance rather than adding chores. Health means physical danger; Sanity means psychological pressure. Late-game wilderness remains risky.
+- **Player agency:** Relaxed farmer, cautious survivor, explorer, and balanced player should each have meaningful progress. Quiet downtime is allowed; compulsory busywork is not.
+- **Existing assets/systems first:** Prefer deeper use of the farm, cave, woodland edge, characters, production buildings, Diary, and weather over large new maps or feature sprawl.
+- **Production baseline:** Preserve approved farmer, cave creature, farmhouse, HUD, menu, balanced night lighting, and outdoor mailbox art except for confirmed functional defects. Main menu remains static. Lantern upgrades increase light radius, not brightness.
+- **Farmhouse:** Four restoration stages (Decrepit, Boarded, Patched, Restored), no new porch or second storey. Legacy extension sale/effects/achievements require separate save-safe retirement plan, not casual deletion.
+- **Code and evidence:** Tests in scratch save profiles, playable Godot validation, measurement before rebalance, owner visual review where screenshots are requested. Never disturb uncommitted sunset experiment.
+
+## Priority definitions
+
+- **P0 — Essential/ship-blocking:** crashes, lost saves, permanent soft locks, inaccessible required progression, regression breaking the core playable build.
+- **P1 — Core loop:** missing or weak experiences that materially prevent a satisfying, replayable everyday game.
+- **P2 — Depth and variety:** enrich existing systems once core play is sound.
+- **P3 — Optional expansion/polish:** longer-term additions, cosmetic polish, larger production investment.
+
+## Status model
+
+**Idea** (not designed), **Design** (owner + ChatGPT discussing), **Ready for approval** (scope/prototype spec complete), **Approved** (owner authorized implementation), **Implementing**, **Testing**, **Review** (results awaiting owner/ChatGPT acceptance), **Complete**, **Deferred**. Priority and status are independent. No approval by proximity in this table.
+
+## Ordered backlog
+
+| Order | ID | Priority | Task / deliverable | Status | Implementation gate / dependencies |
+| --- | --- | --- | --- | --- | --- |
+| 01 | CCH-EVENING-002 | P1 | Farmhouse-stage shelter protection, firewood-free Quiet Hour, clearer evening signs, week-one/long-term sanity simulation | Approved (brief supplied; **not verified implemented**) | Claude follows approved brief; owner reviews simulations and screenshots before accepting values. No broad content expansion |
+| 02 | CCH-FOOD-001 | P1 | **Food economy + cooking design and audit:** classify existing foods/recipes, Hunger recovery, cost, resource availability, preservation/storage, meal roles, farming/fishing/animal links and winter needs; design practical and expedition recipes and identify imbalances | **Design — NEXT** | Owner + ChatGPT design first; Claude source audit/test brief only after separate approval. Do not add recipes or change balance before baseline metrics |
+| 03 | CCH-SURVIVAL-001 | P1 | Balanced survival progression audit across four farmhouse stages: maintenance time and infrastructure benefits for Hunger, Thirst, Comfort, Health, Sanity | Design | Requires evening-balance results and food economy baseline; set and test progression targets, no extra meters |
+| 04 | CCH-LOOP-002 | P1 | Afternoon choice prototype: small errands using existing characters/market/mail and small environmental discoveries on existing farm/woodland landmarks | Idea | Select 1–2 compact loops after food/survival design; use CCH-LOOP-001 baseline; require design and implementation approval |
+| 05 | CCH-HOMESTEAD-001 | P1 | Domestic food production and preservation using existing kitchen/cellar/smokehouse/cooler, pantry-style convenient supplies, useful trek provisions | Idea | Depends on CCH-FOOD-001; improve utility without mandatory chores or automatic eating |
+| 06 | CCH-PLAYTEST-001 | P1 | Human-playable vertical slice/retest: first 14 days with first harvest, trek, visitors, cozy evenings, trading and save-load; compare input-driven bots vs real player | Idea | Revalidate after key P1 changes; measure confusion, repetitive time, Sanity and reasons to keep playing |
+| 07 | CCH-WINTER-001 | P2 | Winter-specific worthwhile work: selected fishing, processing, stored food, maintenance and seasonal encounters | Idea | After food and afternoon loops; avoid winter becoming a mandatory chore escalation |
+| 08 | CCH-WORLD-001 | P2 | Living Hollow: rotating farm/woodland discoveries, revisitable location clues, mild world-state responses to actions and seasons | Idea | Gate story spoilers and persistence; start with one existing landmark, reuse systems |
+| 09 | CCH-PEOPLE-001 | P2 | Relationship-follow-up and optional same-day requests using the existing four walkers, stand and mailbox | Idea | Coordinate with afternoon errands to avoid duplicate quest systems |
+| 10 | CCH-FISH-001 | P2 | Make fishing useful in meals, occasional requests, winter and seasonal collections | Idea | Depends on food economy; don't default to blanket sale-price buffs |
+| 11 | CCH-HERBAL-001 | P2 | Limited herbalism/remedies from existing forage for healing, warmth, and expedition preparedness | Idea | Prefer small meaningful recipe set; no new survival bars |
+| 12 | CCH-ANIMALS-001 | P2 | Small livestock behavior/personality and occasional weather/night reactions | Idea | After core animal interactions confirmed in actual gameplay |
+| 13 | CCH-TREK-002 | P2 | Compact solo woodland-edge forays using existing trek environments with different risk/reward from accompanied treks | Idea | Must not obsolete walker relationships or major treks |
+| 14 | CCH-PROGRESSION-002 | P2 | Mid/late-game milestone pacing, stronger non-trek progress paths for homesteaders, meaningful upgrade acknowledgments | Idea | Revisit 55-day simulated relaxed-farmer progress gap; benchmark first |
+| 15 | CCH-LEGACY-001 | P2 | Retire active covered-porch and second-storey purchase options safely; preserve existing saves, owner bonuses, and published achievement behavior | Ready for approval (D-015 plan already noted in repair report) | Requires separate owner approval before code changes |
+| 16 | CCH-QOL-001 | P2 | Reduce tedious gathering/felling and friction through earned infrastructure rather than simply lowering every material cost | Idea | Measure true player time and wood demand first; balance approval required |
+| 17 | CCH-FESTIVAL-001 | P3 | Small seasonal community traditions using existing world/characters; only after basic seasonal loop is rewarding | Idea | Avoid building an entire town/map |
+| 18 | CCH-ENDGAME-001 | P3 | Long-term homestead mastery, optional neighbor/community projects, meaningful coin sinks after house restoration | Idea | Must preserve existing endings and story canon |
+| 19 | CCH-CUSTOM-001 | P3 | Optional homestead decoration/individuality beyond existing purchased furniture | Idea | Save-compatible; no broad visual overhaul |
+| 20 | CCH-POLISH-001 | P3 | Non-blocking visual/audio/animation polish and quality-of-life details identified by human playtests | Deferred | Only after user confirms actual priority |
+
+## Next design brief: CCH-FOOD-001 (no implementation permission)
+
+**Goal:** Every meaningful food source should have a role without making daily meals a chore. Develop an explicit food ladder:
+
+1. **Daily staples:** Cheap, readily accessible meals or forage that reliably solve routine Hunger.
+2. **Prepared household meals:** More efficient use of crops, animal goods, fish and cooking infrastructure; modest Comfort/Health/Sanity relevance where appropriate.
+3. **Expedition provisions:** Portable, resource-efficient meals with bounded temporary effects that help trek/cave preparation; not obligatory buffs.
+4. **Seasonal preservation:** Use existing cellar, cooler, smokehouse and cooking to convert abundance into winter security.
+5. **Trade and relationship demand:** Selected dishes/ingredients enable market demand or optional character requests; prevent one food from dominating every choice.
+
+**Design questions to settle:** food consumption cadence; meaningful Hunger restoration vs temporary effects; recipe/material and price economy; early access to cooking; food spoilage/stacking complexity; fishing/animal integration; role of warm meals in Comfort/Sanity; winter shortage pressure; accessibility for non-farming explorers; pantry convenience without automation.
+
+**Evidence to request later from Claude:** current foods/recipes and actual code effects; source availability by season; crop/fish/animal output; coins and time cost per Hunger restored; food versus tool/infrastructure progression; 14-/60-/400-day simulated diets; early-, mid-, late-game bottlenecks; a small candidate recipe matrix. **Audit first; implementation only after owner approval.**
+
+## Release gates and operating process
+
+1. Owner + ChatGPT define purpose, success criteria, complexity, and design constraints.
+2. Claude audits current code/measurements when required (separate approved audit brief).
+3. Owner approves exact implementation scope.
+4. Claude implements minimal vertical slice, documents files and tests, pushes commits, posts to message board.
+5. ChatGPT reviews metrics and supplied images; owner accepts, requests adjustments, or defers.
+6. On acceptance, update this roadmap and `TASKS.md`. Re-rank as results change; never silently mark an idea as approved.
+
+**Immediate next conversation:** develop CCH-FOOD-001's roles, recipe principles, and food economy rules; do not send Claude an implementation prompt until requested.
