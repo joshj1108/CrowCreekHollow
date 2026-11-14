@@ -93,3 +93,20 @@ Crow Creek Hollow is a top-down 3/4 cozy folk-horror farming/survival game. **Ho
 **Integration:** CCH-FOOD-001 designs cooked foods and crop value; CCH-ORDERS-001 creates demand for that production; CCH-SKILLS-001 gives mastery unlocks; CCH-LOWMERE-001 provides an optional place to deliver, meet people and follow mysteries; CCH-WORLD-001 ties environmental discoveries back to known landmarks and characters. Avoid duplicating CCH-LOOP-002 afternoon errands or CCH-PEOPLE-001 relationships: those should share a single request/relationship framework.
 
 **Decision process:** (1) research and audit existing code/canon, (2) prototype orders **without** building a town, (3) measure trade economics and whether orders are fun, (4) design Lowmere's footprint, story identity and access, (5) prototype one town block only after explicit owner approval. No prompt to Claude has been authorized by this entry.
+
+
+## 2026-11-14 — Owner-set Lowmere canon: fogbound failing seaside fishing village
+
+**Owner's geographical/atmospheric decision — use as design canon, NOT automatic authorization to implement:**
+
+- **Lowmere** is a **dreary, economically failing seaside fishing village**, situated **down the mountain road from Crow Creek Hollow**.
+- **Crow Creek Hollow Farm** is the **last homestead / closest settled point to Lowmere before the mountain woods begin**; this is why **wilderness treks start at the farm**.
+- A **dense bank of fog envelops Lowmere continuously, 24/7**. From the farm's mountain vantage point the road and town could otherwise be visible, but the permanent fog bank conceals the village/coast below.
+- The existing farm gate and road should stay in place; a future town approach and traversal must respect the established landscape rather than require wholesale farm remapping.
+- Town atmosphere: failing fishing livelihoods, worn coastal infrastructure, trade dependency, fogbound isolation. Avoid describing Lowmere as a cheery bustling market town.
+
+**Optional, not yet canon:** the source of permanent fog, supernatural versus meteorological interpretation, precise road length and route, harbor layout, shop/NPC roster, precise visibility from specific viewpoints, ferry or sea travel, town-access milestones, and all special events. Keep these open for owner + ChatGPT story/gameplay design.
+
+**High-leverage integration:** the farm supplies inland produce, wood, preserved goods and cooked provisions to a stressed fishing village; Lowmere may supply fish and coastal goods. Orders should feel like local needs, not just random generic delivery targets. The town can support atmospheric contrasts: farm as last refuge before wilderness, coastal village as civilization that is itself failing. Treks remain staged at the farm. The permanent fog must look and behave as a geographic landmark without indiscriminately darkening the entire farm or changing approved balanced lighting.
+
+**Next design task:** combine CCH-FOOD-001 and CCH-ORDERS-001 into an *economy design exercise*, then determine the smallest viable Lowmere town slice and its relationship to the road. Still no code implementation authorization.
