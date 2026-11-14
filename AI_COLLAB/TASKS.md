@@ -1,5 +1,7 @@
 # Collaborative Tasks
 
+**Master release pathway:** [`AI_COLLAB/MASTER_ROADMAP_TO_1_0.md`](MASTER_ROADMAP_TO_1_0.md) — ten phases, milestone gates, ranked queue, 1.0 scope, and QA/release gates. **Design plan only, not implementation authorization.**
+
 **Prioritized future gameplay backlog:** [`AI_COLLAB/DEVELOPMENT_ROADMAP.md`](DEVELOPMENT_ROADMAP.md) — P0–P3 priority, independent implementation statuses, 20 ranked tasks. Next design task: `CCH-FOOD-001` (food economy and cooking; design only). The roadmap is not blanket permission to implement.
 
 | ID | Task | Owner | Reviewer | State | Approval gate |
