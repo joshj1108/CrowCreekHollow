@@ -131,3 +131,10 @@ User selected two new gameplay directions (design only, no code approved):
 **Design spec and proposed one-room vertical slice:** [Lowmere First District Design](LOWMERE_FIRST_DISTRICT_DESIGN.md). Restore a room first, furnish second; no new mandatory currency, no copying branded room/UI themes. A repair should benefit town economy and gameplay, not simply recolor a building. Keep perpetual fog and village's decline.
 
 **Sequence revision:** Food/Orders audit → minimal Lowmere district and owners → one inn repair contract → one themed guest room → only then expand building renovations/guest demand based on testing. Existing CCH-EVENING-002 remains first gameplay review gate.
+
+
+## 2026-11-14 — Proposed skill pruning and sea routes
+
+**Skill roster:** [Skill Roster and Maritime Design](SKILL_ROSTER_AND_MARITIME_DESIGN.md) defines CCH-SKILLS-REVIEW-001 (**P1, Design**) to audit Cleaning and Forestry redundancy, preserve their abilities through any safe reallocation, and decide the final skill list before expanding mastery. This supersedes the earlier design assumption that all existing ten skills must remain; no code or save changes are approved.
+
+**Lowmere maritime backlog:** CCH-MARITIME-001 (**P2, Design**) NPC crew fishing trips; CCH-MARITIME-002 (**P2, Idea**) discoverable fishing grounds; CCH-COASTAL-TRADE-001 (**P2/P3, Idea**) trade voyages to off-map coastal villages; CCH-SEAMANSHIP-001 (**P3/conditional, Idea**) potential maritime skill only if repeatable gameplay warrants; CCH-MARITIME-MYSTERY-001 (**P3, Idea**) optional fogbound maritime discoveries. Must first establish Lowmere harbor and one playable short trip, with no obligation to implement open sea/other cities in 1.0.
