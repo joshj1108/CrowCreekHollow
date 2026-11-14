@@ -75,3 +75,21 @@ Crow Creek Hollow is a top-down 3/4 cozy folk-horror farming/survival game. **Ho
 6. On acceptance, update this roadmap and `TASKS.md`. Re-rank as results change; never silently mark an idea as approved.
 
 **Immediate next conversation:** develop CCH-FOOD-001's roles, recipe principles, and food economy rules; do not send Claude an implementation prompt until requested.
+
+
+## 2026-11-14 — New strategic direction: Lowmere, orders, and mastery (exploratory, NOT approved for implementation)
+
+**Design north star:** Stardew Valley's self-directed farming and coziness; We Harvest Shadows' slow-burn farm unease; DREDGE's night-risk/psychological atmosphere; classic RuneScape's interconnected skill mastery; Molehill Empire's customer produce orders and town trade. Borrow design principles, not exact content, assets, story or mechanics.
+
+**Lowmere:** Candidate accessible town connected to the existing gate, marketplace, merchant orders and residents. Its geography, lore, NPC roster, relationship to Crow Creek Hollow and unlock timing are **not yet canon**; reconcile with existing story/treks before approving. Town should feel lived-in and safe by day, subtly unsettling through clues and local history. Keep farm the emotional and functional home; preserve old saves, routes and landmarks.
+
+| Relative priority | Proposed ID | Workstream | State | Prototype gate |
+| --- | --- | --- | --- | --- |
+| **P1, next alongside CCH-FOOD-001 design** | CCH-ORDERS-001 | Molehill Empire-inspired **optional home dispatch orders** at market stand/mailbox: simple produce/fish/food requests, partial delivery, accepted/declined/delayed choices, reasonable availability, predictable rewards and bounded rotating demand. Audit existing trade/inventory/economy and avoid a second parallel quest system | **Design — no implementation authorized** | First prototype entirely at existing farm stand with 2–3 request templates and no town art or new map |
+| **P1, after economy audit** | CCH-SKILLS-001 | RuneScape-inspired **interlocking progression**: audit actual skill XP, level caps and unlocks; create clear novice-to-master capability ladders and meaningful cross-skill production chains without gratuitous level-99 grind | **Design — no implementation authorized** | Preserve existing skill saves and levels; prototype tangible Farming + Cooking/Trading synergies; separate owner approval for any XP rebalancing |
+| **P2 (could rise after order prototype)** | CCH-LOWMERE-001 | **Town feasibility + narrative/technical blueprint**, then a compact accessible Lowmere vertical slice: marketplace, general store, limited NPC routines, one meaningful reason to visit, existing road/gate linkage, weather/time, save-safe scene transfer | **Idea — no implementation authorized** | First audit canon, route, map scale/performance, NPC dialogue, save migration and whether fast travel/dispatch is needed; no expansive town or new multiplayer |
+| P2 | CCH-LOWMERE-002 | Town relationships, local business contracts, mysteries tied to existing Hollow story; distinct daytime comfort versus night unease | Idea | Depends on validated Lowmere slice; no lore rewrites without story review |
+
+**Integration:** CCH-FOOD-001 designs cooked foods and crop value; CCH-ORDERS-001 creates demand for that production; CCH-SKILLS-001 gives mastery unlocks; CCH-LOWMERE-001 provides an optional place to deliver, meet people and follow mysteries; CCH-WORLD-001 ties environmental discoveries back to known landmarks and characters. Avoid duplicating CCH-LOOP-002 afternoon errands or CCH-PEOPLE-001 relationships: those should share a single request/relationship framework.
+
+**Decision process:** (1) research and audit existing code/canon, (2) prototype orders **without** building a town, (3) measure trade economics and whether orders are fun, (4) design Lowmere's footprint, story identity and access, (5) prototype one town block only after explicit owner approval. No prompt to Claude has been authorized by this entry.
