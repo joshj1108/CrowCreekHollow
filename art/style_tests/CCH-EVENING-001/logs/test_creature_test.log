@@ -1,0 +1,76 @@
+Godot Engine v4.7.2.stable.steam.ed1daf0bf - https://godotengine.org
+
+PASS  bat: six sheets, sized to their frames, every frame drawn, no glowing eyes
+PASS  lizard: six sheets, sized to their frames, every frame drawn, no glowing eyes
+PASS  snake: six sheets, sized to their frames, every frame drawn, no glowing eyes
+PASS  lizard idle stays on the ground line in every frame
+PASS  snake idle stays on the ground line in every frame
+PASS  bat: anchors and drawn size steady across states
+PASS  lizard: anchors and drawn size steady across states
+PASS  snake: anchors and drawn size steady across states
+PASS  FOES numbers unchanged
+PASS  seven cave creatures (3 bats, 2 lizards, 2 snakes)
+PASS  combat timings unchanged
+PASS  the strike shows inside the shortest cooldown
+PASS  bat: strikes when in reach with its cooldown spent
+PASS  bat: the cooldown restarts at its old value
+PASS  bat: the attack animation starts on frame 0 the moment it strikes
+PASS  bat: the strike plays every frame in order
+PASS  bat: the strike ends inside ATTACK_T, before the next blow
+PASS  bat: no second blow before the cooldown ends
+PASS  bat: the next blow lands once the cooldown is spent, with the strike again
+PASS  bat: a blow turned aside by the guard still shows the strike, no damage
+PASS  bat: a strike during the farmer's safety shows but does nothing
+PASS  lizard: strikes when in reach with its cooldown spent
+PASS  lizard: the cooldown restarts at its old value
+PASS  lizard: the attack animation starts on frame 0 the moment it strikes
+PASS  lizard: the strike plays every frame in order
+PASS  lizard: the strike ends inside ATTACK_T, before the next blow
+PASS  lizard: no second blow before the cooldown ends
+PASS  lizard: the next blow lands once the cooldown is spent, with the strike again
+PASS  lizard: a blow turned aside by the guard still shows the strike, no damage
+PASS  lizard: a strike during the farmer's safety shows but does nothing
+PASS  snake: strikes when in reach with its cooldown spent
+PASS  snake: the cooldown restarts at its old value
+PASS  snake: the attack animation starts on frame 0 the moment it strikes
+PASS  snake: the strike plays every frame in order
+PASS  snake: the strike ends inside ATTACK_T, before the next blow
+PASS  snake: no second blow before the cooldown ends
+PASS  snake: the next blow lands once the cooldown is spent, with the strike again
+PASS  snake: a blow turned aside by the guard still shows the strike, no damage
+PASS  snake: a strike during the farmer's safety shows but does nothing
+PASS  bat: noticing you shows alert
+PASS  bat: still chases at its old speed
+PASS  bat: after the alert it moves
+PASS  bat: a still foe idles
+PASS  bat: never flips
+PASS  bat: a hit shows the flinch at once, with the flash
+PASS  bat: the flinch ends with the flash
+PASS  bat: a kill removes the foe at once
+PASS  bat: the body falls (death sheet)
+PASS  bat: the body hits nothing and is gone after the fade
+PASS  lizard: noticing you shows alert
+PASS  lizard: still chases at its old speed
+PASS  lizard: after the alert it moves
+PASS  lizard: a still foe idles
+PASS  lizard: flips to face left
+PASS  lizard: a hit shows the flinch at once, with the flash
+PASS  lizard: the flinch ends with the flash
+PASS  lizard: a kill removes the foe at once
+PASS  lizard: the body falls (death sheet)
+PASS  lizard: the body hits nothing and is gone after the fade
+PASS  snake: noticing you shows alert
+PASS  snake: still chases at its old speed
+PASS  snake: after the alert it moves
+PASS  snake: a still foe idles
+PASS  snake: flips to face left
+PASS  snake: a hit shows the flinch at once, with the flash
+PASS  snake: the flinch ends with the flash
+PASS  snake: a kill removes the foe at once
+PASS  snake: the body falls (death sheet)
+PASS  snake: the body hits nothing and is gone after the fade
+PASS  nothing about creatures or bodies is saved
+PASS  leaving the cave clears the bodies
+PASS  with the new sheets off, the old sheets draw
+PASS  the trek dog keeps its own drawing
+PASS: 0 failure(s)

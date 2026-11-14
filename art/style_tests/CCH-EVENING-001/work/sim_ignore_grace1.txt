@@ -1,0 +1,41 @@
+Godot Engine v4.7.2.stable.steam.ed1daf0bf - https://godotengine.org
+
+mode=ignore days=14
+day date   coins san/max fea  Fa Ca Cl Bu Fo Mi Sm steps shd tax  grow wood fib wear kept night  hearts M/D/V/P
+  1 Oct 1     9  92/100   0   1  1  1  2  2  1  1     1   0    0    5    7   0    0    0 first-  0/0/0/0
+  2 Oct 2    10  92/100   0   1  1  1  2  3  1  1     1   0    0    8   21   0    1    0 quiet  0/0/0/0
+  3 Oct 3    14  82/100   1   1  1  1  2  3  1  1     1   1    0   11   21   0    2    0 knock-  0/0/0/0
+  4 Oct 4    34  94/100   1   1  1  1  3  3  1  1     1   0    0   11   20   9    4    0 sighting-  0/0/0/0
+  5 Oct 5    28  72/100   2   1  2  1  3  3  1  1     1   1    0    9   12   0    2    0 field-  0/0/0/0
+  6 Oct 6    12  58/100   2   2  2  1  3  3  1  1     2   2    0   15   12   0    3    1 knock-  0/0/0/0
+  7 Oct 7    21  54/100   2   2  2  1  4  3  1  1     3   2    0   19   20   0    5    0 pond-  0/0/0/0
+  8 Oct 8    20  50/100   3   2  2  1  4  3  1  1     3   2    0   18   29   0    7    0 crows-  0/0/0/0
+  9 Oct 9    28  53/100   3   2  2  1  4  3  1  1     3   2    0   19   29   0    9    0 pond-  0/0/0/0
+ 10 Oct 10    33  53/100   4   2  2  1  5  3  1  1     3   2    0   18   25   8   10    0 crows-  0/0/0/0
+ 11 Oct 11    14  18/100   5   3  2  1  5  3  1  1     3   3    0   25   23   6    6    0 watcher-  0/0/0/0
+ 12 Oct 12    10  38/100   5   3  2  1  5  3  1  1     3   3    0   26   21   5    5    1 quiet  0/0/0/0
+ 13 Oct 13    26  28/100   5   3  3  1  5  3  1  1     4   4    0   24   18   8    1    2 knock-  0/0/0/0
+ 14 Oct 14    12  34/100   6   3  3  1  5  4  1  1     4   4    0   23   29   6    0    0 crows-  0/0/0/0
+--- milestones (first day)
+Bushcrafting 2=1  Forestry 2=1  step: boarded=1  Forestry 3=2  Bushcrafting 3=4  pedlar seen=4  trek: edge=4  
+Carpentry 2=5  hose attached=5  well repaired=5  Farming 2=6  step: plot_two=6  Bushcrafting 4=7  step: coop=7  
+Bushcrafting 5=10  Farming 3=11  Carpentry 3=13  cellar_room waits: Carpentry=13  cellar_room waits: coins=13  
+cellar_room waits: copper_bar=13  cellar_room waits: hardwood=13  cellar_room waits: stone=13  porch waits: Carpentry=13  
+porch waits: coins=13  porch waits: copper_bar=13  porch waits: hardwood=13  porch waits: wood=13  step: patched=13  
+Forestry 4=14  
+--- totals: nights { "faced": 0, "ignored": 12, "lost": 0, "skipped": 0, "hollow": 0, "raids_won": 0, "blessed": 0 }, min sanity 17, days under 30 sanity 2, sanity limit 100, HP lost to needs 0, hours empty { "food": 0.0, "water": 0.0, "warmth": 0.0 }, hours fished 2
+--- madness: days under 60 / 40 / 20 sanity: 10 / 4 / 1; raids 0 (won 0); blight on the ground now 21 tiles; hens 0
+--- coins earned { "crops": 9, "eggs_milk": 0, "fish": 0, "forage": 152, "cooked": 8 }, spent { "seeds": 227, "animals": 0, "tax": 0, "pedlar": 0, "cards": 10, "estate": 0 }; hens 0 goats 0; property value 213; tax owed 0
+--- materials: {"apple_sapling":0,"bell_clapper":0,"bell_frame":0,"bell_metal":0,"bell_rope":0,"copper_bar":0,"copper_ore":0,"feathers":6,"fiber":6,"flax":0,"flour":0,"hardwood":1,"iron_bar":0,"iron_ore":0,"lamp_oil":1,"resin":11,"rope":0,"sticks":0,"stone":3,"storm_oak":0,"wood":29}
+--- harvested {"kale":4,"turnip":7}; withered 0
+--- foraged 59, fish caught 4 (0 at night), cooked by _cook {"rosehip_tea":1}
+--- chores over 14 days: { "water_presses": 28, "hand_feeds": 0, "hopper_fills": 0, "tidies": 1, "mends": 8 }; sprinklers 0
+--- treks: { "edge": 4, "mill": 0, "orchard": 0, "chapel": 0, "post": 0, "grove": 0, "dark": 0, "floods": 0, "dogs": 0, "skipped": 6, "oil_coins": 0, "works_coins": 0, "trade_coins": 0, "short eggs/milk": 1 }, trail works done 0: []
+--- folk: 4 visits, 5 words, 0 gifts (0 loved), 0 requests done; hearts Maren 0, Davy 0, vicar 0, postman 0
+--- scenes seen (day): 
+--- second year: beats {}, meeting not held, Davy -, Hollow left at the door 0; endings reached (day) none
+--- crow charms made 0
+--- estate: extensions [], furniture [], paint plain, paper plain, deed 0/12000; fences 19; stand glut {"forage":2.0}
+--- next step: Build the smokehouse
+--- achievements earned 7 of 60 by day 15: EDGE=5, FIRST_NIGHT=2, SIGHTING=5, FIRST_HARVEST=10, FIRST_CATCH=3, FIRST_MEAL=3, LANTERN=2
+--- achievements not earned (value/goal): FIRST_YEAR 7/10, HOUSE_PAGES 6/10, KNOCK 0/1, MEETING 0/1, DAVY 0/1, ALL_CHAPTERS 7/17, END_BELL 0/1, END_ELIAS 0/1, END_HOLLOW 0/1, END_ALL 0/3, DARK_TRAIL 0/1, NIGHT_TREK 0/1, ALL_ROUTES 0/4, WOOD_PAGES 0/5, GROVE 0/1, DREAD 0/6, BARE 0/1, DARK_NIGHT 0/1, FACE_FIELD 0/1, FACE_KNOCK 0/1, FACE_CROWS 0/1, FACE_POND 0/1, FACE_WATCHER 0/1, FACE_STEPS 0/1, HOLLOW 0/1, RAID 0/1, WINTER 0/1, CLEAN_SEASON 0/1, BACK 0/1, FACED_50 0/50, FRIEND 0/4, REQUEST 0/1, MAREN 0/1, DAVY_SCENE 0/1, VICAR 0/1, POST 0/1, HEARTS 0/4, REQUESTS_ALL 0/12, RESTORED 2/3, HOLLOW_LANTERN 2/3, YARD 0/7, ALL_CROPS 2/11, ALL_FISH 0/8, ALL_RECIPES 2/31, EXTENDED 0/3, DEED 0/1, MASTER 0/10, PALE_CARP 0/1, COLLAPSE 0/1, WADE 0/1, LIGHTS 0/1, CAIRN 0/1, FORTY 6/40

@@ -1,0 +1,12 @@
+Godot Engine v4.7.2.stable.steam.ed1daf0bf - https://godotengine.org
+
+PASS trek art loads (168 pieces, 26 kinds)
+cases: 381, wood tiles: 228878
+PASS every route, trail, clearing and event laid out (381)
+PASS slowest build 41.6 ms (under 50)
+PASS the blocking grid is unchanged by the art (0 changed)
+PASS every wood tile has a tree or undergrowth (0 bare)
+PASS no tree or undergrowth hides the trail or open ground (0 clearings)
+PASS event and destination pieces keep off the trail (0)
+note: the hollow tree reaches over open ground above it in 0 cases (it stands beside the trail, as before)
+trek check: 0 failure(s)

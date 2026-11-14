@@ -1,0 +1,138 @@
+Godot Engine v4.7.2.stable.steam.ed1daf0bf - https://godotengine.org
+
+PASS  stage 0: every open floor tile is reachable from the door
+PASS  stage 0: no shut room can be walked into
+PASS  stage 0: the exit is reachable
+PASS  stage 0: the wake spot beside the bed is free and reachable
+PASS  stage 0: BED can be faced
+PASS  stage 0: DESK can be faced
+PASS  stage 0: FIREPLACE can be faced
+PASS  stage 0: COOLER can be faced
+PASS  stage 0: the washstand is there and faceable only once the wash room opens
+PASS  stage 1: every open floor tile is reachable from the door
+PASS  stage 1: no shut room can be walked into
+PASS  stage 1: the exit is reachable
+PASS  stage 1: the wake spot beside the bed is free and reachable
+PASS  stage 1: BED can be faced
+PASS  stage 1: DESK can be faced
+PASS  stage 1: FIREPLACE can be faced
+PASS  stage 1: COOLER can be faced
+PASS  stage 1: the washstand is there and faceable only once the wash room opens
+PASS  stage 2: every open floor tile is reachable from the door
+PASS  stage 2: no shut room can be walked into
+PASS  stage 2: the exit is reachable
+PASS  stage 2: the wake spot beside the bed is free and reachable
+PASS  stage 2: BED can be faced
+PASS  stage 2: DESK can be faced
+PASS  stage 2: FIREPLACE can be faced
+PASS  stage 2: COOLER can be faced
+PASS  stage 2: the washstand is there and faceable only once the wash room opens
+PASS  stage 3: every open floor tile is reachable from the door
+PASS  stage 3: no shut room can be walked into
+PASS  stage 3: the exit is reachable
+PASS  stage 3: the wake spot beside the bed is free and reachable
+PASS  stage 3: BED can be faced
+PASS  stage 3: DESK can be faced
+PASS  stage 3: FIREPLACE can be faced
+PASS  stage 3: COOLER can be faced
+PASS  stage 3: the washstand is there and faceable only once the wash room opens
+PASS  space at the hearth feeds the fire
+PASS  space at the desk opens the desk
+PASS  space at the cooler opens the cooler
+PASS  space at the washstand tidies the house
+PASS  space at the bed after 18:00 sleeps
+PASS  furniture: the save loads
+PASS  furniture: every piece is still bought after loading
+PASS  furniture: the house stage comes back
+PASS  furniture: nothing doubled (same solid tiles after loading and rebuilding twice)
+PASS  furniture: rebuilding again changes nothing
+PASS  furniture: the dresser stands solid on its spot
+PASS  furniture: the armchair stands solid on its spot
+PASS  furniture: the clock stands solid on its spot
+PASS  furniture: the bookshelf stands solid on its spot
+PASS  furniture: no walkway is blocked by the furniture
+PASS  an old saved spot inside the furniture wakes you by the bed
+PASS  windows: summer noon, sunny: open, with a breeze
+PASS  windows: spring noon, sunny: open
+PASS  windows: summer noon, rain: shut, rain on the glass, curtains still
+PASS  windows: summer noon, downpour: shut
+PASS  windows: winter noon: shut, frosted
+PASS  windows: summer 22:00: shut for the night
+PASS  windows: autumn noon, fog: shut, fog beyond
+PASS  windows: shutters barred: shown shut through the glass
+PASS  windows: Decrepit: boarded, never open
+PASS  windows: Decrepit in rain: the rag curtain stirs in the draft
+PASS  windows: Boarded: one board, never open
+PASS  sprites: every furniture-family frame is present, measured, pixel-clean and tightly cropped
+PASS  sprites: the clock's case is the size InteriorFX swings the pendulum in
+PASS  sprites: the candle wicks are where the candles are
+PASS  sprites: the bought dresser is drawn from the new family
+PASS  sprites: the bought feather_bed is drawn from the new family
+PASS  sprites: the bought armchair is drawn from the new family
+PASS  sprites: the bought clock is drawn from the new family
+PASS  sprites: the bought painting is drawn from the new family
+PASS  sprites: the bought bookshelf is drawn from the new family
+PASS  clipping stage 0, none bought: no two pieces on a row overlap
+PASS  clipping stage 0, none bought: nothing draws through a side wall or partition
+PASS  clipping stage 0, none bought: nothing rises above its wall's face
+PASS  collision stage 0, none bought: every standing piece is solid where it stands
+PASS  bed stage 0, none bought: drawn once, its headboard against the wall (no gap behind it)
+PASS  bed stage 0, none bought: the feather bed shows only once bought
+PASS  candles stage 0, none bought: each stands on its piece, on that piece's row
+PASS  clipping stage 1, none bought: no two pieces on a row overlap
+PASS  clipping stage 1, none bought: nothing draws through a side wall or partition
+PASS  clipping stage 1, none bought: nothing rises above its wall's face
+PASS  collision stage 1, none bought: every standing piece is solid where it stands
+PASS  bed stage 1, none bought: drawn once, its headboard against the wall (no gap behind it)
+PASS  bed stage 1, none bought: the feather bed shows only once bought
+PASS  candles stage 1, none bought: each stands on its piece, on that piece's row
+PASS  clipping stage 2, none bought: no two pieces on a row overlap
+PASS  clipping stage 2, none bought: nothing draws through a side wall or partition
+PASS  clipping stage 2, none bought: nothing rises above its wall's face
+PASS  collision stage 2, none bought: every standing piece is solid where it stands
+PASS  bed stage 2, none bought: drawn once, its headboard against the wall (no gap behind it)
+PASS  bed stage 2, none bought: the feather bed shows only once bought
+PASS  candles stage 2, none bought: each stands on its piece, on that piece's row
+PASS  clipping stage 3, none bought: no two pieces on a row overlap
+PASS  clipping stage 3, none bought: nothing draws through a side wall or partition
+PASS  clipping stage 3, none bought: nothing rises above its wall's face
+PASS  collision stage 3, none bought: every standing piece is solid where it stands
+PASS  bed stage 3, none bought: drawn once, its headboard against the wall (no gap behind it)
+PASS  bed stage 3, none bought: the feather bed shows only once bought
+PASS  candles stage 3, none bought: each stands on its piece, on that piece's row
+PASS  clipping stage 0, all furniture: no two pieces on a row overlap
+PASS  clipping stage 0, all furniture: nothing draws through a side wall or partition
+PASS  clipping stage 0, all furniture: nothing rises above its wall's face
+PASS  collision stage 0, all furniture: every standing piece is solid where it stands
+PASS  bed stage 0, all furniture: drawn once, its headboard against the wall (no gap behind it)
+PASS  bed stage 0, all furniture: the feather bed shows only once bought
+PASS  candles stage 0, all furniture: each stands on its piece, on that piece's row
+PASS  clipping stage 1, all furniture: no two pieces on a row overlap
+PASS  clipping stage 1, all furniture: nothing draws through a side wall or partition
+PASS  clipping stage 1, all furniture: nothing rises above its wall's face
+PASS  collision stage 1, all furniture: every standing piece is solid where it stands
+PASS  bed stage 1, all furniture: drawn once, its headboard against the wall (no gap behind it)
+PASS  bed stage 1, all furniture: the feather bed shows only once bought
+PASS  candles stage 1, all furniture: each stands on its piece, on that piece's row
+PASS  clipping stage 2, all furniture: no two pieces on a row overlap
+PASS  clipping stage 2, all furniture: nothing draws through a side wall or partition
+PASS  clipping stage 2, all furniture: nothing rises above its wall's face
+PASS  collision stage 2, all furniture: every standing piece is solid where it stands
+PASS  bed stage 2, all furniture: drawn once, its headboard against the wall (no gap behind it)
+PASS  bed stage 2, all furniture: the feather bed shows only once bought
+PASS  candles stage 2, all furniture: each stands on its piece, on that piece's row
+PASS  clipping stage 3, all furniture: no two pieces on a row overlap
+PASS  clipping stage 3, all furniture: nothing draws through a side wall or partition
+PASS  clipping stage 3, all furniture: nothing rises above its wall's face
+PASS  collision stage 3, all furniture: every standing piece is solid where it stands
+PASS  bed stage 3, all furniture: drawn once, its headboard against the wall (no gap behind it)
+PASS  bed stage 3, all furniture: the feather bed shows only once bought
+PASS  candles stage 3, all furniture: each stands on its piece, on that piece's row
+PASS  candles: more as the house is restored (1, 3, 6, 7)
+PASS  candles: each lit candle has its own light at night
+PASS  fire: no firelight while the hearth is cold
+PASS  fire: the hearth's light is on while it burns
+PASS  fire: its light flickers
+PASS  candles: unlit by day
+PASS  lights: all off outside the house
+PASS: 0 failure(s)

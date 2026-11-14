@@ -1,0 +1,1171 @@
+[title] OBS: hardware pad buttons isolated: 21 action bindings pinned to the bot's device
+[title] SHOT: art/style_tests/CCH-EVENING-001/play_cautious/01_title.png
+[title] OBS: title buttons: (Continue) | New Game | (Load Game) | Settings | Quit
+[title] OBS: title focus on open: New Game
+[title] SHOT: art/style_tests/CCH-EVENING-001/play_cautious/02_title_slots.png
+[title] OBS: slot page buttons: Slot 1: empty | Slot 2: empty | Slot 3: empty | Back
+[title] SHOT: art/style_tests/CCH-EVENING-001/play_cautious/03_title_name.png
+[title] OBS: name page buttons: Begin | Back
+[D1 06:00] MSG: A new season begins. Day 1. Downpour. Walk with WASD or the arrow keys, and into the farmhouse door to go in.
+[D1 06:03] OBS: world started=true day=1 slot=1 coins=0 hp=10 food=99 water=99 warmth=99 sanity=100 tool=hoe inside=false tile=(59, 20) pack={"firewood":4,"seeds":5} mats={}
+[D1 06:03] OBS: joypads the engine reports connected: ["XInput Controller", "(Standard system devices) Legion-Controller 1-F6", "(Standard system devices) Legion-Controller 1-F6", "(Standard system devices) Legion-Controller 1-F6", "(Standard system devices) Legion-Controller 1-F6", "(Standard system devices) Legion-Controller 1-F6"]
+[D1 06:07] MSG: You step inside. The air is cold and smells of old wood.
+[D1 06:21] MSG: Your diary is in the desk drawer, in the farmhouse bedroom. Walk in at the front door with WASD or the arrow keys, face the desk and press Space.
+[D1 06:24] MSG: You find a diary in the desk drawer. Open it again with J, or from the Diary section on the section wheel. Esc pauses the day and lists every control.
+
+Your diary is in the desk drawer, in the farmhouse bedroom. Walk in at the front door with WASD or the arrow keys, face the desk and press Space.
+[D1 06:41] OBS: --- day 1 begins: coins=0 hp=10 food=98 water=97 warmth=97 sanity=100 tool=hoe inside=false tile=(59, 20) pack={"firewood":4,"seeds":5} mats={}; weather downpour; season Autumn
+[D1 06:44] MSG: You find a diary in the desk drawer. Open it again with J, or from the Diary section on the section wheel. Esc pauses the day and lists every control.
+[D1 07:01] MSG: Planted turnip. +5 Farming XP
+[D1 07:09] MSG: A new page in your diary: Watering.
+
+Planted turnip. +5 Farming XP
+[D1 07:18] MSG: Done: Plant seeds. Your diary has the next step.
+
+Planted turnip. +5 Farming XP
+[D1 07:20] MSG: Done: Plant seeds. Your diary has the next step.
+[D1 07:27] MSG: Done: Your bag. Your diary has the next step.
+[D1 07:33] MSG: Done: Your bag. Your diary has the next step.
+
+Gathered sticks and fiber from the brush. +15 Bushcrafting XP
+[D1 07:41] MSG: Gathered sticks and fiber from the brush. +15 Bushcrafting XP
+[D1 08:00] MSG: Gathered sticks and fiber from the brush. +15 Bushcrafting XP
+[D1 08:03] MSG: Done: Sticks and fiber. Your diary has the next step.
+
+Gathered sticks and fiber from the brush. +15 Bushcrafting XP
+[D1 08:11] MSG: Done: Sticks and fiber. Your diary has the next step.
+
+You make a Crude hatchet. +10 Bushcrafting XP
+[D1 08:12] MSG: Done: The section wheel. Your diary has the next step.
+
+You make a Crude hatchet. +10 Bushcrafting XP
+[D1 08:23] MSG: Done: Your first tool. Your diary has the next step.
+
+You make a Crude hatchet. +10 Bushcrafting XP
+[D1 08:24] MSG: Done: Your first tool. Your diary has the next step.
+
+You start chopping. Keep at it.
+[D1 08:24] MSG: Done: Your first tool. Your diary has the next step.
+
+You fell the tree. +3 wood. +20 Forestry XP
+[D1 08:33] MSG: Done: Timber. Your diary has the next step.
+
+You fell the tree. +3 wood. +20 Forestry XP
+[D1 08:37] MSG: Done: Timber. Your diary has the next step.
+[D1 09:00] MSG: You drink from the pond. Cold and muddy, but it helps. Water 100/100.
+[D1 09:03] MSG: Done: Drink. That's the first day. Your diary has what the farm asks next.
+
+You drink from the pond. Cold and muddy, but it helps. Water 100/100.
+[D1 09:07] OBS: watered 0 crops
+[D1 09:07] OBS: harvested 0
+[D1 09:16] MSG: Done: Drink. That's the first day. Your diary has what the farm asks next.
+[D1 09:35] MSG: Planted turnip. +5 Farming XP
+[D1 09:41] OBS: planted 2 more
+[D1 09:41] OBS: watered 0 crops
+[D1 09:59] MSG: You pick blackberries. +11 Bushcrafting XP
+[D1 10:44] MSG: You pick blackberries. +11 Bushcrafting XP
+[D1 11:35] MSG: You pick pear. +8 Bushcrafting XP
+[D1 11:37] OBS: picked 3 forage
+[D1 12:03] MSG: A new page in your diary: Hunger, thirst, and comfort.
+[D1 12:06] MSG: A new page in your diary: Hunger, thirst, and comfort.
+
+Gathered sticks and fiber from the brush. +15 Bushcrafting XP
+[D1 12:17] MSG: Gathered sticks and fiber from the brush. +15 Bushcrafting XP
+[D1 12:25] MSG: Gathered sticks and fiber from the brush. +15 Bushcrafting XP
+[D1 12:44] OBS: gathered 4 brush piles
+[D1 12:47] MSG: You start chopping. Keep at it.
+[D1 12:47] MSG: Chip, chip. The tree is still standing.
+[D1 12:50] MSG: You fell the tree. +3 wood. +20 Forestry XP
+[D1 12:58] MSG: You start chopping. Keep at it.
+[D1 12:58] MSG: Chip, chip. The tree is still standing.
+[D1 13:01] MSG: You fell the tree. +3 wood. +20 Forestry XP
+[D1 17:00] MSG: A new page in your diary: Sleeping.
+[D1 17:48] MSG: You step inside. The air is cold and smells of old wood.
+[D1 17:57] MSG: You feed the fire. It will burn for about 3 more hours.
+[D1 19:08] MSG: You step inside. The air is cold and smells of old wood.
+[D1 19:16] SHOT: art/style_tests/CCH-EVENING-001/play_cautious/04_d1_hearth_cautious.png
+[D1 20:16] MSG: You spend an hour mending by the fire while the logs settle. For a little while, the house feels like a home. +4 sanity, warmed through.
+[D1 20:17] SHOT: art/style_tests/CCH-EVENING-001/play_cautious/05_d1_by_the_fire_cautious.png
+[D2 20:48] MSG: You sleep through the night. Your crops grew overnight. Something walked the farm in the night. There are prints at the field's edge, and they lead to the house. Sanity -9. 2 fence rails tore loose in the night. (1 of 2)
+[D2 20:48] CARD: Night settles over the farm.
+[D2 20:48] CARD: Day 2. The morning is foggy.
+[D2 06:00] EVE: {"bed_at":20.56,"busy_h":1.12,"day":1,"faced":"","fed":1,"fire_19":2.8,"firewood_19":3,"firewood_bed":3,"grace_used":false,"idle_h":0.39,"morning_sanity":91,"night":"first","night_faced":false,"night_left_alone":true,"noticed":false,"read":false,"sanity_19":100,"sanity_bed":100,"sat":true,"sign":"","sign_tonight":"","sit_sanity":0.0,"stayed_up":false,"style":"cautious","tended":false,"visitor":"","warmth_19":100,"warmth_bed":100}
+[D2 06:00] OBS: --- day 2 begins: coins=0 hp=10 food=64 water=64 warmth=100 sanity=91 tool=axe inside=true tile=(4, 65) pack={"blackberries":2,"firewood":3,"pears":1} mats={"fiber":5,"sticks":5,"wood":9}; weather fog; season Autumn
+[D2 06:08] MSG: You sleep through the night. Your crops grew overnight. Something walked the farm in the night. There are prints at the field's edge, and they lead to the house. Sanity -9. 2 fence rails tore loose in the night. (1 of 2)
+
+The fire has gone out.
+[D2 06:13] MSG: You sleep through the night. Your crops grew overnight. Something walked the farm in the night. There are prints at the field's edge, and they lead to the house. Sanity -9. 2 fence rails tore loose in the night. (1 of 2)
+
+Something still glints in the grass of the yard.
+[D2 06:22] MSG: Chapter complete: Sleep Under Your Own Roof. Reward: 40 Carpentry XP
+
+Something still glints in the grass of the yard.
+[D2 06:27] MSG: Chapter complete: Sleep Under Your Own Roof. Reward: 40 Carpentry XP
+[D2 06:33] MSG: Next: Light the Way. It's in your diary and the Quests section.
+[D2 06:34] MSG: Next: Light the Way. It's in your diary and the Quests section.
+
+Watered from the bucket. 7 left. The pump and hose at the Well save the walk.
+[D2 06:39] MSG: Next: Light the Way. It's in your diary and the Quests section.
+
+Watered from the bucket. 6 left. The pump and hose at the Well save the walk.
+[D2 06:44] MSG: Next: Light the Way. It's in your diary and the Quests section.
+
+Watered from the bucket. 5 left. The pump and hose at the Well save the walk.
+[D2 06:44] MSG: Achievement: Something Walks This Farm. Live through your first night.
+
+Watered from the bucket. 5 left. The pump and hose at the Well save the walk.
+[D2 06:49] MSG: Achievement: Something Walks This Farm. Live through your first night.
+
+Watered from the bucket. 4 left. The pump and hose at the Well save the walk.
+[D2 06:53] MSG: Achievement: Something Walks This Farm. Live through your first night.
+
+Watered from the bucket. 3 left. The pump and hose at the Well save the walk.
+[D2 06:55] MSG: A new page in your diary: Repairing the farmhouse.
+
+Watered from the bucket. 3 left. The pump and hose at the Well save the walk.
+[D2 06:56] OBS: watered 5 crops
+[D2 06:56] OBS: harvested 0
+[D2 07:05] MSG: A new page in your diary: What the night takes.
+
+Watered from the bucket. 3 left. The pump and hose at the Well save the walk.
+[D2 07:10] MSG: A new page in your diary: What the night takes.
+[D2 07:15] MSG: A new page in your diary: Seeds and supplies.
+[D2 07:18] MSG: A new page in your diary: Seeds and supplies.
+
+You pick blackberries. +11 Bushcrafting XP
+[D2 07:28] MSG: You pick blackberries. +11 Bushcrafting XP
+[D2 07:42] MSG: You pick pear. +8 Bushcrafting XP
+[D2 08:09] MSG: You pick rose hips. +11 Bushcrafting XP
+[D2 08:11] OBS: picked 3 forage
+[D2 08:43] MSG: You drink from the pond. Cold and muddy, but it helps. Water 96/100. You fill the bucket (8 waterings).
+[D2 08:45] OBS: gathered 0 brush piles
+[D2 08:56] MSG: You start chopping. Keep at it.
+[D2 08:56] MSG: You fell the tree. +3 wood. +20 Forestry XP
+[D2 09:07] MSG: You start chopping. Keep at it.
+[D2 09:07] MSG: You fell the tree. +3 wood. +20 Forestry XP
+[D2 09:09] UI: Quests [tab=Quests]: 
+[D2 09:09] SHOT: art/style_tests/CCH-EVENING-001/play_cautious/06_d2_quests.png
+[D2 09:09] UI: House [tab=House]: =repair  =cleanse
+[D2 09:09] SHOT: art/style_tests/CCH-EVENING-001/play_cautious/07_d2_house.png
+[D2 09:09] MSG: Repaired. The farmhouse is now Boarded. +30 Carpentry XP
+[D2 09:09] ACT: House, Repair pressed: stage 0 -> 1 ("Repaired. The farmhouse is now Boarded. +30 Carpentry XP")
+[D2 09:09] MSG: You mend a board. +20 Carpentry XP. A crow feather was wedged in the gap. +1 crow feather.
+[D2 09:09] ACT: House, mend pressed: "You mend a board. +20 Carpentry XP. A crow feather was wedged in the gap. +1 crow feather."
+[D2 09:09] MSG: Job done: deliver wood. +24 coins, +12 Forestry XP
+[D2 09:09] ACT: House, job pressed: "Job done: deliver wood. +24 coins, +12 Forestry XP"
+[D2 09:10] UI: Craft other [tab=Craft]: =craft_pick:lantern  =craft_pick:bandage  =craft_pick:rope  =craft_pick:crow_charm  (Build=advance_lantern)
+[D2 09:11] MSG: Homestead step done: Board up the house. +20 coins. 1 of 14 done. Next: Open the second field.
+[D2 10:02] MSG: A new page in your diary: Quests.
+[D2 14:02] MSG: A new page in your diary: Keeping house.
+[D2 17:30] OBS: bag holds: ?, ?, ?, ?, ?, ?, ?, ? (hunger 36)
+[D2 17:30] MSG: You eat the pear. Food 61/100, HP 10/10
+[D2 17:30] ACT: ate from bag slot 0: hunger 36 -> 61 ("You eat the pear. Food 61/100, HP 10/10")
+[D2 17:30] MSG: You eat the blackberries. Food 86/100, HP 10/10
+[D2 17:30] ACT: ate from bag slot 1: hunger 61 -> 86 ("You eat the blackberries. Food 86/100, HP 10/10")
+[D2 18:10] MSG: You step inside. The air is cold and smells of old wood.
+[D2 18:18] MSG: You feed the fire. It will burn for about 3 more hours.
+[D2 18:27] MSG: Something still glints in the grass of the yard.
+[D2 19:00] MSG: Frost is creeping across the farmhouse's front window.
+[D2 19:08] MSG: The boards over the window are cold. Colder than the evening air ought to allow. Whatever comes tonight may come to the house. It will want a good fire.
+
+Frost is creeping across the farmhouse's front window.
+[D2 19:10] ACT: read the chill sign: "The boards over the window are cold. Colder than the evening air ought to allow. Whatever comes tonight may come to the house. It will want a good fire.
+
+Frost is creeping across the farmhouse's front window."
+[D2 19:10] SHOT: art/style_tests/CCH-EVENING-001/play_cautious/08_d2_sign_chill_read.png
+[D2 19:12] MSG: The boards over the window are cold. Colder than the evening air ought to allow. Whatever comes tonight may come to the house. It will want a good fire.
+
+You step inside. The air is cold and smells of old wood.
+[D2 19:21] SHOT: art/style_tests/CCH-EVENING-001/play_cautious/09_d2_hearth_cautious.png
+[D2 19:21] MSG: The boards over the window are cold. Colder than the evening air ought to allow. Whatever comes tonight may come to the house. It will want a good fire.
+
+You feed the fire. It will burn for about 5 more hours.
+[D2 19:51] MSG: The boards over the window are cold. Colder than the evening air ought to allow. Whatever comes tonight may come to the house. It will want a good fire.
+
+You bank the fire with a log, set the guard, draw the curtains and drop the latch. The house is ready for the night, as ready as it can be.
+[D2 19:51] ACT: tended the hearth: firewood 1 -> 0 ("The boards over the window are cold. Colder than the evening air ought to allow. Whatever comes tonight may come to the house. It will want a good fire.
+
+You bank the fire with a log, set the guard, draw the curtains and drop the latch. The house is ready for the night, as ready as it can be.")
+[D2 20:03] MSG: You bank the fire with a log, set the guard, draw the curtains and drop the latch. The house is ready for the night, as ready as it can be.
+[D3 20:24] MSG: You sleep through the night. Your crops grew overnight. Sanity -9. The banked fire burned low and steady through the night. The house is kept well, and you sleep easier. +2 sanity. (1 of 3)
+[D3 20:24] CARD: Night settles over the farm.
+[D3 20:24] CARD: Day 3. The morning is foggy.
+[D3 06:00] EVE: {"bed_at":20.14,"busy_h":0.69,"day":2,"faced":"","fed":2,"fire_19":2.8,"firewood_19":2,"firewood_bed":0,"grace_used":false,"idle_h":0.38,"morning_sanity":93,"night":"quiet","night_faced":false,"night_left_alone":true,"noticed":true,"read":true,"sanity_19":96,"sanity_bed":97,"sat":false,"sign":"chill","sign_tonight":"chill","stayed_up":false,"style":"cautious","tended":true,"visitor":"","warmth_19":100,"warmth_bed":100}
+[D3 06:00] OBS: --- day 3 begins: coins=45 hp=10 food=79 water=61 warmth=100 sanity=93 tool=axe inside=true tile=(4, 65) pack={"blackberries":2,"pears":1,"rosehips":1} mats={"feathers":1,"fiber":2,"sticks":5,"wood":5}; weather fog; season Autumn
+[D3 06:13] MSG: You sleep through the night. Your crops grew overnight. Sanity -9. The banked fire burned low and steady through the night. The house is kept well, and you sleep easier. +2 sanity. (1 of 3)
+
+The mushroom ring is still at the edge of the wood.
+[D3 06:20] MSG: Word of a well-kept farm gets round: 1 coins for odd jobs (1 night in a row). The morning is foggy. A ring of pale mushrooms has come up at the edge of the wood overnight. (2 of 3)
+
+The mushroom ring is still at the edge of the wood.
+[D3 06:27] MSG: Word of a well-kept farm gets round: 1 coins for odd jobs (1 night in a row). The morning is foggy. A ring of pale mushrooms has come up at the edge of the wood overnight. (2 of 3)
+[D3 06:34] MSG: Word of a well-kept farm gets round: 1 coins for odd jobs (1 night in a row). The morning is foggy. A ring of pale mushrooms has come up at the edge of the wood overnight. (2 of 3)
+
+Watered from the bucket. 7 left. The pump and hose at the Well save the walk.
+[D3 06:39] MSG: Word of a well-kept farm gets round: 1 coins for odd jobs (1 night in a row). The morning is foggy. A ring of pale mushrooms has come up at the edge of the wood overnight. (2 of 3)
+
+Watered from the bucket. 6 left. The pump and hose at the Well save the walk.
+[D3 06:39] MSG: Old Maren from the last cottage down the lane stopped at the gate at first light. She'll be back tomorrow morning: she wants walking as far as the edge of the Rookery Wood, and says you'll want a lantern. (3 of 3)
+
+Watered from the bucket. 6 left. The pump and hose at the Well save the walk.
+[D3 06:44] MSG: Old Maren from the last cottage down the lane stopped at the gate at first light. She'll be back tomorrow morning: she wants walking as far as the edge of the Rookery Wood, and says you'll want a lantern. (3 of 3)
+
+Watered from the bucket. 5 left. The pump and hose at the Well save the walk.
+[D3 06:49] MSG: Old Maren from the last cottage down the lane stopped at the gate at first light. She'll be back tomorrow morning: she wants walking as far as the edge of the Rookery Wood, and says you'll want a lantern. (3 of 3)
+
+Watered from the bucket. 4 left. The pump and hose at the Well save the walk.
+[D3 06:53] MSG: Old Maren from the last cottage down the lane stopped at the gate at first light. She'll be back tomorrow morning: she wants walking as far as the edge of the Rookery Wood, and says you'll want a lantern. (3 of 3)
+
+Watered from the bucket. 3 left. The pump and hose at the Well save the walk.
+[D3 06:56] OBS: watered 5 crops
+[D3 06:56] OBS: harvested 0
+[D3 07:01] MSG: A torn page was left in the mailbox, with no envelope. It's in your diary: "The first spring" (1 of 10).
+
+Watered from the bucket. 3 left. The pump and hose at the Well save the walk.
+[D3 07:10] MSG: A torn page was left in the mailbox, with no envelope. It's in your diary: "The first spring" (1 of 10).
+[D3 07:15] MSG: A torn page was left in the mailbox, with no envelope. It's in your diary: "The first spring" (1 of 10).
+
+You pick rose hips. +11 Bushcrafting XP
+[D3 07:15] MSG: A new page in your diary: Buildings.
+
+You pick rose hips. +11 Bushcrafting XP
+[D3 07:28] MSG: You pick rose hips. +11 Bushcrafting XP
+[D3 08:06] MSG: You pick apple. +8 Bushcrafting XP
+[D3 08:33] MSG: You pick rose hips. +11 Bushcrafting XP
+[D3 08:35] OBS: picked 3 forage
+[D3 09:02] MSG: You drink from the pond. Cold and muddy, but it helps. Water 92/100. You fill the bucket (8 waterings).
+[D3 09:04] OBS: gathered 0 brush piles
+[D3 09:18] MSG: You start chopping. Keep at it.
+[D3 09:18] MSG: Chip, chip. The tree is still standing.
+[D3 09:21] MSG: You fell the tree. +3 wood. +20 Forestry XP
+[D3 09:29] MSG: You start chopping. Keep at it.
+[D3 09:29] MSG: You fell the tree. +3 wood. +20 Forestry XP
+[D3 09:30] UI: Quests [tab=Quests]: 
+[D3 09:31] UI: House [tab=House]: =mend  =job
+[D3 09:31] ACT: House, Repair pressed: stage 1 -> 1 ("You fell the tree. +3 wood. +20 Forestry XP")
+[D3 09:31] MSG: You mend a board. +20 Carpentry XP. A bead of resin wells from the new board. +1 resin.
+[D3 09:31] ACT: House, mend pressed: "You mend a board. +20 Carpentry XP. A bead of resin wells from the new board. +1 resin."
+[D3 09:31] ACT: House, job pressed: "You mend a board. +20 Carpentry XP. A bead of resin wells from the new board. +1 resin."
+[D3 09:32] UI: Craft other [tab=Craft]: =craft_pick:lantern  =craft_pick:bandage  =craft_pick:rope  =craft_pick:crow_charm  (Build=advance_lantern)
+[D3 10:21] UI: Farm stand [tab=Trade]: =sell_food:pear  =sell_food:blackberries  =sell_food:rosehips
+[D3 10:21] SHOT: art/style_tests/CCH-EVENING-001/play_cautious/10_d3_stand.png
+[D3 10:21] MSG: Sold 1 for 3 coins.
+[D3 10:21] ACT: stand sell_food:pear: coins 45 -> 48 ("Sold 1 for 3 coins.")
+[D3 10:21] ACT: stand sell_food:blackberries: coins 48 -> 51 ("Sold 1 for 3 coins.")
+[D3 10:21] MSG: Sold 1 for 2 coins.
+[D3 10:21] ACT: stand sell_food:rosehips: coins 51 -> 53 ("Sold 1 for 2 coins.")
+[D3 10:22] MSG: A torn page was folded into the farm stand's cash tin. It's in your diary: "Four families" (2 of 10).
+
+Sold 1 for 2 coins.
+[D3 10:32] MSG: A torn page was folded into the farm stand's cash tin. It's in your diary: "Four families" (2 of 10).
+[D3 12:54] MSG: The fire has gone out.
+[D3 17:30] OBS: bag holds: ?, ?, ?, ?, ?, ?, ?, ? (hunger 52)
+[D3 17:30] MSG: You eat the apple. Food 98/100, HP 10/10
+[D3 17:30] ACT: ate from bag slot 0: hunger 52 -> 98 ("You eat the apple. Food 98/100, HP 10/10")
+[D3 18:00] MSG: You step inside. The air is cold and smells of old wood.
+[D3 18:03] MSG: The mushroom ring is still at the edge of the wood.
+[D3 19:07] MSG: You step inside. The air is cold and smells of old wood.
+[D3 19:16] SHOT: art/style_tests/CCH-EVENING-001/play_cautious/11_d3_hearth_cautious.png
+[D3 19:49] MSG: The fire is out. Nothing warms the house through the night, and you wake chilled.
+[D4 19:49] MSG: You sleep through the night. Your crops grew overnight. The knocking stopped. Something walked away slowly through the crops. Sanity -17. It will not always be so gentle. The shadow came closer in the night. (1 of 4)
+
+The fire is out. Nothing warms the house through the night, and you wake chilled.
+[D4 19:49] CARD: Night settles over the farm.
+[D4 19:49] CARD: Day 4. The morning is sunny.
+[D4 06:00] EVE: {"bed_at":19.56,"busy_h":0.12,"day":3,"faced":"","fed":0,"fire_19":0.0,"firewood_19":0,"firewood_bed":0,"grace_used":true,"idle_h":0.38,"morning_sanity":84,"night":"knock","night_faced":false,"night_left_alone":true,"noticed":false,"read":false,"sanity_19":98,"sanity_bed":98,"sat":false,"sign":"","sign_tonight":"","sit_blocked":"The hearth is cold. Light the fire first.","stayed_up":false,"style":"cautious","tended":false,"visitor":"","warmth_19":100,"warmth_bed":100}
+[D4 06:00] OBS: --- day 4 begins: coins=55 hp=10 food=92 water=59 warmth=100 sanity=84 tool=axe inside=true tile=(4, 65) pack={"blackberries":1,"rosehips":2} mats={"feathers":1,"fiber":1,"resin":1,"sticks":5,"wood":10}; weather sunny; season Autumn
+[D4 06:13] MSG: You sleep through the night. Your crops grew overnight. The knocking stopped. Something walked away slowly through the crops. Sanity -17. It will not always be so gentle. The shadow came closer in the night. (1 of 4)
+
+The pedlar is still waiting by the farm stand, until six.
+[D4 06:22] MSG: A line of dead grass runs from it to your crops, and 2 of them have wilted back. The house is kept well, and you sleep easier. +2 sanity. Word of a well-kept farm gets round: 2 coins for odd jobs (2 nights in a row). (2 of 4)
+
+The pedlar is still waiting by the farm stand, until six.
+[D4 06:28] MSG: A line of dead grass runs from it to your crops, and 2 of them have wilted back. The house is kept well, and you sleep easier. +2 sanity. Word of a well-kept farm gets round: 2 coins for odd jobs (2 nights in a row). (2 of 4)
+[D4 06:34] MSG: A line of dead grass runs from it to your crops, and 2 of them have wilted back. The house is kept well, and you sleep easier. +2 sanity. Word of a well-kept farm gets round: 2 coins for odd jobs (2 nights in a row). (2 of 4)
+
+Watered from the bucket. 7 left. The pump and hose at the Well save the walk.
+[D4 06:40] MSG: A line of dead grass runs from it to your crops, and 2 of them have wilted back. The house is kept well, and you sleep easier. +2 sanity. Word of a well-kept farm gets round: 2 coins for odd jobs (2 nights in a row). (2 of 4)
+
+Watered from the bucket. 6 left. The pump and hose at the Well save the walk.
+[D4 06:45] MSG: A line of dead grass runs from it to your crops, and 2 of them have wilted back. The house is kept well, and you sleep easier. +2 sanity. Word of a well-kept farm gets round: 2 coins for odd jobs (2 nights in a row). (2 of 4)
+
+Watered from the bucket. 5 left. The pump and hose at the Well save the walk.
+[D4 06:45] MSG: 1 fence rail tore loose in the night. Mend them before something finds the gap. The morning is sunny. A pedlar with a heavy pack has stopped by the farm stand. They're selling a sudoku book for 6 coins. (3 of 4)
+
+Watered from the bucket. 5 left. The pump and hose at the Well save the walk.
+[D4 06:48] OBS: watered 3 crops
+[D4 06:48] OBS: harvested 0
+[D4 07:01] MSG: 1 fence rail tore loose in the night. Mend them before something finds the gap. The morning is sunny. A pedlar with a heavy pack has stopped by the farm stand. They're selling a sudoku book for 6 coins. (3 of 4)
+[D4 07:07] MSG: Old Maren is waiting at the east gate, wanting walking to the wood's edge, before three. (4 of 4)
+[D4 07:09] MSG: Old Maren is waiting at the east gate, wanting walking to the wood's edge, before three. (4 of 4)
+
+You pick chanterelles. +14 Bushcrafting XP
+[D4 07:20] MSG: After the knocking, a torn page is lying on the doormat. It's in your diary: "On the knocking" (3 of 10).
+
+You pick chanterelles. +14 Bushcrafting XP
+[D4 07:22] MSG: After the knocking, a torn page is lying on the doormat. It's in your diary: "On the knocking" (3 of 10).
+[D4 07:34] MSG: A new page in your diary: The mine.
+[D4 07:47] MSG: You pick apple. +8 Bushcrafting XP
+[D4 08:21] MSG: You pick blackberries. +11 Bushcrafting XP
+[D4 08:23] OBS: picked 3 forage
+[D4 08:40] MSG: You drink from the pond. Cold and muddy, but it helps. Water 91/100. You fill the bucket (8 waterings).
+[D4 08:58] MSG: Gathered sticks and fiber from the brush. +15 Bushcrafting XP
+[D4 09:08] MSG: Gathered sticks, fiber, and resin from the brush. +15 Bushcrafting XP
+[D4 09:31] MSG: Gathered sticks and fiber from the brush. +15 Bushcrafting XP
+[D4 10:05] MSG: Gathered sticks and fiber from the brush. +15 Bushcrafting XP
+[D4 10:14] OBS: gathered 6 brush piles
+[D4 10:22] MSG: You start chopping. Keep at it.
+[D4 10:22] MSG: Chip, chip. The tree is still standing.
+[D4 10:31] MSG: You fell the tree. +3 wood. +20 Forestry XP
+[D4 11:23] MSG: You start chopping. Keep at it.
+[D4 11:23] MSG: Chip, chip. The tree is still standing.
+[D4 11:35] MSG: You fell the tree. +3 wood. +20 Forestry XP
+[D4 11:36] UI: Quests [tab=Quests]: 
+[D4 11:36] UI: House [tab=House]: =mend  =job
+[D4 11:36] ACT: House, Repair pressed: stage 1 -> 1 ("You fell the tree. +3 wood. +20 Forestry XP")
+[D4 11:36] MSG: You mend a board. +20 Carpentry XP. A bead of resin wells from the new board. +1 resin.
+[D4 11:36] ACT: House, mend pressed: "You mend a board. +20 Carpentry XP. A bead of resin wells from the new board. +1 resin."
+[D4 11:36] MSG: Job done: deliver resin. +20 coins, +12 Bushcrafting XP
+[D4 11:36] ACT: House, job pressed: "Job done: deliver resin. +20 coins, +12 Bushcrafting XP"
+[D4 11:37] UI: Craft other [tab=Craft]: =craft_pick:lantern  =craft_pick:bandage  =craft_pick:rope  =craft_pick:crow_charm  Build=advance_lantern
+[D4 11:37] MSG: You build a Tin Lantern. Its light reaches 2.5 tiles. +25 Bushcrafting XP
+[D4 11:37] ACT: built a lantern: tier 1 ("You build a Tin Lantern. Its light reaches 2.5 tiles. +25 Bushcrafting XP")
+[D4 11:37] MSG: Chapter complete: Light the Way. Reward: 3 turnip seeds
+
+You build a Tin Lantern. Its light reaches 2.5 tiles. +25 Bushcrafting XP
+[D4 11:43] UI: Farm stand [tab=Trade]: =sell_food:blackberries  =sell_food:rosehips  =sell_food:chanterelles
+[D4 11:43] MSG: Chapter complete: Light the Way. Reward: 3 turnip seeds
+
+Sold 1 for 3 coins.
+[D4 11:43] ACT: stand sell_food:blackberries: coins 75 -> 78 ("Chapter complete: Light the Way. Reward: 3 turnip seeds
+
+Sold 1 for 3 coins.")
+[D4 11:43] MSG: Chapter complete: Light the Way. Reward: 3 turnip seeds
+
+Sold 1 for 2 coins.
+[D4 11:43] ACT: stand sell_food:rosehips: coins 78 -> 80 ("Chapter complete: Light the Way. Reward: 3 turnip seeds
+
+Sold 1 for 2 coins.")
+[D4 11:43] MSG: Chapter complete: Light the Way. Reward: 3 turnip seeds
+
+Sold 1 for 7 coins.
+[D4 11:43] ACT: stand sell_food:chanterelles: coins 80 -> 87 ("Chapter complete: Light the Way. Reward: 3 turnip seeds
+
+Sold 1 for 7 coins.")
+[D4 11:43] ACT: a walker waits (edge) at (72, 42); walking over
+[D4 11:47] SHOT: art/style_tests/CCH-EVENING-001/play_cautious/12_trek_edge_gate.png
+[D4 11:47] MSG: Chapter complete: Light the Way. Reward: 3 turnip seeds
+
+"Only as far as the edge of the wood, by daylight. Two clearings, no more." She takes 2 flasks of lamp oil from her basket and gives them to you: "I'm not daft enough to go in there without." A flask burns little more than a minute in the wood; more comes from the catalog, 8 coins. Her nerve will show beside your needs: keep her in your lantern's light and on the trail, and a word (Space beside her) steadies her. If she stops dead, a word calms her enough to go on, or walk back the way you came to turn home. You have 2 lamp oil. Press Space again to set out.
+[D4 11:47] MSG: Next: To the Wood's Edge. It's in your diary and the Quests section.
+
+"Only as far as the edge of the wood, by daylight. Two clearings, no more." She takes 2 flasks of lamp oil from her basket and gives them to you: "I'm not daft enough to go in there without." A flask burns little more than a minute in the wood; more comes from the catalog, 8 coins. Her nerve will show beside your needs: keep her in your lantern's light and on the trail, and a word (Space beside her) steadies her. If she stops dead, a word calms her enough to go on, or walk back the way you came to turn home. You have 2 lamp oil. Press Space again to set out.
+[D4 11:50] OBS: walker says: "Next: To the Wood's Edge. It's in your diary and the Quests section.
+
+"Only as far as the edge of the wood, by daylight. Two clearings, no more." She takes 2 flasks of lamp oil from her basket and gives them to you: "I'm not daft enough to go in there without." A flask burns little more than a minute in the wood; more comes from the catalog, 8 coins. Her nerve will show beside your needs: keep her in your lantern's light and on the trail, and a word (Space beside her) steadies her. If she stops dead, a word calms her enough to go on, or walk back the way you came to turn home. You have 2 lamp oil. Press Space again to set out."
+[D4 11:50] MSG: Next: To the Wood's Edge. It's in your diary and the Quests section.
+
+You lead Maren out through the east gate and into the trees. The light goes green, then grey, and your lantern burns oil in here. Her nerve shows by your needs: keep her close, in your light and on the path.
+[D4 11:51] OBS: trek started: route=edge nerve=69 oil=1 clearings=2 events=["tree", ""]
+[D4 11:51] SHOT: art/style_tests/CCH-EVENING-001/play_cautious/13_trek_edge_start.png
+[D4 11:51] OBS: clearing 1 of 2: event=tree nerve=69 sanity=84 lit=true
+[D4 11:54] MSG: Achievement: Tin Light. Build a Tin Lantern.
+
+You lead Maren out through the east gate and into the trees. The light goes green, then grey, and your lantern burns oil in here. Her nerve shows by your needs: keep her close, in your light and on the path.
+[D4 11:56] MSG: Achievement: Tin Light. Build a Tin Lantern.
+
+"Stay on the path!" Maren hangs back, her eyes on the trees. Off the trail her nerve goes.
+[D4 11:57] SHOT: art/style_tests/CCH-EVENING-001/play_cautious/14_trek_edge_blocked_tree.png
+[D4 11:57] MSG: Achievement: Tin Light. Build a Tin Lantern.
+
+You hack a gap through the fallen trunk and help Maren over. +2 wood, +15 Forestry XP.
+[D4 11:58] OBS: blocked by tree: "Achievement: Tin Light. Build a Tin Lantern.
+
+You hack a gap through the fallen trunk and help Maren over. +2 wood, +15 Forestry XP."
+[D4 11:59] MSG: You hack a gap through the fallen trunk and help Maren over. +2 wood, +15 Forestry XP.
+[D4 12:07] MSG: The trail goes on through the trees.
+[D4 12:09] MSG: "Stay on the path!" Maren hangs back, her eyes on the trees. Off the trail her nerve goes.
+[D4 12:14] PROBLEM: stuck walking at (21, 15) toward (21, 1) (along the trail)
+[D4 12:15] OBS: clearing 2 of 2: event= nerve=51 sanity=83 lit=true
+[D4 12:15] MSG: High in the trees, two red eyes, higher than a man's. They don't move. Maren hasn't seen them. Lift the lantern at them (Space, close by), or walk on and keep her talking.
+[D4 12:25] MSG: When you look again, the eyes are gone. Something tall walks in this wood. Deeper in, it won't keep its distance.
+[D4 12:58] MSG: Chapter complete: To the Wood's Edge. Reward: 20 Bushcrafting XP
+
+At the stile Maren stops and looks down the old trail into the dark of the trees. "That's the way to the mill. The town met there, the night they voted Agnes Rook's bell down. I was there." She doesn't say how she voted. "I'll want walking all the way, in a week or so, once you know the wood. Ask me about Agnes then." +10 coins from her purse, +2 fiber gathered on the way, +25 Bushcrafting XP. You walk her home to her cottage by the lane. Your diary has a new page, The Rookery Wood, and the next chapter.
+[D4 12:59] OBS: trek over: active=false in_cave=false "Chapter complete: To the Wood's Edge. Reward: 20 Bushcrafting XP
+
+At the stile Maren stops and looks down the old trail into the dark of the trees. "That's the way to the mill. The town met there, the night they voted Agnes Rook's bell down. I was there." She doesn't say how she voted. "I'll want walking all the way, in a week or so, once you know the wood. Ask me about Agnes then." +10 coins from her purse, +2 fiber gathered on the way, +25 Bushcrafting XP. You walk her home to her cottage by the lane. Your diary has a new page, The Rookery Wood, and the next chapter."
+[D4 12:59] OBS: coins=97 hp=10 food=75 water=78 warmth=100 sanity=82 tool=axe inside=false tile=(69, 42) pack={"apples":1,"blackberries":1,"rosehips":1,"seeds":3} mats={"feathers":1,"fiber":5,"lamp_oil":1,"sticks":11,"wood":13}
+[D4 13:05] SHOT: art/style_tests/CCH-EVENING-001/play_cautious/15_trek_edge_home.png
+[D4 13:08] MSG: Next: Food Takes Time. It's in your diary and the Quests section.
+
+At the stile Maren stops and looks down the old trail into the dark of the trees. "That's the way to the mill. The town met there, the night they voted Agnes Rook's bell down. I was there." She doesn't say how she voted. "I'll want walking all the way, in a week or so, once you know the wood. Ask me about Agnes then." +10 coins from her purse, +2 fiber gathered on the way, +25 Bushcrafting XP. You walk her home to her cottage by the lane. Your diary has a new page, The Rookery Wood, and the next chapter.
+[D4 13:19] MSG: Achievement: To the Wood's Edge. Walk Old Maren to the edge of the Rookery Wood.
+
+At the stile Maren stops and looks down the old trail into the dark of the trees. "That's the way to the mill. The town met there, the night they voted Agnes Rook's bell down. I was there." She doesn't say how she voted. "I'll want walking all the way, in a week or so, once you know the wood. Ask me about Agnes then." +10 coins from her purse, +2 fiber gathered on the way, +25 Bushcrafting XP. You walk her home to her cottage by the lane. Your diary has a new page, The Rookery Wood, and the next chapter.
+[D4 13:36] MSG: At the stile Maren stops and looks down the old trail into the dark of the trees. "That's the way to the mill. The town met there, the night they voted Agnes Rook's bell down. I was there." She doesn't say how she voted. "I'll want walking all the way, in a week or so, once you know the wood. Ask me about Agnes then." +10 coins from her purse, +2 fiber gathered on the way, +25 Bushcrafting XP. You walk her home to her cottage by the lane. Your diary has a new page, The Rookery Wood, and the next chapter.
+[D4 18:05] MSG: You step inside. The air is cold and smells of old wood.
+[D4 19:08] MSG: You step inside. The air is cold and smells of old wood.
+[D4 19:50] MSG: The fire is out. Nothing warms the house through the night, and you wake chilled.
+[D5 19:50] MSG: You sleep through the night. Your crops grew overnight. In the night every crow in the great tree went up at once; you heard them in your sleep. (1 of 4)
+
+The fire is out. Nothing warms the house through the night, and you wake chilled.
+[D5 19:50] CARD: Night settles over the farm.
+[D5 19:50] CARD: Day 5. The morning is drizzle.
+[D5 06:00] EVE: {"bed_at":19.58,"busy_h":0.12,"day":4,"faced":"","fed":0,"fire_19":0.0,"firewood_19":0,"firewood_bed":0,"grace_used":true,"idle_h":0.4,"morning_sanity":89,"night":"sighting","night_faced":false,"night_left_alone":true,"noticed":false,"read":false,"sanity_19":82,"sanity_bed":82,"sat":false,"sign":"","sign_tonight":"","sit_blocked":"The hearth is cold. Light the fire first.","stayed_up":false,"style":"cautious","tended":false,"visitor":"","warmth_19":100,"warmth_bed":100}
+[D5 06:00] OBS: --- day 5 begins: coins=100 hp=10 food=59 water=58 warmth=99 sanity=89 tool=axe inside=true tile=(4, 65) pack={"apples":1,"blackberries":1,"rosehips":1,"seeds":3} mats={"feathers":1,"fiber":5,"lamp_oil":1,"sticks":11,"wood":13}; weather drizzle; season Autumn
+[D5 06:13] MSG: You sleep through the night. Your crops grew overnight. In the night every crow in the great tree went up at once; you heard them in your sleep. (1 of 4)
+
+Bright things still lie under the great tree.
+[D5 06:15] OBS: watered 0 crops
+[D5 06:15] OBS: harvested 0
+[D5 06:17] MSG: At first light the grass at the field's far edge is pressed flat in a wide ring, wider than a man would leave. Sanity -3. The house is kept well, and you sleep easier. +2 sanity. (2 of 4)
+
+Bright things still lie under the great tree.
+[D5 06:27] MSG: At first light the grass at the field's far edge is pressed flat in a wide ring, wider than a man would leave. Sanity -3. The house is kept well, and you sleep easier. +2 sanity. (2 of 4)
+[D5 06:34] MSG: At first light the grass at the field's far edge is pressed flat in a wide ring, wider than a man would leave. Sanity -3. The house is kept well, and you sleep easier. +2 sanity. (2 of 4)
+
+Planted turnip. +5 Farming XP
+[D5 06:37] MSG: Word of a well-kept farm gets round: 3 coins for odd jobs (3 nights in a row). The morning is drizzle. The crows were busy at dawn. Small bright things lie under the great tree. (3 of 4)
+
+Planted turnip. +5 Farming XP
+[D5 06:42] OBS: planted 3 more
+[D5 06:42] OBS: watered 0 crops
+[D5 06:52] MSG: Word of a well-kept farm gets round: 3 coins for odd jobs (3 nights in a row). The morning is drizzle. The crows were busy at dawn. Small bright things lie under the great tree. (3 of 4)
+[D5 06:57] MSG: Old Maren has come up the lane and is sitting on the edge of the farm stand, until four. (4 of 4)
+[D5 07:10] MSG: Achievement: Hundreds of Them. See the Hollow at the far edge of the field.
+[D5 07:13] MSG: Achievement: Hundreds of Them. See the Hollow at the far edge of the field.
+
+You pick rose hips. +11 Bushcrafting XP
+[D5 07:22] MSG: Where it stood, a torn page is caught on the fence wire. It's in your diary: "What the crows bring" (4 of 10).
+
+You pick rose hips. +11 Bushcrafting XP
+[D5 07:26] MSG: Where it stood, a torn page is caught on the fence wire. It's in your diary: "What the crows bring" (4 of 10).
+[D5 07:57] MSG: You pick pear. +8 Bushcrafting XP
+[D5 08:17] MSG: You pick chanterelles. +14 Bushcrafting XP
+[D5 08:46] MSG: You pick chanterelles. +14 Bushcrafting XP
+[D5 08:48] OBS: picked 4 forage
+[D5 08:48] OBS: bag holds: ?, ?, ?, ?, ?, ?, ?, ?, ?, ? (hunger 52)
+[D5 08:48] MSG: You eat the apple. Food 98/100, HP 10/10
+[D5 08:48] ACT: ate from bag slot 0: hunger 52 -> 98 ("You eat the apple. Food 98/100, HP 10/10")
+[D5 08:58] MSG: You drink from the pond. Cold and muddy, but it helps. Water 89/100.
+[D5 09:53] MSG: Gathered sticks and fiber from the brush. +15 Bushcrafting XP
+[D5 09:55] OBS: gathered 1 brush piles
+[D5 10:27] MSG: You start chopping. Keep at it.
+[D5 10:27] MSG: You fell the tree. +3 wood. +20 Forestry XP
+[D5 10:38] MSG: You start chopping. Keep at it.
+[D5 10:38] MSG: Chip, chip. The tree is still standing.
+[D5 10:44] MSG: You fell the tree. +3 wood. +20 Forestry XP
+[D5 10:45] UI: Quests [tab=Quests]: 
+[D5 10:46] UI: House [tab=House]: =mend  =job
+[D5 10:46] ACT: House, Repair pressed: stage 1 -> 1 ("You fell the tree. +3 wood. +20 Forestry XP")
+[D5 10:46] MSG: You mend a board. +20 Carpentry XP. A bead of resin wells from the new board. +1 resin.
+[D5 10:46] ACT: House, mend pressed: "You mend a board. +20 Carpentry XP. A bead of resin wells from the new board. +1 resin."
+[D5 10:46] MSG: Job done: deliver forage. +24 coins, +14 Bushcrafting XP
+[D5 10:46] ACT: House, job pressed: "Job done: deliver forage. +24 coins, +14 Bushcrafting XP"
+[D5 10:47] UI: Craft other [tab=Craft]: =craft_pick:lantern  =craft_pick:bandage  =craft_pick:rope  =craft_pick:crow_charm  (Upgrade=advance_lantern)
+[D5 11:09] UI: Farm stand [tab=Trade]: =sell_food:blackberries  =sell_food:chanterelles
+[D5 11:09] MSG: Sold 1 for 3 coins.
+[D5 11:09] ACT: stand sell_food:blackberries: coins 124 -> 127 ("Sold 1 for 3 coins.")
+[D5 11:09] MSG: Sold 1 for 7 coins.
+[D5 11:09] ACT: stand sell_food:chanterelles: coins 127 -> 134 ("Sold 1 for 7 coins.")
+[D5 11:10] ACT: walking to the cave at the west edge
+[D5 12:04] MSG: You step into the cave. It smells of damp stone, and something skitters in the dark.
+[D5 12:05] MSG: Pinned under a stone at the cave mouth, a torn page. It's in your diary: "The bell" (5 of 10).
+
+You step into the cave. It smells of damp stone, and something skitters in the dark.
+[D5 12:07] SHOT: art/style_tests/CCH-EVENING-001/play_cautious/16_cave_entry_d5.png
+[D5 12:07] OBS: in the cave: lantern tier 1, 7 foes (bat, bat, bat, lizard, lizard, snake, snake), 8 ore nodes, weapon=hoe, pick tier 0
+[D5 12:10] MSG: Pinned under a stone at the cave mouth, a torn page. It's in your diary: "The bell" (5 of 10).
+
+You need a pick for that. Make a stone pick in the Craft section of the section wheel (Shift).
+[D5 12:12] OBS: ore with no pick: "Pinned under a stone at the cave mouth, a torn page. It's in your diary: "The bell" (5 of 10).
+
+You need a pick for that. Make a stone pick in the Craft section of the section wheel (Shift)."
+[D5 12:15] MSG: Pinned under a stone at the cave mouth, a torn page. It's in your diary: "The bell" (5 of 10).
+
+You step back out into the light.
+[D5 12:18] OBS: after the cave: in_cave=false coins=134 hp=10 food=90 water=79 warmth=95 sanity=94 tool=axe inside=false tile=(25, 17) pack={"chanterelles":1} mats={"feathers":1,"fiber":5,"lamp_oil":1,"resin":1,"sticks":12,"wood":18}
+[D5 12:23] MSG: You step back out into the light.
+[D5 18:03] MSG: You step inside. The air is cold and smells of old wood.
+[D5 18:06] MSG: Bright things still lie under the great tree.
+[D5 19:08] MSG: You step inside. The air is cold and smells of old wood.
+[D5 19:50] MSG: The fire is out. Nothing warms the house through the night, and you wake chilled.
+[D6 19:50] MSG: You sleep through the night. Your crops grew overnight. The thing at the field's edge is gone by one o'clock. It came a little closer first. Sanity -29. The shadow came closer in the night. (1 of 3)
+
+The fire is out. Nothing warms the house through the night, and you wake chilled.
+[D6 19:50] CARD: Night settles over the farm.
+[D6 19:50] CARD: Day 6. The morning is overcast.
+[D6 06:00] EVE: {"bed_at":19.58,"busy_h":0.12,"day":5,"faced":"","fed":0,"fire_19":0.0,"firewood_19":0,"firewood_bed":0,"grace_used":true,"idle_h":0.4,"morning_sanity":73,"night":"field","night_faced":false,"night_left_alone":true,"noticed":false,"read":false,"sanity_19":94,"sanity_bed":95,"sat":false,"sign":"","sign_tonight":"","sit_blocked":"The hearth is cold. Light the fire first.","stayed_up":false,"style":"cautious","tended":false,"visitor":"","warmth_19":100,"warmth_bed":100}
+[D6 06:00] OBS: --- day 6 begins: coins=138 hp=10 food=72 water=56 warmth=99 sanity=73 tool=axe inside=true tile=(4, 65) pack={"chanterelles":1} mats={"feathers":1,"fiber":5,"lamp_oil":1,"resin":1,"sticks":12,"wood":18}; weather cloudy; season Autumn
+[D6 06:17] MSG: You sleep through the night. Your crops grew overnight. The thing at the field's edge is gone by one o'clock. It came a little closer first. Sanity -29. The shadow came closer in the night. (1 of 3)
+[D6 06:20] MSG: A line of dead grass runs from it to your crops, and 2 of them have wilted back. The house is kept well, and you sleep easier. +2 sanity. Word of a well-kept farm gets round: 4 coins for odd jobs (4 nights in a row). (2 of 3)
+[D6 06:34] MSG: A line of dead grass runs from it to your crops, and 2 of them have wilted back. The house is kept well, and you sleep easier. +2 sanity. Word of a well-kept farm gets round: 4 coins for odd jobs (4 nights in a row). (2 of 3)
+
+Watered from the bucket. 7 left. The pump and hose at the Well save the walk.
+[D6 06:39] MSG: A line of dead grass runs from it to your crops, and 2 of them have wilted back. The house is kept well, and you sleep easier. +2 sanity. Word of a well-kept farm gets round: 4 coins for odd jobs (4 nights in a row). (2 of 3)
+
+Watered from the bucket. 6 left. The pump and hose at the Well save the walk.
+[D6 06:43] MSG: The morning is overcast. The pond is boiling with fish this morning. Catches come easier all day. The postman has come up the lane and is waiting by your door with his satchel, until four. (3 of 3)
+
+Watered from the bucket. 6 left. The pump and hose at the Well save the walk.
+[D6 06:44] MSG: The morning is overcast. The pond is boiling with fish this morning. Catches come easier all day. The postman has come up the lane and is waiting by your door with his satchel, until four. (3 of 3)
+
+Watered from the bucket. 5 left. The pump and hose at the Well save the walk.
+[D6 06:48] MSG: The morning is overcast. The pond is boiling with fish this morning. Catches come easier all day. The postman has come up the lane and is waiting by your door with his satchel, until four. (3 of 3)
+
+Watered from the bucket. 4 left. The pump and hose at the Well save the walk.
+[D6 06:51] OBS: watered 4 crops
+[D6 06:51] OBS: harvested 0
+[D6 07:05] MSG: The morning is overcast. The pond is boiling with fish this morning. Catches come easier all day. The postman has come up the lane and is waiting by your door with his satchel, until four. (3 of 3)
+[D6 07:09] MSG: You pick chanterelles. +14 Bushcrafting XP
+[D6 07:25] MSG: You pick chanterelles. +14 Bushcrafting XP
+[D6 08:01] MSG: You pick blackberries. +11 Bushcrafting XP
+[D6 08:06] MSG: You pick apple. +8 Bushcrafting XP
+[D6 08:07] OBS: picked 4 forage
+[D6 08:28] MSG: You drink from the pond. Cold and muddy, but it helps. Water 89/100. You fill the bucket (8 waterings).
+[D6 08:30] OBS: gathered 0 brush piles
+[D6 08:50] MSG: You start chopping. Keep at it.
+[D6 08:50] MSG: You fell the tree. +3 wood. +20 Forestry XP
+[D6 08:52] PROBLEM: no tree could be reached to chop
+[D6 08:52] UI: Quests [tab=Quests]: 
+[D6 08:53] UI: House [tab=House]: =mend  =job
+[D6 08:53] ACT: House, Repair pressed: stage 1 -> 1 ("You fell the tree. +3 wood. +20 Forestry XP")
+[D6 08:53] MSG: You mend a board. +20 Carpentry XP. The offcuts make good kindling. +2 sticks.
+[D6 08:53] ACT: House, mend pressed: "You mend a board. +20 Carpentry XP. The offcuts make good kindling. +2 sticks."
+[D6 08:53] ACT: House, job pressed: "You mend a board. +20 Carpentry XP. The offcuts make good kindling. +2 sticks."
+[D6 08:53] UI: Craft other [tab=Craft]: =craft_pick:lantern  =craft_pick:bandage  =craft_pick:rope  =craft_pick:crow_charm  (Upgrade=advance_lantern)
+[D6 09:50] UI: Farm stand [tab=Trade]: =sell_food:blackberries  =sell_food:chanterelles
+[D6 09:50] MSG: Sold 1 for 3 coins.
+[D6 09:50] ACT: stand sell_food:blackberries: coins 138 -> 141 ("Sold 1 for 3 coins.")
+[D6 09:50] MSG: Sold 1 for 7 coins.
+[D6 09:50] ACT: stand sell_food:chanterelles: coins 141 -> 148 ("Sold 1 for 7 coins.")
+[D6 17:31] OBS: bag holds: ?, ?, ?, ?, ?, ?, ?, ? (hunger 44)
+[D6 17:31] MSG: You eat the apple. Food 90/100, HP 10/10
+[D6 17:31] ACT: ate from bag slot 0: hunger 44 -> 90 ("You eat the apple. Food 90/100, HP 10/10")
+[D6 18:02] MSG: You step inside. The air is cold and smells of old wood.
+[D6 19:07] MSG: You step inside. The air is cold and smells of old wood.
+[D6 19:49] MSG: The fire is out. Nothing warms the house through the night, and you wake chilled.
+[D7 19:49] MSG: You sleep through the night. Your crops grew overnight. The knocking stopped. Something walked away slowly through the crops. Sanity -34. The shadow came closer in the night. (1 of 3)
+
+The fire is out. Nothing warms the house through the night, and you wake chilled.
+[D7 19:49] CARD: Night settles over the farm.
+[D7 19:49] CARD: Day 7. The morning is drizzle.
+[D7 06:00] EVE: {"bed_at":19.55,"busy_h":0.12,"day":6,"faced":"","fed":0,"fire_19":0.0,"firewood_19":0,"firewood_bed":0,"grace_used":true,"idle_h":0.38,"morning_sanity":54,"night":"knock","night_faced":false,"night_left_alone":true,"noticed":false,"read":false,"sanity_19":78,"sanity_bed":78,"sat":false,"sign":"","sign_tonight":"","sit_blocked":"The hearth is cold. Light the fire first.","stayed_up":false,"style":"cautious","tended":false,"visitor":"","warmth_19":100,"warmth_bed":100}
+[D7 06:00] OBS: --- day 7 begins: coins=153 hp=10 food=84 water=55 warmth=99 sanity=54 tool=axe inside=true tile=(4, 65) pack={"chanterelles":2,"firewood":3} mats={"feathers":1,"fiber":4,"lamp_oil":1,"resin":1,"sticks":14,"wood":20}; weather drizzle; season Autumn
+[D7 06:15] OBS: watered 0 crops
+[D7 06:15] OBS: harvested 0
+[D7 06:17] MSG: You sleep through the night. Your crops grew overnight. The knocking stopped. Something walked away slowly through the crops. Sanity -34. The shadow came closer in the night. (1 of 3)
+[D7 06:19] MSG: A line of dead grass runs from it to your crops, and 2 of them have wilted back. The house is kept well, and you sleep easier. +2 sanity. Word of a well-kept farm gets round: 5 coins for odd jobs (5 nights in a row). The morning is drizzle. (2 of 3)
+[D7 06:34] MSG: A line of dead grass runs from it to your crops, and 2 of them have wilted back. The house is kept well, and you sleep easier. +2 sanity. Word of a well-kept farm gets round: 5 coins for odd jobs (5 nights in a row). The morning is drizzle. (2 of 3)
+
+You pick blackberries. +11 Bushcrafting XP
+[D7 06:44] MSG: A neighbour drops off a bundle of kindling. "Your fire was out last winter," she says, "before you came." The postman has come up the lane and is waiting by your door with his satchel, until four. (3 of 3)
+
+You pick blackberries. +11 Bushcrafting XP
+[D7 06:48] MSG: A neighbour drops off a bundle of kindling. "Your fire was out last winter," she says, "before you came." The postman has come up the lane and is waiting by your door with his satchel, until four. (3 of 3)
+[D7 07:22] MSG: You pick pear. +8 Bushcrafting XP
+[D7 07:49] MSG: You pick blackberries. +11 Bushcrafting XP
+[D7 08:23] MSG: You pick apple. +8 Bushcrafting XP
+[D7 08:48] MSG: You pick blackberries. +11 Bushcrafting XP
+[D7 08:49] OBS: picked 5 forage
+[D7 08:57] MSG: You drink from the pond. Cold and muddy, but it helps. Water 86/100.
+[D7 09:09] MSG: Gathered sticks, fiber, and resin from the brush. +15 Bushcrafting XP
+[D7 09:19] MSG: Gathered sticks and fiber from the brush. +15 Bushcrafting XP
+[D7 09:41] MSG: Gathered sticks and fiber from the brush. +15 Bushcrafting XP
+[D7 09:50] MSG: Gathered sticks, fiber, and resin from the brush. +15 Bushcrafting XP
+[D7 10:13] MSG: Gathered sticks and fiber from the brush. +15 Bushcrafting XP
+[D7 10:22] MSG: Gathered sticks, fiber, and resin from the brush. +15 Bushcrafting XP
+[D7 10:24] OBS: gathered 6 brush piles
+[D7 10:32] MSG: You start chopping. Keep at it.
+[D7 10:33] MSG: Chip, chip. The tree is still standing.
+[D7 10:36] MSG: You fell the tree. +3 wood. +20 Forestry XP
+[D7 10:45] MSG: You start chopping. Keep at it.
+[D7 10:45] MSG: Chip, chip. The tree is still standing.
+[D7 10:48] MSG: You fell the tree. +3 wood. +20 Forestry XP
+[D7 10:49] UI: Quests [tab=Quests]: 
+[D7 10:50] UI: House [tab=House]: =mend  =job
+[D7 10:50] ACT: House, Repair pressed: stage 1 -> 1 ("You fell the tree. +3 wood. +20 Forestry XP")
+[D7 10:50] MSG: You mend a board. +20 Carpentry XP. A bead of resin wells from the new board. +1 resin.
+[D7 10:50] ACT: House, mend pressed: "You mend a board. +20 Carpentry XP. A bead of resin wells from the new board. +1 resin."
+[D7 10:50] ACT: House, job pressed: "You mend a board. +20 Carpentry XP. A bead of resin wells from the new board. +1 resin."
+[D7 10:50] UI: Craft other [tab=Craft]: =craft_pick:lantern  =craft_pick:bandage  =craft_pick:rope  =craft_pick:crow_charm  Upgrade=advance_lantern
+[D7 11:38] UI: Farm stand [tab=Trade]: =sell_food:pear  =sell_food:blackberries  =sell_food:chanterelles
+[D7 11:38] MSG: Sold 1 for 3 coins.
+[D7 11:38] ACT: stand sell_food:pear: coins 153 -> 156 ("Sold 1 for 3 coins.")
+[D7 11:38] ACT: stand sell_food:blackberries: coins 156 -> 159 ("Sold 1 for 3 coins.")
+[D7 11:38] MSG: Sold 1 for 7 coins.
+[D7 11:38] ACT: stand sell_food:chanterelles: coins 159 -> 166 ("Sold 1 for 7 coins.")
+[D7 18:04] MSG: You step inside. The air is cold and smells of old wood.
+[D7 18:13] MSG: You feed the fire. It will burn for about 3 more hours.
+[D7 19:00] MSG: Frost is creeping across the farmhouse's front window.
+[D7 19:09] MSG: The boards over the window are cold. Colder than the evening air ought to allow. Whatever comes tonight may come to the house. It will want a good fire.
+
+Frost is creeping across the farmhouse's front window.
+[D7 19:10] ACT: read the chill sign: "The boards over the window are cold. Colder than the evening air ought to allow. Whatever comes tonight may come to the house. It will want a good fire.
+
+Frost is creeping across the farmhouse's front window."
+[D7 19:12] MSG: The boards over the window are cold. Colder than the evening air ought to allow. Whatever comes tonight may come to the house. It will want a good fire.
+
+You step inside. The air is cold and smells of old wood.
+[D7 19:21] MSG: The boards over the window are cold. Colder than the evening air ought to allow. Whatever comes tonight may come to the house. It will want a good fire.
+
+You feed the fire. It will burn for about 5 more hours.
+[D7 19:51] MSG: The boards over the window are cold. Colder than the evening air ought to allow. Whatever comes tonight may come to the house. It will want a good fire.
+
+You bank the fire with a log, set the guard, draw the curtains and drop the latch. The house is ready for the night, as ready as it can be.
+[D7 19:52] ACT: tended the hearth: firewood 1 -> 0 ("The boards over the window are cold. Colder than the evening air ought to allow. Whatever comes tonight may come to the house. It will want a good fire.
+
+You bank the fire with a log, set the guard, draw the curtains and drop the latch. The house is ready for the night, as ready as it can be.")
+[D7 20:03] MSG: You bank the fire with a log, set the guard, draw the curtains and drop the latch. The house is ready for the night, as ready as it can be.
+[D8 20:25] MSG: You sleep through the night. Your crops grew overnight. The lights in the pond went out one by one. Sanity -23. The banked fire burned low and steady through the night. The house is kept well, and you sleep easier. +2 sanity. (1 of 2)
+[D8 20:25] CARD: Night settles over the farm.
+[D8 20:25] CARD: Day 8. The morning is drizzle.
+[D8 06:00] EVE: {"bed_at":20.14,"busy_h":0.69,"day":7,"faced":"","fed":2,"fire_19":2.8,"firewood_19":2,"firewood_bed":0,"grace_used":true,"idle_h":0.38,"morning_sanity":43,"night":"pond","night_faced":false,"night_left_alone":true,"noticed":true,"read":true,"sanity_19":55,"sanity_bed":55,"sat":false,"sign":"chill","sign_tonight":"chill","stayed_up":false,"style":"cautious","tended":true,"visitor":"","warmth_19":100,"warmth_bed":100}
+[D8 06:00] OBS: --- day 8 begins: coins=172 hp=10 food=50 water=52 warmth=100 sanity=43 tool=axe inside=true tile=(4, 65) pack={"apples":1,"blackberries":2,"chanterelles":1} mats={"feathers":1,"fiber":9,"lamp_oil":1,"resin":5,"sticks":20,"wood":25}; weather drizzle; season Autumn
+[D8 06:13] MSG: You sleep through the night. Your crops grew overnight. The lights in the pond went out one by one. Sanity -23. The banked fire burned low and steady through the night. The house is kept well, and you sleep easier. +2 sanity. (1 of 2)
+
+Bright things still lie under the great tree.
+[D8 06:15] OBS: watered 0 crops
+[D8 06:23] MSG: Word of a well-kept farm gets round: 6 coins for odd jobs (6 nights in a row). The morning is drizzle. The crows were busy at dawn. Small bright things lie under the great tree. (2 of 2)
+
+Bright things still lie under the great tree.
+[D8 06:27] MSG: Word of a well-kept farm gets round: 6 coins for odd jobs (6 nights in a row). The morning is drizzle. The crows were busy at dawn. Small bright things lie under the great tree. (2 of 2)
+[D8 06:32] MSG: Word of a well-kept farm gets round: 6 coins for odd jobs (6 nights in a row). The morning is drizzle. The crows were busy at dawn. Small bright things lie under the great tree. (2 of 2)
+
+Harvested 1 turnip and a seed. +25 Farming XP
+[D8 06:32] MSG: Word of a well-kept farm gets round: 6 coins for odd jobs (6 nights in a row). The morning is drizzle. The crows were busy at dawn. Small bright things lie under the great tree. (2 of 2)
+
+Homestead step done: Open the second field. +20 coins. 2 of 14 done. Next: Build the coop.
+[D8 06:36] MSG: Word of a well-kept farm gets round: 6 coins for odd jobs (6 nights in a row). The morning is drizzle. The crows were busy at dawn. Small bright things lie under the great tree. (2 of 2)
+
+Harvested 1 turnip and a seed. +25 Farming XP
+[D8 06:38] OBS: harvested 2
+[D8 06:40] MSG: Word of a well-kept farm gets round: 6 coins for odd jobs (6 nights in a row). The morning is drizzle. The crows were busy at dawn. Small bright things lie under the great tree. (2 of 2)
+
+Planted turnip. +5 Farming XP
+[D8 06:43] MSG: Chapter complete: Food Takes Time. Reward: 50 Farming XP
+
+Planted turnip. +5 Farming XP
+[D8 06:45] OBS: planted 2 more
+[D8 06:45] OBS: watered 0 crops
+[D8 06:53] MSG: Chapter complete: The Overgrown Plot. Reward: 3 pumpkin seeds
+
+Planted turnip. +5 Farming XP
+[D8 06:55] MSG: Chapter complete: The Overgrown Plot. Reward: 3 pumpkin seeds
+[D8 07:04] MSG: Next: Feed Yourself Through the Cold. It's in your diary and the Quests section.
+[D8 07:16] MSG: Achievement: Food Takes Time. Harvest your first crop.
+[D8 07:18] MSG: Achievement: Food Takes Time. Harvest your first crop.
+
+You pick blackberries. +11 Bushcrafting XP
+[D8 07:30] MSG: You pick blackberries. +11 Bushcrafting XP
+[D8 08:01] MSG: You pick pear. +8 Bushcrafting XP
+[D8 08:26] MSG: You pick blackberries. +11 Bushcrafting XP
+[D8 08:59] MSG: You pick pear. +8 Bushcrafting XP
+[D8 09:21] MSG: You pick chanterelles. +14 Bushcrafting XP
+[D8 09:23] OBS: picked 5 forage
+[D8 09:23] OBS: bag holds: ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ? (hunger 42)
+[D8 09:23] MSG: You eat the turnip. Food 64/100, HP 10/10
+[D8 09:23] ACT: ate from bag slot 0: hunger 42 -> 64 ("You eat the turnip. Food 64/100, HP 10/10")
+[D8 09:23] MSG: You eat the apple. Food 100/100, HP 10/10
+[D8 09:23] ACT: ate from bag slot 1: hunger 64 -> 100 ("You eat the apple. Food 100/100, HP 10/10")
+[D8 09:25] MSG: You drink from the pond. Cold and muddy, but it helps. Water 81/100.
+[D8 10:20] MSG: Gathered sticks and fiber from the brush. +15 Bushcrafting XP
+[D8 10:27] MSG: Gathered sticks, fiber, and resin from the brush. +15 Bushcrafting XP
+[D8 10:29] OBS: gathered 2 brush piles
+[D8 10:38] MSG: You start chopping. Keep at it.
+[D8 10:38] MSG: Chip, chip. The tree is still standing.
+[D8 10:41] MSG: You fell the tree. +3 wood. +20 Forestry XP
+[D8 11:25] MSG: You start chopping. Keep at it.
+[D8 11:25] MSG: Chip, chip. The tree is still standing.
+[D8 11:34] MSG: You fell the tree. +3 wood. +20 Forestry XP
+[D8 11:35] UI: Quests [tab=Quests]: 
+[D8 11:35] UI: House [tab=House]: =mend  =job
+[D8 11:35] ACT: House, Repair pressed: stage 1 -> 1 ("You fell the tree. +3 wood. +20 Forestry XP")
+[D8 11:35] MSG: You mend a board. +20 Carpentry XP. A bead of resin wells from the new board. +1 resin.
+[D8 11:35] ACT: House, mend pressed: "You mend a board. +20 Carpentry XP. A bead of resin wells from the new board. +1 resin."
+[D8 11:35] ACT: House, job pressed: "You mend a board. +20 Carpentry XP. A bead of resin wells from the new board. +1 resin."
+[D8 11:36] UI: Craft other [tab=Craft]: =craft_pick:lantern  =craft_pick:bandage  =craft_pick:rope  =craft_pick:crow_charm  Upgrade=advance_lantern
+[D8 11:42] UI: Farm stand [tab=Trade]: =sell_food:turnip  =sell_food:pear  =sell_food:blackberries  =sell_food:chanterelles
+[D8 11:42] SHOT: art/style_tests/CCH-EVENING-001/play_cautious/17_d8_stand.png
+[D8 11:42] MSG: Sold 1 for 9 coins.
+[D8 11:42] ACT: stand sell_food:turnip: coins 192 -> 201 ("Sold 1 for 9 coins.")
+[D8 11:42] MSG: Sold 1 for 3 coins.
+[D8 11:42] ACT: stand sell_food:pear: coins 201 -> 204 ("Sold 1 for 3 coins.")
+[D8 11:42] ACT: stand sell_food:blackberries: coins 204 -> 207 ("Sold 1 for 3 coins.")
+[D8 11:42] MSG: Sold 1 for 7 coins.
+[D8 11:42] ACT: stand sell_food:chanterelles: coins 207 -> 214 ("Sold 1 for 7 coins.")
+[D8 12:48] MSG: The fire has gone out.
+[D8 18:03] MSG: You step inside. The air is cold and smells of old wood.
+[D8 18:06] MSG: Bright things still lie under the great tree.
+[D8 19:08] MSG: You step inside. The air is cold and smells of old wood.
+[D8 19:50] MSG: The fire is out. Nothing warms the house through the night, and you wake chilled.
+[D9 19:50] MSG: You sleep through the night. Your crops grew overnight. The crows came down in the night. Sanity -20. 1 crop pecked back a stage. The house is kept well, and you sleep easier. +2 sanity. (1 of 2)
+
+The fire is out. Nothing warms the house through the night, and you wake chilled.
+[D9 19:50] CARD: Night settles over the farm.
+[D9 19:50] CARD: Day 9. The morning is overcast.
+[D9 06:00] EVE: {"bed_at":19.58,"busy_h":0.12,"day":8,"faced":"","fed":0,"fire_19":0.0,"firewood_19":0,"firewood_bed":0,"grace_used":true,"idle_h":0.4,"morning_sanity":42,"night":"crows","night_faced":false,"night_left_alone":true,"noticed":false,"read":false,"sanity_19":50,"sanity_bed":51,"sat":false,"sign":"","sign_tonight":"","sit_blocked":"The hearth is cold. Light the fire first.","stayed_up":false,"style":"cautious","tended":false,"visitor":"","warmth_19":100,"warmth_bed":100}
+[D9 06:00] OBS: --- day 9 begins: coins=221 hp=10 food=74 water=50 warmth=99 sanity=42 tool=axe inside=true tile=(4, 65) pack={"blackberries":3,"chanterelles":1,"crow_charm":1,"pears":1,"pumpkin_seeds":3} mats={"feathers":1,"fiber":10,"lamp_oil":1,"resin":7,"sticks":22,"wood":30}; weather cloudy; season Autumn
+[D9 06:13] MSG: You sleep through the night. Your crops grew overnight. The crows came down in the night. Sanity -20. 1 crop pecked back a stage. The house is kept well, and you sleep easier. +2 sanity. (1 of 2)
+
+The mushroom ring is still at the edge of the wood.
+[D9 06:20] MSG: Word of a well-kept farm gets round: 7 coins for odd jobs (7 nights in a row). Someone left a crow charm on the step. The morning is overcast. A ring of pale mushrooms has come up at the edge of the wood overnight. (2 of 2)
+
+The mushroom ring is still at the edge of the wood.
+[D9 06:27] MSG: Word of a well-kept farm gets round: 7 coins for odd jobs (7 nights in a row). Someone left a crow charm on the step. The morning is overcast. A ring of pale mushrooms has come up at the edge of the wood overnight. (2 of 2)
+[D9 06:34] MSG: Word of a well-kept farm gets round: 7 coins for odd jobs (7 nights in a row). Someone left a crow charm on the step. The morning is overcast. A ring of pale mushrooms has come up at the edge of the wood overnight. (2 of 2)
+
+Watered from the bucket. 7 left. The pump and hose at the Well save the walk.
+[D9 06:39] MSG: Word of a well-kept farm gets round: 7 coins for odd jobs (7 nights in a row). Someone left a crow charm on the step. The morning is overcast. A ring of pale mushrooms has come up at the edge of the wood overnight. (2 of 2)
+
+Watered from the bucket. 6 left. The pump and hose at the Well save the walk.
+[D9 06:43] MSG: Tucked among the feathers, a torn page. It's in your diary: "Feathers" (6 of 10).
+
+Watered from the bucket. 6 left. The pump and hose at the Well save the walk.
+[D9 06:43] MSG: Tucked among the feathers, a torn page. It's in your diary: "Feathers" (6 of 10).
+
+Watered from the bucket. 5 left. The pump and hose at the Well save the walk.
+[D9 06:46] OBS: watered 3 crops
+[D9 06:46] OBS: harvested 0
+[D9 07:00] MSG: Tucked among the feathers, a torn page. It's in your diary: "Feathers" (6 of 10).
+[D9 07:11] MSG: You pick blackberries. +11 Bushcrafting XP
+[D9 07:28] MSG: You pick blackberries. +11 Bushcrafting XP
+[D9 08:25] MSG: You pick pear. +8 Bushcrafting XP
+[D9 08:30] MSG: You pick apple. +8 Bushcrafting XP
+[D9 08:57] MSG: You pick rose hips. +11 Bushcrafting XP
+[D9 08:58] OBS: picked 5 forage
+[D9 09:00] MSG: You drink from the pond. Cold and muddy, but it helps. Water 81/100. You fill the bucket (8 waterings).
+[D9 09:02] OBS: gathered 0 brush piles
+[D9 09:07] MSG: You start chopping. Keep at it.
+[D9 09:07] MSG: Chip, chip. The tree is still standing.
+[D9 09:13] MSG: You fell the tree. +3 wood. +20 Forestry XP
+[D9 09:26] MSG: You start chopping. Keep at it.
+[D9 09:26] MSG: Chip, chip. The tree is still standing.
+[D9 09:35] MSG: You fell the tree. +3 wood. +20 Forestry XP
+[D9 09:36] UI: Quests [tab=Quests]: 
+[D9 09:36] UI: House [tab=House]: =mend  =job
+[D9 09:36] ACT: House, Repair pressed: stage 1 -> 1 ("You fell the tree. +3 wood. +20 Forestry XP")
+[D9 09:36] MSG: You mend a board. +20 Carpentry XP. The offcuts make good kindling. +2 sticks.
+[D9 09:36] ACT: House, mend pressed: "You mend a board. +20 Carpentry XP. The offcuts make good kindling. +2 sticks."
+[D9 09:36] ACT: House, job pressed: "You mend a board. +20 Carpentry XP. The offcuts make good kindling. +2 sticks."
+[D9 09:37] UI: Craft other [tab=Craft]: =craft_pick:lantern  =craft_pick:bandage  =craft_pick:rope  =craft_pick:crow_charm  Upgrade=advance_lantern
+[D9 10:07] UI: Farm stand [tab=Trade]: =sell_food:pear  =sell_food:blackberries  =sell_food:rosehips  =sell_food:chanterelles
+[D9 10:07] SHOT: art/style_tests/CCH-EVENING-001/play_cautious/18_d9_stand.png
+[D9 10:07] MSG: Sold 1 for 3 coins.
+[D9 10:07] ACT: stand sell_food:pear: coins 221 -> 224 ("Sold 1 for 3 coins.")
+[D9 10:07] ACT: stand sell_food:blackberries: coins 224 -> 227 ("Sold 1 for 3 coins.")
+[D9 10:07] MSG: Sold 1 for 2 coins.
+[D9 10:07] ACT: stand sell_food:rosehips: coins 227 -> 229 ("Sold 1 for 2 coins.")
+[D9 10:07] MSG: Sold 1 for 7 coins.
+[D9 10:07] ACT: stand sell_food:chanterelles: coins 229 -> 236 ("Sold 1 for 7 coins.")
+[D9 17:30] OBS: bag holds: ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ? (hunger 47)
+[D9 17:30] MSG: You eat the apple. Food 93/100, HP 10/10
+[D9 17:30] ACT: ate from bag slot 0: hunger 47 -> 93 ("You eat the apple. Food 93/100, HP 10/10")
+[D9 18:03] MSG: You step inside. The air is cold and smells of old wood.
+[D9 18:06] MSG: The mushroom ring is still at the edge of the wood.
+[D9 19:00] MSG: Crows are gathering along the field fence. None of them is calling.
+[D9 19:15] MSG: The crows have gone quiet. Every one of them faces the woods. They lift off together, low over the field, and none of them looks back. Whatever comes tonight, they think it comes for the crops or the water.
+
+Crows are gathering along the field fence. None of them is calling.
+[D9 19:15] MSG: The crows have gone quiet. Every one of them faces the woods. They lift off together, low over the field, and none of them looks back. Whatever comes tonight, they think it comes for the crops or the water.
+[D9 19:16] ACT: read the crows sign: "The crows have gone quiet. Every one of them faces the woods. They lift off together, low over the field, and none of them looks back. Whatever comes tonight, they think it comes for the crops or the water."
+[D9 19:16] SHOT: art/style_tests/CCH-EVENING-001/play_cautious/19_d9_sign_crows_read.png
+[D9 19:26] MSG: The crows have gone quiet. Every one of them faces the woods. They lift off together, low over the field, and none of them looks back. Whatever comes tonight, they think it comes for the crops or the water.
+
+You step inside. The air is cold and smells of old wood.
+[D9 19:41] MSG: The crows have gone quiet. Every one of them faces the woods. They lift off together, low over the field, and none of them looks back. Whatever comes tonight, they think it comes for the crops or the water.
+[D9 22:00] MSG: Pale lights are drifting under the pond's surface, swelling and fading. Your crow charm grows warm. Stand on the bank, face the lights and press Space as they swell brightest, three times.
+[D9 22:02] SHOT: art/style_tests/CCH-EVENING-001/play_cautious/20_d9_night_pond_cautious.png
+[D9 22:39] MSG: The lights gather round your hand. (1 of 3)
+[D9 22:48] MSG: The lights gather round your hand. (2 of 3)
+[D9 22:57] MSG: On the third swell something cold closes around your hand, then lets go of a fish. Two fish.
+[D9 22:57] MSG: Achievement: Something Cold. Reach into the pond on the lights' third swell.
+
+On the third swell something cold closes around your hand, then lets go of a fish. Two fish.
+[D9 23:14] MSG: On the third swell something cold closes around your hand, then lets go of a fish. Two fish.
+[D9 23:35] MSG: You step inside. The air is cold and smells of old wood.
+[D9 23:51] MSG: The fire is out. Nothing warms the house through the night, and you wake chilled.
+[D10 23:51] MSG: You sleep through the night. Your crops grew overnight. 2 fish spoiled in your pack overnight. The house is kept well, and you sleep easier. +2 sanity. Word of a well-kept farm gets round: 8 coins for odd jobs (8 nights in a row). (1 of 2)
+
+The fire is out. Nothing warms the house through the night, and you wake chilled.
+[D10 23:51] CARD: Night settles over the farm.
+[D10 23:51] CARD: Day 10. The morning is downpour.
+[D10 06:00] EVE: {"bed_at":23.63,"busy_h":1.22,"day":9,"faced":"yes","faced_before":0,"fed":0,"fire_19":0.0,"firewood_19":0,"firewood_bed":0,"grace_used":true,"idle_h":2.38,"morning_sanity":54,"night":"pond","night_faced":true,"night_left_alone":false,"noticed":true,"read":true,"sanity_19":48,"sanity_bed":40,"sat":false,"sign":"crows","sign_tonight":"crows","sit_blocked":"The hearth is cold. Light the fire first.","stayed_up":true,"style":"cautious","tended":false,"visitor":"pond","warmth_19":100,"warmth_bed":100}
+[D10 06:00] OBS: --- day 10 begins: coins=244 hp=10 food=78 water=36 warmth=99 sanity=54 tool=axe inside=true tile=(4, 65) pack={"blackberries":4,"pears":1,"pumpkin_seeds":3} mats={"feathers":1,"fiber":9,"lamp_oil":1,"resin":7,"sticks":24,"wood":35}; weather downpour; season Autumn
+[D10 06:13] MSG: You sleep through the night. Your crops grew overnight. 2 fish spoiled in your pack overnight. The house is kept well, and you sleep easier. +2 sanity. Word of a well-kept farm gets round: 8 coins for odd jobs (8 nights in a row). (1 of 2)
+
+Bright things still lie under the great tree.
+[D10 06:15] OBS: watered 0 crops
+[D10 06:15] OBS: harvested 0
+[D10 06:23] MSG: The morning is downpour. The crows were busy at dawn. Small bright things lie under the great tree. (2 of 2)
+
+Bright things still lie under the great tree.
+[D10 06:27] MSG: The morning is downpour. The crows were busy at dawn. Small bright things lie under the great tree. (2 of 2)
+[D10 06:34] MSG: The morning is downpour. The crows were busy at dawn. Small bright things lie under the great tree. (2 of 2)
+
+You pick chanterelles. +14 Bushcrafting XP
+[D10 06:43] MSG: You pick chanterelles. +14 Bushcrafting XP
+[D10 07:24] MSG: You pick chanterelles. +14 Bushcrafting XP
+[D10 07:30] MSG: You pick apple. +8 Bushcrafting XP
+[D10 07:50] MSG: You pick blackberries. +11 Bushcrafting XP
+[D10 08:13] MSG: You pick pear. +8 Bushcrafting XP
+[D10 08:15] OBS: picked 5 forage
+[D10 08:27] MSG: You drink from the pond. Cold and muddy, but it helps. Water 69/100.
+[D10 08:40] MSG: Gathered sticks and fiber from the brush. +15 Bushcrafting XP
+[D10 09:12] MSG: Gathered sticks and fiber from the brush. +15 Bushcrafting XP
+[D10 09:44] MSG: Gathered sticks, fiber, and resin from the brush. +15 Bushcrafting XP
+[D10 09:53] MSG: Gathered sticks and fiber from the brush. +15 Bushcrafting XP
+[D10 09:55] OBS: gathered 6 brush piles
+[D10 10:16] MSG: You start chopping. Keep at it.
+[D10 10:16] MSG: Chip, chip. The tree is still standing.
+[D10 10:34] MSG: You fell the tree. +3 wood. +20 Forestry XP
+[D10 11:03] MSG: You start chopping. Keep at it.
+[D10 11:03] MSG: You fell the tree. +3 wood. +20 Forestry XP
+[D10 11:05] UI: Quests [tab=Quests]: 
+[D10 11:05] UI: House [tab=House]: =mend  =job
+[D10 11:05] ACT: House, Repair pressed: stage 1 -> 1 ("You fell the tree. +3 wood. +20 Forestry XP")
+[D10 11:05] MSG: You mend a board. +20 Carpentry XP. A bead of resin wells from the new board. +1 resin.
+[D10 11:05] ACT: House, mend pressed: "You mend a board. +20 Carpentry XP. A bead of resin wells from the new board. +1 resin."
+[D10 11:05] MSG: Job done: deliver wood. +24 coins, +12 Forestry XP
+[D10 11:05] ACT: House, job pressed: "Job done: deliver wood. +24 coins, +12 Forestry XP"
+[D10 11:06] UI: Craft other [tab=Craft]: =craft_pick:lantern  =craft_pick:bandage  =craft_pick:rope  =craft_pick:crow_charm  Upgrade=advance_lantern
+[D10 11:30] UI: Farm stand [tab=Trade]: =sell_food:pear  =sell_food:blackberries  =sell_food:chanterelles
+[D10 11:30] SHOT: art/style_tests/CCH-EVENING-001/play_cautious/21_d10_stand.png
+[D10 11:30] MSG: Sold 1 for 3 coins.
+[D10 11:30] ACT: stand sell_food:pear: coins 268 -> 271 ("Sold 1 for 3 coins.")
+[D10 11:30] ACT: stand sell_food:blackberries: coins 271 -> 274 ("Sold 1 for 3 coins.")
+[D10 11:30] MSG: Sold 1 for 7 coins.
+[D10 11:30] ACT: stand sell_food:chanterelles: coins 274 -> 281 ("Sold 1 for 7 coins.")
+[D10 12:01] MSG: You drink from the pond. Cold and muddy, but it helps. Water 98/100.
+[D10 17:31] OBS: bag holds: ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ? (hunger 50)
+[D10 17:31] MSG: You eat the apple. Food 96/100, HP 10/10
+[D10 17:31] ACT: ate from bag slot 0: hunger 50 -> 96 ("You eat the apple. Food 96/100, HP 10/10")
+[D10 18:10] MSG: You step inside. The air is cold and smells of old wood.
+[D10 18:13] MSG: Bright things still lie under the great tree.
+[D10 19:08] MSG: You step inside. The air is cold and smells of old wood.
+[D10 19:50] MSG: The fire is out. Nothing warms the house through the night, and you wake chilled.
+[D11 19:50] MSG: You sleep through the night. Your crops grew overnight. The crows came down in the night. Sanity -20. 1 crop pecked back a stage. The house is kept well, and you sleep easier. +2 sanity. (1 of 3)
+
+The fire is out. Nothing warms the house through the night, and you wake chilled.
+[D11 19:50] CARD: Night settles over the farm.
+[D11 19:50] CARD: Day 11. The morning is rain.
+[D11 06:00] EVE: {"bed_at":19.57,"busy_h":0.12,"day":10,"faced":"","fed":0,"fire_19":0.0,"firewood_19":0,"firewood_bed":0,"grace_used":true,"idle_h":0.39,"morning_sanity":50,"night":"crows","night_faced":false,"night_left_alone":true,"noticed":false,"read":false,"sanity_19":59,"sanity_bed":60,"sat":false,"sign":"","sign_tonight":"","sit_blocked":"The hearth is cold. Light the fire first.","stayed_up":false,"style":"cautious","tended":false,"visitor":"","warmth_19":100,"warmth_bed":100}
+[D11 06:00] OBS: --- day 11 begins: coins=289 hp=10 food=90 water=75 warmth=99 sanity=50 tool=axe inside=true tile=(4, 65) pack={"blackberries":4,"chanterelles":1,"pears":1,"pumpkin_seeds":3} mats={"feathers":1,"fiber":14,"lamp_oil":1,"resin":9,"sticks":30,"wood":34}; weather rain; season Autumn
+[D11 06:13] MSG: You sleep through the night. Your crops grew overnight. The crows came down in the night. Sanity -20. 1 crop pecked back a stage. The house is kept well, and you sleep easier. +2 sanity. (1 of 3)
+
+The mushroom ring is still at the edge of the wood.
+[D11 06:15] OBS: watered 0 crops
+[D11 06:15] OBS: harvested 0
+[D11 06:20] MSG: Word of a well-kept farm gets round: 8 coins for odd jobs (9 nights in a row). 2 fence rails tore loose in the night. Mend them before something finds the gap. The morning is rain. (2 of 3)
+
+The mushroom ring is still at the edge of the wood.
+[D11 06:27] MSG: Word of a well-kept farm gets round: 8 coins for odd jobs (9 nights in a row). 2 fence rails tore loose in the night. Mend them before something finds the gap. The morning is rain. (2 of 3)
+[D11 06:35] MSG: Word of a well-kept farm gets round: 8 coins for odd jobs (9 nights in a row). 2 fence rails tore loose in the night. Mend them before something finds the gap. The morning is rain. (2 of 3)
+
+You pick blackberries. +11 Bushcrafting XP
+[D11 06:40] MSG: A ring of pale mushrooms has come up at the edge of the wood overnight. (3 of 3)
+
+You pick blackberries. +11 Bushcrafting XP
+[D11 06:48] MSG: A ring of pale mushrooms has come up at the edge of the wood overnight. (3 of 3)
+[D11 07:03] MSG: You pick rose hips. +11 Bushcrafting XP
+[D11 07:05] MSG: You pick chanterelles. +14 Bushcrafting XP
+[D11 07:35] MSG: You pick apple. +8 Bushcrafting XP
+[D11 07:41] MSG: You pick pear. +8 Bushcrafting XP
+[D11 07:43] OBS: picked 5 forage
+[D11 08:24] MSG: Gathered sticks and fiber from the brush. +15 Bushcrafting XP
+[D11 08:33] OBS: gathered 2 brush piles
+[D11 09:11] MSG: You start chopping. Keep at it.
+[D11 09:11] MSG: Chip, chip. The tree is still standing.
+[D11 09:17] MSG: You fell the tree. +3 wood. +20 Forestry XP
+[D11 09:55] MSG: You start chopping. Keep at it.
+[D11 09:55] MSG: Chip, chip. The tree is still standing.
+[D11 10:01] MSG: You fell the tree. +3 wood. +20 Forestry XP
+[D11 10:02] UI: Quests [tab=Quests]: 
+[D11 10:03] UI: House [tab=House]: =mend  =job
+[D11 10:03] ACT: House, Repair pressed: stage 1 -> 1 ("You fell the tree. +3 wood. +20 Forestry XP")
+[D11 10:03] MSG: You mend a board. +20 Carpentry XP. The offcuts make good kindling. +2 sticks.
+[D11 10:03] ACT: House, mend pressed: "You mend a board. +20 Carpentry XP. The offcuts make good kindling. +2 sticks."
+[D11 10:03] ACT: House, job pressed: "You mend a board. +20 Carpentry XP. The offcuts make good kindling. +2 sticks."
+[D11 10:03] UI: Craft other [tab=Craft]: =craft_pick:lantern  =craft_pick:bandage  =craft_pick:rope  =craft_pick:crow_charm  Upgrade=advance_lantern
+[D11 10:49] UI: Farm stand [tab=Trade]: =sell_food:pear  =sell_food:blackberries  =sell_food:rosehips  =sell_food:chanterelles
+[D11 10:49] SHOT: art/style_tests/CCH-EVENING-001/play_cautious/22_d11_stand.png
+[D11 10:49] MSG: Sold 1 for 3 coins.
+[D11 10:49] ACT: stand sell_food:pear: coins 289 -> 292 ("Sold 1 for 3 coins.")
+[D11 10:49] ACT: stand sell_food:blackberries: coins 292 -> 295 ("Sold 1 for 3 coins.")
+[D11 10:49] MSG: Sold 1 for 2 coins.
+[D11 10:49] ACT: stand sell_food:rosehips: coins 295 -> 297 ("Sold 1 for 2 coins.")
+[D11 10:49] MSG: Sold 1 for 5 coins. The lane has had its fill of chanterelles: it pays less until it wants more.
+[D11 10:49] ACT: stand sell_food:chanterelles: coins 297 -> 302 ("Sold 1 for 5 coins. The lane has had its fill of chanterelles: it pays less until it wants more.")
+[D11 11:20] MSG: You drink from the pond. Cold and muddy, but it helps. Water 99/100.
+[D11 18:08] MSG: You step inside. The air is cold and smells of old wood.
+[D11 18:11] MSG: The mushroom ring is still at the edge of the wood.
+[D11 19:00] MSG: Frost is creeping across the farmhouse's front window.
+[D11 19:09] MSG: The boards over the window are cold. Colder than the evening air ought to allow. Whatever comes tonight may come to the house. It will want a good fire.
+
+Frost is creeping across the farmhouse's front window.
+[D11 19:10] ACT: read the chill sign: "The boards over the window are cold. Colder than the evening air ought to allow. Whatever comes tonight may come to the house. It will want a good fire.
+
+Frost is creeping across the farmhouse's front window."
+[D11 19:12] MSG: The boards over the window are cold. Colder than the evening air ought to allow. Whatever comes tonight may come to the house. It will want a good fire.
+
+You step inside. The air is cold and smells of old wood.
+[D11 19:27] MSG: The boards over the window are cold. Colder than the evening air ought to allow. Whatever comes tonight may come to the house. It will want a good fire.
+[D11 19:55] MSG: The fire is out. Nothing warms the house through the night, and you wake chilled.
+[D12 19:55] MSG: You sleep through the night. Your crops grew overnight. The figure by the house stood there until one o'clock. You felt it the whole time. Sanity -45. The shadow came closer in the night. (1 of 4)
+
+The fire is out. Nothing warms the house through the night, and you wake chilled.
+[D12 19:55] CARD: Night settles over the farm.
+[D12 19:55] CARD: Day 12. The morning is drizzle.
+[D12 06:00] EVE: {"bed_at":19.64,"busy_h":0.19,"day":11,"faced":"","fed":0,"fire_19":0.0,"firewood_19":0,"firewood_bed":0,"grace_used":true,"idle_h":0.38,"morning_sanity":17,"night":"watcher","night_faced":false,"night_left_alone":true,"noticed":true,"read":true,"sanity_19":50,"sanity_bed":50,"sat":false,"sign":"chill","sign_tonight":"chill","stayed_up":false,"style":"cautious","tend_blocked":"The fire needs to be burning well first (about 3 hours of fuel). Feed it.","tended":false,"visitor":"","warmth_19":100,"warmth_bed":100}
+[D12 06:00] OBS: --- day 12 begins: coins=310 hp=10 food=57 water=73 warmth=99 sanity=17 tool=axe inside=true tile=(4, 65) pack={"apples":1,"blackberries":4,"chanterelles":1,"pears":1,"pumpkin_seeds":3} mats={"feathers":1,"fiber":15,"lamp_oil":1,"resin":9,"sticks":34,"wood":39}; weather drizzle; season Autumn
+[D12 06:15] OBS: watered 0 crops
+[D12 06:15] OBS: harvested 0
+[D12 06:17] MSG: You sleep through the night. Your crops grew overnight. The figure by the house stood there until one o'clock. You felt it the whole time. Sanity -45. The shadow came closer in the night. (1 of 4)
+[D12 06:20] MSG: A line of dead grass runs from it to your crops, and 2 of them have wilted back. The house is kept well, and you sleep easier. +2 sanity. Word of a well-kept farm gets round: 8 coins for odd jobs (10 nights in a row). (2 of 4)
+[D12 06:29] MSG: A line of dead grass runs from it to your crops, and 2 of them have wilted back. The house is kept well, and you sleep easier. +2 sanity. Word of a well-kept farm gets round: 8 coins for odd jobs (10 nights in a row). (2 of 4)
+
+You pick chanterelles. +14 Bushcrafting XP
+[D12 06:42] MSG: A line of dead grass runs from it to your crops, and 2 of them have wilted back. The house is kept well, and you sleep easier. +2 sanity. Word of a well-kept farm gets round: 8 coins for odd jobs (10 nights in a row). (2 of 4)
+[D12 06:43] MSG: 1 fence rail tore loose in the night. Mend them before something finds the gap. The morning is drizzle. The vicar has walked up from the chapel: someone told him you haven't been sleeping. (3 of 4)
+[D12 07:04] MSG: He waits at the gate today to bless the house (House section). The pond is boiling with fish this morning. Catches come easier all day. (4 of 4)
+[D12 07:11] MSG: He waits at the gate today to bless the house (House section). The pond is boiling with fish this morning. Catches come easier all day. (4 of 4)
+
+You pick pear. +8 Bushcrafting XP
+[D12 07:16] MSG: He waits at the gate today to bless the house (House section). The pond is boiling with fish this morning. Catches come easier all day. (4 of 4)
+
+You pick apple. +8 Bushcrafting XP
+[D12 07:27] MSG: You pick apple. +8 Bushcrafting XP
+[D12 07:45] MSG: You pick rose hips. +11 Bushcrafting XP
+[D12 08:23] MSG: You pick blackberries. +11 Bushcrafting XP
+[D12 08:24] OBS: picked 5 forage
+[D12 08:24] OBS: bag holds: ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ? (hunger 51)
+[D12 08:24] MSG: You eat the apple. Food 97/100, HP 10/10
+[D12 08:24] ACT: ate from bag slot 0: hunger 51 -> 97 ("You eat the apple. Food 97/100, HP 10/10")
+[D12 08:25] OBS: gathered 0 brush piles
+[D12 08:58] MSG: You start chopping. Keep at it.
+[D12 08:58] MSG: Chip, chip. The tree is still standing.
+[D12 09:01] MSG: You fell the tree. +3 wood. +20 Forestry XP
+[D12 09:09] MSG: You start chopping. Keep at it.
+[D12 09:09] MSG: Chip, chip. The tree is still standing.
+[D12 09:15] MSG: You fell the tree. +3 wood. +20 Forestry XP
+[D12 09:17] UI: Quests [tab=Quests]: 
+[D12 09:17] UI: House [tab=House]: =mend  =job
+[D12 09:17] ACT: House, Repair pressed: stage 1 -> 1 ("You fell the tree. +3 wood. +20 Forestry XP")
+[D12 09:17] MSG: You mend a board. +20 Carpentry XP. Behind the old board, someone hid 2 coins.
+[D12 09:17] ACT: House, mend pressed: "You mend a board. +20 Carpentry XP. Behind the old board, someone hid 2 coins."
+[D12 09:17] MSG: Job done: deliver resin. +20 coins, +12 Bushcrafting XP
+[D12 09:17] ACT: House, job pressed: "Job done: deliver resin. +20 coins, +12 Bushcrafting XP"
+[D12 09:18] UI: Craft other [tab=Craft]: =craft_pick:lantern  =craft_pick:bandage  =craft_pick:rope  =craft_pick:crow_charm  Upgrade=advance_lantern
+[D12 10:14] UI: Farm stand [tab=Trade]: =sell_food:pear  =sell_food:blackberries  =sell_food:rosehips  =sell_food:chanterelles
+[D12 10:14] SHOT: art/style_tests/CCH-EVENING-001/play_cautious/23_d12_stand.png
+[D12 10:14] MSG: Sold 1 for 3 coins.
+[D12 10:14] ACT: stand sell_food:pear: coins 332 -> 335 ("Sold 1 for 3 coins.")
+[D12 10:14] ACT: stand sell_food:blackberries: coins 335 -> 338 ("Sold 1 for 3 coins.")
+[D12 10:14] MSG: Sold 1 for 1 coins. The lane has had its fill of rose hips: it pays less until it wants more.
+[D12 10:14] ACT: stand sell_food:rosehips: coins 338 -> 339 ("Sold 1 for 1 coins. The lane has had its fill of rose hips: it pays less until it wants more.")
+[D12 10:14] MSG: Sold 1 for 2 coins. The lane has had its fill of chanterelles: it pays less until it wants more.
+[D12 10:14] ACT: stand sell_food:chanterelles: coins 339 -> 341 ("Sold 1 for 2 coins. The lane has had its fill of chanterelles: it pays less until it wants more.")
+[D12 10:46] MSG: You drink from the pond. Cold and muddy, but it helps. Water 99/100.
+[D12 12:13] MSG: Weren't you holding the axe? It's the trowel in your hand.
+[D12 18:08] MSG: You step inside. The air is cold and smells of old wood.
+[D12 19:07] MSG: You step inside. The air is cold and smells of old wood.
+[D12 19:49] MSG: The fire is out. Nothing warms the house through the night, and you wake chilled.
+[D13 19:49] MSG: You sleep through the night. Your crops grew overnight. Sanity -9. The house is kept well, and you sleep easier. +2 sanity. Word of a well-kept farm gets round: 8 coins for odd jobs (11 nights in a row). The morning is downpour. (1 of 2)
+
+The fire is out. Nothing warms the house through the night, and you wake chilled.
+[D13 19:49] CARD: Night settles over the farm.
+[D13 19:49] CARD: Day 13. The morning is downpour.
+[D13 06:00] EVE: {"bed_at":19.55,"busy_h":0.12,"day":12,"faced":"","fed":0,"fire_19":0.0,"firewood_19":0,"firewood_bed":0,"grace_used":true,"idle_h":0.38,"morning_sanity":32,"night":"quiet","night_faced":false,"night_left_alone":true,"noticed":false,"read":false,"sanity_19":22,"sanity_bed":23,"sat":false,"sign":"","sign_tonight":"","sit_blocked":"The hearth is cold. Light the fire first.","stayed_up":false,"style":"cautious","tended":false,"visitor":"","warmth_19":100,"warmth_bed":100}
+[D13 06:00] OBS: --- day 13 begins: coins=349 hp=10 food=70 water=72 warmth=99 sanity=32 tool=trowel inside=true tile=(4, 65) pack={"apples":1,"blackberries":4,"chanterelles":1,"pears":1,"pumpkin_seeds":3} mats={"feathers":1,"fiber":14,"lamp_oil":1,"resin":6,"sticks":34,"wood":44}; weather downpour; season Autumn
+[D13 06:13] MSG: You sleep through the night. Your crops grew overnight. Sanity -9. The house is kept well, and you sleep easier. +2 sanity. Word of a well-kept farm gets round: 8 coins for odd jobs (11 nights in a row). The morning is downpour. (1 of 2)
+
+The fallen branch still lies across the path.
+[D13 06:15] OBS: watered 0 crops
+[D13 06:15] OBS: harvested 0
+[D13 06:23] MSG: A big branch came down across the path in the night. The postman has come up the lane and is waiting by your door with his satchel, until four. (2 of 2)
+
+The fallen branch still lies across the path.
+[D13 06:27] MSG: A big branch came down across the path in the night. The postman has come up the lane and is waiting by your door with his satchel, until four. (2 of 2)
+[D13 06:41] MSG: You pick chanterelles. +14 Bushcrafting XP
+[D13 07:09] MSG: You pick pear. +8 Bushcrafting XP
+[D13 07:14] MSG: You pick chanterelles. +14 Bushcrafting XP
+[D13 07:46] MSG: You pick chanterelles. +14 Bushcrafting XP
+[D13 08:22] MSG: You pick pear. +8 Bushcrafting XP
+[D13 08:23] OBS: picked 5 forage
+[D13 08:39] MSG: Gathered sticks and fiber from the brush. +15 Bushcrafting XP
+[D13 09:11] MSG: Gathered sticks and fiber from the brush. +15 Bushcrafting XP
+[D13 09:43] MSG: Gathered sticks, fiber, and resin from the brush. +15 Bushcrafting XP
+[D13 09:52] MSG: Gathered sticks and fiber from the brush. +15 Bushcrafting XP
+[D13 09:54] OBS: gathered 6 brush piles
+[D13 09:54] PROBLEM: no tree could be reached to chop
+[D13 09:55] PROBLEM: no tree could be reached to chop
+[D13 09:55] UI: Quests [tab=Quests]: 
+[D13 09:55] UI: House [tab=House]: =mend  =job
+[D13 09:55] MSG: Repaired. The farmhouse is now Patched. +30 Carpentry XP
+[D13 09:55] ACT: House, Repair pressed: stage 1 -> 2 ("Repaired. The farmhouse is now Patched. +30 Carpentry XP")
+[D13 09:55] MSG: You tidy the house. The air feels a little lighter. +20 Cleaning XP. A paper twist of turnip seed was tucked in a drawer. +2 turnip seeds.
+[D13 09:55] ACT: House, tidy pressed: "You tidy the house. The air feels a little lighter. +20 Cleaning XP. A paper twist of turnip seed was tucked in a drawer. +2 turnip seeds."
+[D13 09:55] MSG: You mend a board. +20 Carpentry XP. Behind the old board, someone hid 6 coins.
+[D13 09:55] ACT: House, mend pressed: "You mend a board. +20 Carpentry XP. Behind the old board, someone hid 6 coins."
+[D13 09:55] MSG: Job done: deliver forage. +24 coins, +14 Bushcrafting XP
+[D13 09:55] ACT: House, job pressed: "Job done: deliver forage. +24 coins, +14 Bushcrafting XP"
+[D13 09:56] UI: Craft other [tab=Craft]: =craft_pick:lantern  =craft_pick:bandage  =craft_pick:rope  =craft_pick:crow_charm  Upgrade=advance_lantern
+[D13 09:57] MSG: Behind the board you just patched, a torn page. It's in your diary: "Elias" (7 of 10).
+
+Homestead step done: Patch the house. +20 coins. 3 of 14 done. Next: Build the coop.
+[D13 10:14] MSG: Behind the board you just patched, a torn page. It's in your diary: "Elias" (7 of 10).
+[D13 10:40] UI: Farm stand [tab=Trade]: =sell_food:blackberries  =sell_food:chanterelles
+[D13 10:40] SHOT: art/style_tests/CCH-EVENING-001/play_cautious/24_d13_stand.png
+[D13 10:40] MSG: Sold 1 for 3 coins.
+[D13 10:40] ACT: stand sell_food:blackberries: coins 399 -> 402 ("Sold 1 for 3 coins.")
+[D13 10:40] MSG: Sold 1 for 5 coins. The lane has had its fill of chanterelles: it pays less until it wants more.
+[D13 10:40] ACT: stand sell_food:chanterelles: coins 402 -> 407 ("Sold 1 for 5 coins. The lane has had its fill of chanterelles: it pays less until it wants more.")
+[D13 11:11] MSG: You drink from the pond. Cold and muddy, but it helps. Water 96/100.
+[D13 14:31] MSG: Weren't you holding the axe? It's the watering hose in your hand.
+[D13 17:31] OBS: bag holds: ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ? (hunger 42)
+[D13 17:31] MSG: You eat the apple. Food 88/100, HP 10/10
+[D13 17:31] ACT: ate from bag slot 0: hunger 42 -> 88 ("You eat the apple. Food 88/100, HP 10/10")
+[D13 18:10] MSG: You step inside. The air is cold and smells of old wood.
+[D13 18:12] MSG: The fallen branch still lies across the path.
+[D13 19:08] MSG: You step inside. The air is cold and smells of old wood.
+[D13 19:48] MSG: The fire is out. Nothing warms the house through the night, and you wake chilled.
+[D14 19:48] MSG: You sleep through the night. Your crops grew overnight. The knocking stopped. Something walked away slowly through the crops. Sanity -34. The shadow came closer in the night. (1 of 4)
+
+The fire is out. Nothing warms the house through the night, and you wake chilled.
+[D14 19:48] CARD: Night settles over the farm.
+[D14 19:48] CARD: Day 14. The morning is foggy.
+[D14 06:00] EVE: {"bed_at":19.56,"busy_h":0.12,"day":13,"faced":"","fed":0,"fire_19":0.0,"firewood_19":0,"firewood_bed":0,"grace_used":true,"idle_h":0.39,"morning_sanity":20,"night":"knock","night_faced":false,"night_left_alone":true,"noticed":false,"read":false,"sanity_19":40,"sanity_bed":40,"sat":false,"sign":"","sign_tonight":"","sit_blocked":"The hearth is cold. Light the fire first.","stayed_up":false,"style":"cautious","tended":false,"visitor":"","warmth_19":100,"warmth_bed":100}
+[D14 06:00] OBS: --- day 14 begins: coins=415 hp=10 food=83 water=70 warmth=99 sanity=20 tool=hose inside=true tile=(4, 65) pack={"blackberries":3,"chanterelles":3,"pumpkin_seeds":3,"seeds":2} mats={"feathers":1,"fiber":15,"lamp_oil":1,"resin":7,"sticks":40,"wood":38}; weather fog; season Autumn
+[D14 06:13] MSG: You sleep through the night. Your crops grew overnight. The knocking stopped. Something walked away slowly through the crops. Sanity -34. The shadow came closer in the night. (1 of 4)
+
+Bright things still lie under the great tree.
+[D14 06:19] MSG: A line of dead grass runs from it to your crops, and 2 of them have wilted back. The house is kept well, and you sleep easier. +2 sanity. Word of a well-kept farm gets round: 8 coins for odd jobs (12 nights in a row). (2 of 4)
+
+Bright things still lie under the great tree.
+[D14 06:27] MSG: A line of dead grass runs from it to your crops, and 2 of them have wilted back. The house is kept well, and you sleep easier. +2 sanity. Word of a well-kept farm gets round: 8 coins for odd jobs (12 nights in a row). (2 of 4)
+[D14 06:31] MSG: A line of dead grass runs from it to your crops, and 2 of them have wilted back. The house is kept well, and you sleep easier. +2 sanity. Word of a well-kept farm gets round: 8 coins for odd jobs (12 nights in a row). (2 of 4)
+
+Watered from the bucket. 7 left. The pump and hose at the Well save the walk.
+[D14 06:34] OBS: watered 1 crops
+[D14 06:34] OBS: harvested 0
+[D14 06:36] MSG: A line of dead grass runs from it to your crops, and 2 of them have wilted back. The house is kept well, and you sleep easier. +2 sanity. Word of a well-kept farm gets round: 8 coins for odd jobs (12 nights in a row). (2 of 4)
+
+Planted turnip. +5 Farming XP
+[D14 06:40] OBS: planted 2 more
+[D14 06:41] MSG: A line of dead grass runs from it to your crops, and 2 of them have wilted back. The house is kept well, and you sleep easier. +2 sanity. Word of a well-kept farm gets round: 8 coins for odd jobs (12 nights in a row). (2 of 4)
+
+Watered from the bucket. 6 left. The pump and hose at the Well save the walk.
+[D14 06:42] MSG: 3 fence rails tore loose in the night. Mend them before something finds the gap. The morning is foggy. The crows were busy at dawn. Small bright things lie under the great tree. (3 of 4)
+
+Watered from the bucket. 6 left. The pump and hose at the Well save the walk.
+[D14 06:45] MSG: 3 fence rails tore loose in the night. Mend them before something finds the gap. The morning is foggy. The crows were busy at dawn. Small bright things lie under the great tree. (3 of 4)
+
+Watered from the bucket. 5 left. The pump and hose at the Well save the walk.
+[D14 06:48] OBS: watered 2 crops
+[D14 07:01] MSG: 3 fence rails tore loose in the night. Mend them before something finds the gap. The morning is foggy. The crows were busy at dawn. Small bright things lie under the great tree. (3 of 4)
+[D14 07:02] MSG: Old Maren (to the mill) is waiting at the east gate, wanting walking through the wood, before three. A letter from the town clerk is in the mailbox. (4 of 4)
+[D14 07:10] MSG: Old Maren (to the mill) is waiting at the east gate, wanting walking through the wood, before three. A letter from the town clerk is in the mailbox. (4 of 4)
+
+You pick rose hips. +11 Bushcrafting XP
+[D14 07:19] MSG: Old Maren (to the mill) is waiting at the east gate, wanting walking through the wood, before three. A letter from the town clerk is in the mailbox. (4 of 4)
+
+You pick pear. +8 Bushcrafting XP
+[D14 07:25] MSG: You pick pear. +8 Bushcrafting XP
+[D14 07:47] MSG: You pick chanterelles. +14 Bushcrafting XP
+[D14 08:29] MSG: You pick rose hips. +11 Bushcrafting XP
+[D14 08:31] OBS: picked 5 forage
+[D14 09:12] MSG: Gathered sticks and fiber from the brush. +15 Bushcrafting XP
+[D14 09:21] MSG: Gathered sticks, fiber, and resin from the brush. +15 Bushcrafting XP
+[D14 09:22] OBS: gathered 2 brush piles
+[D14 09:26] MSG: You start chopping. Keep at it.
+[D14 09:26] MSG: Chip, chip. The tree is still standing.
+[D14 09:44] MSG: You fell the tree. +3 wood. +20 Forestry XP
+[D14 09:52] MSG: You start chopping. Keep at it.
+[D14 09:52] MSG: You fell the tree. +3 wood. +20 Forestry XP
+[D14 09:53] OBS: mailbox flag is up
+[D14 10:37] SHOT: art/style_tests/CCH-EVENING-001/play_cautious/25_d14_mailbox.png
+[D14 10:37] UI: Mailbox [tab=Mailbox]: =mail_clear
+[D14 10:37] OBS: mailbox: 0 unread, letters: ["From the town clerk"]
+[D14 10:37] OBS: after closing the mailbox: 0 unread, flag up=false
+[D14 10:37] UI: Quests [tab=Quests]: 
+[D14 10:38] UI: House [tab=House]: =tidy  =mend  =job
+[D14 10:38] ACT: House, Repair pressed: stage 2 -> 2 ("")
+[D14 10:38] MSG: You tidy the house. The air feels a little lighter. +20 Cleaning XP. A paper twist of turnip seed was tucked in a drawer. +2 turnip seeds.
+[D14 10:38] ACT: House, tidy pressed: "You tidy the house. The air feels a little lighter. +20 Cleaning XP. A paper twist of turnip seed was tucked in a drawer. +2 turnip seeds."
+[D14 10:38] MSG: You mend a board. +20 Carpentry XP. The offcuts make good kindling. +2 sticks.
+[D14 10:38] ACT: House, mend pressed: "You mend a board. +20 Carpentry XP. The offcuts make good kindling. +2 sticks."
+[D14 10:38] ACT: House, job pressed: "You mend a board. +20 Carpentry XP. The offcuts make good kindling. +2 sticks."
+[D14 10:39] UI: Craft other [tab=Craft]: =craft_pick:lantern  =craft_pick:bandage  =craft_pick:rope  =craft_pick:crow_charm  Upgrade=advance_lantern
+[D14 10:42] UI: Farm stand [tab=Trade]: =sell_food:pear  =sell_food:blackberries  =sell_food:rosehips  =sell_food:chanterelles
+[D14 10:42] SHOT: art/style_tests/CCH-EVENING-001/play_cautious/26_d14_stand.png
+[D14 10:42] MSG: Sold 1 for 3 coins.
+[D14 10:42] ACT: stand sell_food:pear: coins 415 -> 418 ("Sold 1 for 3 coins.")
+[D14 10:42] ACT: stand sell_food:blackberries: coins 418 -> 421 ("Sold 1 for 3 coins.")
+[D14 10:42] MSG: Sold 1 for 1 coins. The lane has had its fill of rose hips: it pays less until it wants more.
+[D14 10:42] ACT: stand sell_food:rosehips: coins 421 -> 422 ("Sold 1 for 1 coins. The lane has had its fill of rose hips: it pays less until it wants more.")
+[D14 10:42] MSG: Sold 1 for 2 coins. The lane has had its fill of chanterelles: it pays less until it wants more.
+[D14 10:42] ACT: stand sell_food:chanterelles: coins 422 -> 424 ("Sold 1 for 2 coins. The lane has had its fill of chanterelles: it pays less until it wants more.")
+[D14 11:13] MSG: You drink from the pond. Cold and muddy, but it helps. Water 95/100. You fill the bucket (8 waterings).
+[D14 11:15] ACT: a walker waits (mill) at (72, 42); walking over
+[D14 11:49] SHOT: art/style_tests/CCH-EVENING-001/play_cautious/27_trek_mill_gate.png
+[D14 11:49] MSG: Maren wants walking to the mill through the Rookery Wood, 3 or 4 clearings as the trail forks. A flask of oil burns little more than a minute in there. You have 1 lamp oil, 0 trail rations, 0 rope and 0 bandages. (3 more hearts of friendship and she'll know you: walks, a word, gifts and help raise it. See Quests, Folk.) At the mill, Maren's sister will buy corn, potatoes and garlic, for the mill's kitchen: up to 8, for a quarter more than the stand pays. Press Space again to set out.
+[D14 11:52] OBS: walker says: "Maren wants walking to the mill through the Rookery Wood, 3 or 4 clearings as the trail forks. A flask of oil burns little more than a minute in there. You have 1 lamp oil, 0 trail rations, 0 rope and 0 bandages. (3 more hearts of friendship and she'll know you: walks, a word, gifts and help raise it. See Quests, Folk.) At the mill, Maren's sister will buy corn, potatoes and garlic, for the mill's kitchen: up to 8, for a quarter more than the stand pays. Press Space again to set out."
+[D14 11:52] MSG: You lead Maren out through the east gate and into the trees. The light goes green, then grey. "Stay close." Press Space beside her for a word, or to give her a trail ration.
+[D14 11:53] OBS: trek started: route=mill nerve=68 oil=0 clearings=4 events=["flood", "hollow", "crows", ""]
+[D14 11:54] SHOT: art/style_tests/CCH-EVENING-001/play_cautious/28_trek_mill_start.png
+[D14 11:54] OBS: clearing 1 of 4: event=flood nerve=68 sanity=23 lit=true
+[D14 12:04] MSG: The trail drops into a hollow full of black water. Space at its edge to cross: a rope across, or wade it.
+[D14 12:05] MSG: "Stay on the path!" Maren hangs back, her eyes on the trees. Off the trail her nerve goes.
+[D14 12:05] SHOT: art/style_tests/CCH-EVENING-001/play_cautious/29_trek_mill_blocked_flood.png
+[D14 12:05] MSG: You have no rope to tie across. Wade it, with Maren on your back? The water is cold: -10 comfort, and she hates it. Space again to wade.
+[D14 12:06] OBS: blocked by flood: "You have no rope to tie across. Wade it, with Maren on your back? The water is cold: -10 comfort, and she hates it. Space again to wade."
+[D14 12:06] MSG: You wade the hollow to the waist with Maren on your back, and set her down on the far side, shaking. -10 comfort, nerve -10.
+[D14 12:06] MSG: Maren stops dead and won't take another step. "I can't. I can't." Without a trail ration (Cooking, at the fire) her nerve won't come back here: walk back the way you came to turn home.
+
+You wade the hollow to the waist with Maren on your back, and set her down on the far side, shaking. -10 comfort, nerve -10.
+[D14 12:11] OBS: walker frozen (nerve 22): "Maren stops dead and won't take another step. "I can't. I can't." Without a trail ration (Cooking, at the fire) her nerve won't come back here: walk back the way you came to turn home.
+
+You wade the hollow to the waist with Maren on your back, and set her down on the far side, shaking. -10 comfort, nerve -10."
+[D14 12:12] OBS: walker frozen (nerve 21): "Maren stops dead and won't take another step. "I can't. I can't." Without a trail ration (Cooking, at the fire) her nerve won't come back here: walk back the way you came to turn home.
+
+You wade the hollow to the waist with Maren on your back, and set her down on the far side, shaking. -10 comfort, nerve -10."
+[D14 12:13] OBS: walker frozen (nerve 19): "Maren stops dead and won't take another step. "I can't. I can't." Without a trail ration (Cooking, at the fire) her nerve won't come back here: walk back the way you came to turn home.
+
+You wade the hollow to the waist with Maren on your back, and set her down on the far side, shaking. -10 comfort, nerve -10."
+[D14 12:14] OBS: walker frozen (nerve 18): "Maren stops dead and won't take another step. "I can't. I can't." Without a trail ration (Cooking, at the fire) her nerve won't come back here: walk back the way you came to turn home.
+
+You wade the hollow to the waist with Maren on your back, and set her down on the far side, shaking. -10 comfort, nerve -10."
+[D14 12:15] OBS: walker frozen (nerve 17): "Maren stops dead and won't take another step. "I can't. I can't." Without a trail ration (Cooking, at the fire) her nerve won't come back here: walk back the way you came to turn home.
+
+You wade the hollow to the waist with Maren on your back, and set her down on the far side, shaking. -10 comfort, nerve -10."
+[D14 12:16] MSG: Maren stops dead and won't take another step. "I can't. I can't." Without a trail ration (Cooking, at the fire) her nerve won't come back here: walk back the way you came to turn home.
+[D14 12:16] OBS: walker frozen (nerve 16): "Maren stops dead and won't take another step. "I can't. I can't." Without a trail ration (Cooking, at the fire) her nerve won't come back here: walk back the way you came to turn home."
+[D14 12:17] OBS: walker frozen (nerve 15): "Maren stops dead and won't take another step. "I can't. I can't." Without a trail ration (Cooking, at the fire) her nerve won't come back here: walk back the way you came to turn home."
+[D14 12:18] OBS: walker frozen (nerve 14): "Maren stops dead and won't take another step. "I can't. I can't." Without a trail ration (Cooking, at the fire) her nerve won't come back here: walk back the way you came to turn home."
+[D14 12:19] OBS: walker frozen (nerve 13): ""
+[D14 12:20] OBS: walker frozen (nerve 10): ""
+[D14 12:21] OBS: walker frozen (nerve 8): ""
+[D14 12:22] OBS: walker frozen (nerve 6): ""
+[D14 12:23] OBS: walker frozen (nerve 4): ""
+[D14 12:24] OBS: walker frozen (nerve 2): ""
+[D14 12:25] MSG: Maren breaks and runs, screaming, back the way you came. You find her at the farm's edge, white and shaking. The trek is over. -10 sanity.
+[D14 12:25] OBS: walker frozen (nerve 0): "Maren breaks and runs, screaming, back the way you came. You find her at the farm's edge, white and shaking. The trek is over. -10 sanity."
+[D14 12:25] OBS: trek over: active=false in_cave=false "Maren breaks and runs, screaming, back the way you came. You find her at the farm's edge, white and shaking. The trek is over. -10 sanity."
+[D14 12:25] OBS: coins=424 hp=10 food=67 water=91 warmth=89 sanity=10 tool=axe inside=false tile=(69, 42) pack={"blackberries":2,"chanterelles":3,"pears":1,"pumpkin_seeds":3,"rosehips":1,"seeds":2} mats={"feathers":1,"fiber":16,"resin":8,"sticks":44,"wood":43}
+[D14 12:31] SHOT: art/style_tests/CCH-EVENING-001/play_cautious/30_trek_mill_home.png
+[D14 14:11] MSG: Weren't you holding the axe? It's the hoe in your hand.
+[D14 18:04] MSG: You step inside. The air is cold and smells of old wood.
+[D14 18:07] MSG: Bright things still lie under the great tree.
+[D14 19:08] MSG: You step inside. The air is cold and smells of old wood.
+[D14 19:48] MSG: The fire is out. Nothing warms the house through the night, and you wake chilled.
+[D15 19:48] MSG: You sleep through the night. Your crops grew overnight. The crows came down in the night. Sanity -20. 1 crop pecked back a stage. The house is kept well, and you sleep easier. +2 sanity. (1 of 4)
+
+The fire is out. Nothing warms the house through the night, and you wake chilled.
+[D15 19:48] CARD: Night settles over the farm.
+[D15 19:48] CARD: Day 15. The morning is downpour.
+[D15 06:00] EVE: {"bed_at":19.57,"busy_h":0.12,"day":14,"faced":"","fed":0,"fire_19":0.0,"firewood_19":0,"firewood_bed":0,"grace_used":true,"idle_h":0.39,"morning_sanity":11,"night":"crows","night_faced":false,"night_left_alone":true,"noticed":false,"read":false,"sanity_19":10,"sanity_bed":11,"sat":false,"sign":"","sign_tonight":"","sit_blocked":"The hearth is cold. Light the fire first.","stayed_up":false,"style":"cautious","tended":false,"visitor":"","warmth_19":100,"warmth_bed":100}
+[D15 06:00] OBS: run over: coins=432 hp=10 food=49 water=69 warmth=99 sanity=11 tool=hoe inside=true tile=(4, 65) pack={"blackberries":2,"chanterelles":3,"pears":1,"pumpkin_seeds":3,"rosehips":1,"seeds":2} mats={"feathers":1,"fiber":16,"resin":8,"sticks":44,"wood":43}
+[D15 06:00] OBS: stats: {"bag_opened":10,"blighted":10,"caught":0,"cleansed":0,"collapses":0,"cooked":0,"crafted":1,"crop_turnip":2,"deep_madness":1,"defeated":0,"drank":15,"eaten":11,"events":14,"events_seen":0,"faced":1,"faced_pond":1,"felled":26,"fished":0,"foraged":60,"gathered":38,"goats_bought":0,"grace_spent":1,"harvested":2,"hearth_evenings":1,"hearth_tended":2,"hose":0,"jobs":6,"left_alone":13,"mended":13,"mined":0,"night_fish":0,"panels_opened":68,"planted":12,"preserved":0,"pump":0,"pumpkins":0,"rain_days":8,"season_blight":0,"season_harvest":0,"season_lost":0,"season_now":4,"season_stock":0,"signs_read":4,"slept":14,"sold":38,"spoiled":2,"tidied":2,"tool_switches":23,"walked":6013,"watered":23,"wheel_opened":41,"withered":0}
+[D15 06:00] OBS: quests done: ["bed", "light", "edge", "first_crop", "second_plot"]
+[D15 06:00] END: problems=4 shots=30

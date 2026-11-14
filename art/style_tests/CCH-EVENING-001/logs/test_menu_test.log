@@ -1,0 +1,801 @@
+Godot Engine v4.7.2.stable.steam.ed1daf0bf - https://godotengine.org
+
+PASS  title: a button has focus on open
+PASS  title: focus starts on the first usable button
+PASS  title (keys): every entry is reached
+PASS  title (D-pad): every entry is reached
+PASS  title: no disabled button can take focus
+PASS  title: left stick inside the deadzone doesn't move focus
+PASS  title: left stick past the deadzone moves focus
+PASS  title: Enter opens Settings
+PASS  title settings: every control can be reached
+PASS  title settings: down reaches Back at the bottom
+PASS  title settings: focus never leaves the page
+PASS  title settings: no disabled button can take focus
+PASS  title settings: the list follows focus
+PASS  title settings: Esc goes back to the title
+PASS  title: A opens Settings
+PASS  title: Controls opens from Settings
+PASS  title controls: down scrolls the long list
+PASS  title controls: B goes back to Settings
+PASS  title settings: B goes back to the title
+PASS  title: Space opens New Game
+PASS  title slots: no disabled button can take focus
+PASS  title slots: Esc goes back
+PASS  title load: B goes back
+PASS  title name: the name field has focus
+PASS  title name: W, A, S and D type into the name
+PASS  title name: the D-pad moves from the field to Begin
+PASS  title name: up goes back to the field
+PASS  title name: Esc in the field goes back to the slots
+PASS  title name: B goes back to the slots
+PASS  title: a click opens Settings
+PASS  title settings: a click on Controls opens it
+PASS  title controls: the mouse wheel scrolls
+PASS  title controls: a click on Back goes to Settings
+PASS  farm: nothing has focus
+PASS  farm: the player can move
+PASS  farm: the clock runs
+PASS  pause: Esc opens it
+PASS  pause: an entry has focus on open
+PASS  pause tab 0: every entry is reached
+PASS  pause tab 0: down from the last entry wraps to the first
+PASS  pause tab 0: up from the first wraps to the last
+PASS  pause tab 0: the left stick moves focus
+PASS  pause tab 0: nothing disabled or hidden takes focus
+PASS  pause: the footer shows the keyboard's names
+PASS  pause: the footer shows the pad's names
+PASS  pause: Enter on Resume closes it
+PASS  pause: Resume: closing leaves nothing focused
+PASS  pause: Resume: closing lets the day run
+PASS  pause: Resume: the player moves again
+PASS  pause: Start opens it
+PASS  pause: Start closes it
+PASS  pause: Start: closing leaves nothing focused
+PASS  pause: Start: closing lets the day run
+PASS  pause: Start: the player moves again
+PASS  pause: A on Settings opens Settings
+PASS  settings: an entry has focus on open
+PASS  settings tab 0: every entry is reached
+PASS  settings tab 0: down from the last entry wraps to the first
+PASS  settings tab 0: up from the first wraps to the last
+PASS  settings tab 0: the left stick moves focus
+PASS  settings tab 0: nothing disabled or hidden takes focus
+PASS  settings: E steps to the next tab
+PASS  settings tab 1: every entry is reached
+PASS  settings tab 1: down from the last entry wraps to the first
+PASS  settings tab 1: up from the first wraps to the last
+PASS  settings tab 1: the left stick moves focus
+PASS  settings tab 1: nothing disabled or hidden takes focus
+PASS  settings: RB steps to the next tab
+PASS  settings tab 2: every entry is reached
+PASS  settings tab 2: down from the last entry wraps to the first
+PASS  settings tab 2: up from the first wraps to the last
+PASS  settings tab 2: nothing disabled or hidden takes focus
+PASS  settings: E steps to the next tab
+PASS  settings: the tabs wrap back to the first
+PASS  settings: Q and LB step back
+PASS  settings: the footer shows the keyboard's names
+PASS  settings: the footer shows the pad's names
+PASS  settings: left steps the volume down
+PASS  settings: the D-pad right steps it back up
+PASS  settings: focus stays on the volume line
+PASS  settings: B goes back to the Pause menu
+PASS  pause: Space on Controls opens Controls
+PASS  controls: an entry has focus on open
+PASS  controls tab 0: every entry is reached
+PASS  controls tab 0: down from the last entry wraps to the first
+PASS  controls tab 0: up from the first wraps to the last
+PASS  controls tab 0: the left stick moves focus
+PASS  controls tab 0: nothing disabled or hidden takes focus
+PASS  controls: E steps to the next tab
+PASS  controls tab 1: every entry is reached
+PASS  controls tab 1: down from the last entry wraps to the first
+PASS  controls tab 1: up from the first wraps to the last
+PASS  controls tab 1: the left stick moves focus
+PASS  controls tab 1: nothing disabled or hidden takes focus
+PASS  controls: RB steps to the next tab
+PASS  controls tab 2: every entry is reached
+PASS  controls tab 2: down from the last entry wraps to the first
+PASS  controls tab 2: up from the first wraps to the last
+PASS  controls tab 2: nothing disabled or hidden takes focus
+PASS  controls: E steps to the next tab
+PASS  controls: the tabs wrap back to the first
+PASS  controls: Q and LB step back
+PASS  controls: the footer shows the keyboard's names
+PASS  controls: the footer shows the pad's names
+PASS  controls: Esc goes back to the Pause menu
+PASS  pause: one press on Quit to the main menu only arms it
+PASS  pause: focus stays on the armed quit
+PASS  pause: B closes it
+PASS  pause: B: closing leaves nothing focused
+PASS  pause: B: closing lets the day run
+PASS  pause: B: the player moves again
+PASS  wheel: Shift opens it
+PASS  wheel: the clock stops
+PASS  wheel: right moves the highlight
+PASS  wheel: left moves it back
+PASS  wheel: the D-pad moves the highlight
+PASS  wheel: D steps through every section
+PASS  wheel: Esc closes it
+PASS  wheel: Esc: closing leaves nothing focused
+PASS  wheel: Esc: closing lets the day run
+PASS  wheel: Esc: the player moves again
+PASS  wheel: L3 opens it
+PASS  wheel: the stick inside the deadzone doesn't move it
+PASS  wheel: the left stick highlights a section
+PASS  wheel: A opens the highlighted section
+PASS  wheel: B from a section goes back to the wheel
+PASS  wheel: B closes the wheel
+PASS  wheel: B: closing leaves nothing focused
+PASS  wheel: B: closing lets the day run
+PASS  wheel: B: the player moves again
+PASS  wheel: Shift closes it again
+PASS  wheel: Enter opens the highlighted section
+PASS  wheel: Space opens the highlighted section
+PASS  wheel: Esc twice from a section is back on the farm
+PASS  Skills: opens from the wheel
+PASS  Skills: the clock stops
+PASS  skills: something has focus
+PASS  skills: nothing disabled or hidden takes focus
+PASS  skills: every control can be reached
+PASS  skills: focus moves and stays on a usable control
+PASS  skills: the footer shows the keyboard's names
+PASS  Skills: Esc goes back to the wheel
+PASS  Skills: closing leaves nothing focused
+PASS  Skills: closing lets the day run
+PASS  Skills: the player moves again
+PASS  Gear: opens from the wheel
+PASS  Gear: the clock stops
+PASS  gear: something has focus
+PASS  gear: nothing disabled or hidden takes focus
+PASS  gear: every control can be reached
+PASS  gear: focus moves and stays on a usable control
+PASS  gear: the footer shows the keyboard's names
+PASS  Gear: Esc goes back to the wheel
+PASS  Gear: closing leaves nothing focused
+PASS  Gear: closing lets the day run
+PASS  Gear: the player moves again
+PASS  Craft: opens from the wheel
+PASS  Craft: the clock stops
+PASS  craft: something has focus
+PASS  craft: nothing disabled or hidden takes focus
+PASS  craft: every control can be reached
+PASS  craft: focus moves and stays on a usable control
+PASS  craft: the footer shows the keyboard's names
+PASS  Craft: Esc goes back to the wheel
+PASS  Craft: closing leaves nothing focused
+PASS  Craft: closing lets the day run
+PASS  Craft: the player moves again
+PASS  Quests: opens from the wheel
+PASS  Quests: the clock stops
+PASS  quests: an entry has focus on open
+PASS  quests tab 0: every entry is reached
+PASS  quests tab 0: down from the last entry wraps to the first
+PASS  quests tab 0: up from the first wraps to the last
+PASS  quests tab 0: the left stick moves focus
+PASS  quests tab 0: nothing disabled or hidden takes focus
+PASS  quests: E steps to the next tab
+PASS  quests tab 1: every entry is reached
+PASS  quests tab 1: down from the last entry wraps to the first
+PASS  quests tab 1: up from the first wraps to the last
+PASS  quests tab 1: nothing disabled or hidden takes focus
+PASS  quests: RB steps to the next tab
+PASS  quests: the tabs wrap back to the first
+PASS  quests: Q and LB step back
+PASS  quests: the footer shows the keyboard's names
+PASS  quests: the footer shows the pad's names
+PASS  Quests: Esc goes back to the wheel
+PASS  Quests: closing leaves nothing focused
+PASS  Quests: closing lets the day run
+PASS  Quests: the player moves again
+PASS  House: opens from the wheel
+PASS  House: the clock stops
+PASS  house: an entry has focus on open
+PASS  house tab 0: every entry is reached
+PASS  house tab 0: down from the last entry wraps to the first
+PASS  house tab 0: up from the first wraps to the last
+PASS  house tab 0: the left stick moves focus
+PASS  house tab 0: nothing disabled or hidden takes focus
+PASS  house: E steps to the next tab
+PASS  house tab 1: every entry is reached
+PASS  house tab 1: down from the last entry wraps to the first
+PASS  house tab 1: up from the first wraps to the last
+PASS  house tab 1: the left stick moves focus
+PASS  house tab 1: nothing disabled or hidden takes focus
+PASS  house: RB steps to the next tab
+PASS  house tab 2: every entry is reached
+PASS  house tab 2: down from the last entry wraps to the first
+PASS  house tab 2: up from the first wraps to the last
+PASS  house tab 2: the left stick moves focus
+PASS  house tab 2: nothing disabled or hidden takes focus
+PASS  house: E steps to the next tab
+PASS  house tab 3: every entry is reached
+PASS  house tab 3: down from the last entry wraps to the first
+PASS  house tab 3: up from the first wraps to the last
+PASS  house tab 3: the left stick moves focus
+PASS  house tab 3: nothing disabled or hidden takes focus
+PASS  house: RB steps to the next tab
+PASS  house: the tabs wrap back to the first
+PASS  house: Q and LB step back
+PASS  house: the footer shows the keyboard's names
+PASS  house: the footer shows the pad's names
+PASS  House: Esc goes back to the wheel
+PASS  House: closing leaves nothing focused
+PASS  House: closing lets the day run
+PASS  House: the player moves again
+PASS  Buildings: opens from the wheel
+PASS  Buildings: the clock stops
+PASS  buildings: an entry has focus on open
+PASS  buildings tab 0: every entry is reached
+PASS  buildings tab 0: down from the last entry wraps to the first
+PASS  buildings tab 0: up from the first wraps to the last
+PASS  buildings tab 0: the left stick moves focus
+PASS  buildings tab 0: nothing disabled or hidden takes focus
+PASS  buildings: E steps to the next tab
+PASS  buildings tab 1: every entry is reached
+PASS  buildings tab 1: down from the last entry wraps to the first
+PASS  buildings tab 1: up from the first wraps to the last
+PASS  buildings tab 1: the left stick moves focus
+PASS  buildings tab 1: nothing disabled or hidden takes focus
+PASS  buildings: RB steps to the next tab
+PASS  buildings tab 2: every entry is reached
+PASS  buildings tab 2: down from the last entry wraps to the first
+PASS  buildings tab 2: up from the first wraps to the last
+PASS  buildings tab 2: the left stick moves focus
+PASS  buildings tab 2: nothing disabled or hidden takes focus
+PASS  buildings: E steps to the next tab
+PASS  buildings tab 3: every entry is reached
+PASS  buildings tab 3: down from the last entry wraps to the first
+PASS  buildings tab 3: up from the first wraps to the last
+PASS  buildings tab 3: the left stick moves focus
+PASS  buildings tab 3: nothing disabled or hidden takes focus
+PASS  buildings: RB steps to the next tab
+PASS  buildings tab 4: every entry is reached
+PASS  buildings tab 4: down from the last entry wraps to the first
+PASS  buildings tab 4: up from the first wraps to the last
+PASS  buildings tab 4: the left stick moves focus
+PASS  buildings tab 4: nothing disabled or hidden takes focus
+PASS  buildings: E steps to the next tab
+PASS  buildings tab 5: every entry is reached
+PASS  buildings tab 5: down from the last entry wraps to the first
+PASS  buildings tab 5: up from the first wraps to the last
+PASS  buildings tab 5: the left stick moves focus
+PASS  buildings tab 5: nothing disabled or hidden takes focus
+PASS  buildings: RB steps to the next tab
+PASS  buildings tab 6: every entry is reached
+PASS  buildings tab 6: down from the last entry wraps to the first
+PASS  buildings tab 6: up from the first wraps to the last
+PASS  buildings tab 6: the left stick moves focus
+PASS  buildings tab 6: nothing disabled or hidden takes focus
+PASS  buildings: E steps to the next tab
+PASS  buildings: the tabs wrap back to the first
+PASS  buildings: Q and LB step back
+PASS  buildings: the footer shows the keyboard's names
+PASS  buildings: the footer shows the pad's names
+PASS  Buildings: Esc goes back to the wheel
+PASS  Buildings: closing leaves nothing focused
+PASS  Buildings: closing lets the day run
+PASS  Buildings: the player moves again
+PASS  Achievements: opens from the wheel
+PASS  Achievements: the clock stops
+PASS  achievements: an entry has focus on open
+PASS  achievements tab 0: every entry is reached
+PASS  achievements tab 0: down from the last entry wraps to the first
+PASS  achievements tab 0: up from the first wraps to the last
+PASS  achievements tab 0: the left stick moves focus
+PASS  achievements tab 0: nothing disabled or hidden takes focus
+PASS  achievements: E steps to the next tab
+PASS  achievements tab 1: every entry is reached
+PASS  achievements tab 1: down from the last entry wraps to the first
+PASS  achievements tab 1: up from the first wraps to the last
+PASS  achievements tab 1: the left stick moves focus
+PASS  achievements tab 1: nothing disabled or hidden takes focus
+PASS  achievements: RB steps to the next tab
+PASS  achievements tab 2: every entry is reached
+PASS  achievements tab 2: down from the last entry wraps to the first
+PASS  achievements tab 2: up from the first wraps to the last
+PASS  achievements tab 2: the left stick moves focus
+PASS  achievements tab 2: nothing disabled or hidden takes focus
+PASS  achievements: E steps to the next tab
+PASS  achievements tab 3: every entry is reached
+PASS  achievements tab 3: down from the last entry wraps to the first
+PASS  achievements tab 3: up from the first wraps to the last
+PASS  achievements tab 3: the left stick moves focus
+PASS  achievements tab 3: nothing disabled or hidden takes focus
+PASS  achievements: RB steps to the next tab
+PASS  achievements tab 4: every entry is reached
+PASS  achievements tab 4: down from the last entry wraps to the first
+PASS  achievements tab 4: up from the first wraps to the last
+PASS  achievements tab 4: the left stick moves focus
+PASS  achievements tab 4: nothing disabled or hidden takes focus
+PASS  achievements: E steps to the next tab
+PASS  achievements tab 5: every entry is reached
+PASS  achievements tab 5: down from the last entry wraps to the first
+PASS  achievements tab 5: up from the first wraps to the last
+PASS  achievements tab 5: the left stick moves focus
+PASS  achievements tab 5: nothing disabled or hidden takes focus
+PASS  achievements: RB steps to the next tab
+PASS  achievements: the tabs wrap back to the first
+PASS  achievements: Q and LB step back
+PASS  achievements: the footer shows the keyboard's names
+PASS  achievements: the footer shows the pad's names
+PASS  Achievements: Esc goes back to the wheel
+PASS  Achievements: closing leaves nothing focused
+PASS  Achievements: closing lets the day run
+PASS  Achievements: the player moves again
+PASS  craft gear: something has focus
+PASS  craft gear: nothing disabled or hidden takes focus
+PASS  craft gear: every control can be reached
+PASS  craft gear: focus moves and stays on a usable control
+PASS  craft gear: the footer shows the keyboard's names
+PASS  craft cooking: something has focus
+PASS  craft cooking: nothing disabled or hidden takes focus
+PASS  craft cooking: every control can be reached
+PASS  craft cooking: focus moves and stays on a usable control
+PASS  craft cooking: the footer shows the keyboard's names
+PASS  craft tools: something has focus
+PASS  craft tools: nothing disabled or hidden takes focus
+PASS  craft tools: every control can be reached
+PASS  craft tools: focus moves and stays on a usable control
+PASS  craft tools: the footer shows the keyboard's names
+PASS  craft other: something has focus
+PASS  craft other: nothing disabled or hidden takes focus
+PASS  craft other: every control can be reached
+PASS  craft other: focus moves and stays on a usable control
+PASS  craft other: the footer shows the keyboard's names
+PASS  craft: RB steps round the sub-tabs back to the first
+PASS  craft: picking a recipe moves focus to its button, or keeps it on the recipe
+PASS  skills: Q steps to Gear
+PASS  gear: LB steps to Inventory
+PASS  inventory: something has focus
+PASS  inventory: nothing disabled or hidden takes focus
+PASS  inventory: every control can be reached
+PASS  inventory: focus moves and stays on a usable control
+PASS  inventory: the footer shows the keyboard's names
+PASS  inventory: E steps to Gear
+PASS  quests: the Folk tab opens with focus
+PASS  craft pad: the stick highlights Craft
+PASS  craft pad: A opens Craft with a recipe in focus
+PASS  craft pad: the D-pad moves to the next recipe
+PASS  craft pad: the D-pad moves down a row
+PASS  craft pad: and back to the first
+PASS  craft pad: A picks the recipe
+PASS  craft pad: A jumps the highlight to Make
+PASS  craft pad: A on Make crafts
+PASS  craft pad: focus stays in the panel after crafting
+PASS  craft pad: some recipe could be made
+PASS  craft pad: RB switches the sub-tab with focus on a recipe
+PASS  craft pad: the D-pad works on the new sub-tab
+PASS  craft pad: LB switches back
+PASS  craft pad: B goes back to the wheel
+PASS  craft pad: closing leaves nothing focused
+PASS  craft pad: closing lets the day run
+PASS  craft pad: the player moves again
+PASS  cooking pad: RB reaches the Cooking tab with a recipe in focus
+PASS  cooking pad: the D-pad reaches Grilled Fish
+PASS  cooking pad: A picks Grilled Fish
+PASS  cooking pad: A jumps the highlight to Cook
+PASS  cooking pad: A on Cook cooks it
+PASS  cooking pad: focus stays on Cook while it can be pressed again
+PASS  cooking pad: with no fish left focus goes back to Grilled Fish
+PASS  cooking pad: the D-pad still moves after cooking
+PASS  cooking keys: Turnip Hash is in the grid
+PASS  cooking keys: Space picks a recipe and jumps to Cook
+PASS  cooking mouse: a click picks a recipe without jumping (focus on craft_pick:cook:fish_meal)
+PASS  cooking: closing leaves nothing focused
+PASS  cooking: closing lets the day run
+PASS  cooking: the player moves again
+PASS  split: Craft's card sits beside the list, outside its scroll
+PASS  split: the recipes all fit in view, nothing hidden to scroll to
+PASS  split: the card's button stays in view while the list scrolls
+PASS  split: the mouse wheel leaves a list that fits where it is
+PASS  split: every recipe's button is in view
+PASS  split: Skills has its card beside the list too
+PASS  split: closing leaves nothing focused
+PASS  split: closing lets the day run
+PASS  split: the player moves again
+PASS  stand: a ledger with an entry in focus
+PASS  stand: an entry starts at Sell 1
+PASS  stand: right steps the amount up (pad and keys)
+PASS  stand: one push of the stick steps once
+PASS  stand: left steps it down
+PASS  stand: A sells that many
+PASS  stand: focus stays on the entry
+PASS  stand: the amount fits what's left
+PASS  stand: right from all goes round to 1
+PASS  stand: left from 1 goes round to all
+PASS  stand: the mouse's - steps it down
+PASS  stand: a click on Sell 2 sells 2
+PASS  stand: Space sells the last one
+PASS  stand: closing leaves nothing focused
+PASS  stand: closing lets the day run
+PASS  stand: the player moves again
+PASS  cellar: storing 2 of 6 turnips
+PASS  cellar: taking 1 back
+PASS  cellar amounts: closing leaves nothing focused
+PASS  cellar amounts: closing lets the day run
+PASS  cellar amounts: the player moves again
+PASS  cooler: storing 3 of 4 fish
+PASS  firewood: taking 3
+PASS  firewood amounts: closing leaves nothing focused
+PASS  firewood amounts: closing lets the day run
+PASS  firewood amounts: the player moves again
+PASS  diary: J opens it
+PASS  diary: the clock stops
+PASS  diary: right turns the page
+PASS  diary: A turns it back
+PASS  diary: the D-pad turns the page
+PASS  diary: the left stick turns it back
+PASS  diary: the mouse wheel turns the page
+PASS  diary: E jumps to the next section
+PASS  diary: LB jumps back
+PASS  diary: the footer shows the pad's names
+PASS  diary: the footer follows the keyboard
+PASS  diary: Esc goes back to the wheel
+PASS  diary: closing leaves nothing focused
+PASS  diary: closing lets the day run
+PASS  diary: the player moves again
+PASS  bag: Tab opens it
+PASS  bag: a usable slot has focus
+PASS  bag: the clock stops
+PASS  bag: no empty slot can take focus
+PASS  bag: every control can be reached
+PASS  bag: Tab closes it
+PASS  bag: Tab: closing leaves nothing focused
+PASS  bag: Tab: closing lets the day run
+PASS  bag: Tab: the player moves again
+PASS  bag: Y opens it
+PASS  bag: the D-pad moves between slots
+PASS  bag: B closes it
+PASS  bag: B: closing leaves nothing focused
+PASS  bag: B: closing lets the day run
+PASS  bag: B: the player moves again
+PASS  bag: Y closes it
+PASS  bag: Esc closes it
+PASS  bag: Esc: closing leaves nothing focused
+PASS  bag: Esc: closing lets the day run
+PASS  bag: Esc: the player moves again
+PASS  bag: Enter on Inventory opens the Inventory
+PASS  bag: focus is on a slot that holds something
+PASS  inventory: opens themed
+PASS  inventory: one slot per item tile
+PASS  inventory: every slot shows its count
+PASS  inventory: the pack's free slots are drawn
+PASS  inventory: free slots never take focus or clicks
+PASS  inventory: one slot is picked and framed as picked
+PASS  inventory: a click picks a slot
+PASS  inventory: the picked slot's frame follows the pick
+PASS  inventory: the caption names the slot in focus
+PASS  inventory: Space picks a slot and focus moves to its action
+PASS  inventory: A picks a slot and focus moves to Eat
+PASS  inventory: A on Eat eats one egg
+PASS  inventory: the count on the egg's slot follows
+PASS  inventory: the D-pad moves between slots
+PASS  inventory: a material slot to pick
+PASS  inventory: an item with no action shows it greyed, out of focus
+PASS  inventory: nothing disabled or hidden takes focus
+PASS  inventory: closing leaves nothing focused
+PASS  inventory: closing lets the day run
+PASS  inventory: the player moves again
+PASS  desk: opens with focus
+PASS  desk: the clock stops
+PASS  desk: an entry has focus on open
+PASS  desk tab 0: every entry is reached
+PASS  desk tab 0: down from the last entry wraps to the first
+PASS  desk tab 0: up from the first wraps to the last
+PASS  desk tab 0: nothing disabled or hidden takes focus
+PASS  desk: E steps to the next tab
+PASS  desk tab 1: every entry is reached
+PASS  desk tab 1: down from the last entry wraps to the first
+PASS  desk tab 1: up from the first wraps to the last
+PASS  desk tab 1: the left stick moves focus
+PASS  desk tab 1: nothing disabled or hidden takes focus
+PASS  desk: RB steps to the next tab
+PASS  desk tab 2: every entry is reached
+PASS  desk tab 2: down from the last entry wraps to the first
+PASS  desk tab 2: up from the first wraps to the last
+PASS  desk tab 2: the left stick moves focus
+PASS  desk tab 2: nothing disabled or hidden takes focus
+PASS  desk: E steps to the next tab
+PASS  desk tab 3: every entry is reached
+PASS  desk tab 3: down from the last entry wraps to the first
+PASS  desk tab 3: up from the first wraps to the last
+PASS  desk tab 3: the left stick moves focus
+PASS  desk tab 3: nothing disabled or hidden takes focus
+PASS  desk: RB steps to the next tab
+PASS  desk: the tabs wrap back to the first
+PASS  desk: Q and LB step back
+PASS  desk: the footer shows the keyboard's names
+PASS  desk: the footer shows the pad's names
+PASS  desk: B closes it
+PASS  desk: closing leaves nothing focused
+PASS  desk: closing lets the day run
+PASS  desk: the player moves again
+PASS  mailbox: opens with focus
+PASS  mailbox: the clock stops
+PASS  mailbox: an entry has focus on open
+PASS  mailbox tab 0: every entry is reached
+PASS  mailbox tab 0: down from the last entry wraps to the first
+PASS  mailbox tab 0: up from the first wraps to the last
+PASS  mailbox tab 0: the left stick moves focus
+PASS  mailbox tab 0: nothing disabled or hidden takes focus
+PASS  mailbox: the footer shows the keyboard's names
+PASS  mailbox: the footer shows the pad's names
+PASS  mailbox: B closes it
+PASS  mailbox: closing leaves nothing focused
+PASS  mailbox: closing lets the day run
+PASS  mailbox: the player moves again
+PASS  furnace: opens with focus
+PASS  furnace: the clock stops
+PASS  furnace: an entry has focus on open
+PASS  furnace tab 0: every entry is reached
+PASS  furnace tab 0: down from the last entry wraps to the first
+PASS  furnace tab 0: up from the first wraps to the last
+PASS  furnace tab 0: the left stick moves focus
+PASS  furnace tab 0: nothing disabled or hidden takes focus
+PASS  furnace: the footer shows the keyboard's names
+PASS  furnace: the footer shows the pad's names
+PASS  furnace: B closes it
+PASS  furnace: closing leaves nothing focused
+PASS  furnace: closing lets the day run
+PASS  furnace: the player moves again
+PASS  smokehouse: opens with focus
+PASS  smokehouse: the clock stops
+PASS  smokehouse: an entry has focus on open
+PASS  smokehouse tab 0: every entry is reached
+PASS  smokehouse tab 0: down from the last entry wraps to the first
+PASS  smokehouse tab 0: up from the first wraps to the last
+PASS  smokehouse tab 0: the left stick moves focus
+PASS  smokehouse tab 0: nothing disabled or hidden takes focus
+PASS  smokehouse: the footer shows the keyboard's names
+PASS  smokehouse: the footer shows the pad's names
+PASS  smokehouse: B closes it
+PASS  smokehouse: closing leaves nothing focused
+PASS  smokehouse: closing lets the day run
+PASS  smokehouse: the player moves again
+PASS  coop: opens with focus
+PASS  coop: the clock stops
+PASS  coop: an entry has focus on open
+PASS  coop tab 0: every entry is reached
+PASS  coop tab 0: down from the last entry wraps to the first
+PASS  coop tab 0: up from the first wraps to the last
+PASS  coop tab 0: the left stick moves focus
+PASS  coop tab 0: nothing disabled or hidden takes focus
+PASS  coop: the footer shows the keyboard's names
+PASS  coop: the footer shows the pad's names
+PASS  coop: B closes it
+PASS  coop: closing leaves nothing focused
+PASS  coop: closing lets the day run
+PASS  coop: the player moves again
+PASS  barn: opens with focus
+PASS  barn: the clock stops
+PASS  barn: an entry has focus on open
+PASS  barn tab 0: every entry is reached
+PASS  barn tab 0: down from the last entry wraps to the first
+PASS  barn tab 0: up from the first wraps to the last
+PASS  barn tab 0: the left stick moves focus
+PASS  barn tab 0: nothing disabled or hidden takes focus
+PASS  barn: the footer shows the keyboard's names
+PASS  barn: the footer shows the pad's names
+PASS  barn: B closes it
+PASS  barn: closing leaves nothing focused
+PASS  barn: closing lets the day run
+PASS  barn: the player moves again
+PASS  cellar: opens with focus
+PASS  cellar: the clock stops
+PASS  cellar: an entry has focus on open
+PASS  cellar tab 0: every entry is reached
+PASS  cellar tab 0: down from the last entry wraps to the first
+PASS  cellar tab 0: up from the first wraps to the last
+PASS  cellar tab 0: the left stick moves focus
+PASS  cellar tab 0: nothing disabled or hidden takes focus
+PASS  cellar: the footer shows the keyboard's names
+PASS  cellar: the footer shows the pad's names
+PASS  cellar: B closes it
+PASS  cellar: closing leaves nothing focused
+PASS  cellar: closing lets the day run
+PASS  cellar: the player moves again
+PASS  cooler: opens with focus
+PASS  cooler: the clock stops
+PASS  cooler: an entry has focus on open
+PASS  cooler tab 0: every entry is reached
+PASS  cooler tab 0: down from the last entry wraps to the first
+PASS  cooler tab 0: up from the first wraps to the last
+PASS  cooler tab 0: the left stick moves focus
+PASS  cooler tab 0: nothing disabled or hidden takes focus
+PASS  cooler: the footer shows the keyboard's names
+PASS  cooler: the footer shows the pad's names
+PASS  cooler: B closes it
+PASS  cooler: closing leaves nothing focused
+PASS  cooler: closing lets the day run
+PASS  cooler: the player moves again
+PASS  woodstore: opens with focus
+PASS  woodstore: the clock stops
+PASS  woodstore: an entry has focus on open
+PASS  woodstore tab 0: every entry is reached
+PASS  woodstore tab 0: down from the last entry wraps to the first
+PASS  woodstore tab 0: up from the first wraps to the last
+PASS  woodstore tab 0: the left stick moves focus
+PASS  woodstore tab 0: nothing disabled or hidden takes focus
+PASS  woodstore: the footer shows the keyboard's names
+PASS  woodstore: the footer shows the pad's names
+PASS  woodstore: B closes it
+PASS  woodstore: closing leaves nothing focused
+PASS  woodstore: closing lets the day run
+PASS  woodstore: the player moves again
+PASS  hearth: opens with focus
+PASS  hearth: the clock stops
+PASS  hearth: an entry has focus on open
+PASS  hearth tab 0: every entry is reached
+PASS  hearth tab 0: down from the last entry wraps to the first
+PASS  hearth tab 0: up from the first wraps to the last
+PASS  hearth tab 0: the left stick moves focus
+PASS  hearth tab 0: nothing disabled or hidden takes focus
+PASS  hearth: the footer shows the keyboard's names
+PASS  hearth: the footer shows the pad's names
+PASS  hearth: B closes it
+PASS  hearth: closing leaves nothing focused
+PASS  hearth: closing lets the day run
+PASS  hearth: the player moves again
+PASS  well: opens with focus
+PASS  well: the clock stops
+PASS  well: an entry has focus on open
+PASS  well tab 0: every entry is reached
+PASS  well tab 0: down from the last entry wraps to the first
+PASS  well tab 0: up from the first wraps to the last
+PASS  well tab 0: the left stick moves focus
+PASS  well tab 0: nothing disabled or hidden takes focus
+PASS  well: E steps to the next tab
+PASS  well tab 1: every entry is reached
+PASS  well tab 1: down from the last entry wraps to the first
+PASS  well tab 1: up from the first wraps to the last
+PASS  well tab 1: nothing disabled or hidden takes focus
+PASS  well: RB steps to the next tab
+PASS  well: the tabs wrap back to the first
+PASS  well: Q and LB step back
+PASS  well: the footer shows the keyboard's names
+PASS  well: the footer shows the pad's names
+PASS  well: B closes it
+PASS  well: closing leaves nothing focused
+PASS  well: closing lets the day run
+PASS  well: the player moves again
+PASS  trade: opens with focus
+PASS  trade: the clock stops
+PASS  trade: an entry has focus on open
+PASS  trade tab 0: every entry is reached
+PASS  trade tab 0: down from the last entry wraps to the first
+PASS  trade tab 0: up from the first wraps to the last
+PASS  trade tab 0: the left stick moves focus
+PASS  trade tab 0: nothing disabled or hidden takes focus
+PASS  trade: the footer shows the keyboard's names
+PASS  trade: the footer shows the pad's names
+PASS  trade: B closes it
+PASS  trade: closing leaves nothing focused
+PASS  trade: closing lets the day run
+PASS  trade: the player moves again
+PASS  achievements: a click picks an entry
+PASS  achievements: a click on a tab opens it
+PASS  achievements: the mouse wheel scrolls a long list
+PASS  achievements: the wheel doesn't switch the tool
+PASS  menu button: a click opens the wheel
+PASS  wheel: a click off the ring closes it
+PASS  wheel: click off: closing leaves nothing focused
+PASS  wheel: click off: closing lets the day run
+PASS  wheel: click off: the player moves again
+PASS  wheel: the mouse highlights a segment
+PASS  wheel: a click opens that section
+PASS  skills: a click on Close goes back
+PASS  close button: closing leaves nothing focused
+PASS  close button: closing lets the day run
+PASS  close button: the player moves again
+PASS  bag button: a click opens the bag
+PASS  bag button: the click doesn't reach the farm
+PASS  prompts: the keyboard shows Space
+PASS  prompts: the gamepad shows A
+PASS  prompts: switching device keeps focus
+PASS  mixed: a key and the D-pad together still leave focus on an entry
+PASS  menus: RB and the mouse wheel don't change the tool in hand
+PASS  mixed: closing leaves nothing focused
+PASS  mixed: closing lets the day run
+PASS  mixed: the player moves again
+PASS  buildings: has a Decor tab
+PASS  placement: A on Place starts placing
+PASS  placement: the same press doesn't place it
+PASS  placement: the day runs while placing
+PASS  placement: B cancels
+PASS  placement: Space on Place starts placing
+PASS  placement: Esc cancels and opens the Pause menu
+PASS  placement: closing leaves nothing focused
+PASS  placement: closing lets the day run
+PASS  placement: the player moves again
+PASS  placement: Enter on Build starts placing the coop
+PASS  placement: B cancels the coop
+PASS  coop placement: closing leaves nothing focused
+PASS  coop placement: closing lets the day run
+PASS  coop placement: the player moves again
+PASS  messages: a click through a passing line reaches the farm
+PASS  scene: the clock stops
+PASS  scene: Space turns the page
+PASS  scene: A turns the page
+PASS  scene: Enter turns the page
+PASS  scene: a click turns the page
+PASS  scene: the bag and wheel wait for it
+PASS  scene: the last page ends it
+PASS  scene: the last press doesn't reach the farm
+PASS  scene: closing leaves nothing focused
+PASS  scene: closing lets the day run
+PASS  scene: the player moves again
+PASS  ending: the clock stops
+PASS  ending: Space moves it on
+PASS  ending: A shows the next line
+PASS  ending: Enter shows the next line
+PASS  ending: Esc doesn't open the Pause menu over it
+PASS  ending: closing leaves nothing focused
+PASS  ending: closing lets the day run
+PASS  ending: the player moves again
+PASS  overlap: Esc and Shift together leave one menu up
+PASS  overlap: B and Tab together leave things tidy
+PASS  overlap: J with the wheel up opens the diary alone
+PASS  overlap: a panel opened right after another closes has focus
+PASS  overlap: closing leaves nothing focused
+PASS  overlap: closing lets the day run
+PASS  overlap: the player moves again
+PASS  buildings: Trail works has an entry in focus
+PASS  buildings late: an entry has focus on open
+PASS  buildings late tab 0: every entry is reached
+PASS  buildings late tab 0: down from the last entry wraps to the first
+PASS  buildings late tab 0: up from the first wraps to the last
+PASS  buildings late tab 0: the left stick moves focus
+PASS  buildings late tab 0: nothing disabled or hidden takes focus
+PASS  buildings late: E steps to the next tab
+PASS  buildings late tab 1: every entry is reached
+PASS  buildings late tab 1: down from the last entry wraps to the first
+PASS  buildings late tab 1: up from the first wraps to the last
+PASS  buildings late tab 1: the left stick moves focus
+PASS  buildings late tab 1: nothing disabled or hidden takes focus
+PASS  buildings late: RB steps to the next tab
+PASS  buildings late tab 2: every entry is reached
+PASS  buildings late tab 2: down from the last entry wraps to the first
+PASS  buildings late tab 2: up from the first wraps to the last
+PASS  buildings late tab 2: the left stick moves focus
+PASS  buildings late tab 2: nothing disabled or hidden takes focus
+PASS  buildings late: E steps to the next tab
+PASS  buildings late tab 3: every entry is reached
+PASS  buildings late tab 3: down from the last entry wraps to the first
+PASS  buildings late tab 3: up from the first wraps to the last
+PASS  buildings late tab 3: the left stick moves focus
+PASS  buildings late tab 3: nothing disabled or hidden takes focus
+PASS  buildings late: RB steps to the next tab
+PASS  buildings late tab 4: every entry is reached
+PASS  buildings late tab 4: down from the last entry wraps to the first
+PASS  buildings late tab 4: up from the first wraps to the last
+PASS  buildings late tab 4: the left stick moves focus
+PASS  buildings late tab 4: nothing disabled or hidden takes focus
+PASS  buildings late: E steps to the next tab
+PASS  buildings late tab 5: every entry is reached
+PASS  buildings late tab 5: down from the last entry wraps to the first
+PASS  buildings late tab 5: up from the first wraps to the last
+PASS  buildings late tab 5: the left stick moves focus
+PASS  buildings late tab 5: nothing disabled or hidden takes focus
+PASS  buildings late: RB steps to the next tab
+PASS  buildings late tab 6: every entry is reached
+PASS  buildings late tab 6: down from the last entry wraps to the first
+PASS  buildings late tab 6: up from the first wraps to the last
+PASS  buildings late tab 6: the left stick moves focus
+PASS  buildings late tab 6: nothing disabled or hidden takes focus
+PASS  buildings late: E steps to the next tab
+PASS  buildings late tab 7: every entry is reached
+PASS  buildings late tab 7: down from the last entry wraps to the first
+PASS  buildings late tab 7: up from the first wraps to the last
+PASS  buildings late tab 7: the left stick moves focus
+PASS  buildings late tab 7: nothing disabled or hidden takes focus
+PASS  buildings late: RB steps to the next tab
+PASS  buildings late: the tabs wrap back to the first
+PASS  buildings late: Q and LB step back
+PASS  buildings late: the footer shows the keyboard's names
+PASS  buildings late: the footer shows the pad's names
+PASS  trail works: closing leaves nothing focused
+PASS  trail works: closing lets the day run
+PASS  trail works: the player moves again
+PASS: 0 failure(s)

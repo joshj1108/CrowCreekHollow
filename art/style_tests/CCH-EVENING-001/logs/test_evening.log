@@ -1,0 +1,103 @@
+Godot Engine v4.7.2.stable.steam.ed1daf0bf - https://godotengine.org
+
+INFO  sign evenings: 496 of 1399 (2.48 a week); 7-day windows by count { 2: 531, 3: 647, 4: 82, 1: 124, 0: 8 }; 85% of windows hold 2-3
+PASS  schedule: about 2-3 sign evenings a week on average  (2.48)
+PASS  schedule: most weeks hold 2 or 3  (85%)
+PASS  schedule: never two sign evenings running  (0)
+PASS  schedule: day 1 (the first night) has no sign
+PASS  schedule: no fixed weekday  ([76, 79, 60, 84, 54, 75, 68])
+PASS  schedule: deterministic after a reload, whatever order the days are asked
+INFO  nights 2-400: 147 signed (91 match tonight's visitor's kind), 229 dangerous with no sign, 11 quiet with a sign, 23 quiet with none
+PASS  schedule: dangerous nights without a sign happen
+PASS  schedule: sign nights with nothing dangerous happen
+PASS  schedule: ordinary nights without a sign happen
+PASS  schedule: a sign usually, not always, matches  (67%)
+PASS  crows: not shown before 19:00
+PASS  crows: shown in the evening
+PASS  crows: stands on the farm where it should  (tile kind 31)
+PASS  crows: there is room to stand and look at it  (standing kind 3)
+PASS  crows: Space reads it
+PASS  crows: says what it is  (Crows are gathering along the field fence. None of them is calling.
+The crows have gone quiet. Every one of them faces t)
+PASS  crows: never names tonight's visitor
+PASS  crows: a second look gives nothing more
+PASS  tracks: not shown before 19:00
+PASS  tracks: shown in the evening
+PASS  tracks: stands on the farm where it should  (tile kind 3)
+PASS  tracks: there is room to stand and look at it  (standing kind 3)
+PASS  tracks: Space reads it
+PASS  tracks: says what it is  (
+The crows have gone quiet. Every one of them faces the woods. They lift off together, low over the field, and none of t)
+PASS  tracks: never names tonight's visitor
+PASS  tracks: a second look gives nothing more
+PASS  chill: not shown before 19:00
+PASS  chill: shown in the evening
+PASS  chill: stands on the farm where it should  (tile kind 5)
+PASS  chill: there is room to stand and look at it  (standing kind 1)
+PASS  chill: Space reads it
+PASS  chill: says what it is  (
+The crows have gone quiet. Every one of them faces the woods. They lift off together, low over the field, and none of t)
+PASS  chill: never names tonight's visitor
+PASS  chill: a second look gives nothing more
+PASS  tracks: rain is noticed
+PASS  tracks: in snow
+PASS  chill: glass once the house has it
+PASS  chill: boards before then
+PASS  chill: in winter it doesn't pretend frost is strange
+PASS  signs: gone once the visitor has come
+PASS  signs: not read from inside the house
+PASS  signs: an evening with none shows none
+PASS  signs: a short notice when the evening opens, once
+PASS  hearth: by day Space feeds the fire as before
+PASS  hearth: in the evening Space opens the Hearth section
+PASS  hearth: it offers feeding, tending and an evening by the fire
+PASS  hearth: feeding from the section is ordinary fuelling
+PASS  hearth: a low fire can't be tended
+PASS  hearth: it costs a firewood from the pack
+PASS  hearth: not before 19:00
+PASS  hearth: tended once, for a firewood and half an hour  (wood 1 hour 20.00)
+PASS  hearth: the banked log burns, so the fire lasts the night  (6.5 h)
+PASS  hearth: the panel closes and says what was done
+PASS  hearth: once an evening
+PASS  hearth: an unanswered knock takes less on a tended night  (25.7 vs 34.3)
+PASS  hearth: the watcher by the house too  (42.9 vs 45.0)
+PASS  hearth: the field figure is not eased
+PASS  hearth: never more than the one easing
+PASS  shutters: barred, an unanswered knock takes half (fixed in passing)  (17.2 vs 34.3)
+PASS  shutters and the tended hearth together  (12.9)
+PASS  hearth: facing the knock still costs something
+PASS  hearth: the morning says so without the mechanics
+PASS  hearth: a night it wasn't needed says only that it burned
+PASS  hearth: gone the next day
+PASS  cozy: not with the hearth cold
+PASS  cozy: an hour by the fire
+PASS  cozy: a little sanity  (54.0)
+PASS  cozy: and warmth
+PASS  cozy: says so
+PASS  cozy: once an evening, no farming it
+PASS  cozy: only in the house
+PASS  cozy: only in the evening
+PASS  cozy: there again the next evening
+INFO  cozy: +4 sanity and +30 comfort once an evening, for an hour (a desk pastime gives +3 a day)
+PASS  grace: unspent in a new game
+PASS  grace: the first unanswered knock in the first week takes half  (17.2 of 34.3)
+PASS  grace: and is spent
+PASS  grace: not cancelled, only eased
+PASS  grace: the second knock takes the full amount
+PASS  grace: other visitors keep their cost
+PASS  grace: a faced knock doesn't use it
+PASS  grace: the morning report gives the cost  (The knocking stopped. Something walked away slowly through the crops. Sanity -17. It will not always be so gentle. The shadow came closer, and the grass it crossed is dead.)
+PASS  grace: from day 8 knocks keep their cost
+PASS  grace: applied when slept through, at the bed  (sanity 82.8)
+PASS  save: the grace stays spent across a reload
+PASS  save: the evening's flags come back
+PASS  save: a new day's evening is fresh
+PASS  save: an unspent grace stays unspent
+PASS  save: tonight's sign is the same after a reload  (chill / chill)
+PASS  old saves: in the first week, with no knock left alone, the grace is still there
+PASS  old saves: in the first week, after a knock was left alone, it is spent
+PASS  old saves: past the first week it is spent
+PASS  first trek: EDGE_WORD_CALMS is on
+PASS  first trek: on the edge a word calms her
+PASS  first trek: on later routes a word alone does not
+evening: 0 failure(s)
