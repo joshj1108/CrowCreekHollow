@@ -166,3 +166,8 @@ A source-grounded, design-only skill mastery plan is now recorded in [SKILL_MAST
 - **CCH-MARITIME-MYSTERY-001 P3:** optional dread in permanent fog, preserving balanced cozy working trips and existing supernatural lore.
 
 **1.0 scope gate:** Voyages remain *candidate/stretch scope*, not mandatory for release. An optional one-route voyage may be promoted only after a tested Lowmere district and feasibility audit. Other seaside town maps are not 1.0 requirements. Restored town, inn and existing mystery remain priority over speculative ocean systems.
+
+
+## 2026-11-14 — Lowmere resident and relationship design
+
+[LOWMERE_RESIDENTS_DESIGN.md](LOWMERE_RESIDENTS_DESIGN.md) records a **design-only** four-resident concept, rooted in existing Maren/Davy/vicar/postman and town-vote canon. Proposed newcomers: Edith Vale (inn), Gideon Pike (fishing crew), Thomas Bellweather (general store), Martha Fenwick (fishmonger). Names, portraits, stories are not canon without owner approval. **CCH-LOWMERE-PEOPLE-001A P1 design prerequisite** is a story/relationship compatibility matrix; **001B P2** is a two-NPC playable town slice. New quests and relationships reuse existing FolkSystem and orders rather than creating separate machinery. Inn guests, fisherman routes, rumors, owner arcs remain downstream P2/P3 expansions.
