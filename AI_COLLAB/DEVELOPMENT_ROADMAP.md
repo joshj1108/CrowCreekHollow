@@ -115,3 +115,17 @@ Crow Creek Hollow is a top-down 3/4 cozy folk-horror farming/survival game. **Ho
 ## 2026-11-14 — Lowmere first-district design draft
 
 A concrete **design-only** first district, farm-to-town exchange, order categories, first-visit storyboard, dependencies and unresolved decisions is now stored at [`AI_COLLAB/LOWMERE_FIRST_DISTRICT_DESIGN.md`](LOWMERE_FIRST_DISTRICT_DESIGN.md). This refines CCH-LOWMERE-001 and CCH-ORDERS-001 without authorizing construction. Recommended sequence: CCH-FOOD-001 economy audit/design → CCH-ORDERS-001 farm dispatch prototype → CCH-SKILLS-001 interlocking skill progression audit → CCH-LOWMERE-001 small town district feasibility/prototype. Existing town-vote lore and farm-stage trek logic must be preserved.
+
+
+## 2026-11-14 — Town-owner construction and inn room-design candidates
+
+User selected two new gameplay directions (design only, no code approved):
+
+| ID | Priority | Feature | Status | Implementation dependency |
+| --- | --- | --- | --- | --- |
+| CCH-LOWMERE-BUILD-001 | **P2** | Help owners visibly repair and improve the inn, general store, fish market and docks through optional labor/material contracts, with meaningful coins/skill progress, service upgrades and owner goodwill | Design | Verify actual Construction or related skill in code; needs CCH-LOWMERE-001 town prototype and CCH-ORDERS-001 shared contract engine |
+| CCH-INN-001 | **P2** | Original, client-briefed themed guest-room design inspired by Animal Crossing 3.0 resort hotel / Happy Home Paradise: one-room editor, furniture arrangement, objective constraints and persistent room layouts | Design | Requires inn scene, furnishings/save infrastructure and one structural repair; prototype one room before multiple room/guest expansion |
+
+**Design spec and proposed one-room vertical slice:** [Lowmere First District Design](LOWMERE_FIRST_DISTRICT_DESIGN.md). Restore a room first, furnish second; no new mandatory currency, no copying branded room/UI themes. A repair should benefit town economy and gameplay, not simply recolor a building. Keep perpetual fog and village's decline.
+
+**Sequence revision:** Food/Orders audit → minimal Lowmere district and owners → one inn repair contract → one themed guest room → only then expand building renovations/guest demand based on testing. Existing CCH-EVENING-002 remains first gameplay review gate.
