@@ -68,3 +68,8 @@ Do not approve 001B/C/D from this design alone.
 - Should the town offer one-time master commissions, repeatable elite contracts or both?
 - Should Cooking be rewarded primarily with provisions, profit, Comfort, or evenly? Coordinate CCH-FOOD-001.
 - How much of Lowmere renovation should be achievable by a farmer who never enters the mine? Provide viable but slower trade alternatives.
+
+
+## Owner-requested roster reassessment — 2026-11-14
+
+The earlier recommendation to preserve all ten skills is **now a safety constraint for existing saves/code pending audit, not a final design decision**. Owner wants redundant/low-value skills considered for removal or consolidation and more enjoyable skills considered for addition. Candidate Cleaning standalone retirement and Forestry merge, with distinct Cooking/Fishing/Carpentry/Bushcrafting retained. Future Seamanship is conditional on engaging NPC-fisherman voyage gameplay. See [SKILL_ROSTER_AND_MARITIME_DESIGN.md](SKILL_ROSTER_AND_MARITIME_DESIGN.md). No implementation authorized.
