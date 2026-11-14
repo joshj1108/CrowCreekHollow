@@ -147,3 +147,8 @@ Approval: owner explicitly approves a *specific brief*; this roadmap merely queu
 6. Re-rank backlog based on measured issues and player enjoyment; do not start a new phase solely because its design is exciting.
 
 **Immediate next action:** receive/test CCH-EVENING-002, then CCH-FOOD-001 audit/design; prepare CCH-ORDERS-001 bounded farm-side prototype. No Lowmere map, new story beat or hotel editor is authorized until its own gate.
+
+
+## CCH-SKILLS-001 design expansion (2026-11-14)
+
+A source-grounded, design-only skill mastery plan is now recorded in [SKILL_MASTERY_DESIGN.md](SKILL_MASTERY_DESIGN.md). Preserve the existing ten skills and level-10 cap for v1.0 unless an audit justifies change. Prioritize meaningful unlocks rather than repetitive XP; use Farming/Cooking/Orders and Carpentry/Lowmere repairs as first synergistic prototypes. Keep current XP thresholds, save keys, chapter gates and Hale interactions intact. **CCH-SKILLS-001A (source/XP audit)** is the next approval gate; broader implementation remains unapproved.
