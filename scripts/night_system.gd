@@ -399,7 +399,16 @@ func _leave_sighting(faced: bool) -> void:
 		m._show_message(text)
 
 
-func _pick() -> Dictionary:
+# The id of the visitor the night would pick if it came now, as if you were outdoors (EveningSystem's signs).
+func _preview_id() -> String:
+	if _first_night():
+		return "first"
+	if _sighting_night():
+		return "sighting"
+	return str(_pick(true).get("id", ""))
+
+
+func _pick(preview := false) -> Dictionary:
 	# The night the crow bell is hung, the Hollow comes to it one last time. Once Agnes is walked to the grove,
 	# it sleeps and never comes again.
 	if (shadow_steps >= SHADOW_MAX and not m.trek.grove_done) or m.projects.bell_day == m.day:
@@ -412,7 +421,7 @@ func _pick() -> Dictionary:
 	for v in VISITORS:
 		if int(v["tier"]) > tier or v["id"] == last_visitor:
 			continue
-		if v.get("outdoors", false) and (m.inside or m.in_cave):
+		if v.get("outdoors", false) and not preview and (m.inside or m.in_cave):
 			continue
 		if v["id"] == "pond" and m.pond_edges.is_empty():
 			continue
@@ -911,14 +920,19 @@ func _end_night() -> String:
 	return note
 
 
-# Everything that scales what a night takes from your sanity.
-func _loss_mult() -> float:
+# Everything that scales what a night takes from your sanity. id names the visitor when it has already been
+# cleared (in _resolve); before CCH-EVENING-001 it read the cleared visitor there, so the barred shutters never
+# eased an unanswered knock, only its strikes.
+func _loss_mult(id := "") -> float:
+	if id == "":
+		id = str(visitor.get("id", ""))
 	var mult := (2.0 if m.sanity_sys._event_active("dread") else 1.0) * (0.5 if m.sanity_sys._event_active("ward") else 1.0)
 	mult *= 0.5 if charmed else 1.0
 	mult *= m.projects._night_mult()   # the crow bell
-	if str(visitor.get("id", "")) == "knock" and m.projects._shutters_barred():
+	if id == "knock" and m.projects._shutters_barred():
 		mult *= m.projects.SHUTTER_KNOCK   # barred shutters
 	mult *= m.estate._night_mult()     # the second storey
+	mult *= m.evening._night_mult(id)   # the hearth tended for the night (CCH-EVENING-001)
 	mult *= m.trek._night_mult()       # walked someone today, the wood come close, or the Hollow asleep
 	mult *= _season_mult()
 	return mult * m.NIGHT_LOSS_MULT
@@ -944,7 +958,14 @@ func _resolve(faced: bool, show := true, key := "") -> String:
 	# Slept through, the sighting is only what you find in the morning.
 	if not show and not faced and v.has("asleep"):
 		text = str(v["asleep"])
-	var loss := minf(float(v["face_sanity"] if faced else v["ignore_sanity"]) * _loss_mult(), NIGHT_CAP)
+	var loss := minf(float(v["face_sanity"] if faced else v["ignore_sanity"]) * _loss_mult(str(v["id"])), NIGHT_CAP)
+	# The first knock left alone in the first week takes half (CCH-EVENING-001's grace; a knock from the story
+	# act is the Hollow's, not this).
+	var graced := false
+	if not faced and not v.has("act"):
+		var eased := m.evening._grace(str(v["id"]), loss)
+		graced = eased < loss
+		loss = eased
 	m.sanity_sys._change_sanity(-loss)
 	var before := shadow_steps
 	if faced:
@@ -973,6 +994,8 @@ func _resolve(faced: bool, show := true, key := "") -> String:
 			m.progression._bump("left_alone")
 			if not show:
 				text += " Sanity -%d." % roundi(loss)
+			if graced:
+				text += " It will not always be so gentle."
 		if v["id"] == "crows":
 			text += " " + _crows_left()
 		if v["id"] == "hollow":
@@ -1176,18 +1199,22 @@ const E3_ART := true
 
 
 # A farm sprite at 3x with its bottom row on foot, centred across.
-func _sprite_at(name: String, foot: Vector2) -> void:
+func _sprite_at(name: String, foot: Vector2, ci: CanvasItem = null) -> void:
 	var tex := FarmSprites.tex(name)
 	var s := Vector2(tex.get_width(), tex.get_height()) * 3.0
-	layer.draw_texture_rect(tex, Rect2(Vector2(foot.x - s.x * 0.5, foot.y - s.y), s), false)
+	(ci if ci != null else layer).draw_texture_rect(tex, Rect2(Vector2(foot.x - s.x * 0.5, foot.y - s.y), s), false)
 
 
 # A crow, black with a bright eye, standing on its tile.
 func _draw_crow(p: Vector2, size: float) -> void:
-	var ci := layer
+	_draw_crow_on(layer, p, size)
+
+
+# The same crow on another canvas (the evening's crows on the fence, EveningSystem).
+func _draw_crow_on(ci: CanvasItem, p: Vector2, size: float) -> void:
 	# ART-OVERHAUL-002 E3: the farm's perched crow sprite, its feet on the crow's foot point; the shapes are the fallback.
 	if E3_ART and FarmSprites.has("crow_perch"):
-		_sprite_at("crow_perch", p + Vector2(0, float(m.PX) * 0.1))
+		_sprite_at("crow_perch", p + Vector2(0, float(m.PX) * 0.1), ci)
 		return
 	var px := float(m.PX) * size
 	ci.draw_colored_polygon(PackedVector2Array([p + Vector2(-px * 0.3, 0), p + Vector2(px * 0.15, -px * 0.22), p + Vector2(px * 0.28, 0), p + Vector2(0, px * 0.1)]), Color(0.03, 0.02, 0.05, 0.95))

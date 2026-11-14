@@ -115,6 +115,7 @@ func _save_game() -> void:
 		"sanity_penalty": m.sanity_penalty,
 		"boredom_loss": m.boredom_loss,
 		"entertained_day": m.entertained_day,
+		"evening": m.evening._save(),
 		"player_pos": _save_pos(),
 		"inside": m.inside,
 		"save_name": m.save_name,
@@ -283,6 +284,7 @@ func _load_game() -> bool:
 	m.sanity_penalty = int(data.get("sanity_penalty", 0))
 	m.boredom_loss = float(data.get("boredom_loss", 0.0))
 	m.entertained_day = int(data.get("entertained_day", 0))
+	m.evening._load(data.get("evening", null))
 	m.sanity = float(data.get("sanity", m.SANITY_MAX))
 	m.saved_inside = bool(data.get("inside", false))
 	m.save_name = str(data.get("save_name", ""))

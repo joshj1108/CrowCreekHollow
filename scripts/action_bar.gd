@@ -54,6 +54,7 @@ const SUBTITLES := {
 	"Smokehouse": "Smoke, dry and put by",
 	"Furnace": "Ore into bars",
 	"Woodstore": "Firewood for the hearth",
+	"Hearth": "The fire, and the evening by it",
 }
 
 const COL_DIM := Color(0.0, 0.0, 0.0, 0.62)

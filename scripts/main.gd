@@ -977,6 +977,7 @@ var ach: AchievementSystem
 var stall: StallSystem
 var sanity_sys: SanitySystem
 var nights: NightSystem
+var evening: EveningSystem       # CCH-EVENING-001: the evening's signs, the tended hearth, the evening by the fire
 var madness: MadnessSystem
 var happenings: DailyHappenings
 var trek: TrekSystem
@@ -1027,6 +1028,7 @@ func _ready() -> void:
 	firewood = FirewoodSystem.new(self)
 	sanity_sys = SanitySystem.new(self)
 	nights = NightSystem.new(self)
+	evening = EveningSystem.new(self)
 	madness = MadnessSystem.new(self)
 	rewards = HomesteadRewards.new(self)
 	happenings = DailyHappenings.new(self)
@@ -1171,6 +1173,7 @@ func _on_title_start(mode: String, slot: int) -> void:
 	_build_ambience()
 	_build_crows()
 	nights._build()
+	evening._build()
 	madness._build()
 	happenings._build()
 	forage._build()
@@ -1322,6 +1325,7 @@ func _process(delta: float) -> void:
 	if current_hour >= EVENT_HOUR and event_fired_day != day:
 		nights._begin()
 	nights._update()
+	evening._update()
 	madness._update(delta)
 	happenings._update()
 	forage._update()
@@ -3566,6 +3570,16 @@ func _on_panel_action(action_id: String) -> void:
 	if action_id.begins_with("smelt:"):
 		mining._smelt(action_id.trim_prefix("smelt:"))
 		return
+	if action_id == "hearth_feed":
+		firewood._feed_fire()
+		_refresh_panel()
+		return
+	if action_id == "hearth_tend":
+		evening._tend()
+		return
+	if action_id == "hearth_sit":
+		evening._sit()
+		return
 	if action_id == "build_woodshed":
 		_build_woodshed()
 		return
@@ -3758,6 +3772,8 @@ func _refresh_panel() -> void:
 			rows = panels._furnace_rows()
 		"Woodstore":
 			rows = panels._woodstore_rows()
+		"Hearth":
+			rows = panels._hearth_rows()
 		"Desk":
 			rows = panels._desk_rows()
 		"Mailbox":
@@ -4170,6 +4186,8 @@ func _interact() -> void:
 	# A night visitor in front of you is faced before anything else there is used.
 	if not inside and nights._try_face(tile):
 		return
+	if not inside and evening._try_read(tile):
+		return
 	if not inside and happenings._try_take(tile):
 		return
 	if not inside and not _tool_press and forage._try_pick(tile):
@@ -4188,7 +4206,11 @@ func _interact() -> void:
 			Tile.BED:
 				_try_sleep()
 			Tile.FIREPLACE:
-				firewood._feed_fire()
+				# In the evening the hearth has more to offer than fuel, so it opens its own section.
+				if evening._evening():
+					_toggle_tab("Hearth")
+				else:
+					firewood._feed_fire()
 			Tile.STATION:
 				sanity_sys._tidy_house()
 			Tile.DESK:
@@ -6231,7 +6253,7 @@ func _end_day(base: String, leave_house: bool = true) -> void:
 		inventory[key] = 0
 	stats["spoiled"] += spoiled
 	var spoil_note := (" %d fish spoiled in your pack overnight." % spoiled) if spoiled > 0 else ""
-	var upkeep_note := night_note + _settle_day() + projects._morning() + estate._morning()
+	var upkeep_note := night_note + evening._morning_note() + _settle_day() + projects._morning() + estate._morning()
 	# Rain waters every crop. Otherwise a crop must have been watered today to grow.
 	if weather_kind in WATER_RAIN_KINDS:
 		stats["rain_days"] += 1

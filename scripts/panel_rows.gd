@@ -1149,6 +1149,42 @@ func _amount_rows(keys: Array, kept: Dictionary, room: int, store: String) -> Ar
 	return rows
 
 
+# The hearth in the evening (CCH-EVENING-001): feed it as ever, tend it for the night, or sit by it awhile.
+func _hearth_rows() -> Array:
+	var ev := m.evening
+	var lit := m.firewood._fire_lit()
+	var wood := int(m.inventory["firewood"])
+	var rows: Array = [{"tab": "Hearth"}]
+	rows.append({"name": "Fire", "value": ("lit, about %d hours left" % ceili(m.fire_hours)) if lit else "out",
+		"progress": m.fire_hours / m.FIRE_MAX_HOURS})
+	rows.append({"name": "Feed the fire", "value": "1 firewood: about %d hours more. %d in your pack" % [int(m.FIREWOOD_HOURS), wood],
+		"button": "Feed", "action": "hearth_feed", "enabled": wood > 0 and m.fire_hours < m.FIRE_MAX_HOURS,
+		"note": "" if wood > 0 else "Take firewood from the store at the workshop."})
+	var tended := ev.prep_day == m.day
+	var tend_row := {"name": "Tend the hearth for the night",
+		"value": "%d firewood and half an hour" % ev.PREP_WOOD,
+		"about": "Bank the fire with a log, set the guard and draw the curtains, so the house is ready for whatever comes in the night. It may not be needed.",
+		"needs": [{"text": "A good fire (%d hours)" % int(ev.PREP_FIRE), "ok": m.fire_hours >= ev.PREP_FIRE},
+			{"text": "%d firewood in your pack" % ev.PREP_WOOD, "ok": wood >= ev.PREP_WOOD},
+			{"text": "Once an evening", "ok": not tended}],
+		"button": "Tend", "action": "hearth_tend", "enabled": ev._prep_blocker() == ""}
+	if tended:
+		tend_row["status"] = "Done tonight"
+		tend_row["status_kind"] = "done"
+	rows.append(tend_row)
+	var sat := ev.cozy_day == m.day
+	var sit_row := {"name": "An evening by the fire",
+		"value": "an hour: +%d sanity, warmed through" % int(ev.COZY_SANITY),
+		"about": "Read, mend or just sit while the logs settle.",
+		"needs": [{"text": "The fire lit", "ok": lit}, {"text": "Once an evening", "ok": not sat}],
+		"button": "Sit", "action": "hearth_sit", "enabled": ev._cozy_blocker() == ""}
+	if sat:
+		sit_row["status"] = "Done tonight"
+		sit_row["status_kind"] = "done"
+	rows.append(sit_row)
+	return rows
+
+
 func _woodstore_rows() -> Array:
 	return [
 		{"tab": "Firewood store"},
