@@ -67,3 +67,39 @@ The descending mountain road enters the upper/landward edge; a muddy, modestly s
 - Exact town map geography, harbor orientation, architecture palette and NPC schedules.
 
 **No code, map, art production or quest rewrites authorized by this document.**
+
+
+## 2026-11-14 — Owner request: construction assistance and inn guest-room design
+
+**Owner-directed feature concept (design approved for exploration; NOT an authorization to code):**
+- The farmer should be able to use construction/building capability to **renovate Lowmere buildings on behalf of their owners**, for meaningful compensation and community progress.
+- The Lowmere inn should offer a **client-briefed hotel room decorating mode**, inspired by Animal Crossing: New Horizons 3.0's themed guest rooms and Happy Home Paradise's interior design freedom, but with original presentation, assets, guests, economy and fiction.
+- These are distinct but integrated loops: **structural restoration** unlocks usable room/facility space; **interior commissions** let the player design, furnish and revisit specific rooms. Keep town economically struggling: visible gradual improvement rather than an instant fully restored tourist destination.
+
+### Proposed town restoration loop
+1. Speak to an owner about a concrete need (leaking roof, rotten dock, ruined cold room).
+2. Accept an optional construction contract; owner contributes some materials, the player contributes gather/craft resources, labor/time and existing relevant progression.
+3. Repair stage visibly changes specific tiles/art and restores a basic service.
+4. Upgrade stages add capabilities, orders, inventory or improved trade terms, not only cosmetic points.
+5. Completion rewards a bounded mix of coins, appropriate **existing** skill XP (verify Construction skill actually exists; do not invent/migrate a skill without design approval), owner relationship progress, furniture recipes, and access to new orders.
+
+**Candidate businesses:** inn (first), fish market, general store, docks. Recommended shared staged renovation framework **Repair → Improve → Restore**; costs/reward figures remain provisional and require an economy and progression audit. Distinguish town business stages from farm's four restoration stages. Preserve owners and their agency.
+
+### Proposed inn-room design loop
+- Player first repairs an inn room structurally, then receives a theme/needs brief from a guest or innkeeper.
+- A **small grid-based room layout editor** uses existing Godot furnishing/panel input and tile art when feasible; supports valid floor placement, rotations where supported, rugs, wall/floor options and lighting.
+- Each brief has a few **objective minimums** (usable bed, path to door, appropriate light, theme request); optional creative bonus, no harsh aesthetic scoring or copying Animal Crossing's exact UI/economy.
+- Players may rearrange and revisit completed rooms. Save per-room furniture layout and unlocked theme; protect older saves.
+- **No special currency necessary**: coins, modest relevant skill XP and furnishings/recipes/town reputation are possible. Avoid a separate mandatory hotel ticket grind.
+- **Prototype:** one inn structural repair + one furnished guest room + two original guest briefs using a small existing furniture set; demonstrate persistent layout, reward, character response and visual before/after. No hotel management empire, tourism simulation, infinite procedural guests, or major new sprite pipeline initially.
+- Optional later: several rooms, returning guests, request variety, coastal furniture, inn food orders, subtle mystery encounters. Town always stays dreary and fogbound.
+
+### Relevance to ongoing progression
+- **Food:** visiting guests and inn meals can create food delivery demand using CCH-FOOD-001.
+- **Orders:** building owners can issue supply contracts within the common CCH-ORDERS-001 framework.
+- **Skills:** construction repair and furnishing should support CCH-SKILLS-001's existing progression review; verify actual skills first, do not assume Construction currently exists.
+- **World:** repairs visibly improve individual buildings, open services and draw occasional visitors without curing Lowmere's decline or fog.
+- **Mystery:** guest interactions or a closed room can organically reveal story clues, but not every contract becomes supernatural.
+- **Scope gate:** Lowmere base map and town service loop must exist before attempting a substantial free-placement designer; avoid making furniture editor a dependency for first playable town.
+
+**New candidate tasks:** CCH-LOWMERE-BUILD-001 (P2, town-owner building repair prototype) and CCH-INN-001 (P2, one-room guest design prototype). Both **Design**, no coding authorization. Owner reviews layout/edit controls, save behavior, rewards and actual game visuals before committing production art.
