@@ -14,6 +14,7 @@ extends SceneTree
 #               the crow bell can be hung is day 396, the second All Hallows)
 #   seed=N      random seed (default 1)
 #   every=N     print one table row every N days (default 1)
+#   grace=0     CCH-EVENING-001's control: the first-week grace for the first unanswered knock is taken as spent
 #   treks=N     go on N treks a week (default 0), on the longest open route the supplies allow. The routes,
 #               events, forks and gifts come from TrekSystem; walking time and sanity are estimated (_route_trek).
 #               With treks, Old Maren is first walked to the wood's edge, the first day she waits with a lantern
@@ -122,12 +123,14 @@ func _initialize() -> void:
 			"seed": s = int(kv[1])
 			"every": every = maxi(1, int(kv[1]))
 			"treks": treks_a_week = int(kv[1])
+			"grace": grace_on = kv[1] != "0"
 	seed(s)
 	m = load("res://scenes/main.tscn").instantiate()
 	root.add_child.call_deferred(m)
 
 
 var started := false
+var grace_on := true   # grace=0: CCH-EVENING-001's first-week grace taken as spent from day 1 (the control)
 
 
 # The game is set up on the first frame, once its _ready has run, and played straight through.
@@ -137,6 +140,8 @@ func _process(_delta: float) -> bool:
 	started = true
 	m._on_title_start("new", SLOT)
 	m.set_process(false)
+	if not grace_on:
+		m.evening.grace_used = true
 	_run()
 	SaveSystem.delete_save(m._save_path())
 	return true

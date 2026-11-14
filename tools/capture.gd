@@ -48,6 +48,11 @@ extends SceneTree
 #                   real foes for hold= clips (chp=N sets their HP); ckinds=A,B picks the creatures, cface=left turns
 #                   them; oldfoes draws the old SpriteCook sheets (CCH-CONSOLIDATED-003 Phase E BEFORE shots)
 #   fish            stand below a fishing spot and cast at it
+#   sign=KIND       CCH-EVENING-001: tonight's evening sign (crows, tracks or chill), shown 19:00-22:00 (use hour=);
+#                   signread marks it read (the crows have gone)
+#   signsay         with sign=, read it now: its text is shown as Space would show it
+#   hearth=ACT      in the house (inside itile=13,4): space (what Space at the hearth does now), feed, tend or sit
+#   morning=KIND    sleep through a knock and show the morning report: prep (hearth tended), plain, or grace
 #   visitor=ID      bring tonight's night visitor now: field, knock, quiet, crows, pond, watcher, footsteps
 #                   or hollow (use with hour=22 or later)
 #                   first is the scripted first night (a new game gets it anyway at 22:00); sighting is the
@@ -270,6 +275,13 @@ func _initialize() -> void:
 		main.diary_new.append("story")
 	if opt.has("hour"):
 		main.clock = (float(opt["hour"]) - main.START_HOUR) / (main.DAY_END_HOUR - main.START_HOUR) * main.DAY_LENGTH
+	# (The evening options are guarded so this script also takes BEFORE shots on a build without EveningSystem.)
+	var has_evening: bool = main.get("evening") != null
+	if opt.has("sign") and has_evening:
+		main.evening.force_kind = str(opt["sign"])
+		main.evening.noticed_day = main.day   # the notice line is the sign= shot's own business, not the frame's
+	if opt.has("signread") and has_evening:
+		main.evening.sign_read_day = main.day
 	if opt.has("inside"):
 		main._enter_house()
 		if opt.has("itile"):
@@ -532,6 +544,40 @@ func _initialize() -> void:
 		main.act.screen.jump(int(opt.get("epage", "0")))
 		for i in 4:
 			await process_frame
+	# CCH-EVENING-001: the evening's own moments, through the game's own functions.
+	if opt.has("signsay") and main.get("evening") != null:
+		main.evening.sign_read_day = main.day
+		main.notice_queue.clear()   # the new game's own opening notices would hold it back
+		main.notice_text = ""
+		main.chatter_text = ""
+		main.evening.top.queue_redraw()
+		_final_line = main.evening._read_text(main.evening._showing())
+		main._show_message(_final_line, true)
+	if opt.has("hearth") or opt.has("morning"):
+		main.notice_queue.clear()
+		main.notice_text = ""
+		main.chatter_text = ""
+	if opt.has("hearth"):
+		main.player.facing = Vector2.UP
+		main._tool_press = false
+		if opt["hearth"] == "space":
+			main._interact()   # what Space at the hearth does at this hour (use with itile=13,4)
+		else:
+			main._on_panel_action("hearth_" + str(opt["hearth"]))
+		for i in 6:
+			await process_frame
+	if opt.has("morning"):
+		# Sleep through a knock: morning=prep (the hearth tended), plain, or grace (the first week's first knock).
+		if main.get("evening") != null:
+			main.evening.prep_day = main.day if opt["morning"] == "prep" else -1
+			main.evening.grace_used = opt["morning"] != "grace"
+		main.event_fired_day = main.day - 1
+		main.nights.first_beat = -1
+		main.nights._begin("knock")
+		main._end_day("You sleep through the night.", false)
+		for i in 30:
+			await process_frame
+		_final_line = main.morning_report
 	if opt.has("tab"):
 		if opt.has("page"):
 			main.action_bar.ledger_tabs[opt["tab"]] = int(opt["page"])
@@ -562,6 +608,15 @@ func _initialize() -> void:
 		return
 	if opt.has("perf"):
 		await _perf()
+	# signsay and morning: the line they are about goes on the message line last, over any opening notices still
+	# queued from the new game (display only; nothing in play changes).
+	if _final_line != "":
+		main.notice_queue.clear()
+		main.notice_text = ""
+		main.chatter_text = ""
+		main.message_label.text = _final_line
+		await process_frame
+		await RenderingServer.frame_post_draw
 	_save(opt)
 
 
@@ -733,6 +788,9 @@ func _log_contact(kind: String, main) -> void:
 		hits.append("%d killed" % killed)
 	print("COMBAT frame %d: contact frame %s shown %.3f s into the swing; hit resolved on it: %s" % [_rec_frame,
 		str(main.player._sheet_frame()), main.player.act_t, ", ".join(hits) if not hits.is_empty() else "a miss"])
+
+
+var _final_line := ""
 
 
 func _save(opt: Dictionary) -> void:

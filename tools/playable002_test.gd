@@ -415,7 +415,10 @@ func _trek_cases() -> void:
 	m.trek.spoke = true   # a word already used in this clearing
 	await frames(3)
 	check("PLAY-09 she freezes", m.trek.frozen)
-	var t: String = str(m.message_log[-1]["text"]) if not m.message_log.is_empty() else ""
+	# The last few logged lines: an achievement notice (Tin Light) can land after the freeze line (CCH-EVENING-001).
+	var t := ""
+	for i in mini(3, m.message_log.size()):
+		t += str(m.message_log[m.message_log.size() - 1 - i]["text"]) + " | "
 	check("PLAY-09 the frozen line offers a word and turning back", t.contains("word") and t.contains("turn home"), t)
 	check("PLAY-09 the frozen line does not ask for a ration the player lacks", not t.contains("Give her a trail ration"), t)
 	m.player.position = m.trek.walker_pos + Vector2(m.PX * 0.5, 0)

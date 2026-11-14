@@ -814,7 +814,7 @@ func _small_panel_cases() -> void:
 	m.mail._add_letter("Menu test", "A letter in the mailbox.")
 	m.mail._open_mailbox()
 	m._close_panel()
-	for panel_name in ["Desk", "Mailbox", "Furnace", "Smokehouse", "Coop", "Barn", "Cellar", "Cooler", "Woodstore", "Well", "Trade"]:
+	for panel_name in ["Desk", "Mailbox", "Furnace", "Smokehouse", "Coop", "Barn", "Cellar", "Cooler", "Woodstore", "Hearth", "Well", "Trade"]:
 		m._toggle_tab(panel_name)
 		await _frames(3)
 		var label: String = panel_name.to_lower()
