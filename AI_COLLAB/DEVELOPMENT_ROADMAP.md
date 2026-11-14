@@ -1,5 +1,7 @@
 # Crow Creek Hollow — Prioritized Development Roadmap
 
+**Master phase-by-phase pathway to 1.0:** [MASTER_ROADMAP_TO_1_0.md](MASTER_ROADMAP_TO_1_0.md). This document remains the detailed candidate backlog and history. Neither roadmap grants blanket implementation approval.
+
 **Established:** 2026-11-14  
 **Authority:** Owner and ChatGPT design direction. This file records plans; **it is not blanket implementation approval**. Claude implements only an explicitly owner-approved brief.  
 **Companions:** `AI_COLLAB/TASKS.md`, `AI_COLLAB/MESSAGE_BOARD.md`, `AI_COLLAB/CCH_LOOP_001_IDLE_TIME_AUDIT.md`, `DESIGN.md`.
