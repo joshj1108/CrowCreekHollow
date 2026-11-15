@@ -198,3 +198,7 @@ Detailed **design-only** specification: [BRANCHING_RESIDENT_ARCS_AND_PLAYER_DIAR
 ## 2026-11-14 — December–February branching story
 
 [**FIRST_WINTER_BRANCHING_DETAIL.md**](FIRST_WINTER_BRANCHING_DETAIL.md) describes one optional supply dilemma with viable help, fair-exchange, self-provision and alternative-problem-solving paths; preserves original Longest Night, Winter Feast, Spring Thaw, hearth and trek rules. Backlog: `CCH-WINTER-BRANCH-001` P1 Design documented; `-002` P1 Design source/economy audit; `-003` P2 Idea first supply decision+callback; `-004` P2 Idea personal event reflection; `-005` P2 Idea February preparedness/spring consequences; `-QA-001` P1 eventual testing. Reuse core choice/diary systems, avoid side quest bloat. No coding authorized.
+
+## 2026-11-14 — First spring Wicker Cove arrival / branching
+
+[**FIRST_SPRING_BRANCHING_DETAIL.md**](FIRST_SPRING_BRANCHING_DETAIL.md) is the design-only spring narrative plan: 4 optional motivations for first town visit, small social callback, no moral roles, fog contradictions without objective truth and late-spring clerk's letter preserved. **CCH-SPRING-BRANCH-001 P1 Design** documented; **-002 P1** audit exact town travel/dialogue/Save, **-003 P2** first-visit candidate after town works; `CCH-SPRING-FOG-001`, `CCH-SPRING-LETTER-001`, `CCH-SPRING-DIARY-001` P2 ideas; **CCH-SPRING-BRANCH-QA-001 P1** eventual regression. Reuse `CCH-LOWMERE-001` for Wicker Cove and avoid new parallel visitor/relationship systems.
