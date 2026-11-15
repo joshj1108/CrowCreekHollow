@@ -190,3 +190,7 @@ Detailed **design-only** specification: [BRANCHING_RESIDENT_ARCS_AND_PLAYER_DIAR
 ## 2026-11-14 — Year-one branching narrative and synopsis
 
 [YEAR_ONE_BRANCHING_NARRATIVE_DESIGN.md](YEAR_ONE_BRANCHING_NARRATIVE_DESIGN.md) records planned-game marketing copy and **October–September** choice arcs with ordinary approaches, later world callbacks and accurate personal diary pages. Tasks: CCH-YEAR1-BRANCH-001 P1 Design complete as proposal; 002 P1 audit existing October dialogue and story hooks; 003 P1 gated optional choice prototype; WINTER-001 P2 winter distribution; COVE-001 P2 first town motives; SUMMER-001 P2 farm/town investment; REFLECT-001 P2 first-year diary reflection; QA-001 P1 eventual save/branch/clock/ending regression. Existing May28 day240 letter and September22 meeting timing supersede inaccurate season labels in earlier prose. No code approved.
+
+## 2026-11-14 — First autumn scenario design
+
+[**FIRST_AUTUMN_BRANCHING_DETAIL.md**](FIRST_AUTUMN_BRANCHING_DETAIL.md) specifies first autumn (Oct/Nov) choice beats, Maren day-4 trek and optional response, first harvest allocation, cautious exploration, All Hallows and First Frost callbacks, and truthful diary memories. This is *design only*. New optional decisions must never block original early story or become mandatory morality tests. Same branch prototype should be reused across CCH-AUTUMN-BRANCH-003 / YEAR1-BRANCH-003 / DIARY-LIFE-001B rather than creating three separate systems.
