@@ -85,3 +85,16 @@ Make Lowmere a failing but inhabited fogbound seaside fishing village whose peop
 - Decide whether Edith's inn or Thomas's store is the first fully working interior.
 - Decide whether any new resident ties to the old 31-to-4 town vote; if so, keep evidence in original stories.
 - Determine which resident first introduces the player to the harbor and future fishing voyages; recommendation Gideon after an ordinary job.
+
+## Owner-set fog testimony direction (2026-11-14)
+
+**CANON:** Lowmere is permanently fogbound; local memories and records about *when* this began contradict each other, and the truth is unresolved. This is a trait of the community, not a reason for every NPC to have a supernatural secret.
+
+**Tentative voice design, not canon individual histories:**
+- Edith (proposed innkeeper) has guest logbooks or old room views that might conflict with community claims; let her treat the records pragmatically.
+- Gideon (proposed boat operator) may recall visibility markers and navigable routes differently from other seasoned fishermen; he should remain a competent worker.
+- Martha (proposed fishmonger) can challenge Gideon's certainty using market history or other fishermen's accounts without either being confirmed correct.
+- Thomas (proposed shopkeeper) may find weather/shipping annotations that conflict with firsthand memories; preserve mundane possibilities.
+- Existing Maren, Davy, vicar and postman retain their established scenes and ending flags. Any added observations of Lowmere fog must be reconcilable with their currently written ages, history, travel schedules and records.
+
+**CCH-LOWMERE-FOG-001 P1 Design:** testimony/conflict matrix required before writing these dialogues. **CCH-LOWMERE-FOG-002 P2 Idea:** micro-conversations and records after town slice works. Preserve ambiguity and ordinary human tone; don't imply a false or definitive backstory.
