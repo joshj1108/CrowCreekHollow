@@ -294,3 +294,7 @@ Proposed back-cover synopsis and mapped October (first-night/neighbor), winter (
 ## 2026-11-14 — Literary depth / plain-language style mandate
 
 Owner established **literary ambition in plain English** as a core narrative quality requirement. [NARRATIVE_VOICE_AND_LITERARY_STANDARDS.md](NARRATIVE_VOICE_AND_LITERARY_STANDARDS.md) guides environmental text, speech, letters, Agnes's authored pages and the player's factual diary. No overwrought purple prose, generic atmospheric exaggeration, omniscient judgements of player emotion or definitive Wicker Cove fog answers. Small human actions carry meaning. Future spring story/first Cove arrival uses this rubric. Editorial design only; unchanged game scripts.
+
+## 2026-11-14 — The second autumn and after the endings: personal consequences, canonical story preserved
+
+[**YEAR_TWO_COST_OF_STAYING_DESIGN.md**](YEAR_TWO_COST_OF_STAYING_DESIGN.md) extends player-authored everyday life into second-calendar-autumn Davy and bell climax, then the continuing farm after any of the original three endings. The actual 'second-year story' code begins at day240 before year2 calendar October; do not defer its story triggers. Support quiet homesteaders as fully as community-minded or mystery-seeking players, keep Davy's original time-limited night and recoverable Hollow outcome, and make player history felt through small truthful memories rather than moral grading or rewritten Rook lore. Design only.
