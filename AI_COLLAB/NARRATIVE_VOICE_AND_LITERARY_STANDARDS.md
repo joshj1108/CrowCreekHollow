@@ -105,3 +105,7 @@ Aim for 10–12 in key scenes, but clarity and integrity override any aesthetic 
 ## Spring's first-visit sample and choice direction (2026-11-14)
 
 [**FIRST_SPRING_BRANCHING_DETAIL.md**](FIRST_SPRING_BRANCHING_DETAIL.md) applies this editorial standard to Wicker Cove's first visit. The player sees ordinary labor (net-mending, a rotten step, damp boards) before hearing uncertainty about Rook's farm. Respond by actual motive (sell, repair, listen, shop); voices should be restrained, useful, short, and differ by profession. No definitive fog reveal or overplayed doom. Prose is a sample only and **does not authorize rewriting** the existing game narrative.
+
+## Extended story architecture (2026-11-14)
+
+[LITERARY_STRUCTURE_AND_HORROR_PACING.md](LITERARY_STRUCTURE_AND_HORROR_PACING.md) establishes five modest repeated motifs and a warm/uncertain/hard storytelling rhythm that keeps farming/food/work/relationships enjoyable, with rare properly prepared folk horror events. No forced player feelings or invented story facts. Existing authored `StoryAct` scenes remain authoritative, Wicker Cove coastal fog's onset/cause unresolved, and owner-approved future forest logging and workbench planks give ordinary work physical meaning. Design only.
