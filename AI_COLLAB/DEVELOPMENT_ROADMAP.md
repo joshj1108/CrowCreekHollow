@@ -271,3 +271,7 @@ New [PLAYER_ARRIVAL_INTERACTIVE_PROLOGUE_DESIGN.md](PLAYER_ARRIVAL_INTERACTIVE_P
 ## 2026-11-14 — Authored mandatory interlude draft, not only origin outline
 
 [**ROAD_TO_CROW_CREEK_HOLLOW_BRANCHING_SCREENPLAY_DRAFT.md**](ROAD_TO_CROW_CREEK_HOLLOW_BRANCHING_SCREENPLAY_DRAFT.md) records `CCH-ROAD-SCREENPLAY-001` P1 first five-branch complete proposed script with shared arrival, past relationship/none, memento and first-winter real decision scenes. No Skip for new game; pause/resume and old-save compatibility. `CCH-ROAD-EDIT-001` P1 literary audit, `CCH-ROAD-UX-001` P1 NewGame/Diary/Mail UI audit, `CCH-ROAD-LEGAL-001` P1 owner decision on town-held occupier listing, `CCH-ROAD-SPRING-001` P1/P2 future consequential midyear scene, `CCH-ROAD-PROTOTYPE-001` P1 gated first playable interlude, `CCH-ROAD-QA-001` P1 QA. This file is draft writing—not implementation permission or an independent narrative system.
+
+## 2026-11-14 — Five spring origin follow-through scenes drafted
+
+[**ROAD_TO_CROW_CREEK_HOLLOW_SPRING_RETURN_SCREENPLAY.md**](ROAD_TO_CROW_CREEK_HOLLOW_SPRING_RETURN_SCREENPLAY.md) defines `CCH-ROAD-SPRING-001` P1 editorial draft, one significant past-life choice and genuine subsequent material/interpersonal state for each of five mandatory earlier-life paths. `CCH-ROAD-SPRING-EDIT-001` P1 state-based edit; `CCH-ROAD-SPRING-PROTOTYPE-001` P1/P2 gated; `CCH-ROAD-SPRING-QA-001` P1 eventual. Existing `StoryAct` day240 parish letter and evidence/ending gates retain priority over personal mail; no new game code changes.
