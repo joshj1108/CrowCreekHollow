@@ -108,3 +108,7 @@ Across all, the world is not judged 'saved' or 'failed' by an all-purpose meter.
 - **CCH-SEPTEMBER-BRANCH-QA-001 — P1 eventual QA:** 4 playstyle checks, no-town-run, early-game fallback, missing facts, diary handwriting, save/version, September22 event gain, day357 next-morning meeting, year-two Davy/crow bell, all 17 chapter progression and endings, normal year rollover.
 
 **Canon / proposal separation:** September Harvest Moon date and reward, story meeting code and prerequisites, Wicker Cove town identity/fog and home gameplay are established. 'My Days' yearly recap, sample lines and social/woodworking acknowledgments are conceptual features until actually implemented.
+
+## 2026-11-14 — Mandatory origin memory is equally weighted in first-year reflection
+
+Owner now requires *The Road to Crow Creek Hollow* as a **mandatory new-game interlude**. The player's reason for arriving is **as important** as what they chose to do or why they stay. The optional first-year diary reflection must include source-truthful aspects of **both** the chosen opening origin/meaningful later origin choice and the recorded first-year actions, without pretending a backstory was skipped or fixed. A pragmatic origin gets the same care as a painful one. If old save has no origin fields, do not fabricate one. Exact prologue and future source fields will be audited before implementation; do not change current September 22 Harvest Moon or day357 meeting fallback.
