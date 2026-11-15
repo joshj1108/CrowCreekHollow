@@ -309,3 +309,7 @@ Reason: drawn to quiet mountains and farm. Connection: close friend or none. Kee
 - End of first year can acknowledge a persistent past and newly built life **without narrating player feelings**.
 - No character can magically know the protagonist's private past if it has not been disclosed or delivered through a plausible channel.
 - First day tutorial, Day4 Maren, canonical letter/meeting/Davy/grove and the three original endings still function.
+
+## 2026-11-14 — Full five-origin continuation and consequences
+
+[**TWO_LIVES_INTERWOVEN_ORIGIN_ARCS.md**](TWO_LIVES_INTERWOVEN_ORIGIN_ARCS.md) expands this owner-mandated non-skippable interlude into **five full earlier-life narratives**, each with an original specific opening scene, the item or relationship carried to the farm, a changing winter circumstance outside the player's control, **one substantive spring/summer choice** with lasting personal/practical outcome, and a truth-based September + second autumn/afterword resonance. The past is **equal in narrative weight to why the player stays**, not merely a background flavor entry, and a positive/pragmatic origin deserves as much development as a difficult departure. This expansion supersedes any statement above limiting origin consequences to 1–3 decorative callbacks. Original October1 tutorial, deed/tenant terms, story gates, endings and fog ambiguity remain untouched. **Design only, no script implementation.**
