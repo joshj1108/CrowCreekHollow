@@ -1,23 +1,25 @@
-# CCH-COAST-WORLD-001 — Lowmere Coast, Fishing Grounds, Voyages and Quiet Mysteries
+# CCH-COAST-WORLD-001 — Wicker Cove Coast, Fishing Grounds, Voyages and Quiet Mysteries
+
+> **Naming update (2026-11-14):** **Wicker Cove** is the official in-world name. Legacy `CCH-LOWMERE-*` task IDs and `LOWMERE_*` document paths are retained as stable project identifiers; they do not indicate a second town. All previous lore and design commitments are preserved.
 
 **Creative exploration draft:** 2026-11-14  
 **State:** DESIGN/IDEAS ONLY; no new production map, dialogue, art, NPC, code or feature authorized.
 **Related design:** `LOWMERE_FIRST_DISTRICT_DESIGN.md`, `LOWMERE_RESIDENTS_DESIGN.md`, `LOWMERE_ECONOMY_HISTORY_DESIGN.md`, `SKILL_ROSTER_AND_MARITIME_DESIGN.md`, `MASTER_ROADMAP_TO_1_0.md`.
 
 ## North star
-Make the coastline feel like part of the same inhabited world as the Hollow: ordinary work, seasonal routines, imperfect repairs, community ties, and intermittent unanswerable contradictions. The farm remains the home base; the mountain's forest treks start from the farm, and sea trips start from **Lowmere's harbor**. Players can be a homesteader who never sails, a cook/supplier who supports fishing crews, or a frequent deckhand who occasionally seeks new waters. None needs a separate campaign or skill tree.
+Make the coastline feel like part of the same inhabited world as the Hollow: ordinary work, seasonal routines, imperfect repairs, community ties, and intermittent unanswerable contradictions. The farm remains the home base; the mountain's forest treks start from the farm, and sea trips start from **Wicker Cove's harbor**. Players can be a homesteader who never sails, a cook/supplier who supports fishing crews, or a frequent deckhand who occasionally seeks new waters. None needs a separate campaign or skill tree.
 
 ## Owner canon (immutable unless owner changes)
-- Lowmere is a struggling seaside fishing village below the Crow Creek Hollow farm, at the end of a descending mountain road; the farm is the last inhabited homestead before the forest.
-- Lowmere has **a dense coastal fog 24/7**. This is not merely a weather roll or occasional mist; it must not require the farm to be dark or foggy.
+- Wicker Cove is a struggling seaside fishing village below the Crow Creek Hollow farm, at the end of a descending mountain road; the farm is the last inhabited homestead before the forest.
+- Wicker Cove has **a dense coastal fog 24/7**. This is not merely a weather roll or occasional mist; it must not require the farm to be dark or foggy.
 - **Fog origin/history is intentionally contradictory.** Some residents sincerely claim it was always present, others remember clear sea horizons, and documents may conflict. **Do not establish an objectively true onset, cause, supernatural explanation, time anomaly or direct tie to Agnes's bell.**
 - Original 17 story chapters, four existing walker relationships, Maren/Ruth's minute book, vicar's register, town vote, E. Pell's letter, Agnes/Elias and all three endings remain intact and accessible.
 - The inn, merchant, fishmonger and boat captain names proposed in resident docs are **candidates**, not final canon.
 
 ## Tentative coastal geography and place identities
-1. **The Working Harbor (first Lowmere district):** a working slipway, fish market, receiving counter, nets, aging boats, inn uphill. Trade, contracts and first boat boarding; a few warm windows against cold damp morning.
+1. **The Working Harbor (first Wicker Cove district):** a working slipway, fish market, receiving counter, nets, aging boats, inn uphill. Trade, contracts and first boat boarding; a few warm windows against cold damp morning.
 2. **The Old Breakwater:** stone and timber storm barrier protecting the mouth of the harbor; cracked walkways and a modest old light/beacon, never an obligatory lighthouse/giant landmark. Shore fishing and a possible safe, visible repair.
-3. **The Tide Pools:** a small sheltered strand accessible on foot from Lowmere when safe; seaweed, shells, occasional bait or edible coastal foraging after an item-economy audit; not a new exhaustive survival meter.
+3. **The Tide Pools:** a small sheltered strand accessible on foot from Wicker Cove when safe; seaweed, shells, occasional bait or edible coastal foraging after an item-economy audit; not a new exhaustive survival meter.
 4. **The Outer Shoals:** nearby low-risk-to-moderate-risk fishing area reached in a brief NPC boat trip. A specific buoy, headland contour or bell-like sound is an *optional detail*, not evidence of fog cause.
 5. **The Far Channel:** optional later waterway to a named off-screen settlement; working trade route/manifest rather than a full additional town map. No unlock until basic coastal activity has proved fun.
 6. **The Unmarked Water:** *long-term story candidate* for one optional mysterious voyage where mismatched charts and testimony create uncertainty; no objective proof of paranormal causation.
@@ -26,11 +28,11 @@ The exact names, coast orientation, inlet shape, distances, lighthouse existence
 
 ## Concrete working-voyage vertical slice
 **A Morning With the Fisherman**, working character concept Gideon Pike if owner approves him:
-- Player accepts optional invitation at Lowmere docks; receives understandable prerequisites, supplies and return estimate; no boat ownership required.
+- Player accepts optional invitation at Wicker Cove docks; receives understandable prerequisites, supplies and return estimate; no boat ownership required.
 - Short loading action (nets, provisions or fuel), departure into permanent fog; harbor visibility fades without going fully unreadable.
 - One approachable, player-controlled deck interaction (haul/sort nets or place a catch, with standard controls; no high-action minigame mandatory).
 - One real choice: return with the dependable catch or make a longer attempt at a nearby ground, with costs/benefits previewed and a safe route home.
-- Return to Lowmere for bounded Fishing XP, share of fish, modest coins and relationship acknowledgment. If eventually Seamanship exists, only distinct seamanship actions award that XP.
+- Return to Wicker Cove for bounded Fishing XP, share of fish, modest coins and relationship acknowledgment. If eventually Seamanship exists, only distinct seamanship actions award that XP.
 - Preserve time-of-day, player health/needs, boat location and loading behavior; explicit save/load handling. No seasickness meter, forced combat, open ocean physics, or irreversible travel lock.
 - **Success:** player finds the work cozy even with no supernatural event; at least one useful reward; a second trip offers some variety, not identical dead time.
 
@@ -40,7 +42,7 @@ The exact names, coast orientation, inlet shape, distances, lighthouse existence
 **Coastwise shipment:** accept a manifest of farm goods, timber or preserved fish destined for an off-screen coastal settlement; return with payment/supplies and possibly traveler rumors. No need to visit a new town map.
 A **rare uncertain voyage** is an optional variant and never replaces regular sea work.
 
-## Lowmere's rhythms by season (suggestions, not implementation mandates)
+## Wicker Cove's rhythms by season (suggestions, not implementation mandates)
 - **Autumn:** active fish preservation, repairs before winter storms, stacked traps, inn's seasonal demand; some fair mornings still fogbound.
 - **Winter:** fewer outings and shorter fishing windows, warmer inns, storm repairs and preserved-food contracts; alternative shore tasks for non-sailors.
 - **Spring:** crews refit boats and try new grounds; village notices deliveries and the first practical repaired dock.
@@ -71,7 +73,7 @@ Avoid simulating a full ocean tide/weather system for v1.0. Reuse seasonal/weath
 - Ambient work can vary by season and completed buildings, with fog always in place.
 
 ## Practical design hazards / tests
-- Do not turn the coastal excursion into a separate game that outshines farming, food or woodland survival; first voyage is a prototype after Lowmere is stable.
+- Do not turn the coastal excursion into a separate game that outshines farming, food or woodland survival; first voyage is a prototype after Wicker Cove is stable.
 - Maintain current camera perspective, 16px world art style, Godot scene conventions and stable saves; no full sailing physics or player boat ownership required.
 - The world clock is short (~7 real minutes per day per DESIGN.md). Prototype voyage duration must be meaningful *in game* without consuming most of the day or causing punitive late arrivals.
 - Coastal fog should support orientation through near-field landmarks and consistent route cues, readable in different accessibility settings; avoid blank white screens.
@@ -83,10 +85,10 @@ Avoid simulating a full ocean tide/weather system for v1.0. Reuse seasonal/weath
 | ID | Priority | Status | Scope / first gate | Dependencies |
 | --- | --- | --- | --- | --- |
 | **CCH-COAST-WORLD-001** | P1 **design-only prerequisite** | Design | Lock a compact coast geography and lore compatibility matrix; owner reviews first district and coastal concept | CCH-LOWMERE-001, FOG-001 |
-| **CCH-COAST-SHORE-001** | P2 | Idea | Prototype one shore-side location (breakwater OR tide pools), 1 interaction, reward and return | Lowmere town |
+| **CCH-COAST-SHORE-001** | P2 | Idea | Prototype one shore-side location (breakwater OR tide pools), 1 interaction, reward and return | Wicker Cove town |
 | **CCH-COAST-VOYAGE-001** | P2 | Idea | One short crewed nearshore fishing voyage with a meaningful decision and save-safe return | CCH-MARITIME-001, dock access, Fishermen-001 |
 | **CCH-COAST-GROUNDS-001** | P2 | Idea | One discoverable fishing ground affecting actual fish catch and market demand | CCH-COAST-VOYAGE-001 |
-| **CCH-COAST-RHYTHMS-001** | P2/P3 | Idea | Seasonal harbor work, inn trade and local ambient improvements | Lowmere services |
+| **CCH-COAST-RHYTHMS-001** | P2/P3 | Idea | Seasonal harbor work, inn trade and local ambient improvements | Wicker Cove services |
 | **CCH-COAST-CHARTS-001** | P2/P3 | Idea | Optional contradictory chart/log/lookout clues, story-canon audit required | CCH-LOWMERE-FOG-001/002 |
 | **CCH-COAST-ROUTES-001** | P3 | Idea | Off-map coastal shipping route manifest, one named destination | Orders and working voyage |
 | **CCH-COAST-DEEPWATER-001** | P3 / stretch | Idea | Rare mysterious offshore trip after regular fishing is demonstrably fun | Voyage, lore, player testing |
@@ -97,5 +99,5 @@ Avoid simulating a full ocean tide/weather system for v1.0. Reuse seasonal/weath
 - Which shoreline mood/location is strongest: a breakwater, tide pools, working slipway, or a mixture?
 - Should working voyages be a 90-second game session, a few in-game hours, or a longer optional expedition?
 - What should drive new fishing grounds: player Fishing mastery, relationship trust, repair work, and/or a documented route?
-- Are the coastal places named as above, or should names tie to historic Lowmere families?
+- Are the coastal places named as above, or should names tie to historic Wicker Cove families?
 - Should post-ending free play eventually expand to nearby off-screen trade towns, and how much detail is needed?
