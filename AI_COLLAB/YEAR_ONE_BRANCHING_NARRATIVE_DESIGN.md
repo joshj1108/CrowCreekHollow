@@ -136,3 +136,7 @@ From current `DESIGN.md`, `scripts/story_act.gd`, existing seasonal calendar:
 ## 2026-11-14 — Narrative voice: simple writing, deep meaning
 
 [NARRATIVE_VOICE_AND_LITERARY_STANDARDS.md](NARRATIVE_VOICE_AND_LITERARY_STANDARDS.md) is the owner-directed style reference for future story expansion: concrete details, authentic NPC speech, controlled subtext and short lines; no showy language or invented player motives. Its Wicker Cove first-visit sample is illustrative, not canon. CCH-SPRING-BRANCH-001 to be developed against this style before town dialogue is finalized.
+
+## First spring detailed narrative (2026-11-14)
+
+[**FIRST_SPRING_BRANCHING_DETAIL.md**](FIRST_SPRING_BRANCHING_DETAIL.md) develops *The Neighbor*: first farm-to-Wicker-Cove visit for supplier, craftsperson, curious person, or ordinary shopper; concise arrival scene in approved plain-language literary voice; optional contradictory testimony; one meaningful interaction and later callback. Existing March1 **Spring Thaw** (2 days boosted crop growth), April20 **Planting Fair** (5 turnip seeds), May28/day240 letter are preserved. No new festival, forced town mission, solved fog, or altered Agnes/Elias chapters. P1 design `CCH-SPRING-BRANCH-001` documented; P1 `-002` audit first visit/time/flags; P2 `-003` optional 1-town-visit prototype, `CCH-SPRING-FOG-001` evidence, `CCH-SPRING-LETTER-001` side reaction, `CCH-SPRING-DIARY-001` memories, P1 eventual `CCH-SPRING-BRANCH-QA-001`. Design-only.
