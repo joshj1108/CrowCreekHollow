@@ -286,3 +286,7 @@ Successful result: a player sees a small action remembered without ever being ca
 - `CCH-STORY-LIFE-QA-001` **P1 eventual** — literary voice, choice fidelity, diary, save migrations, all 17 chapters, three endings, no-town and post-ending life.
 
 **The creative target is emotional coherence, not sheer plot length.**
+
+## 2026-11-14 — The reason the player arrived (before their identity through action)
+
+The companion [PLAYER_ARRIVAL_INTERACTIVE_PROLOGUE_DESIGN.md](PLAYER_ARRIVAL_INTERACTIVE_PROLOGUE_DESIGN.md) proposes a short, fully **optional** choose-your-own-past prologue titled *The Road to Crow Creek Hollow*. It establishes a few player-chosen personal anchors (why move, one meaningful prior relationship or none, one keepsake or none) **without overriding the stronger core rule that identity forms through action after arrival**. Later callbacks may reference chosen motives accurately, but do not dictate emotions or lock life paths. The current `EstateSystem` makes the property **town-held** and deed purchasable later; phrases like 'inherited farm' are promotional shorthand, not proof of already-owned title. Exact legal prologue wording awaits owner review. No implementation permission.
