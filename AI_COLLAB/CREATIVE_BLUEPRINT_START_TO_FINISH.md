@@ -1,13 +1,13 @@
 # CROW CREEK HOLLOW — Creative Blueprint From First Day to Long-Term Life
 
 **Planning draft:** 2026-11-14  
-**Purpose:** Owner/ChatGPT north-star design from first input to post-ending life, tying existing game canon to future Lowmere and coastal aspirations.  
+**Purpose:** Owner/ChatGPT north-star design from first input to post-ending life, tying existing game canon to future Wicker Cove and coastal aspirations.  
 **Authority:** No feature in this document is automatic Claude implementation approval. Development requires specific owner-approved slices and test gates.  
 **Companion:** [MASTER_ROADMAP_TO_1_0.md](MASTER_ROADMAP_TO_1_0.md) is the operational roadmap; this file is the **creative and player-experience blueprint**, not an alternative list of active tasks.
 
 ## 0. Creative thesis
 
-**Player fantasy:** You arrive at an abandoned homestead and gradually build a life worth staying for. The house becomes a refuge, the farm becomes a livelihood, Lowmere becomes a community you help, and the wilderness and sea remain unsettling frontiers you may never fully understand.
+**Player fantasy:** You arrive at an abandoned homestead and gradually build a life worth staying for. The house becomes a refuge, the farm becomes a livelihood, Wicker Cove becomes a community you help, and the wilderness and sea remain unsettling frontiers you may never fully understand.
 
 **Single-sentence positioning:** *A rustic-gothic 3/4 top-down farming and survival life game where a working homestead supports a failing fogbound fishing village while an old folk-horror mystery unfolds over the seasons.*
 
@@ -21,8 +21,8 @@
 **Atmosphere rules:**
 - Horror and warmth amplify each other; neither is mere decoration.
 - Farmhouse cozy by design, with balanced eerie night lighting; lantern tiers extend radius rather than intensity.
-- Lowmere always has dense coastal fog, independent of normal inland weather; accounts of its historical origin **contradict each other and remain unresolved**.
-- Recovery of individual buildings does not turn Lowmere into a sunny theme-park town or explain the fog.
+- Wicker Cove always has dense coastal fog, independent of normal inland weather; accounts of its historical origin **contradict each other and remain unresolved**.
+- Recovery of individual buildings does not turn Wicker Cove into a sunny theme-park town or explain the fog.
 - Quiet work is not a punished alternative to danger. Optional journeys and civic projects should reward curiosity rather than be required for story endings.
 
 ## 1. What exists vs what this document proposes
@@ -37,15 +37,15 @@
 - Existing skill Cleaning and Forestry are **candidates for consolidation/removal**, not deletions; no saved XP, story rewards, or unlocks may break.
 
 ### Established owner direction not yet implemented
-- Lowmere: failing seaside fishing village down winding mountain road from farm, permanent 24/7 fog, historical testimony/records about fog contradictory and uncertain, no established explanation.
+- Wicker Cove: failing seaside fishing village down winding mountain road from farm, permanent 24/7 fog, historical testimony/records about fog contradictory and uncertain, no established explanation.
 - The player should be able to **repair/upgrade town owners' buildings** and earn meaningful rewards.
 - Inn design should offer **client-briefed guest-room decoration** with persistent layouts; borrow the high-level creative mechanic, never another game's assets, UI, brand, or exact reward system.
 - Someday join fishermen on **NPC-led voyages**, find fishing grounds and potentially improve off-map coastal trade routes.
 - Preserve original farm/gameplay and aim for a finished indie-scale product instead of infinite AAA scope.
 
 ### Proposed concepts, not approved canon
-- Lowmere's exact geographic layout, shore landmarks, town economic chronology, candidate new residents Edith Vale, Gideon Pike, Thomas Bellweather and Martha Fenwick, individual guest/story events, exact fog examples, coastal fishing locations, ship route names, new item IDs, and possible Seamanship skill.
-- Exact game-day unlock times for Lowmere, production/cost/economy margins, NPC schedules, building and inn counts and voyage duration.
+- Wicker Cove's exact geographic layout, shore landmarks, town economic chronology, candidate new residents Edith Vale, Gideon Pike, Thomas Bellweather and Martha Fenwick, individual guest/story events, exact fog examples, coastal fishing locations, ship route names, new item IDs, and possible Seamanship skill.
+- Exact game-day unlock times for Wicker Cove, production/cost/economy margins, NPC schedules, building and inn counts and voyage duration.
 
 ## 2. The player experience, act by act
 
@@ -69,7 +69,7 @@
 
 **Reward texture:** patched floorboards, cleaner windows, better water delivery, first sale, first lantern or tool tier, ordinary recognition from a familiar person.
 
-**Proposed first Lowmere signal:** a request arriving at farm's existing mailbox/stand mentioning local food shortages, **without requiring the new town to exist on day one**. Orders should be optional and achievable with current crops/seasons.
+**Proposed first Wicker Cove signal:** a request arriving at farm's existing mailbox/stand mentioning local food shortages, **without requiring the new town to exist on day one**. Orders should be optional and achievable with current crops/seasons.
 
 **Acceptance:** a player can harvest, eat or cook, sell, save and return, complete/skip one optional request, and choose a meaningful use for an afternoon. Multiple viable play styles.
 
@@ -78,7 +78,7 @@
 
 **Emotional beat:** The world outside gets colder; the home gets warmer because of the player's actual work. Winter should be quieter and distinct, not content-free or exclusively punitive.
 
-**Potential Lowmere layer:** periodic food requests for cold-weather households and an innkeeper in need of heat/fuel; initially handled by stand/letters. Not mandatory or an infinite profit exploit.
+**Potential Wicker Cove layer:** periodic food requests for cold-weather households and an innkeeper in need of heat/fuel; initially handled by stand/letters. Not mandatory or an infinite profit exploit.
 
 **Acceptance:** winter supports meaningful but fewer/different pursuits, basic upkeep becomes easier with improvements, low-skill player is not soft-locked. Actual temperatures/needs/sanity must be verified with simulations and human play.
 
@@ -87,7 +87,7 @@
 
 **Design target:** Player discovers positive dependencies: Farming → Cooking → supply; Forestry/Carpentry/Smithing → useful repairs; Fishing → meals/market demand. Trading rewards added usefulness, not double XP faucets.
 
-**Lowmere first visit (proposed timing, not canonical):** after basic survival is established and town map is playable: downhill road, fog swallowing horizon, useful store and market, small inn, docks. A first visit gives one trade advantage and one human encounter without forcing a story explanation.
+**Wicker Cove first visit (proposed timing, not canonical):** after basic survival is established and town map is playable: downhill road, fog swallowing horizon, useful store and market, small inn, docks. A first visit gives one trade advantage and one human encounter without forcing a story explanation.
 
 **World response:** visible repaired shelves, an occasionally stocked counter, a first guest room becoming usable. The town still feels poor, salt-weathered and fogbound.
 
@@ -107,7 +107,7 @@
 ### Act F — The existing second-year story: 'What happened here, and who is responsible?'
 **Hard canon:** Do NOT rewrite the 17 ordered chapters or existing conclusion routes. Around day 240 the town letter arrives, later the water rises, the Hollow knocks, the mill meeting and town vote become consequential, Davy's night occurs around day 370, the bell can be hung at second All Hallows, and grove-related endings branch by requirements already in `DESIGN.md`.
 
-**New-town function:** Embody the town implicated by the farm/keeper and vote, **without** handing the player a simplified 'villain of the town' or invalidating established Maren/vicar/postman evidence. The added Lowmere cast may express nuanced views and partial recollections, but chapter conditions and endings remain the source of truth.
+**New-town function:** Embody the town implicated by the farm/keeper and vote, **without** handing the player a simplified 'villain of the town' or invalidating established Maren/vicar/postman evidence. The added Wicker Cove cast may express nuanced views and partial recollections, but chapter conditions and endings remain the source of truth.
 
 **Fog story:** Town and harbor rumors contradict on when the fog began; no player achievement or final lore diary entry must assert a definitive origin. The fog is not explained by the Rook bell unless the owner separately changes canon.
 
@@ -126,18 +126,18 @@
 
 The best normal day should have **three phases rather than a mandatory checklist**:
 1. **Morning — Care / plan:** wake, check weather/needs, water/harvest or tend animals as available, choose an order or destination.
-2. **Midday — Pursue your interest:** specialize in crops/cooking, craft/build, trade in Lowmere, investigate near farm/cave, meet NPC or take a woodland trek.
+2. **Midday — Pursue your interest:** specialize in crops/cooking, craft/build, trade in Wicker Cove, investigate near farm/cave, meet NPC or take a woodland trek.
 3. **Evening — Return / reckon:** sell/store and cook, light fire if desired, read diary, enjoy comfort/relationships, or choose a calculated night risk. Finish day with sense of accomplishment, not constant exhaustion.
 
 **Daily choice test:** at least two meaningfully different viable plans should exist on normal days; improved infrastructure must *reduce* mandatory maintenance time. Long journeys must have clear payoff, and no obligatory town commute after each harvest.
 
 ## 4. Geographic and atmospheric composition
 
-`Farmhouse → Farm fields and pond → Existing gate and mountain road → Lowmere's compact main street → working harbor → optional shore/boat spaces` (spatial exactness pending map audit). Woods/cave remain separate mountainward frontiers, woodland treks start at the farm. Nearshore coastal trips start at Lowmere's docks.
+`Farmhouse → Farm fields and pond → Existing gate and mountain road → Wicker Cove's compact main street → working harbor → optional shore/boat spaces` (spatial exactness pending map audit). Woods/cave remain separate mountainward frontiers, woodland treks start at the farm. Nearshore coastal trips start at Wicker Cove's docks.
 
 - **Farm:** continuity, warmth and customization; strong day/night and season shifts.
 - **NW cave and Rookery woods:** grounded wilderness, danger, old pages, sense of being watched; no glittering magic cave.
-- **Lowmere:** permanent thick *local* fog, damp salt-stained buildings, working inhabitants, lower income and repairs. Fog density may breathe locally for legibility but coast remains shrouded 24/7.
+- **Wicker Cove:** permanent thick *local* fog, damp salt-stained buildings, working inhabitants, lower income and repairs. Fog density may breathe locally for legibility but coast remains shrouded 24/7.
 - **Working harbor:** tide-stained planks, boats and fish stalls; even a small functional berth matters.
 - **Optional shoreline locations:** breakwater, tide pools, outer shoals (all working names). Prioritize one shore interaction over a giant coastal map.
 - **Off-map coastal settlements:** optional future trade manifests, one destination at first; don't build entire secondary towns for 1.0.
@@ -168,7 +168,7 @@ Current ten skills: Farming, Bushcrafting, Carpentry, Cleaning, Cooking, Fishing
 
 Existing canon: Maren, Davy, the vicar and postman, plus known figures in the story. Their heart/schedule/request/ending systems are protected.
 
-Candidate Lowmere working residents: **Edith** innkeeper, **Gideon** fisherman, **Thomas** storekeeper, **Martha** fishmonger (names NOT canon). Start with two working new residents only when the town slice exists, one order and one personal follow-up each. Reuse existing FolkSystem, not a parallel relationship mechanic.
+Candidate Wicker Cove working residents: **Edith** innkeeper, **Gideon** fisherman, **Thomas** storekeeper, **Martha** fishmonger (names NOT canon). Start with two working new residents only when the town slice exists, one order and one personal follow-up each. Reuse existing FolkSystem, not a parallel relationship mechanic.
 
 **Relationship design:** You learn about their jobs before secrets. 0–10 hearts can open comfort, greater trust and optional requests, but a player should never need to grind friendship to buy basic supplies or beat the established story.
 
@@ -185,17 +185,17 @@ Candidate Lowmere working residents: **Edith** innkeeper, **Gideon** fisherman, 
 
 ## 9. Maritime ambitions: a careful second frontier
 
-**First step (not required for 1.0):** NPC-led fishing boat from Lowmere docks, short preparation, one useful deck task, one optional risk/reward choice, successful return and meaningful fish/relationship reward. No owner-controlled physics or own-boat requirement. A 'working day' should be worthwhile even if no supernatural event occurs.
+**First step (not required for 1.0):** NPC-led fishing boat from Wicker Cove docks, short preparation, one useful deck task, one optional risk/reward choice, successful return and meaningful fish/relationship reward. No owner-controlled physics or own-boat requirement. A 'working day' should be worthwhile even if no supernatural event occurs.
 
 **Later:** discover one nearshore ground → improve fish market demand → make an off-screen shipment to another seaside town → possibly encounter incompatible charts/visibility memories. Ships are not a replacement for farming; player can remain an inland specialist and still progress.
 
-**Release guard:** If a voyage prototype hurts production of stable Lowmere, food/orders or inn system, defer it to post-1.0. Never require every new shore and second town for ship.
+**Release guard:** If a voyage prototype hurts production of stable Wicker Cove, food/orders or inn system, defer it to post-1.0. Never require every new shore and second town for ship.
 
 ## 10. Three intertwined progression paths (not parallel quest clutter)
 
 **A. Homestead:** Broken home → functioning crops/food → sheltered routines → upgraded buildings/gear/animal care → comfortable farm → optional mastery and decoration.
 
-**B. Community:** Notice Lowmere's needs → farm dispatch → first visit → know merchant/innkeeper → one inn repair → one guest room and broader contracts → optional harbor or fish-market work → long-run relationships and recovery.
+**B. Community:** Notice Wicker Cove's needs → farm dispatch → first visit → know merchant/innkeeper → one inn repair → one guest room and broader contracts → optional harbor or fish-market work → long-run relationships and recovery.
 
 **C. Mystery:** First-night dread → Maren and early Hollow sighting → pages, cave, treks and relations → town letter/mill vote/Davy/bell/grove → existing endings and Afterword.
 
@@ -207,7 +207,7 @@ They should **share food/materials, places, time and emotional resonance** but n
 - Stable farm + first-hour onboarding, full 4-stage home, meaningful cooking/storage/survival, playable core skills, seasons and balanced late-game.
 - Existing cave, treks, night systems, 17 chapters and three endings remain reachable and tested, with ongoing play after ending.
 - Optional home-dispatch order loop using existing stand/mailbox.
-- Small usable Lowmere with road connection, foggy exterior, functional store/market/depot/inn/docks and a small working NPC cast.
+- Small usable Wicker Cove with road connection, foggy exterior, functional store/market/depot/inn/docks and a small working NPC cast.
 - At least **one** town-owner repair with lasting practical and visual result.
 - At least **one** guest-room creative brief with usable placement UI, saved layout and earned reward.
 - Input-driven plus human playtest, controller, saves/migration, visual readability, performance/export/release QA.
@@ -222,7 +222,7 @@ They should **share food/materials, places, time and emotional resonance** but n
 - Preserve main-world timing and save data/older saves. Any removed skill requires explicit conversion and story achievement test.
 - Farmhouse and NPC/contract status in data; scenes/visuals read state rather than duplicate progression flags.
 - Single request system / reward ledger for daily job, walker help, contracts and building repairs where practical, so users can't exploit overlapping claims.
-- Shared world time and transitions; entering Lowmere or a voyage shouldn't reset need timers or create untracked day skips.
+- Shared world time and transitions; entering Wicker Cove or a voyage shouldn't reset need timers or create untracked day skips.
 - Avoid UI sprawl: existing diary, Building panel, NPC dialogue, stand/mailbox, skills/quests.
 - Accessibility: never obscure critical interactions behind fog; high contrast for HUD/menus, clear controllers, pause behavior, warnings for risky travel.
 - Preserve static main menu, balanced night brightness, lantern radius-only upgrades, farmhouse no second storey or porch scope.
@@ -231,7 +231,7 @@ They should **share food/materials, places, time and emotional resonance** but n
 
 **P0:** Any crash, save corruption, progression block or regression takes precedence.
 
-**P1 immediate/near-term:** CCH-EVENING-002 result review; CCH-FOOD-001 actual food/economy audit; CCH-SKILLS-REVIEW-001 current skill redundancy + save gate; CCH-ORDERS-001 dispatch design/prototype after price audit; CCH-SURVIVAL-001; CCH-PLAYTEST-001 first 14 days. Design-only P1 dependency work for Lowmere canon/lore (PEOPLE-001A, ECON-001, FOG-001 and COAST-WORLD-001).
+**P1 immediate/near-term:** CCH-EVENING-002 result review; CCH-FOOD-001 actual food/economy audit; CCH-SKILLS-REVIEW-001 current skill redundancy + save gate; CCH-ORDERS-001 dispatch design/prototype after price audit; CCH-SURVIVAL-001; CCH-PLAYTEST-001 first 14 days. Design-only P1 dependency work for Wicker Cove canon/lore (PEOPLE-001A, ECON-001, FOG-001 and COAST-WORLD-001).
 
 **P2 core depth in targeted sequence:** daytime/seasonal/winter additions; LOWMERE-001 small district; PEOPLE-001B first NPCs; LOWMERE-BUILD-001 one inn repair; INN-001 first one-room decorating; selected fish-market and optional coastal shoreline loops; long-term world reactivity, story integration and economy balance.
 
@@ -241,7 +241,7 @@ They should **share food/materials, places, time and emotional resonance** but n
 - **M1 First fortnight is fun:** first harvest, first trek, night/home, saves, cooking.
 - **M2 Work has economic purpose:** decent food/preservation and optional dispatch orders.
 - **M3 A full seasonal cycle has choices:** winter and post-harvest afternoons, non-trek progress.
-- **M4 Lowmere exists:** functional entry/trade/return, local fog and a person worth knowing.
+- **M4 Wicker Cove exists:** functional entry/trade/return, local fog and a person worth knowing.
 - **M5 A real repair changes town:** visual/function/social consequences.
 - **M6 One guest room feels creative:** layout, brief, feedback, persistence.
 - **M7 Existing story complete & life continues:** all three endings with new world, no blockers.
@@ -249,7 +249,7 @@ They should **share food/materials, places, time and emotional resonance** but n
 
 ## 14. Concrete small content prototype: 'A reason to stay'
 
-**First visit to Lowmere**, future approved vertical slice:
+**First visit to Wicker Cove**, future approved vertical slice:
 - The farmer walks downhill into the all-day fog; salt dampness, a lantern, a worn inn and 1–2 people working.
 - An innkeeper offers a small produce order; the fishmonger or storeowner can buy an existing item; town interaction is immediately useful.
 - The inn has one visibly boarded guestroom. A later material job makes it usable, and one customer asks for a small, functional, warm room.
@@ -271,7 +271,7 @@ Every proposed feature must answer:
 7. What source code, lore, asset and save gates need verification?
 8. Is it necessary for 1.0, a post-launch opportunity or simply a mood concept?
 
-**Creative north-star scene:** Late autumn after many seasons. A restored, inhabited farmhouse has food for winter and a warm hearth; a letter from Lowmere thanks the player for a useful repair; a fisherman returns safely from sea. The farm and village have become worth protecting. The woods remain dark, the fog remains permanent, and some things remain unexplainable. The player feels they **belong**, not that they have conquered everything.
+**Creative north-star scene:** Late autumn after many seasons. A restored, inhabited farmhouse has food for winter and a warm hearth; a letter from Wicker Cove thanks the player for a useful repair; a fisherman returns safely from sea. The farm and village have become worth protecting. The woods remain dark, the fog remains permanent, and some things remain unexplainable. The player feels they **belong**, not that they have conquered everything.
 
 **This document changes no code, story chapter, art or numeric gameplay balance.**
 
@@ -285,4 +285,4 @@ Detailed foundational design: [CHOICE_CONSEQUENCE_SYSTEM_DESIGN.md](CHOICE_CONSE
 
 ## 2026-11-14 — Personal stories that persist in the diary
 
-Player-created adventure is strengthened by **branching resident arcs** that preserve NPC agency and **a personal diary** of verified decisions and later consequences. The journal already has a full book/page-turn/handwriting engine; add compact, author-written memory pages from saved facts rather than rebuilding or generating ungrounded prose. Agnes Rook's pages and authoritative StoryAct lore remain immutable. See [BRANCHING_RESIDENT_ARCS_AND_PLAYER_DIARY.md](BRANCHING_RESIDENT_ARCS_AND_PLAYER_DIARY.md). P1 first gate: an existing farm choice with two distinct diary pages and a callback, before full Lowmere story lines. This is design-only.
+Player-created adventure is strengthened by **branching resident arcs** that preserve NPC agency and **a personal diary** of verified decisions and later consequences. The journal already has a full book/page-turn/handwriting engine; add compact, author-written memory pages from saved facts rather than rebuilding or generating ungrounded prose. Agnes Rook's pages and authoritative StoryAct lore remain immutable. See [BRANCHING_RESIDENT_ARCS_AND_PLAYER_DIARY.md](BRANCHING_RESIDENT_ARCS_AND_PLAYER_DIARY.md). P1 first gate: an existing farm choice with two distinct diary pages and a callback, before full Wicker Cove story lines. This is design-only.
