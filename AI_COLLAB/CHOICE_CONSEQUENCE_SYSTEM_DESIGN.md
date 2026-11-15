@@ -100,3 +100,8 @@ Current narrative uses established `maren_book`, `vicar_register`, Davy and post
 This is a **foundational P1 design concern** that influences food/orders, Lowmere contracts, residents and maritime quests, but **does not replace urgent CCH-EVENING-002 evaluation, CCH-FOOD-001 or stability fixes**. Design it before adding many new town NPC quests so future content can use shared decisions, persistence and callbacks rather than being rewritten.
 
 **Owner direction is canon as a game-design pillar; numerical d20 formula, example dialogues and specific branches are candidate designs, not code authorization.**
+
+
+## Companion design: lives that remember (2026-11-14)
+
+[PLAYER_PATHS_AND_CONSEQUENCE_WEAVE.md](PLAYER_PATHS_AND_CONSEQUENCE_WEAVE.md) defines a deeper cross-season framework for personal, economic, community and story callbacks, including three sample CYOA mini-arcs. It distinguishes incidental NPC text from lasting state changes and includes a first-week review gate. These are proposals only; owner has approved the **principle of meaningful choose-your-own-adventure**, not the specific missions or dice probability formula.
