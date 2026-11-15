@@ -124,3 +124,7 @@ From current `DESIGN.md`, `scripts/story_act.gd`, existing seasonal calendar:
 - Major story-critical votes/endings are based on evidence/actions in the authored narrative, not a random charisma check.
 
 **Marketing and title caution:** Back-cover synopsis is a planned-game pitch, not proof all advertised branches/town content currently exist. Wicker Cove name is confirmed canon; details of town residents, buildings, economics, seasonal side arcs are design-stage candidates.
+
+## First autumn detail (2026-11-14)
+
+[**FIRST_AUTUMN_BRANCHING_DETAIL.md**](FIRST_AUTUMN_BRANCHING_DETAIL.md) expands the October–November season into seven beats: initial house/night, original Maren edge trek, first harvest allocation, optional woodside preparation, October 31 All Hallows, November 10 First Frost, and late-November callback/diary. Every new choice remains a proposal. Maren's `FolkSystem` farm visits require day >=5 and edge completed, so first optional choice must attach to existing day-4 TrekSystem encounter or a later eligible interaction—not pretend she visits on day 1. Existing chapter and event effects must remain intact. **CCH-AUTUMN-BRANCH-001 P1 Design** drafted; -002 P1 audit, -003 P1 candidate single-choice prototype; -004..007 P2 ideas, -QA-001 P1 eventual validation.
