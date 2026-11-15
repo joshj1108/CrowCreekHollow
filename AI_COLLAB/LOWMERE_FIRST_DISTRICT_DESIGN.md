@@ -1,4 +1,4 @@
-# LOWMERE — First District and Farm-to-Town Economy Design
+# Wicker Cove — First District and Farm-to-Town Economy Design
 
 > **Naming update (2026-11-14):** **Wicker Cove** is the official in-world name. Legacy `CCH-LOWMERE-*` task IDs and `LOWMERE_*` document paths are retained as stable project identifiers; they do not indicate a second town. All previous lore and design commitments are preserved.
 **Version:** 0.1 — 2026-11-14  
