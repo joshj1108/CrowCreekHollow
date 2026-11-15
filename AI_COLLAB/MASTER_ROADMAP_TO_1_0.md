@@ -186,3 +186,10 @@ Design-only reference: [LOWMERE_ECONOMY_HISTORY_DESIGN.md](LOWMERE_ECONOMY_HISTO
 - **CCH-LOWMERE-FOG-003 — P2, Idea:** persistent coastline fog presentation and readability on foot; extensible to optional future boat trips. The fog is distinct from regular weather and must not obliterate the balanced farm lighting.
 - In release-story review, **do not accidentally answer the fog mystery** or equate one person's recollection with objective lore. A satisfying rumor/discovery can offer a resource, dialogue or route without resolving the fog.
 **No game code changes or Claude task authorization issued.**
+
+
+## 2026-11-14 — Coastal world exploration, locations and working voyages
+
+[LOWMERE_COASTAL_WORLD_DESIGN.md](LOWMERE_COASTAL_WORLD_DESIGN.md) is a **design-only creative exploration** of the Working Harbor, Old Breakwater, Tide Pools, Outer Shoals, off-map Far Channel, and rare Unmarked Water. Place names, coastal geometry and special happenings are speculative. Owner canon remains: permanent 24/7 fog and **contradictory accounts about its history, with no confirmed explanation**. Working sea life and occasional dread must coexist. First possible boat activity is an **NPC-led safe working fishing trip** with one meaningful interaction, one return/continue choice and a save-safe return, *only after* Lowmere district is playable.
+
+New candidates: CCH-COAST-WORLD-001 **P1 Design only** (geography/lore compatibility); CCH-COAST-SHORE-001 **P2 Idea** (one shoreline interaction); CCH-COAST-VOYAGE-001 **P2 Idea** (one working crew trip); CCH-COAST-GROUNDS-001 **P2 Idea** (one new ground with market utility); CCH-COAST-RHYTHMS-001 **P2/P3 Idea** (seasonal harbor ambience); CCH-COAST-CHARTS-001 **P2/P3 Idea** (ambiguous charts/logs); CCH-COAST-ROUTES-001 **P3 Idea** (off-map coastal trade); CCH-COAST-DEEPWATER-001 **P3 stretch** (rare mysterious expedition). Reconcile these with existing CCH-MARITIME-001/002, FISHERY-001 and FOG-001/002; use existing systems, **not duplicate implementations**. v1.0 still does not require an ocean map or voyages.
