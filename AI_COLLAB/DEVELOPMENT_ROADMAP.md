@@ -148,3 +148,12 @@ See [LOWMERE_RESIDENTS_DESIGN.md](LOWMERE_RESIDENTS_DESIGN.md). **CCH-LOWMERE-PE
 ## 2026-11-14 — Harbor economy and history planning tasks
 
 [LOWMERE_ECONOMY_HISTORY_DESIGN.md](LOWMERE_ECONOMY_HISTORY_DESIGN.md) explores the fishing-village decline while preserving the existing Rook, town-vote, vicar and postman timelines. Tasks: **CCH-LOWMERE-ECON-001 P1 Design** (history compatibility and economy audit); **CCH-LOWMERE-ECON-002 P2 Idea** (visible local decline and upgrades); **CCH-FISHERY-001 P2 Idea** (fishing and processing supply); **CCH-HARBOR-REPAIR-001 P2 Idea** (pier repair as future boat access gate); **CCH-LOWMERE-TRADE-001 P2 Idea** (farm-town/coastal exchange); **CCH-LOWMERE-HISTORY-001 P2 Idea** (restrained story-safe village history); **CCH-LOWMERE-RECOVERY-001 P3 Idea** (small atmosphere improvements). Fog's origin and historic start are OPEN. No implementation approval.
+
+## 2026-11-14 — Lowmere fog-memory canon and tasks
+
+**Approved narrative direction:** the 24/7 Lowmere fog has a contradictory/uncertain past. Some locals remember clear sea views; others insist it has always been present. Documents can disagree. Neither chronology nor cause nor relation to the Hollow/bell is determined. This **supersedes** prior suggestion that a single answer to 'when did the fog arrive?' should be chosen now.
+
+- **CCH-LOWMERE-FOG-001 P1 Design:** reconcile testimony chronology, existing characters, Agnes's 30-year history and the mill vote; define clue ambiguity rules and a contradiction matrix.
+- **CCH-LOWMERE-FOG-002 P2 Idea:** optional witness-record-landmark mini-chain through existing dialogue and diary after town exists.
+- **CCH-LOWMERE-FOG-003 P2 Idea:** permanent legible fog system, rain/season separation, future voyage visibility.
+Full details: [LOWMERE_ECONOMY_HISTORY_DESIGN.md](LOWMERE_ECONOMY_HISTORY_DESIGN.md). No implementation approval.
