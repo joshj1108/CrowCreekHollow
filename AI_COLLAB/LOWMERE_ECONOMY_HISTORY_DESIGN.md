@@ -1,15 +1,17 @@
-# CCH-LOWMERE-ECON-001 — Lowmere's Decline, Working Economy and Harbor Recovery
+# CCH-LOWMERE-ECON-001 — Wicker Cove's Decline, Working Economy and Harbor Recovery
+
+> **Naming update (2026-11-14):** **Wicker Cove** is the official in-world name. Legacy `CCH-LOWMERE-*` task IDs and `LOWMERE_*` document paths are retained as stable project identifiers; they do not indicate a second town. All previous lore and design commitments are preserved.
 **Draft:** 2026-11-14. **State:** Economic backstory is a design proposal. **Owner-approved fog-memory contradictions are canon** (below); no code, art or dialogue implementation approved.
 
 ## Established canon to preserve
-- Lowmere is a dreary, failing seaside fishing village down the mountain road from Crow Creek Hollow, veiled in a permanent 24/7 fog bank.
+- Wicker Cove is a dreary, failing seaside fishing village down the mountain road from Crow Creek Hollow, veiled in a permanent 24/7 fog bank.
 - Crow Creek Hollow is the last inhabited farm before the wilderness, where the established treks begin.
 - Existing main story involves Agnes and Elias Rook, Old Maren, Davy Tull, the vicar, the postman, the mill vote and E. Pell's letter; farm's keeper role and three endings must remain intact.
 - Existing farm daily jobs, stand trading/demand, walker requests, town letter, cellar, cooking, fishing, land deed and property taxes must be integrated without doubling rewards or contradicting chronology.
 - New names Edith Vale, Gideon Pike, Thomas Bellweather and Martha Fenwick are proposed resident concepts, not canon.
 
 ## Core premise (PROPOSED, not established backstory)
-Lowmere was formerly a modest viable fishing harbor, not a giant city. Over the years the local fleet shrank, reliable catches and trade declined, buildings aged, household finances deteriorated, and families departed. A persistent fog hangs over it; its origin and precise chronology are unresolved. Real economic problems, human decisions, and possible unexplained maritime changes coexist. **Do not definitively blame the permanent fog, the Hollow, or Agnes's bell for the economic decline without separate story approval.**
+Wicker Cove was formerly a modest viable fishing harbor, not a giant city. Over the years the local fleet shrank, reliable catches and trade declined, buildings aged, household finances deteriorated, and families departed. A persistent fog hangs over it; its origin and precise chronology are unresolved. Real economic problems, human decisions, and possible unexplained maritime changes coexist. **Do not definitively blame the permanent fog, the Hollow, or Agnes's bell for the economic decline without separate story approval.**
 
 ### Six pressures with playable symptoms
 | Cause/pressure | Visible or spoken evidence | Gameplay use |
@@ -24,9 +26,9 @@ Lowmere was formerly a modest viable fishing harbor, not a giant city. Over the 
 No requirement to model a city economy, dynamic population, unemployment or market speculation.
 
 ## Production network
-**Crow Creek Hollow farm → Lowmere:** vegetables, orchard fruit, eggs/milk, preserved meals, timber, firewood, basic crafted parts. Owner's current stock/skills must drive achievable order categories.
-**Lowmere → farm:** coastal fish and shellfish candidates, salt/preservation materials, nets/rope/hardware, specialized seeds/furnishings, rumors and occasional guests' requests. Introduce item kinds only after checking existing item design and economy.
-**Lowmere fishing → fish market → inn/store:** one repaired fish market improves storage or steady demand, not whole-port magical prosperity.
+**Crow Creek Hollow farm → Wicker Cove:** vegetables, orchard fruit, eggs/milk, preserved meals, timber, firewood, basic crafted parts. Owner's current stock/skills must drive achievable order categories.
+**Wicker Cove → farm:** coastal fish and shellfish candidates, salt/preservation materials, nets/rope/hardware, specialized seeds/furnishings, rumors and occasional guests' requests. Introduce item kinds only after checking existing item design and economy.
+**Wicker Cove fishing → fish market → inn/store:** one repaired fish market improves storage or steady demand, not whole-port magical prosperity.
 **Coastal trade → off-map ports:** later optional procurement/sales with saved manifests and a voyage choice; other towns need no playable maps in v1.0.
 
 ## Repair progression with limits
@@ -53,7 +55,7 @@ The town has **localized improvements**, not an all-or-nothing village meter:
 - **Existing Maren/vicar/postman:** have differing perspectives on old farm/keeper story and responsibility, subject to original Folk scenes. Preserve their own schedules/quests and endings.
 - A believable village needs competing viewpoints and ordinary conflict, not an entire cast of secret villains.
 
-## Early, mid, late-game Lowmere content (illustrative)
+## Early, mid, late-game Wicker Cove content (illustrative)
 **First visit:** fogbound village, live fish market and sparse shop, one manageable farm goods request and one small boat/dock sight; no compulsory mystery cutscene or hard gate to essential shops.
 **Early relationship:** repeated produce/fish contracts, first repair quote from Edith, visible lived-in shop restocking; bounded rewards.
 **Mid:** complete inn room repair and first decor request, useful fish-market preservation upgrades, occasional named guest or merchant.
@@ -88,7 +90,7 @@ The town has **localized improvements**, not an all-or-nothing village meter:
 6. `CCH-FISHERY-001` / `CCH-HARBOR-REPAIR-001` → `CCH-MARITIME-001`: one short optional NPC-led working trip. Expanded trade routes only if validated.
 
 ## Owner decisions reserved
-- **Resolved owner decision:** Lowmere's fog history is contradictory and uncertain. Different residents and records disagree on whether it was always present or began within living memory. This disagreement is canon; which version is true and the cause remain explicitly unresolved.
+- **Resolved owner decision:** Wicker Cove's fog history is contradictory and uncertain. Different residents and records disagree on whether it was always present or began within living memory. This disagreement is canon; which version is true and the cause remain explicitly unresolved.
 - Should bad catches be predominantly ordinary fishing-industry hardship, or explicitly correlate with unusual sea events?
 - How bleak does the village feel in the first season versus how much it visibly recovers?
 - Should first harbor repair or first inn repair be the first major town restoration contract?
@@ -97,7 +99,7 @@ The town has **localized improvements**, not an all-or-nothing village meter:
 
 ## Owner-approved CANON — disputed history of the permanent fog (2026-11-14)
 
-The fog **always envelopes Lowmere during gameplay**. Its history is **contradictory and uncertain**: some residents sincerely insist it has always been there; others recall clear horizons or particular periods without fog. Accounts and documents may conflict with each other. The game is **not asserting** that any one witness is correct, lying, hallucinating, or supernaturally influenced. The start date, cause, and relationship to the Hollow, Agnes Rook and the old bell are **UNDECIDED**.
+The fog **always envelopes Wicker Cove during gameplay**. Its history is **contradictory and uncertain**: some residents sincerely insist it has always been there; others recall clear horizons or particular periods without fog. Accounts and documents may conflict with each other. The game is **not asserting** that any one witness is correct, lying, hallucinating, or supernaturally influenced. The start date, cause, and relationship to the Hollow, Agnes Rook and the old bell are **UNDECIDED**.
 
 **Narrative principles:**
 - Contradictions should be grounded in everyday details — harbor visibility, old maps, boat bearings, weather logs, childhood recollections — not constant overt paranormal revelations.
@@ -105,7 +107,7 @@ The fog **always envelopes Lowmere during gameplay**. Its history is **contradic
 - Tie discovery to optional conversations, trade invoices, inn guest logbooks, boats and navigational markers; allow some clues to unlock practical fishing/trade opportunities while still leaving the cause unclear.
 - Villagers have different emotional responses: skeptical, accepting, curious, guarded; avoid an entire town of people who inexplicably all share the same amnesia.
 - The fog remains an environmental landmark **24/7**; changing local density for navigation/readability is allowed, but never show the entire town clearing unless the owner separately approves a major narrative event.
-- Do not equate fog with the current weather generator's ordinary foggy day. The coastal fog bank persists independently of seasonal inland weather and ordinary Lowmere rain.
+- Do not equate fog with the current weather generator's ordinary foggy day. The coastal fog bank persists independently of seasonal inland weather and ordinary Wicker Cove rain.
 - Main story chronology/17 chapters, Agnes/Elias (~30 years), E. Pell, mill meeting and established endings take precedence; do not add a definitive fog/bell connection via side dialogue.
 
 **Sample OPTIONAL conflicting evidence, not yet canon:**
