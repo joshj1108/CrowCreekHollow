@@ -131,3 +131,7 @@ Only write 'I believe Gideon' if player chose an answer indicating that; never d
 
 ## Major design question for next owner discussion
 Should the diary merely reflect decisions, or should players also be able to write a **very short optional personal interpretation** (pick an authored phrasing/attitude, not freeform keyboard text) at rare moments? Recommendation: first ship automatically accurate entries; add player-selected reflection only where it significantly changes the story perspective. This should never be necessary to unlock a route.
+
+## September first-year page design (2026-11-14)
+
+[**FIRST_SEPTEMBER_BRANCHING_DETAIL.md**](FIRST_SEPTEMBER_BRANCHING_DETAIL.md) expands the eventual 'My Days' concept into one carefully authored first-year recap page that references **only verified stored actions and state**. Four possible player approaches (homesteader, village merchant, forest/workbench builder, curious explorer) are playstyle examples, not locked diary classes. No fabricated romances, regrets, villager recognition, workshop progress or fog history. Existing Agnes/second-year book pages retain their own order, writing and flags. Sept22 Harvest Moon and current `StoryAct` meeting behavior unchanged. Requires small first choice/diary prototype first; not approved for code implementation.
