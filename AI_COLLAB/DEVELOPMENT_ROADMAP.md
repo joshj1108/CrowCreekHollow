@@ -157,3 +157,8 @@ See [LOWMERE_RESIDENTS_DESIGN.md](LOWMERE_RESIDENTS_DESIGN.md). **CCH-LOWMERE-PE
 - **CCH-LOWMERE-FOG-002 P2 Idea:** optional witness-record-landmark mini-chain through existing dialogue and diary after town exists.
 - **CCH-LOWMERE-FOG-003 P2 Idea:** permanent legible fog system, rain/season separation, future voyage visibility.
 Full details: [LOWMERE_ECONOMY_HISTORY_DESIGN.md](LOWMERE_ECONOMY_HISTORY_DESIGN.md). No implementation approval.
+
+ 
+## 2026-11-14 — Coastal setting and voyage design candidates
+
+[LOWMERE_COASTAL_WORLD_DESIGN.md](LOWMERE_COASTAL_WORLD_DESIGN.md) (design-only) expands geography/mood from Lowmere harbor into a possible breakwater, tide pools, nearshore shoals and off-map coastal trade; none of these place names are canon. Preserve permanent fog and contradictory unconfirmed origins, main Hollow story, and optional nonpunitive voyages. Added **CCH-COAST-WORLD-001 P1 design prerequisite**, **CCH-COAST-SHORE-001 P2**, **CCH-COAST-VOYAGE-001 P2**, **CCH-COAST-GROUNDS-001 P2**, **CCH-COAST-RHYTHMS-001 P2/P3**, **CCH-COAST-CHARTS-001 P2/P3**, **CCH-COAST-ROUTES-001 P3**, **CCH-COAST-DEEPWATER-001 P3 stretch**. Cross-reference maritime/fishery/fog tasks; avoid overlapping tickets. No code authorization.
