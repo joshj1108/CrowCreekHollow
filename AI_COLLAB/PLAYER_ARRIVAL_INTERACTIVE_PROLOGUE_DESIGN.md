@@ -29,7 +29,7 @@ A player can move for a positive reason. We must not assume every life needs gri
 3. **A Place to Call Your Own** — Expensive or unstable housing and a limited budget made a remote farm a practical chance. A player does not need a tragic identity to want independence. Distinct callback: ledger of savings, old rental key, moving bill, newspaper clipping. Does not contradict actual starting resources or create fake debt mechanic.
 4. **Something About the Place** — A photo, a story of the mountains, a desire to farm or an old pamphlet drew them to the property. May carry a forgotten childhood visit **only if the player explicitly selects it**, and must never imply secret blood relationship to Rooks, predestination or knowledge of fog cause. Distinct callback: photo/pamphlet, memory of trees or rural summers. The farm is no occult summons.
 
-**Player may decline personal history details:** allow 'I'd rather leave that behind' responses and a 'quiet beginning' or skip without moral penalty.
+**Player may decline personal disclosure, but NOT the interlude:** all new playthroughs must complete the opening interlude and commit to a reason for coming. They can choose a private or understated answer about particular relationships or keepsakes; this does not skip the origin story.
 
 ## 4. Design format: playable literary travel, 5–8 minutes target (subject to playtest)
 - Opening scene: near-empty rented room, workroom or household; a few packed belongings. Text on dark parchment or existing diary-inspired interface, not a complex new character creator.
@@ -37,7 +37,7 @@ A player can move for a positive reason. We must not assume every life needs gri
 - Begin with an easy choice about why a listing caught their attention. Then select one ordinary personal relationship or item. Then a choice about whether to keep in contact or leave the past quiet. Then a practical decision about starting.
 - The *last beat* shifts from narration to player agency: **gate, mailbox, path and farmhouse; fade to ordinary Day 1 guided diary**. No added prologue hour that loses planting daylight. At launch, all players start in same opening place with same tutorial, inventory, starting coins, basic tool access and story flags.
 - **Presentation:** existing Rustic Gothic Balanced UI; understated ambient sounds and nature. The existing static moonlit main menu remains unchanged. Prologue itself doesn't require GIF/video or cinematic.
-- **Accessibility:** instant skip, replay from menu without starting new save if useful, gamepad/keyboard/mouse, readable contrast, no timed personal choices, no unskippable 10-minute exposition, no survey about sensitive personal trauma. The player can make strong decisions about what to say without narrating feelings the user didn't select.
+- **Mandatory interlude, accessible presentation:** no Skip or bypass for a new game. Allow players to advance text at their reading pace, use gamepad/keyboard/mouse, change text speed, revisit the previous vignette before confirming their origin, access readable contrast and pause/resume. A Resume action restores progress; it does **not** bypass any narrative beat. Keep prose concise and humane rather than padding mandatory scenes. No forced survey about personal trauma. The player can make strong decisions about what to say without narrating feelings the user didn't select.
 
 ## 5. Six-beat screenplay — original draft, **all tentative**
 
@@ -235,9 +235,9 @@ Reason: drawn to quiet mountains and farm. Connection: close friend or none. Kee
 
 ## 9. Art, pacing and UI integration
 - **Opening medium:** short text/prose with pixel-art travel cards as optional art, using existing fonts, page turns and rustic graphic style. No separate giant player creator. Could be one 2D Godot `ProloguePanel` using data-driven branching paragraphs after approval.
-- **Duration:** target 4–7 minutes for first experience, with direct skip; branch depth 1–2, not many screens or a dense questionnaire.
+- **Duration:** initial pacing target roughly 5–8 minutes for a first reading, to refine through actual testing; **mandatory on every new game**, no Skip option. Branch depth 1–2 per selected memory, with meaningful information rather than many questionnaire screens. Never speed-run a person's past to get to the 'real game'.
 - **World transitions:** 2–3 reusable views (packed room, road in woods, farmhouse gate) can be static tile/scene art matching current pixel camera. Main menu remains static.
-- **Choice UX:** focus one question at a time; clear Save/Continue and controller focus; no pressure timer; previous button allowed before final arrival; if skipping, choose neutral `unspecified` flags, don't assign random trauma or money.
+- **Choice UX:** one question at a time, Save/Continue/pause with controller focus and no time pressure; previous button before final confirmation. **New-game completion requires confirmed arrival_reason and progression through all authored interlude beats.** A player can choose 'private' on particular disclosures, but cannot bypass the interlude or default to an unchosen origin. Never assign trauma, money or a hidden moral trait.
 - **Gameplay starts intact:** day1 06:00/normal source clock as applicable, original inventory, original guided diary at desk, first sleep/scare and day4 Maren trek. No prologue travel clock consumption.
 - **Replaying:** a start-menu backstory history option can replay without overriding save; don't expose final Rook mystery spoilers when rewatching.
 - **Localization:** concise prose, grammatical option texts, avoid embedding player name/pronouns in passages when not yet supported; no assumptions of player gender/sexuality/family situation.
@@ -255,7 +255,7 @@ Reason: drawn to quiet mountains and farm. Connection: close friend or none. Kee
 **A. Five new starts:** change, work, security, curiosity, pragmatic; each produces distinct authentic prologue without changing core game state.
 **B. With and without past contact:** future letter only if justified, no mandatory response; save/load and no ghost NPC.
 **C. Keepsake and no keepsake:** inventory and visual state correctly grounded; no opening item exploit or diary falsehood.
-**D. Skipped:** neutral start with no invented trauma, same controls and first-day resources; player may choose later to revisit description but not retroactively reshape canon with untracked facts.
+**D. Interrupted:** resume at the saved beat with chosen selections preserved; no 'Skip' and no loss of first-day time or starting resources. If the user chooses private responses, preserve privacy without bypassing the interlude. Player cannot retroactively reshape finished selections unless using an explicit New Game.d facts.
 **E. First 30 days:** first-night, Tin Lantern, Maren day4, crop/stand and bench/forest gates unchanged.
 **F. Year one later:** May day240 clerk letter arrives; vicar records and meeting still independent of background.
 **G. Three endings:** `bell`, `elias`, `hollow` still reachable, Wicker Cove fog origin remains unanswered, post-ending personal item may be seen.
@@ -266,8 +266,46 @@ Reason: drawn to quiet mountains and farm. Connection: close friend or none. Kee
 - `CCH-PROLOGUE-001` **P1 Design** — this document, Firewatch-inspired noncopied interactive backstory, multiple origins and callback arcs.
 - `CCH-PROLOGUE-002` **P1 editorial/canon decision** — approve one common lease/occupancy explanation, exact number of origins, player history intensity, and whether keepsake is only diary entry or existing house prop.
 - `CCH-PROLOGUE-003` **P1 technical audit** — current New Game transition, first-day tutorial and Save/Load structure, existing intro art/UI, controller focus.
-- `CCH-PROLOGUE-PROTOTYPE-001` **P2 gated** — one small branching text/prose prologue with 2–3 meaningful choices; direct skip; **no new external scene/biography system**.
-- `CCH-PROLOGUE-REMEMBER-001` **P2 gated** — one accurately saved keepsake or optional letter callback at a future season, reuse existing Mail/Diary rather than building separate origin engine.
-- `CCH-PROLOGUE-QUALITY-001` **P1 QA** — five starts, skip, no trauma assumption, original day1, vicar/deed/letter/ending compatibility and replay truth.
+- `CCH-PROLOGUE-PROTOTYPE-001` **P1 gated** — mandatory branching narrative interlude with substantive origin choice, no Skip/bypass, saved resume state, natural pace and transition to unchanged October 1. **No oversized biography engine.**
+- `CCH-PROLOGUE-REMEMBER-001` **P1/P2 gated** — an origin thread of comparable dramatic weight to new-home story, including spring/winter developments, one consequential later decision and afterword, using Mail/Diary when possible, not just a token keepsake.ne.
+- `CCH-PROLOGUE-QUALITY-001` **P1 QA** — five origin paths, mandatory complete interlude and interruption/resume, no skip, no compulsory personal trauma, repeated callbacks with a meaningful later choice, original day1, vicar/deed/letter/ending compatibility and replay truth.
 
-**Creative goal:** The player reaches the gate with a meaningful personal reason to be there. A year later, their reason for *staying* may be completely different.
+**Creative goal:** The player reaches the gate with a meaningful personal reason to be there. That reason is **as narratively important** as the later reasons for staying. Neither cancels the other; both reach meaningful development through the full story.
+
+## Owner correction — Mandatory, equal-weight origin interlude (2026-11-14)
+
+**This section supersedes every earlier optional/skip/minimal-callback suggestion in this file.**
+
+### Non-negotiable
+1. **Every new player plays the interlude in full; no Skip, fast-bypass or substitute neutral origin.** All authored narrative beats must be experienced, with free reading pace, pause, resume, accessible input and a Previous option during selection. A user can decline to explain one relationship or choose not to carry a keepsake, but **cannot opt out of having a reason to come**.
+2. The starting reason is **not a disposable tutorial hook**. **Why they came and why they stay are equally important, neither subordinated**. The origin story must have its own developing causes and consequences, not merely 1–3 flavor callbacks.
+3. Origin choices must create distinct **recurrent narrative threads** with meaningful decisions and responses, yet not change starting money, equipment, original Rook beats, endings, or force love/grief/trauma on every person.
+4. The interlude is still **narratively economical**: deep does not mean needlessly long or uninterruptible. No cutscene skip or prose bypass, but full Pause, Save/Resume where technically possible, readable text and flexible speed. **No prologue time deducted from October 1 day one.**
+5. Existing saves are a separate compatibility problem: an old playthrough **must not be broken or forced into a contradictory retrospective prologue**. Opening is mandatory for new games; old saves can retain unknown origin or receive a non-retroactive optional continuity policy after audit.
+
+### Origin arc structure: a parallel 'life before' narrative, equal to 'life here'
+- **At arrival:** establish exactly what changed, who or what matters, and one unresolved human question of the player's choice.
+- **Early winter:** a concrete consequence of departure arrives through ordinary means (letter, payment record, unfinished work, absence of expected contact, or a physical keepsake), with at least one small player response or real decision.
+- **Spring/summer:** the past makes a *meaningful* demand or offers an opportunity: answer/decline a letter, renegotiate an old commitment, give someone truthful news, settle a practical matter, share or retain a keepsake. At least one specific outcome must persist.
+- **First September:** diary includes a factual reflection on **both** where the player came from and what they did here. The original motive can evolve, be reaffirmed, questioned or left unresolved according to actual chosen responses.
+- **Second autumn and after ending:** one final authored echo changes according to origin decisions, the farmhouse life and any actual main-story ending. This is **not** a stock 'you learned to love this place' resolution.
+
+### Strong candidate origin payoffs, without one universal tragedy
+| Origin | Unfinished question | Midyear interaction | Late development |
+| --- | --- | --- | --- |
+| Security / affordability | Is stability the same as owning a place? | An old housing/billing issue is resolved or deferred, separate from the existing farm deed | A chosen response to new security, not compulsory self-sufficiency |
+| Work autonomy | Can work belong to you if other people still need you? | Former coworker asks for one specific piece of advice or help, with genuine room to decline | Player decides what responsibilities to retain; parallels current farm/inn work |
+| Life interrupted | What remains of a relationship or shared household after leaving? | A grounded contact or object resurfaces with a concrete request; separation need not mean abuse/death | Reconnect, set boundaries, or leave some things without resolution; no guilt scoring |
+| Curiosity | Is seeking somewhere new enough reason to change a life? | An old friend asks what was worth the journey; player selects one truthful experience to share or keeps private | A response to arrival's original question, not an occult destiny |
+| Pragmatic chance | What did you give up or risk by taking an uncertain offer? | Something from prior circumstances remains unsettled—a work contract, storage box or small practical claim | Player accepts, resolves, or relinquishes an ordinary claim based on actual circumstances |
+
+**All rows are writing proposals, not new canon or guaranteed mandatory mail quests.** Exact events require design and implementation review. Equal narrative weight means each strand has a beginning, a complicating moment, at least one consequential later choice, and an echo; not necessarily equal word counts per chapter.
+
+### New acceptance criteria
+- Player can tell another person **why they arrived** without relying on an achievement description.
+- Player can point to at least **two story moments beyond opening** where their chosen reason affects dialogue, a decision or tangible personal history.
+- Player makes at least **one later meaningful choice involving their earlier life**, not just reads a message.
+- A quiet/pragmatic origin feels as serious as a dramatic one.
+- End of first year can acknowledge a persistent past and newly built life **without narrating player feelings**.
+- No character can magically know the protagonist's private past if it has not been disclosed or delivered through a plausible channel.
+- First day tutorial, Day4 Maren, canonical letter/meeting/Davy/grove and the three original endings still function.
