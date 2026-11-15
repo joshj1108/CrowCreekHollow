@@ -1,3 +1,6 @@
+
+**Creative north-star / start-to-finish experience:** [`AI_COLLAB/CREATIVE_BLUEPRINT_START_TO_FINISH.md`](CREATIVE_BLUEPRINT_START_TO_FINISH.md) — first hour, seasons, full Hollow story, Lowmere, post-ending life and version 1.0 scope; design-only, not implementation authorization.
+
 # Collaborative Tasks
 
 **Master release pathway:** [`AI_COLLAB/MASTER_ROADMAP_TO_1_0.md`](MASTER_ROADMAP_TO_1_0.md) — ten phases, milestone gates, ranked queue, 1.0 scope, and QA/release gates. **Design plan only, not implementation authorization.**
