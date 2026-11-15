@@ -169,3 +169,7 @@ These should be edited for actual character voices/context and only attached aft
 - **Second autumn:** Existing Davy night and bell decisions bring original story consequences; optional social memory may alter human context, never the existing chapter logic.
 
 **Editorial reminder:** Literary ambition comes from credible details, cause and effect, distinct practical voices and restraint—not from long dialogue or mandatory bleakness.
+
+## 2026-11-14 — Owner rule: prepared planks for meaningful repairs
+
+The player now has an **approved future crafting design requirement**: hew logs into planks **at a workbench**, and make all non-anvil tools **at the workbench**; forge metal tools at an **anvil** after the existing furnace processes ore. This reinforces 'The Boards We Have': when eventually implemented, an inn renovation or farmhouse repair involving **planks** can carry a genuine woodworking/time tradeoff rather than magic generic material spending. Do not retroactively change existing repair recipes, NPC gifts or current `wood` resource until the source/audit/migration stage is approved. Never gate the early hatchet/lantern/first crop/day4 Maren trek behind an unreachable workbench or expensive anvil. See [WORKBENCH_ANVIL_WOODWORKING_DESIGN.md](WORKBENCH_ANVIL_WOODWORKING_DESIGN.md). No code authorization.
