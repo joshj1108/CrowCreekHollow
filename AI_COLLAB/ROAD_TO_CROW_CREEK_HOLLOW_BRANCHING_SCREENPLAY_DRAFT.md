@@ -495,3 +495,7 @@ NEW GAME (no Skip)
 - `CCH-ROAD-QA-001` — P1 five paths, interrupted-resume, no trauma forcing, earlier-life winter/midyear branch integration, first day and canonical ending regression.
 
 **Two equal narrative truths:** The player had a life before they came. What they do in Crow Creek Hollow becomes another part of that life. Neither erases the other.
+
+## Companion screenplay: midyear choices and answers
+
+[**ROAD_TO_CROW_CREEK_HOLLOW_SPRING_RETURN_SCREENPLAY.md**](ROAD_TO_CROW_CREEK_HOLLOW_SPRING_RETURN_SCREENPLAY.md) now extends each of the five original opening and first-winter routes into a **spring/early-summer player decision with material or interpersonal consequences**: shipped or released belongings; paid, taught or declined former work; redefined household ties; truthful chosen account of a personally explored place; closed or reopened a legitimate prior opportunity. These are not one-line decorative callbacks and do not overrule the canonical parish letter, town-held land, Davy night or endings. Editorial draft only; no code.
