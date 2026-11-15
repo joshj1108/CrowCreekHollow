@@ -108,11 +108,11 @@ Only write 'I believe Gideon' if player chose an answer indicating that; never d
 - Chronology and visibility across the unusual 420s day and October 1 start must be consistent.
 
 ## First implementation slice — not authorized yet
-**Prototype should work without Lowmere art or new NPCs:**
+**Prototype should work without Wicker Cove art or new NPCs:**
 1. Inspect existing farm/walker events and select one optional action with two viable methods; existing routes `maren_book`/`vicar_register` remain protected.
 2. Save stable **choice/outcome** once with a small schema/migration; no repeat rewards; same decision cannot be rerolled by restarting/reopening.
 3. Add **one** personalized memory page with two text variants to existing diary, plus a **later callback** from existing folk interaction, report or mail. Validate keyboard/controller, layout, page flip and two save/reload paths.
-4. Automated choice matrix plus an actual player test. After this, consider extending to one Lowmere NPC (Edith) alongside `CCH-LOWMERE-PEOPLE-001B`.
+4. Automated choice matrix plus an actual player test. After this, consider extending to one Wicker Cove NPC (Edith) alongside `CCH-LOWMERE-PEOPLE-001B`.
 5. No big branching trees or full 'journal generator' before the single-page prototype feels authentic.
 
 ## Priority and dependencies
@@ -121,7 +121,7 @@ Only write 'I believe Gideon' if player chose an answer indicating that; never d
 | **CCH-CHARACTER-ARCS-001A** | **P1 Design** | Proposed | Audit current four walkers' choices and hooks, then design compatibility matrix for new NPC arc flags |
 | **CCH-DIARY-LIFE-001A** | **P1 Design** | Proposed | Diary data rendering, page count, stable memory records, save migration and privacy of unknown lore |
 | **CCH-DIARY-LIFE-001B** | **P1 prototype candidate** | Not approved | One saved optional choice → two diary variants → delayed callback, using existing content |
-| **CCH-CHARACTER-ARCS-001B** | **P2** | Idea | Edith arc one repair/room branch and 1–2 future callbacks; only after Lowmere/inn basic loop exists |
+| **CCH-CHARACTER-ARCS-001B** | **P2** | Idea | Edith arc one repair/room branch and 1–2 future callbacks; only after Wicker Cove/inn basic loop exists |
 | **CCH-CHARACTER-ARCS-002** | **P2** | Idea | Gideon nearshore work/route choices only after first optional voyage is worthwhile |
 | **CCH-CHARACTER-ARCS-003** | **P2** | Idea | Thomas and Martha economic paths using same contract/relationship infrastructure |
 | **CCH-DIARY-LIFE-002** | **P2** | Idea | Player memory section, one meaningful seasonal reflection and lore-safe belief wording |
