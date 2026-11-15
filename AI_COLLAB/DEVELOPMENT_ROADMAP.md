@@ -143,3 +143,8 @@ User selected two new gameplay directions (design only, no code approved):
 ## 2026-11-14 — New Lowmere cast design and task IDs
 
 See [LOWMERE_RESIDENTS_DESIGN.md](LOWMERE_RESIDENTS_DESIGN.md). **CCH-LOWMERE-PEOPLE-001A** (P1, Design): first reconcile existing characters, relationship flags and endings with proposed Lowmere residents. **001B** (P2, Idea): playable Edith plus one merchant, a few lines and requests. **CCH-LOWMERE-PEOPLE-002** (P2, Idea): one owner arc and restoration acknowledgment. **CCH-INN-GUESTS-001** (P2, Idea): distinctive hotel guest briefs. **CCH-FISHERMEN-001** (P2, Idea): fisher crew/market NPC handoff before boat prototype. **CCH-LOWMERE-RUMORS-001** (P2/P3, Idea): story-safe town rumors. **CCH-LOWMERE-SCHEDULES-001** (P3, Idea): local workday behavior. New character names and arcs are proposals, not canon or coding authorization.
+
+
+## 2026-11-14 — Harbor economy and history planning tasks
+
+[LOWMERE_ECONOMY_HISTORY_DESIGN.md](LOWMERE_ECONOMY_HISTORY_DESIGN.md) explores the fishing-village decline while preserving the existing Rook, town-vote, vicar and postman timelines. Tasks: **CCH-LOWMERE-ECON-001 P1 Design** (history compatibility and economy audit); **CCH-LOWMERE-ECON-002 P2 Idea** (visible local decline and upgrades); **CCH-FISHERY-001 P2 Idea** (fishing and processing supply); **CCH-HARBOR-REPAIR-001 P2 Idea** (pier repair as future boat access gate); **CCH-LOWMERE-TRADE-001 P2 Idea** (farm-town/coastal exchange); **CCH-LOWMERE-HISTORY-001 P2 Idea** (restrained story-safe village history); **CCH-LOWMERE-RECOVERY-001 P3 Idea** (small atmosphere improvements). Fog's origin and historic start are OPEN. No implementation approval.
