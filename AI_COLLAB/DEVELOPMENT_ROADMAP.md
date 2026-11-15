@@ -167,3 +167,10 @@ Full details: [LOWMERE_ECONOMY_HISTORY_DESIGN.md](LOWMERE_ECONOMY_HISTORY_DESIGN
 ## 2026-11-14 — Start-to-finish creative blueprint
 
 [CREATIVE_BLUEPRINT_START_TO_FINISH.md](CREATIVE_BLUEPRINT_START_TO_FINISH.md) is the current **creative north star** from first input through full-year play, original second-year story/endings and life afterward. It divides the game into intertwined Homestead / Community / Mystery paths and explicitly separates existing canon, owner-design direction and speculative expansion. Use this document before accepting newly proposed features; preserve the P0–P3 priority/status and approval process here. No blanket implementation permission.
+
+
+## 2026-11-14 — New defining pillar: living choose-your-own-adventure
+
+Owner wants meaningful branching choices **throughout the playthrough** with no right/wrong way to play, and optional hidden D&D-style rolls for uncertain outcomes. The decisions must affect relationships, livelihood, project order, discovery, town service and narrative callbacks. Avoid arbitrary binary checks, softlocks and required 'correct' dialogue. Keep existing 17 chapters / three endings structurally intact unless owner separately authorizes changes.
+
+Full design: [CHOICE_CONSEQUENCE_SYSTEM_DESIGN.md](CHOICE_CONSEQUENCE_SYSTEM_DESIGN.md). Queue: **CCH-CHOICE-001A P1 Design** (actual branch/flag/save audit), **CCH-CHOICE-001B P1 Design** (hidden roll difficulty/skill/agency rules), **CCH-CHOICE-001C P1 candidate** (three choices and one delayed callback on existing farm; not authorized), **CCH-CHOICE-QA-001 P1** (branch/save/reload/endings regression), **CCH-CHOICE-LOWMERE-001 P2** (resident dilemma after town), **CCH-CHOICE-MARITIME-001 P3 conditional** (onboard navigation/crew decisions after voyages exist). The proposed d20 mechanics are illustrative, not preapproved formula.
