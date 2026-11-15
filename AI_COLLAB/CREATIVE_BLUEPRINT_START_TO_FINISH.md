@@ -290,3 +290,7 @@ Player-created adventure is strengthened by **branching resident arcs** that pre
 ## 2026-11-14 — First-year choose-your-own-adventure plan and pitch
 
 Proposed back-cover synopsis and mapped October (first-night/neighbor), winter (provisions), spring (Wicker Cove approaches and fog accounts), summer (work/repairs/exploration), and September (truthful personal diary recap) are in [YEAR_ONE_BRANCHING_NARRATIVE_DESIGN.md](YEAR_ONE_BRANCHING_NARRATIVE_DESIGN.md). The story spine remains 17 chapters; the first-year optional web should eventually feed callbacks into year two without putting canonical mill/Davy/bell outcomes behind chance. Day 240 is late May in the actual calendar. No implementation authority.
+
+## 2026-11-14 — Literary depth / plain-language style mandate
+
+Owner established **literary ambition in plain English** as a core narrative quality requirement. [NARRATIVE_VOICE_AND_LITERARY_STANDARDS.md](NARRATIVE_VOICE_AND_LITERARY_STANDARDS.md) guides environmental text, speech, letters, Agnes's authored pages and the player's factual diary. No overwrought purple prose, generic atmospheric exaggeration, omniscient judgements of player emotion or definitive Wicker Cove fog answers. Small human actions carry meaning. Future spring story/first Cove arrival uses this rubric. Editorial design only; unchanged game scripts.
