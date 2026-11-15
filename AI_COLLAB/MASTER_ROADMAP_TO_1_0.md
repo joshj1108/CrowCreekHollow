@@ -171,3 +171,8 @@ A source-grounded, design-only skill mastery plan is now recorded in [SKILL_MAST
 ## 2026-11-14 — Lowmere resident and relationship design
 
 [LOWMERE_RESIDENTS_DESIGN.md](LOWMERE_RESIDENTS_DESIGN.md) records a **design-only** four-resident concept, rooted in existing Maren/Davy/vicar/postman and town-vote canon. Proposed newcomers: Edith Vale (inn), Gideon Pike (fishing crew), Thomas Bellweather (general store), Martha Fenwick (fishmonger). Names, portraits, stories are not canon without owner approval. **CCH-LOWMERE-PEOPLE-001A P1 design prerequisite** is a story/relationship compatibility matrix; **001B P2** is a two-NPC playable town slice. New quests and relationships reuse existing FolkSystem and orders rather than creating separate machinery. Inn guests, fisherman routes, rumors, owner arcs remain downstream P2/P3 expansions.
+
+
+## 2026-11-14 — Lowmere economic history and recovery design
+
+Design-only reference: [LOWMERE_ECONOMY_HISTORY_DESIGN.md](LOWMERE_ECONOMY_HISTORY_DESIGN.md). Local history of declining fish catches, damaged harbor, supply shortages, reduced inn traffic and failing coastal trade is **proposed**, not approved story canon. Permanent fog and downhill geography **are** owner canon; the fog's origin/timeline remains undecided. **CCH-LOWMERE-ECON-001 P1 design prerequisite** covers history, existing-story reconciliation, and price/supply audit before production. Supporting P2 tasks: CCH-LOWMERE-ECON-002 (decay/repair world states), CCH-FISHERY-001 (fishery supply chain), CCH-HARBOR-REPAIR-001 (one dock repair opening an NPC voyage), CCH-LOWMERE-TRADE-001 (farm/port trade), CCH-LOWMERE-HISTORY-001 (story-safe town history). CCH-LOWMERE-RECOVERY-001 P3 (ambient local recovery). None may be coded from the roadmap alone.
