@@ -1,5 +1,7 @@
 # Crow Creek Hollow — Prioritized Development Roadmap
 
+> **Naming update (2026-11-14):** **Wicker Cove** is the official in-world name. Legacy `CCH-LOWMERE-*` task IDs and `LOWMERE_*` document paths are retained as stable project identifiers; they do not indicate a second town. All previous lore and design commitments are preserved.
+
 **Master phase-by-phase pathway to 1.0:** [MASTER_ROADMAP_TO_1_0.md](MASTER_ROADMAP_TO_1_0.md). This document remains the detailed candidate backlog and history. Neither roadmap grants blanket implementation approval.
 
 **Established:** 2026-11-14  
@@ -79,42 +81,42 @@ Crow Creek Hollow is a top-down 3/4 cozy folk-horror farming/survival game. **Ho
 **Immediate next conversation:** develop CCH-FOOD-001's roles, recipe principles, and food economy rules; do not send Claude an implementation prompt until requested.
 
 
-## 2026-11-14 — New strategic direction: Lowmere, orders, and mastery (exploratory, NOT approved for implementation)
+## 2026-11-14 — New strategic direction: Wicker Cove, orders, and mastery (exploratory, NOT approved for implementation)
 
 **Design north star:** Stardew Valley's self-directed farming and coziness; We Harvest Shadows' slow-burn farm unease; DREDGE's night-risk/psychological atmosphere; classic RuneScape's interconnected skill mastery; Molehill Empire's customer produce orders and town trade. Borrow design principles, not exact content, assets, story or mechanics.
 
-**Lowmere:** Candidate accessible town connected to the existing gate, marketplace, merchant orders and residents. Its geography, lore, NPC roster, relationship to Crow Creek Hollow and unlock timing are **not yet canon**; reconcile with existing story/treks before approving. Town should feel lived-in and safe by day, subtly unsettling through clues and local history. Keep farm the emotional and functional home; preserve old saves, routes and landmarks.
+**Wicker Cove:** Candidate accessible town connected to the existing gate, marketplace, merchant orders and residents. Its geography, lore, NPC roster, relationship to Crow Creek Hollow and unlock timing are **not yet canon**; reconcile with existing story/treks before approving. Town should feel lived-in and safe by day, subtly unsettling through clues and local history. Keep farm the emotional and functional home; preserve old saves, routes and landmarks.
 
 | Relative priority | Proposed ID | Workstream | State | Prototype gate |
 | --- | --- | --- | --- | --- |
 | **P1, next alongside CCH-FOOD-001 design** | CCH-ORDERS-001 | Molehill Empire-inspired **optional home dispatch orders** at market stand/mailbox: simple produce/fish/food requests, partial delivery, accepted/declined/delayed choices, reasonable availability, predictable rewards and bounded rotating demand. Audit existing trade/inventory/economy and avoid a second parallel quest system | **Design — no implementation authorized** | First prototype entirely at existing farm stand with 2–3 request templates and no town art or new map |
 | **P1, after economy audit** | CCH-SKILLS-001 | RuneScape-inspired **interlocking progression**: audit actual skill XP, level caps and unlocks; create clear novice-to-master capability ladders and meaningful cross-skill production chains without gratuitous level-99 grind | **Design — no implementation authorized** | Preserve existing skill saves and levels; prototype tangible Farming + Cooking/Trading synergies; separate owner approval for any XP rebalancing |
-| **P2 (could rise after order prototype)** | CCH-LOWMERE-001 | **Town feasibility + narrative/technical blueprint**, then a compact accessible Lowmere vertical slice: marketplace, general store, limited NPC routines, one meaningful reason to visit, existing road/gate linkage, weather/time, save-safe scene transfer | **Idea — no implementation authorized** | First audit canon, route, map scale/performance, NPC dialogue, save migration and whether fast travel/dispatch is needed; no expansive town or new multiplayer |
-| P2 | CCH-LOWMERE-002 | Town relationships, local business contracts, mysteries tied to existing Hollow story; distinct daytime comfort versus night unease | Idea | Depends on validated Lowmere slice; no lore rewrites without story review |
+| **P2 (could rise after order prototype)** | CCH-LOWMERE-001 | **Town feasibility + narrative/technical blueprint**, then a compact accessible Wicker Cove vertical slice: marketplace, general store, limited NPC routines, one meaningful reason to visit, existing road/gate linkage, weather/time, save-safe scene transfer | **Idea — no implementation authorized** | First audit canon, route, map scale/performance, NPC dialogue, save migration and whether fast travel/dispatch is needed; no expansive town or new multiplayer |
+| P2 | CCH-LOWMERE-002 | Town relationships, local business contracts, mysteries tied to existing Hollow story; distinct daytime comfort versus night unease | Idea | Depends on validated Wicker Cove slice; no lore rewrites without story review |
 
 **Integration:** CCH-FOOD-001 designs cooked foods and crop value; CCH-ORDERS-001 creates demand for that production; CCH-SKILLS-001 gives mastery unlocks; CCH-LOWMERE-001 provides an optional place to deliver, meet people and follow mysteries; CCH-WORLD-001 ties environmental discoveries back to known landmarks and characters. Avoid duplicating CCH-LOOP-002 afternoon errands or CCH-PEOPLE-001 relationships: those should share a single request/relationship framework.
 
-**Decision process:** (1) research and audit existing code/canon, (2) prototype orders **without** building a town, (3) measure trade economics and whether orders are fun, (4) design Lowmere's footprint, story identity and access, (5) prototype one town block only after explicit owner approval. No prompt to Claude has been authorized by this entry.
+**Decision process:** (1) research and audit existing code/canon, (2) prototype orders **without** building a town, (3) measure trade economics and whether orders are fun, (4) design Wicker Cove's footprint, story identity and access, (5) prototype one town block only after explicit owner approval. No prompt to Claude has been authorized by this entry.
 
 
-## 2026-11-14 — Owner-set Lowmere canon: fogbound failing seaside fishing village
+## 2026-11-14 — Owner-set Wicker Cove canon: fogbound failing seaside fishing village
 
 **Owner's geographical/atmospheric decision — use as design canon, NOT automatic authorization to implement:**
 
-- **Lowmere** is a **dreary, economically failing seaside fishing village**, situated **down the mountain road from Crow Creek Hollow**.
-- **Crow Creek Hollow Farm** is the **last homestead / closest settled point to Lowmere before the mountain woods begin**; this is why **wilderness treks start at the farm**.
-- A **dense bank of fog envelops Lowmere continuously, 24/7**. From the farm's mountain vantage point the road and town could otherwise be visible, but the permanent fog bank conceals the village/coast below.
+- **Wicker Cove** is a **dreary, economically failing seaside fishing village**, situated **down the mountain road from Crow Creek Hollow**.
+- **Crow Creek Hollow Farm** is the **last homestead / closest settled point to Wicker Cove before the mountain woods begin**; this is why **wilderness treks start at the farm**.
+- A **dense bank of fog envelops Wicker Cove continuously, 24/7**. From the farm's mountain vantage point the road and town could otherwise be visible, but the permanent fog bank conceals the village/coast below.
 - The existing farm gate and road should stay in place; a future town approach and traversal must respect the established landscape rather than require wholesale farm remapping.
-- Town atmosphere: failing fishing livelihoods, worn coastal infrastructure, trade dependency, fogbound isolation. Avoid describing Lowmere as a cheery bustling market town.
+- Town atmosphere: failing fishing livelihoods, worn coastal infrastructure, trade dependency, fogbound isolation. Avoid describing Wicker Cove as a cheery bustling market town.
 
 **Optional, not yet canon:** the source of permanent fog, supernatural versus meteorological interpretation, precise road length and route, harbor layout, shop/NPC roster, precise visibility from specific viewpoints, ferry or sea travel, town-access milestones, and all special events. Keep these open for owner + ChatGPT story/gameplay design.
 
-**High-leverage integration:** the farm supplies inland produce, wood, preserved goods and cooked provisions to a stressed fishing village; Lowmere may supply fish and coastal goods. Orders should feel like local needs, not just random generic delivery targets. The town can support atmospheric contrasts: farm as last refuge before wilderness, coastal village as civilization that is itself failing. Treks remain staged at the farm. The permanent fog must look and behave as a geographic landmark without indiscriminately darkening the entire farm or changing approved balanced lighting.
+**High-leverage integration:** the farm supplies inland produce, wood, preserved goods and cooked provisions to a stressed fishing village; Wicker Cove may supply fish and coastal goods. Orders should feel like local needs, not just random generic delivery targets. The town can support atmospheric contrasts: farm as last refuge before wilderness, coastal village as civilization that is itself failing. Treks remain staged at the farm. The permanent fog must look and behave as a geographic landmark without indiscriminately darkening the entire farm or changing approved balanced lighting.
 
-**Next design task:** combine CCH-FOOD-001 and CCH-ORDERS-001 into an *economy design exercise*, then determine the smallest viable Lowmere town slice and its relationship to the road. Still no code implementation authorization.
+**Next design task:** combine CCH-FOOD-001 and CCH-ORDERS-001 into an *economy design exercise*, then determine the smallest viable Wicker Cove town slice and its relationship to the road. Still no code implementation authorization.
 
 
-## 2026-11-14 — Lowmere first-district design draft
+## 2026-11-14 — Wicker Cove first-district design draft
 
 A concrete **design-only** first district, farm-to-town exchange, order categories, first-visit storyboard, dependencies and unresolved decisions is now stored at [`AI_COLLAB/LOWMERE_FIRST_DISTRICT_DESIGN.md`](LOWMERE_FIRST_DISTRICT_DESIGN.md). This refines CCH-LOWMERE-001 and CCH-ORDERS-001 without authorizing construction. Recommended sequence: CCH-FOOD-001 economy audit/design → CCH-ORDERS-001 farm dispatch prototype → CCH-SKILLS-001 interlocking skill progression audit → CCH-LOWMERE-001 small town district feasibility/prototype. Existing town-vote lore and farm-stage trek logic must be preserved.
 
@@ -128,30 +130,30 @@ User selected two new gameplay directions (design only, no code approved):
 | CCH-LOWMERE-BUILD-001 | **P2** | Help owners visibly repair and improve the inn, general store, fish market and docks through optional labor/material contracts, with meaningful coins/skill progress, service upgrades and owner goodwill | Design | Verify actual Construction or related skill in code; needs CCH-LOWMERE-001 town prototype and CCH-ORDERS-001 shared contract engine |
 | CCH-INN-001 | **P2** | Original, client-briefed themed guest-room design inspired by Animal Crossing 3.0 resort hotel / Happy Home Paradise: one-room editor, furniture arrangement, objective constraints and persistent room layouts | Design | Requires inn scene, furnishings/save infrastructure and one structural repair; prototype one room before multiple room/guest expansion |
 
-**Design spec and proposed one-room vertical slice:** [Lowmere First District Design](LOWMERE_FIRST_DISTRICT_DESIGN.md). Restore a room first, furnish second; no new mandatory currency, no copying branded room/UI themes. A repair should benefit town economy and gameplay, not simply recolor a building. Keep perpetual fog and village's decline.
+**Design spec and proposed one-room vertical slice:** [Wicker Cove First District Design](LOWMERE_FIRST_DISTRICT_DESIGN.md). Restore a room first, furnish second; no new mandatory currency, no copying branded room/UI themes. A repair should benefit town economy and gameplay, not simply recolor a building. Keep perpetual fog and village's decline.
 
-**Sequence revision:** Food/Orders audit → minimal Lowmere district and owners → one inn repair contract → one themed guest room → only then expand building renovations/guest demand based on testing. Existing CCH-EVENING-002 remains first gameplay review gate.
+**Sequence revision:** Food/Orders audit → minimal Wicker Cove district and owners → one inn repair contract → one themed guest room → only then expand building renovations/guest demand based on testing. Existing CCH-EVENING-002 remains first gameplay review gate.
 
 
 ## 2026-11-14 — Proposed skill pruning and sea routes
 
 **Skill roster:** [Skill Roster and Maritime Design](SKILL_ROSTER_AND_MARITIME_DESIGN.md) defines CCH-SKILLS-REVIEW-001 (**P1, Design**) to audit Cleaning and Forestry redundancy, preserve their abilities through any safe reallocation, and decide the final skill list before expanding mastery. This supersedes the earlier design assumption that all existing ten skills must remain; no code or save changes are approved.
 
-**Lowmere maritime backlog:** CCH-MARITIME-001 (**P2, Design**) NPC crew fishing trips; CCH-MARITIME-002 (**P2, Idea**) discoverable fishing grounds; CCH-COASTAL-TRADE-001 (**P2/P3, Idea**) trade voyages to off-map coastal villages; CCH-SEAMANSHIP-001 (**P3/conditional, Idea**) potential maritime skill only if repeatable gameplay warrants; CCH-MARITIME-MYSTERY-001 (**P3, Idea**) optional fogbound maritime discoveries. Must first establish Lowmere harbor and one playable short trip, with no obligation to implement open sea/other cities in 1.0.
+**Wicker Cove maritime backlog:** CCH-MARITIME-001 (**P2, Design**) NPC crew fishing trips; CCH-MARITIME-002 (**P2, Idea**) discoverable fishing grounds; CCH-COASTAL-TRADE-001 (**P2/P3, Idea**) trade voyages to off-map coastal villages; CCH-SEAMANSHIP-001 (**P3/conditional, Idea**) potential maritime skill only if repeatable gameplay warrants; CCH-MARITIME-MYSTERY-001 (**P3, Idea**) optional fogbound maritime discoveries. Must first establish Wicker Cove harbor and one playable short trip, with no obligation to implement open sea/other cities in 1.0.
 
 
-## 2026-11-14 — New Lowmere cast design and task IDs
+## 2026-11-14 — New Wicker Cove cast design and task IDs
 
-See [LOWMERE_RESIDENTS_DESIGN.md](LOWMERE_RESIDENTS_DESIGN.md). **CCH-LOWMERE-PEOPLE-001A** (P1, Design): first reconcile existing characters, relationship flags and endings with proposed Lowmere residents. **001B** (P2, Idea): playable Edith plus one merchant, a few lines and requests. **CCH-LOWMERE-PEOPLE-002** (P2, Idea): one owner arc and restoration acknowledgment. **CCH-INN-GUESTS-001** (P2, Idea): distinctive hotel guest briefs. **CCH-FISHERMEN-001** (P2, Idea): fisher crew/market NPC handoff before boat prototype. **CCH-LOWMERE-RUMORS-001** (P2/P3, Idea): story-safe town rumors. **CCH-LOWMERE-SCHEDULES-001** (P3, Idea): local workday behavior. New character names and arcs are proposals, not canon or coding authorization.
+See [LOWMERE_RESIDENTS_DESIGN.md](LOWMERE_RESIDENTS_DESIGN.md). **CCH-LOWMERE-PEOPLE-001A** (P1, Design): first reconcile existing characters, relationship flags and endings with proposed Wicker Cove residents. **001B** (P2, Idea): playable Edith plus one merchant, a few lines and requests. **CCH-LOWMERE-PEOPLE-002** (P2, Idea): one owner arc and restoration acknowledgment. **CCH-INN-GUESTS-001** (P2, Idea): distinctive hotel guest briefs. **CCH-FISHERMEN-001** (P2, Idea): fisher crew/market NPC handoff before boat prototype. **CCH-LOWMERE-RUMORS-001** (P2/P3, Idea): story-safe town rumors. **CCH-LOWMERE-SCHEDULES-001** (P3, Idea): local workday behavior. New character names and arcs are proposals, not canon or coding authorization.
 
 
 ## 2026-11-14 — Harbor economy and history planning tasks
 
 [LOWMERE_ECONOMY_HISTORY_DESIGN.md](LOWMERE_ECONOMY_HISTORY_DESIGN.md) explores the fishing-village decline while preserving the existing Rook, town-vote, vicar and postman timelines. Tasks: **CCH-LOWMERE-ECON-001 P1 Design** (history compatibility and economy audit); **CCH-LOWMERE-ECON-002 P2 Idea** (visible local decline and upgrades); **CCH-FISHERY-001 P2 Idea** (fishing and processing supply); **CCH-HARBOR-REPAIR-001 P2 Idea** (pier repair as future boat access gate); **CCH-LOWMERE-TRADE-001 P2 Idea** (farm-town/coastal exchange); **CCH-LOWMERE-HISTORY-001 P2 Idea** (restrained story-safe village history); **CCH-LOWMERE-RECOVERY-001 P3 Idea** (small atmosphere improvements). Fog's origin and historic start are OPEN. No implementation approval.
 
-## 2026-11-14 — Lowmere fog-memory canon and tasks
+## 2026-11-14 — Wicker Cove fog-memory canon and tasks
 
-**Approved narrative direction:** the 24/7 Lowmere fog has a contradictory/uncertain past. Some locals remember clear sea views; others insist it has always been present. Documents can disagree. Neither chronology nor cause nor relation to the Hollow/bell is determined. This **supersedes** prior suggestion that a single answer to 'when did the fog arrive?' should be chosen now.
+**Approved narrative direction:** the 24/7 Wicker Cove fog has a contradictory/uncertain past. Some locals remember clear sea views; others insist it has always been present. Documents can disagree. Neither chronology nor cause nor relation to the Hollow/bell is determined. This **supersedes** prior suggestion that a single answer to 'when did the fog arrive?' should be chosen now.
 
 - **CCH-LOWMERE-FOG-001 P1 Design:** reconcile testimony chronology, existing characters, Agnes's 30-year history and the mill vote; define clue ambiguity rules and a contradiction matrix.
 - **CCH-LOWMERE-FOG-002 P2 Idea:** optional witness-record-landmark mini-chain through existing dialogue and diary after town exists.
@@ -161,7 +163,7 @@ Full details: [LOWMERE_ECONOMY_HISTORY_DESIGN.md](LOWMERE_ECONOMY_HISTORY_DESIGN
  
 ## 2026-11-14 — Coastal setting and voyage design candidates
 
-[LOWMERE_COASTAL_WORLD_DESIGN.md](LOWMERE_COASTAL_WORLD_DESIGN.md) (design-only) expands geography/mood from Lowmere harbor into a possible breakwater, tide pools, nearshore shoals and off-map coastal trade; none of these place names are canon. Preserve permanent fog and contradictory unconfirmed origins, main Hollow story, and optional nonpunitive voyages. Added **CCH-COAST-WORLD-001 P1 design prerequisite**, **CCH-COAST-SHORE-001 P2**, **CCH-COAST-VOYAGE-001 P2**, **CCH-COAST-GROUNDS-001 P2**, **CCH-COAST-RHYTHMS-001 P2/P3**, **CCH-COAST-CHARTS-001 P2/P3**, **CCH-COAST-ROUTES-001 P3**, **CCH-COAST-DEEPWATER-001 P3 stretch**. Cross-reference maritime/fishery/fog tasks; avoid overlapping tickets. No code authorization.
+[LOWMERE_COASTAL_WORLD_DESIGN.md](LOWMERE_COASTAL_WORLD_DESIGN.md) (design-only) expands geography/mood from Wicker Cove harbor into a possible breakwater, tide pools, nearshore shoals and off-map coastal trade; none of these place names are canon. Preserve permanent fog and contradictory unconfirmed origins, main Hollow story, and optional nonpunitive voyages. Added **CCH-COAST-WORLD-001 P1 design prerequisite**, **CCH-COAST-SHORE-001 P2**, **CCH-COAST-VOYAGE-001 P2**, **CCH-COAST-GROUNDS-001 P2**, **CCH-COAST-RHYTHMS-001 P2/P3**, **CCH-COAST-CHARTS-001 P2/P3**, **CCH-COAST-ROUTES-001 P3**, **CCH-COAST-DEEPWATER-001 P3 stretch**. Cross-reference maritime/fishery/fog tasks; avoid overlapping tickets. No code authorization.
 
 
 ## 2026-11-14 — Start-to-finish creative blueprint
