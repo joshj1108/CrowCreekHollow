@@ -1,14 +1,16 @@
 # LOWMERE — First District and Farm-to-Town Economy Design
+
+> **Naming update (2026-11-14):** **Wicker Cove** is the official in-world name. Legacy `CCH-LOWMERE-*` task IDs and `LOWMERE_*` document paths are retained as stable project identifiers; they do not indicate a second town. All previous lore and design commitments are preserved.
 **Version:** 0.1 — 2026-11-14  
 **State:** DESIGN ONLY. No Claude implementation authorization.  
 **Parent:** `AI_COLLAB/DEVELOPMENT_ROADMAP.md`.
 
 ## Established owner canon
-- Lowmere is a dreary, failing seaside fishing village **down the mountain road** from Crow Creek Hollow farm.
+- Wicker Cove is a dreary, failing seaside fishing village **down the mountain road** from Crow Creek Hollow farm.
 - Crow Creek Hollow is the last homestead/closest settled stop before the woods; wilderness treks rightly start at the farm.
-- Lowmere is covered by a dense, persistent fog bank **24/7**. The town/coast would otherwise be visible from the elevated farm.
+- Wicker Cove is covered by a dense, persistent fog bank **24/7**. The town/coast would otherwise be visible from the elevated farm.
 - Preserve the approved farm map, gate, road, original treks and art direction. The farm remains the emotional home base.
-- The supplied Lowmere concept art is a **mood and composition reference**, not pixel-perfect production assets or binding map geometry.
+- The supplied Wicker Cove concept art is a **mood and composition reference**, not pixel-perfect production assets or binding map geometry.
 
 ## First playable district — proposed, not canon geometry
 The descending mountain road enters the upper/landward edge; a muddy, modestly sloped village street leads to a short harbor frontage. The permanent fog obscures the water beyond nearby boats and piers. Buildings are worn, salt-stained, repaired with mismatched timber and metal; warm interior light implies people still endure there. Avoid a bustling or magically glowing port.
@@ -22,7 +24,7 @@ The descending mountain road enters the upper/landward edge; a muddy, modestly s
 
 **Build strategy:** prototype one compact outdoor district, 1–2 interiors maximum, a very small NPC cast, scene transition from existing farm gate via a short road approach. Verify actual clock/travel time, map perspective and tile scale, saves and collisions before integrating production art. Do not add a second farm or large town sim.
 
-## Exchange: why Lowmere needs the farm
+## Exchange: why Wicker Cove needs the farm
 - **Farm → village:** vegetables, fruit, eggs, goat products, firewood, cooked meals and preserved food, chosen from goods actually present in the game.
 - **Village → farm:** saltwater fish, salt, rope, select hardware/fishing supplies and information, contingent on existing item audit before introducing new inventory types.
 - Use the existing **coins** economy and farm market stand/mailbox; no second money system or standalone duplicate quest engine.
@@ -33,14 +35,14 @@ The descending mountain road enters the upper/landward edge; a muddy, modestly s
 - **Business contract:** medium mixed-goods request encouraging skill/production variety; optional deadline only if comfortably achievable.
 - **Community commission:** rare milestone contract with narrative acknowledgment, not routine grind.
 - Offer a small pool of rotating requests adjusted to player's unlocked crops, seasons, inventory and production ability. Player may accept, decline and deliver in parts. Prevent save-scumming rerolls, repeat-turn-in rewards, impossible deadlines, accidental sale of reserved goods, and overwhelming requests.
-- **Farm dispatch** through existing stand/mailbox; **direct town delivery** once Lowmere opens. Neither route should dominate by compulsory travel. Test baseline sale income versus order premiums using CCH-FOOD-001 audit.
+- **Farm dispatch** through existing stand/mailbox; **direct town delivery** once Wicker Cove opens. Neither route should dominate by compulsory travel. Test baseline sale income versus order premiums using CCH-FOOD-001 audit.
 - The source design inspiration is Molehill Empire customer orders; don't reproduce proprietary art, names or exact mechanics.
 
 ## Progression and character integration
 - Skill mastery remains compatible with current XP, levels, saves and unlocks; audit first. Farming+Cooking+Trading / Fishing synergies are design candidates only. Prefer capability unlocks over repetitive XP-only grinding.
 - Reconcile existing canon: Agnes Rook, Maren, Davy, the vicar and postman, chapel/mill, the town vote, the farm's repeated ownership and the 'keeper' mystery. Their current events and travel timing must not be rewritten casually.
 - First arrival should provide one useful purchase, one achievable order and one subtle context-setting conversation/discovery (not a story reveal or forced combat encounter).
-- **Atmospheric contrast:** the farm is solitary but becoming welcoming; Lowmere is inhabited yet slowly failing. Fog is constant across time/season but may change density locally; do not imply a known supernatural cause unless the owner later chooses one.
+- **Atmospheric contrast:** the farm is solitary but becoming welcoming; Wicker Cove is inhabited yet slowly failing. Fog is constant across time/season but may change density locally; do not imply a known supernatural cause unless the owner later chooses one.
 - Distinctive early town narrative: declining catch, patchwork repairs, shortages, boarded structures, ongoing domestic life. Keep mystery emerging from consequences and behavior, not staged jump scares.
 
 ## First visit — experience storyboard
@@ -62,7 +64,7 @@ The descending mountain road enters the upper/landward edge; a muddy, modestly s
 - Whether the first district includes any accessible indoors besides store/inn.
 - How long mountain travel takes and whether a fast, non-punitive return path is needed.
 - The number and identities of new town residents; overlap with existing vicar/postman.
-- Whether players can fish from the Lowmere docks and how saltwater catches differ from the farm pond.
+- Whether players can fish from the Wicker Cove docks and how saltwater catches differ from the farm pond.
 - What is behind the persistent fog, if anything; preserve mystery rather than assign a definitive explanation.
 - Exact town map geography, harbor orientation, architecture palette and NPC schedules.
 
@@ -72,8 +74,8 @@ The descending mountain road enters the upper/landward edge; a muddy, modestly s
 ## 2026-11-14 — Owner request: construction assistance and inn guest-room design
 
 **Owner-directed feature concept (design approved for exploration; NOT an authorization to code):**
-- The farmer should be able to use construction/building capability to **renovate Lowmere buildings on behalf of their owners**, for meaningful compensation and community progress.
-- The Lowmere inn should offer a **client-briefed hotel room decorating mode**, inspired by Animal Crossing: New Horizons 3.0's themed guest rooms and Happy Home Paradise's interior design freedom, but with original presentation, assets, guests, economy and fiction.
+- The farmer should be able to use construction/building capability to **renovate Wicker Cove buildings on behalf of their owners**, for meaningful compensation and community progress.
+- The Wicker Cove inn should offer a **client-briefed hotel room decorating mode**, inspired by Animal Crossing: New Horizons 3.0's themed guest rooms and Happy Home Paradise's interior design freedom, but with original presentation, assets, guests, economy and fiction.
 - These are distinct but integrated loops: **structural restoration** unlocks usable room/facility space; **interior commissions** let the player design, furnish and revisit specific rooms. Keep town economically struggling: visible gradual improvement rather than an instant fully restored tourist destination.
 
 ### Proposed town restoration loop
@@ -98,12 +100,12 @@ The descending mountain road enters the upper/landward edge; a muddy, modestly s
 - **Food:** visiting guests and inn meals can create food delivery demand using CCH-FOOD-001.
 - **Orders:** building owners can issue supply contracts within the common CCH-ORDERS-001 framework.
 - **Skills:** construction repair and furnishing should support CCH-SKILLS-001's existing progression review; verify actual skills first, do not assume Construction currently exists.
-- **World:** repairs visibly improve individual buildings, open services and draw occasional visitors without curing Lowmere's decline or fog.
+- **World:** repairs visibly improve individual buildings, open services and draw occasional visitors without curing Wicker Cove's decline or fog.
 - **Mystery:** guest interactions or a closed room can organically reveal story clues, but not every contract becomes supernatural.
-- **Scope gate:** Lowmere base map and town service loop must exist before attempting a substantial free-placement designer; avoid making furniture editor a dependency for first playable town.
+- **Scope gate:** Wicker Cove base map and town service loop must exist before attempting a substantial free-placement designer; avoid making furniture editor a dependency for first playable town.
 
 **New candidate tasks:** CCH-LOWMERE-BUILD-001 (P2, town-owner building repair prototype) and CCH-INN-001 (P2, one-room guest design prototype). Both **Design**, no coding authorization. Owner reviews layout/edit controls, save behavior, rewards and actual game visuals before committing production art.
 
 ## Fog history — owner-approved narrative canon (2026-11-14)
 
-**Always fogbound in play, history contested.** Residents' memories and historic records disagree on whether the Lowmere fog has always been present or emerged later. The actual history and reason are deliberately undecided; avoid dialogue, signage or level design that inadvertently confirms a date, supernatural cause, or direct link to Agnes's bell. Suggested optional discoveries are a debated childhood sea view, discrepant harbor weather records, and a once-used lookout. All examples remain noncanonical until owner review. See [LOWMERE_ECONOMY_HISTORY_DESIGN.md](LOWMERE_ECONOMY_HISTORY_DESIGN.md) for CCH-LOWMERE-FOG-001/002/003. Fog visually persists across town time/weather/season, while local density can vary for playability.
+**Always fogbound in play, history contested.** Residents' memories and historic records disagree on whether the Wicker Cove fog has always been present or emerged later. The actual history and reason are deliberately undecided; avoid dialogue, signage or level design that inadvertently confirms a date, supernatural cause, or direct link to Agnes's bell. Suggested optional discoveries are a debated childhood sea view, discrepant harbor weather records, and a once-used lookout. All examples remain noncanonical until owner review. See [LOWMERE_ECONOMY_HISTORY_DESIGN.md](LOWMERE_ECONOMY_HISTORY_DESIGN.md) for CCH-LOWMERE-FOG-001/002/003. Fog visually persists across town time/weather/season, while local density can vary for playability.
