@@ -2,12 +2,12 @@
 
 **Creative planning date:** 2026-11-14. **Status:** DESIGN ONLY; no change to code, lore, story branches, assets or saving authorized.
 **Owner-established direction:** choose-your-own-adventure feeling throughout; no objectively right/wrong playstyle; decisions matter over time; optional behind-the-scenes D&D-inspired rolls for interesting uncertainty.
-**Read with:** `CHOICE_CONSEQUENCE_SYSTEM_DESIGN.md`, `CREATIVE_BLUEPRINT_START_TO_FINISH.md`, `MASTER_ROADMAP_TO_1_0.md`, `DESIGN.md`, existing StoryAct and FolkSystem. All scene names, relationships involving proposed Lowmere cast, options and reward specifics below are concepts, not established in-game canon.
+**Read with:** `CHOICE_CONSEQUENCE_SYSTEM_DESIGN.md`, `CREATIVE_BLUEPRINT_START_TO_FINISH.md`, `MASTER_ROADMAP_TO_1_0.md`, `DESIGN.md`, existing StoryAct and FolkSystem. All scene names, relationships involving proposed Wicker Cove cast, options and reward specifics below are concepts, not established in-game canon.
 
 ## First principles
 1. **Identity comes from accumulated behavior, not selecting a 'class' at character creation.** The farm and neighborhood recognize what the player repeatedly does. No global morality, lawfulness or alignment meter.
 2. **Choice changes context, not the absolute right to progress.** Consequences can be costly, risky, pleasant or unpleasant but must have believable recovery or alternatives. Player still owns decisions and resource tradeoffs.
-3. **Players don't need to touch every system.** A farmer-only, builder, friend-focused or risk-taking explorer should each feel respected. Core Hollow story needs original established gates; optional Lowmere restoration, inn or maritime pursuits don't become required endings.
+3. **Players don't need to touch every system.** A farmer-only, builder, friend-focused or risk-taking explorer should each feel respected. Core Hollow story needs original established gates; optional Wicker Cove restoration, inn or maritime pursuits don't become required endings.
 4. **A major choice gets a callback.** A dialogue line on selection is insufficient. Aim for immediate feedback + remembered response + one future meaningful opportunity or cost.
 5. **Use hidden RNG sparingly** to vary plausible outcomes of uncertain work, not whether the player intended to help, which moral side they are on, or crucial plot canon. Record one-off roll outcomes so reloads can't fish for success.
 6. **Don't manufacture punishment through silence.** The player understands broad stakes through dialogue, skill/tool readiness or clue context. Avoid invisible choices that unexpectedly kill relationships or block the chapter spine.
@@ -17,7 +17,7 @@
 ## How a playthrough is remembered (proposed state model, not approved schema)
 **A. Relationships:** existing FolkSystem points/hearts, scenes and request flags are the baseline. New NPCs should use/extend it, with separate stable 'promise/choice' flags when needed. Two characters may interpret one action differently without imposing global 'reputation'.
 **B. Physical/economic state:** existing farm house/stand, future town projects and practical stock/use; save each upgrade once and persist resulting services.
-**C. Narrative history:** authored choice/outcome IDs and context notes in diary, plus real clues learned. Distinguish what the player **believes** from what the game proves; especially Lowmere's fog chronology.
+**C. Narrative history:** authored choice/outcome IDs and context notes in diary, plus real clues learned. Distinguish what the player **believes** from what the game proves; especially Wicker Cove's fog chronology.
 **D. Hidden resolution:** seeded or persisted per-event random result and inputs to avoid save/reload manipulation; never roll on dialogue panel reopening. Developer-only logs for branch tests.
 **E. Never expose universal numeric morality labels.** A brief diary recap can note 'I chose to keep the grain' without declaring the player selfish.
 
@@ -33,7 +33,7 @@
 These are *styles of play*, not menu-selectable classes or skill locks. Most players will mix them, and habits may change each season.
 
 ## Sample CYOA mini-arc: 'The Winter Shortage' (PROPOSED)
-**Availability:** Optional future Lowmere-adjacent winter side request after farm has food surplus; first occurrence should only be introduced once towns/dispatch loop actually exists. Not a current story beat and not an addition to the fixed 17-chapter spine.
+**Availability:** Optional future Wicker Cove-adjacent winter side request after farm has food surplus; first occurrence should only be introduced once towns/dispatch loop actually exists. Not a current story beat and not an addition to the fixed 17-chapter spine.
 **Premise:** Inn, store and a few households need food and fuel; player's farm has finite stores.
 - **Help the inn:** donate/supply part of stores. More inn cooperation, guest-catering contacts, lower home reserves; later thank-you or useful assistance, not automatic guaranteed bonus.
 - **Sell to general store:** earn bounded coins via fair market contract; store distributes through ordinary channels; later access to a practical merchant opportunity, not moral condemnation.
@@ -44,7 +44,7 @@ These are *styles of play*, not menu-selectable classes or skill locks. Most pla
 **Economy check:** no duplicate reward for sold/donated same items, no exploit through repeat conversation, winter resources available to a reasonable player.
 
 ## Sample CYOA mini-arc: 'Whose Pier?' (PROPOSED)
-**Availability:** Post-Lowmere, after harbor working district; no new ocean needed.
+**Availability:** Post-Wicker Cove, after harbor working district; no new ocean needed.
 **Premise:** There are enough materials to restore one of two damaged waterfront facilities first.
 - **Repair fishing gangway:** enables regular boat prep/market supply; dock workers and fishmonger respond.
 - **Repair delivery landing:** reduces shipping bottleneck; store/inn supply improves and visiting merchants may be more reliable.
@@ -80,9 +80,9 @@ Content budget recommendation: ~70% texture/short responses, ~20% relationship/e
 ## Existing canonical story integration and constraints
 Source: `StoryAct` currently has `beats`, `meeting` won/lost determined by Maren's `maren_book` and the vicar's `vicar_register`, Davy night choices, and saved `endings`; `FolkSystem` has relationship points/hearts, scenes, requests and daily/seasonal lines. These already provide **some** consequences but not a general branching choice engine.
 - A new choice's callback may acknowledge what a character did **without** moving the essential vote/ending flags behind luck.
-- Lowmere's resident cast are proposals and must not overwrite Maren, Davy, vicar and postman schedules or authoritative story evidence.
+- Wicker Cove's resident cast are proposals and must not overwrite Maren, Davy, vicar and postman schedules or authoritative story evidence.
 - If an alternate meeting outcome/new endings is desired later, create a standalone story remapping plan with old-save compatibility and tests, not an incidental addition during town dialogue.
-- Lowmere fog chronology and causation remain contradictory/unconfirmed **no matter how well the player rolls**.
+- Wicker Cove fog chronology and causation remain contradictory/unconfirmed **no matter how well the player rolls**.
 
 ## Priority tasks and design handoffs
 | Task | Priority | State | First useful deliverable |
