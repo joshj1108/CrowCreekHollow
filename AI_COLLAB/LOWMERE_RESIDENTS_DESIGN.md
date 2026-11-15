@@ -100,3 +100,7 @@ Make Wicker Cove a failing but inhabited fogbound seaside fishing village whose 
 - Existing Maren, Davy, vicar and postman retain their established scenes and ending flags. Any added observations of Wicker Cove fog must be reconcilable with their currently written ages, history, travel schedules and records.
 
 **CCH-LOWMERE-FOG-001 P1 Design:** testimony/conflict matrix required before writing these dialogues. **CCH-LOWMERE-FOG-002 P2 Idea:** micro-conversations and records after town slice works. Preserve ambiguity and ordinary human tone; don't imply a false or definitive backstory.
+
+## 2026-11-14 — Character writing expansion and postman name continuity
+
+[**CHARACTER_LIVES_AND_RELATIONSHIPS_DESIGN.md**](CHARACTER_LIVES_AND_RELATIONSHIPS_DESIGN.md) is the current literary/plain-language character voice, ordinary habits and human relationship plan. **Cast remain proposals** pending owner naming approval. Preserve existing four walker story scenes, heart gates and ending flags. **CCH-LORE-NAME-001 P1 required:** in `scripts/folk_system.gd` original postman scenes `post_round`, `post_crate`, `post_dead` describe Lowmere 'over the hills' as source of Agnes's mail, bell iron and bill. Wicker Cove now officially names coastal village downhill. Before changing running dialogue, reconcile whether the old source place is geographically/historically the same settlement or needs a different owner-approved account; don't silently convert an 'over the hills' line into downhill lore or create an accidental second village. No code authorization.
