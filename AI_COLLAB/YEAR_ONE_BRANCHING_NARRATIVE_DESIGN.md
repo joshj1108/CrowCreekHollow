@@ -132,3 +132,7 @@ From current `DESIGN.md`, `scripts/story_act.gd`, existing seasonal calendar:
 ## First winter detail (2026-11-14)
 
 [**FIRST_WINTER_BRANCHING_DETAIL.md**](FIRST_WINTER_BRANCHING_DETAIL.md) details December–February: Dec household/route readiness, proposed fair four-way neighbor-supply dilemma, **existing** December 21 Longest Night double-night-Sanity event, **existing** January 1 Winter Feast (2 grilled fish + bandage), Jan acknowledgment, February real preparedness and March 1 Spring Thaw handoff. Winter context is source-checked against real 420s day, firewood and Comfort, early winter day62 wood-encroachment and walkers' intermittent visits. Preserve event effects and essential story gates. `CCH-WINTER-BRANCH-001` P1 design drafted, `-002` P1 audit, `-003/004/005` P2 optional candidates, `-QA-001` P1 eventual regression. No code approval.
+
+## 2026-11-14 — Narrative voice: simple writing, deep meaning
+
+[NARRATIVE_VOICE_AND_LITERARY_STANDARDS.md](NARRATIVE_VOICE_AND_LITERARY_STANDARDS.md) is the owner-directed style reference for future story expansion: concrete details, authentic NPC speech, controlled subtext and short lines; no showy language or invented player motives. Its Wicker Cove first-visit sample is illustrative, not canon. CCH-SPRING-BRANCH-001 to be developed against this style before town dialogue is finalized.
