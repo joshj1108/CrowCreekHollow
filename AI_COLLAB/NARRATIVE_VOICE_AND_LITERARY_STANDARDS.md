@@ -101,3 +101,7 @@ Aim for 10–12 in key scenes, but clarity and integrity override any aesthetic 
 - **CCH-NARRATIVE-QA-001 — P1 eventual QA:** edit scenes for voice consistency, choice fidelity, accessibility, story-lore contradictions and on-screen reading pace.
 
 **Status boundary:** Owner has approved the literary/plain-language narrative target, not this exact sample dialogue or permission to change existing scripts.
+
+## Spring's first-visit sample and choice direction (2026-11-14)
+
+[**FIRST_SPRING_BRANCHING_DETAIL.md**](FIRST_SPRING_BRANCHING_DETAIL.md) applies this editorial standard to Wicker Cove's first visit. The player sees ordinary labor (net-mending, a rotten step, damp boards) before hearing uncertainty about Rook's farm. Respond by actual motive (sell, repair, listen, shop); voices should be restrained, useful, short, and differ by profession. No definitive fog reveal or overplayed doom. Prose is a sample only and **does not authorize rewriting** the existing game narrative.
