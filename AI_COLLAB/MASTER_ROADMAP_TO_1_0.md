@@ -198,3 +198,12 @@ New candidates: CCH-COAST-WORLD-001 **P1 Design only** (geography/lore compatibi
 ## 2026-11-14 — Comprehensive creative blueprint for the complete game
 
 **Primary start-to-finish player-experience reference:** [CREATIVE_BLUEPRINT_START_TO_FINISH.md](CREATIVE_BLUEPRINT_START_TO_FINISH.md). Covers the first hour, first fortnight, autumn/winter/spring/summer, existing second-year 17-chapter story and three endings, post-story daily life, three interconnected progress paths (Homestead, Community, Mystery), Lowmere and maritime future, skills consolidation, minimum v1.0 content, QA and emotional north star. All historical/character/shore examples not already owner-set remain proposals. This operational master roadmap remains the priority and release-gate source of truth; blueprint is the **creative** source of truth. No code authorization.
+
+
+## 2026-11-14 — Choice & consequence becomes a core 1.0 pillar
+
+**Owner direction:** Crow Creek Hollow must feel like a choose-your-own-adventure, with **no morally or strategically mandatory 'right' way to play**. Meaningful decisions should persist and influence relationships, town economy, world state and personal journey. D&D-inspired hidden resolution rolls may introduce uncertainty, but must respect preparation, skills and agency; failure opens a different path rather than deleting essential content. Major authored ending conditions and existing 17 chapters remain in place until independently approved narrative changes.
+
+Design: [CHOICE_CONSEQUENCE_SYSTEM_DESIGN.md](CHOICE_CONSEQUENCE_SYSTEM_DESIGN.md). **P1 CCH-CHOICE-001A** audit current branch/flag/save systems; **P1 CCH-CHOICE-001B** hidden d20-style degree-of-outcome spec; **P1 CCH-CHOICE-001C** three-choice prototype using existing farm/walker content after separate owner approval; **P1 CCH-CHOICE-QA-001** choice/roll/save/endings QA; **P2 CCH-CHOICE-LOWMERE-001** later town dilemma; **P3 conditional CCH-CHOICE-MARITIME-001** future sea decisions.
+
+**1.0 definition refinement:** include one small validated *persistent and replayably divergent* choice-and-consequence loop with a later callback; spread it to more content only after game tests prove it valuable. No sprawling branching novel, new moral alignment, redundant RPG stats or visible dice UI required. This is a cross-cutting design gate for town NPCs, orders and restoration and should be solved in the current farm before adding many narrative scenes. No code approved by this entry.
