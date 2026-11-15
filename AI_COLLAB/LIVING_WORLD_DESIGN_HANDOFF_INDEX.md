@@ -101,3 +101,7 @@ Earlier index prose describing the new prologue as **'short optional'** is now *
 ## 2026-11-14 — Two complete lives, not a disposable prologue
 
 Read [**TWO_LIVES_INTERWOVEN_ORIGIN_ARCS.md**](TWO_LIVES_INTERWOVEN_ORIGIN_ARCS.md) after the mandatory [PLAYER_ARRIVAL_INTERACTIVE_PROLOGUE_DESIGN.md](PLAYER_ARRIVAL_INTERACTIVE_PROLOGUE_DESIGN.md). Five origin types now have complete proposed interlude→autumn→winter→midyear agency→September→year2/afterending arcs. Neither the reason for arrival nor the life built on farm dominates the story, and the earlier life remains active independent of supernatural fate. P1 design `CCH-TWO-LIVES-001` drafted; P1 narrative/engine audits, gated playable prologue and later actual consequences remain. No code modified.
+
+## 2026-11-14 — New first authored opening screenplay
+
+[**ROAD_TO_CROW_CREEK_HOLLOW_BRANCHING_SCREENPLAY_DRAFT.md**](ROAD_TO_CROW_CREEK_HOLLOW_BRANCHING_SCREENPLAY_DRAFT.md) is the principal **working dialogue/prose script** behind the mandatory, no-Skip `PLAYER_ARRIVAL_INTERACTIVE_PROLOGUE_DESIGN`. It contains a common opening, five distinct origin departures, realistic parting relationship or no-person scene, keepsake, road scenes, threshold and first-winter letters/decisions. Use as *proposed literature* only, pending scene/voice/legal and implementation review, and pair with `TWO_LIVES_INTERWOVEN_ORIGIN_ARCS.md` for full autumn-through-afterword development. Existing October1 and original endings protected.
