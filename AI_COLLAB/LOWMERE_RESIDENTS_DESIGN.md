@@ -1,12 +1,14 @@
 # CCH-LOWMERE-PEOPLE-001 — Residents, Relationships and Working Village
 
+> **Naming update (2026-11-14):** **Wicker Cove** is the official in-world name. Legacy `CCH-LOWMERE-*` task IDs and `LOWMERE_*` document paths are retained as stable project identifiers; they do not indicate a second town. All previous lore and design commitments are preserved.
+
 **Draft date:** 2026-11-14. **Status:** DESIGN ONLY; no authorization to implement new NPCs, art, quests or dialogue.
 **Sources checked:** `DESIGN.md` sections **Folk**, **Story chapters**, **Endings**, **Groves and treks**; `AI_COLLAB/LOWMERE_FIRST_DISTRICT_DESIGN.md`; `AI_COLLAB/MASTER_ROADMAP_TO_1_0.md`.
 **Canon distinction:** Existing walker identities, relationships and story hooks below are current code/design canon. All new character names, roles, costumes, stories, sample hooks and encounter arrangements are **candidate concepts**, not canon until owner approves. Concept portrait references are mood only, not production assets.
 
 ## Design goal
 
-Make Lowmere a failing but inhabited fogbound seaside fishing village whose people have believable work, relationships, hardships and occasional warmth. Player trade, cooking, carpentry, fishing and hospitality should improve particular livelihoods while **not eliminating Lowmere's permanent fog or making it a cheerful resort**. Ordinary everyday life must remain enjoyable independent of the main mystery.
+Make Wicker Cove a failing but inhabited fogbound seaside fishing village whose people have believable work, relationships, hardships and occasional warmth. Player trade, cooking, carpentry, fishing and hospitality should improve particular livelihoods while **not eliminating Wicker Cove's permanent fog or making it a cheerful resort**. Ordinary everyday life must remain enjoyable independent of the main mystery.
 
 ### Existing story anchors — PRESERVE
 - **Old Maren:** edge and mill walker, her sister and Ruth's minute book; sees the 31-to-4 vote and can help overturn it. Her already-existing `maren_book` scene is essential to winning the meeting.
@@ -39,7 +41,7 @@ Make Lowmere a failing but inhabited fogbound seaside fishing village whose peop
 - Edith and Thomas depend on farm produce and seasonal goods.
 - Gideon brings catch to Martha; market storage improvements should benefit both.
 - Martha's processed fish can feed the inn or supply voyages.
-- The postman's known rounds and letters connect Lowmere to Crow Creek Hollow without changing the existing visit scheduler.
+- The postman's known rounds and letters connect Wicker Cove to Crow Creek Hollow without changing the existing visit scheduler.
 - The vicar's chapel charity and old town vote cast a long shadow; one resident may hold a different perspective on it without contradicting literal facts.
 - Maren and Davy have credible reasons to know the community; their main already-built trek gates are authoritative.
 - Distinguish villagers' individual relationships with Agnes from rumor; avoid unanimous collective amnesia or four simultaneous 'secret villains'.
@@ -48,7 +50,7 @@ Make Lowmere a failing but inhabited fogbound seaside fishing village whose peop
 **Small daily loop:** speak to merchant / see available supplies → accept a reachable order → return to farm or fulfill from home dispatch → modest coin and relevant existing skill XP, possible friendship advancement.
 **Longer personal loop:** improve one relationship → learn a real material need → complete one Carpentry contract → see permanent visual/functional change → unlock a higher-value service or guest request.
 **Inn loop:** help Edith repair one guest room → arrange existing furniture to meet a brief → receive guest feedback and revisit the persisted room. One-time XP for successful completion; no exploit through rearrangement.
-**Maritime loop (stretch):** earn Gideon's trust through a modest fish/supply contract → join short working boat voyage → help with catch/crew choice → return to the fishmonger → possible new fishing ground. Needs Lowmere harbor before implementation.
+**Maritime loop (stretch):** earn Gideon's trust through a modest fish/supply contract → join short working boat voyage → help with catch/crew choice → return to the fishmonger → possible new fishing ground. Needs Wicker Cove harbor before implementation.
 **Narrative loop:** subtle inconsistencies in ledgers, route memories, decades-old letters and votes may connect to existing Agnes / town-keeper lore, but keep hard revelations in current pages, walker scenes and StoryAct.
 
 ## Example small story arcs (not canon, no dates/mandatory branches)
@@ -77,24 +79,24 @@ Make Lowmere a failing but inhabited fogbound seaside fishing village whose peop
 | CCH-LOWMERE-RUMORS-001 | **P2/P3** | Idea | Original story-safe short town rumor/ledger discovery chain; no retcons |
 | CCH-LOWMERE-SCHEDULES-001 | **P3** | Idea | Seasonal weather/workday ambient schedules, only after functional town slice |
 
-**Priority nuance:** P1 lore/roster *design* prevents expensive retcons; the actual new town NPCs are P2 and depend on the first Lowmere district. No phase should add all four as fully featured NPCs before the first two are engaging.
+**Priority nuance:** P1 lore/roster *design* prevents expensive retcons; the actual new town NPCs are P2 and depend on the first Wicker Cove district. No phase should add all four as fully featured NPCs before the first two are engaging.
 
 ## Decisions reserved for owner
 - Confirm/change the four suggested names, appearance and ages.
-- Choose Lowmere's main emotional tone: guarded but helpful, suspicious, or divided among generations. Recommendation: guarded but helpful, different residents have divergent opinions.
+- Choose Wicker Cove's main emotional tone: guarded but helpful, suspicious, or divided among generations. Recommendation: guarded but helpful, different residents have divergent opinions.
 - Decide whether Edith's inn or Thomas's store is the first fully working interior.
 - Decide whether any new resident ties to the old 31-to-4 town vote; if so, keep evidence in original stories.
 - Determine which resident first introduces the player to the harbor and future fishing voyages; recommendation Gideon after an ordinary job.
 
 ## Owner-set fog testimony direction (2026-11-14)
 
-**CANON:** Lowmere is permanently fogbound; local memories and records about *when* this began contradict each other, and the truth is unresolved. This is a trait of the community, not a reason for every NPC to have a supernatural secret.
+**CANON:** Wicker Cove is permanently fogbound; local memories and records about *when* this began contradict each other, and the truth is unresolved. This is a trait of the community, not a reason for every NPC to have a supernatural secret.
 
 **Tentative voice design, not canon individual histories:**
 - Edith (proposed innkeeper) has guest logbooks or old room views that might conflict with community claims; let her treat the records pragmatically.
 - Gideon (proposed boat operator) may recall visibility markers and navigable routes differently from other seasoned fishermen; he should remain a competent worker.
 - Martha (proposed fishmonger) can challenge Gideon's certainty using market history or other fishermen's accounts without either being confirmed correct.
 - Thomas (proposed shopkeeper) may find weather/shipping annotations that conflict with firsthand memories; preserve mundane possibilities.
-- Existing Maren, Davy, vicar and postman retain their established scenes and ending flags. Any added observations of Lowmere fog must be reconcilable with their currently written ages, history, travel schedules and records.
+- Existing Maren, Davy, vicar and postman retain their established scenes and ending flags. Any added observations of Wicker Cove fog must be reconcilable with their currently written ages, history, travel schedules and records.
 
 **CCH-LOWMERE-FOG-001 P1 Design:** testimony/conflict matrix required before writing these dialogues. **CCH-LOWMERE-FOG-002 P2 Idea:** micro-conversations and records after town slice works. Preserve ambiguity and ordinary human tone; don't imply a false or definitive backstory.
