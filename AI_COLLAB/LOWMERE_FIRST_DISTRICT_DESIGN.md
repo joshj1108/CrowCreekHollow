@@ -103,3 +103,7 @@ The descending mountain road enters the upper/landward edge; a muddy, modestly s
 - **Scope gate:** Lowmere base map and town service loop must exist before attempting a substantial free-placement designer; avoid making furniture editor a dependency for first playable town.
 
 **New candidate tasks:** CCH-LOWMERE-BUILD-001 (P2, town-owner building repair prototype) and CCH-INN-001 (P2, one-room guest design prototype). Both **Design**, no coding authorization. Owner reviews layout/edit controls, save behavior, rewards and actual game visuals before committing production art.
+
+## Fog history — owner-approved narrative canon (2026-11-14)
+
+**Always fogbound in play, history contested.** Residents' memories and historic records disagree on whether the Lowmere fog has always been present or emerged later. The actual history and reason are deliberately undecided; avoid dialogue, signage or level design that inadvertently confirms a date, supernatural cause, or direct link to Agnes's bell. Suggested optional discoveries are a debated childhood sea view, discrepant harbor weather records, and a once-used lookout. All examples remain noncanonical until owner review. See [LOWMERE_ECONOMY_HISTORY_DESIGN.md](LOWMERE_ECONOMY_HISTORY_DESIGN.md) for CCH-LOWMERE-FOG-001/002/003. Fog visually persists across town time/weather/season, while local density can vary for playability.
