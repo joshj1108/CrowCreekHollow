@@ -76,3 +76,7 @@ Choose deliberately, not opportunistically, and compare resources in 30/90/365-d
 - **CCH-ANVIL-001 — P2 gated candidate:** forge metal tools/gear at an anvil after furnace, phase by verified progression; use existing Smithing XP.
 - **CCH-CRAFT-QA-001 — P1 QA:** all tool station classification, legacy save, 30-90-365 day economy, first-hour controls, day4 escort, lantern, frost fuel, 17 chapters and endings.
 **No implementation authority yet.** Owner-set crafting destination rules are canon design requirements.
+
+## 2026-11-14 — Owner requirement: logs should come from forest woodcutting
+
+Owners report that current farm trees are difficult to locate. **Forest logging** (repeatable solo trips from farm to an intentional accessible cutting grove) should become the primary source of timber, with homestead grove trees retained as secondary/emergency sources. See [FOREST_LOGGING_EXPEDITIONS_DESIGN.md](FOREST_LOGGING_EXPEDITIONS_DESIGN.md). Integrated intended loop: **forest → harvest raw logs → carry home → hew planks at workbench → construction/Wicker Cove repair.** Early workbench and first hatchet must not depend on each other circularly. Shared CCH-WOOD-001 inventory migration, forest tree regrowth, XP/yields and farm/forest balance must be audited before code changes. **No implementation authorization.**
