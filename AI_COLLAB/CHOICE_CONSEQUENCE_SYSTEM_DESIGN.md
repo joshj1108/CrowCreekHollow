@@ -26,7 +26,7 @@
 - Never secretly punish roleplaying by making the allegedly favorable choice a trap. Let prior actions and consequences influence odds. UI should communicate meaningful risks and advantages in ordinary language (e.g., 'You have the proper tools', 'The tide is rising') even if numeric dice remain hidden.
 - Degrees of outcome: **strong success**, **ordinary success**, **partial success / complication**, **setback with a different available path**. Side content may be permanently missed through informed choices, but essential chapters, original endings and fundamental farm progression never become unreachable due to a single random low roll.
 - Different approaches (practical, empathetic, cautious, risky) must be viable. Early-player low skills should not make roleplay a series of failed checks.
-- No arbitrary critical-success supernatural truth. Even a perfect roll cannot definitively settle Lowmere's fog onset/cause, which is owner-set ambiguous.
+- No arbitrary critical-success supernatural truth. Even a perfect roll cannot definitively settle Wicker Cove's fog onset/cause, which is owner-set ambiguous.
 - **No rewards for spamming** decision prompts or repeating failed actions without new preparation/resources. An outcome is committed and saved *atomically*, with a saved decision ID/outcome/dice evidence so reloading cannot reroll indefinitely.
 - Persistent reproducibility: evaluate a one-time scene roll using save-stable seed or generated result persisted immediately; reopening the dialogue returns its resolved state. For debugging/tests, expose roll inputs and outputs in **developer-only logs**.
 
@@ -72,7 +72,7 @@ Current narrative uses established `maren_book`, `vicar_register`, Davy and post
 
 **CCH-CHOICE-001B — P1 Design:** create a resolution spec with difficulty bands, bounded modifiers from **existing** skills, meaningful odds, warnings, persistent roll results and debug/simulation hooks. Avoid releasing a general dice engine before one decision proves fun.
 
-**CCH-CHOICE-001C — P1 prototype candidate (not approved):** three connected decisions in **existing farm/walker content** (not dependent on Lowmere art): e.g., an optional resource allocation, a supportive vs practical answer, and a prepared vs risky exploration action. At least one deterministic tradeoff, one reasonable hidden roll, and one callback a few days later. Preserve existing story states and save migration. One small and testable vertical slice; existing features don't break.
+**CCH-CHOICE-001C — P1 prototype candidate (not approved):** three connected decisions in **existing farm/walker content** (not dependent on Wicker Cove art): e.g., an optional resource allocation, a supportive vs practical answer, and a prepared vs risky exploration action. At least one deterministic tradeoff, one reasonable hidden roll, and one callback a few days later. Preserve existing story states and save migration. One small and testable vertical slice; existing features don't break.
 
 **CCH-CHOICE-LOWMERE-001 — P2:** one early-town character dilemma with visible delayed callback, tied to inn or fish market. Reuse 001's same engine and order/relationship tools.
 
@@ -97,7 +97,7 @@ Current narrative uses established `maren_book`, `vicar_register`, Davy and post
 7. No new major map, UI redesign, skill tree, combat overhaul, or arbitrary supernatural exposition.
 
 ## Priority relationship to current roadmap
-This is a **foundational P1 design concern** that influences food/orders, Lowmere contracts, residents and maritime quests, but **does not replace urgent CCH-EVENING-002 evaluation, CCH-FOOD-001 or stability fixes**. Design it before adding many new town NPC quests so future content can use shared decisions, persistence and callbacks rather than being rewritten.
+This is a **foundational P1 design concern** that influences food/orders, Wicker Cove contracts, residents and maritime quests, but **does not replace urgent CCH-EVENING-002 evaluation, CCH-FOOD-001 or stability fixes**. Design it before adding many new town NPC quests so future content can use shared decisions, persistence and callbacks rather than being rewritten.
 
 **Owner direction is canon as a game-design pillar; numerical d20 formula, example dialogues and specific branches are candidate designs, not code authorization.**
 
