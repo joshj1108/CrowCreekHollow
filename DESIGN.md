@@ -1157,3 +1157,7 @@ Since FARM-001 (November 2026) the farm is the playable concept farm: the ART-00
 
 - Whether the house interior should become a separate scene.
 - Whether the tile map moves to a `TileMapLayer` with a real `TileSet` once art is in.
+
+## Owner-approved crafting station redesign (2026-11-14; design-only, not implemented)
+
+**Official target rules:** Players **hew raw logs into planks at a physical workbench**, and **all tools that are not forged at an anvil must be made at a workbench**. Anvil crafting covers metal tool forging and appropriate metal equipment. Preserve specialized existing hearth, chopping log, furnace and preservation stations. This supersedes generic Craft-panel tool manufacturing **as a future behavior**, not as a claim that current game code already follows it. Current resource key `wood` serves many functions; actual logs/planks split, recipes, bench location, anvil unlock, saves and first-hour no-softlock progression must be audited before implementation. The first Tin Lantern and Old Maren day-4 escort must remain attainable. Full specification: [AI_COLLAB/WORKBENCH_ANVIL_WOODWORKING_DESIGN.md](AI_COLLAB/WORKBENCH_ANVIL_WOODWORKING_DESIGN.md). Existing gameplay documentation above describes current mechanics until explicitly changed and tested.
