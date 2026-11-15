@@ -1,5 +1,5 @@
 
-**Creative north-star / start-to-finish experience:** [`AI_COLLAB/CREATIVE_BLUEPRINT_START_TO_FINISH.md`](CREATIVE_BLUEPRINT_START_TO_FINISH.md) — first hour, seasons, full Hollow story, Lowmere, post-ending life and version 1.0 scope; design-only, not implementation authorization.
+**Creative north-star / start-to-finish experience:** [`AI_COLLAB/CREATIVE_BLUEPRINT_START_TO_FINISH.md`](CREATIVE_BLUEPRINT_START_TO_FINISH.md) — first hour, seasons, full Hollow story, Wicker Cove, post-ending life and version 1.0 scope; design-only, not implementation authorization.
 
 # Collaborative Tasks
 
