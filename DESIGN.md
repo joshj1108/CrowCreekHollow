@@ -2,6 +2,8 @@
 
 A top-down farming game with heavy psychological horror, built in Godot 4.7.
 
+**Official town name (2026-11-14): Wicker Cove.** This is the struggling seaside fishing village downhill from Crow Creek Hollow, perpetually shrouded in fog. Its residents and records give contradictory accounts of when the fog began; the true cause and timeline remain deliberately unknown. Historic references to the former planning name in code or archives require a separate non-breaking runtime-text audit. Stable legacy `CCH-LOWMERE-*` task IDs and `LOWMERE_*` document filenames continue to identify this same town.
+
 ## Pillars
 
 - **Day is work, night is dread.** Each day is a farming shift. Night brings a horror encounter.
