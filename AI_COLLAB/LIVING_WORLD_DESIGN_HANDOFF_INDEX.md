@@ -79,3 +79,13 @@
 
 ## Completion accounting
 As of this date, the linked work is **writing, design and roadmap updates only**. The repo's live game code was not changed by this pass. Avoid reporting an idea as playable simply because a Markdown document describes it.
+
+## November 14, 2026 — Deep thematic and player-identity story design
+
+A further research-grounded narrative pass expands the project's *emotional structure*, without implementing anything:
+- [PLAYER_IDENTITY_AND_HOME_STORY_BIBLE.md](PLAYER_IDENTITY_AND_HOME_STORY_BIBLE.md): central idea **inheritance ≠ belonging**; distinct ownership/belonging/responsibility questions; five tensions of shelter, reliance, records, keeping, inherited duty; farmhouse as repeated setting; deed/tenant contrast; player identity emerges from *recorded behavior*, never a class/moral label; original 17 chapters and endings mapped to emotional reversals.
+- [HOUSE_MEMORY_AND_PLAYER_DIARY_ATLAS.md](HOUSE_MEMORY_AND_PLAYER_DIARY_ATLAS.md): seven remembered spaces (bedroom, kitchen, hearth, workshop, door/mailbox, stand/fields, forest edge), sample conditional prose, factual event ledger vs explicit player opinion, reliable diary page composition, alternate/no-town/old-save safety and one small vertical-slice proposal. No invented log→plank, inn repair or deed state.
+- [MEANINGFUL_CHOICES_AND_REVELATION_ARCHITECTURE.md](MEANINGFUL_CHOICES_AND_REVELATION_ARCHITECTURE.md): eight-step **existing canon** reveal ladder, six types of player decisions, eight fully sketched optional situations, narrative causality, Davy safeguarding and three original ending meanings without ranking lives.
+- [NARRATIVE_QUALITY_BENCHMARK_AND_RED_TEAM.md](NARRATIVE_QUALITY_BENCHMARK_AND_RED_TEAM.md): concrete anti-melodrama, anti-railroad, anti-punishment, pacing and continuity tests; 12-point scene grading; four contrasting playthrough matrix; recurring-object payoff and three release gates.
+
+New design IDs: `CCH-STORY-LIFE-001`, `CCH-HOUSE-MEMORY-001`, `CCH-STORY-CHOICES-001`, `CCH-STORY-QUALITY-001` P1 editorial design recorded. Source audits: `CCH-STORY-LIFE-002`, `CCH-HOUSE-MEMORY-002`, `CCH-STORY-CHOICES-AUDIT-001`, `CCH-STORY-QUALITY-002` P1 proposed. First real code slice is still one existing-farm choice/memory and separate forestry/workbench audits after **explicit approval**, not wholesale new lore. `CCH-LORE-NAME-001` postal Lowmere/Wicker Cove conflict remains pending owner resolution.
