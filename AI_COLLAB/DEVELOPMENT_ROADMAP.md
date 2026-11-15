@@ -162,3 +162,8 @@ Full details: [LOWMERE_ECONOMY_HISTORY_DESIGN.md](LOWMERE_ECONOMY_HISTORY_DESIGN
 ## 2026-11-14 — Coastal setting and voyage design candidates
 
 [LOWMERE_COASTAL_WORLD_DESIGN.md](LOWMERE_COASTAL_WORLD_DESIGN.md) (design-only) expands geography/mood from Lowmere harbor into a possible breakwater, tide pools, nearshore shoals and off-map coastal trade; none of these place names are canon. Preserve permanent fog and contradictory unconfirmed origins, main Hollow story, and optional nonpunitive voyages. Added **CCH-COAST-WORLD-001 P1 design prerequisite**, **CCH-COAST-SHORE-001 P2**, **CCH-COAST-VOYAGE-001 P2**, **CCH-COAST-GROUNDS-001 P2**, **CCH-COAST-RHYTHMS-001 P2/P3**, **CCH-COAST-CHARTS-001 P2/P3**, **CCH-COAST-ROUTES-001 P3**, **CCH-COAST-DEEPWATER-001 P3 stretch**. Cross-reference maritime/fishery/fog tasks; avoid overlapping tickets. No code authorization.
+
+
+## 2026-11-14 — Start-to-finish creative blueprint
+
+[CREATIVE_BLUEPRINT_START_TO_FINISH.md](CREATIVE_BLUEPRINT_START_TO_FINISH.md) is the current **creative north star** from first input through full-year play, original second-year story/endings and life afterward. It divides the game into intertwined Homestead / Community / Mystery paths and explicitly separates existing canon, owner-design direction and speculative expansion. Use this document before accepting newly proposed features; preserve the P0–P3 priority/status and approval process here. No blanket implementation permission.
