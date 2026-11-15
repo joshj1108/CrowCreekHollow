@@ -218,3 +218,7 @@ User reports scattered farm trees hard to locate. Approved design direction: an 
 ## 2026-11-14 — September / first-year culmination
 
 [**FIRST_SEPTEMBER_BRANCHING_DETAIL.md**](FIRST_SEPTEMBER_BRANCHING_DETAIL.md): source-checked Harvest Moon timing and reward, delayed meeting conditional on canonical evidence, multi-playstyle environment and optional factual personal diary. **`CCH-SEPTEMBER-BRANCH-001` P1 design documented, `-002` P1 actual journal/save/flag audit, `CCH-SEPTEMBER-DIARY-001` P2 gated memory-page candidate, `CCH-SEPTEMBER-CALLBACK-001` P2 gated next-year callback, `CCH-SEPTEMBER-BRANCH-QA-001` P1 eventual season/story/old-save QA**. Reuse existing `CCH-DIARY-LIFE-001B` mechanics, no new generic story generator. No gameplay implementation approved.
+
+## 2026-11-14 — Second autumn, existing endings and post-ending life
+
+[**YEAR_TWO_COST_OF_STAYING_DESIGN.md**](YEAR_TWO_COST_OF_STAYING_DESIGN.md) elaborates a second-autumn narrative layer **without changing original StoryAct**: Davy night Oct5/year2 if orchard beat, bell's second All Hallows Oct31, all three endings and their afterwords, post-ending free play. Everyday relationships and physical repaired state can make the existing story feel personally earned. `CCH-YEAR2-NARRATIVE-001` P1 Design documented; `-002` P1 actual scene/callback audit; `CCH-YEAR2-DAVY-001`, `CCH-YEAR2-CHOICE-001`, `CCH-YEAR2-AFTER-001` P2 gated candidates; `CCH-YEAR2-QA-001` P1 eventually test all endings/save and no-town play. Do not implement code or retcon existing story flags based on this note.
