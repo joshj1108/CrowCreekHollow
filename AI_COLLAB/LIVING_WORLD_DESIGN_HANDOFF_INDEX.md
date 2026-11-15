@@ -105,3 +105,7 @@ Read [**TWO_LIVES_INTERWOVEN_ORIGIN_ARCS.md**](TWO_LIVES_INTERWOVEN_ORIGIN_ARCS.
 ## 2026-11-14 — New first authored opening screenplay
 
 [**ROAD_TO_CROW_CREEK_HOLLOW_BRANCHING_SCREENPLAY_DRAFT.md**](ROAD_TO_CROW_CREEK_HOLLOW_BRANCHING_SCREENPLAY_DRAFT.md) is the principal **working dialogue/prose script** behind the mandatory, no-Skip `PLAYER_ARRIVAL_INTERACTIVE_PROLOGUE_DESIGN`. It contains a common opening, five distinct origin departures, realistic parting relationship or no-person scene, keepsake, road scenes, threshold and first-winter letters/decisions. Use as *proposed literature* only, pending scene/voice/legal and implementation review, and pair with `TWO_LIVES_INTERWOVEN_ORIGIN_ARCS.md` for full autumn-through-afterword development. Existing October1 and original endings protected.
+
+## 2026-11-14 — Companion spring screenplay
+
+[**ROAD_TO_CROW_CREEK_HOLLOW_SPRING_RETURN_SCREENPLAY.md**](ROAD_TO_CROW_CREEK_HOLLOW_SPRING_RETURN_SCREENPLAY.md) is the midyear counterpart to [**ROAD_TO_CROW_CREEK_HOLLOW_BRANCHING_SCREENPLAY_DRAFT.md**](ROAD_TO_CROW_CREEK_HOLLOW_BRANCHING_SCREENPLAY_DRAFT.md): five meaningful new personal-history decisions and consequences based on selected opening and winter events. Read both for the owner's **mandatory interlude and equal-weight former-life** rule. Both are source-safe editorial proposals, not shipped text or features.
