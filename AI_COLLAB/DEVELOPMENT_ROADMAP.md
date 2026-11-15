@@ -194,3 +194,7 @@ Detailed **design-only** specification: [BRANCHING_RESIDENT_ARCS_AND_PLAYER_DIAR
 ## 2026-11-14 — First autumn scenario design
 
 [**FIRST_AUTUMN_BRANCHING_DETAIL.md**](FIRST_AUTUMN_BRANCHING_DETAIL.md) specifies first autumn (Oct/Nov) choice beats, Maren day-4 trek and optional response, first harvest allocation, cautious exploration, All Hallows and First Frost callbacks, and truthful diary memories. This is *design only*. New optional decisions must never block original early story or become mandatory morality tests. Same branch prototype should be reused across CCH-AUTUMN-BRANCH-003 / YEAR1-BRANCH-003 / DIARY-LIFE-001B rather than creating three separate systems.
+
+## 2026-11-14 — December–February branching story
+
+[**FIRST_WINTER_BRANCHING_DETAIL.md**](FIRST_WINTER_BRANCHING_DETAIL.md) describes one optional supply dilemma with viable help, fair-exchange, self-provision and alternative-problem-solving paths; preserves original Longest Night, Winter Feast, Spring Thaw, hearth and trek rules. Backlog: `CCH-WINTER-BRANCH-001` P1 Design documented; `-002` P1 Design source/economy audit; `-003` P2 Idea first supply decision+callback; `-004` P2 Idea personal event reflection; `-005` P2 Idea February preparedness/spring consequences; `-QA-001` P1 eventual testing. Reuse core choice/diary systems, avoid side quest bloat. No coding authorized.
