@@ -249,3 +249,7 @@ origin = {
 - `CCH-TWO-LIVES-QA-001` — **P1 QA:** five origins, two different resolutions each, privacy/legacy, canon, full opening and long-play read.
 
 **Last editorial principle:** The old life should never become a footnote that says 'this is who you used to be'. The player can be more than one person at the same time.
+
+## 2026-11-14 — Full authored opening + winter screenplay available
+
+[**ROAD_TO_CROW_CREEK_HOLLOW_BRANCHING_SCREENPLAY_DRAFT.md**](ROAD_TO_CROW_CREEK_HOLLOW_BRANCHING_SCREENPLAY_DRAFT.md) develops the five origin pathways into staged **original second-person scenes**, dialogue, individual practical choice options, a shared goodbye/person-or-no-person scene, selected keepsake, two road transitions, the farm-gate arrival and five distinct **first-winter** follow-through scenes with real later response choices. **Mandatory for all new playthroughs, no Skip, but pause/resume/back/read-speed support.** This screenplay is **editorial draft, not approved final narrative or implemented content**; later spring/summer screenplay is separately required. Exact town legal listing text remains owner review, and the source day1, original seventeen chapters/three endings and old save compatibility remain intact.
