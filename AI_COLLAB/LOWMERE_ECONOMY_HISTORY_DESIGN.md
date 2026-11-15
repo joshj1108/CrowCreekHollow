@@ -1,5 +1,5 @@
 # CCH-LOWMERE-ECON-001 — Lowmere's Decline, Working Economy and Harbor Recovery
-**Draft:** 2026-11-14. **State:** Design proposal only; no gameplay, lore, asset or implementation approval.
+**Draft:** 2026-11-14. **State:** Economic backstory is a design proposal. **Owner-approved fog-memory contradictions are canon** (below); no code, art or dialogue implementation approved.
 
 ## Established canon to preserve
 - Lowmere is a dreary, failing seaside fishing village down the mountain road from Crow Creek Hollow, veiled in a permanent 24/7 fog bank.
@@ -88,9 +88,34 @@ The town has **localized improvements**, not an all-or-nothing village meter:
 6. `CCH-FISHERY-001` / `CCH-HARBOR-REPAIR-001` → `CCH-MARITIME-001`: one short optional NPC-led working trip. Expanded trade routes only if validated.
 
 ## Owner decisions reserved
-- Did Lowmere always have the fog, or did it begin within living memory? Either way it remains permanent during gameplay. Do not decide cause yet.
+- **Resolved owner decision:** Lowmere's fog history is contradictory and uncertain. Different residents and records disagree on whether it was always present or began within living memory. This disagreement is canon; which version is true and the cause remain explicitly unresolved.
 - Should bad catches be predominantly ordinary fishing-industry hardship, or explicitly correlate with unusual sea events?
 - How bleak does the village feel in the first season versus how much it visibly recovers?
 - Should first harbor repair or first inn repair be the first major town restoration contract?
 - What trade goods (besides existing farm products) warrant introducing new item IDs and asset costs?
 **No assets, maps, quests or game code authorized by this design.**
+
+## Owner-approved CANON — disputed history of the permanent fog (2026-11-14)
+
+The fog **always envelopes Lowmere during gameplay**. Its history is **contradictory and uncertain**: some residents sincerely insist it has always been there; others recall clear horizons or particular periods without fog. Accounts and documents may conflict with each other. The game is **not asserting** that any one witness is correct, lying, hallucinating, or supernaturally influenced. The start date, cause, and relationship to the Hollow, Agnes Rook and the old bell are **UNDECIDED**.
+
+**Narrative principles:**
+- Contradictions should be grounded in everyday details — harbor visibility, old maps, boat bearings, weather logs, childhood recollections — not constant overt paranormal revelations.
+- Stories may disagree *between* residents or *between* records, without declaring either record objectively falsified or proving that time was rewritten.
+- Tie discovery to optional conversations, trade invoices, inn guest logbooks, boats and navigational markers; allow some clues to unlock practical fishing/trade opportunities while still leaving the cause unclear.
+- Villagers have different emotional responses: skeptical, accepting, curious, guarded; avoid an entire town of people who inexplicably all share the same amnesia.
+- The fog remains an environmental landmark **24/7**; changing local density for navigation/readability is allowed, but never show the entire town clearing unless the owner separately approves a major narrative event.
+- Do not equate fog with the current weather generator's ordinary foggy day. The coastal fog bank persists independently of seasonal inland weather and ordinary Lowmere rain.
+- Main story chronology/17 chapters, Agnes/Elias (~30 years), E. Pell, mill meeting and established endings take precedence; do not add a definitive fog/bell connection via side dialogue.
+
+**Sample OPTIONAL conflicting evidence, not yet canon:**
+1. A fisherman remembers counting distant headland lights before the fog; a fishmonger of similar age swears the lights were never visible.
+2. Two independently kept weather or harbor ledgers record incompatible visibility for the same season.
+3. An abandoned lookout faces the harbor; its original purpose could be quite ordinary and is not proof the fog appeared later.
+4. A faded painting depicts a clear horizon; the artist might simply have imagined it.
+
+**Design task CCH-LOWMERE-FOG-001 (P1, Design):** create a story-canon conflict matrix: claims, source/witness, age/date, how player encounters it, what can be inferred, and which interpretations must remain open. No definitive answer in the design brief.
+**Design task CCH-LOWMERE-FOG-002 (P2, Idea):** prototype three optional, contradictory micro-discoveries (one villager exchange, one old record, one environmental hint) integrated into existing diary/FolkSystem, gated by the first accessible town district. Test for spoilers and coherence.
+**Design task CCH-LOWMERE-FOG-003 (P2, Idea):** design constant, layered coastal fog and sound/visibility gameplay at harbor and on future voyages without impairing navigation or accessibility.
+
+**State distinction:** fog permanence and uncertain/conflicting testimony = owner canon; all specific quotes, names, documents, artifacts and root explanations = proposals until approval. No implementation authority.
