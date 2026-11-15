@@ -179,3 +179,8 @@ Full design: [CHOICE_CONSEQUENCE_SYSTEM_DESIGN.md](CHOICE_CONSEQUENCE_SYSTEM_DES
 ## 2026-11-14 — Season-spanning choice arcs and player life identity
 
 [PLAYER_PATHS_AND_CONSEQUENCE_WEAVE.md](PLAYER_PATHS_AND_CONSEQUENCE_WEAVE.md) outlines meaningful player-authored paths without classes, moral alignment or random critical story gates. CCH-CHOICE-PATHS-001 P1 design completed as concept; CCH-CHOICE-PATHS-002 P1 design proposed (current first-week choice audit); CCH-CHOICE-PERSIST-001 P1 design/QA; CCH-CHOICE-WINTER-001 P2 (winter supply tradeoff), CCH-CHOICE-TOWN-001 P2 (what to repair first), CCH-CHOICE-FOG-001 P2 (testimony responses), CCH-CHOICE-LIFE-001 P2/P3 (diary reflections and season callbacks). **Design only; not approved game content.**
+
+
+## 2026-11-14 — Resident arcs and personalized life diary
+
+Detailed **design-only** specification: [BRANCHING_RESIDENT_ARCS_AND_PLAYER_DIARY.md](BRANCHING_RESIDENT_ARCS_AND_PLAYER_DIARY.md). Existing `FolkSystem` walker scenes and diary UI are reusable and must be preserved. **P1** CCH-CHARACTER-ARCS-001A (canon/choice audit), CCH-DIARY-LIFE-001A (diary/readability/save audit), CCH-DIARY-LIFE-001B (candidate first-page/choice/callback prototype, NOT approved). **P2** CCH-CHARACTER-ARCS-001B (Edith), -002 (Gideon), -003 (Thomas/Martha), CCH-DIARY-LIFE-002 (6–12 selected memories/one seasonal recap only if usable). **P3** CCH-DIARY-LIFE-003 (additional character/profile journal content). New character histories and branches remain concepts, not owner-approved canon. Explicitly forbid fabricated memories, supernatural fog answers, incompatible original story flags and a duplicate diary system.
