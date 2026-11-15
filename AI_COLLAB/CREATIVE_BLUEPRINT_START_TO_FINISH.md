@@ -274,3 +274,10 @@ Every proposed feature must answer:
 **Creative north-star scene:** Late autumn after many seasons. A restored, inhabited farmhouse has food for winter and a warm hearth; a letter from Lowmere thanks the player for a useful repair; a fisherman returns safely from sea. The farm and village have become worth protecting. The woods remain dark, the fog remains permanent, and some things remain unexplainable. The player feels they **belong**, not that they have conquered everything.
 
 **This document changes no code, story chapter, art or numeric gameplay balance.**
+
+
+## 2026-11-14 — Owner-approved foundational pillar: player-authored adventure
+
+**The experience should be choose-your-own-adventure across the entire world, with no universally right/wrong way to play.** Decisions should change outcomes over time across farming, trade, construction, personal relationships, exploration and story. Hidden tabletop/d20-inspired checks may resolve uncertain actions using **existing relevant skills, preparation, relationships and circumstances**, but never randomly determine the established story endings or soft-lock essential progression. Favor degrees of consequence, recovery paths and later callbacks over one-off flavor options. Protect a relaxed, careful player just as much as an adventurous risk-taker. All specific numbers and story branches require design approval before implementation.
+
+Detailed foundational design: [CHOICE_CONSEQUENCE_SYSTEM_DESIGN.md](CHOICE_CONSEQUENCE_SYSTEM_DESIGN.md). **P1 CCH-CHOICE-001A/B** (existing choice/branch audit, hidden-resolution spec), **P1 CCH-CHOICE-001C** (three-decision farm-side prototype only after approval), **P2 CCH-CHOICE-LOWMERE-001** (town dilemma), **P3 CCH-CHOICE-MARITIME-001** (optional future crew decisions), **P1 CCH-CHOICE-QA-001** (branch/save/ending verification). This is an ongoing design lens, not a new enforced moral meter or replacement for the 17-chapter story.
