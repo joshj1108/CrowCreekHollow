@@ -286,3 +286,7 @@ Detailed foundational design: [CHOICE_CONSEQUENCE_SYSTEM_DESIGN.md](CHOICE_CONSE
 ## 2026-11-14 — Personal stories that persist in the diary
 
 Player-created adventure is strengthened by **branching resident arcs** that preserve NPC agency and **a personal diary** of verified decisions and later consequences. The journal already has a full book/page-turn/handwriting engine; add compact, author-written memory pages from saved facts rather than rebuilding or generating ungrounded prose. Agnes Rook's pages and authoritative StoryAct lore remain immutable. See [BRANCHING_RESIDENT_ARCS_AND_PLAYER_DIARY.md](BRANCHING_RESIDENT_ARCS_AND_PLAYER_DIARY.md). P1 first gate: an existing farm choice with two distinct diary pages and a callback, before full Wicker Cove story lines. This is design-only.
+
+## 2026-11-14 — First-year choose-your-own-adventure plan and pitch
+
+Proposed back-cover synopsis and mapped October (first-night/neighbor), winter (provisions), spring (Wicker Cove approaches and fog accounts), summer (work/repairs/exploration), and September (truthful personal diary recap) are in [YEAR_ONE_BRANCHING_NARRATIVE_DESIGN.md](YEAR_ONE_BRANCHING_NARRATIVE_DESIGN.md). The story spine remains 17 chapters; the first-year optional web should eventually feed callbacks into year two without putting canonical mill/Davy/bell outcomes behind chance. Day 240 is late May in the actual calendar. No implementation authority.
