@@ -176,3 +176,13 @@ A source-grounded, design-only skill mastery plan is now recorded in [SKILL_MAST
 ## 2026-11-14 — Lowmere economic history and recovery design
 
 Design-only reference: [LOWMERE_ECONOMY_HISTORY_DESIGN.md](LOWMERE_ECONOMY_HISTORY_DESIGN.md). Local history of declining fish catches, damaged harbor, supply shortages, reduced inn traffic and failing coastal trade is **proposed**, not approved story canon. Permanent fog and downhill geography **are** owner canon; the fog's origin/timeline remains undecided. **CCH-LOWMERE-ECON-001 P1 design prerequisite** covers history, existing-story reconciliation, and price/supply audit before production. Supporting P2 tasks: CCH-LOWMERE-ECON-002 (decay/repair world states), CCH-FISHERY-001 (fishery supply chain), CCH-HARBOR-REPAIR-001 (one dock repair opening an NPC voyage), CCH-LOWMERE-TRADE-001 (farm/port trade), CCH-LOWMERE-HISTORY-001 (story-safe town history). CCH-LOWMERE-RECOVERY-001 P3 (ambient local recovery). None may be coded from the roadmap alone.
+
+## 2026-11-14 — Canon decision: contradictory Lowmere fog history
+
+**Owner decision:** The town stays shrouded by fog 24/7. Villagers and historical documents provide contradictory, uncertain accounts of whether the fog always existed or arrived within living memory. **The cause, timeline and any Hollow/bell connection remain unresolved**. See [LOWMERE_ECONOMY_HISTORY_DESIGN.md](LOWMERE_ECONOMY_HISTORY_DESIGN.md) and [LOWMERE_RESIDENTS_DESIGN.md](LOWMERE_RESIDENTS_DESIGN.md) for canon safeguards. This updates earlier 'timing undecided' wording: **no canonical timing is decided, but contradictions themselves are mandatory world lore**.
+
+- **CCH-LOWMERE-FOG-001 — P1, Design:** canon-safe evidence/testimony matrix, preserving existing 17 chapters and ending requirements. Prerequisite for new Lowmere lore.
+- **CCH-LOWMERE-FOG-002 — P2, Idea:** 3 optional micro-discoveries (NPC, document, environmental feature), to implement only after town NPC/diary systems are ready and the owner approves.
+- **CCH-LOWMERE-FOG-003 — P2, Idea:** persistent coastline fog presentation and readability on foot; extensible to optional future boat trips. The fog is distinct from regular weather and must not obliterate the balanced farm lighting.
+- In release-story review, **do not accidentally answer the fog mystery** or equate one person's recollection with objective lore. A satisfying rumor/discovery can offer a resource, dialogue or route without resolving the fog.
+**No game code changes or Claude task authorization issued.**
