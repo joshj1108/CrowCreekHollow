@@ -110,12 +110,12 @@ func _pick() -> String:
 		return "" if vid == "quiet" else "dread"
 	if m.trek.active:
 		return "trek"
-	if m.in_cave:
+	if m.in_cave and not m.town.active:
 		return "cave"
 	if m.ambience.hush_left > 0.0 or m.ambience._fear() >= SILENT_FEAR:
 		return ""
 	var night := m.current_hour >= m.DUSK_HOUR or m.current_hour < 5.0
-	if m.inside:
+	if m.inside or (m.town.active and m.town.indoors):
 		return "" if night else "hearth"
 	if night:
 		return "night"

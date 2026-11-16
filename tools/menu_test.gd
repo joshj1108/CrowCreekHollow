@@ -815,18 +815,33 @@ func _small_panel_cases() -> void:
 	m.mail._open_mailbox()
 	m._close_panel()
 	for panel_name in ["Desk", "Mailbox", "Furnace", "Smokehouse", "Coop", "Barn", "Cellar", "Cooler", "Woodstore", "Hearth", "Well", "Trade"]:
-		m._toggle_tab(panel_name)
-		await _frames(3)
-		var label: String = panel_name.to_lower()
-		_check("%s: opens with focus" % label, m.open_tab == panel_name and _focus_ok())
-		_check("%s: the clock stops" % label, await _clock_stopped())
-		if m.action_bar.ledger.visible:
-			await _ledger_checks(label)
-		else:
-			await _grid_checks(label)
-		await _pad(JOY_BUTTON_B)
-		_check("%s: B closes it" % label, m.open_tab == "" and not m.action_bar.panel.visible)
-		await _handed_back(label)
+		await _small_panel(panel_name)
+	# CCH-WICKER-COVE-ALPHA-001: the village's counters, opened in the village with coins and things to trade.
+	if m.get("town") != null:
+		m.town._arrive()
+		m.money = 200
+		m.inventory["crops"] = 10
+		m.inventory["fish"] = 2
+		await _frames(2)
+		for panel_name in TownSystem.TABS:
+			await _small_panel(panel_name)
+		m.town._go_home()
+		await _frames(2)
+
+
+func _small_panel(panel_name: String) -> void:
+	m._toggle_tab(panel_name)
+	await _frames(3)
+	var label: String = panel_name.to_lower()
+	_check("%s: opens with focus" % label, m.open_tab == panel_name and _focus_ok())
+	_check("%s: the clock stops" % label, await _clock_stopped())
+	if m.action_bar.ledger.visible:
+		await _ledger_checks(label)
+	else:
+		await _grid_checks(label)
+	await _pad(JOY_BUTTON_B)
+	_check("%s: B closes it" % label, m.open_tab == "" and not m.action_bar.panel.visible)
+	await _handed_back(label)
 
 
 # --- The mouse in a ledger --------------------------------------------------------

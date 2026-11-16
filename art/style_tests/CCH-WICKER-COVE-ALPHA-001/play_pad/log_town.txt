@@ -1,0 +1,62 @@
+[title] OBS: hardware pad buttons isolated: 21 action bindings pinned to the bot's device
+[title] SHOT: art/style_tests/CCH-WICKER-COVE-ALPHA-001/play_pad/01_title.png
+[title] OBS: title buttons: (Continue) | New Game | (Load Game) | Settings | Quit
+[title] OBS: title focus on open: New Game
+[title] SHOT: art/style_tests/CCH-WICKER-COVE-ALPHA-001/play_pad/02_title_slots.png
+[title] OBS: slot page buttons: Slot 1: empty | Slot 2: empty | Slot 3: empty | Back
+[title] SHOT: art/style_tests/CCH-WICKER-COVE-ALPHA-001/play_pad/03_title_name.png
+[title] OBS: name page buttons: Begin | Back
+[D1 06:00] MSG: A new season begins. Day 1. Rain. Walk with the left stick, and into the farmhouse door to go in.
+[D1 06:03] OBS: world started=true day=1 slot=1 coins=0 hp=10 food=99 water=99 warmth=99 sanity=100 tool=hoe inside=false tile=(59, 20) pack={"firewood":4,"seeds":5} mats={}
+[D1 06:03] OBS: joypads the engine reports connected: ["XInput Controller", "(Standard system devices) Legion-Controller 1-F6", "(Standard system devices) Legion-Controller 1-F6", "(Standard system devices) Legion-Controller 1-F6", "(Standard system devices) Legion-Controller 1-F6", "(Standard system devices) Legion-Controller 1-F6"]
+[D2 09:00] SETUP: day 2, 09:00, 8 turnips and 60 coins in the pack
+[D2 09:14] MSG: Your diary is in the desk drawer, in the farmhouse bedroom. Walk in at the front door with the left stick, face the desk and press A.
+[D2 09:36] MSG: The east gate. A to take the road down to Wicker Cove.
+[D2 09:36] CHECK: ok walked to the east gate
+[D2 09:37] SHOT: art/style_tests/CCH-WICKER-COVE-ALPHA-001/play_pad/04_gate.png
+[D2 09:37] MSG: The east gate, and the road down the hill to Wicker Cove: half an hour's walk each way. A again to go.
+[D2 09:37] CHECK: ok the gate asks first
+[D2 10:07] MSG: You smelled the sea before you saw the water. Wicker Cove: the store is on your right, the inn down the street, the harbour at the bottom. The road home is behind you.
+
+The east gate, and the road down the hill to Wicker Cove: half an hour's walk each way. A again to go.
+[D2 10:07] CARD: The road goes down through the firs, and the air turns to salt.
+[D2 10:08] CHECK: ok down the road to Wicker Cove
+[D2 10:08] SHOT: art/style_tests/CCH-WICKER-COVE-ALPHA-001/play_pad/05_arrive.png
+[D2 10:18] CHECK: ok reached Thomas's counter
+[D2 10:18] SHOT: art/style_tests/CCH-WICKER-COVE-ALPHA-001/play_pad/06_thomas_scene_0.png
+[D2 10:18] SHOT: art/style_tests/CCH-WICKER-COVE-ALPHA-001/play_pad/07_thomas_scene_1.png
+[D2 10:18] CHECK: ok Thomas's scene leads to his store
+[D2 10:18] CHECK: ok handed in the turnip order
+[D2 10:18] MSG: You smelled the sea before you saw the water. Wicker Cove: the store is on your right, the inn down the street, the harbour at the bottom. The road home is behind you.
+
+Bought 1 lamp oil for 9 coins.
+[D2 10:18] CHECK: ok bought lamp oil
+[D2 10:18] SHOT: art/style_tests/CCH-WICKER-COVE-ALPHA-001/play_pad/08_store.png
+[D2 10:26] MSG: "Six. Good ones, too." He weighs them anyway, out of habit, and counts the coins out twice. +70 coins.
+
+Bought 1 lamp oil for 9 coins.
+[D2 10:30] MSG: "Six. Good ones, too." He weighs them anyway, out of habit, and counts the coins out twice. +70 coins.
+[D2 10:35] CHECK: ok reached the fish market
+[D2 10:35] MSG: "Six. Good ones, too." He weighs them anyway, out of habit, and counts the coins out twice. +70 coins.
+
+Nobody at the stall. A slate reads: PRICES AS MARKED. COINS IN THE TIN. BACK WHEN THE TIDE TURNS.
+[D2 10:35] CHECK: ok the fish market opens
+[D2 10:35] SHOT: art/style_tests/CCH-WICKER-COVE-ALPHA-001/play_pad/09_market.png
+[D2 10:45] MSG: Nobody at the stall. A slate reads: PRICES AS MARKED. COINS IN THE TIN. BACK WHEN THE TIDE TURNS.
+[D2 10:55] MSG: Warm air, woodsmoke, and the smell of stock on the stove.
+[D2 10:57] CHECK: ok walked into the inn
+[D2 11:01] CHECK: ok reached Edith's counter
+[D2 11:01] SHOT: art/style_tests/CCH-WICKER-COVE-ALPHA-001/play_pad/10_edith_scene_0.png
+[D2 11:01] CHECK: ok Edith's scene leads to the inn's counter
+[D2 11:01] MSG: Bought 1 fish stew for 17 coins.
+[D2 11:01] CHECK: ok bought a pot of stew
+[D2 11:01] SHOT: art/style_tests/CCH-WICKER-COVE-ALPHA-001/play_pad/11_inn.png
+[D2 11:07] CHECK: ok out of the inn
+[D2 11:59] MSG: Back up the hill road, through the east gate, and home.
+[D2 11:59] CARD: Up the hill road, out of the fog, to the farm.
+[D2 12:00] CHECK: ok walked up the road
+[D2 12:00] CHECK: ok home inside the east gate
+[D2 12:00] CHECK: ok half an hour for the walk back
+[D2 12:00] SHOT: art/style_tests/CCH-WICKER-COVE-ALPHA-001/play_pad/12_home.png
+[D2 12:00] OBS: end coins=104 hp=10 food=92 water=90 warmth=97 sanity=100 tool=hoe inside=false tile=(71, 43) pack={"crops":2,"firewood":4,"fish_stew":1,"seeds":5} mats={"lamp_oil":1}
+[D2 12:00] END: problems=0 shots=12

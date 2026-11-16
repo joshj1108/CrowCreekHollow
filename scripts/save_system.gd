@@ -3,7 +3,7 @@ extends RefCounted
 
 # Bumped when a save's keys change shape. Saves from before the number was written count as 1.
 # _migrate lifts an older save one version at a time, so every old save still loads.
-const SAVE_VERSION := 16
+const SAVE_VERSION := 17
 # Keys a save must hold with the right type, or it isn't read: the loader would trip over anything else.
 const DICT_KEYS := ["inventory", "materials", "skill_xp", "stats", "equipment", "quests_done", "achievements_done",
 	"tool_tier", "trek_walked", "night_seen"]
@@ -102,6 +102,7 @@ func _save_game() -> void:
 		"sighting_seen": m.nights.sighting_seen,
 		"trek_works": m.trek.works.keys(),
 		"folk": m.folk._to_save(),
+		"town": m.town._to_save(),
 		"act": m.act._to_save(),
 		"estate": m.estate._to_save(),
 		"stand_glut": m.stall.glut,
@@ -261,6 +262,7 @@ func _load_game() -> bool:
 	m.trek.edge_done = bool(data.get("trek_edge_done", false))
 	m.nights.sighting_seen = bool(data.get("sighting_seen", false))
 	m.folk._from_save(data.get("folk", {}))
+	m.town._from_save(data.get("town", null))
 	m.act._from_save(data.get("act", {}))
 	m.trek.works.clear()
 	for id in data.get("trek_works", []):
@@ -580,6 +582,11 @@ static func _migrate(data: Dictionary) -> Dictionary:
 		# their Steam API names. Earned ones carry over where an old id has a match (OLD_IDS); the rest are
 		# dropped, and every new one re-checks from the saved stats on the next frame.
 		data["achievements_done"] = AchievementSystem.migrate_ids(data.get("achievements_done", {}))
+	if v < 17:
+		# Version 17 added Wicker Cove (`town`: visits, who you have met, the day's trade, the order). An older save
+		# has never been there: nobody has met you and the order on the board still stands.
+		if typeof(data.get("town", null)) != TYPE_DICTIONARY:
+			data["town"] = {}
 	# A save from a newer build keeps its number; keys this build doesn't know are ignored.
 	data["save_version"] = maxi(v, SAVE_VERSION)
 	return data

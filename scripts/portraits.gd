@@ -10,13 +10,13 @@ extends RefCounted
 const GRID := 48
 const EXPRESSIONS := ["neutral", "smile", "worry", "grim", "far"]
 const NAMES := {"mill": "Old Maren", "edge": "Old Maren", "orchard": "Davy Tull", "chapel": "The vicar",
-	"post": "The postman", "grove": "The woman in grey"}
+	"post": "The postman", "grove": "The woman in grey", "thomas": "Thomas Bellweather", "edith": "Edith Vale"}
 const INK := Color("1d1611")
 const WOOD := Color("4a3424")
 const WOOD_LIGHT := Color("6a4c34")
 const IRON := Color("8a8a90")
 const BACKS := {"mill": Color("3a3a44"), "orchard": Color("34402e"), "chapel": Color("2e2a34"),
-	"post": Color("2c3444"), "grove": Color("201e26")}
+	"post": Color("2c3444"), "grove": Color("201e26"), "thomas": Color("343a40"), "edith": Color("3a2e2a")}
 
 
 static func id_for(who: String) -> String:
@@ -49,6 +49,10 @@ static func draw(ci: CanvasItem, who: String, expr: String, rect: Rect2) -> void
 			_postman(p, expr)
 		"grove":
 			_woman(p, expr)
+		"thomas":
+			_thomas(p, expr)
+		"edith":
+			_edith(p, expr)
 		_:
 			_maren(p, expr)
 	for c in [Vector2(1, 1), Vector2(42, 1), Vector2(1, 42), Vector2(42, 42)]:
@@ -196,3 +200,43 @@ static func _woman(p: Callable, expr: String) -> void:
 			p.call(20, 21, 2, 2, eye)
 			p.call(26, 21, 2, 2, eye)
 	p.call(18, 31, 12, 1, Color("5a5a62"))
+
+
+# Thomas Bellweather (Wicker Cove's store, CCH-WICKER-COVE-ALPHA-001): greying short hair, round spectacles, a pencil
+# behind the ear, a dark waistcoat over rolled shirt sleeves, a canvas apron's bib.
+static func _thomas(p: Callable, expr: String) -> void:
+	_body(p, 8, 32, 32, Color("d8d0bc"))
+	p.call(12, 33, 24, 12, Color("2e2a2a"))
+	p.call(19, 35, 10, 10, Color("a89a78"))
+	p.call(21, 29, 6, 4, INK)
+	p.call(22, 29, 4, 4, Color("c8a888"))
+	_face(p, 24, 13, 14, 16, Color("d8b898"), expr)
+	p.call(16, 9, 16, 6, INK)
+	p.call(17, 10, 14, 4, Color("8a8478"))
+	p.call(16, 13, 2, 5, Color("8a8478"))
+	p.call(30, 13, 2, 5, Color("8a8478"))
+	# spectacles
+	p.call(18, 18, 5, 1, INK)
+	p.call(25, 18, 5, 1, INK)
+	p.call(23, 18, 2, 1, INK)
+	# the pencil behind his ear
+	p.call(31, 12, 1, 7, Color("c8a040"))
+
+
+# Edith Vale (Wicker Cove's inn): auburn hair streaked grey, pinned up, a dark green dress, a cream apron, a cloth
+# over one shoulder.
+static func _edith(p: Callable, expr: String) -> void:
+	_body(p, 8, 32, 33, Color("3a5040"))
+	p.call(18, 36, 12, 9, Color("e0d6bc"))
+	p.call(30, 33, 6, 6, Color("c8bca0"))
+	p.call(21, 29, 6, 4, INK)
+	p.call(22, 29, 4, 4, Color("d8b498"))
+	_face(p, 24, 14, 14, 15, Color("e2c2a4"), expr)
+	p.call(15, 9, 18, 7, INK)
+	p.call(16, 10, 16, 5, Color("8a4a30"))
+	p.call(15, 14, 2, 8, Color("8a4a30"))
+	p.call(31, 14, 2, 8, Color("8a4a30"))
+	p.call(20, 6, 8, 5, INK)
+	p.call(21, 7, 6, 4, Color("8a4a30"))
+	p.call(18, 11, 4, 1, Color("a8a098"))
+	p.call(26, 7, 2, 2, Color("a8a098"))

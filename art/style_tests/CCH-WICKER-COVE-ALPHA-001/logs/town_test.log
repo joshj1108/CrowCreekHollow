@@ -1,0 +1,168 @@
+Godot Engine v4.7.2.stable.steam.ed1daf0bf - https://godotengine.org
+
+ok    gate: the walker is asked before the gate (MainGame._interact order)
+ok    gate: facing it from the road picks the gate tile
+ok    gate: the gate still blocks on the farm
+ok    gate: day 1 keeps you home
+ok    gate: first press only asks
+ok    travel: second press goes down
+ok    travel: arrive at the top of the road
+ok    travel: half an hour passes
+ok    travel: needs go down, nothing is refilled
+ok    travel: coins and pack untouched
+ok    travel: first arrival recorded
+ok    map: arrival tile is open road
+ok    map: the store counter is solid
+ok    map: the sea is solid
+ok    map: the pier is walkable to its end
+ok    map: the road runs from the arrival to the quay
+ok    map: the inn's lane reaches its door
+ok    map: the fish counter is reached from the quay
+ok    map: every building rectangle is solid
+ok    camera: limits are the village
+ok    layers: the village's front layer, fog and lights are on
+ok    inn: the door takes you in
+ok    inn: inside, the room's floor is open
+ok    inn: Edith's counter opens the inn
+ok    inn: the mat takes you out to the lane
+ok    store: Thomas's counter opens the store
+ok    store: rows build
+ok    buy: two flasks of oil
+ok    buy: only the day's stock is sold
+ok    buy: sold out until tomorrow
+ok    buy: refused without the coins
+ok    buy: coins limit how many
+ok    panel: an action string with an amount
+ok    buy: unknown item or shop does nothing
+ok    buy: no room in the pack, nothing bought
+ok    sell: the store takes 12 a day
+ok    sell: then no more today
+ok    sell: the store won't buy fish
+ok    sell: the fish market buys fish
+ok    sell: nothing held, nothing paid
+ok    hooks: first trade recorded
+ok    order: five turnips aren't six
+ok    order: six are handed in, all at once
+ok    order: only once
+ok    order: the board shows it done
+ok    home: the road at the top takes you home
+ok    home: half an hour back up
+ok    home: the farm's bounds again
+ok    home: back inside the east gate, on open road
+ok    travel: three round trips land in the same places
+ok    gate: shut after dark
+Unicode parsing error, some characters were replaced with � (U+FFFD): Invalid UTF-8 leading byte (fc)
+Unicode parsing error, some characters were replaced with � (U+FFFD): Invalid UTF-8 leading byte (81)
+Unicode parsing error: Byte 74 is not a correct continuation byte after d3
+Unicode parsing error, some characters were replaced with � (U+FFFD): Invalid UTF-8 leading byte (9a)
+Unicode parsing error, some characters were replaced with � (U+FFFD): Invalid UTF-8 leading byte (88)
+Unicode parsing error, some characters were replaced with � (U+FFFD): Invalid UTF-8 leading byte (9c)
+Unicode parsing error: Byte d1 is not a correct continuation byte after f4
+Unicode parsing error, some characters were replaced with � (U+FFFD): Invalid UTF-8 leading byte (89)
+Unicode parsing error, some characters were replaced with � (U+FFFD): Invalid UTF-8 leading byte (ad)
+Unicode parsing error, some characters were replaced with � (U+FFFD): Invalid UTF-8 leading byte (a5)
+Unicode parsing error, some characters were replaced with � (U+FFFD): Invalid UTF-8 leading byte (aa)
+Unicode parsing error: Byte a is not a correct continuation byte after dd
+Unicode parsing error: Byte d3 is not a correct continuation byte after d0
+Unicode parsing error: Byte 45 is not a correct continuation byte after d3
+Unicode parsing error, some characters were replaced with � (U+FFFD): Invalid UTF-8 leading byte (80)
+Unicode parsing error: Byte 37 is not a correct continuation byte after f2
+Unicode parsing error: Byte 71 is not a correct continuation byte after d3
+Unicode parsing error: Byte e8 is not a correct continuation byte after e9
+Unicode parsing error: Byte 24 is not a correct continuation byte after e8
+Unicode parsing error: Byte 4e is not a correct continuation byte after d2
+Unicode parsing error, some characters were replaced with � (U+FFFD): Invalid UTF-8 leading byte (bb)
+Unicode parsing error, some characters were replaced with � (U+FFFD): Invalid UTF-8 leading byte (f8)
+Unicode parsing error, some characters were replaced with � (U+FFFD): Invalid UTF-8 leading byte (88)
+Unicode parsing error: Byte d2 is not a correct continuation byte after e3
+Unicode parsing error, some characters were replaced with � (U+FFFD): Invalid UTF-8 leading byte (97)
+Unicode parsing error: Byte 2a is not a correct continuation byte after dc
+Unicode parsing error, some characters were replaced with � (U+FFFD): Invalid UTF-8 leading byte (ba)
+Unicode parsing error, some characters were replaced with � (U+FFFD): Invalid UTF-8 leading byte (90)
+Unicode parsing error: Byte e6 is not a correct continuation byte after dc
+Unicode parsing error: Byte 24 is not a correct continuation byte after e6 80
+Unicode parsing error, some characters were replaced with � (U+FFFD): Invalid UTF-8 leading byte (81)
+Unicode parsing error, some characters were replaced with � (U+FFFD): Invalid UTF-8 leading byte (9f)
+Unicode parsing error: Byte 5e is not a correct continuation byte after f2 90
+Unicode parsing error, some characters were replaced with � (U+FFFD): Invalid UTF-8 leading byte (a2)
+Unicode parsing error, some characters were replaced with � (U+FFFD): Invalid UTF-8 leading byte (fd)
+Unicode parsing error, some characters were replaced with � (U+FFFD): Invalid UTF-8 leading byte (a8)
+Unicode parsing error, some characters were replaced with � (U+FFFD): Invalid UTF-8 leading byte (82)
+Unicode parsing error: Byte d4 is not a correct continuation byte after e6
+Unicode parsing error: Byte 69 is not a correct continuation byte after d4
+Unicode parsing error, some characters were replaced with � (U+FFFD): Invalid UTF-8 leading byte (bf)
+Unicode parsing error, some characters were replaced with � (U+FFFD): Invalid UTF-8 leading byte (fc)
+Unicode parsing error, some characters were replaced with � (U+FFFD): Invalid UTF-8 leading byte (a9)
+Unicode parsing error: Byte d6 is not a correct continuation byte after ea
+Unicode parsing error: Byte d5 is not a correct continuation byte after d6
+Unicode parsing error: Byte c1 is not a correct continuation byte after d5
+Unicode parsing error: Byte 5d is not a correct continuation byte after c1
+Unicode parsing error, some characters were replaced with � (U+FFFD): Invalid UTF-8 leading byte (90)
+Unicode parsing error: Byte 51 is not a correct continuation byte after eb
+Unicode parsing error: Byte 2c is not a correct continuation byte after ec b1
+Unicode parsing error: Byte 2a is not a correct continuation byte after cc
+Unicode parsing error: Byte 1 is not a correct continuation byte after c2
+Unicode parsing error, some characters were replaced with � (U+FFFD): Invalid UTF-8 leading byte (8a)
+Unicode parsing error: Byte 29 is not a correct continuation byte after e9
+Unicode parsing error, some characters were replaced with � (U+FFFD): Invalid UTF-8 leading byte (88)
+Unicode parsing error: Byte b6 is not a correct continuation byte after ed
+Unicode parsing error, some characters were replaced with � (U+FFFD): Invalid UTF-8 leading byte (b6)
+Unicode parsing error, some characters were replaced with � (U+FFFD): Invalid UTF-8 leading byte (a6)
+Unicode parsing error, some characters were replaced with � (U+FFFD): Invalid UTF-8 leading byte (a1)
+Unicode parsing error, some characters were replaced with � (U+FFFD): Invalid UTF-8 leading byte (a4)
+Unicode parsing error, some characters were replaced with � (U+FFFD): Invalid UTF-8 leading byte (89)
+Unicode parsing error, some characters were replaced with � (U+FFFD): Invalid UTF-8 leading byte (b3)
+Unicode parsing error: Byte c3 is not a correct continuation byte after c3
+Unicode parsing error: Byte 2c is not a correct continuation byte after c3
+Unicode parsing error, some characters were replaced with � (U+FFFD): Invalid UTF-8 leading byte (99)
+Unicode parsing error: Byte 67 is not a correct continuation byte after f3
+Unicode parsing error: Byte dc is not a correct continuation byte after df
+Unicode parsing error, some characters were replaced with � (U+FFFD): Invalid UTF-8 leading byte (89)
+Unicode parsing error, some characters were replaced with � (U+FFFD): Invalid UTF-8 leading byte (94)
+Unicode parsing error, some characters were replaced with � (U+FFFD): Invalid UTF-8 leading byte (a4)
+Unicode parsing error: Byte 57 is not a correct continuation byte after ec
+Unicode parsing error, some characters were replaced with � (U+FFFD): Invalid UTF-8 leading byte (a9)
+Unicode parsing error: Byte f7 is not a correct continuation byte after e2 bb
+Unicode parsing error: Byte 7 is not a correct continuation byte after f7
+Unicode parsing error, some characters were replaced with � (U+FFFD): Invalid UTF-8 leading byte (ff)
+Unicode parsing error: Byte 57 is not a correct continuation byte after d5
+Unicode parsing error: Byte ea is not a correct continuation byte after ed
+Unicode parsing error: Byte 40 is not a correct continuation byte after ea
+Unicode parsing error: Byte 30 is not a correct continuation byte after cc
+Unicode parsing error, some characters were replaced with � (U+FFFD): Invalid UTF-8 leading byte (a7)
+Unicode parsing error: Byte 2b is not a correct continuation byte after ef
+Unicode parsing error, some characters were replaced with � (U+FFFD): Invalid UTF-8 leading byte (fe)
+Unicode parsing error, some characters were replaced with � (U+FFFD): Invalid UTF-8 leading byte (8d)
+Unicode parsing error, some characters were replaced with � (U+FFFD): Invalid UTF-8 leading byte (8a)
+Unicode parsing error, some characters were replaced with � (U+FFFD): Invalid UTF-8 leading byte (fb)
+Unicode parsing error: Byte dd is not a correct continuation byte after c0
+Unicode parsing error: Byte ef is not a correct continuation byte after dd
+Unicode parsing error: Byte 7e is not a correct continuation byte after ef
+Unicode parsing error, some characters were replaced with � (U+FFFD): Invalid UTF-8 leading byte (ba)
+Unicode parsing error, some characters were replaced with � (U+FFFD): Invalid UTF-8 leading byte (fd)
+Unicode parsing error: Byte c4 is not a correct continuation byte after c6
+Unicode parsing error: Byte 2f is not a correct continuation byte after c4
+Unicode parsing error: Byte 4f is not a correct continuation byte after da
+Unicode parsing error, some characters were replaced with � (U+FFFD): Invalid UTF-8 leading byte (96)
+Unicode parsing error, some characters were replaced with � (U+FFFD): Invalid UTF-8 leading byte (b1)
+Unicode parsing error, some characters were replaced with � (U+FFFD): Invalid UTF-8 leading byte (9a)
+Unicode parsing error: Byte 92 is not a correct continuation byte after f4
+Unicode parsing error, some characters were replaced with � (U+FFFD): Invalid UTF-8 leading byte (92)
+ERROR: Parse JSON failed. Error at line 0: Unexpected character
+   at: parse_string (core/io/json.cpp:629)
+   GDScript backtrace (most recent call first):
+       [0] _raw (res://tools/town_test.gd:255)
+       [1] _run (res://tools/town_test.gd:179)
+       [2] _process (res://tools/town_test.gd:31)
+SCRIPT ERROR: Invalid access to property or key 'player_pos' on a base object of type 'Dictionary'.
+   at: _run (res://tools/town_test.gd:180)
+   GDScript backtrace (most recent call first):
+       [0] _run (res://tools/town_test.gd:180)
+       [1] _process (res://tools/town_test.gd:31)
+PASS: 0 failure(s)
+ERROR: 24 RID allocations of type 'PN13RendererDummy14TextureStorage12DummyTextureE' were leaked at exit.
+WARNING: 53 ObjectDB instances were leaked at exit (run with `--verbose` for details).
+   at: cleanup (core/object/object.cpp:2536)
+ERROR: 26 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:822)
+exit 0

@@ -270,7 +270,7 @@ func _meeting_morning() -> String:
 
 func _davy_waiting() -> bool:
 	return davy_day == m.day and davy == "" and m.current_hour >= DAVY_FROM_HOUR and m.current_hour < DAVY_UNTIL \
-		and not m.trek.active and not _closed()
+		and not m.trek.active and not m.town.active and not _closed()
 
 
 # The Tull boy is gone from the lane until the grove (FolkSystem._can_visit, TrekSystem._route_open).
@@ -295,7 +295,7 @@ func _update() -> void:
 			_lose_davy()
 			m.folk.visitor = ""
 			m._show_message("Under the great tree the roots shift, once, like something settling. Davy has gone in.", true)
-	if pending != "" and not playing() and not m.trek.active and not m.folk._in_scene() and m.open_tab == "" and not m.transitioning:
+	if pending != "" and not playing() and not m.trek.active and not m.town.active and not m.folk._in_scene() and m.open_tab == "" and not m.transitioning:
 		_play_ending(pending)
 
 

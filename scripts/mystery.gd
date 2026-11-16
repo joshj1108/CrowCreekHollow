@@ -103,7 +103,7 @@ func _check(quiet := false) -> void:
 		"p5": int(m.stats["sold"]) >= 1,
 		"p6": m.house_stage >= 2,
 		"p7": _events.has("crows") or _events.has("sighting"),
-		"p8": m.in_cave and not m.trek.active,
+		"p8": m.in_cave and not m.trek.active and not m.town.active,
 		"p9": _events.has("hollow"),
 		"p10": m.house_stage >= 3,
 		"bell": m.projects._has_bell(),

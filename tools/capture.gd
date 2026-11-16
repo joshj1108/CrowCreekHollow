@@ -53,6 +53,12 @@ extends SceneTree
 #   signsay         with sign=, read it now: its text is shown as Space would show it
 #   hearth=ACT      in the house (inside itile=13,4): space (what Space at the hearth does now), feed, tend or sit
 #   morning=KIND    sleep through a knock and show the morning report: prep (hearth tended), plain, or grace
+#   town            CCH-WICKER-COVE-ALPHA-001: go down to Wicker Cove (at hour=, if given); tinn: in the inn's room;
+#                   ttile=X,Y stand on this village tile (the room's own coordinates with tinn); ttalk=thomas|edith
+#                   talk to them (the first-meeting scene; tmet skips it and opens their counter); ttab=NAME opens
+#                   a village tab (Store, Fish_market, The_inn, Notice_board); tsay=CODE shows what that thing says;
+#                   thome walks back up the road home (where you come back to); tzoom=F zooms the camera (overviews)
+#   gate            stand at the farm's east gate, facing it, and press the hand once (from day 2)
 #   visitor=ID      bring tonight's night visitor now: field, knock, quiet, crows, pond, watcher, footsteps
 #                   or hollow (use with hour=22 or later)
 #                   first is the scripted first night (a new game gets it anyway at 22:00); sighting is the
@@ -282,6 +288,37 @@ func _initialize() -> void:
 		main.evening.noticed_day = main.day   # the notice line is the sign= shot's own business, not the frame's
 	if opt.has("signread") and has_evening:
 		main.evening.sign_read_day = main.day
+	# CCH-WICKER-COVE-ALPHA-001: the village (guarded, so BEFORE shots still run on a build without it).
+	if opt.has("town") and main.get("town") != null:
+		main.town._arrive()
+		if opt.has("hour"):
+			main.clock = (float(opt["hour"]) - main.START_HOUR) / (main.DAY_END_HOUR - main.START_HOUR) * main.DAY_LENGTH
+			main.current_hour = float(opt["hour"])
+		if opt.has("tinn"):
+			main.town._enter_inn()
+		if opt.has("ttile"):
+			var tt: PackedStringArray = opt["ttile"].split(",")
+			var base: Vector2i = TownLayout.INT_ORIGIN if opt.has("tinn") else Vector2i.ZERO
+			main.player.position = main._tile_center(base.x + int(tt[0]), base.y + int(tt[1]))
+		if opt.has("ttalk"):
+			if opt.has("tmet"):
+				main.town.flags["met_" + str(opt["ttalk"])] = main.day
+			main.town._talk(str(opt["ttalk"]))
+		if opt.has("ttab"):
+			main.town._open(str(opt["ttab"]).replace("_", " "))
+		if opt.has("tzoom"):
+			main.camera.zoom = Vector2.ONE * float(opt["tzoom"])
+			main.town._bounds()
+		if opt.has("thome"):
+			main.town._go_home()
+		if opt.has("tsay"):
+			main._show_message(str(TownData.LOOK.get(str(opt["tsay"]), "")))
+	if opt.has("gate") and main.get("town") != null:
+		# Stand at the farm's east gate facing it and press the hand once (the confirm line shows).
+		main.day = maxi(main.day, 2)
+		main.player.position = main._tile_center(58 + main.BORDER_X, 34 + main.BORDER_Y)
+		main.player.facing = Vector2.RIGHT
+		main.town._try_gate(main._tile_in_front())
 	if opt.has("inside"):
 		main._enter_house()
 		if opt.has("itile"):

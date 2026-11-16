@@ -3894,5 +3894,158 @@
         "note": "wall shelf with four books and a ledger, colours from fc/books.png"
       }
     ]
+  },
+  "CCH-WICKER-COVE-ALPHA-001": {
+    "tool": "tools/wicker_art.py (picks, trims, binary alpha, halves the prop pieces, lifts the tilesets); tools/town_layout.py (the map)",
+    "sources": "art/style_tests/CCH-WICKER-COVE-ALPHA-001/raw/ (fetch.sh, contact.py, slice.py, style_board.png, sheet_*.png contact sheets, <key>/NN.png candidates, tiles_*.png and tiles_*.json)",
+    "note": "Wicker Cove alpha (2026-11-15): 10 PixelLab requests of the 12 the owner allowed, no retries, subscription generations only (USD 0; 2522 generations remaining before). Prompts asked for a straight-on front view for a top-down 3/4 RPG, not isometric. The prop sheets came out about twice the farm's scale and are halved by script; both tilesets came back with their terrains swapped (TownArt maps them accordingly) and darker than the farm's ground (lifted by script). Reused, not generated: farm firs, boulders, the concept lantern post, farmhouse-interior floor, wall, hearth, fire, tables, chairs, barrels, crocks, painting, shelf, window frame, the e3 bench.",
+    "generations": 117,
+    "requests": 10,
+    "jobs": [
+      {
+        "key": "store",
+        "tool": "create_image_pro",
+        "job_id": "edac2571-8d1a-49e1-85d1-cd2f0e9c7cd6",
+        "asset_id": "1ed4b05c-f4ba-587f-a943-08979dbfe354",
+        "size": [
+          128,
+          112
+        ],
+        "settings": "style image art/style_tests/CCH-WICKER-COVE-ALPHA-001/raw/style_board.png (farmhouse stage 2, farm stand, well, mailbox), all four style aspects",
+        "prompt": "general store, salt-stained clapboard, patched slate roof, shop window, half-door counter, blank signboard",
+        "cost_generations": 10,
+        "candidates": 4,
+        "raw": "art/style_tests/CCH-WICKER-COVE-ALPHA-001/raw/store/",
+        "note": "kept 01 -> art/farm/town/store.png"
+      },
+      {
+        "key": "inn",
+        "tool": "create_image_pro",
+        "job_id": "855e6349-fe2b-4ebc-bb1b-770873519a54",
+        "asset_id": "647eb580-035d-5a15-87f7-03c88e8e92e0",
+        "size": [
+          160,
+          128
+        ],
+        "settings": "style image art/style_tests/CCH-WICKER-COVE-ALPHA-001/raw/style_board.png (farmhouse stage 2, farm stand, well, mailbox), all four style aspects",
+        "prompt": "modest two-storey village inn, warm ground-floor windows, one boarded upstairs window, lantern by the door, hanging sign",
+        "cost_generations": 15,
+        "candidates": 4,
+        "raw": "art/style_tests/CCH-WICKER-COVE-ALPHA-001/raw/inn/",
+        "note": "kept 02 -> inn.png"
+      },
+      {
+        "key": "cottage",
+        "tool": "create_image_pro",
+        "job_id": "e95b055e-9fc9-4a15-8bc8-95aab9363023",
+        "asset_id": "6fb2c7b8-ab62-5134-93b3-a734e7eb834c",
+        "size": [
+          96,
+          96
+        ],
+        "settings": "style image art/style_tests/CCH-WICKER-COVE-ALPHA-001/raw/style_board.png (farmhouse stage 2, farm stand, well, mailbox), all four style aspects",
+        "prompt": "small fisherman's cottage, patched roof, lit or boarded window, mismatched repairs",
+        "cost_generations": 10,
+        "candidates": 4,
+        "raw": "art/style_tests/CCH-WICKER-COVE-ALPHA-001/raw/cottage/",
+        "note": "kept all four -> house_a (00), house_d (01), house_b (02), house_c (03)"
+      },
+      {
+        "key": "market",
+        "tool": "create_image_pro",
+        "job_id": "3d9a102a-626e-47ab-9cd0-608f3ce83f08",
+        "asset_id": "192151af-a827-5d69-a14a-58a6d457e68e",
+        "size": [
+          112,
+          80
+        ],
+        "settings": "style image art/style_tests/CCH-WICKER-COVE-ALPHA-001/raw/style_board.png (farmhouse stage 2, farm stand, well, mailbox), all four style aspects",
+        "prompt": "open-air fish market stall, faded striped awning, crates of fish on ice, hand scale, slate, coin tin",
+        "cost_generations": 10,
+        "candidates": 4,
+        "raw": "art/style_tests/CCH-WICKER-COVE-ALPHA-001/raw/market/",
+        "note": "kept 00 -> market.png"
+      },
+      {
+        "key": "boat",
+        "tool": "create_image_pro",
+        "job_id": "0ea6238a-f29b-4ced-a6bc-98f6a5060d9f",
+        "asset_id": "a51a3788-1cd7-5347-b098-0bd5e4c3b4ae",
+        "size": [
+          64,
+          64
+        ],
+        "settings": "style image art/style_tests/CCH-WICKER-COVE-ALPHA-001/raw/style_board.png (farmhouse stage 2, farm stand, well, mailbox), all four style aspects",
+        "prompt": "small weathered wooden rowboat seen from above, bow up",
+        "cost_generations": 10,
+        "candidates": 16,
+        "raw": "art/style_tests/CCH-WICKER-COVE-ALPHA-001/raw/boat/",
+        "note": "kept 04 -> boat_a.png, 06 -> boat_b.png"
+      },
+      {
+        "key": "props",
+        "tool": "create_image_pro",
+        "job_id": "d8885670-40c5-441e-9e19-92f548aeca18",
+        "asset_id": "72be7b40-23a1-5df6-9876-b54ca1b864f4",
+        "size": [
+          128,
+          128
+        ],
+        "settings": "style image art/style_tests/CCH-WICKER-COVE-ALPHA-001/raw/style_board.png (farmhouse stage 2, farm stand, well, mailbox), all four style aspects",
+        "prompt": "harbour props sheet: crates, barrels, rope coil, net on a drying rack, bollard, lobster pot, lamp post",
+        "cost_generations": 10,
+        "candidates": 4,
+        "raw": "art/style_tests/CCH-WICKER-COVE-ALPHA-001/raw/props/",
+        "note": "pieces halved: net_rack (02), bollard, lobster_pot, rope_coil (01), crate_pile (00); 03's lamp post unused (too tall)"
+      },
+      {
+        "key": "thomas",
+        "tool": "create_image_pro",
+        "job_id": "998477df-5b3a-4100-a2b0-3d34aa225b25",
+        "asset_id": "a44d9039-b45b-5a8e-9623-5150c8a9dc58",
+        "size": [
+          32,
+          32
+        ],
+        "settings": "style image art/style_tests/CCH-WICKER-COVE-ALPHA-001/raw/style_board.png (farmhouse stage 2, farm stand, well, mailbox), all four style aspects",
+        "prompt": "tiny full-body shopkeeper facing the viewer: greying hair, spectacles, pencil behind the ear, waistcoat, canvas apron",
+        "cost_generations": 10,
+        "candidates": 64,
+        "raw": "art/style_tests/CCH-WICKER-COVE-ALPHA-001/raw/thomas/",
+        "note": "kept 06 -> thomas.png"
+      },
+      {
+        "key": "edith",
+        "tool": "create_image_pro",
+        "job_id": "a86c164d-f453-46f6-8d3e-0f236356a1aa",
+        "asset_id": "ca3c249e-532b-558c-8918-62fda3b8f127",
+        "size": [
+          32,
+          32
+        ],
+        "settings": "style image art/style_tests/CCH-WICKER-COVE-ALPHA-001/raw/style_board.png (farmhouse stage 2, farm stand, well, mailbox), all four style aspects",
+        "prompt": "tiny full-body innkeeper woman facing the viewer: grey-streaked auburn hair pinned up, green wool dress, cream apron, cloth on shoulder",
+        "cost_generations": 10,
+        "candidates": 64,
+        "raw": "art/style_tests/CCH-WICKER-COVE-ALPHA-001/raw/edith/",
+        "note": "kept 00 -> edith.png"
+      },
+      {
+        "key": "tiles_street",
+        "tool": "create_topdown_tileset (standard, 16 px)",
+        "job_id": "db2a304e-1463-4f99-bff8-d100062d1143",
+        "prompt": "lower: dark muddy wet grass with puddles; upper: worn grey wet cobblestone street (came back swapped)",
+        "cost_generations": 1,
+        "note": "-> art/farm/town/tiles_street.png (lifted)"
+      },
+      {
+        "key": "tiles_sea",
+        "tool": "create_topdown_tileset (standard, 16 px, transition 0.25)",
+        "job_id": "80c8e3ca-35cd-4c83-b969-1b4e09c0cd16",
+        "prompt": "lower: dark grey-green cold sea water; upper: weathered grey stone harbour quay slabs; transition: wet stone quay wall face with weed (came back swapped)",
+        "cost_generations": 1,
+        "note": "-> art/farm/town/tiles_sea.png (lifted)"
+      }
+    ]
   }
 }

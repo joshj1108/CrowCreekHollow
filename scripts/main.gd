@@ -981,6 +981,7 @@ var evening: EveningSystem       # CCH-EVENING-001: the evening's signs, the ten
 var madness: MadnessSystem
 var happenings: DailyHappenings
 var trek: TrekSystem
+var town: TownSystem              # CCH-WICKER-COVE-ALPHA-001: Wicker Cove, down the hill road from the east gate
 var folk: FolkSystem
 var projects: FarmProjects
 var estate: EstateSystem
@@ -1033,6 +1034,7 @@ func _ready() -> void:
 	rewards = HomesteadRewards.new(self)
 	happenings = DailyHappenings.new(self)
 	trek = TrekSystem.new(self)
+	town = TownSystem.new(self)
 	folk = FolkSystem.new(self)
 	projects = FarmProjects.new(self)
 	estate = EstateSystem.new(self)
@@ -1178,6 +1180,7 @@ func _on_title_start(mode: String, slot: int) -> void:
 	happenings._build()
 	forage._build()
 	trek._build()
+	town._build()
 	folk._build()
 	act._build()
 	projects._build()
@@ -1248,7 +1251,7 @@ func _process(delta: float) -> void:
 			last_cam_tile = cam_tile
 			queue_redraw()
 	if weather != null:
-		weather.visible = not inside and not in_cave
+		weather.visible = not inside and (not in_cave or (town.active and not town.indoors))
 	# The farm's standing art lives on its own layers, which the cave's _draw doesn't cover, so hide them there.
 	for layer in [house_roof_layer, stall_layer, well_layer, big_tree_layer, tree_front_layer]:
 		if layer != null:
@@ -1330,6 +1333,7 @@ func _process(delta: float) -> void:
 	happenings._update()
 	forage._update()
 	trek._update(delta)
+	town._update(delta)
 	act._update()
 	if Engine.get_process_frames() % 30 == 0:
 		projects._check(true)
@@ -1346,7 +1350,7 @@ func _process(delta: float) -> void:
 		canvas_modulate.color = _sky_tint(lamp_dark).lerp(SANITY_TINT, gloom * 0.5)
 		grade_mat.set_shader_parameter("saturation", 0.62 * (1.0 - SANITY_DESAT * gloom))
 	if in_cave:
-		canvas_modulate.color = trek._tint(darkness) if trek.active else CAVE_TINT
+		canvas_modulate.color = trek._tint(darkness) if trek.active else (town._tint(lamp_dark) if town.active else CAVE_TINT)
 	if inside:
 		# FARMHOUSE-INTERIOR-001: the house's own air, cold and grey while derelict, warmer as it is restored.
 		# At night the room never goes quite black: a little moonlight through the windows (or the gaps in the
@@ -1356,7 +1360,7 @@ func _process(delta: float) -> void:
 		canvas_modulate.color = Color(maxf(base.r, least.r), maxf(base.g, least.g), maxf(base.b, least.b)) * InteriorArt.AMBIENT[house_stage]
 	weather.night_tint = canvas_modulate.color if LIGHTING_V2 else Color.WHITE
 	night_boost = lerpf(1.0, NIGHT_LIGHT_BOOST, smoothstep(0.35, 1.0, lamp_dark)) if farm_scenery != null and not in_cave and not inside else 1.0
-	_update_lantern(1.0 if in_cave else lamp_dark)
+	_update_lantern(1.0 if in_cave and not town.active else lamp_dark)
 	projects._update(lamp_dark)
 	_update_cave_mouth_light(smoothstep(DUSK_HOUR, DUSK_HOUR + 2.0, current_hour))
 	sanity_sys._update_sanity(darkness, delta * (DAY_END_HOUR - START_HOUR) / DAY_LENGTH)
@@ -1419,6 +1423,8 @@ func _draw() -> void:
 	if in_cave:
 		if trek.active:
 			trek._draw_map()
+		elif town.active:
+			town._draw_map()
 		else:
 			_draw_cave()
 		return
@@ -3047,6 +3053,11 @@ func _update_perf() -> void:
 
 
 func _update_minimap() -> void:
+	if town.active:
+		_place_minimap(Vector2(TownLayout.W, TownLayout.H) * Minimap.PX_PER_TILE)
+		var at: Vector2 = Vector2(TownLayout.INN_OUT) if town.indoors else player.position / PX
+		minimap.update_view(town.minimap_tiles(), TILE_COLORS, [], at, Vector2i(-1, -1))
+		return
 	if in_cave:
 		_place_minimap(Vector2(CAVE_W, CAVE_H) * Minimap.PX_PER_TILE)
 		minimap.update_view(cave, TILE_COLORS, [], Vector2(_player_tile()), Vector2i(-1, -1))
@@ -3506,6 +3517,10 @@ func _on_panel_action(action_id: String) -> void:
 	if PAGE_SOUNDS.has(action_id):
 		play_sfx_at(action_id, float(PAGE_SOUNDS[action_id]), 0.06)
 		return
+	if action_id.begins_with("town:"):
+		town._action(action_id.trim_prefix("town:"))
+		_refresh_panel()
+		return
 	if action_id.begins_with("decor:"):
 		projects._start_place(action_id.trim_prefix("decor:"))
 		return
@@ -3762,6 +3777,8 @@ func _refresh_panel() -> void:
 			rows = panels._achievement_rows()
 		"Trade":
 			rows = panels._trade_rows()
+		"Store", "Fish market", "The inn", "Notice board":
+			rows = town._rows(open_tab)
 		"Cellar":
 			rows = panels._cellar_rows()
 		"Cooler":
@@ -4173,6 +4190,9 @@ func _interact() -> void:
 	if in_cave:
 		if trek.active:
 			trek._interact(_tile_in_front())
+		elif town.active:
+			if not _tool_press:
+				town._interact(_tile_in_front())
 		else:
 			_interact_cave()
 		return
@@ -4195,6 +4215,8 @@ func _interact() -> void:
 	if not inside and folk._try_visit(tile):
 		return
 	if not inside and trek._try_walker(tile):
+		return
+	if not inside and not _tool_press and town._try_gate(tile):
 		return
 	if not inside and not in_cave and (projects._repair_fence(tile) or projects._try_use(tile)):
 		return
@@ -5279,6 +5301,7 @@ func _fallen() -> void:
 	play_sfx("sting")
 	sanity_sys._change_sanity(-10.0)
 	hp = max_hp()
+	town._abort()
 	in_cave = false
 	foes = []
 	fishing._stop_fishing("")
@@ -5480,6 +5503,9 @@ func _unstick() -> void:
 		player.position = _tile_center(INT_ORIGIN.x + INT_ENTRY.x, INT_ORIGIN.y + INT_ENTRY.y)
 		_set_bounds()
 		_show_message("You step back to the door.")
+		return
+	if town.active:
+		town._unstick()
 		return
 	if in_cave:
 		_show_message("Unstick works on the farm and in the house. Leave the cave first.")
@@ -6079,6 +6105,7 @@ func _dev_trek_day() -> void:
 	materials["lamp_oil"] = maxi(int(materials["lamp_oil"]), 2)
 	inventory["trail_ration"] = maxi(int(inventory["trail_ration"]), 2)
 	trek._abort()
+	town._abort()
 	if in_cave:
 		in_cave = false
 		foes = []
@@ -6104,6 +6131,7 @@ func _dev_trek(id: String) -> void:
 	materials["rope"] = maxi(int(materials["rope"]), 2)
 	inventory["trail_ration"] = maxi(int(inventory["trail_ration"]), 4)
 	trek._abort()
+	town._abort()
 	if in_cave:
 		in_cave = false
 		foes = []
@@ -6197,7 +6225,7 @@ func _update_lantern(darkness: float) -> void:
 		lantern_light.position = _light_snap(player.global_position + lamp_at) - player.global_position
 	else:
 		lantern_light.position = lamp_at
-	var energy := LANTERN_ENERGY * ((TREK_LANTERN_BOOST if trek.active else CAVE_LANTERN_BOOST) if in_cave else night_boost)
+	var energy := LANTERN_ENERGY * ((TREK_LANTERN_BOOST if trek.active else CAVE_LANTERN_BOOST) if in_cave and not town.active else night_boost)
 	if lantern_tier >= LANTERN_FLICKER_TIER:
 		var t := Time.get_ticks_msec() / 1000.0
 		if LIGHTING_V2:
@@ -6220,7 +6248,7 @@ func _update_lantern(darkness: float) -> void:
 
 # Daylight through the cave's exit: very faint, fading out with the dusk and gone at night.
 func _update_cave_mouth_light(darkness: float) -> void:
-	cave_mouth_light.enabled = in_cave and not trek.active and darkness < 0.95
+	cave_mouth_light.enabled = in_cave and not trek.active and not town.active and darkness < 0.95
 	cave_mouth_light.energy = CAVE_MOUTH_ENERGY * (1.0 - darkness)
 
 
@@ -6233,6 +6261,7 @@ func _update_cave_mouth_light(darkness: float) -> void:
 # Ends the day and saves. Both sleeping and collapsing come through here.
 func _end_day(base: String, leave_house: bool = true) -> void:
 	trek._abort()
+	town._abort()
 	if folk.dialogue != null:
 		folk.dialogue.close()
 	hp = max_hp()
@@ -6308,7 +6337,9 @@ func _check_doors() -> void:
 	var tile := _player_tile()
 	var kind := _kind_at(tile)
 	if in_cave:
-		if trek.active:
+		if town.active:
+			town._on_step()
+		elif trek.active:
 			trek._on_step(kind)
 		elif kind == Tile.CAVE_EXIT:
 			_leave_cave()
@@ -6341,6 +6372,9 @@ func _leave_house() -> void:
 
 
 func _set_bounds() -> void:
+	if town.active:
+		town._bounds()
+		return
 	if in_cave:
 		player.min_pos = _tile_center(1, 1)
 		player.max_pos = _tile_center(CAVE_W - 2, CAVE_H - 2)
@@ -6538,6 +6572,8 @@ func _in_interior(tile: Vector2i) -> bool:
 
 # The tile kind at a world tile: the interior if it's inside the house, else the farm.
 func _kind_at(tile: Vector2i) -> int:
+	if town.active:
+		return town._kind(tile)
 	if in_cave:
 		if tile.x < 0 or tile.y < 0 or tile.x >= CAVE_W or tile.y >= CAVE_H:
 			return Tile.WALL

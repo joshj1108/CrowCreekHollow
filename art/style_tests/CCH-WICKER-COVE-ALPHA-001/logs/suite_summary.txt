@@ -1,0 +1,17 @@
+mail_test exit=0 pass_lines=42 fail_lines=0 engine_errors=2 secs=4
+town_test exit=0 pass_lines=65 fail_lines=0 engine_errors=2 secs=4
+interior_test exit=0 pass_lines=136 fail_lines=0 engine_errors=2 secs=4
+save_test exit=0 pass_lines=66 fail_lines=0 engine_errors=2 secs=4
+menu_test exit=0 pass_lines=854 fail_lines=0 engine_errors=2 secs=37
+debug_menu_test exit=0 pass_lines=40 fail_lines=0 engine_errors=2 secs=6
+farmer_test exit=0 pass_lines=79 fail_lines=0 engine_errors=2 secs=6
+wheel_test exit=0 pass_lines=87 fail_lines=0 engine_errors=2 secs=11
+diary_test exit=0 pass_lines=63 fail_lines=0 engine_errors=2 secs=19
+layout_test exit=0 pass_lines=67 fail_lines=0 engine_errors=2 secs=46
+creature_test exit=0 pass_lines=74 fail_lines=0 engine_errors=2 secs=15
+aoh2_e2_check exit=0 pass_lines=62 fail_lines=0 engine_errors=2 secs=16
+aoh2_e3_check exit=0 pass_lines=208 fail_lines=0 engine_errors=2 secs=17
+aoh_cave_check exit=1 pass_lines=5 fail_lines=1 engine_errors=2 secs=16
+aoh2_e5_check exit=0 pass_lines=209 fail_lines=0 engine_errors=2 secs=17
+diary_fit exit=0 pass_lines=0 fail_lines=0 engine_errors=2 secs=10
+aoh_trek_check exit=1 pass_lines=6 fail_lines=1 engine_errors=2 secs=52
