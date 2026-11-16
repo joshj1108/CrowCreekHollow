@@ -3,6 +3,8 @@
 
 # Collaborative Tasks
 
+**Release board (CCH-RELEASE-001, 2026-11-15):** [`AI_COLLAB/PRODUCTION_BOARD.md`](PRODUCTION_BOARD.md) — release audit, P0–P7 roadmap, critical path, owner decisions and quality gates. **It is the one schedule;** this file keeps task history.
+
 **Master release pathway:** [`AI_COLLAB/MASTER_ROADMAP_TO_1_0.md`](MASTER_ROADMAP_TO_1_0.md) — ten phases, milestone gates, ranked queue, 1.0 scope, and QA/release gates. **Design plan only, not implementation authorization.**
 
 **Prioritized future gameplay backlog:** [`AI_COLLAB/DEVELOPMENT_ROADMAP.md`](DEVELOPMENT_ROADMAP.md) — P0–P3 priority, independent implementation statuses, 20 ranked tasks. Next design task: `CCH-FOOD-001` (food economy and cooking; design only). The roadmap is not blanket permission to implement.
@@ -30,6 +32,7 @@
 | CCH-EVENING-001 | The hours before dark: evening prototype (evening signs, tend the hearth, an evening by the fire) and the first-week grace for the first unanswered knock; `EDGE_WORD_CALMS` kept on | Claude Code | ChatGPT | **Prototype built 2026-11-13, review requested** (commit on the board). Report `AI_COLLAB/CCH_EVENING_001_REPORT.md`; review master `art/style_tests/CCH-EVENING-001/review/CCH-EVENING-001_master.png`. Prototype values are constants in `scripts/evening_system.gd`. Also fixed in passing: barred shutters now ease an unanswered knock (flagged) | Owner and ChatGPT accept or change the prototype before it is expanded |
 | CCH-WICKER-COVE-ALPHA-001 | First playable Wicker Cove: compact fogbound village from the east gate, store, fish market, inn interior, harbour, one order | Claude Code | ChatGPT | **Visually accepted 2026-11-15** as the first playable village baseline (provisional 82/100, `D-019`); not yet human play-tested. Low-priority visual backlog WC-VIS-01 to 03 below | Owner accepted the visuals; gameplay acceptance awaits human testing |
 | CCH-WICKER-COVE-002 | Dependency audit and smallest next gameplay batch for Wicker Cove and the first Living Memory use (`AI_COLLAB/CCH_WICKER_COVE_002_SCOPE.md`) | Claude Code | ChatGPT | proposed 2026-11-15; nothing implemented | Owner approves a scoped batch and its five open decisions |
+| CCH-RELEASE-001 | Release-readiness audit, P0–P7 roadmap, first production sprint (`AI_COLLAB/PRODUCTION_BOARD.md`) | Claude Code | ChatGPT | **Audit and board done 2026-11-15, review requested.** R-P0-01 regression runner fixed; owner decisions OD-1..OD-6 open | Owner accepts the board and answers OD-1..OD-6 |
 
 ## ART-003 — W-3 history (all non-production, prototype only)
 | Step | Commit | What it did | PixelLab | ChatGPT review |

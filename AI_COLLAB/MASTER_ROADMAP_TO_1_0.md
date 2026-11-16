@@ -106,6 +106,9 @@ Approval: owner explicitly approves a *specific brief*; this roadmap merely queu
 - **M8 Release candidate:** playtests, stability, performance, accessibility and exports pass.
 
 ## 5. Master task queue for next implementation/design cycle
+
+> **Superseded for scheduling (2026-11-15):** the live, ranked schedule is [`PRODUCTION_BOARD.md`](PRODUCTION_BOARD.md) (CCH-RELEASE-001). This table is kept as history.
+
 | Rank | Task ID | Priority | Current state | Next action / acceptance gate |
 | --- | --- | --- | --- | --- |
 | 1 | CCH-EVENING-002 | P1 | Approved / result not yet verified | Claude simulation and screenshot review; tune numbers |
