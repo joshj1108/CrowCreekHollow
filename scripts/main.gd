@@ -712,7 +712,11 @@ const PORCH_SPILL := 0.0        # the same for the porch lamp: kept on the steps
 # it starts the sunset's colour at 17:30 and holds it to 19:30 before the night tint takes over. All three are
 # colour or falloff only: darkness, sanity and the lamps' timing are unchanged.
 const LONG_DUSK := false
-const SUNSET_TINT := Color("e6a98a")
+const SUNSET_TINT := Color("f4bf96")   # peach-amber, bright enough not to dim the evening early
+# A multiply alone turns green grass olive, so the sunset also adds a warm glow to lit areas and gives back a
+# little saturation in the colour grade, both peaking with the sunset and gone by night.
+const SUNSET_GLOW := Color(1.0, 0.6, 0.28) * 0.09
+const SUNSET_SAT := 0.14
 const SUNSET_START := 17.5
 const SUNSET_PEAK := 19.5
 const SANITY_COLD := true
@@ -1346,10 +1350,19 @@ func _process(delta: float) -> void:
 	var lamp_dark := darkness
 	darkness = clampf(darkness + sanity_sys._low_sanity_boost(), 0.0, 1.0)
 	canvas_modulate.color = _sky_tint(darkness)
-	if LIGHTING_V2 and SANITY_COLD:
-		var gloom := sanity_sys._low_sanity_boost() / 0.25   # 0 at LOW_SANITY, 1 at none
-		canvas_modulate.color = _sky_tint(lamp_dark).lerp(SANITY_TINT, gloom * 0.5)
-		grade_mat.set_shader_parameter("saturation", 0.62 * (1.0 - SANITY_DESAT * gloom))
+	if LIGHTING_V2:
+		var sat := 0.62
+		var glow := Color.BLACK
+		if LONG_DUSK and not in_cave:
+			var sun := _sunset_glow()
+			sat += SUNSET_SAT * sun
+			glow = SUNSET_GLOW * sun
+		if SANITY_COLD:
+			var gloom := sanity_sys._low_sanity_boost() / 0.25   # 0 at LOW_SANITY, 1 at none
+			canvas_modulate.color = _sky_tint(lamp_dark).lerp(SANITY_TINT, gloom * 0.5)
+			sat *= 1.0 - SANITY_DESAT * gloom
+		grade_mat.set_shader_parameter("saturation", sat)
+		grade_mat.set_shader_parameter("glow", Vector3(glow.r, glow.g, glow.b))
 	if in_cave:
 		canvas_modulate.color = trek._tint(darkness) if trek.active else (town._tint(lamp_dark) if town.active else CAVE_TINT)
 	if inside:
@@ -2094,6 +2107,11 @@ func _glow(light: PointLight2D, scale: float) -> void:
 # A light's position on the art-pixel grid, with LIGHTING_V2.
 func _light_snap(at: Vector2) -> Vector2:
 	return at.snapped(Vector2(ART_PX, ART_PX)) if LIGHTING_V2 else at
+
+
+# How strong the sunset is, by the clock: rising from SUNSET_START to SUNSET_PEAK, then fading as night falls.
+func _sunset_glow() -> float:
+	return smoothstep(SUNSET_START, SUNSET_PEAK, current_hour) * (1.0 - smoothstep(SUNSET_PEAK, DUSK_HOUR + 2.0, current_hour))
 
 
 # The world's tint for this darkness: the weather's daylight, through dusk with LIGHTING_V2, to night.
