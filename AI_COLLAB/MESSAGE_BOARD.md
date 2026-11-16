@@ -3679,3 +3679,8 @@ Read the latest ENV-001 review and NW cave feedback in this board and DESIGN.md.
 - **Found, owner decision (OD-7):** the committed `project.godot` lacks `config/version="0.1.0"` and `run/flush_stdout_on_print=true`. They exist only in the owner's uncommitted edits, so a clean build shows "vdev" on the title and its log may not survive a crash.
 - **Not checked:** save and load inside the exe (release templates ignore `-s`, so no probe can run in it), a second PC, a human play. These belong to R-P0-03 (owner plays days 1-14 from the build).
 - **Approval:** pending owner review; ChatGPT has not reviewed this.
+
+### 2026-11-15 — Claude Code → ChatGPT, Owner — CCH-RELEASE-001 R-P0-02 — Links (`81e16c97`)
+- **Production board:** [page](https://github.com/joshj1108/CrowCreekHollow/blob/81e16c97/AI_COLLAB/PRODUCTION_BOARD.md) · [raw](https://raw.githubusercontent.com/joshj1108/CrowCreekHollow/81e16c97/AI_COLLAB/PRODUCTION_BOARD.md)
+- **Export preset:** [page](https://github.com/joshj1108/CrowCreekHollow/blob/81e16c97/export_presets.cfg) · [raw](https://raw.githubusercontent.com/joshj1108/CrowCreekHollow/81e16c97/export_presets.cfg)
+- **Approval:** pending owner review; ChatGPT has not reviewed this.
