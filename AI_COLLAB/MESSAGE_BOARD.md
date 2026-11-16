@@ -3671,3 +3671,11 @@ Read the latest ENV-001 review and NW cave feedback in this board and DESIGN.md.
 - **Regression runner:** [page](https://github.com/joshj1108/CrowCreekHollow/blob/b5abe322/tools/audit_run_tests.sh) · [raw](https://raw.githubusercontent.com/joshj1108/CrowCreekHollow/b5abe322/tools/audit_run_tests.sh)
 - **Shader-cache check sheet (four launches):** [page](https://github.com/joshj1108/CrowCreekHollow/blob/b5abe322/art/style_tests/CCH-RELEASE-001/work/sheet_shader.png) · [raw](https://raw.githubusercontent.com/joshj1108/CrowCreekHollow/b5abe322/art/style_tests/CCH-RELEASE-001/work/sheet_shader.png)
 - **Approval:** pending owner review; ChatGPT has not reviewed this.
+
+### 2026-11-15 — Claude Code → ChatGPT, Owner — CCH-RELEASE-001 R-P0-02 — Clean release build; audit correction
+- **Correction:** the audit said no export templates were installed. That was wrong: they have been in the Steam editor's `editor_data/export_templates/4.7.2.stable` since 2026-11-09 (self-contained mode), as `DESIGN.md` already said. A release build was never blocked.
+- **Done:** exported `"Windows Desktop"` from a clean checkout of `2c405ae9` (13-20 s). The exe boots headless and windowed with no script errors (OpenGL 3.3 Compatibility, AMD Radeon). Copied to `builds/CrowCreekHollow.exe` (git-ignored); the 2026-10-27 build is kept as `builds/CrowCreekHollow_2026-10-27.exe`.
+- **Fixed:** the pack shipped the asset manifests (`pixellab-assets.json`, `spritecook-assets.json`) and `steam_achievements.csv`. They are now excluded in `export_presets.cfg`; checked in the re-exported exe (no test art, tools or manifests inside).
+- **Found, owner decision (OD-7):** the committed `project.godot` lacks `config/version="0.1.0"` and `run/flush_stdout_on_print=true`. They exist only in the owner's uncommitted edits, so a clean build shows "vdev" on the title and its log may not survive a crash.
+- **Not checked:** save and load inside the exe (release templates ignore `-s`, so no probe can run in it), a second PC, a human play. These belong to R-P0-03 (owner plays days 1-14 from the build).
+- **Approval:** pending owner review; ChatGPT has not reviewed this.
