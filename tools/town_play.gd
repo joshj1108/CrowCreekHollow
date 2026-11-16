@@ -56,6 +56,7 @@ func _sc_town() -> void:
 	m.clock = (9.0 - m.START_HOUR) / (m.DAY_END_HOUR - m.START_HOUR) * m.DAY_LENGTH
 	if opt.has("weather"):   # weather=KIND pins the day's weather (it is random per new game), for comparisons
 		m.weather_kind = str(opt["weather"])
+		m._apply_weather()
 	m.inventory["crops"] = 8
 	m.money = 60
 	note("SETUP", "day 2, 09:00, 8 turnips and 60 coins in the pack")
@@ -148,6 +149,7 @@ func _sc_orders() -> void:
 	m.clock = (9.0 - m.START_HOUR) / (m.DAY_END_HOUR - m.START_HOUR) * m.DAY_LENGTH
 	if opt.has("weather"):   # weather=KIND pins the day's weather (it is random per new game), for comparisons
 		m.weather_kind = str(opt["weather"])
+		m._apply_weather()
 	m.inventory["crops"] = 14
 	m.inventory["fish"] = 3
 	m.money = 40
@@ -206,6 +208,9 @@ func _sc_orders() -> void:
 	await frames(15)
 	check("Thomas speaks of the delivery", m.town._line("thomas").find(str(m.town.history[-1]["label"])) >= 0)
 	await shot("thomas_after")
+	note("OBS", "render: weather=%s modulate=%s in_cave=%s inside=%s fog=%s fog_rect=%s/%s grade=%s view=%s cam=%s" % [m.weather_kind,
+		m.canvas_modulate.color, m.in_cave, m.inside, m.town.fog.visible, m.town.fog_rect.position, m.town.fog_rect.size,
+		str(m.get("grade_rect").visible) if m.get("grade_rect") != null else "-", get_root().get_visible_rect().size, m.camera.get_screen_center_position()])
 	close_all()
 	await frames(10)
 	check("walked up the road", await step_onto(Vector2i(19, 0), "the road home"))

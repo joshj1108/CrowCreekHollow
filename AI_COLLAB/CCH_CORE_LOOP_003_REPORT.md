@@ -187,12 +187,18 @@ ending. Nothing in story, night or ending code changed.
 
 ## 8. Known issues and deferred work
 
-- **The village washes out white on a naturally sunny day (pre-existing, found here, not fixed).** In played runs where
-  the day rolled sunny, the street was hidden under large pale squares. With fog pinned, with sunny pinned after a
-  rainy roll, and in a sunny `capture.gd` shot, the village renders normally, and the previous commit's scripts
-  behave the same (the orders flow isn't involved). Likely cause, not confirmed: the farm's pond sun glare
-  (`main.gd` `water_fx`, `sky = 1` when `weather_kind == "sunny"`) is drawn while in the village. It touches the
-  approved village lighting, so it's left for its own small fix. Evidence: `play_kbm/08_thomas_after.png`.
+- **Fixed after the first commit: the village washed out from a player's second launch.** Played runs on a reused
+  profile showed the street under a pale wash with lamp-sized light squares. It isn't weather: an overcast rerun on
+  the same profile did it too. A fresh profile, or the same profile with its `shader_cache` folder deleted, rendered
+  normally, and the second launch on that profile turned pale again (screen brightness 152 against 52-65 normal).
+  So Godot's GL Compatibility shader cache brings something back wrong on load; the village shows it in daylight
+  because its windows and lamps are lit all day. Neither filling in the fog shader's uniforms nor rewriting its
+  Bayer table helped (both tried and reverted). **Fix:** `rendering/shader_compiler/shader_cache/enabled=false` in
+  `project.godot` (only that line committed; the owner's other `project.godot` edits stay uncommitted). Shaders now
+  compile at each start; the played run took 22-32 s either way. Verified: two launches on the old warm keyboard
+  profile and one on the warm controller profile, all normal and PASS; `orders_test`, `town_test`, `save_test`,
+  `menu_test` pass again. Sheet: `review/sheet3_shader_cache.png`. Not checked: whether the farm's night lights
+  were affected on later launches (likely, as the same lights path), or whether a Godot update fixes the cache.
 - `aoh_trek_check` misses its 50 ms build threshold alone (55-67 ms) on this machine today; trek code untouched.
   Not investigated further.
 - Notices are all-at-once; no partial delivery. Taking notices from the farm (mailbox) was not built: the
@@ -213,6 +219,7 @@ ending. Nothing in story, night or ending code changed.
   `REPEAT_DONE_LINES`.
 - `scripts/town_system.gd` — the board, take/decline/hand in, rotation, Thomas's line, `history` memory hook,
   save/load with validation; the turnip order spends through `_spend_recipe_input`.
+- `project.godot` — the shader cache off (one line).
 - `scripts/town_art.gd` — the pinned paper shows while any notice is up (`notices_up`); drawing unchanged.
 - `DESIGN.md` — Cooking table; Wicker Cove › repeatable notices, saving, tests, deferred.
 - `tools/orders_test.gd` (new), `tools/food_audit.gd` (new), `tools/town_play.gd` (`scenario=orders`,

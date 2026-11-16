@@ -7,36 +7,23 @@ ok    save records its version
 ok    loads day 6
 ok    truncated: restored from backup
 ok    truncated: damaged file kept aside
-Unicode parsing error: Byte 13 is not a correct continuation byte after c6
-Unicode parsing error, some characters were replaced with � (U+FFFD): Invalid UTF-8 leading byte (a0)
-Unicode parsing error: Byte 4c is not a correct continuation byte after e7 a2
-Unicode parsing error: Byte fb is not a correct continuation byte after e7
-Unicode parsing error, some characters were replaced with � (U+FFFD): Invalid UTF-8 leading byte (fb)
-Unicode parsing error: Byte 3 is not a correct continuation byte after d3
-Unicode parsing error, some characters were replaced with � (U+FFFD): Invalid UTF-8 leading byte (97)
-Unicode parsing error, some characters were replaced with � (U+FFFD): Invalid UTF-8 leading byte (b2)
-Unicode parsing error, some characters were replaced with � (U+FFFD): Invalid UTF-8 leading byte (95)
-Unicode parsing error, some characters were replaced with � (U+FFFD): Invalid UTF-8 leading byte (87)
-Unicode parsing error: Byte 7e is not a correct continuation byte after e6
-Unicode parsing error, some characters were replaced with � (U+FFFD): Invalid UTF-8 leading byte (bf)
-Unicode parsing error: Byte 12 is not a correct continuation byte after d2
-Unicode parsing error, some characters were replaced with � (U+FFFD): Invalid UTF-8 leading byte (f9)
-Unicode parsing error, some characters were replaced with � (U+FFFD): Invalid UTF-8 leading byte (9a)
-Unicode parsing error, some characters were replaced with � (U+FFFD): Invalid UTF-8 leading byte (81)
-Unicode parsing error: Byte e is not a correct continuation byte after ec
-Unicode parsing error: Byte ed is not a correct continuation byte after de
-Unicode parsing error: Byte e8 is not a correct continuation byte after ed
-Unicode parsing error: Byte 16 is not a correct continuation byte after e8 93
-Unicode parsing error, some characters were replaced with � (U+FFFD): Invalid UTF-8 leading byte (9f)
-Unicode parsing error: Byte 1a is not a correct continuation byte after f0
-Unicode parsing error, some characters were replaced with � (U+FFFD): Invalid UTF-8 leading byte (ac)
-Unicode parsing error: Byte a is not a correct continuation byte after c3
-Unicode parsing error, some characters were replaced with � (U+FFFD): Invalid UTF-8 leading byte (b5)
-Unicode parsing error, some characters were replaced with � (U+FFFD): Invalid UTF-8 leading byte (86)
-Unicode parsing error: Byte ce is not a correct continuation byte after d7
-Unicode parsing error: Byte df is not a correct continuation byte after ce
+Unicode parsing error, some characters were replaced with � (U+FFFD): Invalid UTF-8 leading byte (ab)
 Unicode parsing error, some characters were replaced with � (U+FFFD): Invalid UTF-8 leading byte (b1)
-Unicode parsing error, some characters were replaced with � (U+FFFD): Invalid UTF-8 leading byte (94)
+Unicode parsing error, some characters were replaced with � (U+FFFD): Invalid UTF-8 leading byte (a1)
+Unicode parsing error, some characters were replaced with � (U+FFFD): Invalid UTF-8 leading byte (98)
+Unicode parsing error, some characters were replaced with � (U+FFFD): Invalid UTF-8 leading byte (b1)
+Unicode parsing error: Byte 6d is not a correct continuation byte after e5
+Unicode parsing error: Byte dd is not a correct continuation byte after dd
+Unicode parsing error: Byte ce is not a correct continuation byte after dd
+Unicode parsing error: Byte 2e is not a correct continuation byte after ce
+Unicode parsing error: Byte de is not a correct continuation byte after c3
+Unicode parsing error: Byte c9 is not a correct continuation byte after de
+Unicode parsing error: Byte 3d is not a correct continuation byte after c9
+Unicode parsing error: Byte f3 is not a correct continuation byte after cb
+Unicode parsing error: Byte ce is not a correct continuation byte after f3
+Unicode parsing error: Byte f1 is not a correct continuation byte after ce
+Unicode parsing error: Byte 73 is not a correct continuation byte after f1
+Unicode parsing error, some characters were replaced with � (U+FFFD): Missing f6 UTF-8 continuation byte
 ok    garbage bytes: restored from backup
 ok    empty file: restored from backup
 ok    JSON array: restored from backup
