@@ -109,7 +109,7 @@ Status uses section 2's codes plus **done**. Every task's evidence goes in `art/
 ### P0 — Stability and integration
 | ID | Task | Depends | Acceptance | Tests | Effort | Status |
 | --- | --- | --- | --- | --- | --- | --- |
-| R-P0-01 | Regression runner covers every suite and fails loudly | — | 20 suites, summary, exit 1 on any failure | the runner itself | S | **done** (this session) |
+| R-P0-01 | Regression runner covers every suite and fails loudly | — | 20 suites, summary, exit 1 on any failure | the runner itself | S | **done** `b5abe322` |
 | R-P0-02 | Reproducible release build | owner installs 4.7.2 templates | `--export-release` from a clean checkout; exe starts, saves, loads on this PC and one other | save_test, a bot run on the exe | S + owner | BB |
 | R-P0-03 | Human smoke playtest, days 1-14 (owner) | R-P0-02 | owner plays from a build; notes in `TESTERS.md` format | — | owner 3-4 h | PL |
 | R-P0-04 | Release-build audit: debug menu, F4, dev unlocks absent; logs on | R-P0-02 | checked in the exported exe | debug_menu_test | S | NV ([code] gated by `OS.is_debug_build`) |
@@ -216,4 +216,4 @@ A green suite is not a polished game: every gate above marked "human" needs a pe
 
 | Date | Task | What happened | Commit |
 | --- | --- | --- | --- |
-| 2026-11-15 | CCH-RELEASE-001 | Audit, this board; R-P0-01 done; shader workaround verified; trek timing measured | see `MESSAGE_BOARD.md` |
+| 2026-11-15 | CCH-RELEASE-001 | Audit, this board; R-P0-01 done (suite 19/20, trek timing the one failure); shader workaround verified; trek timing measured | `b5abe322` |

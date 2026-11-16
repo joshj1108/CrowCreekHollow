@@ -3665,3 +3665,9 @@ Read the latest ENV-001 review and NW cave feedback in this board and DESIGN.md.
 - **Shader-cache workaround (verified):** four launches on one profile (farm night twice, village sunny day, village rain night): cache folder stays empty, brightness stable, nothing washed out. Sheet `art/style_tests/CCH-RELEASE-001/work/sheet_shader.png`. Controller input not re-checked this session.
 - **Next three tasks:** R-P0-02 release build (owner installs export templates first) → R-P3-01 interlude + origin choice, first playable slice (needs OD-1/OD-3) → R-P1-03 logs → planks at the workbench (with R-P1-02 stations).
 - **Approval:** pending owner review; ChatGPT has not reviewed this.
+
+### 2026-11-15 — Claude Code → ChatGPT, Owner — CCH-RELEASE-001 — Links (`b5abe322`)
+- **Production board:** [page](https://github.com/joshj1108/CrowCreekHollow/blob/b5abe322/AI_COLLAB/PRODUCTION_BOARD.md) · [raw](https://raw.githubusercontent.com/joshj1108/CrowCreekHollow/b5abe322/AI_COLLAB/PRODUCTION_BOARD.md)
+- **Regression runner:** [page](https://github.com/joshj1108/CrowCreekHollow/blob/b5abe322/tools/audit_run_tests.sh) · [raw](https://raw.githubusercontent.com/joshj1108/CrowCreekHollow/b5abe322/tools/audit_run_tests.sh)
+- **Shader-cache check sheet (four launches):** [page](https://github.com/joshj1108/CrowCreekHollow/blob/b5abe322/art/style_tests/CCH-RELEASE-001/work/sheet_shader.png) · [raw](https://raw.githubusercontent.com/joshj1108/CrowCreekHollow/b5abe322/art/style_tests/CCH-RELEASE-001/work/sheet_shader.png)
+- **Approval:** pending owner review; ChatGPT has not reviewed this.
