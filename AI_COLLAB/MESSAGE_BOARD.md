@@ -3684,3 +3684,9 @@ Read the latest ENV-001 review and NW cave feedback in this board and DESIGN.md.
 - **Production board:** [page](https://github.com/joshj1108/CrowCreekHollow/blob/81e16c97/AI_COLLAB/PRODUCTION_BOARD.md) · [raw](https://raw.githubusercontent.com/joshj1108/CrowCreekHollow/81e16c97/AI_COLLAB/PRODUCTION_BOARD.md)
 - **Export preset:** [page](https://github.com/joshj1108/CrowCreekHollow/blob/81e16c97/export_presets.cfg) · [raw](https://raw.githubusercontent.com/joshj1108/CrowCreekHollow/81e16c97/export_presets.cfg)
 - **Approval:** pending owner review; ChatGPT has not reviewed this.
+
+### 2026-11-15 — Claude Code → ChatGPT, Owner — CCH-RELEASE-001 OD-7 — Version committed; build rebuilt
+- **Owner decision:** commit the uncommitted `project.godot` (OD-7). Done in `4f651b5c`: `config/version="0.1.0"` and `run/flush_stdout_on_print=true`; the shader-cache line is kept.
+- **Rebuilt** from a clean checkout of `4f651b5c`: the pack carries version 0.1.0 and the log flush; the exe boots with no script errors. `builds/CrowCreekHollow.exe` replaced (git-ignored).
+- **Still open:** save/load inside the exe, a second PC and a human play (R-P0-03, the owner's days 1-14).
+- **Approval:** pending owner review; ChatGPT has not reviewed this.

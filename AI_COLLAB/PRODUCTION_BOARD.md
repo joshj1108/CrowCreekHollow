@@ -67,7 +67,7 @@ implemented · **PL** planned, not implemented · **BB** broken or blocked.
 | Achievements / Steam | `achievement_system.gd`, `steam_achievements.gd` | PI | code | GodotSteam not in the project | Unlocks reach Steam in a Steam build |
 | Audio (SFX, ambience, music) | `music_system.gd`, `ambience_system.gd`, `tools/make_*.py` | PI | code | Generated in-house (licence clean); production quality is an owner call (`MUSIC_BRIEF.md`) | Owner accepts the mix and score |
 | Accessibility | `game_settings.gd` | PI | code | Has volumes, window, message speed, page turns. No remapping, text size, brightness | Remap, text size, brightness/gamma, flashing/shake toggle |
-| Release build / export | `export_presets.cfg` | NV | clean checkout of `2c405ae9` exports (13-20 s) and boots headless and windowed with no script errors (follow-up session). Templates are in the Steam editor's `editor_data/export_templates/4.7.2.stable` (self-contained mode), installed 2026-11-09 | The committed `project.godot` lacks `config/version` and `run/flush_stdout_on_print` (only in the owner's uncommitted edits), so a clean build shows "vdev" and its log may not survive a crash. The release exe ignores `-s`, so save/load inside the exe is unchecked | Clean-checkout build with the version label; save/load checked in the exe by a person |
+| Release build / export | `export_presets.cfg` | NV | clean checkout of `2c405ae9` exports (13-20 s) and boots headless and windowed with no script errors (follow-up session). Templates are in the Steam editor's `editor_data/export_templates/4.7.2.stable` (self-contained mode), installed 2026-11-09 | Version and log flush committed (OD-7, `4f651b5c`). The release exe ignores `-s`, so save/load inside the exe is unchecked | Clean-checkout build with the version label; save/load checked in the exe by a person |
 | Regression suite | `tools/audit_run_tests.sh` | VW | 20 suites, one command (this session) | Was missing 4 suites and never failed | Green before every commit |
 | Performance | `tools/perf_f.gd` | NV | auto | No target hardware documented | Documented min spec holds 60 fps |
 
@@ -98,7 +98,7 @@ implemented · **PL** planned, not implemented · **BB** broken or blocked.
 | OD-4 | Evening multipliers (CCH-EVENING-002 §G) | Survival balance |
 | OD-5 | Should cooked food restore more than its raw parts? | Whether cooking is worth doing |
 | OD-6 | Music: keep the generated score, commission, or license | Licensing and polish schedule |
-| OD-7 | Commit the version and log-flush lines from your uncommitted `project.godot` | Without them a clean build shows "vdev" and may lose its log on a crash |
+| OD-7 | ~~Commit the version and log-flush lines from the owner's `project.godot`~~ | **Decided 2026-11-15: committed** (`4f651b5c`); clean builds carry v0.1.0 |
 | (pending) | CCH-WICKER-COVE-002 batch and its five sub-decisions | Living Memory's first real use |
 
 ## 5. Roadmap P0–P7
@@ -111,7 +111,7 @@ Status uses section 2's codes plus **done**. Every task's evidence goes in `art/
 | ID | Task | Depends | Acceptance | Tests | Effort | Status |
 | --- | --- | --- | --- | --- | --- | --- |
 | R-P0-01 | Regression runner covers every suite and fails loudly | — | 20 suites, summary, exit 1 on any failure | the runner itself | S | **done** `b5abe322` |
-| R-P0-02 | Reproducible release build | — | `--export-release` from a clean checkout; exe starts, saves, loads on this PC and one other | save_test, a bot run on the exe | S + owner | **exported and boots**; dev manifests excluded; version label waits on OD-7; save/load in the exe and a second PC still to do |
+| R-P0-02 | Reproducible release build | — | `--export-release` from a clean checkout; exe starts, saves, loads on this PC and one other | save_test, a bot run on the exe | S + owner | **exported from clean `4f651b5c`, v0.1.0, boots**; save/load in the exe and a second PC still to do (R-P0-03) |
 | R-P0-03 | Human smoke playtest, days 1-14 (owner) | R-P0-02 | owner plays from a build; notes in `TESTERS.md` format | — | owner 3-4 h | PL |
 | R-P0-04 | Release-build audit: debug menu, F4, dev unlocks absent; logs on | R-P0-02 | checked in the exported exe | debug_menu_test | S | NV ([code] gated by `OS.is_debug_build`) |
 | R-P0-05 | Document target hardware and first perf baseline | R-P0-02 | min spec written; perf_f on it | perf_f | S | PL |
@@ -217,5 +217,6 @@ A green suite is not a polished game: every gate above marked "human" needs a pe
 
 | Date | Task | What happened | Commit |
 | --- | --- | --- | --- |
+| 2026-11-15 | OD-7 | Owner approved committing `project.godot`; rebuilt from a clean checkout with v0.1.0 | `4f651b5c` |
 | 2026-11-15 | CCH-RELEASE-001 R-P0-02 | Release build from a clean checkout exported and booted; dev manifests and Steam CSV excluded from the pack; templates were already installed (audit corrected) | see `MESSAGE_BOARD.md` |
 | 2026-11-15 | CCH-RELEASE-001 | Audit, this board; R-P0-01 done (suite 19/20, trek timing the one failure); shader workaround verified; trek timing measured | `b5abe322` |
