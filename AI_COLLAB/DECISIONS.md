@@ -56,3 +56,10 @@ Still unapproved: production integration, the live layout, saves, camera, scalin
   - The openings and footprint held within 1 px.
   - The roof stayed a rectangle grid with pale blotches, and the fascia board became shake butts, so **the stop rule was triggered**. Nothing was rescued.
   - See `AI_COLLAB/ART_005_P1_RESULTS.md`. Awaiting the owner's and ChatGPT's image review.
+
+## Wicker Cove owner decision — 2026-11-15
+- **D-019 — Wicker Cove alpha accepted as the first playable village baseline (visual acceptance):** after reviewing the full in-engine master sheet (`7602126a`) with ChatGPT, the owner accepts CCH-WICKER-COVE-ALPHA-001; provisional visual score **82/100**. The compact village, general store, fish market, inn interior, harbour, day/night fog, lighting and the farm connection are approved as the foundation for further development.
+  - **Scope of the acceptance:** visual. It is **not** a gameplay acceptance: no human has play-tested the village yet; its play is checked only by the automated and played-input tests in `CCH_WICKER_COVE_ALPHA_001_REPORT.md`.
+  - **Not to do:** regenerate the buildings, replace the art style, redesign the map, or run another broad polish cycle.
+  - **Low-priority visual backlog (not blockers):** WC-VIS-01 street cobbles darker and blockier than the farm ground (minor palette/edge adjustment, existing assets); WC-VIS-02 some night areas rather dark (keep the eerie mood, keep doors, paths and interactions legible); WC-VIS-03 the sign's lettering could better match the pixel art. Recorded in `TASKS.md`.
+  - **Next focus:** functional depth over visual polish: prepare the minimal Wicker Cove gameplay expansion and the Living Memory integration. Candidates: a small persistent inn repair project, the first memory-enabled village interaction, simple resident routines, a harbour fishing interaction using the existing fishing. **Not all together without a scoped task:** audit dependencies and recommend the smallest playable next batch (`CCH_WICKER_COVE_002_SCOPE.md`, proposal only). Preserve the original mystery, saves, the established UI and accepted art.

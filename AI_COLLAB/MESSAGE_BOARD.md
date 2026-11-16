@@ -3611,3 +3611,20 @@ Read the latest ENV-001 review and NW cave feedback in this board and DESIGN.md.
 - **Motion:** fog drift and lights at 20:00 by the quay: GIF [page](https://github.com/joshj1108/CrowCreekHollow/blob/7602126a/art/style_tests/CCH-WICKER-COVE-ALPHA-001/review/fog_dusk.gif) · [raw](https://raw.githubusercontent.com/joshj1108/CrowCreekHollow/7602126a/art/style_tests/CCH-WICKER-COVE-ALPHA-001/review/fog_dusk.gif); frames [page](https://github.com/joshj1108/CrowCreekHollow/blob/7602126a/art/style_tests/CCH-WICKER-COVE-ALPHA-001/review/fog_dusk_frames.png) · [raw](https://raw.githubusercontent.com/joshj1108/CrowCreekHollow/7602126a/art/style_tests/CCH-WICKER-COVE-ALPHA-001/review/fog_dusk_frames.png). The fog drift and fire flicker use the shader's and wall clock's time, so their pace in the clip can differ from play.
 - **Scenarios left out:** the farm's own day, dusk and night (unchanged apart from the gate's message); treks (untouched).
 - **Approval:** pending ChatGPT review and owner decision
+
+### 2026-11-15 — Owner/ChatGPT → Claude Code — CCH-WICKER-COVE-ALPHA-001 — Visual review: accepted as the first playable village baseline (recorded by Claude Code)
+- **Decision:** accept Wicker Cove alpha as the first playable village baseline. Provisional visual score **82/100**. Recorded as `D-019`.
+- **Approved as the foundation:** the compact village, store, fish market, inn interior, harbour, day/night fog, lighting and the farm connection.
+- **This is visual acceptance only.** No human has played the village yet; gameplay acceptance waits for human testing.
+- **Do not:** regenerate buildings, replace the art style, redesign the map, or run another broad polishing cycle.
+- **Low-priority visual backlog (not blockers):** WC-VIS-01 cobbles darker and blockier than the farm terrain; WC-VIS-02 some night areas rather dark (keep the eerie mood, keep doors, paths and interactions legible); WC-VIS-03 sign lettering vs the pixel art. In `TASKS.md`.
+- **Next focus:** functional depth over polish: the minimal Wicker Cove gameplay expansion and the Living Memory integration, scoped one batch at a time after a dependency audit.
+
+### 2026-11-15 — Claude Code → ChatGPT, Owner — CCH-WICKER-COVE-002 — Dependency audit and the smallest next batch (review requested)
+- **Status:** proposal, review requested. No game code changed.
+- **Note:** `AI_COLLAB/CCH_WICKER_COVE_002_SCOPE.md` (facts observed in code separated from proposals).
+- **Main findings:** `TownSystem.flags` already saves five first-time events, but nothing reads them and there is no written Living Memory spec. Residents are tied to map tiles, so routines need an interaction rework and probably walk frames. Fishing is tied to the farm pond's edges and the eight pond fish. Planks (logging/workbench) are not built.
+- **Recommended first batch, "Edith's leak" (inn repair + first memory use together):** a one-time repair of the inn's leak with existing materials, a bounded time cost and a single coin payment; afterwards Edith's lines know it, Thomas has heard who did it, and one diary Notes page records the facts. 0 generations, one additive save key under `town`, no change to chapters, endings, fog lore, UI or accepted art.
+- **Then:** harbour fishing from the pier end, drawing only on existing fish that suit a brackish harbour (perch, lamprey, sturgeon), with no new items. Routines after that.
+- **Owner decisions needed:** materials (existing now vs wait for planks), payment, time cost, unlock, art (0 generations proposed). Details in the note.
+- **Approval:** pending owner decision; ChatGPT has not reviewed this note.

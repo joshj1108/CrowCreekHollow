@@ -28,6 +28,8 @@
 | CCH-PLAYABLE-002 | Gameplay repairs from CCH-PLAYABLE-001 (P1 blockers, first-week onboarding, early trek, low-risk P2) | Claude Code | ChatGPT | **Repairs done 2026-11-13, review requested** (`2a4748f`). Report `AI_COLLAB/CCH_PLAYABLE_002_REPAIR_REPORT.md`; review master `art/style_tests/CCH-PLAYABLE-002/review/CCH-PLAYABLE-002_master.png`. 14 issues fixed; one flagged tuning change (PLAY-09 `EDGE_WORD_CALMS`); sanity balance unchanged, first-week finding for the owner | Owner approved (PROCEED); owner decides on the early sanity cost and the porch/storey retirement |
 | CCH-LOOP-001 | Daily activity and idle-time audit (no implementation) | Claude Code | ChatGPT | **Audit complete 2026-11-13, stopped for review.** `AI_COLLAB/CCH_LOOP_001_IDLE_TIME_AUDIT.md`, evidence `art/style_tests/CCH-LOOP-001/`. Opportunities in section H are unapproved | Owner and ChatGPT choose which activities (if any) to design |
 | CCH-EVENING-001 | The hours before dark: evening prototype (evening signs, tend the hearth, an evening by the fire) and the first-week grace for the first unanswered knock; `EDGE_WORD_CALMS` kept on | Claude Code | ChatGPT | **Prototype built 2026-11-13, review requested** (commit on the board). Report `AI_COLLAB/CCH_EVENING_001_REPORT.md`; review master `art/style_tests/CCH-EVENING-001/review/CCH-EVENING-001_master.png`. Prototype values are constants in `scripts/evening_system.gd`. Also fixed in passing: barred shutters now ease an unanswered knock (flagged) | Owner and ChatGPT accept or change the prototype before it is expanded |
+| CCH-WICKER-COVE-ALPHA-001 | First playable Wicker Cove: compact fogbound village from the east gate, store, fish market, inn interior, harbour, one order | Claude Code | ChatGPT | **Visually accepted 2026-11-15** as the first playable village baseline (provisional 82/100, `D-019`); not yet human play-tested. Low-priority visual backlog WC-VIS-01 to 03 below | Owner accepted the visuals; gameplay acceptance awaits human testing |
+| CCH-WICKER-COVE-002 | Dependency audit and smallest next gameplay batch for Wicker Cove and the first Living Memory use (`AI_COLLAB/CCH_WICKER_COVE_002_SCOPE.md`) | Claude Code | ChatGPT | proposed 2026-11-15; nothing implemented | Owner approves a scoped batch and its five open decisions |
 
 ## ART-003 — W-3 history (all non-production, prototype only)
 | Step | Commit | What it did | PixelLab | ChatGPT review |
@@ -71,7 +73,24 @@
 
 [**LIVING_WORLD_DESIGN_HANDOFF_INDEX.md**](LIVING_WORLD_DESIGN_HANDOFF_INDEX.md) is the consolidated directory for the extensive new character/interpersonal, first-year and second-year, Wicker Cove district, inn-room story, forest logging and workbench/anvil design. **Recommended next review:** [FIRST_30_DAYS_LIVING_WORLD_VERTICAL_SLICE.md](FIRST_30_DAYS_LIVING_WORLD_VERTICAL_SLICE.md) after live code/resource/UI audit. `CCH-LORE-NAME-001` postal Lowmere vs official Wicker Cove origin/geography continuity is documented in [WICKER_COVE_POSTAL_LORE_CONTINUITY_AUDIT.md](WICKER_COVE_POSTAL_LORE_CONTINUITY_AUDIT.md); do not global-rename runtime dialogue. These are planning entries only; none of the new P1/P2 candidates has owner approval to implement in Claude Code. Preserve historical tasks, existing artwork, story scenes and 3 endings.
 
+## CCH-WICKER-COVE-002 — Wicker Cove gameplay depth and the first Living Memory use (proposed 2026-11-15)
+**Status:** proposed, awaiting owner decision. **Owner:** Claude Code. **Reviewer:** ChatGPT. **Final acceptance:** project owner.
+
+The owner asked for a dependency audit of four candidates (inn repair project, first memory-enabled interaction, simple resident routines, harbour fishing) and the smallest playable next batch, prioritizing functional depth over visual polish. Audit and recommendation: [CCH_WICKER_COVE_002_SCOPE.md](CCH_WICKER_COVE_002_SCOPE.md). Recommended first batch: the inn's leak repaired with existing materials, remembered by Edith, by Thomas and in one factual diary note (0 generations, one additive save key). Harbour fishing next, routines after. Five owner decisions are listed in the note (materials, payment, time, unlock, art). Nothing is implemented; saves, the original mystery, the established UI and accepted art are preserved.
+
 ## CCH-WICKER-COVE-ALPHA-001 — First playable Wicker Cove (owner-authorized 2026-11-15)
-**Status:** built, review requested. **Owner:** Claude Code. **Reviewer:** ChatGPT. **Final acceptance:** project owner.
+**Status:** **visually accepted 2026-11-15 as the first playable village baseline** (owner, after reviewing the master sheet with ChatGPT; provisional visual score 82/100; `D-019`). **Not yet human play-tested:** the acceptance covers how it looks (village, store, fish market, inn interior, harbour, day/night fog, lighting, the farm connection); the gameplay has only been checked by the automated tests and played-input scripts in the report. **Owner:** Claude Code. **Reviewer:** ChatGPT. **Final acceptance:** project owner.
+
+Do not regenerate the buildings, replace the art style, redesign the map or run another broad polish pass.
+
+**Low-priority visual backlog (not blockers; do not hold other work for them):**
+
+| ID | Item | Constraint |
+| --- | --- | --- |
+| WC-VIS-01 | Street cobbles read darker and blockier than the farm ground: a minor palette or edge adjustment | existing assets only; no regeneration |
+| WC-VIS-02 | Some night areas are rather dark: keep the eerie mood but make doors, paths and interactions legible | no change to the fog's concept; never tuned to flatter a screenshot |
+| WC-VIS-03 | The village sign's lettering (UI font) could better match the pixel art | small; sign art or a pixel font only |
+
+**Next (proposal, not approved):** `CCH-WICKER-COVE-002`, the dependency audit and smallest next batch, in [CCH_WICKER_COVE_002_SCOPE.md](CCH_WICKER_COVE_002_SCOPE.md).
 
 One compact fogbound village reached from the farm's east gate (from day 2, half an hour each way): general store with Thomas Bellweather, fish market (honesty tin), the inn with Edith Vale (the one interior), one all-at-once turnip order, harbour and pier, four homes, persistent fog and warm lights. 10 PixelLab requests of 12. Report: [CCH_WICKER_COVE_ALPHA_001_REPORT.md](CCH_WICKER_COVE_ALPHA_001_REPORT.md); design: `DESIGN.md` › "Wicker Cove (alpha)"; review package: `art/style_tests/CCH-WICKER-COVE-ALPHA-001/review/`. Deferred: saltwater fishing, more orders, inn repairs and rooms, more residents, schedules. The postal Lowmere question (`CCH-LORE-NAME-001`) is untouched.
