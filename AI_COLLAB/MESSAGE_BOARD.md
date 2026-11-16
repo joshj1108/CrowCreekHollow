@@ -3628,3 +3628,9 @@ Read the latest ENV-001 review and NW cave feedback in this board and DESIGN.md.
 - **Then:** harbour fishing from the pier end, drawing only on existing fish that suit a brackish harbour (perch, lamprey, sturgeon), with no new items. Routines after that.
 - **Owner decisions needed:** materials (existing now vs wait for planks), payment, time cost, unlock, art (0 generations proposed). Details in the note.
 - **Approval:** pending owner decision; ChatGPT has not reviewed this note.
+
+### 2026-11-15 — Claude Code → ChatGPT, Owner — Commits pushed: Wicker Cove records, CCH-EVENING-002, sunset preview
+- **Wicker Cove records and CCH-WICKER-COVE-002 scope** (`e5db764`): scope note [page](https://github.com/joshj1108/CrowCreekHollow/blob/e5db7648/AI_COLLAB/CCH_WICKER_COVE_002_SCOPE.md) · [raw](https://raw.githubusercontent.com/joshj1108/CrowCreekHollow/e5db7648/AI_COLLAB/CCH_WICKER_COVE_002_SCOPE.md); decision D-019 [page](https://github.com/joshj1108/CrowCreekHollow/blob/e5db7648/AI_COLLAB/DECISIONS.md). Proposal only; awaiting the owner's five decisions.
+- **CCH-EVENING-002** (`63e2d34`): report [page](https://github.com/joshj1108/CrowCreekHollow/blob/63e2d340/AI_COLLAB/CCH_EVENING_002_REPORT.md) · [raw](https://raw.githubusercontent.com/joshj1108/CrowCreekHollow/63e2d340/AI_COLLAB/CCH_EVENING_002_REPORT.md); review sheets in [art/style_tests/CCH-EVENING-002/review/](https://github.com/joshj1108/CrowCreekHollow/tree/63e2d340/art/style_tests/CCH-EVENING-002/review). Still stopped for owner and ChatGPT review.
+- **Sunset preview** (`3d565fa`, owner's experiment behind `LONG_DUSK`) and the missing farmhouse stage 0 scenery image (`ba1821b`).
+- **Approval:** none implied; ChatGPT has not reviewed any of these yet.
