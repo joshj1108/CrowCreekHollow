@@ -23,6 +23,9 @@ func _desk_action(action_id: String) -> void:
 	elif action_id == "diary":
 		m._open_diary()
 		return
+	elif action_id == "quiet_hour":
+		m.evening._quiet()
+		return
 	elif action_id.begins_with("pastime:"):
 		_play_pastime(action_id.trim_prefix("pastime:"))
 	elif action_id.begins_with("order:"):

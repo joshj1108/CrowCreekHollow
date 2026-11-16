@@ -1,6 +1,6 @@
 extends SceneTree
 
-# CCH-EVENING-001: focused checks of the evening prototype (EveningSystem) and the first-week grace. Each case starts
+# CCH-EVENING-001 and -002: focused checks of the evening prototype (EveningSystem) and the first-week grace. Each case starts
 # a new game in slot 9 (run it in a throwaway profile: APPDATA pointed at a scratch folder) and sets a state up
 # through the game's own functions. These are set-up states, not played ones.
 #   godot --path . --headless --fixed-fps 60 -s tools/evening_test.gd
@@ -87,6 +87,9 @@ func _run() -> void:
 	await _grace_cases()
 	await _save_cases()
 	await _trek_rule_cases()
+	await _shelter_cases()
+	await _quiet_cases()
+	await _onboarding_cases()
 	print("evening: %d failure(s)" % failures)
 	quit(1 if failures > 0 else 0)
 
@@ -334,7 +337,8 @@ func _hearth_cases() -> void:
 	var barred := await _night_loss("knock", false)
 	check("shutters: barred, an unanswered knock takes half (fixed in passing)", absf(barred / knock_plain - m.projects.SHUTTER_KNOCK) < 0.02, "%.1f vs %.1f" % [barred, knock_plain])
 	var both := await _night_loss("knock", true)
-	check("shutters and the tended hearth together", absf(both / knock_plain - m.projects.SHUTTER_KNOCK * ev.PREP_MULT) < 0.02, "%.1f" % both)
+	# CCH-EVENING-002: the two are in the shelter group, floored at SHELTER_FLOOR (0.5 x 0.75 = 0.375 -> 0.4).
+	check("shutters and the tended hearth together (floored)", absf(both / knock_plain - maxf(m.projects.SHUTTER_KNOCK * ev.PREP_MULT, ev.SHELTER_FLOOR)) < 0.02, "%.1f" % both)
 	m.projects.decor.erase(Vector2i(-50, -50))
 	m.projects.barred_day = -1
 	var faced := await _night_loss("knock", true, true)
@@ -365,6 +369,10 @@ func _night_loss(id: String, prepared: bool, faced := false) -> float:
 	m.nights.visitor = {}
 	m.nights.charmed = false
 	m.nights._begin(id)
+	if m.nights.visitor.is_empty():   # a visitor with no encounter (the quiet night): as the night settles it
+		for v in m.nights.VISITORS:
+			if v["id"] == id:
+				m.nights.visitor = v
 	m.nights.charmed = false
 	m.nights._resolve(faced, false)
 	await frames(1)
@@ -522,6 +530,289 @@ func _save_cases() -> void:
 	m.day = 20
 	m.evening._load(null)
 	check("old saves: past the first week it is spent", m.evening.grace_used)
+
+
+# --- CCH-EVENING-002: the farmhouse as shelter ----------------------------------------------------------------------
+
+# Loss for visitor id with the given protection, standing inside (or out on the farm), at house stage st.
+func _shelter_loss(id: String, st: int, inside := true, hearth := false, shutters := false, faced := false) -> float:
+	m.house_stage = st
+	if inside and not m.inside:
+		m._enter_house()
+		await frames(2)
+	elif not inside and m.inside:
+		m._leave_house()
+		await frames(2)
+	if shutters:
+		m.projects.decor[Vector2i(-50, -50)] = "shutters"
+		m.projects.barred_day = m.day
+	else:
+		m.projects.decor.erase(Vector2i(-50, -50))
+		m.projects.barred_day = -1
+	var loss := await _night_loss(id, hearth, faced)
+	m.projects.decor.erase(Vector2i(-50, -50))
+	m.projects.barred_day = -1
+	return loss
+
+
+func _shelter_cases() -> void:
+	await _new_game()
+	var ev := m.evening
+	m.day = 10
+	ev.grace_used = true
+	var base := await _shelter_loss("knock", 0)
+	print("INFO  shelter: an unanswered knock, day 10 (autumn), stage 0, nothing else: %.1f" % base)
+	check("shelter: the values are the briefed ones", ev.SHELTER_STAGE == [1.0, 0.75, 0.6, 0.45] and absf(ev.SHELTER_FLOOR - 0.4) < 0.001)
+	for st in 4:
+		var l := await _shelter_loss("knock", st)
+		check("shelter: stage %d (%s) inside, a knock left alone takes %d%%" % [st, m.STAGE_NAMES[st], roundi(ev.SHELTER_STAGE[st] * 100)], absf(l / base - ev.SHELTER_STAGE[st]) < 0.02, "%.1f of %.1f" % [l, base])
+	# Every sheltered visitor, at the restored house, below the cap so the ratio shows.
+	for id in ["field", "knock", "crows", "pond", "quiet"]:
+		var plain := await _shelter_loss(id, 0)
+		var restored := await _shelter_loss(id, 3)
+		check("shelter: %s left alone, restored house, inside" % id, plain > 0.0 and absf(restored / plain - ev.SHELTER_STAGE[3]) < 0.03, "%.1f of %.1f" % [restored, plain])
+	# Not outdoors, not faced, not the footsteps (they catch you outside), not the story act's.
+	var out0 := await _shelter_loss("knock", 0, false)
+	var out3 := await _shelter_loss("knock", 3, false)
+	check("shelter: outside on the farm the house gives nothing", absf(out3 - out0) < 0.01, "%.1f vs %.1f" % [out3, out0])
+	var f0 := await _shelter_loss("knock", 0, true, false, false, true)
+	var f3 := await _shelter_loss("knock", 3, true, false, false, true)
+	check("shelter: a faced visitor's cost is not eased by the house", absf(f3 - f0) < 0.01)
+	var s0 := await _shelter_loss("footsteps", 0)
+	var s3 := await _shelter_loss("footsteps", 3)
+	check("shelter: the footsteps are not sheltered", absf(s3 - s0) < 0.01, "%.1f vs %.1f" % [s3, s0])
+	check("shelter: the story act's visitor is not (passed as attended)", ev._house_mult("hollow", false) == 1.0)
+	check("shelter: strikes in a confrontation are not eased by the stage", absf(m.nights._loss_mult("knock") - m.nights._loss_mult("knock", false)) < 0.0001)
+	# The Hollow left at the door: its sanity loss is sheltered but its lost limit is not, and the cap still holds.
+	m.sanity_penalty = 0
+	var hl0 := await _shelter_loss("hollow", 0)
+	var pen0 := m.sanity_penalty
+	m.sanity_penalty = 0
+	var hl3 := await _shelter_loss("hollow", 3)
+	var pen3 := m.sanity_penalty
+	check("shelter: the Hollow's lost limit is never eased", pen0 == pen3 and pen0 > 0, "%d vs %d" % [pen0, pen3])
+	check("shelter: the night cap still holds", hl0 <= m.nights.NIGHT_CAP + 0.01 and hl3 <= hl0)
+	m.sanity_penalty = 0
+	# Stacking: every combination, as a share of the unprotected knock (stage 0, nothing).
+	var combos := [
+		["none", 0, false, false, 1.0],
+		["house alone (restored)", 3, false, false, 0.45],
+		["hearth alone", 0, true, false, 0.75],
+		["shutters alone", 0, false, true, 0.5],
+		["house + hearth (restored): floored", 3, true, false, 0.4],
+		["house + shutters (restored): floored", 3, false, true, 0.4],
+		["all three (restored): floored", 3, true, true, 0.4],
+		["house + hearth (boarded)", 1, true, false, 0.5625],
+		["house + shutters (boarded)", 1, false, true, 0.4],
+		["house + hearth (patched)", 2, true, false, 0.45],
+		["hearth + shutters (decrepit): floored", 0, true, true, 0.4],
+	]
+	for c in combos:
+		var l := await _shelter_loss("knock", int(c[1]), true, bool(c[2]), bool(c[3]))
+		check("stacking: %s takes %d%%" % [c[0], roundi(float(c[4]) * 100)], absf(l / base - float(c[4])) < 0.02, "%.1f of %.1f (%.3f)" % [l, base, l / base])
+	# Never immune: the lowest the shelter group can give.
+	var low := 1.0
+	for st in 4:
+		for h in [false, true]:
+			for sh in [false, true]:
+				m.house_stage = st
+				ev.prep_day = m.day if h else -1
+				if sh:
+					m.projects.decor[Vector2i(-50, -50)] = "shutters"
+					m.projects.barred_day = m.day
+				else:
+					m.projects.decor.erase(Vector2i(-50, -50))
+					m.projects.barred_day = -1
+				low = minf(low, ev._shelter("knock", true))
+	m.projects.decor.erase(Vector2i(-50, -50))
+	m.projects.barred_day = -1
+	ev.prep_day = -1
+	check("stacking: the shelter group never goes below the floor (no immunity)", absf(low - ev.SHELTER_FLOOR) < 0.001, "%.3f" % low)
+	# The first-week grace comes after the floor and may go under it, once.
+	m.day = 4
+	ev.grace_used = true
+	var wk := await _shelter_loss("knock", 0)
+	ev.grace_used = false
+	var g1 := await _shelter_loss("knock", 1)
+	check("grace + boarded house: 75% then half", absf(g1 / wk - 0.75 * ev.GRACE_MULT) < 0.02, "%.1f of %.1f" % [g1, wk])
+	ev.grace_used = false
+	var g3 := await _shelter_loss("knock", 3, true, true, true)
+	check("grace + everything: the floor, then half (the one onboarding exception)", absf(g3 / wk - ev.SHELTER_FLOOR * ev.GRACE_MULT) < 0.02, "%.1f of %.1f" % [g3, wk])
+	check("grace: still only once", ev.grace_used)
+	# The morning line: said, never with numbers.
+	m.day = 10
+	ev.grace_used = true
+	ev.sheltered = false
+	await _shelter_loss("knock", 2)
+	var note := ev._morning_note()
+	check("shelter: the morning says the house held, without numbers", ev.sheltered == false and note.contains("walls") and not note.contains("%"), note)
+	await _shelter_loss("knock", 0)
+	check("shelter: no line from the decrepit house", ev._morning_note().strip_edges() == "")
+	# The house stage is the only authority: after a reload, the protection follows the saved stage.
+	m.house_stage = 2
+	await _reload()
+	ev = m.evening
+	ev.grace_used = true
+	m.day = 10
+	check("save: the protection follows the saved house stage", m.house_stage == 2 and ev._house_mult("knock", true) == (ev.SHELTER_STAGE[2] if m.inside else 1.0) and not ev._save().has("shelter"))
+	var keys := ev._save().keys()
+	check("save: no new saved shelter state", not keys.has("sheltered") and not keys.has("shelter_stage"), str(keys))
+
+
+# --- CCH-EVENING-002: a quiet hour ----------------------------------------------------------------------------------
+
+func _at_desk() -> void:
+	if not m.inside:
+		m._enter_house()
+		await frames(2)
+	var t := m.INT_ORIGIN + m.DESK_IX + Vector2i(0, 1)
+	m.player.position = m._tile_center(t.x, t.y)
+	m.player.facing = Vector2.UP
+	m._tool_press = false
+
+
+func _desk_row(name_has: String) -> Dictionary:
+	for r in m.panels._desk_rows():
+		if str(r.get("name", "")).contains(name_has):
+			return r
+	return {}
+
+
+func _quiet_cases() -> void:
+	await _new_game()
+	var ev := m.evening
+	m.day = 10
+	m.event_fired_day = 9
+	await _at_desk()
+	m.fire_hours = 0.0
+	m.inventory["firewood"] = 0
+	_set_hour(18.5)
+	check("quiet: not before 19:00", ev._quiet_blocker().contains("evening"))
+	var row := _desk_row("quiet hour")
+	check("quiet: listed under the desk's Pastimes, off before the evening", not row.is_empty() and row["action"] == "quiet_hour" and not bool(row["enabled"]))
+	_set_hour(20.0)
+	check("quiet: no fire, no firewood, no supplies needed", ev._quiet_blocker() == "" and bool(_desk_row("quiet hour")["enabled"]))
+	m.sanity = 50.0
+	m.warmth = 30.0
+	var hour0 := m.current_hour
+	m._on_panel_action("quiet_hour")
+	await frames(2)
+	check("quiet: an hour passes", absf(m.current_hour - hour0 - ev.QUIET_HOURS) < 0.05, "%.2f" % m.current_hour)
+	check("quiet: +4 sanity", absf(m.sanity - 50.0 - ev.QUIET_SANITY) < 0.6, "%.1f" % m.sanity)
+	check("quiet: +15 comfort", m.warmth >= 30.0 + ev.QUIET_WARMTH - 1.0, "%.1f" % m.warmth)
+	check("quiet: no firewood used", int(m.inventory["firewood"]) == 0)
+	check("quiet: says so, and the panel closes", m.open_tab == "" and _said().contains("quiet hour"))
+	var s1 := m.sanity
+	for i in 4:
+		m._on_panel_action("quiet_hour")
+	await frames(2)
+	check("quiet: once an evening", absf(m.sanity - s1) < 0.01 and ev._quiet_blocker().contains("already"))
+	m.fire_hours = 6.0
+	await _at_hearth()
+	m._on_panel_action("hearth_sit")
+	await frames(2)
+	check("shared rest: no evening by the fire after a quiet hour", absf(m.sanity - s1) < 0.01 and ev._cozy_blocker().contains("quiet hour"), ev._cozy_blocker())
+	var hrows: Array = m.panels._hearth_rows()
+	var sit_ok := false
+	for r in hrows:
+		if str(r.get("name", "")) == "An evening by the fire":
+			sit_ok = not bool(r["enabled"]) and str(r.get("status", "")).contains("desk")
+	check("shared rest: the Hearth section shows the evening is spent", sit_ok)
+	# The desk's own daily game is untouched (+3 the first a day): the evening's most stays +7.
+	m.card_games = 1
+	await _at_desk()
+	m._on_panel_action("pastime:solitaire")
+	await frames(2)
+	check("desk game: still works after a quiet hour (+%d)" % int(m.rewards.PASTIME_SANITY), absf(m.sanity - s1 - m.rewards.PASTIME_SANITY) < 0.6, "%.1f" % m.sanity)
+	# The other order, the next evening: the fire first, then no quiet hour.
+	m.day += 1
+	m.event_fired_day = m.day - 1
+	_set_hour(19.5)
+	check("quiet: there again the next evening", ev._quiet_blocker() == "")
+	m.fire_hours = 6.0
+	await _at_hearth()
+	m.sanity = 50.0
+	m._on_panel_action("hearth_sit")
+	await frames(2)
+	m._on_panel_action("quiet_hour")
+	await frames(2)
+	check("shared rest: no quiet hour after the fire", absf(m.sanity - 50.0 - ev.COZY_SANITY) < 0.6 and ev._quiet_blocker().contains("by the fire"), "%.1f" % m.sanity)
+	# Where and when.
+	m.day += 1
+	_set_hour(20.0)
+	m._leave_house()
+	await frames(2)
+	check("quiet: only in the house", ev._quiet_blocker().contains("inside"))
+	m._enter_house()
+	await frames(2)
+	_set_hour(22.5)
+	check("quiet: not after 22:00", ev._quiet_blocker().contains("evening"))
+	# The Hearth section, cold, points to the quiet hour.
+	_set_hour(20.0)
+	m.fire_hours = 0.0
+	var note_ok := false
+	for r in m.panels._hearth_rows():
+		if str(r.get("name", "")) == "An evening by the fire":
+			note_ok = str(r.get("note", "")).contains("quiet hour")
+	check("quiet: a cold hearth points to it", note_ok)
+	# Reloading can't give it twice: the evening's rest is saved with the day.
+	await _at_desk()
+	m._on_panel_action("quiet_hour")
+	await frames(2)
+	var d := m.day
+	await _reload()
+	m.day = d
+	_set_hour(20.5)
+	check("save: a reload doesn't give the evening's rest again", m.evening.cozy_day == d and m.evening._quiet_blocker() != "")
+	m.day = d + 1
+	check("save: the next day it is fresh", m.evening._quiet_blocker() == "" or m.evening._quiet_blocker().contains("inside"))
+
+
+# --- CCH-EVENING-002: onboarding and the signs' interaction ---------------------------------------------------------
+
+func _onboarding_cases() -> void:
+	await _new_game()
+	var ev := m.evening
+	var sleep_tip := ""
+	var eve_tip := ""
+	for t in m.TIPS:
+		if t["id"] == "sleep":
+			sleep_tip = str(t["text"])
+		if t["id"] == "evening":
+			eve_tip = str(t["text"])
+	check("onboarding: the bed tip no longer hurries you to bed", sleep_tip.contains("no hurry"))
+	check("onboarding: an evening page exists, with no numbers", eve_tip != "" and not eve_tip.contains("%") and not eve_tip.contains("0."))
+	for word in ["quiet hour", "fire", "wrong", "Tending the hearth", "refuge", "bed early"]:
+		check("onboarding: it mentions %s" % word, eve_tip.contains(word))
+	check("onboarding: it doesn't say you must face visitors", not eve_tip.contains("must"))
+	m.day = 1
+	_set_hour(19.5)
+	check("onboarding: not on the guided first day", not m._tip_ready("evening"))
+	m.day = 2
+	m.diary_found = true
+	check("onboarding: from the second evening", m._tip_ready("evening"))
+	_set_hour(15.0)
+	check("onboarding: only once evening comes", not m._tip_ready("evening"))
+	# Facing an unread sign: one line, once.
+	ev.force_kind = "crows"
+	m.day = 9
+	m.event_fired_day = 8
+	_set_hour(19.5)
+	if m.inside:
+		m._leave_house()
+		await frames(2)
+	var t: Vector2i = ev._tiles("crows")[1]
+	_face(t)
+	ev._update()
+	check("signs: facing one says it can be looked at", _said().contains("look closer"))
+	var said := m.message_log.size()
+	ev._update()
+	check("signs: only once", m.message_log.size() == said)
+	check("signs: the crows fly rather than vanish", ev._try_read(t) and ev._flying())
+	ev.fly_s = 10.0
+	check("signs: and are gone after", not ev._flying())
+	check("signs: the crow's moonlit edge is made", ev._crow_halo() != null)
+	ev.force_kind = ""
 
 
 # --- The first trek's rule stays as decided -----------------------------------------------------------------------

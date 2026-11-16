@@ -922,17 +922,16 @@ func _end_night() -> String:
 
 # Everything that scales what a night takes from your sanity. id names the visitor when it has already been
 # cleared (in _resolve); before CCH-EVENING-001 it read the cleared visitor there, so the barred shutters never
-# eased an unanswered knock, only its strikes.
-func _loss_mult(id := "") -> float:
+# eased an unanswered knock, only its strikes. unattended: the visitor is being left alone, so the farmhouse's
+# own shelter can apply (CCH-EVENING-002). The shelter group (house stage, barred shutters, second storey, tended
+# hearth) is one calculation with a floor, EveningSystem._shelter; everything else multiplies as before.
+func _loss_mult(id := "", unattended := false) -> float:
 	if id == "":
 		id = str(visitor.get("id", ""))
 	var mult := (2.0 if m.sanity_sys._event_active("dread") else 1.0) * (0.5 if m.sanity_sys._event_active("ward") else 1.0)
 	mult *= 0.5 if charmed else 1.0
 	mult *= m.projects._night_mult()   # the crow bell
-	if id == "knock" and m.projects._shutters_barred():
-		mult *= m.projects.SHUTTER_KNOCK   # barred shutters
-	mult *= m.estate._night_mult()     # the second storey
-	mult *= m.evening._night_mult(id)   # the hearth tended for the night (CCH-EVENING-001)
+	mult *= m.evening._shelter(id, unattended)   # house stage x shutters x second storey x tended hearth, floored
 	mult *= m.trek._night_mult()       # walked someone today, the wood come close, or the Hollow asleep
 	mult *= _season_mult()
 	return mult * m.NIGHT_LOSS_MULT
@@ -958,7 +957,12 @@ func _resolve(faced: bool, show := true, key := "") -> String:
 	# Slept through, the sighting is only what you find in the morning.
 	if not show and not faced and v.has("asleep"):
 		text = str(v["asleep"])
-	var loss := minf(float(v["face_sanity"] if faced else v["ignore_sanity"]) * _loss_mult(str(v["id"])), NIGHT_CAP)
+	# The farmhouse shelters you from a visitor left alone while you are inside it (CCH-EVENING-002); not from
+	# one you face, the story act's, or the scripted first night and sighting (not in SHELTER_FOR).
+	var unattended := not faced and not v.has("act")
+	var loss := minf(float(v["face_sanity"] if faced else v["ignore_sanity"]) * _loss_mult(str(v["id"]), unattended), NIGHT_CAP)
+	if unattended and loss >= 1.0 and m.evening._house_mult(str(v["id"]), true) < 1.0:
+		m.evening.sheltered = true   # the morning line
 	# The first knock left alone in the first week takes half (CCH-EVENING-001's grace; a knock from the story
 	# act is the Hollow's, not this).
 	var graced := false

@@ -7,7 +7,9 @@ extends "res://tools/audit_play.gd"
 # It is NOT a human player, and nothing here says whether an evening is enjoyable.
 #   APPDATA=<scratch> godot --path . --fixed-fps 60 --disable-vsync -s tools/evening_play.gd -- scenario=evening style=cozy days=14
 # Options after "--" (besides the parent's dev=, out=, size=):
-#   style=cozy|cautious|curious|minimal
+# CCH-EVENING-002: every style but minimal takes a quiet hour at the desk (Desk > Pastimes) when the fire can't be
+# sat by, and a fifth style, balanced, mixes them. Cozy tends whenever it has 2+ firewood.
+#   style=cozy|cautious|curious|balanced|minimal
 #     cozy      indoors by 18:30; the evening by the fire each night it can, tends the hearth every third night;
 #               bed after the hour by the fire (sleeps through the visitor)
 #     cautious  looks for the evening's sign and reads it; tends the hearth when the sign points at the house,
@@ -105,7 +107,7 @@ func _evening() -> void:
 	busy_hours = 0.0
 	idle_hours = 0.0
 	eve = {"day": m.day, "style": style, "sign": "", "noticed": false, "read": false, "tended": false, "sat": false,
-		"fed": 0, "visitor": "", "faced": "", "stayed_up": false}
+		"fed": 0, "visitor": "", "faced": "", "stayed_up": false, "quiet": false}
 	await wait_until_hour(17.5)
 	await eat_from_bag()
 	if style == "minimal":
@@ -121,7 +123,8 @@ func _evening() -> void:
 		await _feed_hearth(1)
 		await _snapshot_at(19.0)
 		await idle_until(19.02)
-		await _hearth_evening(m.day % 3 == 0, true)
+		await _hearth_evening(int(m.inventory["firewood"]) >= 2, true)
+		await _rest_fallback()
 		await idle_until(minf(m.current_hour + 0.25, 21.5))
 		await _bed()
 		return
@@ -137,10 +140,19 @@ func _evening() -> void:
 	eve["noticed"] = sign != "" and m.evening.noticed_day == m.day
 	if sign != "":
 		await _read_sign(sign)
-	if style == "cautious":
+	if style == "cautious" or style == "balanced":
 		await enter_house()
 		var house_sign: bool = sign == "chill" and bool(eve["read"])
-		await _hearth_evening(house_sign, not house_sign)
+		await _hearth_evening(house_sign, true)
+		await _rest_fallback()
+		if style == "balanced":
+			var face_b: bool = m.lantern_tier > 0 and ((bool(eve["read"]) and sign in ["tracks", "crows"]) or m.day % 2 == 0)
+			if face_b:
+				await _face_night()
+			else:
+				await idle_until(minf(m.current_hour + 0.25, 21.5))
+			await _bed()
+			return
 		var face: bool = bool(eve["read"]) and sign in ["tracks", "crows"] and m.lantern_tier > 0
 		if face:
 			await _face_night()
@@ -151,6 +163,7 @@ func _evening() -> void:
 	# curious
 	await enter_house()
 	await _hearth_evening(false, true)
+	await _rest_fallback()
 	await _face_night()
 	await _bed()
 
@@ -231,6 +244,7 @@ func _hearth_evening(tend: bool, sit: bool) -> void:
 		if m.open_tab == "Hearth" and await ledger_press("hearth_sit", "Sit", func() -> bool: return m.evening.cozy_day == m.day):
 			eve["sat"] = true
 			eve["sit_sanity"] = snappedf(m.sanity - s0, 0.1)
+			await frames(240)   # the short rest scene (CCH-EVENING-002)
 			if m.day <= 4:
 				await shot("d%d_by_the_fire_%s" % [m.day, style])
 		else:
@@ -238,6 +252,40 @@ func _hearth_evening(tend: bool, sit: bool) -> void:
 	if m.open_tab != "":
 		await close_all()
 	busy_hours += maxf(0.0, m.current_hour - maxf(t0, 19.0))
+
+
+# CCH-EVENING-002: no fire to sit by: a quiet hour at the desk instead (Space at the desk, the Pastimes tab by E or
+# RB, then the row's Sit), once the evening's rest isn't spent.
+func _rest_fallback() -> void:
+	if bool(eve.get("sat", false)) or m.evening.cozy_day == m.day or not m.evening._evening():
+		return
+	var t0: float = m.current_hour
+	if not await enter_house():
+		return
+	if not await use_tile_kind(m.Tile.DESK, "the desk"):
+		return
+	await frames(20)
+	if m.open_tab != "Desk" or not await ledger_tab_with("quiet_hour"):
+		note("PROBLEM", "the desk's Pastimes tab with the quiet hour did not open (tab=%s)" % m.open_tab)
+		await close_all()
+		return
+	if not shot_quiet:
+		shot_quiet = true
+		await shot("d%d_desk_quiet_%s" % [m.day, style])
+	var s0 := m.sanity
+	if await ledger_press("quiet_hour", "Sit", func() -> bool: return m.evening.cozy_day == m.day):
+		eve["quiet"] = true
+		eve["quiet_sanity"] = snappedf(m.sanity - s0, 0.1)
+		note("ACT", "a quiet hour at the desk: \"%s\"" % m.message_label.text)
+		await frames(240)   # the short rest scene
+	else:
+		eve["quiet_blocked"] = m.evening._quiet_blocker()
+	if m.open_tab != "":
+		await close_all()
+	busy_hours += maxf(0.0, m.current_hour - maxf(t0, 19.0))
+
+
+var shot_quiet := false
 
 
 func _read_sign(kind: String) -> void:

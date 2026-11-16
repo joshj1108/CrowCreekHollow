@@ -235,7 +235,8 @@ const STAGE_NAMES := ["Decrepit", "Boarded", "Patched", "Restored"]
 # Braces name controls and are filled in for a keyboard or a gamepad, see _fill_controls.
 const TIPS := [
 	{"id": "well", "title": "Watering", "text": "A crop only grows on a night after it was watered, and rain waters everything. The pump by the plots is seized: face the well and press {hand} to open it. Until then, water from the bucket: {tool:hose} to select it, face a crop and press {tool}; face the pond and press {hand} to fill it again. Repairing the pump and attaching the hose saves the walk."},
-	{"id": "sleep", "title": "Sleeping", "text": "From 18:00, walk to the bed in the bedroom and press {hand} to save and end the day. Stay up past 03:00 and you collapse, which lowers your sanity limit."},
+	{"id": "sleep", "title": "Sleeping", "text": "From 18:00, walk to the bed in the bedroom and press {hand} to save and end the day. There is no hurry: the evening is yours until the night comes, and the bed is there whenever you want it. Stay up past 03:00 and you collapse, which lowers your sanity limit."},
+	{"id": "evening", "title": "Evenings at home", "text": "The hours from 19:00 are yours. Sit by the fire, or spend a quiet hour at the desk, which needs no firewood. Some evenings the farm shows you that something is wrong: crows that won't call, marks by a gate, a window frosting too fast. Look closer if you like; they hint at what may come. Tending the hearth readies the house against a visitor at the door, and every repair makes the farmhouse a better refuge on the nights you stay in, though never a perfect one. Going to bed early is always allowed."},
 	{"id": "repair", "title": "Repairing the farmhouse", "text": "Repair the house from the House section on the section wheel ({wheel}). Each stage restores it inside and out, and unlocks rooms and features."},
 	{"id": "quests", "title": "Quests", "text": "The Quests section, on the section wheel ({wheel}), lists what the farm asks of you. Press Details on a quest to read its story."},
 	{"id": "chores", "title": "Keeping house", "text": "The house wears down a little each night. Tidy it and mend a board each day from the House section on the section wheel ({wheel}). Chores you skip add wear."},
@@ -275,8 +276,8 @@ const REPAIR_COSTS := [
 	{"wood": 8, "fiber": 6, "level": 8, "season": "Summer"},   # the paint needs a dry season
 ]
 const HOUSE_FEATURES := [
-	{"stage": 1, "text": "Boarded: the walls hold, and sanity recovers faster indoors"},
-	{"stage": 2, "text": "Parlor opens: tidy at the station for Cleaning XP"},
+	{"stage": 1, "text": "Boarded: the walls hold, sanity recovers faster indoors, and the nights reach in less"},
+	{"stage": 2, "text": "Parlor opens: tidy at the station for Cleaning XP, and the house keeps more of the night out"},
 	{"stage": 3, "text": "Study opens, and a restored house softens the night"},
 ]
 const HOUSE_WALLS := [Color("4a3a2e"), Color("6b5340"), Color("8a6a4c"), Color("b08a5e")]
@@ -3093,6 +3094,8 @@ func _tip_ready(id: String) -> bool:
 			return int(stats.get("planted", 0)) >= 3 or day >= 2
 		"sleep":
 			return current_hour >= 17.0
+		"evening":
+			return day >= 2 and current_hour >= 19.0 and diary_found
 		"needs":
 			return current_hour >= 12.0
 		"repair":
@@ -3556,7 +3559,7 @@ func _on_panel_action(action_id: String) -> void:
 		estate._repaper(action_id.trim_prefix("paper:"))
 		_refresh_panel()
 		return
-	if action_id.begins_with("pastime:") or action_id.begins_with("order:") or action_id == "pay_tax" or action_id == "pay_deed" or action_id == "diary":
+	if action_id.begins_with("pastime:") or action_id.begins_with("order:") or action_id == "pay_tax" or action_id == "pay_deed" or action_id == "diary" or action_id == "quiet_hour":
 		desk._desk_action(action_id)
 		return
 	if action_id == "mail_clear":
@@ -5412,7 +5415,7 @@ func _repair_house() -> void:
 	farm._check_plot_three()
 	progression._grant_xp("Carpentry", XP_REPAIR)
 	_build_interior()
-	_show_message("Repaired. The farmhouse is now %s. +%d Carpentry XP" % [STAGE_NAMES[house_stage], XP_REPAIR])
+	_show_message("Repaired. The farmhouse is now %s. +%d Carpentry XP. The house will hold a little better against the night." % [STAGE_NAMES[house_stage], XP_REPAIR])
 	queue_redraw()
 
 
@@ -5991,6 +5994,22 @@ func _collapse_scene() -> void:
 	await _show_card("Something in the dark has been keeping pace with you.", 1.8, 2.8, 1.4)
 	await _show_card("You don't remember the way home.", 1.6, 2.2, 1.8)
 	await _fade_to(Color(0.22, 0.0, 0.0, 0.0), 4.2, Tween.TRANS_CUBIC)
+	transitioning = false
+
+
+# CCH-EVENING-002: an evening's rest (by the fire, or a quiet hour at the desk). The clock has already moved on;
+# this is only the feel of it: the room dims to a warm half-dark for a moment, with the fire and the lamps still
+# moving under it, a line, and back. Short, and only in a real window (tests and the balance sim run headless).
+func _rest_scene(line: String) -> void:
+	if DisplayServer.get_name() == "headless" or transitioning or fade_rect == null:
+		return
+	transitioning = true
+	player.paused = true
+	card_label.add_theme_color_override("font_color", Color("e8dcc0"))
+	await _fade_to(Color(0.06, 0.03, 0.01, 0.62), 0.7, Tween.TRANS_SINE)
+	await _show_card(line, 0.4, 1.0, 0.4)
+	await _fade_to(Color(0.06, 0.03, 0.01, 0.0), 0.8, Tween.TRANS_SINE)
+	player.paused = false
 	transitioning = false
 
 

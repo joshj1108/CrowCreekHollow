@@ -15,6 +15,18 @@ extends SceneTree
 #   seed=N      random seed (default 1)
 #   every=N     print one table row every N days (default 1)
 #   grace=0     CCH-EVENING-001's control: the first-week grace for the first unanswered knock is taken as spent
+#   style=NAME  CCH-EVENING-002's play styles; the evening is played as each would (overrides mode):
+#               minimal  - in by 19:00, a desk game, asleep before the visitor (earlybed); no evening rest, no signs
+#               cozy     - stays in: lights the fire if there is firewood, rests each evening (by the fire, or a quiet
+#                          hour without one), tends the hearth when there are 2+ firewood, sleeps through the visitor
+#               cautious - reads a sign when there is one; tends the hearth on a frost sign; faces the visitor on a
+#                          crows or tracks sign; otherwise rests and stays in
+#               curious  - reads every sign, rests, and faces every visitor (as engaged)
+#               balanced - reads signs, rests, tends on frost, faces on a crows or tracks sign and every other night
+#   shelter=a,b,c,d  EveningSystem's house-stage multipliers for this run (probes; the game's own are unchanged)
+#   quiet=0     no quiet hour (CCH-EVENING-001's evening, for the baseline with shelter=1,1,1,1)
+#   stage=N     controlled test: the house is held at stage N all run (not natural progression; labelled as such)
+#   json=PATH   write each day's evening and night (sanity, losses, gains, choices) to PATH as JSON
 #   treks=N     go on N treks a week (default 0), on the longest open route the supplies allow. The routes,
 #               events, forks and gifts come from TrekSystem; walking time and sanity are estimated (_route_trek).
 #               With treks, Old Maren is first walked to the wood's edge, the first day she waits with a lantern
@@ -87,6 +99,15 @@ const RAID_WIN := 0.75
 const ROPE_FIBER := 2
 const GIFT_KEEP := 3        # a walker's gift is only given from more than this many held, so rations and meals come first
 var mode := "engaged"
+var style := ""             # CCH-EVENING-002: a play style for the evening (see the options)
+var quiet_on := true
+var shelter_arg := ""
+var force_stage := -1
+var json_path := ""
+var day_log: Array = []      # one entry a day (json=)
+var today := {}              # the entry being filled
+var ev_tot := {"sign_evenings": 0, "signs_read": 0, "preps": 0, "fire_rests": 0, "quiet_rests": 0, "cold_evenings": 0,
+	"rest_option": 0, "fire_option": 0, "tend_option": 0, "faced": 0, "ignored": 0, "wood_fire": 0, "wood_tend": 0}
 var treks_a_week := 0
 var rope := 0
 var grove_rations := 0      # rations baked ahead for the grove, one a day once she waits (see _trek)
@@ -124,6 +145,11 @@ func _initialize() -> void:
 			"every": every = maxi(1, int(kv[1]))
 			"treks": treks_a_week = int(kv[1])
 			"grace": grace_on = kv[1] != "0"
+			"style": style = kv[1]
+			"quiet": quiet_on = kv[1] != "0"
+			"shelter": shelter_arg = kv[1]
+			"stage": force_stage = int(kv[1])
+			"json": json_path = kv[1]
 	seed(s)
 	m = load("res://scenes/main.tscn").instantiate()
 	root.add_child.call_deferred(m)
@@ -142,15 +168,26 @@ func _process(_delta: float) -> bool:
 	m.set_process(false)
 	if not grace_on:
 		m.evening.grace_used = true
+	if shelter_arg != "":
+		m.evening.shelter_stage = Array(shelter_arg.split(",")).map(func(x: String) -> float: return float(x))
+	if force_stage >= 0:
+		m.house_stage = force_stage
 	_run()
+	if json_path != "":
+		var f := FileAccess.open(json_path, FileAccess.WRITE)
+		f.store_string(JSON.stringify({"style": style, "mode": mode, "shelter": m.evening.shelter_stage, "quiet": quiet_on,
+			"stage_start": force_stage, "grace": grace_on, "days": day_log, "totals": ev_tot, "milestones": milestones}))
+		f.close()
 	SaveSystem.delete_save(m._save_path())
 	return true
 
 
 func _run() -> void:
-	print("mode=%s days=%d" % [mode, days])
+	print("mode=%s style=%s days=%d shelter=%s quiet=%s stage=%d" % [mode, style, days, str(m.evening.shelter_stage), str(quiet_on), force_stage])
 	print("day date   coins san/max fea  Fa Ca Cl Bu Fo Mi Sm steps shd tax  grow wood fib wear kept night  hearts M/D/V/P")
 	for i in days:
+		today = {"d": m.day, "season": m._season_today(), "stage": m.house_stage, "night_loss": 0.0, "sleep": 0.0, "act": 0.0,
+			"faced": 0, "ignored": 0, "sign": "", "prep": 0, "rest": "", "cold": 0, "options": []}
 		var night := _play_day()
 		_note_milestones()
 		if (m.day - 1) % every == 0 or i == days - 1:
@@ -211,7 +248,9 @@ func _play_day() -> String:
 	_split_firewood()
 	# Evening.
 	var night := ""
-	if mode == "engaged":
+	if style != "":
+		night = _style_evening()
+	elif mode == "engaged":
 		_pass(1.0, false)
 		_desk_game()
 		_davy()
@@ -236,7 +275,21 @@ func _play_day() -> String:
 
 func _sleep() -> void:
 	m.stats["slept"] += 1
+	var s0 := m.sanity
 	m.sanity_sys._change_sanity(m.sanity_sys._sleep_gain())
+	today["sleep"] = m.sanity - s0
+	# A visitor still to come (asleep before it, as minimal is) is settled here first, so its cost can be measured;
+	# _end_day then finds the night already settled, as the game does at the bed.
+	if m.event_fired_day != m.day:
+		var s1 := m.sanity
+		var stage := m.house_stage
+		m.nights._end_night()
+		today["night_loss"] = s1 - m.sanity
+		if m.nights.last_visitor != "" and s1 - m.sanity > 0.0:
+			today["ignored"] = 1
+			ev_tot["ignored"] += 1
+		today["visitor"] = m.nights.last_visitor
+		today["stage"] = stage
 	if m.firewood._fire_lit():
 		m.warmth = 100.0
 	# In earlybed the visitor comes to the sleeping house during _end_day, so the Hollow is counted here.
@@ -252,6 +305,9 @@ func _sleep() -> void:
 	m.projects._check(false)
 	m.mystery._check()
 	_track_sanity()
+	today["morning"] = m.sanity
+	today["low"] = float(day_min.get(m.day - 1, m.sanity))
+	day_log.append(today)
 
 
 # Hours pass as if standing there: needs drop, the fire burns, sanity drifts with the dark.
@@ -825,6 +881,8 @@ func _try_build(id: String, cost: Dictionary) -> String:
 		return "wait"
 	match id:
 		"boarded", "patched", "restored":
+			if force_stage >= 0:
+				return "skip"   # controlled stage test: the house stays as set
 			m._repair_house()
 		"coop", "barn":
 			# As _confirm_placement does, without choosing a spot.
@@ -1146,6 +1204,105 @@ func _ignore_night() -> String:
 	m.nights._resolve(false)
 	nights["ignored"] += 1
 	return id + "-"
+
+
+# CCH-EVENING-002: the evening as each play style spends it, from 19:00 (see the options at the top).
+func _style_evening() -> String:
+	var ev := m.evening
+	_pass(maxf(0.0, 19.0 - m.current_hour), false)
+	today["eve"] = m.sanity
+	today["comfort"] = m.warmth
+	today["wood"] = int(m.inventory["firewood"])
+	var sign := ev._tonight()
+	today["sign"] = sign
+	if sign != "":
+		ev_tot["sign_evenings"] += 1
+	if sign != "" and style in ["cautious", "curious", "balanced"]:
+		_pass(0.25, false)   # out to it and back
+		if ev._try_read(ev._tiles(sign)[0]):
+			ev_tot["signs_read"] += 1
+	m.inside = true
+	# The fire: a cold hearth with no firewood is a cold evening; anyone but minimal lights it if they can.
+	if not m.firewood._fire_lit() and int(m.inventory["firewood"]) == 0:
+		today["cold"] = 1
+		ev_tot["cold_evenings"] += 1
+	if style != "minimal" and not m.firewood._fire_lit() and int(m.inventory["firewood"]) > 0:
+		m.firewood._feed_fire()
+		ev_tot["wood_fire"] += 1
+	# What could be chosen now (19:00-19:15).
+	var opts: Array = []
+	if ev._cozy_blocker() == "":
+		opts.append("fire")
+		ev_tot["fire_option"] += 1
+	if quiet_on and ev._quiet_blocker() == "":
+		opts.append("quiet")
+	if ev._cozy_blocker() == "" or (quiet_on and ev._quiet_blocker() == ""):
+		ev_tot["rest_option"] += 1
+	var tend_could := ev._prep_blocker() == "" or (int(m.inventory["firewood"]) >= 2 and ev._prep_blocker().contains("burning well"))
+	if tend_could:
+		opts.append("tend")
+		ev_tot["tend_option"] += 1
+	if m.desk._can_pastime("solitaire") or m.desk._can_pastime("sudoku"):
+		opts.append("desk_game")
+	today["options"] = opts
+	# Preparation.
+	var want_tend := (style == "cozy" and int(m.inventory["firewood"]) >= 2) or (style in ["cautious", "balanced"] and sign == "chill")
+	if want_tend and m.fire_hours < ev.PREP_FIRE and int(m.inventory["firewood"]) >= 2:
+		m.firewood._feed_fire()
+		ev_tot["wood_fire"] += 1
+	if want_tend and ev._prep_blocker() == "":
+		ev._tend()
+		today["prep"] = 1
+		ev_tot["preps"] += 1
+		ev_tot["wood_tend"] += 1
+	# The evening's rest.
+	if style != "minimal":
+		var s0 := m.sanity
+		if ev._cozy_blocker() == "":
+			ev._sit()
+			today["rest"] = "fire"
+			ev_tot["fire_rests"] += 1
+		elif quiet_on and ev._quiet_blocker() == "":
+			ev._quiet()
+			today["rest"] = "quiet"
+			ev_tot["quiet_rests"] += 1
+		today["act"] += m.sanity - s0
+	var s1 := m.sanity
+	_desk_game()
+	today["act"] += m.sanity - s1
+	# The night.
+	var face := style == "curious" or (style in ["cautious", "balanced"] and sign in ["tracks", "crows"]) or (style == "balanced" and m.day % 2 == 0)
+	var night := ""
+	if face:
+		_davy()
+		_pass(maxf(0.0, 21.5 - m.current_hour), true)
+		_pass(maxf(0.0, 22.0 - m.current_hour), false)
+		var s2 := m.sanity
+		night = _face_night()
+		today["night_loss"] = s2 - m.sanity
+		today["visitor"] = m.nights.last_visitor
+		if night.ends_with("+"):
+			today["faced"] = 1
+			ev_tot["faced"] += 1
+		elif night != "quiet":
+			today["ignored"] = 1
+			ev_tot["ignored"] += 1
+		_pass(1.0, true)
+	elif style == "minimal":
+		_pass(maxf(0.0, 21.0 - m.current_hour), true)
+		nights["skipped"] += 1
+		night = "-"
+	else:
+		_pass(maxf(0.0, 22.0 - m.current_hour), true)
+		var s2 := m.sanity
+		night = _ignore_night()
+		today["night_loss"] = s2 - m.sanity
+		today["visitor"] = m.nights.last_visitor
+		if night != "quiet":
+			today["ignored"] = 1
+			ev_tot["ignored"] += 1
+		_pass(1.0, true)
+	return night
 
 
 # Davy's night (StoryAct): engaged is out at 21:00 and finds him at the great tree; the others don't, and he is

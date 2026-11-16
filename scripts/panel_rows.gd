@@ -877,6 +877,19 @@ func _desk_rows() -> Array:
 	rows.append({"name": "Sudoku (%s)" % m.desk._hours_text(m.SUDOKU_HOURS), "value": "sudoku book: %d puzzles left" % m.sudoku_puzzles,
 		"needs": [{"text": "A sudoku book (order one from the catalog)", "ok": m.sudoku_puzzles > 0}],
 		"button": "Play", "action": "pastime:sudoku", "enabled": m.desk._can_pastime("sudoku")})
+	# CCH-EVENING-002: the evening's rest without a fire. It shares the one rest an evening with the hearth.
+	var ev := m.evening
+	var rested := ev.cozy_day == m.day
+	var quiet_row := {"name": "A quiet hour (1 hour)",
+		"value": "evenings: read or write in the diary. +%d sanity, a little comfort" % int(ev.QUIET_SANITY),
+		"about": "Spend an hour at the desk, reading, writing or just sitting quietly while the house settles. No fire or supplies needed.",
+		"needs": [{"text": "The evening, 19:00 to 22:00", "ok": ev._evening()},
+			{"text": "One rest an evening (this or the fire)", "ok": not rested}],
+		"button": "Sit", "action": "quiet_hour", "enabled": ev._quiet_blocker() == ""}
+	if rested:
+		quiet_row["status"] = "Rested tonight"
+		quiet_row["status_kind"] = "done"
+	rows.append(quiet_row)
 
 	rows.append({"tab": "Catalog", "icon": "catalog"})
 	if not m.desk_orders.is_empty():
@@ -1176,11 +1189,13 @@ func _hearth_rows() -> Array:
 	var sit_row := {"name": "An evening by the fire",
 		"value": "an hour: +%d sanity, warmed through" % int(ev.COZY_SANITY),
 		"about": "Read, mend or just sit while the logs settle.",
-		"needs": [{"text": "The fire lit", "ok": lit}, {"text": "Once an evening", "ok": not sat}],
+		"needs": [{"text": "The fire lit", "ok": lit}, {"text": "One rest an evening (this or a quiet hour)", "ok": not sat}],
 		"button": "Sit", "action": "hearth_sit", "enabled": ev._cozy_blocker() == ""}
 	if sat:
-		sit_row["status"] = "Done tonight"
+		sit_row["status"] = "Done tonight" if ev.cozy_kind != "quiet" else "Rested at the desk"
 		sit_row["status_kind"] = "done"
+	elif not lit:
+		sit_row["note"] = "No fire tonight? A quiet hour at the desk needs none."
 	rows.append(sit_row)
 	return rows
 

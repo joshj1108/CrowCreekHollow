@@ -53,6 +53,10 @@ extends SceneTree
 #   signsay         with sign=, read it now: its text is shown as Space would show it
 #   hearth=ACT      in the house (inside itile=13,4): space (what Space at the hearth does now), feed, tend or sit
 #   morning=KIND    sleep through a knock and show the morning report: prep (hearth tended), plain, or grace
+#   rest=KIND       CCH-EVENING-002: in the house, spend the evening's rest now, fire (at the hearth) or quiet (the
+#                   desk's quiet hour), and shoot restwait= seconds into its short scene (default 1.3)
+#   flyms=N         with sign=crows: the crows were read N ms ago, so they are mid-flight off the fence
+#   (with hold, walk legs "rest-fire" and "rest-quiet" do the same as rest=, for a clip)
 #   town            CCH-WICKER-COVE-ALPHA-001: go down to Wicker Cove (at hour=, if given); tinn: in the inn's room;
 #                   ttile=X,Y stand on this village tile (the room's own coordinates with tinn); ttalk=thomas|edith
 #                   talk to them (the first-meeting scene; tmet skips it and opens their counter); ttab=NAME opens
@@ -603,6 +607,17 @@ func _initialize() -> void:
 			main._on_panel_action("hearth_" + str(opt["hearth"]))
 		for i in 6:
 			await process_frame
+	if opt.has("rest") and main.get("evening") != null and main.evening.has_method("_quiet"):
+		main.notice_queue.clear()
+		main.notice_text = ""
+		main.chatter_text = ""
+		main._on_panel_action("quiet_hour" if opt["rest"] == "quiet" else "hearth_sit")
+		var until := Time.get_ticks_msec() + int(float(opt.get("restwait", "1.3")) * 1000.0)
+		while Time.get_ticks_msec() < until:
+			await process_frame
+		await RenderingServer.frame_post_draw
+		_save(opt)
+		return
 	if opt.has("morning"):
 		# Sleep through a knock: morning=prep (the hearth tended), plain, or grace (the first week's first knock).
 		if main.get("evening") != null:
@@ -639,6 +654,13 @@ func _initialize() -> void:
 		main.canvas_modulate.color = Color.WHITE
 		for i in 3:
 			await process_frame
+	if opt.has("flyms") and main.get("evening") != null and "fly_s" in main.evening:
+		main.evening.sign_read_day = main.day
+		main.evening.fly_s = float(opt["flyms"]) / 1000.0
+		main.set_process(false)   # hold the flight at that moment for the shot
+		main.evening.top.queue_redraw()
+		await process_frame
+		await RenderingServer.frame_post_draw
 	if opt.has("hold"):
 		await _hold(main, opt)
 		quit()
@@ -707,6 +729,8 @@ func _hold(main, opt: Dictionary) -> void:
 			# The hand action on what the farmer faces; a panel it opens is shut again so the scene stays in view.
 			main._interact()
 			main._close_panel()
+		if part[0] == "rest-fire" or part[0] == "rest-quiet":
+			main._on_panel_action("hearth_sit" if part[0] == "rest-fire" else "quiet_hour")
 		if part[0] == "letter":
 			main.mail._add_letter("A letter", "Delivered for the recording.")
 		# CCH-CONSOLIDATED-003 Phase F: the developer panel's buttons, as a leg (debug builds): dw-KIND forces the
