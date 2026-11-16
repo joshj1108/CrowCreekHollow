@@ -1,0 +1,61 @@
+[title] OBS: hardware pad buttons isolated: 21 action bindings pinned to the bot's device
+[title] SHOT: art/style_tests/CCH-CORE-LOOP-003/play_pad/01_title.png
+[title] OBS: title buttons: (Continue) | New Game | (Load Game) | Settings | Quit
+[title] OBS: title focus on open: New Game
+[title] SHOT: art/style_tests/CCH-CORE-LOOP-003/play_pad/02_title_slots.png
+[title] OBS: slot page buttons: Slot 1: empty | Slot 2: empty | Slot 3: empty | Back
+[title] SHOT: art/style_tests/CCH-CORE-LOOP-003/play_pad/03_title_name.png
+[title] OBS: name page buttons: Begin | Back
+[D1 06:00] MSG: A new season begins. Day 1. Sunny. Walk with the left stick, and into the farmhouse door to go in.
+[D1 06:03] OBS: world started=true day=1 slot=1 coins=0 hp=10 food=99 water=99 warmth=100 sanity=100 tool=hoe inside=false tile=(59, 20) pack={"firewood":4,"seeds":5} mats={}
+[D1 06:03] OBS: joypads the engine reports connected: ["XInput Controller", "(Standard system devices) Legion-Controller 1-F6", "(Standard system devices) Legion-Controller 1-F6", "(Standard system devices) Legion-Controller 1-F6", "(Standard system devices) Legion-Controller 1-F6", "(Standard system devices) Legion-Controller 1-F6"]
+[D2 09:00] SETUP: day 2, 09:00, 14 turnips, 3 perch and 40 coins in the pack
+[D2 09:14] MSG: Your diary is in the desk drawer, in the farmhouse bedroom. Walk in at the front door with the left stick, face the desk and press A.
+[D2 09:36] MSG: The east gate. A to take the road down to Wicker Cove.
+[D2 09:36] CHECK: ok walked to the east gate
+[D2 09:37] MSG: The east gate, and the road down the hill to Wicker Cove: half an hour's walk each way. A again to go.
+[D2 10:07] MSG: You smelled the sea before you saw the water. Wicker Cove: the store is on your right, the inn down the street, the harbour at the bottom. The road home is behind you.
+
+The east gate, and the road down the hill to Wicker Cove: half an hour's walk each way. A again to go.
+[D2 10:07] CARD: The road goes down through the firs, and the air turns to salt.
+[D2 10:08] CHECK: ok down the road to Wicker Cove
+[D2 10:18] CHECK: ok reached Thomas's counter
+[D2 10:18] CHECK: ok handed in the turnip order
+[D2 10:20] CHECK: ok reached the notice board
+[D2 10:20] CHECK: ok the notice board opens by its tile
+[D2 10:20] OBS: notices: produce=6 turnips for 70, prepared=2 grilled fish for 25, household=3 fish for 25
+[D2 10:20] CHECK: ok three notices are up
+[D2 10:20] SHOT: art/style_tests/CCH-CORE-LOOP-003/play_pad/04_board_open.png
+[D2 10:20] MSG: You smelled the sea before you saw the water. Wicker Cove: the store is on your right, the inn down the street, the harbour at the bottom. The road home is behind you.
+
+You unpin the notice and pocket it: 6 turnips, for 70 coins. Hand it in at Thomas's counter.
+[D2 10:20] CHECK: ok took the produce notice
+[D2 10:20] MSG: You smelled the sea before you saw the water. Wicker Cove: the store is on your right, the inn down the street, the harbour at the bottom. The road home is behind you.
+
+You unpin the notice and pocket it: 3 fish, for 25 coins. Hand it in at Thomas's counter.
+[D2 10:20] CHECK: ok took the household notice
+[D2 10:20] MSG: You smelled the sea before you saw the water. Wicker Cove: the store is on your right, the inn down the street, the harbour at the bottom. The road home is behind you.
+
+You leave it for someone else. Thomas will pin up another next week.
+[D2 10:20] CHECK: ok declined the prepared notice, nothing lost
+[D2 10:20] SHOT: art/style_tests/CCH-CORE-LOOP-003/play_pad/05_board_taken.png
+[D2 10:21] CHECK: ok back at Thomas's counter
+[D2 10:21] CHECK: ok the counter opens
+[D2 10:21] SHOT: art/style_tests/CCH-CORE-LOOP-003/play_pad/06_counter_taken.png
+[D2 10:21] CHECK: ok handed in the produce notice
+[D2 10:21] SHOT: art/style_tests/CCH-CORE-LOOP-003/play_pad/07_delivered_produce.png
+[D2 10:21] CHECK: ok handed in the household notice
+[D2 10:21] CHECK: ok the counter offers no second payment
+[D2 10:23] CHECK: ok Thomas speaks of the delivery
+[D2 10:23] SHOT: art/style_tests/CCH-CORE-LOOP-003/play_pad/08_thomas_after.png
+[D2 10:26] MSG: "Six. Good ones, too." He weighs them anyway, out of habit, and counts the coins out twice. +70 coins.
+
+You leave it for someone else. Thomas will pin up another next week.
+[D2 11:04] MSG: "Six. Good ones, too." He weighs them anyway, out of habit, and counts the coins out twice. +70 coins.
+
+Back up the hill road, through the east gate, and home.
+[D2 11:04] CARD: Up the hill road, out of the fog, to the farm.
+[D2 11:05] CHECK: ok walked up the road
+[D2 11:05] CHECK: ok home inside the east gate
+[D2 11:05] OBS: end coins=205 hp=10 food=94 water=93 warmth=100 sanity=100 tool=hoe inside=false tile=(71, 43) pack={"crops":2,"firewood":4,"seeds":5} mats={} history=[{ "day": 2, "kind": "produce", "food": "turnip", "n": 6, "coins": 70, "label": "turnips" }, { "day": 2, "kind": "household", "food": "any_fish", "n": 3, "coins": 25, "label": "fish" }]
+[D2 11:05] END: problems=0 shots=8

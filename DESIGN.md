@@ -380,7 +380,7 @@ The list:
 | Dish | Needs | Level | Sells | Also |
 |---|---|---|---|---|
 | Grilled fish | 1 fish (any), 1 wood | Cooking 0 | 8 | |
-| Turnip hash | 2 turnips, 1 wood | Cooking 0 | 8 | |
+| Turnip hash | 1 turnip, 1 wood | Cooking 0 | 8 | +10 warmth |
 | Baked potato | 1 potato, 1 wood | Cooking 1 | 9 | +10 warmth |
 | Rose hip tea | 3 rose hips, 1 wood | Cooking 1 | 8 | +15 warmth, +20 water, +4 calm |
 | Nettle soup | 2 nettles, 1 wood | Cooking 1 | 10 | +10 warmth, +15 water |
@@ -389,7 +389,7 @@ The list:
 | Fiddlehead fry | 2 fiddleheads, 1 egg, 1 wood | Cooking 2 | 14 | |
 | Farmhouse bread | 2 flour, 1 egg, 1 wood | Cooking 3 | 14 | for a walker with no rations |
 | Pumpkin soup | 2 pumpkins, 1 wood | Cooking 3 | 12 | +10 warmth |
-| Fish stew | 1 fish (any), 2 turnips, 1 wood | Cooking 3 | 13 | +10 warmth |
+| Fish stew | 1 fish (any), 1 turnip, 1 wood | Cooking 3 | 13 | +10 warmth |
 | Colcannon | 2 potatoes, 1 kale, 1 milk, 1 wood | Cooking 3 | 18 | +10 warmth |
 | Leek and potato soup | 1 leek, 2 potatoes, 1 wood | Cooking 3 | 20 | +25 warmth, +10 water |
 | Roast roots | 2 parsnips, 1 turnip, 1 wood | Cooking 3 | 22 | +15 warmth |
@@ -882,12 +882,20 @@ CCH-WICKER-COVE-ALPHA-001 (2026-11-15): the first playable version of Wicker Cov
 - **Thomas Bellweather (store):** a short first-meeting scene, then his counter: his word for the day (rotating lines, a seasonal one, a late one, a callback once you have traded, a line after the order), the order, Buy (lamp oil 9, turnip seeds 3, flour 6, rope 7, bandage 12, trail ration 14; a few of each a day) and Sell produce (crops, eggs and milk at the farm stand's full price, 12 a day).
 - **The fish market:** nobody at the stall, prices on a slate and an honesty tin. Buys fish at their stand price (8 a day); sells perch (8) and smoked fish (15).
 - **Edith Vale (inn):** the door on the lane opens the common room (hearth with fire, her counter, two tables, barrels). A first-meeting scene, then the inn's counter: her word for the day and food to carry home (fish stew 17, bread 18, rose hip tea 11). No new recovery mechanic. She mentions the leaking back room; there is no repair quest yet.
-- **The order:** "Turnips for the store": six turnips, all at once, at Thomas's counter, for 70 coins (54 at the stand). Once only in the alpha (`orders_done`). Pinned to the notice board while it stands.
+- **The order:** "Turnips for the store": six turnips, all at once, at Thomas's counter, for 70 coins (54 at the stand). Once only in the alpha (`orders_done`). Pinned to the notice board while it stands. It counts turnips only (until CCH-CORE-LOOP-003 it counted any crop and took turnips, so six kale could leave the turnip count negative).
+- **Repeatable notices (CCH-CORE-LOOP-003):** once the turnip order is in, Thomas keeps three notices on the board, one of each kind (`TownData.REPEAT_ORDERS`), each asking for one thing, all at once:
+  - *Produce for the store* (×1.3 the stand): 6 turnips, 5 kale, 6 potatoes, 4 corn, 3 leeks, 3 pumpkins or 3 parsnips.
+  - *A pot for the inn* (×1.5, Edith's, handed in at the store): 3 turnip hash, 2 grilled fish, 2 fish stew or 2 smoked fish.
+  - *Household supplies* (×1.3): 3 fish (any), 4 eggs or 2 jugs of milk.
+  - Only what you could fill now is asked: crops in season and within your Farming level, dishes within their skill level (smoked fish once the smokehouse stands), eggs with hens, milk with goats. The reward is the stand's full price for the lot times the premium, to the nearest 5 coins and at least 3 over (week 1 of a new game: 6 turnips 70, 2 grilled fish 25, 3 fish 25).
+  - **The week:** notices change every 7 days (from day 1). One not taken comes down when the week turns. **Take it** (the board, facing it) and it stays yours until you **hand it in** at Thomas's counter or **give it up**; **Decline** takes it down. A kind handed in or turned down gets its next notice at the next week's turn, so each pays at most once a week and nothing can be re-rolled. A notice is picked by the week and its kind, not at random, and saved, so loading changes nothing. No penalty for declining or giving up.
+  - Thomas mentions the delivery the day of and the day after, naming what was handed over (`REPEAT_DONE_LINES`), only from a delivery that went through.
+  - **Memory hook:** each delivery sets `flags["order_<kind>"]` (first day) and appends `{day, kind, food, n, coins, label}` to `TownSystem.history` (the last 30), for a later callback, letter or diary line. Nothing else reads it yet.
 - **Fog and light:** the fog is there day and night, every season and weather. A drifting grey on the art-pixel grid, thin within three tiles of the farmer and thicker with distance and over the water. The light is the day's sky leaned 16% toward a cool grey and never darker than a floor at night; windows and lamps are warm point lights, stronger after dusk; the inn is lit by its fire. Weather (rain, snow) shows in the street. Nothing says why the fog is there or when it came; two brothers disagree about whether it ever lifts.
-- **Saved** under `town` (save version 17): visits, the first-time hooks (`flags`: arrived, traded, delivered, met_thomas, met_edith; for the Living Memory System later, read by nothing else yet), each resident's last word, each shop's last trade day, today's stock and sales, and the orders done. An older save has none and starts fresh.
+- **Saved** under `town` (save version 17): visits, the first-time hooks (`flags`: arrived, traded, delivered, met_thomas, met_edith; for the Living Memory System later, read by nothing else yet), each resident's last word, each shop's last trade day, today's stock and sales, the orders done, and the notices (`board`, `slot_week`, `history`; new keys, no version bump: a save without them gets this week's notices, and a save with the turnips done keeps them done). An older save has none and starts fresh.
 - **Art:** PixelLab (10 requests): the store, inn, four cottages, the market stall, two dories, harbour props, Thomas and Edith, and two Wang tilesets (muddy grass to cobbles, sea to quay stone). Picked and cleaned by `tools/wicker_art.py`; ids in `pixellab-assets.json`. Reused: the farm's firs, boulders, lantern post, barrels, bench and the farmhouse interior's floor, wall, hearth, fire and furniture. The sign's words are drawn in the UI font. Portraits are code-drawn like the walkers'.
-- **Tests:** `tools/town_test.gd` (headless, slot 9: the gate, travel both ways and back three times, time, collision, doors, both residents, buying and refusing, selling, the order once only, action strings, save and load, an old save, bad data, a day ending away); `tools/town_play.gd` (one visit played with injected keyboard and mouse or Xbox input, in a throwaway profile); `menu_test.gd` covers the four village panels. `capture.gd` takes `town`, `tinn`, `ttile=`, `ttalk=`, `tmet`, `ttab=`, `tzoom=`, `thome` and `gate`.
-- **Deferred:** saltwater fishing (the pier end is look-only), more orders and partial deliveries, the inn's repair and guest rooms, more residents (Martha, Gideon), schedules, a store interior, sounds of the harbour. The postal Lowmere/Wicker Cove question (`AI_COLLAB/WICKER_COVE_POSTAL_LORE_CONTINUITY_AUDIT.md`) is untouched: no historical dialogue was renamed.
+- **Tests:** `tools/town_test.gd` (headless, slot 9: the gate, travel both ways and back three times, time, collision, doors, both residents, buying and refusing, selling, the order once only, action strings, save and load, an old save, bad data, a day ending away); `tools/orders_test.gd` (headless, slot 9: the food changes, the notices, rotation, save and load, old saves); `tools/town_play.gd` (one visit played with injected keyboard and mouse or Xbox input, in a throwaway profile); `menu_test.gd` covers the four village panels. `capture.gd` takes `town`, `tinn`, `ttile=`, `ttalk=`, `tmet`, `ttab=`, `tzoom=`, `thome` and `gate`.
+- **Deferred:** saltwater fishing (the pier end is look-only), partial deliveries, taking notices from the farm (the mailbox), the inn's repair and guest rooms, more residents (Martha, Gideon), schedules, a store interior, sounds of the harbour. The postal Lowmere/Wicker Cove question (`AI_COLLAB/WICKER_COVE_POSTAL_LORE_CONTINUITY_AUDIT.md`) is untouched: no historical dialogue was renamed.
 
 ## The diary
 

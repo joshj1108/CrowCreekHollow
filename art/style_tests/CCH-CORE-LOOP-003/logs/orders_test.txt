@@ -1,0 +1,56 @@
+Godot Engine v4.7.2.stable.steam.ed1daf0bf - https://godotengine.org
+
+ok    food: turnip hash takes one turnip and one wood
+ok    food: turnip hash restores as much Hunger as the raw turnip, and warms
+ok    food: eating it fills Hunger and warmth
+ok    food: fish stew takes a fish and one turnip
+ok    food: fish stew restores more than its raw fish and turnip
+ok    board: empty until the first order is in
+ok    board: no repeat notices before the turnips
+ok    first order: six kale are not six turnips (the old any-crop bug)
+ok    first order: six turnips pay 70
+ok    first order: still only once
+ok    board: three notices once the turnips are in
+      notice produce: 6 turnips for 70 coins (stand 54)
+      notice prepared: 2 grilled fish for 25 coins (stand 16)
+      notice household: 3 fish for 25 coins (stand 18)
+ok    board: each pays over the stand, at most ~1.7x, and can be filled now
+ok    board: no impossible early asks (no hens, goats, smokehouse or Cooking 3 yet)
+ok    board: looking again changes nothing
+ok    deliver: an untaken notice can't be handed in
+ok    accept: by the panel's action string
+ok    accept: not twice
+ok    deliver: one short is refused, nothing taken
+ok    deliver: the lot is taken and paid, by the panel's action string
+ok    deliver: a memory record and flag for the delivery
+ok    deliver: never twice
+ok    rotation: no new produce notice the same week
+ok    thomas: names what was handed in
+ok    thomas: no delivery line days later
+ok    deliver: any fish, cheapest first
+ok    pack: nothing below zero
+ok    prepared: cooked at the fire and handed in
+ok    rotation: a new week puts up all three again
+ok    rotation: the produce ask is picked by the week, not reused blindly
+ok    decline: no coins, sanity or anything lost; gone until next week
+ok    decline: no re-roll the same week
+ok    expiry: a taken notice is kept past the week
+ok    expiry: an untaken one is replaced by this week's
+ok    expiry: the declined kind is back the next week
+ok    load: loads
+ok    load: notices, taken state and history come back
+ok    load: no re-roll after loading
+ok    load: a taken notice still hands in once
+ok    alpha save: loads
+ok    alpha save: the turnip order stays done
+ok    alpha save: the board fills
+ok    alpha save, turnips open: the order stands, no notices
+ok    bad notice data: loads and drops it
+ok    panel: the board offers Take it and Decline for open notices
+ok    panel: Thomas's counter offers Hand in for a taken notice
+PASS: 0 failure(s)
+ERROR: 5 RID allocations of type 'PN13RendererDummy14TextureStorage12DummyTextureE' were leaked at exit.
+WARNING: 15 ObjectDB instances were leaked at exit (run with `--verbose` for details).
+   at: cleanup (core/object/object.cpp:2536)
+ERROR: 7 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:822)

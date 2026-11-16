@@ -1,0 +1,75 @@
+Godot Engine v4.7.2.stable.steam.ed1daf0bf - https://godotengine.org
+ERROR: Condition "err != OK" is true.
+   at: initialize (drivers/gles3/shader_gles3.cpp:802)
+ERROR: Condition "err != OK" is true.
+   at: initialize (drivers/gles3/shader_gles3.cpp:802)
+ERROR: Condition "err != OK" is true.
+   at: initialize (drivers/gles3/shader_gles3.cpp:802)
+ERROR: Condition "err != OK" is true.
+   at: initialize (drivers/gles3/shader_gles3.cpp:802)
+ERROR: Condition "err != OK" is true.
+   at: initialize (drivers/gles3/shader_gles3.cpp:802)
+ERROR: Condition "err != OK" is true.
+   at: initialize (drivers/gles3/shader_gles3.cpp:802)
+ERROR: Condition "err != OK" is true.
+   at: initialize (drivers/gles3/shader_gles3.cpp:802)
+ERROR: Condition "err != OK" is true.
+   at: initialize (drivers/gles3/shader_gles3.cpp:802)
+ERROR: Condition "err != OK" is true.
+   at: initialize (drivers/gles3/shader_gles3.cpp:802)
+OpenGL API 3.3.0 Core Profile Context 25.30.44.260508 - Compatibility - Using Device: ATI Technologies Inc. - AMD Radeon Graphics
+
+TOWN-PLAY PASS
+ERROR: 24 RID allocations of type 'N5GLES37TextureE' were leaked at exit.
+ERROR: Texture with GL ID of 131: leaked 1364 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:82)
+ERROR: Texture with GL ID of 132: leaked 1364 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:82)
+ERROR: Texture with GL ID of 143: leaked 8188 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:82)
+ERROR: Texture with GL ID of 165: leaked 1780 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:82)
+ERROR: Texture with GL ID of 293: leaked 62352 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:82)
+ERROR: Texture with GL ID of 294: leaked 98892 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:82)
+ERROR: Texture with GL ID of 295: leaked 41108 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:82)
+ERROR: Texture with GL ID of 296: leaked 39608 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:82)
+ERROR: Texture with GL ID of 297: leaked 41132 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:82)
+ERROR: Texture with GL ID of 385: leaked 8188 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:82)
+ERROR: Texture with GL ID of 386: leaked 8188 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:82)
+ERROR: Texture with GL ID of 387: leaked 8188 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:82)
+ERROR: Texture with GL ID of 388: leaked 1052 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:82)
+ERROR: Texture with GL ID of 389: leaked 3248 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:82)
+ERROR: Texture with GL ID of 390: leaked 44928 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:82)
+ERROR: Texture with GL ID of 391: leaked 41932 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:82)
+ERROR: Texture with GL ID of 392: leaked 21844 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:82)
+ERROR: Texture with GL ID of 393: leaked 21844 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:82)
+ERROR: Texture with GL ID of 396: leaked 14320 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:82)
+ERROR: Texture with GL ID of 397: leaked 2936 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:82)
+ERROR: Texture with GL ID of 398: leaked 3256 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:82)
+ERROR: Texture with GL ID of 399: leaked 13076 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:82)
+ERROR: Texture with GL ID of 400: leaked 2976 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:82)
+ERROR: Texture with GL ID of 401: leaked 1076 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:82)
+WARNING: 29 ObjectDB instances were leaked at exit (run with `--verbose` for details).
+   at: cleanup (core/object/object.cpp:2536)
+ERROR: 26 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:822)

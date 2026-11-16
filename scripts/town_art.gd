@@ -332,13 +332,13 @@ func _draw_sign(ci: CanvasItem, tile: Vector2i) -> void:
 	ci.draw_string(font, Vector2(board.position.x, board.position.y + 9.5 * S), "WICKER COVE", HORIZONTAL_ALIGNMENT_CENTER, board.size.x, 20, Color("e6dcc4"))
 
 
-# The notice board on the store's wall, with the order pinned to it while it stands.
+# The notice board on the store's wall, with a notice pinned to it while one is up and not taken on.
 func draw_board(ci: CanvasItem) -> void:
 	var cell := Rect2(13 * T, 8 * T, T, T)
 	var r := Rect2(cell.position.x + 2 * S, cell.position.y - 6 * S, 12 * S, 11 * S)
 	ci.draw_rect(r.grow(S), Color("1d1611"))
 	ci.draw_rect(r, Color("5a4430"))
-	if town.order_open():
+	if town.notices_up():
 		ci.draw_rect(Rect2(r.position.x + 2 * S, r.position.y + 2 * S, 6 * S, 7 * S), Color("e0d6bc"))
 		for k in 3:
 			ci.draw_rect(Rect2(r.position.x + 3 * S, r.position.y + (4 + k * 2) * S, 4 * S, S), Color("6a6050"))

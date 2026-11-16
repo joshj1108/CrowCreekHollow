@@ -1,0 +1,72 @@
+Godot Engine v4.7.2.stable.steam.ed1daf0bf - https://godotengine.org
+
+ok    gate: the walker is asked before the gate (MainGame._interact order)
+ok    gate: facing it from the road picks the gate tile
+ok    gate: the gate still blocks on the farm
+ok    gate: day 1 keeps you home
+ok    gate: first press only asks
+ok    travel: second press goes down
+ok    travel: arrive at the top of the road
+ok    travel: half an hour passes
+ok    travel: needs go down, nothing is refilled
+ok    travel: coins and pack untouched
+ok    travel: first arrival recorded
+ok    map: arrival tile is open road
+ok    map: the store counter is solid
+ok    map: the sea is solid
+ok    map: the pier is walkable to its end
+ok    map: the road runs from the arrival to the quay
+ok    map: the inn's lane reaches its door
+ok    map: the fish counter is reached from the quay
+ok    map: every building rectangle is solid
+ok    camera: limits are the village
+ok    layers: the village's front layer, fog and lights are on
+ok    inn: the door takes you in
+ok    inn: inside, the room's floor is open
+ok    inn: Edith's counter opens the inn
+ok    inn: the mat takes you out to the lane
+ok    store: Thomas's counter opens the store
+ok    store: rows build
+ok    buy: two flasks of oil
+ok    buy: only the day's stock is sold
+ok    buy: sold out until tomorrow
+ok    buy: refused without the coins
+ok    buy: coins limit how many
+ok    panel: an action string with an amount
+ok    buy: unknown item or shop does nothing
+ok    buy: no room in the pack, nothing bought
+ok    sell: the store takes 12 a day
+ok    sell: then no more today
+ok    sell: the store won't buy fish
+ok    sell: the fish market buys fish
+ok    sell: nothing held, nothing paid
+ok    hooks: first trade recorded
+ok    order: five turnips aren't six
+ok    order: six are handed in, all at once
+ok    order: only once
+ok    order: the board shows it done
+ok    home: the road at the top takes you home
+ok    home: half an hour back up
+ok    home: the farm's bounds again
+ok    home: back inside the east gate, on open road
+ok    travel: three round trips land in the same places
+ok    gate: shut after dark
+ok    save: made in the village puts you at the homestead
+ok    save: records the village
+ok    load: loads
+ok    load: the village comes back
+ok    load: coins and pack come back
+ok    load: no order paid twice
+ok    old save: loads
+ok    old save: nobody has met you, the order stands
+ok    old save: lifted to this version
+ok    bad village data: loads
+ok    day end in the village: you wake at the homestead
+ok    a fall in the village: you wake at the homestead
+ok    stock: a new day restocks
+PASS: 0 failure(s)
+ERROR: 5 RID allocations of type 'PN13RendererDummy14TextureStorage12DummyTextureE' were leaked at exit.
+WARNING: 15 ObjectDB instances were leaked at exit (run with `--verbose` for details).
+   at: cleanup (core/object/object.cpp:2536)
+ERROR: 7 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:822)

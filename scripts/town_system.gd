@@ -16,6 +16,13 @@ extends RefCounted
 # Memory hooks for later (the Living Memory System is not built): `flags` records the day of the first arrival
 # ("arrived"), first trade ("traded"), first delivery ("delivered"), and first word with each resident
 # ("met_thomas", "met_edith"). Building repairs would add their own keys here. Nothing else reads them yet.
+#
+# Repeatable notices (CCH-CORE-LOOP-003, TownData.REPEAT_ORDERS): `board` holds the notices up now (kind -> what it
+# wants, its coins, the week it went up, whether you took it on), `slot_week` the week each kind was last handed in
+# or turned down. Each handed-in notice also sets flags["order_<kind>"] (the first day) and appends to `history`
+# ({day, kind, food, n, coins, label}, the last HISTORY_KEEP): the integration point for the Living Memory work, so a
+# later callback, letter or diary line can say what was really delivered and when. Only a delivery that went
+# through is ever written there.
 
 const FOG_TINT := Color("a8b3bb")        # the cool grey the village's light leans toward
 const FOG_LEAN := 0.16                   # how far, by day
@@ -51,6 +58,10 @@ var stock_day := 0              # the day `bought` and `sold` count for
 var bought := {}                # "shop:item" -> how many bought today
 var sold := {}                  # shop -> how many things it has bought from you today
 var orders_done := {}           # order id -> the day it was handed in
+var board := {}                 # repeat notice kind -> {food, key, n, coins, week, taken}
+var slot_week := {}             # kind -> the week it was last handed in or turned down (no new notice until the next)
+var history: Array = []         # handed-in notices, oldest first: {day, kind, food, n, coins, label}
+const HISTORY_KEEP := 30
 
 
 func _init(main: MainGame) -> void:
@@ -505,6 +516,10 @@ func _line(who: String) -> String:
 	if m.current_hour >= TownData.LATE_HOUR:
 		return str(TownData.LATE_LINES[who])
 	var shop := "store" if who == "thomas" else "inn"
+	# The newest delivery first: a notice can only follow the turnip order, so its line wins when both are recent.
+	if who == "thomas" and not history.is_empty() and int(history[-1]["day"]) >= m.day - 1:
+		var last: Dictionary = history[-1]
+		return str(TownData.REPEAT_DONE_LINES[str(last["kind"])]) % str(last["label"])
 	if who == "thomas" and orders_done.has("thomas_turnips") and int(orders_done["thomas_turnips"]) >= m.day - 1:
 		return TownData.ORDER_DONE_LINE
 	if trade_day.has(shop) and int(trade_day[shop]) < m.day and int(trade_day[shop]) >= m.day - 7 and (m.day % 3) == 0:
@@ -576,6 +591,164 @@ func order_open() -> bool:
 	return false
 
 
+# True when the board has anything on it you haven't taken on: the first order, or a repeat notice.
+func notices_up() -> bool:
+	if order_open():
+		return true
+	_refresh_board()
+	for kind in board:
+		if not bool(board[kind]["taken"]):
+			return true
+	return false
+
+
+# --- Repeatable notices (TownData.REPEAT_ORDERS) ----------------------------------------------------
+
+func _week() -> int:
+	return maxi(0, m.day - 1) / TownData.ORDER_WEEK
+
+
+# The pack key a notice's food is counted and spent under (MainGame._held, _spend_recipe_input).
+func _food_key(food: String) -> String:
+	if food == "any_fish":
+		return "any_fish"
+	if food == "turnip":
+		return "turnips"
+	return str(Foods.find(food)["held"])
+
+
+const NO_PLURAL := ["fish", "stew", "hash", "corn", "kale"]
+
+
+# The food's name for a notice: "turnips", "fish stew", "jugs of milk", "fish".
+func _food_label(food: String, n: int) -> String:
+	if food == "any_fish":
+		return "fish"
+	if food == "milk":
+		return "jugs of milk" if n > 1 else "jug of milk"
+	var name := str(Foods.find(food)["name"]).to_lower()
+	if n <= 1 or name.ends_with("s"):
+		return name
+	for tail in NO_PLURAL:
+		if name.ends_with(tail):
+			return name
+	return name + ("es" if name.ends_with("o") else "s")
+
+
+func _stand_price(food: String) -> int:
+	return m.stall._food_price("perch" if food == "any_fish" else food)
+
+
+# Could the farmer fill this option now, from what the farm has? (Not whether the pack holds it today.)
+func _option_ok(food: String) -> bool:
+	if food == "any_fish":
+		return true   # the pond, from the first day
+	var f := Foods.find(food)
+	if f.is_empty():
+		return false
+	if m.progression._level(str(f["skill"])) < int(f["level"]):
+		return false
+	match str(f["kind"]):
+		"crop":
+			var seasons: Array = m.CROPS[food]["seasons"]
+			return seasons.is_empty() or seasons.has(m._season_today())
+		"animal":
+			return m.hens > 0 if food == "egg" else m.goats > 0
+		"cooked":
+			var r := Foods.recipe(food)
+			return not r.is_empty() and (str(r["station"]) != "smokehouse" or m.smokehouse_built)
+	return true
+
+
+# Posts this week's notices where a slot is free, and takes down untaken ones from an earlier week. A notice is
+# picked by the week and its kind, never at random, so loading or leaving and coming back can't change it.
+func _refresh_board() -> void:
+	if not orders_done.has("thomas_turnips"):
+		return   # the board fills once the first order is in
+	var week := _week()
+	for kind in TownData.ORDER_KINDS:
+		if board.has(kind) and not bool(board[kind]["taken"]) and int(board[kind]["week"]) < week:
+			board.erase(kind)
+		if board.has(kind) or int(slot_week.get(kind, -1)) >= week:
+			continue
+		var spec: Dictionary = TownData.REPEAT_ORDERS[kind]
+		var options: Array = []
+		for o in spec["options"]:
+			if _option_ok(str(o["food"])):
+				options.append(o)
+		if options.is_empty():
+			continue
+		var pick: Dictionary = options[(week + TownData.ORDER_KINDS.find(kind)) % options.size()]
+		var food := str(pick["food"])
+		var n := int(pick["n"])
+		var stand := n * _stand_price(food)
+		var coins := maxi(stand + 3, int(round(float(stand) * float(spec["premium"]) / 5.0)) * 5)
+		board[kind] = {"food": food, "key": _food_key(food), "n": n, "coins": coins, "week": week, "taken": false}
+
+
+func _notice_want(e: Dictionary) -> String:
+	return "%d %s" % [int(e["n"]), _food_label(str(e["food"]), int(e["n"]))]
+
+
+func _notice_text(kind: String) -> String:
+	var e: Dictionary = board[kind]
+	return str(TownData.REPEAT_ORDERS[kind]["board"]) % [_notice_want(e), int(e["coins"])]
+
+
+func _notice_ready(kind: String) -> bool:
+	return board.has(kind) and m._held(str(board[kind]["key"])) >= int(board[kind]["n"])
+
+
+# Takes a notice on: it stays yours until handed in or given up.
+func accept(kind: String) -> bool:
+	_refresh_board()
+	if not board.has(kind) or bool(board[kind]["taken"]):
+		return false
+	board[kind]["taken"] = true
+	m._show_message("You unpin the notice and pocket it: %s, for %d coins. Hand it in at Thomas's counter." % [_notice_want(board[kind]), int(board[kind]["coins"])])
+	return true
+
+
+# Turns a notice down (taken or not). No penalty: the kind gets a new notice at the next week's turn.
+func decline(kind: String) -> bool:
+	_refresh_board()
+	if not board.has(kind):
+		return false
+	board.erase(kind)
+	slot_week[kind] = _week()
+	m._show_message("You leave it for someone else. Thomas will pin up another next week.")
+	return true
+
+
+# Hands a taken notice in at the counter, all at once. Checked again here, so no button state can pay twice.
+func deliver_notice(kind: String) -> bool:
+	_refresh_board()
+	if not board.has(kind) or not bool(board[kind]["taken"]):
+		return false
+	var e: Dictionary = board[kind]
+	var key := str(e["key"])
+	var n := int(e["n"])
+	if m._held(key) < n:
+		m._show_message("Not yet: it wants %s, all at once. You have %d." % [_notice_want(e), m._held(key)])
+		return false
+	m._spend_recipe_input(key, n)
+	var coins := int(e["coins"])
+	m.money += coins
+	board.erase(kind)
+	slot_week[kind] = _week()
+	var label := _food_label(str(e["food"]), n)
+	history.append({"day": m.day, "kind": kind, "food": str(e["food"]), "n": n, "coins": coins, "label": label})
+	while history.size() > HISTORY_KEEP:
+		history.pop_front()
+	if not flags.has("order_" + kind):
+		flags["order_" + kind] = m.day
+	if not flags.has("delivered"):
+		flags["delivered"] = m.day
+	m.play_sfx("coin", 0.03)
+	m._show_message("Thomas counts the %s, writes it in the ledger, and counts out %d coins. +%d coins." % [label, coins, coins], true)
+	return true
+
+
 # "6 turnips": what an order wants, in words.
 func _want_text(o: Dictionary) -> String:
 	var parts: Array = []
@@ -602,7 +775,33 @@ func _rows(tab: String) -> Array:
 			var done := orders_done.has(str(o["id"]))
 			rows.append({"name": str(o["title"]), "status": "Done" if done else "Open", "status_kind": "done" if done else "ok",
 				"value": "Handed in" if done else "Wants %s" % _want_text(o), "about": str(o["board"])})
-		rows.append({"note": "Hand an order in at Thomas's counter, all at once. Older notices have been taken down; the pins are still there."})
+		_refresh_board()
+		for kind in TownData.ORDER_KINDS:
+			if not board.has(kind):
+				continue
+			var e: Dictionary = board[kind]
+			var title := str(TownData.REPEAT_ORDERS[kind]["title"])
+			var ready := _notice_ready(kind)
+			var held := "You have %d." % m._held(str(e["key"]))
+			if bool(e["taken"]):
+				rows.append({"name": title, "status": "Taken", "status_kind": "ok" if ready else "short",
+					"value": "%s for %d coins" % [_notice_want(e), int(e["coins"])],
+					"about": _notice_text(kind) + " You took this one on: hand it in at Thomas's counter. " + held,
+					"needs": [{"text": _notice_want(e), "ok": ready}],
+					"button": "Give it up", "action": "town:decline|" + kind, "enabled": true})
+			else:
+				rows.append({"name": title, "status": "Open", "status_kind": "ok",
+					"value": "%s for %d coins" % [_notice_want(e), int(e["coins"])],
+					"about": _notice_text(kind) + " Up for this week; it comes down when the week turns unless you take it. " + held,
+					"needs": [{"text": _notice_want(e), "ok": ready}],
+					"button": "Take it", "action": "town:accept|" + kind, "enabled": true})
+				rows.append({"name": "Leave it: %s" % title.to_lower(), "value": "No harm done",
+					"about": "Leave this one for someone else. Thomas pins up a new one of these next week.",
+					"button": "Decline", "action": "town:decline|" + kind, "enabled": true})
+		if orders_done.has("thomas_turnips"):
+			rows.append({"note": "Thomas changes the notices every %d days. Take one on here and hand it in at his counter, all at once. One handed in or turned down is replaced when the week turns." % TownData.ORDER_WEEK})
+		else:
+			rows.append({"note": "Hand an order in at Thomas's counter, all at once. Older notices have been taken down; the pins are still there."})
 		return rows
 	var shop := _shop_for_tab(tab)
 	var spec: Dictionary = TownData.SHOPS[shop]
@@ -625,6 +824,27 @@ func _rows(tab: String) -> Array:
 				"about": str(o["board"]), "status": "Ready" if ok else "Not yet", "status_kind": "ok" if ok else "short",
 				"needs": [{"text": _want_text(o), "ok": ok}],
 				"button": "Hand in", "action": "town:deliver|" + str(o["id"]), "enabled": ok})
+		_refresh_board()
+		var waiting := 0
+		var headed := false
+		for kind in TownData.ORDER_KINDS:
+			if not board.has(kind):
+				continue
+			if not bool(board[kind]["taken"]):
+				waiting += 1
+				continue
+			var e: Dictionary = board[kind]
+			var ready := _notice_ready(kind)
+			if not headed:
+				headed = true
+				rows.append({"section": "Notices you took on"})
+			rows.append({"name": str(TownData.REPEAT_ORDERS[kind]["title"]), "value": "%s, all at once" % _notice_want(e),
+				"about": _notice_text(kind) + " You have %d." % m._held(str(e["key"])),
+				"status": "Ready" if ready else "Not yet", "status_kind": "ok" if ready else "short",
+				"needs": [{"text": _notice_want(e), "ok": ready}],
+				"button": "Hand in", "action": "town:deliver|" + kind, "enabled": ready})
+		if waiting > 0:
+			rows.append({"note": "%d notice%s on the board outside, not yet taken on." % [waiting, "" if waiting == 1 else "s"]})
 	rows.append({"section": "Buy"})
 	for s in spec["sells"]:
 		var left := _stock_left(shop, s)
@@ -699,7 +919,16 @@ func _action(action: String) -> void:
 				sell(parts[1], parts[2], amount)
 		"deliver":
 			if parts.size() == 2:
-				deliver(parts[1])
+				if TownData.REPEAT_ORDERS.has(parts[1]):
+					deliver_notice(parts[1])
+				else:
+					deliver(parts[1])
+		"accept":
+			if parts.size() == 2:
+				accept(parts[1])
+		"decline":
+			if parts.size() == 2:
+				decline(parts[1])
 
 
 # Buys n of item at shop. Every limit is checked again here, so no button state can make it go wrong.
@@ -773,7 +1002,7 @@ func deliver(id: String) -> bool:
 		m._show_message("Not yet: it wants %s, all at once." % _want_text(o))
 		return false
 	for key in o["want"]:
-		m.folk._take(str(key), int(o["want"][key]))
+		m._spend_recipe_input(str(key), int(o["want"][key]))
 	orders_done[id] = m.day
 	var got: String = m.folk._give_reward(o["reward"])
 	if not flags.has("delivered"):
@@ -787,7 +1016,7 @@ func deliver(id: String) -> bool:
 
 func _to_save() -> Dictionary:
 	return {"visits": visits, "flags": flags, "talk_day": talk_day, "trade_day": trade_day, "stock_day": stock_day,
-		"bought": bought, "sold": sold, "orders_done": orders_done}
+		"bought": bought, "sold": sold, "orders_done": orders_done, "board": board, "slot_week": slot_week, "history": history}
 
 
 # An older save has no village: everything starts fresh, and nobody has met you.
@@ -802,6 +1031,9 @@ func _from_save(d: Variant) -> void:
 	bought = {}
 	sold = {}
 	orders_done = {}
+	board = {}
+	slot_week = {}
+	history = []
 	if typeof(d) != TYPE_DICTIONARY:
 		return
 	visits = maxi(0, int(d.get("visits", 0)))
@@ -812,3 +1044,33 @@ func _from_save(d: Variant) -> void:
 			var dst: Dictionary = get(key)
 			for k in src:
 				dst[str(k)] = maxi(0, int(src[k]))
+	# Repeat notices (CCH-CORE-LOOP-003). Anything malformed is dropped rather than trusted: a notice must name a
+	# known kind and food, a count and coins over zero; the board then refills at the next look.
+	var b: Variant = d.get("board", {})
+	if typeof(b) == TYPE_DICTIONARY:
+		for kind in b:
+			var e: Variant = b[kind]
+			if not TownData.REPEAT_ORDERS.has(str(kind)) or typeof(e) != TYPE_DICTIONARY:
+				continue
+			var food := str(e.get("food", ""))
+			if food != "any_fish" and Foods.find(food).is_empty():
+				continue
+			var n := int(e.get("n", 0))
+			var coins := int(e.get("coins", 0))
+			if n <= 0 or coins <= 0:
+				continue
+			board[str(kind)] = {"food": food, "key": _food_key(food), "n": n, "coins": coins,
+				"week": maxi(0, int(e.get("week", 0))), "taken": bool(e.get("taken", false))}
+	var sw: Variant = d.get("slot_week", {})
+	if typeof(sw) == TYPE_DICTIONARY:
+		for kind in sw:
+			if TownData.REPEAT_ORDERS.has(str(kind)):
+				slot_week[str(kind)] = int(sw[kind])
+	var h: Variant = d.get("history", [])
+	if typeof(h) == TYPE_ARRAY:
+		for e in h:
+			if typeof(e) == TYPE_DICTIONARY and TownData.REPEAT_ORDERS.has(str(e.get("kind", ""))):
+				history.append({"day": int(e.get("day", 0)), "kind": str(e["kind"]), "food": str(e.get("food", "")),
+					"n": int(e.get("n", 0)), "coins": int(e.get("coins", 0)), "label": str(e.get("label", "produce"))})
+		while history.size() > HISTORY_KEEP:
+			history.pop_front()

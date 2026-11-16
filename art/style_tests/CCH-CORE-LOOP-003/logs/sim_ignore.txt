@@ -1,0 +1,60 @@
+Godot Engine v4.7.2.stable.steam.ed1daf0bf - https://godotengine.org
+
+mode=ignore style= days=160 shelter=[1.0, 0.75, 0.6, 0.45] quiet=true stage=-1
+day date   coins san/max fea  Fa Ca Cl Bu Fo Mi Sm steps shd tax  grow wood fib wear kept night  hearts M/D/V/P
+  1 Oct 1     9  92/100   0   1  1  1  2  2  1  1     1   0    0    5    7   0    0    0 first-  0/0/0/0
+ 11 Oct 11    22  49/100   5   2  2  1  5  3  1  1     3   5    0   29   19   3    4    0 watcher-  0/0/0/0
+ 21 Oct 21   215  87/ 99   9   5  3  2  6  4  3  1     5   5    0   38   42   6    0    7 field-  0/0/0/0
+ 31 Oct 31   378  93/100  14   6  4  3  7  5  5  1     7   4    0   38   55  15    0   17 pond-  0/0/0/0
+ 41 Nov 10   687  80/100   8   7  5  4  7  5  5  4     8   4    0   40   11  17    0   27 quiet  0/0/0/0
+ 51 Nov 20   887  80/100   9   8  6  4  8  6  6  5     8   5    0   39   18  19    0   37 knock-  0/0/0/0
+ 61 Nov 30   838  66/100  12   8  6  5  8  6  6  5     8   5    0   39    8  30    0   47 watcher-  0/1/0/0
+ 71 Dec 10  1088  82/100   7   8  6  5  8  6  7  6     8   7    0   40   19  34    0   57 crows-  0/1/0/0
+ 81 Dec 20  1243  27/ 95  11   8  7  5  8  7  7  6     9   4    0   40    9  33    0   67 hollow-  0/1/0/1
+ 91 Dec 30  1166  31/ 99  15   9  7  6  8  7  7  6    10   7    0   38   15  45    0    0 pond-  0/1/0/1
+101 Jan 9   664  19/ 95  25   9  7  6  9  7  7  6    10   4    0   40   24  49    0    0 hollow-  0/1/0/1
+111 Jan 19   291  41/ 97  30   9  7  6  9  7  8  7    11   5    0   38   13  53    0    0 quiet  0/1/0/1
+121 Jan 29   371  35/100  34   9  7  6  9  7  8  7    11   8    0   38   30  65    0    0 pond-  0/1/0/1
+131 Feb 8   181  40/100   0   9  8  6  9  7  8  7    11   6    0   36   20  69    0    0 field-  0/1/1/1
+141 Feb 18   117  53/100   8   9  8  6  9  8  8  8    11   8    0   62   35  73    0    0 quiet  0/1/1/1
+151 Feb 28   317  43/100  15  10  8  7  9  8  8  8    11   5    0   54   20  85    0    5 crows-  0/2/1/1
+160 Mar 9   266  88/ 99  18  10  8  7  9  8  8  8    11   6    0   53   13  90    0    0 crows-  0/2/1/1
+--- milestones (first day)
+Bushcrafting 2=1  Forestry 2=1  step: boarded=1  Forestry 3=2  Bushcrafting 3=4  pedlar seen=4  Carpentry 2=5  
+well repaired=5  Farming 2=6  step: plot_two=6  Bushcrafting 4=7  hose attached=7  step: coop=7  Bushcrafting 5=11  
+Carpentry 3=12  Farming 3=12  cellar_room waits: Carpentry=13  cellar_room waits: coins=13  cellar_room waits: copper_bar=13  
+cellar_room waits: hardwood=13  cellar_room waits: stone=13  porch waits: Carpentry=13  porch waits: coins=13  
+porch waits: copper_bar=13  porch waits: hardwood=13  porch waits: wood=13  step: patched=13  Forestry 4=14  
+Farming 4=15  Mining 2=15  150 coins held=17  Mining 3=17  root cellar=17  Cleaning 2=18  Bushcrafting 6=19  
+Farming 5=19  step: hollow_lantern=19  Forestry 5=22  Carpentry 4=24  Farming 6=24  Mining 4=24  step: smokehouse=24  
+step: woodshed=24  wallpaper=24  Cleaning 3=26  furniture: painting=27  Mining 5=30  Bushcrafting 7=31  
+Farming 7=33  Carpentry 5=34  Smithing 2=34  step: furnace=34  Smithing 3=35  coop hopper=35  copper nozzle=35  
+decor: birdbath=36  furniture: armchair=36  Smithing 4=37  Cleaning 4=38  sprinklers 1=38  Forestry 6=42  
+decor: bench=42  Mining 6=43  Smithing 5=43  Carpentry 6=47  bell: coins=47  deed begun=49  Bushcrafting 8=51  
+Farming 8=51  Cleaning 5=55  furniture: dresser=57  Smithing 6=63  Mining 7=65  bell: bell_metal=71  
+got bell_metal=71  Carpentry 7=75  Forestry 7=77  step: barn=77  Farming 9=85  barn hopper=85  step: plot_three=85  
+Cleaning 6=86  Bushcrafting 9=93  tax paid=93  bell: feathers=94  sprinklers 5=99  Mining 8=103  Smithing 7=103  
+step: lamp=103  furniture: clock=106  spray head=119  decor: weathervane=123  Carpentry 8=124  furniture: feather_bed=130  
+Forestry 8=134  cistern=135  Smithing 8=141  Cleaning 7=142  Farming 10=145  sprinklers 8=147  bell: bell_frame=153  
+got bell_frame=153  got storm_oak=157  
+--- totals: nights { "faced": 0, "ignored": 143, "lost": 0, "skipped": 0, "hollow": 27, "raids_won": 0, "blessed": 0 }, min sanity 2, days under 30 sanity 25, sanity limit 99, HP lost to needs 0, hours empty { "food": 0.0, "water": 0.0, "warmth": 1.25 }, hours fished 13
+--- madness: days under 60 / 40 / 20 sanity: 85 / 45 / 8; raids 141 (won 0); blight on the ground now 22 tiles; hens 1
+--- coins earned { "crops": 2723, "eggs_milk": 647, "fish": 0, "forage": 1273, "cooked": 1871 }, spent { "seeds": 2203, "animals": 1494, "tax": 421, "pedlar": 443, "cards": 90, "estate": 3000 }; hens 1 goats 1; property value 416; tax owed 0
+--- materials: {"apple_sapling":0,"bell_clapper":0,"bell_frame":1,"bell_metal":1,"bell_rope":0,"copper_bar":22,"copper_ore":254,"feathers":18,"fiber":90,"flax":0,"flour":0,"hardwood":60,"iron_bar":104,"iron_ore":1,"lamp_oil":0,"resin":189,"rope":0,"sticks":272,"stone":163,"storm_oak":1,"wood":13}
+--- harvested {"corn":84,"garlic":82,"kale":455,"leek":37,"parsnip":56,"peas":34,"potato":48,"pumpkin":46,"turnip":145}; withered 27
+--- foraged 809, fish caught 26 (0 at night), cooked by _cook {"baked_potato":6,"bramble_jam":5,"dried_mushrooms":86,"forager_stew":8,"ghost_tincture":8,"nettle_soup":1,"pea_soup":1,"rosehip_tea":29}
+--- chores over 160 days: { "water_presses": 804, "hand_feeds": 114, "hopper_fills": 12, "tidies": 147, "mends": 286 }; sprinklers 8
+--- cave: 5.9 copper and 2.2 iron nodes a day on average, over 146 visits
+--- folk: 79 visits, 83 words, 4 gifts (1 loved), 0 requests done; hearts Maren 0, Davy 2, vicar 1, postman 1
+--- scenes seen (day): davy_notes 146
+--- second year: beats {}, meeting not held, Davy -, Hollow left at the door 0; endings reached (day) none
+--- crow charms made 0
+--- estate: extensions [], furniture ["painting", "armchair", "dresser", "clock", "feather_bed"], paint plain, paper damask, deed 1500/12000; fences 120; stand glut {"cooked":1.0,"forage":1.0}
+--- next step: Plant four flower beds
+--- achievements earned 9 of 60 by day 161: FIRST_NIGHT=2, SIGHTING=10, BACK=85, FIRST_HARVEST=11, FIRST_CATCH=3, FIRST_MEAL=3, LANTERN=2, HOLLOW_LANTERN=20, YARD=80
+--- achievements not earned (value/goal): FIRST_YEAR 2/10, HOUSE_PAGES 7/10, KNOCK 0/1, MEETING 0/1, DAVY 0/1, ALL_CHAPTERS 2/17, END_BELL 0/1, END_ELIAS 0/1, END_HOLLOW 0/1, END_ALL 0/3, EDGE 0/1, DARK_TRAIL 0/1, NIGHT_TREK 0/1, ALL_ROUTES 0/4, WOOD_PAGES 0/5, GROVE 0/1, DREAD 0/6, BARE 0/1, DARK_NIGHT 0/1, FACE_FIELD 0/1, FACE_KNOCK 0/1, FACE_CROWS 0/1, FACE_POND 0/1, FACE_WATCHER 0/1, FACE_STEPS 0/1, HOLLOW 0/1, RAID 0/1, WINTER 0/1, CLEAN_SEASON 0/1, FACED_50 0/50, FRIEND 2/4, REQUEST 0/1, MAREN 0/1, DAVY_SCENE 0/1, VICAR 0/1, POST 0/1, HEARTS 0/4, REQUESTS_ALL 0/12, RESTORED 2/3, ALL_CROPS 9/11, ALL_FISH 0/8, ALL_RECIPES 9/31, EXTENDED 0/3, DEED 0/1, MASTER 1/10, PALE_CARP 0/1, COLLAPSE 0/1, WADE 0/1, LIGHTS 0/1, CAIRN 0/1, FORTY 18/40
+ERROR: 5 RID allocations of type 'PN13RendererDummy14TextureStorage12DummyTextureE' were leaked at exit.
+WARNING: 15 ObjectDB instances were leaked at exit (run with `--verbose` for details).
+   at: cleanup (core/object/object.cpp:2536)
+ERROR: 7 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:822)

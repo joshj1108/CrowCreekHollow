@@ -57,11 +57,46 @@ const SHOPS := {
 # The one order for the alpha: posted on the store's notice board, handed in at Thomas's counter, all at once.
 # It pays a little over the stand's price for the trouble of the walk. Done once; not repeated in the alpha.
 const ORDERS := [
+	# "turnips" is the turnips themselves (MainGame._held). It was "crops" until CCH-CORE-LOOP-003, which counted
+	# any crop while only turnips were taken: six kale could hand it in and leave the turnip count negative.
 	{"id": "thomas_turnips", "who": "thomas", "title": "Turnips for the store",
-		"want": {"crops": 6}, "reward": {"coins": 70},
+		"want": {"turnips": 6}, "reward": {"coins": 70},
 		"board": "WANTED: six good turnips, for the store. 70 coins on delivery, all six at once. Ask at the counter. T. Bellweather",
 		"thanks": "\"Six. Good ones, too.\" He weighs them anyway, out of habit, and counts the coins out twice."},
 ]
+
+# Repeatable notices (CCH-CORE-LOOP-003). Once the turnip order is in, Thomas keeps three notices on the board, one
+# of each kind. A notice is posted for the week (ORDER_WEEK days, counted from day 1) and stays up until the week
+# turns; take it on and it stays yours until you hand it in or give it up. A slot that was handed in or turned down
+# gets its next notice at the next week's turn, so each kind pays at most once a week and nothing can be re-rolled.
+# What a notice asks for is fixed when it goes up (and saved), picked from the options you could fill now:
+#   food   - a Foods id; "any_fish" for any fish. Crops must be in season and within your Farming level, cooked
+#            food within its skill's level (and the smokehouse built for its dishes), eggs need hens, milk goats.
+#   n      - how many, all at once.
+# The reward is the farm stand's full price for the lot times the kind's premium, to the nearest 5 coins (and always at
+# least 3 over the stand). The stand's own daily demand (StallSystem) still applies there; a notice is an outlet beyond
+# it, worth the walk.
+const ORDER_WEEK := 7
+const ORDER_KINDS := ["produce", "prepared", "household"]
+const REPEAT_ORDERS := {
+	"produce": {"title": "Produce for the store", "premium": 1.3,
+		"board": "WANTED for the store: %s, all at once. %d coins on delivery. T. Bellweather",
+		"options": [{"food": "turnip", "n": 6}, {"food": "kale", "n": 5}, {"food": "potato", "n": 6}, {"food": "corn", "n": 4},
+			{"food": "leek", "n": 3}, {"food": "pumpkin", "n": 3}, {"food": "parsnip", "n": 3}]},
+	"prepared": {"title": "A pot for the inn", "premium": 1.5,
+		"board": "Edith at the inn wants %s, cooked and ready, for the crews. %d coins on delivery, at the store. T.B.",
+		"options": [{"food": "turnip_hash", "n": 3}, {"food": "fish_meal", "n": 2}, {"food": "fish_stew", "n": 2},
+			{"food": "smoked_fish", "n": 2}]},
+	"household": {"title": "Household supplies", "premium": 1.3,
+		"board": "WANTED: %s, for the village's kitchens. %d coins on delivery, all at once. Ask at the store.",
+		"options": [{"food": "any_fish", "n": 3}, {"food": "egg", "n": 4}, {"food": "milk", "n": 2}]},
+}
+# Thomas, the day of and the day after a notice is handed in. %s is what was actually handed over.
+const REPEAT_DONE_LINES := {
+	"produce": "\"The %s you brought sold before noon. I've put you down for more, if you'll have it.\"",
+	"prepared": "\"Edith served your %s last night and never said whose they were. From her, that's praise.\"",
+	"household": "\"The %s went out of here nearly as fast as they came in. Folk were glad of them.\"",
+}
 
 # The first time you meet each of them: a short scene. Pages are {who, expr, text}; who "" is narration.
 const MEET := {
