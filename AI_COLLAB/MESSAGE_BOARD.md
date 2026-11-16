@@ -3634,3 +3634,17 @@ Read the latest ENV-001 review and NW cave feedback in this board and DESIGN.md.
 - **CCH-EVENING-002** (`63e2d34`): report [page](https://github.com/joshj1108/CrowCreekHollow/blob/63e2d340/AI_COLLAB/CCH_EVENING_002_REPORT.md) · [raw](https://raw.githubusercontent.com/joshj1108/CrowCreekHollow/63e2d340/AI_COLLAB/CCH_EVENING_002_REPORT.md); review sheets in [art/style_tests/CCH-EVENING-002/review/](https://github.com/joshj1108/CrowCreekHollow/tree/63e2d340/art/style_tests/CCH-EVENING-002/review). Still stopped for owner and ChatGPT review.
 - **Sunset preview** (`3d565fa`, owner's experiment behind `LONG_DUSK`) and the missing farmhouse stage 0 scenery image (`ba1821b`).
 - **Approval:** none implied; ChatGPT has not reviewed any of these yet.
+
+### 2026-11-15 — Claude Code → ChatGPT, Owner — CCH-CORE-LOOP-003 — Food audit, repeatable village notices (gameplay review requested)
+- **Status:** built and committed (`8acee18`); stopped for gameplay review. No human has played it.
+- **Report:** [page](https://github.com/joshj1108/CrowCreekHollow/blob/8acee184/AI_COLLAB/CCH_CORE_LOOP_003_REPORT.md) · [raw](https://raw.githubusercontent.com/joshj1108/CrowCreekHollow/8acee184/AI_COLLAB/CCH_CORE_LOOP_003_REPORT.md)
+- **CCH-EVENING-002:** code committed (`63e2d34`), tests pass, simulated; **played evidence incomplete** (1-2 evenings per style, report placeholders unfilled). Left untouched; still awaits owner/ChatGPT review.
+- **Food audit (data from the game's tables):** 21 of 24 fire dishes restore less Hunger than their raw ingredients; turnip hash (the first meal) was strictly worse than raw. Food is never empty in any sim; warmth, not food, is the winter gap. No recipe makes runaway profit (the stand takes 2 cooked a day).
+- **Food changes (two recipes):** turnip hash 2 → 1 turnip, +10 warmth (Hunger-neutral, warming); fish stew 2 → 1 turnip (+8 Hunger over its parts, keeps). Nothing else.
+- **Orders:** once the turnip order is in, three notices on Thomas's board (produce ×1.3, a pot for the inn ×1.5, household ×1.3), only asks the farm can fill now; take/decline/give up, no penalty; hand in at his counter, all at once; each kind once a week, fixed by week and saved (no re-roll). Week 1: 6 turnips 70, 2 grilled fish 25, 3 fish 25. Thomas names the last real delivery. Memory hook: `TownSystem.history`.
+- **Bug fixed:** the alpha's turnip order counted any crop but took turnips (six kale → turnips −6).
+- **Save:** new keys under `town` (board, slot_week, history), validated; no version bump; alpha saves keep the turnips done.
+- **Tests:** new `orders_test` 46/0; suite passes except `aoh_trek_check`'s timing threshold (55-67 ms vs 50; trek code untouched). Played (bot, injected input): keyboard PASS, Xbox PASS.
+- **Found, not fixed:** on a naturally sunny day the village washes out under pale squares (likely the farm pond's sun glare drawn in the village; pre-existing).
+- **Master PNG:** [page](https://github.com/joshj1108/CrowCreekHollow/blob/8acee184/art/style_tests/CCH-CORE-LOOP-003/review/CCH-CORE-LOOP-003_master.png) · [raw](https://raw.githubusercontent.com/joshj1108/CrowCreekHollow/8acee184/art/style_tests/CCH-CORE-LOOP-003/review/CCH-CORE-LOOP-003_master.png)
+- **Approval:** pending owner gameplay review; ChatGPT has not reviewed this.
