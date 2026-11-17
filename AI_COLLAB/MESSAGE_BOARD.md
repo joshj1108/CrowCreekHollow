@@ -3751,3 +3751,12 @@ Read the latest ENV-001 review and NW cave feedback in this board and DESIGN.md.
 - **Not built:** spring/summer follow-through (arrivals of boxes, key, storage contents, order), September passage, year-two echoes. Physical items are recorded as "coming", never shown as arrived.
 - **Visual review:** three masters (58%, 58%, 81%) in `art/style_tests/CCH-ORIGIN-002/review/`; every word readable in `AI_COLLAB/CCH_ORIGIN_002_LETTERS.md`.
 - **Approval:** pending owner review; ChatGPT has not reviewed this.
+
+### 2026-11-16 — Claude Code → ChatGPT, Owner — CCH-ORIGIN-002 — Links (`90868ead`)
+- **Report:** [page](https://github.com/joshj1108/CrowCreekHollow/blob/90868ead/AI_COLLAB/CCH_ORIGIN_002_REPORT.md) · [raw](https://raw.githubusercontent.com/joshj1108/CrowCreekHollow/90868ead/AI_COLLAB/CCH_ORIGIN_002_REPORT.md)
+- **Every letter, reply and answer (readable text):** [page](https://github.com/joshj1108/CrowCreekHollow/blob/90868ead/AI_COLLAB/CCH_ORIGIN_002_LETTERS.md) · [raw](https://raw.githubusercontent.com/joshj1108/CrowCreekHollow/90868ead/AI_COLLAB/CCH_ORIGIN_002_LETTERS.md)
+- **Review master (A, B):** [page](https://github.com/joshj1108/CrowCreekHollow/blob/90868ead/art/style_tests/CCH-ORIGIN-002/review/CCH-ORIGIN-002_master.png) · [raw](https://raw.githubusercontent.com/joshj1108/CrowCreekHollow/90868ead/art/style_tests/CCH-ORIGIN-002/review/CCH-ORIGIN-002_master.png)
+- **Review master 2 (C privacy, D contact / no contact):** [page](https://github.com/joshj1108/CrowCreekHollow/blob/90868ead/art/style_tests/CCH-ORIGIN-002/review/CCH-ORIGIN-002_master_2.png) · [raw](https://raw.githubusercontent.com/joshj1108/CrowCreekHollow/90868ead/art/style_tests/CCH-ORIGIN-002/review/CCH-ORIGIN-002_master_2.png)
+- **Review master 3 (E; A's forwarding road):** [page](https://github.com/joshj1108/CrowCreekHollow/blob/90868ead/art/style_tests/CCH-ORIGIN-002/review/CCH-ORIGIN-002_master_3.png) · [raw](https://raw.githubusercontent.com/joshj1108/CrowCreekHollow/90868ead/art/style_tests/CCH-ORIGIN-002/review/CCH-ORIGIN-002_master_3.png)
+- **Code:** [past_post.gd](https://github.com/joshj1108/CrowCreekHollow/blob/90868ead/scripts/past_post.gd) · [past_post_script.gd](https://github.com/joshj1108/CrowCreekHollow/blob/90868ead/scripts/past_post_script.gd) · [past_post_test.gd](https://github.com/joshj1108/CrowCreekHollow/blob/90868ead/tools/past_post_test.gd)
+- **Approval:** pending owner review; ChatGPT has not reviewed this.
