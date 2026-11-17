@@ -60,7 +60,8 @@ func _has_read_mail() -> bool:
 func _clear_read_mail() -> void:
 	var kept: Array = []
 	for letter in m.desk_mail:
-		if bool(letter["unread"]):
+		# A letter from before still waiting on an answer (PastPost) stays with its reply rows.
+		if bool(letter["unread"]) or m.past_post.keeps(str(letter.get("post", ""))):
 			kept.append(letter)
 	m.desk_mail = kept
 	m._show_message("You take the read letters out of the mailbox and keep them.")
@@ -80,8 +81,11 @@ static func migrate(letters: Variant) -> Array:
 	for letter in letters:
 		if not (letter is Dictionary):
 			continue
-		out.append({"title": str(letter.get("title", "Letter")), "text": str(letter.get("text", "")),
-			"unread": bool(letter.get("unread", true))})
+		var kept := {"title": str(letter.get("title", "Letter")), "text": str(letter.get("text", "")),
+			"unread": bool(letter.get("unread", true))}
+		if letter.has("post"):
+			kept["post"] = str(letter["post"])   # CCH-ORIGIN-002: which PastPost letter this is
+		out.append(kept)
 	return out
 
 
@@ -91,6 +95,8 @@ func _open_mailbox() -> void:
 	lid_left = LID_TIME
 	m.play_sfx_at("door", -8.0)
 	for letter in m.desk_mail:
+		if bool(letter["unread"]) and letter.has("post"):
+			m.past_post.read(str(letter["post"]))
 		letter["unread"] = false
 	m._toggle_tab("Mailbox")
 

@@ -149,6 +149,12 @@ extends SceneTree
 #                   c42, arrive) with roadc=KEY:ID,KEY:ID as the choices already made (in order); roadpad shows the
 #                   controller's prompts, roadpause opens its pause menu. roadarrive plays the door and the fade
 #                   into the farm, then shoots the first gameplay view. Uses slot 8 and deletes it after.
+#   past=KEY:ID,..  CCH-ORIGIN-002: the road taken (the first option for any choice not given) and the first winter's
+#                   letter from that life, delivered on day 104. pfacts=crops,repair,woods,boards,inn makes those true on
+#                   the farm (pumpkins harvested, the house Boarded, the Nearwood walked, 3 boards mended, the inn mended);
+#                   pans=ID answers it, pans2=ID answers a follow-up (the order book's page); pflow=written (left for
+#                   the post), sent, answered (the sender's answer in) or lapsed (nothing sent by February 28).
+#                   mpick=ACTION (or mpick=#N) focuses that Mailbox entry, with mailopen mailpanel, so its detail shows
 #   combatlog       with hold, print COMBAT lines: each swing's press, its contact frame and hit, each blow and the guard
 
 func _initialize() -> void:
@@ -433,12 +439,23 @@ func _initialize() -> void:
 		if int(opt["mail"]) == 0:
 			main.desk_mail[0]["unread"] = false
 		main.mail.flag = 1.0 if main.mail._flag_up() else 0.0
+	if opt.has("past") and main.get("past_post") != null:
+		_past_post(main, opt)
 	if opt.has("mailopen"):
 		# Check the mailbox: its door stays open for the shot; mailpanel keeps the Mailbox panel open too.
 		main.mail._open_mailbox()
 		main.mail.lid_left = 3600.0
 		if not opt.has("mailpanel"):
 			main._close_panel()
+		if opt.has("mpick"):
+			await process_frame
+			await process_frame
+			var want := str(opt["mpick"])
+			var entries: Array = main.action_bar.list_box.get_children().filter(func(c: Node) -> bool: return c is Button)
+			for k in entries.size():
+				var e: Button = entries[k]
+				if (want.begins_with("#") and k == int(want.substr(1))) or str(e.get_meta("action", "")) == want:
+					e.grab_focus()
 	# CCH-WOODWORK-001 (guarded, so BEFORE shots still run on a build without it).
 	if opt.has("stations") and main.get("woodwork") != null:
 		var here: Vector2i = main._player_tile()
@@ -562,6 +579,14 @@ func _initialize() -> void:
 		if opt.has("dpage"):
 			var at: PackedStringArray = opt["dpage"].split(",")
 			main.action_bar.open_book_at(int(at[0]), int(at[1]) if at.size() > 1 else 0)
+		if opt.has("dpost"):
+			# CCH-ORIGIN-002: open the book at the winter post's page in Notes.
+			var secs: Array = main.panels._diary_sections()
+			for si in secs.size():
+				var pages: Array = secs[si]["pages"]
+				for pi in pages.size():
+					if str(pages[pi].get("title", "")) == str(main.past_post.script().get("title", "")):
+						main.action_bar.open_book_at(si, pi)
 		await process_frame
 		# dturn=1 or -1 turns a page forward or back, djump=N jumps to section N instead (riffled leaves), and
 		# dprog=F holds the turn at F (0 to 1) for the shot. Without dprog the turn plays out (for hold= clips).
@@ -976,3 +1001,76 @@ func _diary_cycle(ab: ActionBar) -> void:
 			ab._open_book_section(start)
 		else:
 			ab._turn_page(int(step))
+
+
+# CCH-ORIGIN-002: a farm on a chosen road, in its first winter, with the letter from that life (see past= above).
+func _past_post(main, opt: Dictionary) -> void:
+	var wants := {}
+	for pair in str(opt["past"]).split(",", false):
+		var kv := pair.split(":")
+		wants[kv[0]] = kv[1]
+	var choices := {}
+	var order := []
+	for i in 40:
+		var next := RoadScript.next_choice(choices)
+		if next.is_empty():
+			break
+		var ids: Array = RoadScript.option_ids(next)
+		var pick := str(wants.get(str(next["key"]), ids[0]))
+		choices[str(next["key"])] = pick if ids.has(pick) else ids[0]
+		order.append(str(next["key"]))
+	main.origin = OriginState.new({"v": 1, "status": "complete", "choices": choices, "order": order, "day": 1})
+	main.past_post.reset()
+	main.desk_mail = []
+	main.money = maxi(main.money, 120)
+	for f in str(opt.get("pfacts", "")).split(",", false):
+		match f:
+			"crops":
+				main.stats["crop_pumpkin"] = 4
+			"repair":
+				main.woodwork.repairs["house_1"] = {"day": 60, "cost": {}}
+				main.house_stage = maxi(main.house_stage, 1)
+			"woods":
+				main.nearwood.trips = 3
+			"boards":
+				main.stats["mended"] = 3
+			"inn":
+				main.woodwork.repairs["inn_roof"] = {"day": 90, "cost": {}}
+	var pp: PastPost = main.past_post
+	main.day = PastPost.LETTER_DAY
+	pp._morning()
+	var flow := str(opt.get("pflow", ""))
+	for l in main.desk_mail:
+		if l.has("post"):
+			pp.read(str(l["post"]))
+			l["unread"] = flow == ""
+	if opt.has("pans"):
+		main.day += 2
+		pp.answer(str(opt["pans"]))
+	if flow == "lapsed":
+		main.day = PastPost.ANSWER_BY + 1
+		pp._morning()
+	elif flow in ["sent", "answered"]:
+		main.day += 1
+		pp._morning()
+		if flow == "answered" or opt.has("pans2"):
+			main.day += PastPost.ACK_DAYS
+			pp._morning()
+		if opt.has("pans2"):
+			for l in main.desk_mail:
+				if l.has("post"):
+					pp.read(str(l["post"]))
+					l["unread"] = false
+			pp.answer(str(opt["pans2"]))
+			if flow == "answered":
+				main.day += 1
+				pp._morning()
+				main.day += PastPost.ACK_DAYS
+				pp._morning()
+	if flow != "":
+		for l in main.desk_mail:
+			if l.has("post"):
+				pp.read(str(l["post"]))
+				l["unread"] = false
+	main.mail.flag = 1.0 if main.mail._flag_up() else 0.0
+	main.diary_new = [PastPost.DIARY_ID]

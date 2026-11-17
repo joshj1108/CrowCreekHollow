@@ -117,6 +117,9 @@ func _diary_sections() -> Array:
 	# Work done in Wicker Cove (CCH-WICKER-COVE-002), from the record of it, never from a promise.
 	for p in m.town.diary_pages():
 		notes.append({"title": str(p["title"]), "text": str(p["text"]), "new": is_new.call(str(p["id"]))})
+	# The winter's post from the life before (CCH-ORIGIN-002), from what was really received, written and sent.
+	for p in m.past_post.diary_pages():
+		notes.append({"title": str(p["title"]), "text": str(p["text"]), "new": is_new.call(str(p["id"]))})
 	if not notes.is_empty():
 		sections.append({"name": "Notes", "heading": "Notes", "pages": notes})
 	return sections + m.mystery._sections(is_new)
@@ -829,6 +832,7 @@ func _mailbox_rows() -> Array:
 	for letter in m.desk_mail:
 		rows.append({"name": str(letter["title"]), "status": "New" if bool(letter["unread"]) else "Read",
 			"status_kind": "ok" if bool(letter["unread"]) else "done", "value": str(letter["text"])})
+		rows.append_array(m.past_post.rows_for(letter))   # CCH-ORIGIN-002: answers to a letter from before
 	if m.desk_mail.is_empty():
 		rows.append({"note": "The mailbox is empty. The post comes in the morning, with any catalog orders."})
 	else:

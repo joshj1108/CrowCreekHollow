@@ -28,6 +28,11 @@ Target: Windows / Steam, $19.99, a complete single-player **Year One** (see OD-1
   all five origins from the screenplay, Back/pause/resume, origin record saved (`origin`, save v18; old saves
   `legacy`), Day 1 unchanged. Report `AI_COLLAB/CCH_ORIGIN_001_REPORT.md`. Stopped for owner and ChatGPT review;
   no human play yet. Winter letters and later callbacks not built.
+- **CCH-ORIGIN-002 (2026-11-16):** the first winter's post from the life before (W-A…W-E): one letter on January 12
+  in the real mailbox per origin and variant, answered there (reply left for the morning post, sender's answer ~6 days
+  later, sender's own terms if unanswered by February 28), a factual Notes page, saved outcome for spring
+  (`past_post`, save v19). Report `AI_COLLAB/CCH_ORIGIN_002_REPORT.md`, full text `CCH_ORIGIN_002_LETTERS.md`.
+  Stopped for owner and ChatGPT review; no human play. Spring follow-through (CCH-ORIGIN-003) not built.
 - **Owner decisions waiting:** OD-1 to OD-6 (section 4), plus the pending CCH-EVENING-002 multipliers.
 
 ## 1. Evidence levels
@@ -69,7 +74,7 @@ implemented · **PL** planned, not implemented · **BB** broken or blocked.
 | Folk on the farm (Maren, Davy, vicar, postman, Mrs Tull) | `folk_system.gd` | NV | sim | No daily routines; resident arcs designed only | Each has a routine and an arc in Year One |
 | Story chapters 1-17, second-year act, 3 endings | `story_act.gd`, `mystery.gd`, `ending_screen.gd` | NV | sim (17/17, all endings) | Act opens day 240, bell from day 396: **two years** (OD-1); never human-played | A human reaches an ending |
 | Agnes's diary + handwriting | `diary_book.gd`, `mystery.gd` | VW | auto `diary_test` 63; UI approved | — | unchanged |
-| Opening interlude + five origins | `road_script.gd`, `road_interlude.gd`, `origin_state.gd` | **PI** | [auto] interlude built and tested (CCH-ORIGIN-001), all five origins; later consequences not built | Owner-mandated, non-skippable; human play pending | Interlude plays, origin saved, ≥3 later consequences per origin |
+| Opening interlude + five origins | `road_script.gd`, `road_interlude.gd`, `origin_state.gd` | **PI** | [auto] interlude built and tested (CCH-ORIGIN-001), all five origins; winter letters built (CCH-ORIGIN-002, `past_post.gd`); spring and later not built | Owner-mandated, non-skippable; human play pending | Interlude plays, origin saved, ≥3 later consequences per origin |
 | Mid-year decisions, resident arcs, inn room | AI_COLLAB designs | **PL** | docs only | Large; must be scoped (OD-3) | Per scope decision |
 | Achievements / Steam | `achievement_system.gd`, `steam_achievements.gd` | PI | code | GodotSteam not in the project | Unlocks reach Steam in a Steam build |
 | Audio (SFX, ambience, music) | `music_system.gd`, `ambience_system.gd`, `tools/make_*.py` | PI | code | Generated in-house (licence clean); production quality is an owner call (`MUSIC_BRIEF.md`) | Owner accepts the mix and score |
@@ -149,7 +154,7 @@ Status uses section 2's codes plus **done**. Every task's evidence goes in `art/
 | --- | --- | --- | --- | --- | --- |
 | R-P3-01 | Opening interlude, first playable slice: presentation scene + origin choice saved (`origin`) | OD-3 | non-skippable, plays before day 1, kb/controller, saved and migrated | M | **VW** [auto] — CCH-ORIGIN-001, in review |
 | R-P3-02 | All five origins' interlude content | R-P3-01 | each branch complete per screenplay | L | **VW** [auto] — CCH-ORIGIN-001, in review |
-| R-P3-03 | Origin consequences in Year One (diary pages, folk lines, the winter scenes) | R-P3-02, OD-1 | ≥3 visible consequences per origin | L | PL |
+| R-P3-03 | Origin consequences in Year One (diary pages, folk lines, the winter scenes) | R-P3-02, OD-1 | ≥3 visible consequences per origin | L | **PI** [auto] — winter letters done (CCH-ORIGIN-002, in review); spring next (CCH-ORIGIN-003) |
 | R-P3-04 | Story pacing fitted to Year One (OD-1) | OD-1 | a human reaches an ending inside the 1.0 span | M | PL |
 | R-P3-05 | Midyear decisions and resident arcs (scoped by OD-3) | OD-3, R-P2-03 | per scope | XL | PL |
 | R-P3-06 | Narrative QA: every chapter and ending reachable on each origin | R-P3-03..05 | sim + scripted checks per origin | M | PL |
@@ -226,6 +231,7 @@ A green suite is not a polished game: every gate above marked "human" needs a pe
 
 | Date | Task | What happened | Commit |
 | --- | --- | --- | --- |
+| 2026-11-16 | CCH-ORIGIN-002 | First-winter letters for all five origins, answered in the mailbox, diary record, `past_post` (save v19); past_post_test 192 PASS; suite 22/24 (aoh_trek_check timing, pre-existing; playable002_test intermittent under load, passes alone) | see `MESSAGE_BOARD.md` |
 | 2026-11-16 | CCH-ORIGIN-001 | Opening interlude, five origins, origin record (save v18); interlude_test 101 PASS; suite 22/23 (aoh_trek_check timing, pre-existing) | see `MESSAGE_BOARD.md` |
 | 2026-11-15 | OD-7 | Owner approved committing `project.godot`; rebuilt from a clean checkout with v0.1.0 | `4f651b5c` |
 | 2026-11-15 | CCH-RELEASE-001 R-P0-02 | Release build from a clean checkout exported and booted; dev manifests and Steam CSV excluded from the pack; templates were already installed (audit corrected) | see `MESSAGE_BOARD.md` |

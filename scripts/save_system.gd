@@ -3,7 +3,7 @@ extends RefCounted
 
 # Bumped when a save's keys change shape. Saves from before the number was written count as 1.
 # _migrate lifts an older save one version at a time, so every old save still loads.
-const SAVE_VERSION := 18
+const SAVE_VERSION := 19
 # Keys a save must hold with the right type, or it isn't read: the loader would trip over anything else.
 const DICT_KEYS := ["inventory", "materials", "skill_xp", "stats", "equipment", "quests_done", "achievements_done",
 	"tool_tier", "trek_walked", "night_seen"]
@@ -106,6 +106,7 @@ func _save_game() -> void:
 		"woodwork": m.woodwork._to_save(),      # CCH-WOODWORK-001: logs hewn, recorded repairs
 		"nearwood": m.nearwood._to_save(),      # CCH-WOODWORK-001: the Nearwood's felled trees
 		"origin": m.origin.to_save(),           # CCH-ORIGIN-001: the life before, from the opening interlude
+		"past_post": m.past_post.to_save(),     # CCH-ORIGIN-002: the first winter's post from that life
 		"act": m.act._to_save(),
 		"estate": m.estate._to_save(),
 		"stand_glut": m.stall.glut,
@@ -278,6 +279,7 @@ func _load_game() -> bool:
 	m.nearwood._from_save(data.get("nearwood", null))   # an older save: every Nearwood tree standing
 	m.act._from_save(data.get("act", {}))
 	m.origin = OriginState.new(data.get("origin", null))   # a save from before the interlude: "legacy", nothing made up
+	m.past_post.from_save(data.get("past_post", null))    # after the origin: the record is checked against it
 	m.trek.works.clear()
 	for id in data.get("trek_works", []):
 		if TrekSystem.WORKS.has(str(id)):
@@ -606,6 +608,12 @@ static func _migrate(data: Dictionary) -> Dictionary:
 		# its past is unknown, recorded as "legacy", and it never plays the interlude or gets an origin made up.
 		if typeof(data.get("origin", null)) != TYPE_DICTIONARY:
 			data["origin"] = {"v": OriginState.V, "status": "legacy"}
+	if v < 19:
+		# Version 19 added the first winter's post from the life before (CCH-ORIGIN-002, `past_post`). An older save
+		# has none: it is made from the save's origin on load, so a legacy past still gets nothing, and a save already
+		# past the winter's letter days never gets a winter letter late (PastPost.LAST_DELIVER).
+		if typeof(data.get("past_post", null)) != TYPE_DICTIONARY:
+			data["past_post"] = {}
 	# A save from a newer build keeps its number; keys this build doesn't know are ignored.
 	data["save_version"] = maxi(v, SAVE_VERSION)
 	return data
