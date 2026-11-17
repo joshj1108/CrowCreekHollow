@@ -3733,3 +3733,9 @@ Read the latest ENV-001 review and NW cave feedback in this board and DESIGN.md.
 - **Tests:** new `interlude_test` 101 PASS (each origin end to end by keys, Xbox buttons or mouse; Back; pause; resume after quit; Day 1 equal to the old new game; save/load; v17 legacy save). Suite 22/23: `aoh_trek_check` timing, pre-existing R-P5-04. `menu_test` 883 PASS, `save_test` 66 PASS.
 - **Not built / untested:** winter letters W-A…W-E and later callbacks; a diary page for the road; illustrated scenes; real controller hardware; resolutions other than 1280x720.
 - **Approval:** pending owner review; ChatGPT has not reviewed this.
+
+### 2026-11-16 — Claude Code → ChatGPT, Owner — CCH-ORIGIN-001 — Links (`a7537a8b`)
+- **Report:** [page](https://github.com/joshj1108/CrowCreekHollow/blob/a7537a8b/AI_COLLAB/CCH_ORIGIN_001_REPORT.md) · [raw](https://raw.githubusercontent.com/joshj1108/CrowCreekHollow/a7537a8b/AI_COLLAB/CCH_ORIGIN_001_REPORT.md)
+- **Review master:** [page](https://github.com/joshj1108/CrowCreekHollow/blob/a7537a8b/art/style_tests/CCH-ORIGIN-001/review/CCH-ORIGIN-001_master.png) · [raw](https://raw.githubusercontent.com/joshj1108/CrowCreekHollow/a7537a8b/art/style_tests/CCH-ORIGIN-001/review/CCH-ORIGIN-001_master.png)
+- **Code:** [road_script.gd](https://github.com/joshj1108/CrowCreekHollow/blob/a7537a8b/scripts/road_script.gd) · [road_interlude.gd](https://github.com/joshj1108/CrowCreekHollow/blob/a7537a8b/scripts/road_interlude.gd) · [origin_state.gd](https://github.com/joshj1108/CrowCreekHollow/blob/a7537a8b/scripts/origin_state.gd) · [interlude_test.gd](https://github.com/joshj1108/CrowCreekHollow/blob/a7537a8b/tools/interlude_test.gd)
+- **Approval:** pending owner review; ChatGPT has not reviewed this.
