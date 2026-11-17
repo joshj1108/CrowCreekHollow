@@ -19,10 +19,12 @@ Target: Windows / Steam, $19.99, a complete single-player **Year One** (see OD-1
   workaround verified over 4 launches; trek timing investigated (real cost, threshold kept). Follow-up: clean
   release build exported and booted (R-P0-02); the first audit wrongly said the export templates were missing.
 - **Next three tasks:** R-P0-03 owner plays days 1-14 from `builds/CrowCreekHollow.exe` → R-P3-01 interlude and
-  origin choice, first playable slice (needs OD-1/OD-3) → R-P2-02 Edith's inn repair on the plank chain (after the owner's CCH-WOODWORK-001 review).
-- **CCH-WOODWORK-001 (2026-11-16):** workbench, anvil, Nearwood logging grove, logs → planks, Patched/Restored paid in planks, `try_repair` for the inn. Report `AI_COLLAB/CCH_WOODWORK_001_REPORT.md`. Stopped for gameplay review.
-- **Owner decisions waiting:** OD-1 to OD-6 (section 4), plus the pending CCH-EVENING-002 multipliers and
-  CCH-WICKER-COVE-002 batch.
+  origin choice, first playable slice (needs OD-1/OD-3) → R-P2-05 harbour fishing (after the owner's CCH-WICKER-COVE-002 review).
+- **CCH-WOODWORK-001 (2026-11-16):** workbench, anvil, Nearwood logging grove, logs → planks, Patched/Restored paid in planks, `try_repair` for the inn. Report `AI_COLLAB/CCH_WOODWORK_001_REPORT.md`. Stopped for gameplay review. The owner accepted it as the prototype baseline (human play still pending).
+- **CCH-WICKER-COVE-002 (2026-11-16):** Edith's leak (8 planks, 2 iron bars, Carpentry 2, 2 h, 60 coins) through
+  `try_repair`, a code-drawn stain/bucket that goes once mended, and the first Living Memory loop (Edith, Thomas,
+  diary). Report `AI_COLLAB/CCH_WICKER_COVE_002_REPORT.md`. Stopped for review.
+- **Owner decisions waiting:** OD-1 to OD-6 (section 4), plus the pending CCH-EVENING-002 multipliers.
 
 ## 1. Evidence levels
 
@@ -59,7 +61,7 @@ implemented · **PL** planned, not implemented · **BB** broken or blocked.
 | Forest treks | `trek_system.gd`, `trek_art.gd` | NV | auto 208+209+62 pass; timing FAIL | Clearing rebuild 37-45 ms median, 59-80 max: a visible hitch when logs clear mid-trek | Rebuild under one frame budget or hidden by the fade (R-P5-04) |
 | Wicker Cove (alpha + notices) | `town_*.gd` | NV | auto `town_test` 65, bot kb+Xbox; visual accepted D-019 | Residents fixed to tiles; no routines; not human-played | Human visits, trades, returns without help |
 | Village rendering / shader cache | `project.godot` | VW | 4 launches, one profile, cache stays empty; farm night + village day/rain/night normal (this session) | Shaders compile each launch; controller warm launch checked earlier only | Unchanged across launches and Godot updates |
-| Living Memory | `TownSystem.flags`, `.history` | PI | code | Stored; only Thomas reads the last delivery | Residents and diary react to what the player did |
+| Living Memory | `TownSystem.flags`, `.history`, `woodwork.repairs` | NV | auto `inn_repair_test` 86 (2026-11-16) | First loop built (Edith's leak: Edith, Thomas, diary); one case only, no general framework; not human-played | Residents and diary react to what the player did |
 | Folk on the farm (Maren, Davy, vicar, postman, Mrs Tull) | `folk_system.gd` | NV | sim | No daily routines; resident arcs designed only | Each has a routine and an arc in Year One |
 | Story chapters 1-17, second-year act, 3 endings | `story_act.gd`, `mystery.gd`, `ending_screen.gd` | NV | sim (17/17, all endings) | Act opens day 240, bell from day 396: **two years** (OD-1); never human-played | A human reaches an ending |
 | Agnes's diary + handwriting | `diary_book.gd`, `mystery.gd` | VW | auto `diary_test` 63; UI approved | — | unchanged |
@@ -81,8 +83,10 @@ implemented · **PL** planned, not implemented · **BB** broken or blocked.
   Sheet: `art/style_tests/CCH-RELEASE-001/work/sheet_shader.png`. Controller input was not re-checked this session.
 - **Core economy:** the two recipe changes and the notices are sound in tests and sims; whether the loop *feels*
   rewarding needs a human. Cooking still mostly loses Hunger against raw food; that is a design call (OD-5).
-- **Living Memory:** `flags` (five first-time events) and `history` (deliveries) are saved; only Thomas's line about
-  the last delivery reads them. Everything else is stored data waiting for dialogue.
+- **Living Memory:** `flags` (five first-time events) and `history` (deliveries) are saved; Thomas's line about the
+  last delivery reads them. Since CCH-WICKER-COVE-002 (2026-11-16) Edith's leak is the first full loop: the repair's
+  record drives the room's look, Edith's lines (that day, it held, it held through rain), Thomas's second-hand line
+  and a diary page; old saves remember nothing.
 - **Trek timing:** not a flaky threshold. Over 381 clearing layouts the rebuild takes a median 37-45 ms (p90 43-57,
   max 59-80; worse with other processes running). It runs on clearing entry and whenever the clearing's tiles
   change (a log cleared), so the player can see a 2-4 frame hitch mid-trek. Threshold kept at 50 ms; fix is R-P5-04.
@@ -100,7 +104,7 @@ implemented · **PL** planned, not implemented · **BB** broken or blocked.
 | OD-5 | Should cooked food restore more than its raw parts? | Whether cooking is worth doing |
 | OD-6 | Music: keep the generated score, commission, or license | Licensing and polish schedule |
 | OD-7 | ~~Commit the version and log-flush lines from the owner's `project.godot`~~ | **Decided 2026-11-15: committed** (`4f651b5c`); clean builds carry v0.1.0 |
-| (pending) | CCH-WICKER-COVE-002 batch and its five sub-decisions | Living Memory's first real use |
+| ~~(pending)~~ | ~~CCH-WICKER-COVE-002 batch and its five sub-decisions~~ | **Decided 2026-11-16** by the owner's brief: 8 planks, 2 iron bars, Carpentry 2, 2 h, 60 coins, 0 generations; built (R-P2-02) |
 
 ## 5. Roadmap P0–P7
 
@@ -131,7 +135,7 @@ Status uses section 2's codes plus **done**. Every task's evidence goes in `art/
 | ID | Task | Depends | Acceptance | Effort | Status |
 | --- | --- | --- | --- | --- | --- |
 | R-P2-01 | Farmhouse four stages final; porch/storey per OD-2 | OD-2 | stages coherent, no storey on the critical path | M | PI |
-| R-P2-02 | Wicker Cove batch 1: Edith's leak + first Living Memory reads (WC-002) | R-P1-03 (planks) or owner's material choice | repair persists; three residents/diary react | M | PL |
+| R-P2-02 | Wicker Cove batch 1: Edith's leak + first Living Memory reads (WC-002) | R-P1-03 (planks) or owner's material choice | repair persists; three residents/diary react | M | NV — built 2026-11-16 (CCH-WICKER-COVE-002), owner review |
 | R-P2-03 | Resident routines (farm folk + village) | R-P2-02 | each named resident has a day/evening place | L | PL |
 | R-P2-04 | Forest exploration content per logging design | R-P1-03 | discoveries and timber worth the walk | M | PL |
 | R-P2-05 | Harbour fishing | R-P2-02 | existing brackish fish only | S | PL |

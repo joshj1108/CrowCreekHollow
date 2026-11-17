@@ -410,6 +410,7 @@ func draw_inn(ci: CanvasItem, front: bool, feet: float) -> void:
 		_put(ci, "res://art/farm/fc/jug.png", o + Vector2(10.5, 2.25) * T)
 		_put(ci, "res://art/farm/fc/painting.png", o + Vector2(3.6, 0.6) * T)
 		_put(ci, "res://art/farm/fi/win_frame.png", o + Vector2(11.4, 0.7) * T)
+		_draw_leak(ci, o)
 	# What stands, in row order.
 	var items: Array = []
 	items.append([(TownLayout.INT_ORIGIN.y + 4) * T, "hearth"])
@@ -483,6 +484,69 @@ func _draw_hearth(ci: CanvasItem, o: Vector2) -> void:
 		var frame := int(Time.get_ticks_msec() / 140) % 10
 		var src := Rect2(frame * 22, 0, 22, 14)
 		ci.draw_texture_rect_region(fire, Rect2(at + Vector2(6, 39) * S, src.size * S), src)
+
+
+# Edith's leak (CCH-WICKER-COVE-002), code-drawn in art pixels (S): before the repair, a brown stain spreading from
+# the ceiling line down the north wall, a wet streak, a puddle and a bucket on the floor tile under it (LEAK_TILE),
+# with a drop falling into it (faster on a rainy day). After it, a pale new board at the ceiling line, nailed with
+# iron, and nothing else: the wall is drying.
+const LEAK_STAIN := Color(0.24, 0.16, 0.08, 0.5)
+const LEAK_STAIN_DARK := Color(0.16, 0.1, 0.05, 0.55)
+const LEAK_WET := Color(0.1, 0.12, 0.13, 0.4)
+const LEAK_WATER := Color("4a6670")
+const LEAK_DROP := Color("b8d0d6")
+
+
+func _px(ci: CanvasItem, at: Vector2, w: float, h: float, c: Color) -> void:
+	ci.draw_rect(Rect2((at / S).floor() * S, Vector2(w, h) * S), c)
+
+
+func _draw_leak(ci: CanvasItem, o: Vector2) -> void:
+	var cx := o.x + (TownData.LEAK_TILE.x + 0.5) * T          # the middle of the bucket's tile
+	var floor_y := o.y + (TownData.LEAK_TILE.y + 0.85) * T     # the bucket's foot
+	if town.inn_fixed():
+		# A new board along the ceiling line, paler than the old wall, with two iron nail heads.
+		var p := Vector2(cx - 9 * S, o.y + 1 * S)
+		_px(ci, p - Vector2(S, S), 20, 6, Color("2a1f17"))
+		_px(ci, p, 18, 4, Color("a8885c"))
+		_px(ci, p + Vector2(0, 3 * S), 18, 1, Color("86683f"))
+		_px(ci, p + Vector2(2 * S, S), 1, 1, Color("3a3a3e"))
+		_px(ci, p + Vector2(15 * S, S), 1, 1, Color("3a3a3e"))
+		return
+	# The stain: a blotch from the ceiling line, ragged at its lower edge, and a streak down to the floor.
+	var top := o.y + 1 * S
+	var rows := [[-8, 15], [-10, 19], [-9, 18], [-11, 18], [-8, 16], [-9, 12], [-5, 11], [-7, 9], [-3, 7], [-4, 4], [-1, 3]]
+	for i in rows.size():
+		var r: Array = rows[i]
+		_px(ci, Vector2(cx + int(r[0]) * S, top + i * 2 * S), int(r[1]), 2, LEAK_STAIN)
+	_px(ci, Vector2(cx - 7 * S, top), 13, 2, LEAK_STAIN_DARK)   # the tide line, darkest where it starts
+	_px(ci, Vector2(cx - 9 * S, top + 2 * S), 2, 4, LEAK_STAIN_DARK)
+	var streak_top := top + rows.size() * 2 * S
+	var wall_foot := o.y + 3.0 * T
+	_px(ci, Vector2(cx - 1 * S, streak_top), 2, (wall_foot - streak_top) / S, LEAK_WET)
+	# The puddle the bucket doesn't quite catch.
+	_px(ci, Vector2(cx - 9 * S, floor_y - 2 * S), 18, 3, LEAK_WET)
+	_px(ci, Vector2(cx - 7 * S, floor_y + 1 * S), 13, 1, LEAK_WET)
+	# The bucket: wooden staves, an iron hoop, rainwater at the top.
+	var b := Vector2(cx - 5 * S, floor_y - 10 * S)
+	_px(ci, b - Vector2(S, S), 12, 12, Color("1d1611"))
+	_px(ci, b, 10, 10, Color("6a4a30"))
+	for k in [2, 5, 8]:
+		_px(ci, b + Vector2(k * S, 2 * S), 1, 8, Color("4e3622"))
+	_px(ci, b + Vector2(0, 6 * S), 10, 1, Color("3e3e44"))
+	_px(ci, b + Vector2(1 * S, 0), 8, 2, LEAK_WATER)
+	# A drop from the stain into the bucket, and a ring where it lands.
+	var raining := m.weather_kind in m.WATER_RAIN_KINDS
+	var period := 0.8 if raining else 1.6
+	var t := fmod(Time.get_ticks_msec() / 1000.0, period) / period
+	var fall_from := streak_top - 6 * S
+	var fall_to := b.y
+	if t < 0.8:
+		var y := lerpf(fall_from, fall_to, (t / 0.8) * (t / 0.8))
+		_px(ci, Vector2(cx, y), 1, 2, LEAK_DROP)
+	else:
+		_px(ci, Vector2(cx - 2 * S, b.y), 1, 1, LEAK_DROP)
+		_px(ci, Vector2(cx + 2 * S, b.y), 1, 1, LEAK_DROP)
 
 
 func hearth_point() -> Vector2:

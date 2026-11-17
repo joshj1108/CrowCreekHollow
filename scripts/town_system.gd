@@ -15,7 +15,10 @@ extends RefCounted
 #
 # Memory hooks for later (the Living Memory System is not built): `flags` records the day of the first arrival
 # ("arrived"), first trade ("traded"), first delivery ("delivered"), and first word with each resident
-# ("met_thomas", "met_edith"). Building repairs would add their own keys here. Nothing else reads them yet.
+# ("met_thomas", "met_edith"). Edith's leak (CCH-WICKER-COVE-002) is the first thing that reads them: see
+# "Edith's leak" below. The repair itself is recorded once in WoodworkSystem.repairs["inn_roof"] ({day, cost, paid,
+# rain}), which is the single truth that it was done; flags["inn_roof"] marks the day, and flags["inn_roof_edith"] /
+# ["inn_roof_thomas"] the day each resident first spoke of it. A save without the record remembers nothing.
 #
 # Repeatable notices (CCH-CORE-LOOP-003, TownData.REPEAT_ORDERS): `board` holds the notices up now (kind -> what it
 # wants, its coins, the week it went up, whether you took it on), `slot_week` the week each kind was last handed in
@@ -125,6 +128,8 @@ func _char(t: Vector2i) -> String:
 func _kind(t: Vector2i) -> int:
 	var c := _char(t)
 	if indoors:
+		if t - TownLayout.INT_ORIGIN == TownData.LEAK_TILE and not inn_fixed():
+			return MainGame.Tile.TABLE   # the bucket
 		match c:
 			".":
 				return MainGame.Tile.FLOOR
@@ -442,6 +447,9 @@ func _draw_front() -> void:
 func _interact(tile: Vector2i) -> void:
 	var c := _char(tile)
 	if indoors:
+		if tile - TownLayout.INT_ORIGIN == TownData.LEAK_TILE:
+			m._show_message(TownData.LOOK_MENDED if inn_fixed() else TownData.LOOK_LEAK)
+			return
 		match c:
 			"C", "e":
 				_talk("edith")
@@ -513,6 +521,9 @@ func _open(tab: String) -> void:
 
 # The day's word from who: late, after an order, a callback once you've traded, the season, or the day's line.
 func _line(who: String) -> String:
+	var remembered := _memory_line(who)
+	if remembered != "":
+		return remembered
 	if m.current_hour >= TownData.LATE_HOUR:
 		return str(TownData.LATE_LINES[who])
 	var shop := "store" if who == "thomas" else "inn"
@@ -525,10 +536,134 @@ func _line(who: String) -> String:
 	if trade_day.has(shop) and int(trade_day[shop]) < m.day and int(trade_day[shop]) >= m.day - 7 and (m.day % 3) == 0:
 		return str(TownData.CALLBACK_LINES[who])
 	var season := m._season_today()
+	var mended := who == "edith" and inn_fixed()
 	if (m.day % 4) == 1 and TownData.SEASON_LINES[who].has(season):
+		if mended and season == "Spring":
+			return TownData.LEAK_AFTER_SPRING
 		return str(TownData.SEASON_LINES[who][season])
 	var lines: Array = TownData.LINES[who]
-	return str(lines[m.day % lines.size()])
+	var i := m.day % lines.size()
+	if mended and i == 0:
+		return TownData.LEAK_AFTER   # in place of the line about the bucket
+	return str(lines[i])
+
+
+# --- Edith's leak (CCH-WICKER-COVE-002) ---------------------------------------------------------------
+# The first Living Memory loop: a repair done for a resident is remembered by her, passed on to a second resident,
+# and written in the diary, all from the one record WoodworkSystem keeps when the work is actually done.
+
+func inn_record() -> Dictionary:
+	return m.woodwork.repairs.get(str(TownData.INN_REPAIR["id"]), {})
+
+
+func inn_fixed() -> bool:
+	return not inn_record().is_empty()
+
+
+# What a resident says because of the repair, or "". Edith: on the day, then the first word on a later day (which
+# knows whether it has rained since). Thomas: once, on a later day than the work, since he hears it from her.
+# A line once chosen holds for the rest of that day, so reopening the counter says the same thing.
+func _memory_line(who: String) -> String:
+	var rec := inn_record()
+	if rec.is_empty():
+		return ""
+	var done := int(rec.get("day", 0))
+	var key := "inn_roof_" + who
+	var said := int(flags.get(key, -1))
+	if who == "edith":
+		if done == m.day:
+			return TownData.LEAK_SAME_DAY
+		if said != -1 and said != m.day:
+			return ""
+		flags[key] = m.day
+		var rained := int(m.stats.get("rain_days", 0)) > int(rec.get("rain", 1 << 30))
+		return TownData.LEAK_HELD_RAIN if rained else TownData.LEAK_HELD
+	if who == "thomas" and m.day > done and (said == -1 or said == m.day):
+		flags[key] = m.day
+		return TownData.LEAK_THOMAS
+	return ""
+
+
+# The counter's rows for the leak: the quote, or the work done.
+func _leak_rows() -> Array:
+	var r: Dictionary = TownData.INN_REPAIR
+	var rows: Array = [{"section": "The leak"}]
+	var rec := inn_record()
+	if not rec.is_empty():
+		rows.append({"name": "The back room's roof", "status": "Mended", "status_kind": "done",
+			"value": "Mended on day %d; paid %d coins" % [int(rec.get("day", 0)), int(rec.get("paid", 0))],
+			"about": TownData.LOOK_MENDED})
+		return rows
+	var cost: Dictionary = r["cost"]
+	var needs: Array = []
+	for key in cost:
+		needs.append({"text": WoodworkSystem.amount_text(str(key), int(cost[key])), "have": m._held(str(key)),
+			"ok": m._held(str(key)) >= int(cost[key])})
+	var lvl := m.progression._level(str(r["skill"]))
+	needs.append({"text": "%s %d" % [str(r["skill"]), int(r["level"])], "have": lvl, "ok": lvl >= int(r["level"])})
+	needs.append({"text": "%d hours, begun by %02d:00" % [int(r["hours"]), int(r["start_by"])],
+		"ok": m.current_hour <= float(r["start_by"])})
+	var ok := _leak_ready()
+	var what := m.woodwork.cost_text(cost)
+	rows.append({"name": "Mend the leak", "status": "Ready" if ok else "Not yet", "status_kind": "ok" if ok else "short",
+		"value": "%s; pays %d coins" % [what, int(r["coins"])],
+		"about": TownData.LEAK_OFFER, "needs": needs,
+		"button": "Do the work", "action": "town:repair|inn_roof", "enabled": ok})
+	rows.append({"name": "Leave it for now", "value": "No harm done",
+		"about": "Nothing is taken and nothing is promised. Edith's offer stands for whenever you come back.",
+		"button": "Not now", "action": "town:leave|inn_roof", "enabled": true})
+	return rows
+
+
+func _leak_ready() -> bool:
+	var r: Dictionary = TownData.INN_REPAIR
+	return not inn_fixed() and m.woodwork.can_pay(r["cost"]) and m.current_hour <= float(r["start_by"]) \
+		and m.progression._level(str(r["skill"])) >= int(r["level"])
+
+
+# The work itself. Everything is checked again here; nothing changes unless it all goes through, and it can only
+# ever be paid once (WoodworkSystem.try_repair refuses an id it has recorded). Returns whether it was done.
+func repair_inn() -> bool:
+	var r: Dictionary = TownData.INN_REPAIR
+	var id := str(r["id"])
+	if inn_fixed():
+		m._show_message("The back room's roof is already mended.")
+		return false
+	if not (active and indoors):
+		return false
+	if m.current_hour > float(r["start_by"]):
+		m._show_message(TownData.LEAK_LATE)
+		return false
+	var rain_before := int(m.stats.get("rain_days", 0))
+	var xp_before := int(m.skill_xp[str(r["skill"])])
+	if not m.woodwork.try_repair(id, r["cost"], str(r["skill"]), int(r["level"]), float(r["hours"]), int(r["xp"])):
+		return false
+	var coins := int(r["coins"])
+	m.money += coins
+	m.woodwork.repairs[id]["paid"] = coins
+	m.woodwork.repairs[id]["rain"] = rain_before
+	if not flags.has(id):
+		flags[id] = m.day
+	m._diary_page("town_" + id)
+	m.play_sfx("coin", 0.05)
+	m._show_message(TownData.LEAK_DONE % [coins, int(m.skill_xp[str(r["skill"])]) - xp_before], true)
+	m.queue_redraw()
+	return true
+
+
+# The diary's Notes page for the repair, in your hand: what was done, when, what it took and what was paid. Only
+# from the record of work actually done.
+func diary_pages() -> Array:
+	var rec := inn_record()
+	if rec.is_empty():
+		return []
+	var d := int(rec.get("day", 0))
+	var date := m._calendar_date(maxi(1, d))
+	var cost: Dictionary = rec.get("cost", {})
+	var took := m.woodwork.cost_text(cost) if not cost.is_empty() else "planks and iron"
+	return [{"id": "town_inn_roof", "title": "The leak at the inn",
+		"text": "Day %d, %s %d.\n\nI mended the leak over the back room at the inn in Wicker Cove, for Edith Vale. It took %s, and two hours of the day.\n\nShe paid me %d coins." % [
+			d, str(m.MONTH_NAMES[date["month"]]), int(date["day"]), took, int(rec.get("paid", 0))]}]
 
 
 # --- Shops ------------------------------------------------------------------------------------------
@@ -811,6 +946,8 @@ func _rows(tab: String) -> Array:
 	if who != "":
 		rows.append({"section": str(TownData.PEOPLE[who]["where"]).capitalize()})
 		rows.append({"name": str(TownData.PEOPLE[who]["name"]), "about": _line(who)})
+		if shop == "inn":
+			rows.append_array(_leak_rows())
 	else:
 		rows.append({"section": "Nobody at the stall"})
 		rows.append({"name": "The slate", "about": TownData.MARKET_SLATE})
@@ -929,6 +1066,12 @@ func _action(action: String) -> void:
 		"decline":
 			if parts.size() == 2:
 				decline(parts[1])
+		"repair":
+			if parts.size() == 2 and parts[1] == str(TownData.INN_REPAIR["id"]):
+				repair_inn()
+				m._refresh_panel()
+		"leave":
+			m._show_message(TownData.LEAK_LEAVE)
 
 
 # Buys n of item at shop. Every limit is checked again here, so no button state can make it go wrong.

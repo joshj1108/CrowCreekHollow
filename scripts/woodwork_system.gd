@@ -16,8 +16,9 @@ extends RefCounted
 #   repairs (MainGame.REPAIR_COSTS) and by anything built with `try_repair`.
 # - Repairs. `try_repair` is the one transaction for a repair or build paid in materials: it checks the skill and
 #   the materials, takes them, passes the work's hours, gives the XP and records it once in `repairs`
-#   ({id: {day, cost}}). The house repairs record themselves here too. Edith's inn repair (Wicker Cove) is meant
-#   to come through it: planks, hardware, a Carpentry level, bounded hours, one recorded success.
+#   ({id: {day, cost}}). The house repairs record themselves here too. Edith's inn repair (Wicker Cove,
+#   TownSystem.repair_inn) comes through it as "inn_roof", and adds what she paid ("paid") and the rain count then
+#   ("rain") to its record.
 
 var m: MainGame
 
@@ -198,8 +199,16 @@ func cost_text(cost: Dictionary) -> String:
 	var parts: Array = []
 	var c := mats(cost)
 	for key in c:
-		parts.append("%d %s" % [int(c[key]), label(key)])
+		parts.append(amount_text(key, int(c[key])))
 	return ", ".join(parts)
+
+
+# "2 iron bars", "1 iron bar", "8 planks".
+static func amount_text(key: String, n: int) -> String:
+	var l := label(key)
+	if n != 1 and l.ends_with(" bar"):
+		l += "s"
+	return "%d %s" % [n, l]
 
 
 # What a material is called on screen. The raw log keeps its old `wood` key.
@@ -232,6 +241,10 @@ func _from_save(d: Variant) -> void:
 				var e: Variant = r[id]
 				if typeof(e) == TYPE_DICTIONARY:
 					repairs[str(id)] = {"day": int(e.get("day", 0)), "cost": e.get("cost", {}) if typeof(e.get("cost", {})) == TYPE_DICTIONARY else {}}
+					# What a paid job was paid, and the rain count when it was done (Edith's leak, CCH-WICKER-COVE-002).
+					for extra in ["paid", "rain"]:
+						if e.has(extra):
+							repairs[str(id)][extra] = maxi(0, int(e[extra]))
 	for stage in range(1, m.house_stage + 1):
 		var id := "house_%d" % stage
 		if not repairs.has(id):

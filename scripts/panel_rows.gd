@@ -114,6 +114,9 @@ func _diary_sections() -> Array:
 		var tip := m._tip_data(str(id))
 		if tip.has("id") and not str(id).begins_with("g_"):
 			notes.append({"title": str(tip["title"]), "text": m._fill_controls(str(tip["text"])), "new": is_new.call(str(id))})
+	# Work done in Wicker Cove (CCH-WICKER-COVE-002), from the record of it, never from a promise.
+	for p in m.town.diary_pages():
+		notes.append({"title": str(p["title"]), "text": str(p["text"]), "new": is_new.call(str(p["id"]))})
 	if not notes.is_empty():
 		sections.append({"name": "Notes", "heading": "Notes", "pages": notes})
 	return sections + m.mystery._sections(is_new)

@@ -40,7 +40,7 @@ extends SceneTree
 #   pack            UI checks: put a mix of crops, fish, eggs, milk, a bandage and a crow charm in the pack
 #   ipick=KEY       the Inventory item whose details show, e.g. ipick=pack:egg or ipick=mat:wood
 #   focus=N         with tab, move the focus to the section's Nth focusable button (0 = the first tile)
-#   tab=NAME        open a section, e.g. tab=Craft
+#   tab=NAME        open a section, e.g. tab=Craft (an underscore for a space: tab=The_inn)
 #   page=N          with tab, open the section's Nth ledger tab (counting from 0)
 #   fight           put a creature in front of the player and swing at it, so it is hurt
 #   creatures=S     with cave: the bat, lizard and snake in a row right of the farmer (use ctile=16,19) in state S (idle, move, alert,
@@ -67,6 +67,8 @@ extends SceneTree
 #                   talk to them (the first-meeting scene; tmet skips it and opens their counter); ttab=NAME opens
 #                   a village tab (Store, Fish_market, The_inn, Notice_board); tsay=CODE shows what that thing says;
 #                   thome walks back up the road home (where you come back to); tzoom=F zooms the camera (overviews)
+#                   tready holds what Edith's leak needs; tfixed=N records it mended N days ago (0: today), trained=1
+#                   with a rainy day since (CCH-WICKER-COVE-002)
 #   gate            stand at the farm's east gate, facing it, and press the hand once (from day 2)
 #   visitor=ID      bring tonight's night visitor now: field, knock, quiet, crows, pond, watcher, footsteps
 #                   or hollow (use with hour=22 or later)
@@ -303,6 +305,21 @@ func _initialize() -> void:
 		if opt.has("hour"):
 			main.clock = (float(opt["hour"]) - main.START_HOUR) / (main.DAY_END_HOUR - main.START_HOUR) * main.DAY_LENGTH
 			main.current_hour = float(opt["hour"])
+		# CCH-WICKER-COVE-002: tready holds what Edith's leak needs; tfixed=N records it as mended N days ago
+		# (0: today), with trained=1 a rainy day since.
+		if opt.has("tready") and main.town.has_method("repair_inn"):
+			main.materials["planks"] = 8
+			main.materials["iron_bar"] = 2
+			main.skill_xp["Carpentry"] = maxi(int(main.skill_xp["Carpentry"]), main.progression._xp_for_level(2))
+		if opt.has("tfixed") and main.town.has_method("repair_inn"):
+			var ago := int(opt["tfixed"])
+			main.day = maxi(main.day, ago + 2)
+			main.woodwork.repairs["inn_roof"] = {"day": main.day - ago, "cost": {"planks": 8, "iron_bar": 2}, "paid": 60,
+				"rain": int(main.stats["rain_days"]) - (1 if opt.has("trained") else 0)}
+			main.town.flags["inn_roof"] = main.day - ago
+			main.town.flags["met_thomas"] = 1
+			main.town.flags["met_edith"] = 1
+			main.diary_new.append("town_inn_roof")
 		if opt.has("tinn"):
 			main.town._enter_inn()
 		if opt.has("ttile"):
@@ -665,7 +682,7 @@ func _initialize() -> void:
 	if opt.has("tab"):
 		if opt.has("page"):
 			main.action_bar.ledger_tabs[opt["tab"]] = int(opt["page"])
-		main._toggle_tab(opt["tab"])
+		main._toggle_tab(str(opt["tab"]).replace("_", " "))
 		await process_frame
 		await process_frame
 		if opt.has("focus"):

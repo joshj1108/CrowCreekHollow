@@ -179,5 +179,30 @@ const LOOK := {
 	"table": "A scrubbed table, ring-marked by a hundred mugs.",
 	"p": "Barrels of something. Edith's handwriting on the lids: ONIONS, SALT, DO NOT.",
 }
-const ARRIVE_FIRST := "You smelled the sea before you saw the water."
+# Edith's leak (CCH-WICKER-COVE-002): the one repair project in the village. The back room's roof lets the rain
+# through and it runs down the common room's north wall into a bucket. Quoted at her counter; done once, through
+# WoodworkSystem.try_repair (materials, Carpentry, hours and XP in one go), then she pays the coins. Nothing is
+# taken or recorded until the work is done; leaving it costs nothing and the quote stands.
+#   cost: materials handed over. iron_bar is the hardware (nails and a strap for the flashing).
+#   start_by: the latest hour the work can begin (it is up a ladder, on a roof, in the fog).
+const INN_REPAIR := {"id": "inn_roof", "cost": {"planks": 8, "iron_bar": 2}, "skill": "Carpentry", "level": 2,
+	"hours": 2.0, "xp": 30, "coins": 60, "start_by": 17.0}
+const LEAK_TILE := Vector2i(5, 3)        # the bucket, on the floor under the stain (local to INT_ORIGIN)
+const LEAK_OFFER := "\"That stain's the back room's roof. When it rains, it runs down the wall into my bucket. The rafters are sound; the boards and the flashing aren't.\" She looks at the wall, not at you. \"I'd pay sixty coins to have it mended. Eight planks, and iron for the nails and a strap. Two hours' work.\""
+const LEAK_LEAVE := "Edith shrugs. \"It's waited this long. The bucket isn't going anywhere.\""
+const LEAK_LATE := "\"Not now. I'll not have anyone on that roof in the dark. Come in the morning, if you're still minded to.\""
+const LEAK_DONE := "Two hours in the back room and up on its roof: new boards over the rafters, the flashing strapped down with iron. The drip stops. Edith counts %d coins into your hand. +%d Carpentry XP"
+const LOOK_LEAK := "A bucket half full of rainwater, under a brown stain that runs down the wall from the ceiling. Every so often, a drop."
+const LOOK_MENDED := "The wall is drying out. Up where the stain began, the edge of a new board shows, paler than the old ones."
+# Edith, once it is done. The same day; the first word on a later day (after rain since, or not yet); then, now and
+# then, the back room as it is now. The repair helps her; it does not make the inn prosper.
+const LEAK_SAME_DAY := "\"I keep looking up at that wall, waiting for it to start again. It hasn't. Sixty coins well spent, and I don't say that about much.\""
+const LEAK_HELD := "\"No proper rain since you were up there, so I can't swear to it yet. But the wall's drying, and I've moved my jars back into the back room.\""
+const LEAK_HELD_RAIN := "\"We've had rain since you were up on that roof, and the wall stayed dry. The bucket's back to being a bucket.\""
+const LEAK_AFTER := "\"The back room's dry now. Not let yet; it wants a bed, and a bed wants money. But it's dry.\""
+const LEAK_AFTER_SPRING := "\"Spring cleaning. I found a chair upstairs I didn't know I had. The roof's off my list, at least. The list is long.\""
+# Thomas hears it from Edith, so only on a later day than the work, once.
+const LEAK_THOMAS := "\"Edith was in here telling the whole queue her back room's dry, and that it was you up the ladder. From her, that's a parade.\""
+
+const ARRIVE_FIRST :="You smelled the sea before you saw the water."
 const MARKET_SLATE := "Nobody at the stall. A slate reads: PRICES AS MARKED. COINS IN THE TIN. BACK WHEN THE TIDE TURNS."
