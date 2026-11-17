@@ -3,7 +3,7 @@ extends RefCounted
 
 # Bumped when a save's keys change shape. Saves from before the number was written count as 1.
 # _migrate lifts an older save one version at a time, so every old save still loads.
-const SAVE_VERSION := 17
+const SAVE_VERSION := 18
 # Keys a save must hold with the right type, or it isn't read: the loader would trip over anything else.
 const DICT_KEYS := ["inventory", "materials", "skill_xp", "stats", "equipment", "quests_done", "achievements_done",
 	"tool_tier", "trek_walked", "night_seen"]
@@ -105,6 +105,7 @@ func _save_game() -> void:
 		"town": m.town._to_save(),
 		"woodwork": m.woodwork._to_save(),      # CCH-WOODWORK-001: logs hewn, recorded repairs
 		"nearwood": m.nearwood._to_save(),      # CCH-WOODWORK-001: the Nearwood's felled trees
+		"origin": m.origin.to_save(),           # CCH-ORIGIN-001: the life before, from the opening interlude
 		"act": m.act._to_save(),
 		"estate": m.estate._to_save(),
 		"stand_glut": m.stall.glut,
@@ -179,6 +180,11 @@ func _load_game() -> bool:
 	if data.is_empty() and recover(m._save_path()) != "":
 		data = read_save(m._save_path())
 	if data.is_empty():
+		return false
+	# CCH-ORIGIN-001: a slot still on the road (or just arrived) holds only the interlude's record, not a farm.
+	# It is not a farm to load: main.gd starts the farm fresh (or resumes the road) from it instead.
+	if is_interlude(data):
+		m.origin = OriginState.new(data.get("origin", null))
 		return false
 
 	# Debug overrides (scripts/debug_menu.gd) never outlive a load: the save's own state is the truth.
@@ -271,6 +277,7 @@ func _load_game() -> bool:
 	m.woodwork._from_save(data.get("woodwork", null))   # an older save: nothing hewn, its house stages recorded
 	m.nearwood._from_save(data.get("nearwood", null))   # an older save: every Nearwood tree standing
 	m.act._from_save(data.get("act", {}))
+	m.origin = OriginState.new(data.get("origin", null))   # a save from before the interlude: "legacy", nothing made up
 	m.trek.works.clear()
 	for id in data.get("trek_works", []):
 		if TrekSystem.WORKS.has(str(id)):
@@ -594,6 +601,11 @@ static func _migrate(data: Dictionary) -> Dictionary:
 		# has never been there: nobody has met you and the order on the board still stands.
 		if typeof(data.get("town", null)) != TYPE_DICTIONARY:
 			data["town"] = {}
+	if v < 18:
+		# Version 18 added the opening interlude's record (CCH-ORIGIN-001). A farm saved before it never had one:
+		# its past is unknown, recorded as "legacy", and it never plays the interlude or gets an origin made up.
+		if typeof(data.get("origin", null)) != TYPE_DICTIONARY:
+			data["origin"] = {"v": OriginState.V, "status": "legacy"}
 	# A save from a newer build keeps its number; keys this build doesn't know are ignored.
 	data["save_version"] = maxi(v, SAVE_VERSION)
 	return data
@@ -636,6 +648,18 @@ static func _migrate_world(data: Dictionary) -> void:
 			stats.erase(key)
 	for key in WORLD_KEYS:
 		data.erase(key)
+
+
+# CCH-ORIGIN-001: whether a slot's save is only the opening interlude's record (no farm yet).
+static func is_interlude(data: Dictionary) -> bool:
+	return bool(data.get("interlude", false))
+
+
+# Writes the interlude's record to the slot, with just enough of a save around it (day 1, an empty pack) to be
+# listed, recovered and continued like any save. Loading it starts a fresh farm, never this stub's contents.
+static func write_interlude(path: String, save_name: String, origin: Dictionary) -> bool:
+	return write_save(path, {"interlude": true, "day": 1, "inventory": {}, "save_name": save_name,
+		"origin": origin, "save_version": SAVE_VERSION})
 
 
 static func write_save(path: String, data: Dictionary) -> bool:

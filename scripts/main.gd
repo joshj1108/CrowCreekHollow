@@ -632,6 +632,10 @@ const COLLAPSE_SANITY_PENALTY := 5   # permanent cap reduction, curable with a c
 var save_slot := 1                  # which save slot this game reads and writes
 var save_name := ""                 # the name given to the save when the game was started
 var world_started := false         # false while the start screen is up
+# CCH-ORIGIN-001: the player's life before the farm, from the opening interlude (OriginState, read-only to the
+# rest of the game). "none" until a new game's interlude finishes; "legacy" for a farm saved before it existed.
+var origin := OriginState.new(null)
+var interlude: RoadInterlude       # the opening interlude while it is up (before the farm is built)
 var title_menu: TitleMenu
 var music: MusicSystem   # volumes and the rest of the settings are in GameSettings
 var pause_armed := ""               # the Pause menu's quit button pressed once, waiting for a second press
@@ -1078,7 +1082,7 @@ func _ready() -> void:
 	# The start screen comes first. The world is built once the player picks Continue, New Game, or a slot.
 	title_menu = TitleMenu.new()
 	title_menu.settings_rows = panels._controls_rows()
-	title_menu.start_requested.connect(_on_title_start)
+	title_menu.start_requested.connect(_on_title_choice)
 	title_menu.quit_requested.connect(func() -> void: get_tree().quit())
 	add_child(title_menu)
 
@@ -1161,7 +1165,53 @@ func _quit_to_title() -> void:
 	get_tree().call_deferred("reload_current_scene")
 
 
+# CCH-ORIGIN-001: the start screen's choice. A New Game plays the opening interlude first, and a slot still on the
+# road picks it up on the page it was left; a slot whose road is finished (the farm not saved yet) starts the
+# farm fresh with that record. Any other save loads as before and never sees the interlude.
+func _on_title_choice(mode: String, slot: int) -> void:
+	if mode == "new":
+		_start_interlude(slot, {}, TitleMenu.pending_name)
+		return
+	var data := SaveSystem.read_save(TitleMenu.slot_path(slot))
+	if SaveSystem.is_interlude(data):
+		var rec := OriginState.sanitize(data.get("origin", null))
+		var name_of_save := str(data.get("save_name", ""))
+		if rec["status"] == "complete":
+			origin = OriginState.new(rec)
+			TitleMenu.pending_name = name_of_save
+			_on_title_start("new", slot)
+		else:
+			_start_interlude(slot, rec, name_of_save)
+		return
+	_on_title_start(mode, slot)
+
+
+func _start_interlude(slot: int, record: Dictionary, name_of_save: String) -> void:
+	save_slot = slot
+	TitleMenu.active_slot = slot
+	title_menu.visible = false
+	interlude = RoadInterlude.new(record, TitleMenu.slot_path(slot), name_of_save)
+	interlude.sound = func(n: String) -> void: play_sfx_at(n, -12.0, 0.03)
+	interlude.finished.connect(_on_interlude_finished.bind(slot, name_of_save))
+	add_child(interlude)
+
+
+# The door at the end of the road: the record is kept in the slot, then the farm is built behind the black
+# exactly as a new game always has (October 1, 06:00, the usual pack, purse and first-day guide) and fades in.
+# The clock is held (transitioning) until the fade is over, so the arrival costs no minutes.
+func _on_interlude_finished(record: Dictionary, slot: int, name_of_save: String) -> void:
+	origin = OriginState.new(record)
+	SaveSystem.write_interlude(TitleMenu.slot_path(slot), name_of_save, origin.to_save())
+	TitleMenu.pending_name = name_of_save
+	_on_title_start("new", slot)
+	transitioning = true
+	interlude.reveal(func() -> void:
+		transitioning = false
+		interlude = null)
+
+
 # Starts the world from the start screen: Continue or Load Game read the slot, New Game starts fresh.
+# Tools call this directly to start a farm without the interlude (the origin is then "none").
 func _on_title_start(mode: String, slot: int) -> void:
 	save_slot = slot
 	TitleMenu.active_slot = slot
@@ -1212,7 +1262,8 @@ func _on_title_start(mode: String, slot: int) -> void:
 	else:
 		_show_message(_fill_controls("A new season begins. Day 1. %s. Walk with {move}, and into the farmhouse door to go in." % WEATHER_NAMES.get(weather_kind, "Overcast")))
 	world_started = true
-	title_menu.queue_free()
+	if title_menu != null:
+		title_menu.queue_free()
 	title_menu = null
 
 

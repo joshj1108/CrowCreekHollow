@@ -333,6 +333,11 @@ func _show_controls() -> void:
 func _slot_text(slot: int, data: Dictionary) -> String:
 	if data.is_empty():
 		return "Slot %d: empty" % slot
+	# CCH-ORIGIN-001: a slot still on the opening road, or just arrived with the farm not yet saved.
+	if SaveSystem.is_interlude(data):
+		var arrived := str((data.get("origin", {}) as Dictionary).get("status", "")) == "complete" if typeof(data.get("origin")) == TYPE_DICTIONARY else false
+		var where := "arrived, day 1" if arrived else "on the road to Crow Creek Hollow"
+		return "Slot %d: %s\n%s" % [slot, str(data.get("save_name", "")), where]
 	var stages := ["Decrepit", "Boarded", "Patched", "Restored"]
 	var stage := clampi(int(data.get("house_stage", 0)), 0, stages.size() - 1)
 	var details := "day %d, %d coins, house %s" % [int(data.get("day", 1)), int(data.get("money", 0)), stages[stage]]

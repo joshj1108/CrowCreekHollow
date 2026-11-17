@@ -11,9 +11,9 @@ Target: Windows / Steam, $19.99, a complete single-player **Year One** (see OD-1
 ## 0. Handoff (read this first)
 
 - **State:** a large, mostly working farm game with 17 story chapters and 3 endings, a playable first village, and a
-  19-of-20 green automated suite. **No human has played any of it end to end.** The new narrative canon (mandatory
-  interlude, five origins, resident arcs) exists only as documents: **zero code**.
-- **Can't ship today because:** the origin/interlude story isn't built, timber (built 2026-11-16, CCH-WOODWORK-001) is unplayed by a human, the story's length doesn't match "Year One" (OD-1),
+  19-of-20 green automated suite. **No human has played any of it end to end.** The new narrative canon
+  (resident arcs, origin callbacks) exists only as documents; the opening interlude is built (CCH-ORIGIN-001, in review).
+- **Can't ship today because:** the origin callbacks after the interlude aren't built, timber (built 2026-11-16, CCH-WOODWORK-001) is unplayed by a human, the story's length doesn't match "Year One" (OD-1),
   and there is no human playtest.
 - **Done this session:** audit, this board, regression runner now covers all 20 suites and fails loudly; shader-cache
   workaround verified over 4 launches; trek timing investigated (real cost, threshold kept). Follow-up: clean
@@ -24,6 +24,10 @@ Target: Windows / Steam, $19.99, a complete single-player **Year One** (see OD-1
 - **CCH-WICKER-COVE-002 (2026-11-16):** Edith's leak (8 planks, 2 iron bars, Carpentry 2, 2 h, 60 coins) through
   `try_repair`, a code-drawn stain/bucket that goes once mended, and the first Living Memory loop (Edith, Thomas,
   diary). Report `AI_COLLAB/CCH_WICKER_COVE_002_REPORT.md`. Stopped for review.
+- **CCH-ORIGIN-001 (2026-11-16):** the opening interlude, *The Road to Crow Creek Hollow*: mandatory on New Game,
+  all five origins from the screenplay, Back/pause/resume, origin record saved (`origin`, save v18; old saves
+  `legacy`), Day 1 unchanged. Report `AI_COLLAB/CCH_ORIGIN_001_REPORT.md`. Stopped for owner and ChatGPT review;
+  no human play yet. Winter letters and later callbacks not built.
 - **Owner decisions waiting:** OD-1 to OD-6 (section 4), plus the pending CCH-EVENING-002 multipliers.
 
 ## 1. Evidence levels
@@ -65,7 +69,7 @@ implemented · **PL** planned, not implemented · **BB** broken or blocked.
 | Folk on the farm (Maren, Davy, vicar, postman, Mrs Tull) | `folk_system.gd` | NV | sim | No daily routines; resident arcs designed only | Each has a routine and an arc in Year One |
 | Story chapters 1-17, second-year act, 3 endings | `story_act.gd`, `mystery.gd`, `ending_screen.gd` | NV | sim (17/17, all endings) | Act opens day 240, bell from day 396: **two years** (OD-1); never human-played | A human reaches an ending |
 | Agnes's diary + handwriting | `diary_book.gd`, `mystery.gd` | VW | auto `diary_test` 63; UI approved | — | unchanged |
-| Opening interlude + five origins | AI_COLLAB screenplays | **PL** | docs only | Owner-mandated, non-skippable; nothing built | Interlude plays, origin saved, ≥3 later consequences per origin |
+| Opening interlude + five origins | `road_script.gd`, `road_interlude.gd`, `origin_state.gd` | **PI** | [auto] interlude built and tested (CCH-ORIGIN-001), all five origins; later consequences not built | Owner-mandated, non-skippable; human play pending | Interlude plays, origin saved, ≥3 later consequences per origin |
 | Mid-year decisions, resident arcs, inn room | AI_COLLAB designs | **PL** | docs only | Large; must be scoped (OD-3) | Per scope decision |
 | Achievements / Steam | `achievement_system.gd`, `steam_achievements.gd` | PI | code | GodotSteam not in the project | Unlocks reach Steam in a Steam build |
 | Audio (SFX, ambience, music) | `music_system.gd`, `ambience_system.gd`, `tools/make_*.py` | PI | code | Generated in-house (licence clean); production quality is an owner call (`MUSIC_BRIEF.md`) | Owner accepts the mix and score |
@@ -143,8 +147,8 @@ Status uses section 2's codes plus **done**. Every task's evidence goes in `art/
 ### P3 — Narrative completion
 | ID | Task | Depends | Acceptance | Effort | Status |
 | --- | --- | --- | --- | --- | --- |
-| R-P3-01 | Opening interlude, first playable slice: presentation scene + origin choice saved (`origin`) | OD-3 | non-skippable, plays before day 1, kb/controller, saved and migrated | M | PL |
-| R-P3-02 | All five origins' interlude content | R-P3-01 | each branch complete per screenplay | L | PL |
+| R-P3-01 | Opening interlude, first playable slice: presentation scene + origin choice saved (`origin`) | OD-3 | non-skippable, plays before day 1, kb/controller, saved and migrated | M | **VW** [auto] — CCH-ORIGIN-001, in review |
+| R-P3-02 | All five origins' interlude content | R-P3-01 | each branch complete per screenplay | L | **VW** [auto] — CCH-ORIGIN-001, in review |
 | R-P3-03 | Origin consequences in Year One (diary pages, folk lines, the winter scenes) | R-P3-02, OD-1 | ≥3 visible consequences per origin | L | PL |
 | R-P3-04 | Story pacing fitted to Year One (OD-1) | OD-1 | a human reaches an ending inside the 1.0 span | M | PL |
 | R-P3-05 | Midyear decisions and resident arcs (scoped by OD-3) | OD-3, R-P2-03 | per scope | XL | PL |
@@ -222,6 +226,7 @@ A green suite is not a polished game: every gate above marked "human" needs a pe
 
 | Date | Task | What happened | Commit |
 | --- | --- | --- | --- |
+| 2026-11-16 | CCH-ORIGIN-001 | Opening interlude, five origins, origin record (save v18); interlude_test 101 PASS; suite 22/23 (aoh_trek_check timing, pre-existing) | see `MESSAGE_BOARD.md` |
 | 2026-11-15 | OD-7 | Owner approved committing `project.godot`; rebuilt from a clean checkout with v0.1.0 | `4f651b5c` |
 | 2026-11-15 | CCH-RELEASE-001 R-P0-02 | Release build from a clean checkout exported and booted; dev manifests and Steam CSV excluded from the pack; templates were already installed (audit corrected) | see `MESSAGE_BOARD.md` |
 | 2026-11-15 | CCH-RELEASE-001 | Audit, this board; R-P0-01 done (suite 19/20, trek timing the one failure); shader workaround verified; trek timing measured | `b5abe322` |

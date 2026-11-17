@@ -145,6 +145,10 @@ extends SceneTree
 #                   (a hit; "block+blow:S" guards and the blow is turned aside; "block+blowback:S" brings it from behind,
 #                   so it lands; "use+block+blow:S" swings while holding the guard, which is down during the swing),
 #                   "chop:S" / "mine:S" / "fish:S" run that loop for S seconds
+#   road=STEP       CCH-ORIGIN-001: the opening interlude, on step STEP (an id from RoadScript, e.g. s00, c00, s1c,
+#                   c42, arrive) with roadc=KEY:ID,KEY:ID as the choices already made (in order); roadpad shows the
+#                   controller's prompts, roadpause opens its pause menu. roadarrive plays the door and the fade
+#                   into the farm, then shoots the first gameplay view. Uses slot 8 and deletes it after.
 #   combatlog       with hold, print COMBAT lines: each swing's press, its contact frame and hit, each blow and the guard
 
 func _initialize() -> void:
@@ -172,6 +176,9 @@ func _initialize() -> void:
 			quit()
 			return
 		_save(opt)
+		return
+	if opt.has("road") or opt.has("roadarrive"):
+		await _road(main, opt)
 		return
 	main._on_title_start("new", 8)
 	if opt.has("season"):
@@ -901,6 +908,34 @@ func _log_contact(kind: String, main) -> void:
 
 
 var _final_line := ""
+
+
+# CCH-ORIGIN-001: a page of the opening interlude, or its hand-over to the farm.
+func _road(main, opt: Dictionary) -> void:
+	var rec := OriginState.fresh()
+	for pair in str(opt.get("roadc", "")).split(",", false):
+		var kv := pair.split(":")
+		rec["choices"][kv[0]] = kv[1]
+		rec["order"].append(kv[0])
+	main._start_interlude(8, rec, "Review")
+	var it: RoadInterlude = main.interlude
+	await process_frame
+	var want := str(opt.get("road", "arrive"))
+	for i in it.steps.size():
+		if str(it.steps[i]["id"]) == want:
+			it.index = i
+	it.black.color.a = 0.0
+	it.pad = opt.has("roadpad")
+	it._show(false)
+	if opt.has("roadpause"):
+		it.set_paused(true)
+	if opt.has("roadarrive"):
+		it._arrive()
+		await create_timer(3.2).timeout
+	for i in int(opt["frames"]):
+		await process_frame
+	_save(opt)
+	SaveSystem.delete_save(TitleMenu.slot_path(8))
 
 
 func _save(opt: Dictionary) -> void:
