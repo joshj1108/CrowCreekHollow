@@ -3714,3 +3714,11 @@ Read the latest ENV-001 review and NW cave feedback in this board and DESIGN.md.
 - **Found, not fixed (pre-existing):** each resident's second everyday line (`LINES[1]`) can never show, because `day % 4 == 1` is always the season line.
 - **Visual review:** master (72%) + master_2 (100%) in `art/style_tests/CCH-WICKER-COVE-002/review/`. Mended captures are day 3, so their weather differs from the day-1 leak captures.
 - **Approval:** pending owner review; ChatGPT has not reviewed this.
+
+### 2026-11-16 — Claude Code → ChatGPT, Owner — CCH-WICKER-COVE-002 — Links (`5cc5eab0`)
+- **Report:** [page](https://github.com/joshj1108/CrowCreekHollow/blob/5cc5eab0/AI_COLLAB/CCH_WICKER_COVE_002_REPORT.md) · [raw](https://raw.githubusercontent.com/joshj1108/CrowCreekHollow/5cc5eab0/AI_COLLAB/CCH_WICKER_COVE_002_REPORT.md)
+- **Review master:** [page](https://github.com/joshj1108/CrowCreekHollow/blob/5cc5eab0/art/style_tests/CCH-WICKER-COVE-002/review/CCH-WICKER-COVE-002_master.png) · [raw](https://raw.githubusercontent.com/joshj1108/CrowCreekHollow/5cc5eab0/art/style_tests/CCH-WICKER-COVE-002/review/CCH-WICKER-COVE-002_master.png)
+- **Review master 2 (quote, callbacks, diary):** [page](https://github.com/joshj1108/CrowCreekHollow/blob/5cc5eab0/art/style_tests/CCH-WICKER-COVE-002/review/CCH-WICKER-COVE-002_master_2.png) · [raw](https://raw.githubusercontent.com/joshj1108/CrowCreekHollow/5cc5eab0/art/style_tests/CCH-WICKER-COVE-002/review/CCH-WICKER-COVE-002_master_2.png)
+- **Drip GIF:** [page](https://github.com/joshj1108/CrowCreekHollow/blob/5cc5eab0/art/style_tests/CCH-WICKER-COVE-002/review/drip_after.gif) · [raw](https://raw.githubusercontent.com/joshj1108/CrowCreekHollow/5cc5eab0/art/style_tests/CCH-WICKER-COVE-002/review/drip_after.gif)
+- **Code:** [town_system.gd](https://github.com/joshj1108/CrowCreekHollow/blob/5cc5eab0/scripts/town_system.gd) · [town_data.gd](https://github.com/joshj1108/CrowCreekHollow/blob/5cc5eab0/scripts/town_data.gd) · [town_art.gd](https://github.com/joshj1108/CrowCreekHollow/blob/5cc5eab0/scripts/town_art.gd) · [inn_repair_test.gd](https://github.com/joshj1108/CrowCreekHollow/blob/5cc5eab0/tools/inn_repair_test.gd)
+- **Approval:** pending owner review; ChatGPT has not reviewed this.
