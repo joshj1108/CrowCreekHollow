@@ -39,6 +39,11 @@ const DECOR := {
 		"desc": "Old clothes on a cross of boards. At night the crows won't settle on crops within 4 tiles of it."},
 	"shutters": {"name": "Window shutters", "cost": {"wood": 6, "sticks": 2, "fiber": 2}, "skill": "Carpentry", "level": 3, "max": 1, "blocks": true, "xp": 30,
 		"desc": "Hung on a farmhouse wall. From 18:00, Space bars them for the night, and the knocking takes half as much from you."},
+	# CCH-WOODWORK-001 (WoodworkSystem): the two crafting stations, placed like decor. Space at one opens its panel.
+	"workbench": {"name": "Workbench", "cost": {"sticks": 4}, "skill": "", "level": 0, "max": 1, "blocks": true,
+		"desc": "A trestle of poles wedged together with a split-log top. Logs are hewn into planks here, and every tool, lantern and piece of gear that isn't forged is made here."},
+	"anvil": {"name": "Anvil", "cost": {"stone": 8, "copper_bar": 2, "planks": 4}, "skill": "Smithing", "level": 1, "max": 1, "blocks": true,
+		"desc": "A block of iron set on a hewn stump. Copper and iron tools, arms and armor are forged here, and the farm's metal fittings need one."},
 	"bell": {"name": "Crow bell", "cost": {"bell_metal": 1, "bell_frame": 1, "bell_rope": 1, "bell_clapper": 1, "feathers": 20, "coins": 150}, "skill": "Carpentry", "level": 6, "max": 1, "blocks": true,
 		"desc": "Hung only on All Hallows, and the Hollow comes to it that night. While it stands, the field shadow can't reach the house, so the Hollow stops coming, and the night takes a quarter less from your sanity."},
 }
@@ -171,7 +176,16 @@ func _can_afford(kind: String) -> bool:
 
 func _can_place(kind: String) -> bool:
 	return _level_ok(kind) and _can_afford(kind) and _count(kind) < int(DECOR[kind]["max"]) and (kind != "bell" or _bell_night()) \
-		and (kind != "flowers" or _season() in ["Spring", "Summer"])
+		and (kind != "flowers" or _season() in ["Spring", "Summer"]) and _anvil_ok(kind)
+
+
+# CCH-WOODWORK-001: metal fittings (anything with bars in it) are forged, so they need an anvil on the farm.
+func needs_anvil(kind: String) -> bool:
+	return kind != "anvil" and kind != "bell" and m.woodwork.station_for(DECOR[kind]["cost"]) == "anvil"
+
+
+func _anvil_ok(kind: String) -> bool:
+	return not needs_anvil(kind) or m.woodwork.has_station("anvil")
 
 
 func _bell_night() -> bool:
@@ -217,7 +231,7 @@ func _make_part(id: String) -> void:
 func _cost_list(cost: Dictionary) -> String:
 	var parts: Array = []
 	for key in cost:
-		var label := "turnip seeds" if key == "seeds" else ("crow feathers" if key == "feathers" else str(key).replace("_", " "))
+		var label := WoodworkSystem.label(str(key))
 		parts.append("%d %s" % [int(cost[key]), label])
 	return ", ".join(parts)
 
@@ -251,6 +265,12 @@ func _start_place(kind: String) -> void:
 		return
 	if kind == "bell" and _level_ok(kind) and _can_afford(kind) and not _bell_night():
 		m._show_message("The crow bell can only be hung on All Hallows, October 31.")
+		return
+	if _count(kind) >= int(DECOR[kind]["max"]) and m.woodwork.STATIONS.has(kind):
+		m._show_message("You already have a %s. Take it down from its panel to move it." % str(DECOR[kind]["name"]).to_lower())
+		return
+	if not _anvil_ok(kind) and _level_ok(kind) and _can_afford(kind):
+		m._show_message("The %s is forged. Build an anvil first (Buildings, under Workshop)." % str(DECOR[kind]["name"]).to_lower())
 		return
 	if not _can_place(kind):
 		m._show_message("A %s needs %s." % [str(DECOR[kind]["name"]).to_lower(), _cost_text(kind)])
@@ -301,6 +321,10 @@ func _try_use(t: Vector2i) -> bool:
 	if not decor.has(t):
 		return false
 	var kind: String = decor[t]
+	if m.woodwork.STATIONS.has(kind):
+		if not m._tool_press:
+			m._toggle_tab(str(m.woodwork.STATIONS[kind]))
+		return true
 	if kind == "snare" and snared.has(t):
 		_take_catch(t)
 		return true
@@ -574,7 +598,7 @@ func _art(kind: String, t: Vector2i, winter: bool) -> String:
 			name = "e3/apple_bare" if winter else ["concept/w4_orchard_apple_a", "concept/w4_orchard_apple_b"][absi(t.x + t.y) % 2]
 		"scarecrow":
 			name = "scarecrow"
-		"sprinkler", "sprinkler_big", "bench", "birdbath", "weathervane", "torch", "snare", "shutters", "bell":
+		"sprinkler", "sprinkler_big", "bench", "birdbath", "weathervane", "torch", "snare", "shutters", "bell", "workbench", "anvil":
 			name = "e3/" + kind
 	return name if name != "" and FarmSprites.has(name) else ""
 
@@ -605,6 +629,7 @@ func _draw_fence(t: Vector2i) -> bool:
 func _draw() -> void:
 	var px := float(m.PX)
 	var ink := Color("1d1611")
+	m.nearwood.draw_farm(layer)
 	var winter := m._season_of(m._calendar_date(m.day)["month"]) == "Winter"
 	for t in decor:
 		var c := m._tile_center(t.x, t.y)
@@ -623,6 +648,10 @@ func _draw() -> void:
 					layer.draw_rect(Rect2(c + Vector2(-px * 0.42, -px * 0.1), Vector2(px * 0.84, px * 0.12)), Color("3a2a1c"))
 				continue
 		match str(decor[t]):
+			"workbench":
+				_draw_workbench(c, px, ink)
+			"anvil":
+				_draw_anvil(t, c, px, ink)
 			"lamp":
 				var base := c + Vector2(0, px * 0.35)
 				layer.draw_rect(Rect2(base + Vector2(-px * 0.2, -px * 0.12), Vector2(px * 0.4, px * 0.12)), ink)
@@ -790,3 +819,52 @@ func _draw() -> void:
 		layer.draw_line(c + Vector2(-px * 0.45, -px * 0.15), c + Vector2(-px * 0.05, px * 0.1), Color("b89a6a"), 2.0)
 		layer.draw_line(c + Vector2(px * 0.1, -px * 0.25), c + Vector2(px * 0.4, px * 0.2), ink, 5.0)
 		layer.draw_line(c + Vector2(px * 0.1, -px * 0.25), c + Vector2(px * 0.4, px * 0.2), Color("b89a6a"), 2.0)
+
+
+# CCH-WOODWORK-001: placeholder stations, drawn in code in the decor's style until their sprites are made.
+# The workbench: a split-log top on four splayed legs, with a log across it and a hatchet bitten into the end.
+func _draw_workbench(c: Vector2, px: float, ink: Color) -> void:
+	var top := Rect2(c + Vector2(-px * 0.46, -px * 0.22), Vector2(px * 0.92, px * 0.22))
+	for lx in [-0.38, 0.3]:
+		var leg := Rect2(c + Vector2(px * lx, 0.0), Vector2(px * 0.1, px * 0.42))
+		layer.draw_rect(leg.grow(2.0), ink)
+		layer.draw_rect(leg, Color("4a3424"))
+	layer.draw_rect(top.grow(2.0), ink)
+	layer.draw_rect(top, Color("8a6a46"))
+	layer.draw_rect(Rect2(top.position + Vector2(0, top.size.y - 4.0), Vector2(top.size.x, 4.0)), Color("5e4430"))
+	var log := Rect2(c + Vector2(-px * 0.3, -px * 0.44), Vector2(px * 0.5, px * 0.2))
+	layer.draw_rect(log.grow(2.0), ink)
+	layer.draw_rect(log, Color("6b4a32"))
+	layer.draw_circle(Vector2(log.end.x, log.get_center().y), px * 0.1 + 2.0, ink)
+	layer.draw_circle(Vector2(log.end.x, log.get_center().y), px * 0.1, Color("c8a070"))
+	var haft := c + Vector2(px * 0.32, -px * 0.3)
+	layer.draw_line(haft, haft + Vector2(px * 0.1, -px * 0.36), ink, 5.0)
+	layer.draw_line(haft, haft + Vector2(px * 0.1, -px * 0.36), Color("a07a4a"), 2.0)
+	layer.draw_rect(Rect2(haft + Vector2(px * 0.02, -px * 0.44), Vector2(px * 0.2, px * 0.12)).grow(1.0), Color("8a8a90"))
+
+
+# The anvil: a dark iron block with a horn, on a hewn stump.
+func _draw_anvil(t: Vector2i, c: Vector2, px: float, ink: Color) -> void:
+	layer.draw_texture_rect(FarmSprites.tex("prop_stump"), m._tile_rect(t), false)
+	var body := Rect2(c + Vector2(-px * 0.24, -px * 0.36), Vector2(px * 0.4, px * 0.2))
+	var waist := Rect2(c + Vector2(-px * 0.12, -px * 0.18), Vector2(px * 0.18, px * 0.14))
+	var horn := PackedVector2Array([body.end - Vector2(0, body.size.y), Vector2(body.end.x + px * 0.2, body.position.y + px * 0.06), body.end - Vector2(0, px * 0.06)])
+	layer.draw_rect(waist.grow(2.0), ink)
+	layer.draw_rect(waist, Color("3a3a42"))
+	layer.draw_colored_polygon(horn, ink)
+	layer.draw_rect(body.grow(2.0), ink)
+	layer.draw_rect(body, Color("4a4a54"))
+	layer.draw_rect(Rect2(body.position, Vector2(body.size.x, 3.0)), Color("7a7a86"))
+
+
+# CCH-WOODWORK-001: takes the workbench or anvil down from its panel, materials back, so it can be placed elsewhere.
+func take_station(kind: String) -> void:
+	for t in decor.keys():
+		if str(decor[t]) == kind:
+			decor.erase(t)
+			_pay(kind, -1)
+			_stamp()
+			m._close_panel()
+			m.queue_redraw()
+			m._show_message("You take down the %s and keep its materials. Place it again from Buildings, under Workshop." % str(DECOR[kind]["name"]).to_lower())
+			return

@@ -53,6 +53,8 @@ const SUBTITLES := {
 	"Cooler": "Fish kept fresh",
 	"Smokehouse": "Smoke, dry and put by",
 	"Furnace": "Ore into bars",
+	"Workbench": "Hew planks; make tools and gear",
+	"Anvil": "Forge metal tools and gear",
 	"Woodstore": "Firewood for the hearth",
 	"Hearth": "The fire, and the evening by it",
 }

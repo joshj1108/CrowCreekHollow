@@ -13,13 +13,14 @@ Target: Windows / Steam, $19.99, a complete single-player **Year One** (see OD-1
 - **State:** a large, mostly working farm game with 17 story chapters and 3 endings, a playable first village, and a
   19-of-20 green automated suite. **No human has played any of it end to end.** The new narrative canon (mandatory
   interlude, five origins, resident arcs) exists only as documents: **zero code**.
-- **Can't ship today because:** the origin/interlude story isn't built, timber (logs → planks, workbench/anvil) isn't built, the story's length doesn't match "Year One" (OD-1),
+- **Can't ship today because:** the origin/interlude story isn't built, timber (built 2026-11-16, CCH-WOODWORK-001) is unplayed by a human, the story's length doesn't match "Year One" (OD-1),
   and there is no human playtest.
 - **Done this session:** audit, this board, regression runner now covers all 20 suites and fails loudly; shader-cache
   workaround verified over 4 launches; trek timing investigated (real cost, threshold kept). Follow-up: clean
   release build exported and booted (R-P0-02); the first audit wrongly said the export templates were missing.
 - **Next three tasks:** R-P0-03 owner plays days 1-14 from `builds/CrowCreekHollow.exe` → R-P3-01 interlude and
-  origin choice, first playable slice (needs OD-1/OD-3) → R-P1-02/03 workbench and anvil, then logs → planks.
+  origin choice, first playable slice (needs OD-1/OD-3) → R-P2-02 Edith's inn repair on the plank chain (after the owner's CCH-WOODWORK-001 review).
+- **CCH-WOODWORK-001 (2026-11-16):** workbench, anvil, Nearwood logging grove, logs → planks, Patched/Restored paid in planks, `try_repair` for the inn. Report `AI_COLLAB/CCH_WOODWORK_001_REPORT.md`. Stopped for gameplay review.
 - **Owner decisions waiting:** OD-1 to OD-6 (section 4), plus the pending CCH-EVENING-002 multipliers and
   CCH-WICKER-COVE-002 batch.
 
@@ -46,8 +47,8 @@ implemented · **PL** planned, not implemented · **BB** broken or blocked.
 | Evenings, shelter, Quiet Hour (CCH-EVENING-002) | `evening_system.gd` | NV | auto, sim; played evidence 1-2 evenings/style | Multipliers make a repairing sleeper nearly safe (report §F) | Owner picks multipliers; 14 played evenings per style |
 | Farmhouse restoration (4 stages) | `estate_system.gd`, `farm_scenery.gd`, `interior_art.gd` | PI | auto `interior_test` 136 | Porch/second storey still live (D-015 conflict); production stage art incomplete | Four coherent stages, no storey dependency on the critical path |
 | Inventory, bags, storage, cellar/cooler/smokehouse | `bag_panel.gd`, `stall_system.gd` | VW | auto, sim | — | unchanged |
-| Crafting stations (workbench / anvil) | `craft_system.gd` | **PL** | code: one Craft panel, no stations | Owner rule "non-anvil tools at a workbench" not built | Workbench and anvil as places; tools split per rule |
-| Timber: logs → planks, forest woodcutting | — | **PL** | code: no planks anywhere | Required by non-negotiables; inn repair waits on it | Fell → logs → hew at workbench → planks used by repairs |
+| Crafting stations (workbench / anvil) | `woodwork_system.gd`, `craft_system.gd`, `farm_projects.gd` | **NV** | auto `woodwork_test` 93, `menu_test` (both panels, kb + pad); sim 3×400 days | No human play; placeholder art (R-P4-02); big metal works not anvil-gated | Owner gameplay review (CCH-WOODWORK-001) |
+| Timber: logs → planks, forest woodcutting | `nearwood_system.gd`, `woodwork_system.gd` | **NV** | auto `woodwork_test`; sim: ~39 logs a 2.65 h Nearwood trip, ladder days unchanged | No human play; trail mouth only signposted; deep stand deferred | Owner gameplay review; human trip and repair |
 | Tools, forestry, mining, smithing, shields | `mining_system.gd`, `combat_system.gd`, main.gd | NV | auto `creature_test` 74 | Upgrade ladder vs new stations | Each tier reachable in Year One |
 | Lantern (radius tiers, fixed energy) | main.gd `LANTERN_TIERS` | VW | code + auto | — | matches design rule |
 | Cooking, food economy | `foods.gd`, `tools/food_audit.gd` | NV | auto, data audit (CORE-LOOP-003) | 21/24 dishes restore less than raw parts (formula kept on purpose) | Cooking worth doing; human judgement |
@@ -120,8 +121,8 @@ Status uses section 2's codes plus **done**. Every task's evidence goes in `art/
 | ID | Task | Depends | Acceptance | Effort | Status |
 | --- | --- | --- | --- | --- | --- |
 | R-P1-01 | Evening balance accepted (OD-4) and played fortnight | OD-4 | numbers set; 14 played evenings per style | M | NV |
-| R-P1-02 | Workbench and anvil as stations; tool recipes split per the owner rule | — | non-anvil tools only at the workbench; saves migrate | M | PL |
-| R-P1-03 | Logs → planks at the workbench; forest woodcutting as the main timber route | R-P1-02 | planks feed repairs; no grind spike in sim | M | PL |
+| R-P1-02 | Workbench and anvil as stations; tool recipes split per the owner rule | — | non-anvil tools only at the workbench; saves migrate | M | NV — built 2026-11-16 (CCH-WOODWORK-001), owner review |
+| R-P1-03 | Logs → planks at the workbench; forest woodcutting as the main timber route | R-P1-02 | planks feed repairs; no grind spike in sim | M | NV — built 2026-11-16 (CCH-WOODWORK-001), owner review |
 | R-P1-04 | Food and cooking value (OD-5) | OD-5 | cooking chosen in sims and by the human tester | S | NV |
 | R-P1-05 | Survival upkeep time by house stage (CCH-SURVIVAL-001) | R-P1-01 | upkeep falls with stage, measured | S | PL |
 | R-P1-06 | Essential tool upgrade ladder reachable in Year One | R-P1-02, OD-1 | sim reaches each tier by its season | S | NV |

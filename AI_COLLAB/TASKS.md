@@ -33,6 +33,7 @@
 | CCH-WICKER-COVE-ALPHA-001 | First playable Wicker Cove: compact fogbound village from the east gate, store, fish market, inn interior, harbour, one order | Claude Code | ChatGPT | **Visually accepted 2026-11-15** as the first playable village baseline (provisional 82/100, `D-019`); not yet human play-tested. Low-priority visual backlog WC-VIS-01 to 03 below | Owner accepted the visuals; gameplay acceptance awaits human testing |
 | CCH-WICKER-COVE-002 | Dependency audit and smallest next gameplay batch for Wicker Cove and the first Living Memory use (`AI_COLLAB/CCH_WICKER_COVE_002_SCOPE.md`) | Claude Code | ChatGPT | proposed 2026-11-15; nothing implemented | Owner approves a scoped batch and its five open decisions |
 | CCH-RELEASE-001 | Release-readiness audit, P0–P7 roadmap, first production sprint (`AI_COLLAB/PRODUCTION_BOARD.md`) | Claude Code | ChatGPT | **Audit and board done 2026-11-15, review requested.** R-P0-01 regression runner fixed; owner decisions OD-1..OD-6 open | Owner accepts the board and answers OD-1..OD-6 |
+| CCH-WOODWORK-001 | Workbench and anvil stations, logs → planks, the Nearwood logging grove, planks in the house repairs, repair transaction for the inn (`AI_COLLAB/CCH_WOODWORK_001_REPORT.md`) | Claude Code | ChatGPT | **Implemented 2026-11-16, stopped for the owner's gameplay review.** Automated and sim evidence only; no human play | Owner plays a trip, a hew and a repair; accepts costs |
 
 ## ART-003 — W-3 history (all non-production, prototype only)
 | Step | Commit | What it did | PixelLab | ChatGPT review |

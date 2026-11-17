@@ -10,7 +10,7 @@ func _init(main: MainGame) -> void:
 
 func _chop(tile: Vector2i) -> void:
 	if int(m.tool_tier["hatchet"]) < 1:
-		m._show_message("You need a hatchet. Craft a crude one from the Craft panel.")
+		m._show_message("You need a hatchet. Make a crude one at the workbench.")
 		return
 	# Chopping keeps rolling each tick until the tree falls. Moving away stops it.
 	m.farm._start_harvest("chop", tile)
@@ -22,7 +22,7 @@ func _finish_chop(tile: Vector2i) -> void:
 	m.play_sfx("tree_fall", 0.04)
 	m._apply_grove()
 	m.materials["wood"] += 3
-	var found := "3 wood"
+	var found := "3 logs"
 	if int(m.tool_tier["hatchet"]) >= 3 and randf() < m.HARDWOOD_CHANCE:
 		m.materials["hardwood"] += 1
 		found += ", 1 hardwood"

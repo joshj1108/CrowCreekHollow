@@ -79,3 +79,8 @@ PASS  numbers: 0.9 s of safety after a hit
 PASS  numbers: walking speed and the feet's box
 PASS  numbers: the farmer's feet stay where props sort against them
 PASS: 0 failure(s)
+ERROR: 5 RID allocations of type 'PN13RendererDummy14TextureStorage12DummyTextureE' were leaked at exit.
+WARNING: 47 ObjectDB instances were leaked at exit (run with `--verbose` for details).
+   at: cleanup (core/object/object.cpp:2536)
+ERROR: 15 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:822)

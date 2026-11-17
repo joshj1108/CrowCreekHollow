@@ -99,7 +99,7 @@ func _fear() -> float:
 
 
 func _place() -> String:
-	if m.in_cave and not m.trek.active and not m.town.active:
+	if m.in_cave and not m.trek.active and not m.town.active and not m.nearwood.active:
 		return "cave"
 	return "in" if m.inside else "out"
 

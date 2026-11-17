@@ -175,6 +175,10 @@ PASS decor scarecrow has art (scarecrow)
 PASS decor scarecrow has art in winter (scarecrow)
 PASS decor shutters has art (e3/shutters)
 PASS decor shutters has art in winter (e3/shutters)
+PASS decor workbench has art (e3/workbench)
+PASS decor workbench has art in winter (e3/workbench)
+PASS decor anvil has art (e3/anvil)
+PASS decor anvil has art in winter (e3/anvil)
 PASS decor bell has art (e3/bell)
 PASS decor bell has art in winter (e3/bell)
 PASS fence piece concept/gen_f4c74269c8 exists
@@ -209,7 +213,8 @@ PASS night/madness art crop_pumpkin exists
 PASS decor layer drew
 PASS happenings, forage, raiders and madness drew
 e3 check: 0 failure(s)
-WARNING: 12 ObjectDB instances were leaked at exit (run with `--verbose` for details).
+ERROR: 5 RID allocations of type 'PN13RendererDummy14TextureStorage12DummyTextureE' were leaked at exit.
+WARNING: 15 ObjectDB instances were leaked at exit (run with `--verbose` for details).
    at: cleanup (core/object/object.cpp:2536)
-ERROR: 6 resources still in use at exit (run with --verbose for details).
+ERROR: 7 resources still in use at exit (run with --verbose for details).
    at: clear (core/io/resource.cpp:822)

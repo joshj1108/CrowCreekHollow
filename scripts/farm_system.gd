@@ -227,6 +227,11 @@ func _update_harvest(delta: float) -> void:
 				_stop_harvest("")
 				return
 			_roll_harvest(m.CHOP_BASE_CHANCE + m.TOOL_TIER_CHANCE * float(m.tool_tier["hatchet"]), "Chip, chip. The tree is still standing.", func() -> void: m.firewood._finish_chop(tile))
+		"log":
+			if not m.nearwood.active or not m.nearwood.standing(tile):
+				_stop_harvest("")
+				return
+			_roll_harvest(m.nearwood.chop_chance(), "Chip, chip. The marked tree is still standing.", func() -> void: m.nearwood._finish(tile))
 		"mine":
 			if not m.rocks.has(tile):
 				_stop_harvest("")

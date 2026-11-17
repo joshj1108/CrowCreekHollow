@@ -46,6 +46,7 @@ func _run() -> void:
 	await _pause_cases()
 	await _wheel_cases()
 	await _section_cases()
+	_stations_beside_player()
 	await _craft_pad_cases()
 	await _cooking_pad_cases()
 	await _split_cases()
@@ -68,6 +69,16 @@ func _run() -> void:
 	SaveSystem.delete_save(TitleMenu.slot_path(SLOT))
 	print("%s: %d failure(s)" % ["PASS" if failures == 0 else "FAIL", failures])
 	quit(failures)
+
+
+# CCH-WOODWORK-001: tools and gear are made beside the workbench or forged beside the anvil, so the craft cases
+# stand between the two (and the anvil lets the metal decor be placed in the placement cases).
+func _stations_beside_player() -> void:
+	var here := m._player_tile()
+	m.projects.decor[here + Vector2i(1, 0)] = "workbench"
+	m.projects.decor[here + Vector2i(-1, 0)] = "anvil"
+	m.projects._stamp()
+	_check("stations: the workbench and anvil stand beside the farmer", m.woodwork.near("workbench") and m.woodwork.near("anvil"))
 
 
 # --- The start screen ---------------------------------------------------------
@@ -814,7 +825,7 @@ func _small_panel_cases() -> void:
 	m.mail._add_letter("Menu test", "A letter in the mailbox.")
 	m.mail._open_mailbox()
 	m._close_panel()
-	for panel_name in ["Desk", "Mailbox", "Furnace", "Smokehouse", "Coop", "Barn", "Cellar", "Cooler", "Woodstore", "Hearth", "Well", "Trade"]:
+	for panel_name in ["Desk", "Mailbox", "Furnace", "Smokehouse", "Coop", "Barn", "Cellar", "Cooler", "Woodstore", "Hearth", "Well", "Trade", "Workbench", "Anvil"]:
 		await _small_panel(panel_name)
 	# CCH-WICKER-COVE-ALPHA-001: the village's counters, opened in the village with coins and things to trade.
 	if m.get("town") != null:

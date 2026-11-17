@@ -57,6 +57,11 @@ extends SceneTree
 #                   desk's quiet hour), and shoot restwait= seconds into its short scene (default 1.3)
 #   flyms=N         with sign=crows: the crows were read N ms ago, so they are mid-flight off the fence
 #   (with hold, walk legs "rest-fire" and "rest-quiet" do the same as rest=, for a clip)
+#   stations        CCH-WOODWORK-001: the workbench right of the player and the anvil left (with tab=Workbench or
+#                   tab=Anvil for their panels); timber=L,P sets logs and planks held
+#   trail           stand just below the timber trail's gap north of the farmhouse, facing it (the sign beside it)
+#   nearwood        go up the timber trail to the Nearwood (at hour=); nwtile=X,Y stand on this grove tile;
+#                   nwfell=N the first N marked trees are stumps; nwsay faces up and uses what is there
 #   town            CCH-WICKER-COVE-ALPHA-001: go down to Wicker Cove (at hour=, if given); tinn: in the inn's room;
 #                   ttile=X,Y stand on this village tile (the room's own coordinates with tinn); ttalk=thomas|edith
 #                   talk to them (the first-meeting scene; tmet skips it and opens their counter); ttab=NAME opens
@@ -410,6 +415,33 @@ func _initialize() -> void:
 		main.mail.lid_left = 3600.0
 		if not opt.has("mailpanel"):
 			main._close_panel()
+	# CCH-WOODWORK-001 (guarded, so BEFORE shots still run on a build without it).
+	if opt.has("stations") and main.get("woodwork") != null:
+		var here: Vector2i = main._player_tile()
+		main.projects.decor[here + Vector2i(1, 0)] = "workbench"
+		main.projects.decor[here + Vector2i(-1, 0)] = "anvil"
+		main.projects._stamp()
+	if opt.has("timber") and main.get("woodwork") != null:
+		var tw: PackedStringArray = str(opt["timber"]).split(",")
+		main.materials["wood"] = int(tw[0])
+		main.materials["planks"] = int(tw[1]) if tw.size() > 1 else 0
+	if opt.has("trail") and main.get("nearwood") != null:
+		var home: Vector2i = main._world_tile(NearwoodSystem.HOME_IX.x, NearwoodSystem.HOME_IX.y)
+		main.player.position = main._tile_center(home.x, home.y + 1)
+		main.player.facing = Vector2.UP
+	if opt.has("nearwood") and main.get("nearwood") != null:
+		main.nearwood._arrive()
+		if opt.has("hour"):
+			main.clock = (float(opt["hour"]) - main.START_HOUR) / (main.DAY_END_HOUR - main.START_HOUR) * main.DAY_LENGTH
+			main.current_hour = float(opt["hour"])
+		for i in int(opt.get("nwfell", "0")):
+			main.nearwood.felled[main.nearwood.trees()[i]] = main.day
+		if opt.has("nwtile"):
+			var nt: PackedStringArray = opt["nwtile"].split(",")
+			main.player.position = main._tile_center(int(nt[0]), int(nt[1]))
+		if opt.has("nwsay"):
+			main.player.facing = Vector2.UP
+			main.nearwood._interact(main._tile_in_front())
 	if opt.has("decor"):
 		var at: Vector2i = main._player_tile() + Vector2i(-2, 2)
 		for kind in opt["decor"].split(","):

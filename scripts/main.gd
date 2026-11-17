@@ -263,17 +263,20 @@ const GUIDE := [
 	{"id": "g_bag", "title": "Your bag", "text": "Press {bag} to open your bag and see what you carry. Press it again to close it.", "stat": "bag_opened", "goal": 1},
 	{"id": "g_brush", "title": "Sticks and fiber", "text": "The brush piles around the yard hide sticks and fiber. Face one and press {hand} to gather it. Gather three.", "stat": "gathered", "goal": 3},
 	{"id": "g_wheel", "title": "The section wheel", "text": "Press {wheel} to open the section wheel. It holds Skills, Gear, Craft, Quests, the Diary, House, Buildings, and Achievements.", "stat": "wheel_opened", "goal": 1},
-	{"id": "g_hatchet", "title": "Your first tool", "text": "Open Craft from the section wheel ({wheel}) and make a crude hatchet from 2 sticks and 2 fiber.", "stat": "hatchet", "goal": 1},
+	{"id": "g_bench", "title": "A workbench", "text": "Tools are made at a workbench. Open Buildings from the section wheel ({wheel}), and under Workshop place a workbench (4 sticks) on open grass.", "stat": "bench", "goal": 1},
+	{"id": "g_hatchet", "title": "Your first tool", "text": "Stand beside the workbench and press {hand}, then Craft: make a crude hatchet from 2 sticks and 2 fiber.", "stat": "hatchet", "goal": 1},
 	{"id": "g_chop", "title": "Timber", "text": "{tool:axe} to select the axe. Face a tree and press {tool}, and keep chopping until it falls.", "stat": "felled", "goal": 1},
 	{"id": "g_drink", "title": "Drink", "text": "Walk to the pond, face the water, and press {hand} to drink.", "stat": "drank", "goal": 1},
 ]
 # Cost to reach the next house stage, and the Carpentry level it needs.
 # The levels spread the homestead over the first year: boarded in the first days, patched in the second
 # week, restored in early summer (see the Homestead projects section of DESIGN.md).
+# CCH-WOODWORK-001: Boarded is rough logs nailed over the gaps; Patched and Restored are hewn planks from the
+# workbench (two to a log, so fewer logs than the old 5 and 8 wood). A save past a stage keeps it.
 const REPAIR_COSTS := [
 	{"wood": 3, "fiber": 2, "level": 1},
-	{"wood": 5, "fiber": 4, "level": 3},
-	{"wood": 8, "fiber": 6, "level": 8, "season": "Summer"},   # the paint needs a dry season
+	{"planks": 8, "fiber": 4, "level": 3},
+	{"planks": 14, "fiber": 6, "level": 8, "season": "Summer"},   # the paint needs a dry season
 ]
 const HOUSE_FEATURES := [
 	{"stage": 1, "text": "Boarded: the walls hold, sanity recovers faster indoors, and the nights reach in less"},
@@ -783,7 +786,7 @@ static func _starting_inventory() -> Dictionary:
 
 
 var materials := {"wood": 0, "sticks": 0, "fiber": 0, "resin": 0, "hardwood": 0, "stone": 0, "copper_ore": 0, "iron_ore": 0, "copper_bar": 0, "iron_bar": 0, "feathers": 0,
-	"storm_oak": 0, "flax": 0, "bell_metal": 0, "bell_frame": 0, "bell_rope": 0, "bell_clapper": 0, "lamp_oil": 0, "rope": 0, "flour": 0, "apple_sapling": 0}
+	"storm_oak": 0, "flax": 0, "bell_metal": 0, "bell_frame": 0, "bell_rope": 0, "bell_clapper": 0, "lamp_oil": 0, "rope": 0, "flour": 0, "apple_sapling": 0, "planks": 0}
 # The hotbar, in slot order. Slots after these are empty.
 const HOTBAR_TOOLS := [
 	{"id": "sword", "name": "Weapon", "icon": "sword", "tint": "6b4a3a"},
@@ -796,7 +799,7 @@ const HOTBAR_TOOLS := [
 ]
 # How to come by a tool the player has not made yet, for _need_tool.
 const TOOL_MAKE := {
-	"axe": "You need a hatchet for that. Make a crude hatchet in the Craft section of the section wheel ({wheel}).",
+	"axe": "You need a hatchet for that. Make a crude hatchet at the workbench: place one from Buildings ({wheel}), under Workshop, stand beside it and press {hand}.",
 	"pick": "You need a pick for that. Make a stone pick in the Craft section of the section wheel ({wheel}).",
 	"sword": "You need a weapon for that. Make one in the Craft section of the section wheel ({wheel}) and equip it from Gear.",
 }
@@ -812,7 +815,7 @@ var stats := {"jobs": 0, "planted": 0, "harvested": 0, "gathered": 0, "slept": 0
 	"pumpkins": 0, "collapses": 0, "events": 0, "sold": 0, "spoiled": 0,
 	"defeated": 0, "preserved": 0, "felled": 0, "mined": 0,
 	"drank": 0, "watered": 0, "pump": 0, "hose": 0, "rain_days": 0, "events_seen": 0, "goats_bought": 0, "faced": 0,
-	"withered": 0, "foraged": 0, "night_fish": 0}
+	"withered": 0, "foraged": 0, "night_fish": 0, "hewn": 0}
 var achievements_done := {}     # achievement id (its Steam API name, AchievementSystem.LIST) -> true
 var quests_done := {}               # quest id -> true
 var selected_seed := "turnip"
@@ -987,6 +990,8 @@ var madness: MadnessSystem
 var happenings: DailyHappenings
 var trek: TrekSystem
 var town: TownSystem              # CCH-WICKER-COVE-ALPHA-001: Wicker Cove, down the hill road from the east gate
+var nearwood: NearwoodSystem      # CCH-WOODWORK-001: the Nearwood cutting grove, up the timber trail behind the house
+var woodwork: WoodworkSystem      # CCH-WOODWORK-001: the workbench and anvil, hewing planks, repair transactions
 var folk: FolkSystem
 var projects: FarmProjects
 var estate: EstateSystem
@@ -1040,6 +1045,8 @@ func _ready() -> void:
 	happenings = DailyHappenings.new(self)
 	trek = TrekSystem.new(self)
 	town = TownSystem.new(self)
+	nearwood = NearwoodSystem.new(self)
+	woodwork = WoodworkSystem.new(self)
 	folk = FolkSystem.new(self)
 	projects = FarmProjects.new(self)
 	estate = EstateSystem.new(self)
@@ -1186,6 +1193,7 @@ func _on_title_start(mode: String, slot: int) -> void:
 	forage._build()
 	trek._build()
 	town._build()
+	nearwood._build()
 	folk._build()
 	act._build()
 	projects._build()
@@ -1256,7 +1264,7 @@ func _process(delta: float) -> void:
 			last_cam_tile = cam_tile
 			queue_redraw()
 	if weather != null:
-		weather.visible = not inside and (not in_cave or (town.active and not town.indoors))
+		weather.visible = not inside and (not in_cave or (town.active and not town.indoors) or nearwood.active)
 	# The farm's standing art lives on its own layers, which the cave's _draw doesn't cover, so hide them there.
 	for layer in [house_roof_layer, stall_layer, well_layer, big_tree_layer, tree_front_layer]:
 		if layer != null:
@@ -1339,6 +1347,7 @@ func _process(delta: float) -> void:
 	forage._update()
 	trek._update(delta)
 	town._update(delta)
+	nearwood._update(delta)
 	act._update()
 	if Engine.get_process_frames() % 30 == 0:
 		projects._check(true)
@@ -1364,7 +1373,7 @@ func _process(delta: float) -> void:
 		grade_mat.set_shader_parameter("saturation", sat)
 		grade_mat.set_shader_parameter("glow", Vector3(glow.r, glow.g, glow.b))
 	if in_cave:
-		canvas_modulate.color = trek._tint(darkness) if trek.active else (town._tint(lamp_dark) if town.active else CAVE_TINT)
+		canvas_modulate.color = trek._tint(darkness) if trek.active else (town._tint(lamp_dark) if town.active else (nearwood._tint(lamp_dark) if nearwood.active else CAVE_TINT))
 	if inside:
 		# FARMHOUSE-INTERIOR-001: the house's own air, cold and grey while derelict, warmer as it is restored.
 		# At night the room never goes quite black: a little moonlight through the windows (or the gaps in the
@@ -1374,7 +1383,7 @@ func _process(delta: float) -> void:
 		canvas_modulate.color = Color(maxf(base.r, least.r), maxf(base.g, least.g), maxf(base.b, least.b)) * InteriorArt.AMBIENT[house_stage]
 	weather.night_tint = canvas_modulate.color if LIGHTING_V2 else Color.WHITE
 	night_boost = lerpf(1.0, NIGHT_LIGHT_BOOST, smoothstep(0.35, 1.0, lamp_dark)) if farm_scenery != null and not in_cave and not inside else 1.0
-	_update_lantern(1.0 if in_cave and not town.active else lamp_dark)
+	_update_lantern(1.0 if in_cave and not town.active and not nearwood.active else lamp_dark)
 	projects._update(lamp_dark)
 	_update_cave_mouth_light(smoothstep(DUSK_HOUR, DUSK_HOUR + 2.0, current_hour))
 	sanity_sys._update_sanity(darkness, delta * (DAY_END_HOUR - START_HOUR) / DAY_LENGTH)
@@ -1439,6 +1448,8 @@ func _draw() -> void:
 			trek._draw_map()
 		elif town.active:
 			town._draw_map()
+		elif nearwood.active:
+			nearwood._draw_map()
 		else:
 			_draw_cave()
 		return
@@ -2037,7 +2048,7 @@ func _build_world() -> void:
 	cave_front_layer = Node2D.new()
 	cave_front_layer.z_index = 1
 	cave_front_layer.draw.connect(func() -> void:
-		if in_cave and not trek.active and cave_art != null and cave_view.size != Vector2i.ZERO:
+		if in_cave and not trek.active and not nearwood.active and cave_art != null and cave_view.size != Vector2i.ZERO:
 			cave_art.draw_front(cave_front_layer, self, cave_view.position.x, cave_view.position.y,
 					cave_view.end.x - 1, cave_view.end.y - 1))
 	add_child(cave_front_layer)
@@ -3072,6 +3083,10 @@ func _update_perf() -> void:
 
 
 func _update_minimap() -> void:
+	if nearwood.active:
+		_place_minimap(Vector2(NearwoodSystem.W, NearwoodSystem.H) * Minimap.PX_PER_TILE)
+		minimap.update_view(nearwood.minimap_tiles(), TILE_COLORS, [], player.position / PX, Vector2i(-1, -1))
+		return
 	if town.active:
 		_place_minimap(Vector2(TownLayout.W, TownLayout.H) * Minimap.PX_PER_TILE)
 		var at: Vector2 = Vector2(TownLayout.INN_OUT) if town.indoors else player.position / PX
@@ -3159,6 +3174,8 @@ func _guide_step() -> Dictionary:
 func _guide_done(step: Dictionary) -> bool:
 	var stat := str(step["stat"])
 	var value := int(tool_tier["hatchet"]) if stat == "hatchet" else int(stats.get(stat, 0))
+	if stat == "bench":
+		value = 1 if woodwork.has_station("workbench") or int(tool_tier["hatchet"]) > 0 else 0
 	return value >= int(step["goal"])
 
 
@@ -3606,6 +3623,18 @@ func _on_panel_action(action_id: String) -> void:
 	if action_id.begins_with("smelt:"):
 		mining._smelt(action_id.trim_prefix("smelt:"))
 		return
+	if action_id.begins_with("hew:"):
+		woodwork.hew(int(action_id.trim_prefix("hew:")))
+		_refresh_panel()
+		return
+	if action_id.begins_with("station_craft:"):
+		craft_tab = action_id.trim_prefix("station_craft:")
+		open_tab = "Craft"
+		_refresh_panel()
+		return
+	if action_id.begins_with("station_take:"):
+		projects.take_station(action_id.trim_prefix("station_take:"))
+		return
 	if action_id == "hearth_feed":
 		firewood._feed_fire()
 		_refresh_panel()
@@ -3808,6 +3837,10 @@ func _refresh_panel() -> void:
 			rows = panels._smokehouse_rows()
 		"Furnace":
 			rows = panels._furnace_rows()
+		"Workbench":
+			rows = panels._workbench_rows()
+		"Anvil":
+			rows = panels._anvil_rows()
 		"Woodstore":
 			rows = panels._woodstore_rows()
 		"Hearth":
@@ -3863,7 +3896,8 @@ func _skill_chosen(tiles: Array) -> Dictionary:
 
 # The pack, seeds, and materials are a grid of picture tiles. Picking one shows its details beside the grid.
 const MATERIAL_INFO := {
-	"wood": {"name": "Wood", "icon": "log", "tint": "6b4a3a", "desc": "Burned for cooking and used in most early crafts."},
+	"wood": {"name": "Logs", "icon": "log", "tint": "6b4a3a", "desc": "Raw logs from felled trees: the Nearwood up the timber trail, or the grove trees round the farm. Hewn into planks at the workbench, split into firewood at the chopping log, burned for cooking and smelting, and used in most early crafts."},
+	"planks": {"name": "Planks", "icon": "log", "tint": "b08a5a", "desc": "Boards hewn from logs at the workbench, two to a log. The house's later repairs and the anvil are built from them."},
 	"sticks": {"name": "Sticks", "icon": "sticks", "tint": "8a6a3a", "desc": "Dry sticks from the brush piles. Crude hatchets and rods are made from them."},
 	"fiber": {"name": "Fiber", "icon": "fiber", "tint": "8a8a4a", "desc": "Plant fiber for wraps, leggings, and the hose."},
 	"resin": {"name": "Resin", "icon": "resin", "tint": "b5703a", "desc": "Sticky sap for caps, amulets, and the hose."},
@@ -4020,7 +4054,7 @@ func _cost_lines(cost: Dictionary) -> Array:
 		var need := int(cost[mat])
 		if need <= 0:
 			continue
-		lines.append({"label": "%d %s" % [need, str(mat).replace("_", " ")], "have": _held(str(mat)), "need": need})
+		lines.append({"label": "%d %s" % [need, WoodworkSystem.label(str(mat))], "have": _held(str(mat)), "need": need})
 	return lines
 
 
@@ -4214,6 +4248,8 @@ func _interact() -> void:
 		elif town.active:
 			if not _tool_press:
 				town._interact(_tile_in_front())
+		elif nearwood.active:
+			nearwood._interact(_tile_in_front())
 		else:
 			_interact_cave()
 		return
@@ -4238,6 +4274,8 @@ func _interact() -> void:
 	if not inside and trek._try_walker(tile):
 		return
 	if not inside and not _tool_press and town._try_gate(tile):
+		return
+	if not inside and not _tool_press and nearwood._try_gate(tile):
 		return
 	if not inside and not in_cave and (projects._repair_fence(tile) or projects._try_use(tile)):
 		return
@@ -5323,6 +5361,7 @@ func _fallen() -> void:
 	sanity_sys._change_sanity(-10.0)
 	hp = max_hp()
 	town._abort()
+	nearwood._abort()
 	in_cave = false
 	foes = []
 	fishing._stop_fishing("")
@@ -5415,20 +5454,19 @@ func _can_repair() -> bool:
 	if house_stage >= MAX_STAGE:
 		return false
 	var cost: Dictionary = REPAIR_COSTS[house_stage]
-	return materials["wood"] >= cost["wood"] \
-		and materials["fiber"] >= cost["fiber"] \
+	return woodwork.can_pay(cost) \
 		and progression._level("Carpentry") >= cost["level"] 		and str(cost.get("season", _season_of(_calendar_date(day)["month"]))) == _season_of(_calendar_date(day)["month"])
 
 
 func _repair_house() -> void:
 	play_sfx("repair")
 	if not _can_repair():
-		_show_message("Not enough wood and fiber, Carpentry is too low, or it isn't the season for this repair.")
+		_show_message("This repair needs %s and Carpentry %d%s." % [woodwork.cost_text(REPAIR_COSTS[house_stage]), int(REPAIR_COSTS[house_stage]["level"]), ", in summer" if REPAIR_COSTS[house_stage].has("season") else ""])
 		return
 	var cost: Dictionary = REPAIR_COSTS[house_stage]
-	materials["wood"] -= cost["wood"]
-	materials["fiber"] -= cost["fiber"]
+	woodwork.pay(cost)
 	house_stage += 1
+	woodwork.record("house_%d" % house_stage, cost)
 	wear = maxi(0, wear - WEAR_REPAIR)
 	farm._check_plot_three()
 	progression._grant_xp("Carpentry", XP_REPAIR)
@@ -5527,6 +5565,9 @@ func _unstick() -> void:
 		return
 	if town.active:
 		town._unstick()
+		return
+	if nearwood.active:
+		nearwood._unstick()
 		return
 	if in_cave:
 		_show_message("Unstick works on the farm and in the house. Leave the cave first.")
@@ -6103,12 +6144,14 @@ func _can_advance_lantern() -> bool:
 	return materials["wood"] >= t["wood"] \
 		and materials["fiber"] >= t["fiber"] \
 		and materials["resin"] >= t["resin"] \
-		and progression._level("Bushcrafting") >= t["level"]
+		and progression._level("Bushcrafting") >= t["level"] \
+		and woodwork.near("workbench")
 
 
 func _advance_lantern() -> void:
 	if not _can_advance_lantern():
-		_show_message("You need %s for the next lantern." % _cost_text(LANTERN_TIERS[lantern_tier]))
+		var why := woodwork.why_not("workbench")
+		_show_message(why if why != "" else "You need %s for the next lantern." % _cost_text(LANTERN_TIERS[lantern_tier]))
 		return
 	var t: Dictionary = LANTERN_TIERS[lantern_tier]
 	materials["wood"] -= t["wood"]
@@ -6143,6 +6186,7 @@ func _dev_trek_day() -> void:
 	inventory["trail_ration"] = maxi(int(inventory["trail_ration"]), 2)
 	trek._abort()
 	town._abort()
+	nearwood._abort()
 	if in_cave:
 		in_cave = false
 		foes = []
@@ -6169,6 +6213,7 @@ func _dev_trek(id: String) -> void:
 	inventory["trail_ration"] = maxi(int(inventory["trail_ration"]), 4)
 	trek._abort()
 	town._abort()
+	nearwood._abort()
 	if in_cave:
 		in_cave = false
 		foes = []
@@ -6262,7 +6307,7 @@ func _update_lantern(darkness: float) -> void:
 		lantern_light.position = _light_snap(player.global_position + lamp_at) - player.global_position
 	else:
 		lantern_light.position = lamp_at
-	var energy := LANTERN_ENERGY * ((TREK_LANTERN_BOOST if trek.active else CAVE_LANTERN_BOOST) if in_cave and not town.active else night_boost)
+	var energy := LANTERN_ENERGY * ((TREK_LANTERN_BOOST if trek.active else CAVE_LANTERN_BOOST) if in_cave and not town.active and not nearwood.active else night_boost)
 	if lantern_tier >= LANTERN_FLICKER_TIER:
 		var t := Time.get_ticks_msec() / 1000.0
 		if LIGHTING_V2:
@@ -6285,7 +6330,7 @@ func _update_lantern(darkness: float) -> void:
 
 # Daylight through the cave's exit: very faint, fading out with the dusk and gone at night.
 func _update_cave_mouth_light(darkness: float) -> void:
-	cave_mouth_light.enabled = in_cave and not trek.active and not town.active and darkness < 0.95
+	cave_mouth_light.enabled = in_cave and not trek.active and not town.active and not nearwood.active and darkness < 0.95
 	cave_mouth_light.energy = CAVE_MOUTH_ENERGY * (1.0 - darkness)
 
 
@@ -6299,6 +6344,7 @@ func _update_cave_mouth_light(darkness: float) -> void:
 func _end_day(base: String, leave_house: bool = true) -> void:
 	trek._abort()
 	town._abort()
+	nearwood._abort()
 	if folk.dialogue != null:
 		folk.dialogue.close()
 	hp = max_hp()
@@ -6376,6 +6422,8 @@ func _check_doors() -> void:
 	if in_cave:
 		if town.active:
 			town._on_step()
+		elif nearwood.active:
+			nearwood._on_step()
 		elif trek.active:
 			trek._on_step(kind)
 		elif kind == Tile.CAVE_EXIT:
@@ -6411,6 +6459,9 @@ func _leave_house() -> void:
 func _set_bounds() -> void:
 	if town.active:
 		town._bounds()
+		return
+	if nearwood.active:
+		nearwood._bounds()
 		return
 	if in_cave:
 		player.min_pos = _tile_center(1, 1)
@@ -6611,6 +6662,8 @@ func _in_interior(tile: Vector2i) -> bool:
 func _kind_at(tile: Vector2i) -> int:
 	if town.active:
 		return town._kind(tile)
+	if nearwood.active:
+		return nearwood._kind(tile)
 	if in_cave:
 		if tile.x < 0 or tile.y < 0 or tile.x >= CAVE_W or tile.y >= CAVE_H:
 			return Tile.WALL
@@ -6628,7 +6681,7 @@ func _is_blocked_world(p: Vector2) -> bool:
 		return true
 	# Rocks are solid like the trees. Inside the cave the farm rocks' coordinates mean nothing,
 	# so they only count out on the farm.
-	return not inside and not in_cave and (brush.has(t) or rocks.has(t) or projects._blocks(t))
+	return not inside and not in_cave and (brush.has(t) or rocks.has(t) or projects._blocks(t) or nearwood.blocks_farm(t))
 
 
 func _world_tile(ix: int, iy: int) -> Vector2i:

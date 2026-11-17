@@ -355,6 +355,7 @@ PASS  inventory: focus moves and stays on a usable control
 PASS  inventory: the footer shows the keyboard's names
 PASS  inventory: E steps to Gear
 PASS  quests: the Folk tab opens with focus
+PASS  stations: the workbench and anvil stand beside the farmer
 PASS  craft pad: the stick highlights Craft
 PASS  craft pad: A opens Craft with a recipe in focus
 PASS  craft pad: the D-pad moves to the next recipe
@@ -624,6 +625,20 @@ PASS  woodstore: B closes it
 PASS  woodstore: closing leaves nothing focused
 PASS  woodstore: closing lets the day run
 PASS  woodstore: the player moves again
+PASS  hearth: opens with focus
+PASS  hearth: the clock stops
+PASS  hearth: an entry has focus on open
+PASS  hearth tab 0: every entry is reached
+PASS  hearth tab 0: down from the last entry wraps to the first
+PASS  hearth tab 0: up from the first wraps to the last
+PASS  hearth tab 0: the left stick moves focus
+PASS  hearth tab 0: nothing disabled or hidden takes focus
+PASS  hearth: the footer shows the keyboard's names
+PASS  hearth: the footer shows the pad's names
+PASS  hearth: B closes it
+PASS  hearth: closing leaves nothing focused
+PASS  hearth: closing lets the day run
+PASS  hearth: the player moves again
 PASS  well: opens with focus
 PASS  well: the clock stops
 PASS  well: an entry has focus on open
@@ -660,6 +675,89 @@ PASS  trade: B closes it
 PASS  trade: closing leaves nothing focused
 PASS  trade: closing lets the day run
 PASS  trade: the player moves again
+PASS  workbench: opens with focus
+PASS  workbench: the clock stops
+PASS  workbench: an entry has focus on open
+PASS  workbench tab 0: every entry is reached
+PASS  workbench tab 0: down from the last entry wraps to the first
+PASS  workbench tab 0: up from the first wraps to the last
+PASS  workbench tab 0: the left stick moves focus
+PASS  workbench tab 0: nothing disabled or hidden takes focus
+PASS  workbench: the footer shows the keyboard's names
+PASS  workbench: the footer shows the pad's names
+PASS  workbench: B closes it
+PASS  workbench: closing leaves nothing focused
+PASS  workbench: closing lets the day run
+PASS  workbench: the player moves again
+PASS  anvil: opens with focus
+PASS  anvil: the clock stops
+PASS  anvil: an entry has focus on open
+PASS  anvil tab 0: every entry is reached
+PASS  anvil tab 0: down from the last entry wraps to the first
+PASS  anvil tab 0: up from the first wraps to the last
+PASS  anvil tab 0: the left stick moves focus
+PASS  anvil tab 0: nothing disabled or hidden takes focus
+PASS  anvil: the footer shows the keyboard's names
+PASS  anvil: the footer shows the pad's names
+PASS  anvil: B closes it
+PASS  anvil: closing leaves nothing focused
+PASS  anvil: closing lets the day run
+PASS  anvil: the player moves again
+PASS  store: opens with focus
+PASS  store: the clock stops
+PASS  store: an entry has focus on open
+PASS  store tab 0: every entry is reached
+PASS  store tab 0: down from the last entry wraps to the first
+PASS  store tab 0: up from the first wraps to the last
+PASS  store tab 0: the left stick moves focus
+PASS  store tab 0: nothing disabled or hidden takes focus
+PASS  store: the footer shows the keyboard's names
+PASS  store: the footer shows the pad's names
+PASS  store: B closes it
+PASS  store: closing leaves nothing focused
+PASS  store: closing lets the day run
+PASS  store: the player moves again
+PASS  fish market: opens with focus
+PASS  fish market: the clock stops
+PASS  fish market: an entry has focus on open
+PASS  fish market tab 0: every entry is reached
+PASS  fish market tab 0: down from the last entry wraps to the first
+PASS  fish market tab 0: up from the first wraps to the last
+PASS  fish market tab 0: the left stick moves focus
+PASS  fish market tab 0: nothing disabled or hidden takes focus
+PASS  fish market: the footer shows the keyboard's names
+PASS  fish market: the footer shows the pad's names
+PASS  fish market: B closes it
+PASS  fish market: closing leaves nothing focused
+PASS  fish market: closing lets the day run
+PASS  fish market: the player moves again
+PASS  the inn: opens with focus
+PASS  the inn: the clock stops
+PASS  the inn: an entry has focus on open
+PASS  the inn tab 0: every entry is reached
+PASS  the inn tab 0: down from the last entry wraps to the first
+PASS  the inn tab 0: up from the first wraps to the last
+PASS  the inn tab 0: the left stick moves focus
+PASS  the inn tab 0: nothing disabled or hidden takes focus
+PASS  the inn: the footer shows the keyboard's names
+PASS  the inn: the footer shows the pad's names
+PASS  the inn: B closes it
+PASS  the inn: closing leaves nothing focused
+PASS  the inn: closing lets the day run
+PASS  the inn: the player moves again
+PASS  notice board: opens with focus
+PASS  notice board: the clock stops
+PASS  notice board: an entry has focus on open
+PASS  notice board tab 0: every entry is reached
+PASS  notice board tab 0: down from the last entry wraps to the first
+PASS  notice board tab 0: up from the first wraps to the last
+PASS  notice board tab 0: nothing disabled or hidden takes focus
+PASS  notice board: the footer shows the keyboard's names
+PASS  notice board: the footer shows the pad's names
+PASS  notice board: B closes it
+PASS  notice board: closing leaves nothing focused
+PASS  notice board: closing lets the day run
+PASS  notice board: the player moves again
 PASS  achievements: a click picks an entry
 PASS  achievements: a click on a tab opens it
 PASS  achievements: the mouse wheel scrolls a long list
@@ -785,3 +883,8 @@ PASS  trail works: closing leaves nothing focused
 PASS  trail works: closing lets the day run
 PASS  trail works: the player moves again
 PASS: 0 failure(s)
+ERROR: 27 RID allocations of type 'PN13RendererDummy14TextureStorage12DummyTextureE' were leaked at exit.
+WARNING: 59 ObjectDB instances were leaked at exit (run with `--verbose` for details).
+   at: cleanup (core/object/object.cpp:2536)
+ERROR: 29 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:822)

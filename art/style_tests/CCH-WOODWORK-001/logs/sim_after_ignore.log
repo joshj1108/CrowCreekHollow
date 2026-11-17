@@ -1,0 +1,64 @@
+Godot Engine v4.7.2.stable.steam.ed1daf0bf - https://godotengine.org
+
+mode=ignore style= days=400 shelter=[1.0, 0.75, 0.6, 0.45] quiet=true stage=-1
+day date   coins san/max fea  Fa Ca Cl Bu Fo Mi Sm steps shd tax  grow wood fib wear kept night  hearts M/D/V/P
+  1 Oct 1     9  92/100   0   1  1  1  2  3  1  1     1   0    0    5   39   0    0    0 first-  0/0/0/0
+ 41 Nov 10   468  95/100  33   7  5  4  7  6  5  5     8   5    0   40   66  29    0   27 quiet  4/0/0/0
+ 81 Dec 20   893  64/100  51   9  7  5  9  7  7  7    11   6    0   40   68  99    0   67 pond-  10/0/0/0
+121 Jan 29   821  83/100  91  10  7  6 10  8  8  8    11   3    0   64   92 166    0   27 pond-  10/0/0/1
+161 Mar 10   787  87/100  91  10  8  7 10  8  8  8    12   3    0   64   69 220    0    4 pond-  10/1/0/1
+201 Apr 19  1086  98/100  92  10  8  7 10  9  9  9    12   6    0   64   63 272    0   30 quiet  10/6/0/1
+241 May 29  1413  92/100 103  10  9  8 10  9  9  9    12   6    0   62   33 347    0   70 knock-  10/10/1/1
+281 Jul 8   172  88/100  93  10  9  8 10  9 10  9    13   8    0   62   76 317    0   28 watcher-  10/10/7/1
+321 Aug 17   374  88/100  92  10  9  8 10  9 10 10    13   5    0   62   72 287    0   68 knock-  10/10/10/1
+361 Sep 26  1570  90/100  96  10  9  8 10 10 10 10    13   5    0   62   49 305    0   12 field-  10/10/10/6
+400 Nov 4   329  84/100  78  10 10  8 10 10 10 10    14   0    0   64   68 346    0    3 knock-  10/10/10/9
+--- milestones (first day)
+Bushcrafting 2=1  Forestry 2=1  Forestry 3=1  step: boarded=1  workbench placed=1  Carpentry 2=2  Bushcrafting 3=4  
+hose attached=4  pedlar seen=4  trek: edge=4  well repaired=4  Farming 2=6  Forestry 4=6  step: plot_two=6  
+Bushcrafting 4=7  step: coop=7  Bushcrafting 5=10  Farming 3=10  Carpentry 3=13  Farming 4=13  cellar_room waits: Carpentry=13  
+cellar_room waits: coins=13  cellar_room waits: copper_bar=13  cellar_room waits: hardwood=13  cellar_room waits: stone=13  
+porch waits: Carpentry=13  porch waits: coins=13  porch waits: copper_bar=13  porch waits: hardwood=13  
+step: patched=13  Forestry 5=14  Mining 2=15  150 coins held=17  Bushcrafting 6=17  Farming 5=17  Mining 3=17  
+step: hollow_lantern=17  Cleaning 2=18  root cellar=19  work: waymarks=21  Carpentry 4=22  Farming 6=22  
+step: smokehouse=22  step: woodshed=22  Mining 4=24  Cleaning 3=26  wallpaper=27  work: footbridge=27  
+Bushcrafting 7=28  trek: mill=28  Forestry 6=29  Mining 5=29  Farming 7=30  furniture: painting=32  Carpentry 5=35  
+Smithing 2=35  coop hopper=35  step: furnace=35  Smithing 3=36  anvil placed=36  copper nozzle=36  Cleaning 4=37  
+Smithing 4=37  page t1=37  sprinklers 1=38  porch waits: wood=39  Smithing 5=40  decor: birdbath=41  
+sprinklers 5=41  Bushcrafting 8=42  furniture: armchair=42  Mining 6=43  page t2=43  Farming 8=46  decor: bench=46  
+Smithing 6=47  Carpentry 6=48  bell: coins=48  bell: feathers=48  spray head=49  decor: weathervane=50  
+work: gate_lamp=51  furniture: feather_bed=52  Cleaning 5=53  Forestry 7=55  furniture: dresser=57  Mining 7=59  
+bell: bell_metal=62  got bell_metal=62  Bushcrafting 9=63  Smithing 7=65  step: lamp=65  furniture: clock=69  
+Carpentry 7=76  Farming 9=76  barn hopper=76  step: barn=76  step: plot_three=76  Cleaning 6=84  cistern=86  
+tax paid=93  sprinklers 8=95  Mining 8=96  Forestry 8=105  Smithing 8=107  ext: cellar_room=107  Bushcrafting 10=112  
+Farming 10=114  Carpentry 8=123  deed begun=130  Cleaning 7=140  ext: porch=146  bell: bell_frame=153  
+got bell_frame=153  step: flowers=153  got storm_oak=157  trek: orchard=161  Mining 9=163  page t3=169  
+work: boardwalk=181  Smithing 9=183  Forestry 9=196  Carpentry 9=210  Cleaning 8=239  act: letter=240  
+act: shown=244  second_storey waits: coins=244  second_storey waits: wood=244  step: restored=244  got flax=247  
+ENDING: hollow=257  bell: bell_clapper=260  got bell_clapper=260  page t4=260  trek: chapel=260  act at orchard=266  
+act: orchard=266  got bell_rope=268  page t5=268  Mining 10=273  bell: bell_rope=274  Smithing 10=302  
+furniture: bookshelf=305  Forestry 10=323  paint=324  trek: post=337  act: meeting=358  Carpentry 10=370  
+act: davy=371  work: waystation=389  step: bell=396  act: knock=397  ENDING: bell=400  trek: grove=400  
+--- totals: nights { "faced": 0, "ignored": 355, "lost": 0, "skipped": 0, "hollow": 33, "raids_won": 0, "blessed": 0 }, min sanity 41, days under 30 sanity 0, sanity limit 100, HP lost to needs 1, hours empty { "food": 0.0, "water": 0.0, "warmth": 2.0 }, hours fished 3
+--- madness: days under 60 / 40 / 20 sanity: 33 / 0 / 0; raids 380 (won 0); blight on the ground now 22 tiles; hens 3
+--- coins earned { "crops": 4430, "eggs_milk": 2665, "fish": 0, "forage": 3631, "cooked": 5466 }, spent { "seeds": 3803, "animals": 2028, "tax": 2732, "pedlar": 1068, "cards": 190, "estate": 8900 }; hens 3 goats 3; property value 885; tax owed 0
+--- materials: {"apple_sapling":6,"bell_clapper":0,"bell_frame":0,"bell_metal":0,"bell_rope":0,"copper_bar":423,"copper_ore":0,"feathers":78,"fiber":346,"flax":37,"flour":94,"hardwood":309,"iron_bar":365,"iron_ore":0,"lamp_oil":0,"planks":0,"resin":425,"rope":0,"sticks":939,"stone":367,"storm_oak":10,"wood":68}
+--- timber: workbench day 1, anvil day 36, first planks day 2; Nearwood trips 21 (55.5 h, 2.64 h a trip), logs from it 824 (39.2 a trip); logs hewn 13 (2.0 h); house stage 3
+--- harvested {"blueberry":622,"corn":522,"garlic":118,"kale":1010,"parsnip":162,"peas":1384,"potato":189,"pumpkin":394,"turnip":776}; withered 140
+--- foraged 2212, fish caught 6 (0 at night), cooked by _cook {"baked_potato":125,"bramble_jam":227,"dried_mushrooms":163,"ghost_tincture":16,"nettle_soup":32,"pea_soup":261,"pumpkin_soup":125,"rosehip_tea":54}
+--- chores over 400 days: { "water_presses": 3380, "hand_feeds": 76, "hopper_fills": 119, "tidies": 387, "mends": 763 }; sprinklers 8
+--- treks: { "edge": 4, "mill": 47, "orchard": 32, "chapel": 14, "post": 6, "grove": 1, "dark": 49, "floods": 22, "dogs": 29, "skipped": 72, "oil_coins": 1072, "works_coins": 2750, "trade_coins": 1446, "short eggs/milk": 7, "short crops": 135, "short coins": 31, "grove short crops": 1 }, trail works done 5: ["waymarks", "footbridge", "gate_lamp", "boardwalk", "waystation"]
+--- cave: 5.9 copper and 2.2 iron nodes a day on average, over 386 visits
+--- folk: 73 visits, 620 words, 90 gifts (37 loved), 3 requests done; hearts Maren 10, Davy 10, vicar 10, postman 9
+--- scenes seen (day): maren_lamp 29, maren_hens 43, maren_hands 61, maren_book 163, davy_notes 167, davy_rows 180, davy_man 202, davy_turn 220, act_shown 244, vicar_names 253, vicar_ladder 275, vicar_struck 300, vicar_register 310, post_round 342, post_crate 353, post_dead 371, post_hand 382
+--- second year: beats {"davy":371,"knock":-1,"letter":240,"meeting":358,"orchard":266,"shown":244}, meeting won, Davy home, Hollow left at the door 0; endings reached (day) {"bell":400,"hollow":257}
+--- crow charms made 147
+--- estate: extensions ["cellar_room", "porch"], furniture ["painting", "armchair", "feather_bed", "dresser", "clock", "bookshelf"], paint sage, paper damask, deed 5000/12000; fences 120; stand glut {"cooked":220.0,"milk":0.75}
+--- next step: all done
+--- achievements earned 26 of 60 by day 401: FIRST_YEAR=246, MEETING=358, END_BELL=401, END_HOLLOW=258, EDGE=5, DARK_TRAIL=30, ALL_ROUTES=338, WOOD_PAGES=269, GROVE=401, DREAD=43, FIRST_NIGHT=2, SIGHTING=5, FRIEND=31, REQUEST=68, MAREN=164, DAVY_SCENE=221, VICAR=311, POST=383, FIRST_HARVEST=10, FIRST_CATCH=3, FIRST_MEAL=3, LANTERN=2, RESTORED=245, HOLLOW_LANTERN=18, YARD=79, FORTY=52
+--- achievements not earned (value/goal): HOUSE_PAGES 8/10, KNOCK 0/1, DAVY 0/1, ALL_CHAPTERS 17/17, END_ELIAS 0/1, END_ALL 2/3, NIGHT_TREK 0/1, BARE 0/1, DARK_NIGHT 0/1, FACE_FIELD 0/1, FACE_KNOCK 0/1, FACE_CROWS 0/1, FACE_POND 0/1, FACE_WATCHER 0/1, FACE_STEPS 0/1, HOLLOW 0/1, RAID 0/1, WINTER 0/1, CLEAN_SEASON 0/1, BACK 0/1, FACED_50 0/50, HEARTS 3/4, REQUESTS_ALL 3/12, ALL_CROPS 9/11, ALL_FISH 0/8, ALL_RECIPES 9/31, EXTENDED 2/3, DEED 0/1, MASTER 6/10, PALE_CARP 0/1, COLLAPSE 0/1, WADE 0/1, LIGHTS 0/1, CAIRN 0/1
+ERROR: 5 RID allocations of type 'PN13RendererDummy14TextureStorage12DummyTextureE' were leaked at exit.
+WARNING: 15 ObjectDB instances were leaked at exit (run with `--verbose` for details).
+   at: cleanup (core/object/object.cpp:2536)
+ERROR: 7 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:822)

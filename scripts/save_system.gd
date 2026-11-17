@@ -103,6 +103,8 @@ func _save_game() -> void:
 		"trek_works": m.trek.works.keys(),
 		"folk": m.folk._to_save(),
 		"town": m.town._to_save(),
+		"woodwork": m.woodwork._to_save(),      # CCH-WOODWORK-001: logs hewn, recorded repairs
+		"nearwood": m.nearwood._to_save(),      # CCH-WOODWORK-001: the Nearwood's felled trees
 		"act": m.act._to_save(),
 		"estate": m.estate._to_save(),
 		"stand_glut": m.stall.glut,
@@ -196,6 +198,9 @@ func _load_game() -> bool:
 	_merge_ints(m.inventory, data.get("inventory"))
 	_migrate_legacy_food(data.get("inventory"))
 	_merge_ints(m.materials, data.get("materials"))
+	# CCH-WOODWORK-001: planks are new; a save from before them has none.
+	if typeof(data.get("materials")) == TYPE_DICTIONARY and not (data["materials"] as Dictionary).has("planks"):
+		m.materials["planks"] = 0
 	_merge_ints(m.stats, data.get("stats"), true)
 	# Saves before version 2 used the old quest list, so their progress is reset.
 	# Stat-based achievements re-check from saved stats on the next frame.
@@ -263,6 +268,8 @@ func _load_game() -> bool:
 	m.nights.sighting_seen = bool(data.get("sighting_seen", false))
 	m.folk._from_save(data.get("folk", {}))
 	m.town._from_save(data.get("town", null))
+	m.woodwork._from_save(data.get("woodwork", null))   # an older save: nothing hewn, its house stages recorded
+	m.nearwood._from_save(data.get("nearwood", null))   # an older save: every Nearwood tree standing
 	m.act._from_save(data.get("act", {}))
 	m.trek.works.clear()
 	for id in data.get("trek_works", []):

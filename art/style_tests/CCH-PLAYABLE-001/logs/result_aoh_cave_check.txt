@@ -1,0 +1,1 @@
+aoh_cave_check exit=0 pass_lines=6 fail_lines=0 engine_errors=0 secs=6 ok

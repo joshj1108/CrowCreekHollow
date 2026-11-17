@@ -110,7 +110,7 @@ func _pick() -> String:
 		return "" if vid == "quiet" else "dread"
 	if m.trek.active:
 		return "trek"
-	if m.in_cave and not m.town.active:
+	if m.in_cave and not m.town.active and not m.nearwood.active:
 		return "cave"
 	if m.ambience.hush_left > 0.0 or m.ambience._fear() >= SILENT_FEAR:
 		return ""

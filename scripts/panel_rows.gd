@@ -369,11 +369,7 @@ func _needs(cost: Dictionary, skill: String, level: int = 0) -> Array:
 
 
 func _need_label(key: String) -> String:
-	if key == "seeds":
-		return "turnip seeds"
-	if key == "feathers":
-		return "crow feathers"
-	return key.replace("_", " ")
+	return WoodworkSystem.label(key)
 
 
 # The House panel, in four tabs: the house itself, the day's chores, storage, and what each repair unlocks.
@@ -389,10 +385,10 @@ func _house_rows() -> Array:
 		var cost: Dictionary = m.REPAIR_COSTS[m.house_stage]
 		rows.append({
 			"name": "Repair to %s" % m.STAGE_NAMES[m.house_stage + 1],
-			"value": "%d wood, %d fiber, Carpentry %d%s" % [cost["wood"], cost["fiber"], cost["level"], (", in %s" % str(cost["season"]).to_lower()) if cost.has("season") else ""],
+			"value": "%s, Carpentry %d%s" % [m.woodwork.cost_text(cost), cost["level"], (", in %s" % str(cost["season"]).to_lower()) if cost.has("season") else ""],
 			"about": "Unlocks: %s." % next_feature if next_feature != "" else "",
 			"needs": _needs(cost, "Carpentry"),
-			"note": "The paint needs a dry season, so this repair can only be done in summer." if cost.has("season") else "",
+			"note": ("The paint needs a dry season, so this repair can only be done in summer. " if cost.has("season") else "") + ("Planks are hewn from logs at the workbench." if cost.has("planks") else ""),
 			"button": "Repair",
 			"action": "repair",
 			"enabled": m._can_repair(),
@@ -569,6 +565,8 @@ func _buildings_rows() -> Array:
 	rows += _estate_rows()
 
 	rows.append({"tab": "Workshop", "icon": "workshop"})
+	for kind in ["workbench", "anvil"]:
+		rows.append(_station_build_row(kind))
 	if m._is_built("workshop"):
 		var shop: Dictionary = m._placed_row("Workshop", "workshop", m.workshop_tile, "move_workshop")
 		shop["status"] = "Placed"
@@ -1212,6 +1210,65 @@ func _woodstore_rows() -> Array:
 			"about": "Choose how many with left and right, then press to store them.",
 			"enabled": int(m.inventory["firewood"]) > 0 and m.firewood_store < m.WOODSTORE_CAP},
 		{"note": "Split wood at the chopping log: stand beside it, facing it, hold the axe, and press RT or click. Feed the hearth in the house with firewood from your pack."},
+	]
+
+
+# CCH-WOODWORK-001: placing the workbench or anvil (Buildings, Workshop). Each is one piece, placed like decor.
+func _station_build_row(kind: String) -> Dictionary:
+	var p := m.projects
+	var d: Dictionary = p.DECOR[kind]
+	var about := "Hew logs into planks, and make every tool, lantern and piece of gear that isn't forged." if kind == "workbench" 		else "Forge copper and iron tools, arms and armor. Lamp posts, sprinklers and other metal fittings need one on the farm."
+	var row := {"name": str(d["name"]), "about": about, "value": p._cost_text(kind)}
+	if p._count(kind) > 0:
+		row["status"] = "Placed"
+		row["status_kind"] = "done"
+		row["value"] = "Stand beside it, facing it, and press Space (A)."
+		return row
+	row["needs"] = _needs(d["cost"], str(d["skill"]), int(d["level"]))
+	row["button"] = "Place"
+	row["action"] = "decor:" + kind
+	row["enabled"] = p._can_place(kind)
+	return row
+
+
+# The workbench's panel: hew logs into planks, and the way into Craft for what's made here.
+func _workbench_rows() -> Array:
+	var w := m.woodwork
+	var logs := int(m.materials["wood"])
+	var mins := roundi(w.hew_minutes())
+	var rows: Array = [
+		{"tab": "Workbench"},
+		{"name": "Timber", "status": "%d logs, %d planks" % [logs, int(m.materials["planks"])], "status_kind": "info",
+			"value": "Hewing a log gives %d planks and takes %d minutes at Carpentry %d (less as Carpentry grows). +%d Carpentry XP a log." % [w.PLANKS_PER_LOG, mins, m.progression._level("Carpentry"), w.XP_HEW]},
+		{"name": "Hew a log into %d planks" % w.PLANKS_PER_LOG, "value": "1 log, %d min" % mins,
+			"about": "Square the log with the hatchet and split it into boards.",
+			"needs": [{"text": "1 log", "have": logs, "ok": logs >= 1}, {"text": "Before %02d:00" % int(fmod(m.DAY_END_HOUR - w.HEW_LATE, 24.0)), "ok": not w.too_late()}],
+			"button": "Hew", "action": "hew:1", "enabled": w.can_hew()},
+		{"name": "Hew up to %d logs" % w.HEW_BATCH, "value": "%d logs, %d min" % [mini(logs, w.HEW_BATCH), mins * mini(logs, w.HEW_BATCH)],
+			"about": "Work through a stack at once, as many as you hold up to %d." % w.HEW_BATCH,
+			"needs": [{"text": "%d logs" % w.HEW_BATCH, "have": logs, "ok": logs >= 2}],
+			"button": "Hew", "action": "hew:%d" % w.HEW_BATCH, "enabled": w.can_hew() and logs >= 2},
+		{"name": "Tools and gear", "value": "Hatchets, picks, rods, lanterns, bark and fiber gear",
+			"about": "Open the Craft panel here. Anything made at the workbench can be made while you stand beside it.",
+			"button": "Craft", "action": "station_craft:tools", "enabled": true},
+		{"name": "Take it down", "value": "Get its materials back, to place it elsewhere", "button": "Take down", "action": "station_take:workbench", "enabled": true},
+		{"note": "Logs come from the marked trees in the Nearwood, up the timber trail north of the farmhouse, and from the grove trees round the farm. Planks go into the house's later repairs and the anvil."},
+	]
+	return rows
+
+
+# The anvil's panel: the way into Craft for what's forged here.
+func _anvil_rows() -> Array:
+	return [
+		{"tab": "Anvil"},
+		{"name": "Tools", "value": "Copper and iron hatchets and picks, and the hose's heads",
+			"about": "Open the Craft panel at the Tools tab. Forging needs the bars from the furnace.",
+			"button": "Forge", "action": "station_craft:tools", "enabled": true},
+		{"name": "Arms and armor", "value": "Copper and iron gear, and metal shields",
+			"about": "Open the Craft panel at the Gear tab.",
+			"button": "Forge", "action": "station_craft:gear", "enabled": true},
+		{"name": "Take it down", "value": "Get its materials back, to place it elsewhere", "button": "Take down", "action": "station_take:anvil", "enabled": true},
+		{"note": "Bars are smelted at the furnace. Lamp posts, sprinklers, the birdbath, the garden bench and the weathervane are forged too, so they need an anvil on the farm before they can be placed."},
 	]
 
 

@@ -7,83 +7,15 @@ ok    save records its version
 ok    loads day 6
 ok    truncated: restored from backup
 ok    truncated: damaged file kept aside
-Unicode parsing error, some characters were replaced with � (U+FFFD): Invalid UTF-8 leading byte (80)
-Unicode parsing error, some characters were replaced with � (U+FFFD): Invalid UTF-8 leading byte (ad)
-Unicode parsing error: Byte e0 is not a correct continuation byte after ec
-Unicode parsing error: Byte 32 is not a correct continuation byte after e0
-Unicode parsing error, some characters were replaced with � (U+FFFD): Invalid UTF-8 leading byte (8d)
-Unicode parsing error, some characters were replaced with � (U+FFFD): Invalid UTF-8 leading byte (b3)
-Unicode parsing error, some characters were replaced with � (U+FFFD): Invalid UTF-8 leading byte (b1)
-Unicode parsing error, some characters were replaced with � (U+FFFD): Invalid UTF-8 leading byte (9a)
-Unicode parsing error: Byte 17 is not a correct continuation byte after d6
-Unicode parsing error, some characters were replaced with � (U+FFFD): Invalid UTF-8 leading byte (8a)
-Unicode parsing error: Byte f is not a correct continuation byte after d8
-Unicode parsing error: Byte c3 is not a correct continuation byte after f3
-Unicode parsing error: Byte 78 is not a correct continuation byte after de
-Unicode parsing error, some characters were replaced with � (U+FFFD): Invalid UTF-8 leading byte (82)
-Unicode parsing error: Byte 13 is not a correct continuation byte after c4
-Unicode parsing error, some characters were replaced with � (U+FFFD): Invalid UTF-8 leading byte (98)
-Unicode parsing error, some characters were replaced with � (U+FFFD): Invalid UTF-8 leading byte (9d)
-Unicode parsing error, some characters were replaced with � (U+FFFD): Invalid UTF-8 leading byte (9e)
-Unicode parsing error: Byte 44 is not a correct continuation byte after f7
-Unicode parsing error, some characters were replaced with � (U+FFFD): Invalid UTF-8 leading byte (9a)
-Unicode parsing error, some characters were replaced with � (U+FFFD): Invalid UTF-8 leading byte (f9)
-Unicode parsing error: Byte d5 is not a correct continuation byte after ed
-Unicode parsing error: Byte 6 is not a correct continuation byte after d5
-Unicode parsing error, some characters were replaced with � (U+FFFD): Invalid UTF-8 leading byte (9d)
-Unicode parsing error, some characters were replaced with � (U+FFFD): Invalid UTF-8 leading byte (99)
-Unicode parsing error, some characters were replaced with � (U+FFFD): Invalid UTF-8 leading byte (b0)
-Unicode parsing error, some characters were replaced with � (U+FFFD): Invalid UTF-8 leading byte (88)
-Unicode parsing error: Byte 11 is not a correct continuation byte after e9
-Unicode parsing error, some characters were replaced with � (U+FFFD): Invalid UTF-8 leading byte (ba)
-Unicode parsing error, some characters were replaced with � (U+FFFD): Invalid UTF-8 leading byte (80)
-Unicode parsing error: Byte 3b is not a correct continuation byte after dc
-Unicode parsing error: Byte 60 is not a correct continuation byte after c3
-Unicode parsing error, some characters were replaced with � (U+FFFD): Invalid UTF-8 leading byte (a6)
-Unicode parsing error, some characters were replaced with � (U+FFFD): Invalid UTF-8 leading byte (98)
-Unicode parsing error: Overlong encoding (c1 9b)
-Unicode parsing error, some characters were replaced with � (U+FFFD): Invalid UTF-8 leading byte (9b)
-Unicode parsing error, some characters were replaced with � (U+FFFD): Invalid UTF-8 leading byte (84)
-Unicode parsing error: Byte dd is not a correct continuation byte after eb
-Unicode parsing error: Byte dd is not a correct continuation byte after dd
-Unicode parsing error: Byte 1c is not a correct continuation byte after dd
+Unicode parsing error, some characters were replaced with � (U+FFFD): Invalid UTF-8 leading byte (a7)
+Unicode parsing error, some characters were replaced with � (U+FFFD): Invalid UTF-8 leading byte (b4)
+Unicode parsing error, some characters were replaced with � (U+FFFD): Invalid UTF-8 leading byte (89)
+Unicode parsing error, some characters were replaced with � (U+FFFD): Invalid UTF-8 leading byte (8c)
 Unicode parsing error, some characters were replaced with � (U+FFFD): Invalid UTF-8 leading byte (93)
-Unicode parsing error, some characters were replaced with � (U+FFFD): Invalid UTF-8 leading byte (af)
-Unicode parsing error: Byte d8 is not a correct continuation byte after d7
-Unicode parsing error: Byte 5e is not a correct continuation byte after d8
-Unicode parsing error, some characters were replaced with � (U+FFFD): Invalid UTF-8 leading byte (85)
-Unicode parsing error: Byte e7 is not a correct continuation byte after c8
-Unicode parsing error: Byte 23 is not a correct continuation byte after e7
-Unicode parsing error: Byte 3b is not a correct continuation byte after e1 bd
-Unicode parsing error, some characters were replaced with � (U+FFFD): Invalid UTF-8 leading byte (8f)
-Unicode parsing error, some characters were replaced with � (U+FFFD): Invalid UTF-8 leading byte (99)
-Unicode parsing error, some characters were replaced with � (U+FFFD): Invalid UTF-8 leading byte (97)
-Unicode parsing error: Byte 7 is not a correct continuation byte after e6
-Unicode parsing error: Byte 44 is not a correct continuation byte after c4
-Unicode parsing error: Byte ef is not a correct continuation byte after cf
-Unicode parsing error: Byte 7c is not a correct continuation byte after ef
-Unicode parsing error, some characters were replaced with � (U+FFFD): Invalid UTF-8 leading byte (bf)
-Unicode parsing error: Byte 1c is not a correct continuation byte after d7
-Unicode parsing error: Byte 6c is not a correct continuation byte after f6
-Unicode parsing error: Byte 3f is not a correct continuation byte after c5
-Unicode parsing error, some characters were replaced with � (U+FFFD): Invalid UTF-8 leading byte (b3)
-Unicode parsing error: Byte 64 is not a correct continuation byte after c5
-Unicode parsing error: Byte 5e is not a correct continuation byte after d9
-Unicode parsing error, some characters were replaced with � (U+FFFD): Invalid UTF-8 leading byte (8e)
-Unicode parsing error, some characters were replaced with � (U+FFFD): Invalid UTF-8 leading byte (aa)
-Unicode parsing error, some characters were replaced with � (U+FFFD): Invalid UTF-8 leading byte (8f)
-Unicode parsing error, some characters were replaced with � (U+FFFD): Invalid UTF-8 leading byte (aa)
-Unicode parsing error, some characters were replaced with � (U+FFFD): Invalid UTF-8 leading byte (fb)
-Unicode parsing error, some characters were replaced with � (U+FFFD): Invalid UTF-8 leading byte (be)
-Unicode parsing error, some characters were replaced with � (U+FFFD): Invalid UTF-8 leading byte (92)
-Unicode parsing error, some characters were replaced with � (U+FFFD): Invalid UTF-8 leading byte (95)
-Unicode parsing error, some characters were replaced with � (U+FFFD): Invalid UTF-8 leading byte (a1)
-Unicode parsing error, some characters were replaced with � (U+FFFD): Invalid UTF-8 leading byte (a9)
-Unicode parsing error, some characters were replaced with � (U+FFFD): Invalid UTF-8 leading byte (b1)
-Unicode parsing error: Byte c4 is not a correct continuation byte after f2 88 a8
-Unicode parsing error: Byte 21 is not a correct continuation byte after c4
-Unicode parsing error, some characters were replaced with � (U+FFFD): Invalid UTF-8 leading byte (be)
-Unicode parsing error, some characters were replaced with � (U+FFFD): Invalid UTF-8 leading byte (83)
+Unicode parsing error: Byte 68 is not a correct continuation byte after e3
+Unicode parsing error, some characters were replaced with � (U+FFFD): Invalid UTF-8 leading byte (b9)
+Unicode parsing error, some characters were replaced with � (U+FFFD): Invalid UTF-8 leading byte (90)
+Unicode parsing error: Byte 0 is not a correct continuation byte after d6
 ok    garbage bytes: restored from backup
 ok    empty file: restored from backup
 ok    JSON array: restored from backup
@@ -143,3 +75,8 @@ ok    day end during a trek: saved and loads
 ok    eviction: every file gone
 ok    eviction: nothing to recover
 PASS: 0 failure(s)
+ERROR: 5 RID allocations of type 'PN13RendererDummy14TextureStorage12DummyTextureE' were leaked at exit.
+WARNING: 15 ObjectDB instances were leaked at exit (run with `--verbose` for details).
+   at: cleanup (core/object/object.cpp:2536)
+ERROR: 7 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:822)

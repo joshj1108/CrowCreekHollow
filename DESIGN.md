@@ -502,13 +502,13 @@ The house is drawn in four stages that match its repair level. **Decrepit** has 
 
 - Starts at its final size in a **Decrepit** state. Repairs change its condition, not its footprint.
 - Stages: Decrepit → Boarded → Patched → Restored.
-- Repairs cost wood and fiber and need a Carpentry level:
+- Repairs cost logs or planks and fiber and need a Carpentry level. Boarded is rough logs nailed over the gaps; Patched and Restored are planks hewn at the workbench (CCH-WOODWORK-001; they cost 5 and 8 wood before, so the plank costs come to fewer logs). A save past a stage keeps it.
 
-| Repair to | Wood | Fiber | Carpentry |
+| Repair to | Materials | Fiber | Carpentry |
 |---|---|---|---|
-| Boarded | 3 | 2 | 1 |
-| Patched | 5 | 4 | 3 |
-| Restored | 8 | 6 | 8, in summer only (the paint needs a dry season) |
+| Boarded | 3 logs | 2 | 1 |
+| Patched | 8 planks (4 logs) | 4 | 3 |
+| Restored | 14 planks (7 logs) | 6 | 8, in summer only (the paint needs a dry season) |
 
 - The hall and bedroom are open from the start, so the bed is usable right away. Other rooms open as the house is repaired:
   - **Hall:** open from the start, with the exit mat.
@@ -1000,8 +1000,8 @@ Defense stacks across slots, so a full set can turn most hits into single points
 
 ## Forestry and tools
 
-- **Forestry** trains by felling trees. Twelve grove trees stand on the forest's edge round the clearing (`GROVE_SPOTS`). Each tree gives 3 wood, and with an iron hatchet a 40% chance of 1 hardwood (`HARDWOOD_CHANCE`; 2 every tree until the October 2026 economy pass, when hardwood piled up past 2,000), and 20 Forestry XP. Felled trees come back each morning.
-- **Hatchets** and **picks** are tools with tiers. They are crafted from the Tools tab of the Craft panel and are kept by tier rather than worn in a slot. Hatchet tiers: crude, stone, copper, iron. Pick tiers: stone, copper, iron.
+- **Forestry** trains by felling trees. The main supply is the **Nearwood** up the timber trail (see "Workbench, anvil and timber"). Twelve grove trees also stand on the forest's edge round the clearing (`GROVE_SPOTS`). Each grove tree gives 3 logs (the `wood` material), and with an iron hatchet a 40% chance of 1 hardwood (`HARDWOOD_CHANCE`; 2 every tree until the October 2026 economy pass, when hardwood piled up past 2,000), and 20 Forestry XP. Felled trees come back each morning.
+- **Hatchets** and **picks** are tools with tiers. They are listed in the Tools tab of the Craft panel and made standing beside the workbench (crude and stone) or forged beside the anvil (copper and iron), and are kept by tier rather than worn in a slot. Hatchet tiers: crude, stone, copper, iron. Pick tiers: stone, copper, iron.
 - A hatchet is needed to fell trees. Hardwood needs a copper hatchet or better.
 
 - **Fishing rods** are in the Tools tab too. A **Willow rod** (Fishing 2: 2 wood, 2 fiber) adds 10% to each catch chance. A **Hardwood rod** (Fishing 5: 2 hardwood, 2 fiber, 1 resin) adds another 10%. The rod sits in the toolbelt on the Gear panel.
@@ -1136,6 +1136,8 @@ Particles do not run indoors or in the cave. Nothing in the grade pass changes g
 - `animal_system.gd` (`animals`): hens and goats, feeding, ageing and sales.
 - `farm_system.gd` (`farm`): seeds, planting, watering, harvest and crop unlocks.
 - `firewood_system.gd` (`firewood`): chopping, the fire, and warmth.
+- `woodwork_system.gd` (`woodwork`): the workbench and anvil rules (what is made where), hewing logs into planks, and the repair transaction (`try_repair`, the `repairs` log).
+- `nearwood_system.gd` (`nearwood`): the Nearwood cutting grove up the timber trail: its map, the trail both ways, felling marked trees, regrowth, its drawing and its save.
 - `sanity_system.gd` (`sanity_sys`): the day's events, tidying, cleansing and the night relief.
 - `night_system.gd` (`nights`): the night visitors and their encounters, the raids on the coop and barn, the field shadow and its blight, crow feathers and the crow charm.
 - `madness_system.gd` (`madness`): what low sanity shows you: the crows watching, figures at the screen's edge, the tool swapped in your hand, the lying clock and the crop that isn't there.
@@ -1193,10 +1195,27 @@ Since FARM-001 (November 2026) the farm is the playable concept farm: the ART-00
 - Whether the house interior should become a separate scene.
 - Whether the tile map moves to a `TileMapLayer` with a real `TileSet` once art is in.
 
-## Owner-approved crafting station redesign (2026-11-14; design-only, not implemented)
+## Workbench, anvil and timber (CCH-WOODWORK-001, 2026-11-16)
+
+Implemented from the two owner-approved designs below (`scripts/woodwork_system.gd`, `scripts/nearwood_system.gd`; tested by `tools/woodwork_test.gd`). Station visuals are temporary (R-P4-02).
+
+- **Logs.** The saved `wood` material is the raw log, shown as "logs" everywhere a cost is listed (`WoodworkSystem.label`). The key is unchanged, so every old save and every existing cost (firewood, smelting fuel, lanterns, gear, buildings) keeps working. Planks are a new material, `planks`; an old save has none.
+- **The workbench** is placed like decor from Buildings, under Workshop: **4 sticks**, no level, one on the farm, on open grass, solid. It costs only what the day-1 brush piles give (seven piles: 7 sticks, 7 fiber) and no fiber, so the day-1 hatchet, Tin Lantern and boarding keep theirs; the guide places it before the crude hatchet (guide step `g_bench`; an old save that already has a hatchet counts it done). Space beside it opens its panel: hew logs, open Craft, or take it down (materials back).
+- **Hewing.** At the workbench a log becomes **2 planks** (`PLANKS_PER_LOG`). One log takes **15 game minutes** at Carpentry 1, 1.5 minutes less a level, never under 6 (`HEW_MINUTES`), and gives **5 Carpentry XP** (`XP_HEW`). One press hews 1 log, or up to 5. Not within an hour of the day's end (03:00); a batch stops short rather than run into a collapse. It never takes more logs than you hold.
+- **What is made where** (by the bill of materials, `WoodworkSystem.station_for`): anything with copper or iron bars in it is **forged at the anvil**; every other tool, lantern and piece of gear is **made at the workbench**. The Craft panel stays a catalog you can browse anywhere; each card lists "At the workbench" or "At the anvil" with the costs (green when you stand beside it), and Make works only within one tile of the right station. Away from it the button explains where to go.
+  - Workbench: crude and stone hatchets, the stone pick, both rods, all three lanterns, the sharpened stick, hunting knife and every bark, fiber and resin piece, the hardwood shield.
+  - Anvil: copper and iron hatchets and picks, both hose heads, every copper and iron piece, the copper and iron shields.
+  - In the hand (no station): bandages, rope and crow charms. Cooking stays at the fire, smoking at the smokehouse, smelting at the furnace, splitting at the chopping log.
+  - Metal decor (lamp post, both sprinklers, garden bench, birdbath, weathervane) needs an anvil on the farm before it can be placed. The large metal works (house extensions, the cistern, hoppers, trail works, bell metal) are unchanged for now.
+- **The anvil** is placed the same way: **8 stone, 2 copper bars, 4 planks, Smithing 1**. Copper bars come from the furnace, so the first ore never needs a forged tool.
+- **The Nearwood** (`NearwoodSystem`): the gap in the trees north of the farmhouse, by a forester's sign (inner tiles 50-51, 1), is the timber trail. Space there and again to go, 06:00 to 17:00; a quarter hour each way (`TRAVEL_HOURS`) with the needs that go with it. A small clearing (28 by 18 tiles) with **8 marked timber trees**, each with a pale blaze on the trunk; the unmarked wood is darker and never cut. A marked tree is felled like a grove tree (the hatchet's tier sets the odds per stroke) and gives **4 logs**, 5 from Forestry 5, the farm's hardwood chance from a copper hatchet, and 20 Forestry XP. A felled tree is a stump (open ground) and stands again **4 days** later (a sapling shows the day before). No walker, no lamp oil, no foes; a trip is not a trek, so it doesn't hold the wood back, and no story beat waits there. A word at 18:00 to head home; the day ending there wakes you at home. Saved under `nearwood` (felled trees, trips).
+- **Repairs.** `WoodworkSystem.try_repair(id, cost, skill, level, hours, xp)` is the one transaction for a repair paid in materials: it checks, pays, passes the hours, gives the XP and records it once in `repairs` (`{id: {day, cost}}`, saved under `woodwork`). The house's repairs record themselves there as `house_1` to `house_3` (an older save's stages are recorded on load). Edith's inn repair is meant to use it.
+- **Time and yield** (balance_sim, 400 days, all three modes, treks=3): a full Nearwood clear is about 2.7 game hours there and back and about 40 logs; the planks for Patched take about an hour at the bench. The sim places the bench on day 1, hews its first planks on day 2 and the anvil around day 35, and every homestead step keeps its old day (Boarded 1, Patched 13, Restored 244).
+
+## Owner-approved crafting station redesign (2026-11-14; implemented 2026-11-16, see above)
 
 **Official target rules:** Players **hew raw logs into planks at a physical workbench**, and **all tools that are not forged at an anvil must be made at a workbench**. Anvil crafting covers metal tool forging and appropriate metal equipment. Preserve specialized existing hearth, chopping log, furnace and preservation stations. This supersedes generic Craft-panel tool manufacturing **as a future behavior**, not as a claim that current game code already follows it. Current resource key `wood` serves many functions; actual logs/planks split, recipes, bench location, anvil unlock, saves and first-hour no-softlock progression must be audited before implementation. The first Tin Lantern and Old Maren day-4 escort must remain attainable. Full specification: [AI_COLLAB/WORKBENCH_ANVIL_WOODWORKING_DESIGN.md](AI_COLLAB/WORKBENCH_ANVIL_WOODWORKING_DESIGN.md). Existing gameplay documentation above describes current mechanics until explicitly changed and tested.
 
-## Owner-approved forest logging progression direction (2026-11-14; not yet implemented)
+## Owner-approved forest logging progression direction (2026-11-14; the near grove implemented 2026-11-16, see "Workbench, anvil and timber"; the deep stand is not)
 
 Player feedback: the **12** harvestable grove trees scattered around the farm's woodland perimeter are too difficult to identify and gather from. Future target: **forest logging expeditions** from an obvious forest access on the homestead, with a compact nearwood cutting area where trees are visibly harvestable and renew over several game days. Forest should be the primary source of raw **logs**, homestead trees early/emergency supply, and a later optional deep timber stand may offer hardwood. After the player returns, logs are **hewn into planks at the workbench** under the separately owner-approved crafting rule. See [AI_COLLAB/FOREST_LOGGING_EXPEDITIONS_DESIGN.md](AI_COLLAB/FOREST_LOGGING_EXPEDITIONS_DESIGN.md) and [AI_COLLAB/WORKBENCH_ANVIL_WOODWORKING_DESIGN.md](AI_COLLAB/WORKBENCH_ANVIL_WOODWORKING_DESIGN.md). This is **target design**, while existing `GROVE_SPOTS`, `wood`, tree respawn and player interactions remain as documented above until implementation. Forest logging is voluntary and solo; it must not overwrite Maren's original day4 edge trek, other walker routes, the northwest cave/hillside, or original story/ending gates. Audit map access, item/save migration and resource balance before development.

@@ -144,10 +144,10 @@ func _craft_footer() -> String:
 		"cooking":
 			return "Eat meals from the Inventory panel. Smoking and preserving are done at the smokehouse, and smelting at the furnace."
 		"tools":
-			return "Tools are kept by tier rather than worn in a slot. Upgrade them one tier at a time."
+			return "Tools are kept by tier rather than worn in a slot. Wood and stone tools are made at the workbench, copper and iron ones forged at the anvil: browse here, make them standing beside it."
 		"other":
-			return "The lantern hangs from the belt and lights a ring around you in the dark."
-	return "Crafted gear equips at once and replaces what was worn in that slot. Armor cuts damage from foes. Weapons decide how hard you hit."
+			return "The lantern hangs from the belt and lights a ring around you in the dark. Lanterns are made at the workbench; bandages, rope and charms in the hand."
+	return "Crafted gear equips at once and replaces what was worn in that slot. Bark and fiber gear is made at the workbench, metal gear forged at the anvil."
 
 
 func _recipes_gear() -> Array:
@@ -175,7 +175,7 @@ func _recipes_gear() -> Array:
 			tint = m.TINT_ACCESSORY
 		out.append({
 			"key": "gear:" + str(id), "name": str(item["name"]), "icon": gear_icon(str(id)), "tint": tint,
-			"desc": desc, "costs": m._cost_lines(item["cost"]), "level_text": m._level_text(skill, level),
+			"desc": desc, "costs": m._cost_lines(item["cost"]) + [m.woodwork.station_line(m.woodwork.station_for(item["cost"]))], "level_text": m._level_text(skill, level),
 			"level_ok": m.progression._level(skill) >= level, "enabled": _can_craft(str(id)), "action": "craft:" + str(id),
 			"button": "Worn" if worn else "Make",
 		})
@@ -199,7 +199,7 @@ func _recipes_tools() -> Array:
 		out.append({
 			"key": "tool:" + kind, "name": str(tier["name"]), "icon": icon, "tint": m.TINT_TOOL,
 			"desc": _tool_desc(kind, tier, have),
-			"costs": m._cost_lines(tier["cost"]), "level_text": m._level_text(str(tier["skill"]), int(tier["level"])),
+			"costs": m._cost_lines(tier["cost"]) + [m.woodwork.station_line(m.woodwork.station_for(tier["cost"]))], "level_text": m._level_text(str(tier["skill"]), int(tier["level"])),
 			"level_ok": m.progression._level(str(tier["skill"])) >= int(tier["level"]), "enabled": _can_craft_tool(kind),
 			"action": "tool:" + kind, "button": "Make",
 		})
@@ -211,11 +211,12 @@ func _recipes_other() -> Array:
 	if m.lantern_tier < m.LANTERN_TIERS.size():
 		var t: Dictionary = m.LANTERN_TIERS[m.lantern_tier]
 		var costs: Array = [
-			{"label": "%d wood" % int(t["wood"]), "have": m._held("wood"), "need": int(t["wood"])},
+			{"label": "%d logs" % int(t["wood"]), "have": m._held("wood"), "need": int(t["wood"])},
 			{"label": "%d fiber" % int(t["fiber"]), "have": m._held("fiber"), "need": int(t["fiber"])},
 		]
 		if int(t["resin"]) > 0:
 			costs.append({"label": "%d resin" % int(t["resin"]), "have": m._held("resin"), "need": int(t["resin"])})
+		costs.append(m.woodwork.station_line("workbench"))
 		var desc := "Lights a ring %.1f tiles across. It hangs from your belt." % float(t["radius"])
 		if m.lantern_tier > 0:
 			desc = "You have the %s. %s" % [m.LANTERN_TIERS[m.lantern_tier - 1]["name"], desc]
@@ -268,12 +269,17 @@ func _can_craft_tool(kind: String) -> bool:
 	var tier: Dictionary = tiers[have]
 	if m.progression._level(str(tier["skill"])) < int(tier["level"]):
 		return false
-	return m._has_materials(tier["cost"])
+	return m._has_materials(tier["cost"]) and m.woodwork.near(m.woodwork.station_for(tier["cost"]))
 
 
 func _craft_tool(kind: String) -> void:
 	if not _can_craft_tool(kind):
-		m._show_message("You need the materials and skill level for the next %s." % kind)
+		var tiers: Array = m.TOOL_TIERS[kind]
+		var have := int(m.tool_tier[kind])
+		var why := ""
+		if have < tiers.size():
+			why = m.woodwork.why_not(m.woodwork.station_for(tiers[have]["cost"]))
+		m._show_message(why if why != "" else "You need the materials and skill level for the next %s." % kind)
 		return
 	m.progression._bump("crafted")
 	var tier: Dictionary = m.TOOL_TIERS[kind][int(m.tool_tier[kind])]
@@ -295,12 +301,13 @@ func _can_craft(id: String) -> bool:
 	for mat in cost.keys():
 		if int(m.materials[mat]) < int(cost[mat]):
 			return false
-	return true
+	return m.woodwork.near(m.woodwork.station_for(cost))
 
 
 func _craft_gear(id: String) -> void:
 	if not _can_craft(id):
-		m._show_message("You don't have the materials, or Bushcrafting is too low for that.")
+		var why := m.woodwork.why_not(m.woodwork.station_for(m.GEAR_ITEMS[id]["cost"]))
+		m._show_message(why if why != "" else "You don't have the materials, or the skill is too low for that.")
 		return
 	var item: Dictionary = m.GEAR_ITEMS[id]
 	var cost: Dictionary = item["cost"]

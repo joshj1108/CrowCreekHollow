@@ -109,6 +109,14 @@ var today := {}              # the entry being filled
 var ev_tot := {"sign_evenings": 0, "signs_read": 0, "preps": 0, "fire_rests": 0, "quiet_rests": 0, "cold_evenings": 0,
 	"rest_option": 0, "fire_option": 0, "tend_option": 0, "faced": 0, "ignored": 0, "wood_fire": 0, "wood_tend": 0}
 var treks_a_week := 0
+# CCH-WOODWORK-001: the workbench and anvil are placed as soon as they can be; tools are made standing by the right
+# one (_stand_by); a trip to the Nearwood is taken when the logs run under LOG_WANT (felling every standing tree,
+# its time estimated from the hatchet's odds, _nearwood), and logs are hewn into planks for the next repair and
+# the anvil (_hew_for). The trip's hours come out of the morning's outdoor block, so the day keeps its shape.
+const LOG_WANT := 40
+const TREE_WALK_SECONDS := 4.0   # real seconds walking from one marked tree to the next
+var trip_hours := 0.0
+var timber := {"trips": 0, "hours": 0.0, "logs": 0, "hewn": 0, "hew_hours": 0.0, "workbench": -1, "anvil": -1, "first_planks": -1}
 var rope := 0
 var grove_rations := 0      # rations baked ahead for the grove, one a day once she waits (see _trek)
 var last_trek := ""         # the route of the last trek walked
@@ -233,7 +241,7 @@ func _play_day() -> String:
 	_gather()
 	_forage()
 	_animals()
-	_pass(6.0, false)
+	_pass(6.0 - trip_hours, false)
 	_eat_drink()
 	_craft_and_build()
 	_tend_field()   # anything planted with new seeds today
@@ -657,8 +665,11 @@ func _desk_game() -> void:
 # --- Gathering, crafting, building --------------------------------------------------------
 
 func _gather() -> void:
+	trip_hours = 0.0
 	for t in m.brush.keys():
 		m.mining._gather(t)
+	_stations()
+	_stand_by("workbench")
 	if int(m.tool_tier["hatchet"]) == 0 and m.crafting._can_craft_tool("hatchet"):
 		m.crafting._craft_tool("hatchet")
 	if int(m.tool_tier["hatchet"]) >= 1:
@@ -673,7 +684,77 @@ func _gather() -> void:
 			felled += 1
 	for t in m.rocks.keys():
 		m.mining._finish_mine(t)
+	_nearwood()
 	_cave()
+
+
+# --- CCH-WOODWORK-001: stations, the Nearwood and hewing ----------------------------------------------------
+
+func _stations() -> void:
+	for kind in ["workbench", "anvil"]:
+		if m.projects._count(kind) > 0:
+			continue
+		if kind == "anvil":
+			_hew_for(int(m.projects.DECOR["anvil"]["cost"]["planks"]))
+		if not m.projects._can_place(kind):
+			continue
+		var t := m._world_tile(46 if kind == "workbench" else 48, 14)
+		if not m.projects._fits(kind, t):
+			t = _open_grass()
+		m.projects._confirm(kind, t)
+		timber[kind] = m.day
+		_mark(kind + " placed")
+
+
+# Puts the farmer beside a station, as a player walks to it before making something there.
+func _stand_by(kind: String) -> void:
+	for t in m.projects.decor:
+		if str(m.projects.decor[t]) == kind:
+			m.inside = false   # out of the house to it
+			m.player.position = m._tile_center(t.x, t.y + 1)
+			return
+
+
+func _nearwood() -> void:
+	var nw := m.nearwood
+	if int(m.tool_tier["hatchet"]) < 1 or int(m.materials["wood"]) >= LOG_WANT:
+		return
+	nw._regrow()
+	var trees: Array = []
+	for t in nw.trees():
+		if nw.standing(t):
+			trees.append(t)
+	if trees.size() < 3:
+		return
+	var per_hour := m.DAY_LENGTH / (m.DAY_END_HOUR - m.START_HOUR)   # real seconds a game hour
+	var seconds := 0.0
+	var logs0 := int(m.materials["wood"])
+	for t in trees:
+		seconds += 1.0 / clampf(nw.chop_chance(), 0.05, 0.95) + TREE_WALK_SECONDS
+		nw._finish(t)
+	var hours := seconds / per_hour + nw.TRAVEL_HOURS * 2.0
+	nw.trips += 1
+	_pass(hours, false)
+	trip_hours = hours
+	timber["trips"] += 1
+	timber["hours"] += hours
+	timber["logs"] += int(m.materials["wood"]) - logs0
+
+
+# Hews logs at the bench until there are `need` planks, keeping a few logs for the furnace and the fire.
+func _hew_for(need: int) -> void:
+	if m.projects._count("workbench") == 0:
+		return
+	_stand_by("workbench")
+	while int(m.materials["planks"]) < need and int(m.materials["wood"]) > 4 and m.woodwork.can_hew():
+		var h0 := m.current_hour
+		var n := m.woodwork.hew(mini(m.woodwork.HEW_BATCH, ceili(float(need - int(m.materials["planks"])) / float(m.woodwork.PLANKS_PER_LOG))))
+		if n <= 0:
+			break
+		timber["hewn"] += n
+		timber["hew_hours"] += m.current_hour - h0
+		if timber["first_planks"] < 0:
+			timber["first_planks"] = m.day
 
 
 func _cave() -> void:
@@ -709,8 +790,13 @@ func _craft_and_build() -> void:
 	while m.mining._can_smelt("copper") and int(m.materials["wood"]) > 30:
 		m.mining._smelt("copper")
 	for kind in ["hatchet", "pick", "hose"]:
+		if int(m.tool_tier[kind]) < m.TOOL_TIERS[kind].size():
+			_stand_by(m.woodwork.station_for(m.TOOL_TIERS[kind][int(m.tool_tier[kind])]["cost"]))
 		if m.crafting._can_craft_tool(kind):
 			m.crafting._craft_tool(kind)
+	_stand_by("workbench")
+	if m.house_stage in [1, 2] and m.progression._level("Carpentry") >= int(m.REPAIR_COSTS[m.house_stage]["level"]):
+		_hew_for(int(m.REPAIR_COSTS[m.house_stage].get("planks", 0)))
 	if m._can_repair_well():
 		m._repair_well()
 	if m._can_attach_hose():
@@ -865,6 +951,7 @@ func _try_build(id: String, cost: Dictionary) -> String:
 			m.projects._confirm(kind, _open_grass())
 			return "done"
 		"lantern":
+			_stand_by("workbench")
 			if m._can_advance_lantern():
 				m._advance_lantern()
 				return "done"
@@ -1409,6 +1496,9 @@ func _summary() -> void:
 		tiers[0], tiers[1], tiers[2], int(m.nights.seen.get("raid", 0)), int(nights["raids_won"]), m.nights.blight.size(), m.hens])
 	print("--- coins earned %s, spent %s; hens %d goats %d; property value %d; tax owed %d" % [earned, spent, m.hens, m.goats, m.desk._property_value(), m.tax_owed])
 	print("--- materials: %s" % JSON.stringify(m.materials))
+	print("--- timber: workbench day %d, anvil day %d, first planks day %d; Nearwood trips %d (%.1f h, %.2f h a trip), logs from it %d (%.1f a trip); logs hewn %d (%.1f h); house stage %d" % [
+		timber["workbench"], timber["anvil"], timber["first_planks"], timber["trips"], timber["hours"], timber["hours"] / maxf(1.0, timber["trips"]),
+		timber["logs"], float(timber["logs"]) / maxf(1.0, timber["trips"]), timber["hewn"], timber["hew_hours"], m.house_stage])
 	print("--- harvested %s; withered %d" % [JSON.stringify(grown), int(m.stats["withered"])])
 	print("--- foraged %d, fish caught %d (%d at night), cooked by _cook %s" % [int(m.stats["foraged"]), int(m.stats["caught"]), int(m.stats["night_fish"]), JSON.stringify(cooked)])
 	print("--- chores over %d days: %s; sprinklers %d" % [m.day - 1, chores, m.projects._count("sprinkler")])
