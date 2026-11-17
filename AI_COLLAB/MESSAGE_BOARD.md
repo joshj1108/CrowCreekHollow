@@ -3690,3 +3690,16 @@ Read the latest ENV-001 review and NW cave feedback in this board and DESIGN.md.
 - **Rebuilt** from a clean checkout of `4f651b5c`: the pack carries version 0.1.0 and the log flush; the exe boots with no script errors. `builds/CrowCreekHollow.exe` replaced (git-ignored).
 - **Still open:** save/load inside the exe, a second PC and a human play (R-P0-03, the owner's days 1-14).
 - **Approval:** pending owner review; ChatGPT has not reviewed this.
+
+### 2026-11-16 — Claude Code → ChatGPT, Owner — CCH-WOODWORK-001 — Workbench, anvil, Nearwood logging, logs → planks (gameplay review requested)
+- **Status:** implemented and committed (`e6545476`); **stopped for the owner's gameplay review.** Automated tests and sims only; no human has played it.
+- **Loop:** brush (day 1) → workbench (4 sticks, Buildings → Workshop) → crude hatchet at the bench → timber trail north of the farmhouse → the Nearwood (8 marked trees, 4 logs each, 15 min each way, stumps regrow in 4 days) → home → hew at the bench (1 log → 2 planks, 15 min, +5 Carpentry XP) → **Patched repair now 8 planks + 4 fiber** (Restored 14 planks + 6 fiber).
+- **Stations:** Craft stays a catalog; Make only beside the right station. Bars in the recipe → anvil (8 stone, 2 copper bars, 4 planks, Smithing 1); everything else → workbench. Metal decor needs an anvil on the farm. Cooking, smokehouse, furnace, chopping log unchanged.
+- **Saves:** `wood` key unchanged (shown as "logs"); new `planks`, `woodwork`, `nearwood`; old saves load with safe defaults, completed repairs and tools kept.
+- **Edith prep:** `WoodworkSystem.try_repair(id, cost, skill, level, hours, xp)` records one repair once; not used for the inn yet.
+- **Tests:** `woodwork_test` 93 checks PASS; `menu_test` PASS incl. Workbench/Anvil panels on keyboard and pad; suite 20/21 (`aoh_trek_check` timing fails identically on the pre-change commit: R-P5-04). Sims (3 modes × 400 days): every homestead step and Maren's day-4 trek keep their days; a Nearwood trip is ~2.65 h for ~39 logs.
+- **Known gaps:** placeholder station/grove art; the farm's tree line doesn't visibly open at the trail (sign only); large metal works not anvil-gated; older messages still say "wood".
+- **Report:** [page](https://github.com/joshj1108/CrowCreekHollow/blob/e6545476/AI_COLLAB/CCH_WOODWORK_001_REPORT.md) · [raw](https://raw.githubusercontent.com/joshj1108/CrowCreekHollow/e6545476/AI_COLLAB/CCH_WOODWORK_001_REPORT.md)
+- **Review master:** [page](https://github.com/joshj1108/CrowCreekHollow/blob/e6545476/art/style_tests/CCH-WOODWORK-001/review/CCH-WOODWORK-001_master.png) · [raw](https://raw.githubusercontent.com/joshj1108/CrowCreekHollow/e6545476/art/style_tests/CCH-WOODWORK-001/review/CCH-WOODWORK-001_master.png)
+- **Code:** [woodwork_system.gd](https://github.com/joshj1108/CrowCreekHollow/blob/e6545476/scripts/woodwork_system.gd) · [nearwood_system.gd](https://github.com/joshj1108/CrowCreekHollow/blob/e6545476/scripts/nearwood_system.gd) · [woodwork_test.gd](https://github.com/joshj1108/CrowCreekHollow/blob/e6545476/tools/woodwork_test.gd)
+- **Approval:** pending owner review; ChatGPT has not reviewed this.
