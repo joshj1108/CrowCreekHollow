@@ -3,7 +3,7 @@ extends RefCounted
 
 # Bumped when a save's keys change shape. Saves from before the number was written count as 1.
 # _migrate lifts an older save one version at a time, so every old save still loads.
-const SAVE_VERSION := 21
+const SAVE_VERSION := 22
 # Keys a save must hold with the right type, or it isn't read: the loader would trip over anything else.
 const DICT_KEYS := ["inventory", "materials", "skill_xp", "stats", "equipment", "quests_done", "achievements_done",
 	"tool_tier", "trek_walked", "night_seen"]
@@ -109,6 +109,7 @@ func _save_game() -> void:
 		"past_post": m.past_post.to_save(),     # CCH-ORIGIN-002: the first winter's post from that life
 		"past_spring": m.past_spring.to_save(), # CCH-ORIGIN-003: its spring and summer
 		"first_september": m.first_september.to_save(), # CCH-ORIGIN-004: the first September's diary page
+		"second_autumn": m.second_autumn.to_save(), # CCH-ORIGIN-005: the second autumn's scene from before
 		"act": m.act._to_save(),
 		"estate": m.estate._to_save(),
 		"stand_glut": m.stall.glut,
@@ -284,6 +285,7 @@ func _load_game() -> bool:
 	m.past_post.from_save(data.get("past_post", null))    # after the origin: the record is checked against it
 	m.past_spring.from_save(data.get("past_spring", null))   # after the winter: the route is checked against it
 	m.first_september.from_save(data.get("first_september", null))
+	m.second_autumn.from_save(data.get("second_autumn", null))   # after the origin: a scene for another past is dropped
 	m.trek.works.clear()
 	for id in data.get("trek_works", []):
 		if TrekSystem.WORKS.has(str(id)):
@@ -630,6 +632,13 @@ static func _migrate(data: Dictionary) -> Dictionary:
 		# farm's half. Nothing is written for the player.
 		if typeof(data.get("first_september", null)) != TYPE_DICTIONARY:
 			data["first_september"] = {}
+	if v < 22:
+		# Version 22 added the second autumn's scene from before and its practical morning (CCH-ORIGIN-005,
+		# `second_autumn`). An older save has none: the scene is chosen on the first quiet morning from October 7 of
+		# year two, from the save's own winter and spring records, so a legacy past still gets nothing and nothing
+		# already paid, sent or received is ever repeated.
+		if typeof(data.get("second_autumn", null)) != TYPE_DICTIONARY:
+			data["second_autumn"] = {}
 	# A save from a newer build keeps its number; keys this build doesn't know are ignored.
 	data["save_version"] = maxi(v, SAVE_VERSION)
 	return data

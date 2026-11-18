@@ -1,0 +1,94 @@
+Godot Engine v4.7.2.stable.steam.ed1daf0bf - https://godotengine.org
+
+ok    setup: in the inn
+ok    setup: Edith's counter opens the inn
+ok    before: not mended on a new game
+ok    before: the bucket's tile is solid
+ok    before: facing the bucket describes the leak
+ok    quote: the counter has a section for the leak
+ok    quote: the job is offered
+ok    quote: shows the exact requirements
+ok    quote: shows the pay
+ok    quote: Edith explains it
+ok    quote: can't be started with nothing
+ok    quote: leaving it is offered
+ok    quote: looking records nothing
+ok    refuse: no materials
+ok    refuse: planks but no iron
+ok    refuse: one plank short
+ok    refuse: Carpentry 1
+ok    quote: ready with everything
+ok    refuse: too late to start
+ok    quote: not ready late
+ok    refuse: away from the inn
+ok    refuse: an unknown id does nothing
+ok    leave: nothing taken or recorded
+ok    leave: Edith shrugs it off
+ok    leave: the offer still stands
+ok    leave: no diary page
+ok    work: done
+ok    work: 8 planks taken
+ok    work: 2 iron bars taken
+ok    work: logged as a notice
+ok    work: two hours pass
+ok    work: 60 coins paid
+ok    work: Carpentry XP given
+ok    work: recorded once, with the day, cost and pay
+ok    work: the day is a memory hook
+ok    work: a new diary page
+ok    work: the counter shows it mended
+ok    work: never twice (panel)
+ok    work: never twice (call)
+ok    work: never twice (try_repair)
+ok    after: the bucket is gone (tile open)
+ok    after: the wall is mended
+ok    diary: a Notes page for the repair
+ok    diary: the day and date
+ok    diary: what it took
+ok    diary: what was paid
+ok    diary: facts only (no feelings written for you)
+ok    diary: only one page for it
+ok    Edith: same day
+ok    Thomas: not the same day (he hasn't heard)
+ok    Thomas: nothing marked heard yet
+ok    Edith: next day, it has held (no rain yet)
+ok    Edith: the same line again that day
+ok    Thomas: the next day he has heard
+ok    Thomas: and again that day
+ok    Thomas: even late in the day
+ok    Thomas: once only
+ok    Edith: the callback once only
+ok    Edith: after rain, it held through the rain
+ok    Edith: never speaks of the bucket or the roof money again
+ok    Edith: the back room as it is now
+ok    Edith: the inn's other troubles remain (her other lines)
+ok    save: the record is written
+ok    load: loads
+ok    load: still mended, same record
+ok    load: memory hooks come back
+ok    load: coins not paid again
+ok    load: the bucket stays gone
+ok    load: the diary page is still there
+ok    load: can't be done again
+ok    old save (village, no repair): loads
+ok    old save: not mended, no memory
+ok    old save: no diary page
+ok    old save: the bucket is back
+ok    odd save (a flag but no record): loads
+ok    odd save: a flag alone is no memory
+ok    old save (before the village and woodwork): loads
+ok    old save: no false memory anywhere
+ok    bad repair data: loads and is ignored
+ok    workbench: still hews logs into planks
+ok    Nearwood: the system is there
+ok    village: the road down still works
+ok    village: the store still sells
+ok    village: the notice board still builds
+ok    village: the inn still sells
+ok    village: the road home still works
+PASS: 0 failure(s)
+ERROR: 5 RID allocations of type 'PN13RendererDummy14TextureStorage12DummyTextureE' were leaked at exit.
+WARNING: 15 ObjectDB instances were leaked at exit (run with `--verbose` for details).
+   at: cleanup (core/object/object.cpp:2536)
+ERROR: 7 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:822)

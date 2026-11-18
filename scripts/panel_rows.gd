@@ -123,6 +123,9 @@ func _diary_sections() -> Array:
 	# Its spring and summer (CCH-ORIGIN-003): what came, what was opened, written, sent and answered.
 	for p in m.past_spring.diary_pages():
 		notes.append({"title": str(p["title"]), "text": str(p["text"]), "new": is_new.call(str(p["id"]))})
+	# The second autumn (CCH-ORIGIN-005): the practical morning, and the one scene from before and what was done.
+	for p in m.second_autumn.diary_pages():
+		notes.append({"title": str(p["title"]), "text": str(p["text"]), "new": is_new.call(str(p["id"]))})
 	if not notes.is_empty():
 		sections.append({"name": "Notes", "heading": "Notes", "pages": notes})
 	# The first September's page (CCH-ORIGIN-004): the year, from the records, and the last line the player chose.
@@ -843,6 +846,7 @@ func _mailbox_rows() -> Array:
 			"status_kind": "ok" if bool(letter["unread"]) else "done", "value": str(letter["text"])})
 		rows.append_array(m.past_post.rows_for(letter))   # CCH-ORIGIN-002: answers to a letter from before
 		rows.append_array(m.past_spring.rows_for(letter))   # CCH-ORIGIN-003: its spring answers, and parcels to open
+		rows.append_array(m.second_autumn.rows_for(letter))   # CCH-ORIGIN-005: the second autumn's answers and parcel
 	if m.desk_mail.is_empty():
 		rows.append({"note": "The mailbox is empty. The post comes in the morning, with any catalog orders."})
 	else:
@@ -859,6 +863,7 @@ func _desk_rows() -> Array:
 		"button": "Read", "action": "diary", "enabled": true})
 	rows.append_array(m.past_spring.desk_rows())   # CCH-ORIGIN-003: a photograph, or paid work on papers by post
 	rows.append_array(m.first_september.desk_rows())   # CCH-ORIGIN-004: the first September's page and its last line
+	rows.append_array(m.second_autumn.desk_rows())   # CCH-ORIGIN-005: the second autumn's scene from before
 	rows.append({"note": "The post comes to the mailbox by the east gate, beside the farm stand."})
 
 	rows.append({"tab": "Tax", "icon": "coins"})

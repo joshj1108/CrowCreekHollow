@@ -1,0 +1,1 @@
+mail_test exit=0 pass_lines=42 fail_lines=0 engine_errors=0 secs=12 ok

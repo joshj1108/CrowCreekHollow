@@ -154,7 +154,7 @@ extends SceneTree
 #                   the farm (pumpkins harvested, the house Boarded, the Nearwood walked, 3 boards mended, the inn mended);
 #                   pans=ID answers it, pans2=ID answers a follow-up (the order book's page); pflow=written (left for
 #                   the post), sent, answered (the sender's answer in) or lapsed (nothing sent by February 28).
-#                   mpick=ACTION (or mpick=#N) focuses that Mailbox entry, with mailopen mailpanel, so its detail shows
+#                   mpick=ACTION (or mpick=#N, or mpick=^ACTION: the entry above it) focuses that Mailbox entry, with mailopen mailpanel, so its detail shows
 #   spring=STEPS    CCH-ORIGIN-003: after past= (and pans=, pflow=answered or lapsed), play on into the spring, one
 #                   morning at a time (both posts). Steps, comma-separated: spring (on to the spring's first scene),
 #                   to:N (to day N), go:N (N more days), ans:ID (answer the open stage), post (on to the sender's
@@ -167,6 +167,11 @@ extends SceneTree
 #                   leak mended in May), cove:N (N visits to Wicker Cove), deed:N (coins paid toward it), note (the
 #                   morning's note), write:ID (finish it with that closing line), reload (save and load slot 8).
 #                   dsept=P with diary opens the book at its section, page P; spick with tab=Desk focuses its page row.
+#   autumn=STEPS    CCH-ORIGIN-005: after past=/spring=/sept= (or alone), on into the second autumn with every post's
+#                   morning (default: to October 7, day 372, the scene's day). Steps: to:N, go:N, ans:ID (answer the
+#                   scene), post (on to the sender's answer), open (open the parcel it brought), read (read the post),
+#                   reload (save and load), say (show the morning's report). dautumn=P with diary opens the book at its Notes page P ("last"); dworld at
+#                   the practical morning's page. tpick=autumn:answer|ID with tab=Desk focuses a choice; mpick likewise.
 #   combatlog       with hold, print COMBAT lines: each swing's press, its contact frame and hit, each blow and the guard
 
 func _initialize() -> void:
@@ -457,6 +462,8 @@ func _initialize() -> void:
 		_past_spring(main, opt)
 	if opt.has("sept") and main.get("first_september") != null:
 		_first_september(main, opt)
+	if opt.has("autumn") and main.get("second_autumn") != null:
+		_second_autumn(main, opt)
 	if opt.has("mailopen"):
 		# Check the mailbox: its door stays open for the shot; mailpanel keeps the Mailbox panel open too.
 		main.mail._open_mailbox()
@@ -472,6 +479,8 @@ func _initialize() -> void:
 				var e: Button = entries[k]
 				if (want.begins_with("#") and k == int(want.substr(1))) or str(e.get_meta("action", "")) == want:
 					e.grab_focus()
+				elif want.begins_with("^") and k > 0 and str(e.get_meta("action", "")) == want.substr(1):
+					(entries[k - 1] as Button).grab_focus()   # the entry just above that one (a letter above its answers)
 	# CCH-WOODWORK-001 (guarded, so BEFORE shots still run on a build without it).
 	if opt.has("stations") and main.get("woodwork") != null:
 		var here: Vector2i = main._player_tile()
@@ -602,6 +611,19 @@ func _initialize() -> void:
 				if str(fsecs[si]["name"]) == FirstSeptember.SECTION:
 					var last: int = (fsecs[si]["pages"] as Array).size() - 1
 					main.action_bar.open_book_at(si, last if str(opt["dsept"]) == "last" else (int(opt["dsept"]) if str(opt["dsept"]).is_valid_int() else 0))
+		if opt.has("dautumn") or opt.has("dworld"):
+			# CCH-ORIGIN-005: open the book at the second autumn's page in Notes (or the practical morning's).
+			var title := SecondAutumnScript.WORLD_TITLE if opt.has("dworld") else SecondAutumnScript.TITLE
+			var asecs: Array = main.panels._diary_sections()
+			for si in asecs.size():
+				var apages: Array = asecs[si]["pages"]
+				var hits: Array = []
+				for pi in apages.size():
+					if str(apages[pi].get("title", "")).begins_with(title):
+						hits.append(pi)
+				if not hits.is_empty():
+					var want := str(opt.get("dautumn", "0"))
+					main.action_bar.open_book_at(si, int(hits[-1]) if want == "last" else int(hits[mini(int(want), hits.size() - 1)]))
 		if opt.has("dspring"):
 			# CCH-ORIGIN-003: open the book at the spring post's page in Notes.
 			var ssecs: Array = main.panels._diary_sections()
@@ -758,9 +780,14 @@ func _initialize() -> void:
 			for f in 3:
 				await process_frame
 		if opt.has("tpick"):
-			for e in main.action_bar.list_box.get_children():
-				if e is Button and str(e.get_meta("action", "")) == str(opt["tpick"]):
+			var tes: Array = main.action_bar.list_box.get_children().filter(func(c: Node) -> bool: return c is Button)
+			var twant := str(opt["tpick"])
+			for k in tes.size():
+				var e: Button = tes[k]
+				if str(e.get_meta("action", "")) == twant:
 					e.grab_focus()
+				elif twant.begins_with("^") and k > 0 and str(e.get_meta("action", "")) == twant.substr(1):
+					(tes[k - 1] as Button).grab_focus()   # the entry just above (a scene's own row above its first choice)
 			for f in 3:
 				await process_frame
 		if opt.has("focus"):
@@ -1174,6 +1201,53 @@ func _first_september(main, opt: Dictionary) -> void:
 				main.saver._save_game()
 				main.saver._load_game()
 	main.diary_new = [FirstSeptember.DIARY_ID]
+
+
+# CCH-ORIGIN-005: on into the second autumn with every post's morning (see autumn= above).
+func _second_autumn(main, opt: Dictionary) -> void:
+	var sa: SecondAutumn = main.second_autumn
+	var read := func() -> void:
+		for l in main.desk_mail:
+			if l.has("post"):
+				main.past_post.read(str(l["post"]))
+				main.past_spring.read(str(l["post"]))
+				sa.read(str(l["post"]))
+			l["unread"] = false
+	var go := func(d: int) -> void:
+		while main.day < d:
+			main.day += 1
+			var note: String = main.past_post._morning() + main.past_spring._morning() + main.first_september._morning() + sa._morning()
+			if note != "":
+				main.morning_report = "Day %d." % main.day + note
+				main.morning_report_day = main.day
+	var steps: PackedStringArray = str(opt["autumn"]).split(",", false)
+	if not str(opt["autumn"]).begins_with("to:"):
+		go.call(SecondAutumn.FROM)
+	for step in steps:
+		var kv := step.split(":")
+		match kv[0]:
+			"to":
+				go.call(int(kv[1]))
+			"go":
+				go.call(main.day + int(kv[1]))
+			"ans":
+				read.call()
+				sa.answer(kv[1])
+			"post":
+				var a: Dictionary = sa.data.get("ack", {})
+				if not a.is_empty():
+					go.call(int(a["due"]))
+			"open":
+				sa.open_parcel()
+			"read":
+				read.call()
+			"reload":
+				main.saver._save_game()
+				main.saver._load_game()
+			"say":
+				main._show_message(main.morning_report, true)
+	main.mail.flag = 1.0 if main.mail._flag_up() else 0.0
+	main.diary_new = [SecondAutumn.DIARY_ID]
 
 
 # CCH-ORIGIN-003: play on from the winter into the spring, one morning at a time (see spring= above).

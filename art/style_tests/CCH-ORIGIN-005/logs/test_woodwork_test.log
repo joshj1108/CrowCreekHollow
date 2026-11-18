@@ -1,0 +1,101 @@
+Godot Engine v4.7.2.stable.steam.ed1daf0bf - https://godotengine.org
+
+ok    fresh: no workbench, no hatchet
+ok    fresh: logs and planks start empty
+ok    guide: the workbench step comes before the hatchet
+ok    day 1: the brush gives enough for a bench, a hatchet, a lantern and the boarding
+ok    bench: the spot is open grass
+ok    bench: can be placed with day-1 materials
+ok    bench: placed, cost paid once
+ok    bench: a second can't be placed
+ok    bench: it blocks like a placed piece
+ok    bench: away from it, the crude hatchet is refused
+ok    bench: refusing takes nothing
+ok    bench: facing it, Space opens its panel
+ok    bench: beside it, the crude hatchet can be made
+ok    bench: crude hatchet made (a valid non-anvil tool)
+ok    guide: the bench step is done
+ok    trail: facing the gap picks the gate tile
+ok    trail: the forester's sign blocks
+ok    trail: the first press only asks
+ok    trail: the second press goes up
+ok    trail: a quarter hour passes
+ok    trail: needs go down a little, coins untouched
+ok    trail: arrive on open ground
+ok    trail: not counted as a trek
+ok    grove: 8 marked trees, all standing
+ok    grove: every marked tree can be reached from the arrival
+ok    grove: unmarked wood blocks
+ok    fell: four marked trees came down with the crude hatchet
+ok    fell: each gave 4 logs
+ok    fell: Forestry XP for each
+ok    fell: a stump is open ground
+ok    fell: chopping a stump gives nothing
+   info: 11 harvest ticks (real seconds) for 4 trees with the crude hatchet
+ok    home: back on the farm
+ok    home: a quarter hour each way
+ok    hew: refused away from the bench
+ok    hew: one log
+ok    hew: one log off, two planks on
+ok    hew: takes its time
+ok    hew: trains Carpentry
+ok    hew: a batch is capped at 5
+ok    hew: no logs, nothing happens
+ok    hew: refused late at night
+ok    hew: near the end of the day it stops short
+ok    stone hatchet: a workbench tool, made beside the bench
+ok    copper hatchet: refused at the bench (anvil only)
+ok    copper gear: refused at the bench (anvil only)
+ok    lamp post: can't be placed without an anvil
+ok    bark gear: made at the bench
+ok    lantern: made at the bench
+ok    anvil: placeable with stone, bars and planks
+ok    anvil: placed, planks paid
+ok    anvil: Space opens its panel
+ok    copper hatchet: forged beside the anvil
+ok    copper hatchet: made
+ok    lamp post: placeable once the anvil stands
+ok    copper helm: forged beside the anvil
+ok    copper helm: worn
+ok    patched: needs planks, not logs
+ok    patched: refused without enough planks
+ok    patched: can be done with hewn planks
+ok    patched: the house is Patched
+ok    patched: the planks were spent
+ok    patched: recorded once in the repair log
+ok    repair API: a recorded repair isn't paid twice
+ok    repair API: a new repair goes through once
+ok    repair API: and never twice
+ok    load: loads
+ok    load: logs and planks come back
+ok    load: both stations stand where they were
+ok    load: the house repair and its record come back
+ok    load: tools and gear come back
+ok    load: skills come back
+ok    load: the Nearwood's stumps come back
+ok    load: logs hewn come back
+ok    regrow: a stump is still a stump the day before
+ok    regrow: 4 days on, every tree stands again
+ok    repeat: a full clear with the copper hatchet
+ok    day end in the Nearwood: you wake at home
+ok    a fall in the Nearwood: you wake at home
+ok    trail: shut after 17:00
+ok    save: made in the Nearwood puts you at the homestead
+ok    old save: loads
+ok    old save: no planks
+ok    old save: no stations
+ok    old save: every Nearwood tree standing
+ok    old save: earlier repairs kept and recorded
+ok    old save: tools kept
+ok    old save: a bench can be built at once
+ok    bad timber data: loads safely
+ok    Wicker Cove: the east gate still opens the road
+ok    NW cave: the cave mouth is still on the farm
+ok    Maren: the edge route still starts on day 4
+ok    trail: doesn't touch the trek clock
+PASS: 0 failure(s)
+ERROR: 5 RID allocations of type 'PN13RendererDummy14TextureStorage12DummyTextureE' were leaked at exit.
+WARNING: 15 ObjectDB instances were leaked at exit (run with `--verbose` for details).
+   at: cleanup (core/object/object.cpp:2536)
+ERROR: 7 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:822)

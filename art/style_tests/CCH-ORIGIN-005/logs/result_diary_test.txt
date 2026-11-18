@@ -1,0 +1,1 @@
+diary_test exit=0 pass_lines=63 fail_lines=0 engine_errors=0 secs=17 ok

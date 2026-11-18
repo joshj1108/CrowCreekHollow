@@ -1,0 +1,152 @@
+Godot Engine v4.7.2.stable.steam.ed1daf0bf - https://godotengine.org
+
+PASS  gating: a legacy past gets no spring letter all year
+PASS  gating: a 'none' past gets nothing
+PASS  gating: a missed winter has no spring
+PASS  gating: an unsettled winter (the order book's page still open) holds the spring back
+PASS  gating: once it settles, the spring comes on its date (day 190)
+PASS  gating: nothing arrives before its date (boxes on day 166)
+PASS  A paid: the boxes come on day 166 with a letter
+PASS  A paid: nothing is charged again
+PASS  A paid: the sender is the friend who kept them
+PASS  A paid: the mailbox has an Open row for the boxes
+PASS  A paid: clearing keeps the letter while the boxes are unopened
+PASS  A paid: opening them is recorded; nothing goes in the pack
+PASS  A paid: asking to send things on is answered with its terms
+PASS  A paid: one thing is sent on later: a seed catalogue
+PASS  A paid: the diary says what came and what was in it
+PASS  A paid: a September line
+PASS  A held: the April letter on day 190, deadline April 30
+PASS  A held: no second extension for someone who already asked
+PASS  A held: shipping costs 30 when written
+PASS  A held: taking it back returns the 30
+PASS  A held: the carrier has them (dispatched)
+PASS  A held: the boxes arrive five days later, paid once
+PASS  A held: nothing happens until April 30 has passed
+PASS  A held lapse: May 1, the things go to the charity shop, no parcel
+PASS  A unanswered: the extension to May 20 is offered
+PASS  A unanswered: May 20 is the last date; no further extension
+PASS  A unanswered: after May 20 they give the things away
+PASS  A released: no parcel, no charge; the papers letter
+PASS  A released: the papers come by post; the diary says what they are
+PASS  A forward/renew: the deposit letter, and no boxes anywhere
+PASS  A forward/end: the deposit letter, and no boxes anywhere
+PASS  A forward/lapsed: the deposit letter, and no boxes anywhere
+PASS  A extension/renew: the deposit letter, and no boxes anywhere
+PASS  A extension/end: the deposit letter, and no boxes anywhere
+PASS  A extension/lapsed: the deposit letter, and no boxes anywhere
+PASS  A extension: the letting office writes, and says the rent was settled
+PASS  A deposit: signing brings 24 coins once
+PASS  A deposit: and never again after a load
+PASS  A deposit: questioning it: they look again and share the cost, 27
+PASS  A deposit: put away unsigned, the money stays on the account; nothing comes
+PASS  B explained: the letter respects the winter's outcome
+PASS  B declined: the letter respects the winter's outcome
+PASS  B sorted_without_me: the letter respects the winter's outcome
+PASS  B: the offer states the time and the pay
+PASS  B: four choices: take, method, decline, ask
+PASS  B take: the sheets come by post; the work is at the desk
+PASS  B take: the desk row shows the hours, the clock times and the pay
+PASS  B take: too late at night it is refused
+PASS  B take: doing it passes exactly 3 hours
+PASS  B take: checked work can't be taken back
+PASS  B take: 20 coins with their answer
+PASS  B take: paid once, also across a load
+PASS  B method: they write later that it worked
+PASS  B ask: one answer, then take / method / decline only
+PASS  B decline: the work goes on without you
+PASS  B lapse: sheets not checked in time; they do them from their copies, no pay
+PASS  C promised: the key comes in a small parcel with the letter (day 175)
+PASS  C partner: the sender as the player named them
+PASS  C promised: unwrapping the key
+PASS  C send: 20 coins, and the two boxes come
+PASS  C keep: no key arrives
+PASS  C no_need: no key arrives
+PASS  C unanswered: no key arrives
+PASS  C private: the sender names nobody
+PASS  C kept: the screenplay's line
+PASS  C write: they agree, and write in summer about ordinary things
+PASS  C time: more time until the end of September, and no further
+PASS  C close: settled and closed; nothing more comes
+PASS  C boundaries: a line will do
+PASS  D contact: the spring letter remembers what was told (pumpkins)
+PASS  D contact: nothing claimable before it happens
+PASS  D contact: a harvest and a visit to the village make those true
+PASS  D contact: the answer speaks to what was told
+PASS  D contact: and the diary keeps it as told
+PASS  D unanswered winter: asks once more
+PASS  D repair: the inn roof gets an answer about the village, not the house
+PASS  D no contact: no letter; the photograph is at the desk
+PASS  D no contact: comparing needs a real change
+PASS  D no contact: the note says what's different, from the farm
+PASS  D no contact: later, the photograph again, at the desk
+PASS  D no contact: adding needs something harvested since
+PASS  D no contact: the added line counts what really came in
+PASS  D no contact: kept without writing, nothing follows
+PASS  E work closed: the screenplay's note, the place filled in February
+PASS  E work unanswered: the place was filled; no job is held
+PASS  E work on the list: the August letter on day 306
+PASS  E storage paid: the contents come on day 166, no new charge
+PASS  E storage paid: deciding about the contents needs them opened first
+PASS  E storage paid: no imaginary contents
+PASS  E storage paid: the charity shop's receipt
+PASS  E storage renewed: the May letter on day 222
+PASS  E storage renewed lapse: held to June 30 (the letter comes after the parish day)
+PASS  E storage renewed: cleared after June 30
+PASS  E storage renewed: one more month for 5 coins, no more
+PASS  E storage unanswered: a reminder on day 160, by March 30
+PASS  E storage unanswered: cleared after March 30
+PASS  E storage cleared: only the papers they won't throw away
+PASS  E order paid: it comes on day 166, no new charge
+PASS  E order return: 6 coins out, 30 back, once; the parcel is returned
+PASS  E order return: no second refund
+PASS  E order refunded in winter: the deposit came once (512)
+PASS  E order refunded: an offer to buy, no refund again
+PASS  E order refunded: nothing more is credited
+PASS  E order held: refund the 12 once
+PASS  E order held: and not again after a load or the deadline
+PASS  E order unanswered: cancelled after April 30, deposit 12 once
+PASS  E meeting spring: their availability: a Saturday in April, then away
+PASS  E meeting autumn: agreed to speak again, no day
+PASS  E meeting lapsed: once more, then they leave it
+PASS  E meeting closed: not reopened; their own move, and a new address
+PASS  honesty: every route checked (21 distinct routes)
+PASS  honesty: spring post changes no sanity, skill, friendship or pack
+PASS  honesty: nothing of the old life arrives or lapses on day 240
+PASS  save: a written spring reply loads as written, coins paid once
+PASS  save: sent loads as sent
+PASS  save: dispatched loads as dispatched
+PASS  save: the parcel arrives once across loads, charged once
+PASS  save: the winter record is untouched by spring
+PASS  save: a v19 save loads
+PASS  save: a v19 save gets its spring from its winter, nothing paid again
+PASS  save: a record for another route is dropped
+PASS  save: garbage is dropped
+PASS  save: a legacy save loads
+PASS  save: a legacy save never gets spring post
+PASS  real day: the spring letter comes with the morning on day 190
+PASS  real day: reading takes no time
+PASS  real day: the diary page is in Notes
+PASS  real day: the post takes it
+PASS  real day: the parish letter still comes on day 240
+PASS  real day: the parish chapters are not touched
+PASS  input: the mailbox opens with focus
+PASS  input: Space on "Unwrap the order" opens it
+PASS  input: A on "Send it back" writes the reply
+PASS  input: Enter takes it back
+PASS  input: a click on the entry and then its button
+PASS  input: nothing disabled takes focus
+PASS  input: B closes the mailbox
+PASS  input: a long letter overflows its page and says so
+PASS  input: the long letter doesn't grow its page past the list beside it (345 vs 345)
+PASS  input: the page's button stays inside the page
+PASS  input: PgDn scrolls the letter and presses nothing
+PASS  input: the last entry scrolls the list to its notes
+PASS  input: Esc closes it
+PASS  input: Space at the desk does the work (3 hours)
+PASS: 0 failure(s)
+ERROR: 5 RID allocations of type 'PN13RendererDummy14TextureStorage12DummyTextureE' were leaked at exit.
+WARNING: 53 ObjectDB instances were leaked at exit (run with `--verbose` for details).
+   at: cleanup (core/object/object.cpp:2536)
+ERROR: 23 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:822)

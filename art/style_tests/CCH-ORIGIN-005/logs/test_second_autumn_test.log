@@ -1,0 +1,216 @@
+Godot Engine v4.7.2.stable.steam.ed1daf0bf - https://godotengine.org
+
+PASS  date: nothing before October 2 (day 367)
+PASS  date: the practical morning on October 2, once
+PASS  date: nothing on Davy's day or the morning after (370, 371)
+PASS  date: the scene on October 7 (day 372), once
+PASS  date: the September note's morning keeps to itself (day 359)
+PASS  date: a late save: nothing on days 395-397; the scene and the morning come after
+PASS  date: a spring letter still waiting on an answer is waited for
+PASS  date: and the scene comes once it is settled
+PASS  date: ignored for months it stays, with no reminder
+PASS  A deposit on account: the route is a_deposit
+PASS  A deposit on account: 'sign' answers, its diary line, its answer, coins only as written
+PASS  A deposit on account: 'close' answers, its diary line, its answer, coins only as written
+PASS  A deposit on account: 'file' answers, its diary line, its answer, coins only as written
+PASS  A: the letting office writes when the player asked for more time
+PASS  A: a settled deposit gets no new debt: the desk, the account closed
+PASS  A boxes opened, sent on: the route is a_send_on
+PASS  A boxes opened, sent on: 'tenant' answers, its diary line, its answer, coins only as written
+PASS  A boxes opened, sent on: 'leave' answers, its diary line, its answer, coins only as written
+PASS  A boxes opened, sent on: 'keep' answers, its diary line, its answer, coins only as written
+PASS  A: the keeper's letter names the seed catalogue only because it came
+PASS  A boxes shut: the route is a_desk
+PASS  A boxes shut: 'open_boxes' answers, its diary line, its answer, coins only as written
+PASS  A boxes shut: 'file' answers, its diary line, its answer, coins only as written
+PASS  A boxes shut: 'discard' answers, its diary line, its answer, coins only as written
+PASS  A boxes shut: 'leave' answers, its diary line, its answer, coins only as written
+PASS  A: boxes that came and were never opened are 'still shut', with a way to open them
+PASS  A: opening them goes through the spring's own parcel (once)
+PASS  A: boxes opened: the scene revisits what was in them
+PASS  A papers kept in a drawer: the route is a_papers
+PASS  A papers kept in a drawer: 'post' answers, its diary line, its answer, coins only as written
+PASS  A papers kept in a drawer: 'burn' answers, its diary line, its answer, coins only as written
+PASS  A papers kept in a drawer: 'keep' answers, its diary line, its answer, coins only as written
+PASS  A: boxes given away: no boxes in the house
+PASS  A: the deed as it stands, never 'owned' unless paid
+PASS  B paid work: the route is b_paid
+PASS  B paid work: 'ask_first' answers, its diary line, its answer, coins only as written
+PASS  B paid work: 'last' answers, its diary line, its answer, coins only as written
+PASS  B paid work: 'file' answers, its diary line, its answer, coins only as written
+PASS  B paid: a final accounting, and a question, not a job
+PASS  B paid, boundary: the route is b_paid
+PASS  B paid, boundary: 'thank' answers, its diary line, its answer, coins only as written
+PASS  B paid, boundary: 'file' answers, its diary line, its answer, coins only as written
+PASS  B boundary: no new request at all
+PASS  B method sent: the route is b_method
+PASS  B method sent: 'theirs' answers, its diary line, its answer, coins only as written
+PASS  B method sent: 'write_if' answers, its diary line, its answer, coins only as written
+PASS  B method sent: 'keep' answers, its diary line, its answer, coins only as written
+PASS  B declined: the route is b_closed
+PASS  B declined: 'wish' answers, its diary line, its answer, coins only as written
+PASS  B declined: 'keep' answers, its diary line, its answer, coins only as written
+PASS  B declined: 'discard' answers, its diary line, its answer, coins only as written
+PASS  B declined: a closing note, no demand; their sheet only because it was left
+PASS  B never answered: the route is b_desk
+PASS  B never answered: 'close' answers, its diary line, its answer, coins only as written
+PASS  B never answered: 'file' answers, its diary line, its answer, coins only as written
+PASS  B never answered: 'leave' answers, its diary line, its answer, coins only as written
+PASS  B unanswered: private, the planks from the bench's own count
+PASS  C held to September: the route is c_held
+PASS  C held to September: 'send' answers, its diary line, its answer, coins only as written
+PASS  C held to September: 'send' brings its parcel only with the answer, shut until opened
+PASS  C held to September: 'send' parcel opened once, in the diary
+PASS  C held to September: 'give' answers, its diary line, its answer, coins only as written
+PASS  C writing now and then: the route is c_letter
+PASS  C writing now and then: 'farm' answers, its diary line, its answer, coins only as written
+PASS  C writing now and then: 'send' answers, its diary line, its answer, coins only as written
+PASS  C writing now and then: 'send' brings its parcel only with the answer, shut until opened
+PASS  C writing now and then: 'send' parcel opened once, in the diary
+PASS  C writing now and then: 'pause' answers, its diary line, its answer, coins only as written
+PASS  C never answered: the route is c_unanswered
+PASS  C never answered: 'send' answers, its diary line, its answer, coins only as written
+PASS  C never answered: 'send' brings its parcel only with the answer, shut until opened
+PASS  C never answered: 'send' parcel opened once, in the diary
+PASS  C never answered: 'give' answers, its diary line, its answer, coins only as written
+PASS  C never answered: 'leave' answers, its diary line, its answer, coins only as written
+PASS  C closed, notebook: the route is c_keepsake
+PASS  C closed, notebook: 'open_key' answers, its diary line, its answer, coins only as written
+PASS  C closed, notebook: 'add' answers, its diary line, its answer, coins only as written
+PASS  C closed, notebook: 'case' answers, its diary line, its answer, coins only as written
+PASS  C closed, notebook: 'leave' answers, its diary line, its answer, coins only as written
+PASS  C closed: no letter reopens it; a keepsake at the desk
+PASS  C private, held: the route is c_held
+PASS  C private, held: 'send' answers, its diary line, its answer, coins only as written
+PASS  C private, held: 'send' brings its parcel only with the answer, shut until opened
+PASS  C private, held: 'send' parcel opened once, in the diary
+PASS  C private, held: 'give' answers, its diary line, its answer, coins only as written
+PASS  C private: never who, never why
+PASS  C boxes sent, shut: the route is c_keepsake
+PASS  C boxes sent, shut: 'open_house_boxes' answers, its diary line, its answer, coins only as written
+PASS  C boxes sent, shut: 'open_key' answers, its diary line, its answer, coins only as written
+PASS  C boxes sent, shut: 'finish' answers, its diary line, its answer, coins only as written
+PASS  C boxes sent, shut: 'case' answers, its diary line, its answer, coins only as written
+PASS  C boxes sent, shut: 'leave' answers, its diary line, its answer, coins only as written
+PASS  C sent but shut: 'still shut', a way to open them, the postcard
+PASS  C nothing kept: told as nothing, no keepsake invented
+PASS  D no contact: the route is d_photo
+PASS  D no contact: 'note' answers, its diary line, its answer, coins only as written
+PASS  D no contact: 'file' answers, its diary line, its answer, coins only as written
+PASS  D no contact: 'leave' answers, its diary line, its answer, coins only as written
+PASS  D no contact: complete, private, nobody made up
+PASS  D: the photograph against today's facts (house, field, woods)
+PASS  D: an untouched photograph is said to be untouched
+PASS  D wrote about a place: the route is d_photo
+PASS  D wrote about a place: 'note' answers, its diary line, its answer, coins only as written
+PASS  D wrote about a place: 'write' answers, its diary line, its answer, coins only as written
+PASS  D wrote about a place: 'file' answers, its diary line, its answer, coins only as written
+PASS  D wrote about a place: 'leave' answers, its diary line, its answer, coins only as written
+PASS  D contact: the letter can go to the person who saw them off
+PASS  D contact: their answer refers to exactly what they were told
+PASS  D contact unanswered in spring: said so
+PASS  E order kept for collection: the route is e_collect
+PASS  E order kept for collection: 'send' answers, its diary line, its answer, coins only as written
+PASS  E order kept for collection: 'send' brings its parcel only with the answer, shut until opened
+PASS  E order kept for collection: 'send' parcel opened once, in the diary
+PASS  E order kept for collection: 'refund' answers, its diary line, its answer, coins only as written
+PASS  E meeting in the autumn: the route is e_meeting
+PASS  E meeting in the autumn: 'tell' answers, its diary line, its answer, coins only as written
+PASS  E meeting in the autumn: 'letters' answers, its diary line, its answer, coins only as written
+PASS  E meeting in the autumn: 'leave' answers, its diary line, its answer, coins only as written
+PASS  E meeting: their availability, and no trip is asked of the player
+PASS  E on next year's list: the route is e_desk
+PASS  E on next year's list: 'keep' answers, its diary line, its answer, coins only as written
+PASS  E on next year's list: 'off' answers, its diary line, its answer, coins only as written
+PASS  E on next year's list: 'write_down' answers, its diary line, its answer, coins only as written
+PASS  E on next year's list: 'put_away' answers, its diary line, its answer, coins only as written
+PASS  E on next year's list: 'leave' answers, its diary line, its answer, coins only as written
+PASS  E list: no letter that contradicts 'we write in August'; the list told truly
+PASS  E closed offer: the fact stands
+PASS  E storage shut: the route is e_desk
+PASS  E storage shut: 'open_unit' answers, its diary line, its answer, coins only as written
+PASS  E storage shut: 'write_down' answers, its diary line, its answer, coins only as written
+PASS  E storage shut: 'put_away' answers, its diary line, its answer, coins only as written
+PASS  E storage shut: 'leave' answers, its diary line, its answer, coins only as written
+PASS  E storage here, unopened: 'still shut', and openable
+PASS  E address kept: the route is e_desk
+PASS  E address kept: 'write' answers, its diary line, its answer, coins only as written
+PASS  E address kept: 'write_down' answers, its diary line, its answer, coins only as written
+PASS  E address kept: 'put_away' answers, its diary line, its answer, coins only as written
+PASS  E address kept: 'leave' answers, its diary line, its answer, coins only as written
+PASS  E order cancelled: no parcel, nothing said to have come
+PASS  September unwritten: the scene still comes and answers, with no quote
+PASS  finish, house finished since: said so
+PASS  finish, nothing done since: the work is still there
+PASS  keep, the account closed by signing: 'This one I closed.'
+PASS  unknown: no fear, a plain fact
+PASS  unsettled, the deposit was open and is settled now
+PASS  stay: still here, no promise claimed
+PASS  two closings change the same moment's diary
+PASS  September written late (Oct 15): told as written then, never 'at the end of September'
+PASS  September written after the answer: the answer's entry doesn't claim it
+PASS  the September page is never rewritten
+PASS  deadline: a sender's date, 21 days, clear of the busy days
+PASS  deadline: still open the day before
+PASS  deadline: on the day it lapses, by their terms
+PASS  deadline: nothing to answer afterwards
+PASS  deadline: the shop cancels and returns the deposit, 12 coins, once
+PASS  deadline: reloading never pays it twice
+PASS  deadline: later mornings pay nothing more
+PASS  coins: a reply that needs coins is shown as needing them, and refused
+PASS  dupes: before answering, a reload keeps one letter, waiting
+PASS  dupes: during (answer in the post), a reload keeps it
+PASS  dupes: answering again is refused
+PASS  dupes: after, the 24 coins once
+PASS  dupes: no second letter or payment later
+PASS  time: answering takes no time
+PASS  nothing given: sanity, pack and friendship unchanged
+PASS  world: Edith's repair, only with its record
+PASS  world: the house as repaired
+PASS  world: the planks from the bench's count
+PASS  world: a walker's errands, never 'friend'
+PASS  world: Wicker Cove visits
+PASS  world: a farmer who stayed close is not criticised
+PASS  world: a legacy save gets the morning but no past
+PASS  world: once only
+PASS  save: waiting, the record loads exactly
+PASS  save: answered, the record loads exactly
+PASS  save: after the answer and the parcel, the diary loads the same
+PASS  save: later changes on the farm never alter what was written
+PASS  save: a v21 save loads with nothing made
+PASS  save: and the scene comes from its own records
+PASS  save: garbage is dropped
+PASS  save: a scene for another origin is dropped
+PASS  save: an unknown scene is dropped
+PASS  save: an answer with no choice in it goes back to waiting; the morning kept
+PASS  legacy: no past is ever made up
+PASS  legacy: a world with no interlude gets no scene
+PASS  origin with no winter or spring: still a scene, from the road only
+PASS  real day: the practical morning on October 2 (367)
+PASS  real day: the scene's letter on October 7 (372)
+PASS  real day: nothing of this on Davy's day or the morning after
+PASS  real day: nothing of this on the three days around All Hallows
+PASS  real day: at 20:00 on Davy's day nothing is open; he can be found
+   (the original story on this save, as it ran: {"beats":{"davy":371,"letter":240,"meeting":363,"orchard":270,"shown":250},"davy":"lost","davy_day":370,"endings":{"hollow":376},"meeting":"lost"})
+PASS  real day: the story's state is identical with and without a past
+PASS  real day: Davy found or lost stays the story's own (his night passed by its own rules)
+PASS  real day: the story's dates are untouched
+PASS  real day: nothing in the story, nights or endings reads this (bell, grove, endings unchanged)
+PASS  real day: this never writes the story, Davy, skills, sanity, the pack or friendship
+PASS  input: the desk opens with focus
+PASS  input: Space on a choice answers it
+PASS  input: nothing disabled takes focus
+PASS  input: Esc closes the desk
+PASS  input: Xbox A answers
+PASS  input: B closes the desk (back one level at a time)
+PASS  input: a mouse click on the choice, then its button
+PASS  input: the mailbox shows the letter's answers; one is written
+PASS  input: the answered letter can be cleared; nothing else waits
+PASS  input: J opens the diary; the entry is under Notes
+PASS  input: its page doesn't scroll
+PASS: 0 failure(s)
+ERROR: 5 RID allocations of type 'PN13RendererDummy14TextureStorage12DummyTextureE' were leaked at exit.
+WARNING: 15 ObjectDB instances were leaked at exit (run with `--verbose` for details).
+   at: cleanup (core/object/object.cpp:2536)
+ERROR: 7 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:822)

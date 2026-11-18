@@ -1,0 +1,200 @@
+Godot Engine v4.7.2.stable.steam.ed1daf0bf - https://godotengine.org
+
+PASS  timing: nothing comes before January 12
+PASS  timing: day 104 is January 12, in winter
+PASS  timing: the letter comes that morning, with a note
+PASS  timing: never twice
+PASS  timing: clear of the Longest Night, the New Year post and the minute book
+PASS  timing: a legacy past gets no letter all year
+PASS  timing: a legacy past's mailbox lists ordinary post with no reply rows
+PASS  timing: a none past gets no letter all year
+PASS  timing: a none past's mailbox lists ordinary post with no reply rows
+PASS  timing: first seen after February 17, nothing comes (no winter letter in spring)
+PASS  timing: an old save mid-winter gets its letter the next morning
+PASS  letter: {"origin":"security","security_exit":"stored"} gets "About the two boxes" and no other
+PASS  letter: security keeps to its thread forwarded_belongings
+PASS  letter: {"origin":"security","security_exit":"forward"} gets "Forwarded post" and no other
+PASS  letter: security keeps to its thread forwarded_belongings
+PASS  letter: {"origin":"security","security_exit":"extension"} gets "Forwarded post" and no other
+PASS  letter: security keeps to its thread forwarded_belongings
+PASS  letter: {"origin":"work","work_exit":"finish"} gets "The order book" and no other
+PASS  letter: work keeps to its thread old_workplace
+PASS  letter: {"origin":"work","work_exit":"instructions"} gets "The order book" and no other
+PASS  letter: work keeps to its thread old_workplace
+PASS  letter: {"origin":"work","work_exit":"boundary"} gets "The order book" and no other
+PASS  letter: work keeps to its thread old_workplace
+PASS  letter: {"household_relation":"partner","origin":"household"} gets "The second key" and no other
+PASS  letter: household keeps to its thread former_household
+PASS  letter: {"household_relation":"private","origin":"household"} gets "The second key" and no other
+PASS  letter: household keeps to its thread former_household
+PASS  letter: {"contact":"friend","origin":"curiosity"} gets "Did it look like the picture?" and no other
+PASS  letter: curiosity keeps to its thread the_place
+PASS  letter: {"contact":"none","origin":"curiosity"} gets "A correction to the notice" and no other
+PASS  letter: curiosity keeps to its thread the_place
+PASS  letter: {"chance_loose_end":"work_offer","origin":"chance"} gets "The seasonal place" and no other
+PASS  letter: chance keeps to its thread open_arrangement
+PASS  letter: {"chance_loose_end":"storage","origin":"chance"} gets "The storage unit" and no other
+PASS  letter: chance keeps to its thread open_arrangement
+PASS  letter: {"chance_loose_end":"order","origin":"chance"} gets "Your order" and no other
+PASS  letter: chance keeps to its thread open_arrangement
+PASS  letter: {"chance_loose_end":"meeting","origin":"chance"} gets "The meeting" and no other
+PASS  letter: chance keeps to its thread open_arrangement
+PASS  A stored: the screenplay's letter
+PASS  A stored: ship, more time, release
+PASS  A stored: shipping can't be written without the 30 coins
+PASS  A stored: shipping takes the 30 coins once
+PASS  A stored: a second answer can't be written over it
+PASS  A stored: the diary says the reply waits for the post, not that it went
+PASS  A stored: taking it back returns the coins
+PASS  A stored: taking it back twice gives nothing more
+PASS  A stored: after taking it back the diary claims no reply
+PASS  A stored, more time: the answer gives the end of April
+PASS  A stored, more time: outcome held until day 212, pending
+PASS  A stored, more time: the diary is the factual record
+PASS  A stored, more time: the diary assigns no feeling
+PASS  A stored, more time: no money moved
+PASS  A stored: no options once answered
+PASS  A stored, ship: 30 coins paid exactly once over the winter
+PASS  A stored, ship: the boxes are on their way, not arrived
+PASS  A stored, ship: one answer letter only
+PASS  A stored: still answerable on February 28
+PASS  A stored, no answer: one last word on March 1 with the sender's terms
+PASS  A stored, no answer: nothing left to answer
+PASS  A stored, no answer: the diary says so plainly
+PASS  A forward: no boxes anywhere in the thread
+PASS  A forward: renew or let it end
+PASS  A forward, renew: 12 coins, forwarding to August
+PASS  A extension: no boxes anywhere in the thread
+PASS  A extension: renew or let it end
+PASS  A extension, renew: 12 coins, forwarding to August
+PASS  A extension: says the extra month was kept
+PASS  A forward, let it end: closed
+PASS  B finish: the opening fits how they left
+PASS  B finish: not the instructions opening
+PASS  B finish: not the boundary opening
+PASS  B instructions: the opening fits how they left
+PASS  B instructions: not the finish opening
+PASS  B instructions: not the boundary opening
+PASS  B boundary: the opening fits how they left
+PASS  B boundary: not the finish opening
+PASS  B boundary: not the instructions opening
+PASS  B: explain, ask, decline
+PASS  B ask: no answer yet while the question travels
+PASS  B ask: the page comes back, bounded
+PASS  B ask then explain: the figures are sorted
+PASS  B ask then explain: the diary keeps both steps in order
+PASS  B decline: the old job carries on without you
+PASS  B no answer: they sort it themselves
+PASS  B late ask: the page can be answered two weeks on
+PASS  B late ask: no lapse on March 1 while the page is fresh
+PASS  B late ask: lapses after its own date
+PASS  C private: the sender is not named
+PASS  C: the screenplay's letter
+PASS  C: ask, keep, no need, don't reply yet
+PASS  C partner: named only as the person you shared the house with
+PASS  C family: from family at the old house
+PASS  C: told this person no plans, the letter keeps to a line
+PASS  C: told someone else no plans, no such line
+PASS  C defer: recorded, nothing written
+PASS  C defer: the other answers stay open, defer once
+PASS  C defer: the diary says so
+PASS  C defer: nothing went with the post
+PASS  C defer then keep: kept in the tin
+PASS  C defer then keep: the diary has both, in order
+PASS  C ask: the key will come with the rest (no key appears now)
+PASS  C defer, no answer: they put the key away
+PASS  D friend: the screenplay's letter
+PASS  D friend: nothing done yet, only "hard to put into words" can be written
+PASS  D friend: a crop can't be claimed unharvested
+PASS  D friend: the woods can't be claimed unvisited
+PASS  D friend: a harvest makes the crops reply true, naming the crop
+PASS  D friend, crops: the answer speaks only of what was told
+PASS  D friend, crops: the diary too
+PASS  D friend: the inn's roof counts as a repair
+PASS  D friend: the farmhouse's own repair is told first
+PASS  D friend: the Nearwood counts as the woods
+PASS  D friend: the wood's edge alone says only that much
+PASS  D friend, promise: the letter remembers the parting words
+PASS  D friend, invite: the letter remembers the parting words
+PASS  D friend, boundaries: the letter remembers the parting words
+PASS  D private contact: not named
+PASS  D no contact: no friend's letter, the town's correction
+PASS  D no contact: only the office or leaving it, until something is done
+PASS  D no contact: the inn's roof isn't the house in the photograph
+PASS  D no contact: mended boards are
+PASS  D no contact: a note goes in the diary, nothing is posted
+PASS  D no contact, note: the diary has it
+PASS  D no contact, note: the next morning, the photograph is still on the desk
+PASS  D no contact, road: the office files the note
+PASS  D no contact, leave it: the diary says only that
+PASS  E work_offer: its own letter
+PASS  E work_offer: its own answers
+PASS  E work_offer: not the storage letter
+PASS  E work_offer: not the order letter
+PASS  E work_offer: not the meeting letter
+PASS  E storage: its own letter
+PASS  E storage: its own answers
+PASS  E storage: not the work_offer letter
+PASS  E storage: not the order letter
+PASS  E storage: not the meeting letter
+PASS  E order: its own letter
+PASS  E order: its own answers
+PASS  E order: not the work_offer letter
+PASS  E order: not the storage letter
+PASS  E order: not the meeting letter
+PASS  E meeting: its own letter
+PASS  E meeting: its own answers
+PASS  E meeting: not the work_offer letter
+PASS  E meeting: not the storage letter
+PASS  E meeting: not the order letter
+PASS  E order, refund: the deposit comes back with the answer
+PASS  E order, refund: once only
+PASS  E order, send: 24 coins, coming in spring, no deposit back
+PASS  E storage, send: 30 coins once
+PASS  E storage, no answer: held to March 30, then cleared
+PASS  E work offer, no answer: nothing more comes, it is closed
+PASS  E meeting, spring: a day in April, no promise
+PASS  E work offer, list: written to in August
+PASS  honesty: every variant checked for death, romance, the mystery and assigned feelings (14)
+PASS  honesty: a letter changes no sanity, skill, friendship or pack
+PASS  save: a written reply loads as written, coins paid once
+PASS  save: sent reply loads as sent
+PASS  save: the answer once, after load
+PASS  save: no letter, payment or answer repeats across loads
+PASS  save: the letter keeps its id through the mailbox's migration
+PASS  save: the deposit is credited once across loads
+PASS  save: a v18 save loads
+PASS  save: a v18 save mid-winter gets its letter
+PASS  save: a legacy save loads
+PASS  save: a legacy save never gets a letter
+PASS  save: a record for another origin starts again from the origin
+PASS  save: a garbage record starts again
+PASS  real day: the New Year tax bill still comes (day 94)
+PASS  real day: the letter comes with the morning on day 104, beside the other post
+PASS  real day: the morning report says so
+PASS  real day: the flag is up
+PASS  real day: opening the mailbox reads it
+PASS  real day: reading takes no time or food
+PASS  real day: clearing read letters keeps the one waiting for an answer
+PASS  real day: the diary page is in Notes, in your hand
+PASS  real day: the post takes the reply in the morning
+PASS  real day: the answer comes in the morning post
+PASS  real day: the parish letter still comes on day 240
+PASS  real day: the parish chapters are not touched
+PASS  input: the mailbox opens with focus
+PASS  input: the clock is held while reading
+PASS  input: nothing disabled takes focus
+PASS  input: Space on "Ask them to hold it" writes the reply
+PASS  input: A on "Take it back" takes it back
+PASS  input: Enter writes the paid reply, 24 coins
+PASS  input: and the coins come back
+PASS  input: a click on the entry and then "Write it"
+PASS  input: B closes the mailbox
+PASS  input: an unaffordable reply is not in the focus path
+PASS  input: Esc closes it
+PASS: 0 failure(s)
+ERROR: 5 RID allocations of type 'PN13RendererDummy14TextureStorage12DummyTextureE' were leaked at exit.
+WARNING: 57 ObjectDB instances were leaked at exit (run with `--verbose` for details).
+   at: cleanup (core/object/object.cpp:2536)
+ERROR: 23 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:822)

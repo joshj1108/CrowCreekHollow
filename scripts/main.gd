@@ -1014,6 +1014,7 @@ var mail: MailSystem
 var past_post: PastPost         # CCH-ORIGIN-002: the first winter's post from the life before
 var past_spring: PastSpring     # CCH-ORIGIN-003: its spring and summer, from what the winter settled
 var first_september: FirstSeptember   # CCH-ORIGIN-004: "One Year on the Road", the first September's diary page
+var second_autumn: SecondAutumn   # CCH-ORIGIN-005: "The Second Year Remembers", one scene from before in the second autumn
 var forage: ForageSystem
 var night_boost := 1.0           # how much stronger outdoor lights burn against the dark night (see NIGHT_LIGHT_BOOST)
 var lantern_light: PointLight2D
@@ -1043,6 +1044,7 @@ func _ready() -> void:
 	past_post = PastPost.new(self)
 	past_spring = PastSpring.new(self)
 	first_september = FirstSeptember.new(self)
+	second_autumn = SecondAutumn.new(self)
 	forage = ForageSystem.new(self)
 	animals = AnimalSystem.new(self)
 	farm = FarmSystem.new(self)
@@ -1228,6 +1230,7 @@ func _on_title_start(mode: String, slot: int) -> void:
 		past_post.reset()   # made from this game's origin when first asked for
 		past_spring.reset()
 		first_september.reset()
+		second_autumn.reset()
 	_build_interior()
 	_build_world()
 	_build_hud()
@@ -3670,6 +3673,10 @@ func _on_panel_action(action_id: String) -> void:
 		return
 	if action_id.begins_with("september:"):
 		first_september._action(action_id.trim_prefix("september:"))
+		_refresh_panel()
+		return
+	if action_id.begins_with("autumn:"):
+		second_autumn._action(action_id.trim_prefix("autumn:"))
 		_refresh_panel()
 		return
 	if action_id.begins_with("cook:"):
@@ -6470,7 +6477,7 @@ func _end_day(base: String, leave_house: bool = true) -> void:
 	stall._recover()
 	_update_shadow_tile()
 	var happening_note := happenings._start_day(true) + folk._start_day(true)
-	var mail_note := desk._mail_day() + estate._mail_day() + act._morning() + past_post._morning() + past_spring._morning() + first_september._morning()
+	var mail_note := desk._mail_day() + estate._mail_day() + act._morning() + past_post._morning() + past_spring._morning() + first_september._morning() + second_autumn._morning()
 	_show_morning_report("%s Your crops grew overnight.%s%s The morning is %s.%s" % [
 		base, spoil_note, upkeep_note, str(WEATHER_NAMES.get(weather_kind, "overcast")).to_lower(), event_note + happening_note + trek._morning_note() + mail_note])
 	if desk._tax_evicts():

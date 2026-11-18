@@ -1,0 +1,111 @@
+Godot Engine v4.7.2.stable.steam.ed1daf0bf - https://godotengine.org
+
+PASS  script: every screenplay choice key exists
+PASS  script: five origins
+PASS  script: 'someone from the house' is only offered on the household road
+PASS  script: all 17220 complete roads end at the door with every choice made
+   longest road, words of narration per origin: { "chance": 470, "curiosity": 456, "household": 479, "work": 482, "security": 494 }
+PASS  record: a choice from another road is dropped, and an unfinished road isn't 'complete'
+PASS  record: garbage is 'none'
+PASS  record: a legacy past answers nothing
+PASS  baseline: a farm started the old way has no origin ('none')
+PASS  security: New Game opens the interlude before the farm
+PASS  security: the road starts at the farm notice
+PASS  security: the clock hasn't started (no farm)
+PASS  security: the origin choice shows all five reasons
+PASS  security: the road reached the door by key alone
+PASS  security: its own scene showed, and no other origin's
+PASS  security: the farm is built after the door
+PASS  security: the clock is held while the farm fades in
+PASS  security: the interlude is gone and the clock runs
+PASS  security: the origin record is complete and is exactly the road taken
+PASS  security: Day 1 begins exactly as before (pack, purse, meters, skills, tools, place, guide, story): []
+PASS  security: no in-game minutes were lost (06:01 after the fade-in)
+PASS  security: the slot holds the arrived record until the first save
+PASS  security: the first-night story is still ahead
+PASS  security: Maren's day-4 trek is untouched (the act has seen no beats)
+PASS  security: the farmer walks once the road is over
+PASS  work: New Game opens the interlude before the farm
+PASS  work: the road starts at the farm notice
+PASS  work: the clock hasn't started (no farm)
+PASS  work: the origin choice shows all five reasons
+PASS  work: the road reached the door by pad alone
+PASS  work: its own scene showed, and no other origin's
+PASS  work: the farm is built after the door
+PASS  work: the clock is held while the farm fades in
+PASS  work: the interlude is gone and the clock runs
+PASS  work: the origin record is complete and is exactly the road taken
+PASS  work: Day 1 begins exactly as before (pack, purse, meters, skills, tools, place, guide, story): []
+PASS  work: no in-game minutes were lost (06:01 after the fade-in)
+PASS  work: the slot holds the arrived record until the first save
+PASS  household: New Game opens the interlude before the farm
+PASS  household: the road starts at the farm notice
+PASS  household: the clock hasn't started (no farm)
+PASS  household: the origin choice shows all five reasons
+PASS  household: the road reached the door by mouse alone
+PASS  household: its own scene showed, and no other origin's
+PASS  household: the farm is built after the door
+PASS  household: the clock is held while the farm fades in
+PASS  household: the interlude is gone and the clock runs
+PASS  household: the origin record is complete and is exactly the road taken
+PASS  household: Day 1 begins exactly as before (pack, purse, meters, skills, tools, place, guide, story): []
+PASS  household: no in-game minutes were lost (06:01 after the fade-in)
+PASS  household: the slot holds the arrived record until the first save
+PASS  curiosity: New Game opens the interlude before the farm
+PASS  curiosity: the road starts at the farm notice
+PASS  curiosity: the clock hasn't started (no farm)
+PASS  curiosity: the origin choice shows all five reasons
+PASS  curiosity: the road reached the door by key alone
+PASS  curiosity: its own scene showed, and no other origin's
+PASS  curiosity: the farm is built after the door
+PASS  curiosity: the clock is held while the farm fades in
+PASS  curiosity: the interlude is gone and the clock runs
+PASS  curiosity: the origin record is complete and is exactly the road taken
+PASS  curiosity: Day 1 begins exactly as before (pack, purse, meters, skills, tools, place, guide, story): []
+PASS  curiosity: no in-game minutes were lost (06:01 after the fade-in)
+PASS  curiosity: the slot holds the arrived record until the first save
+PASS  chance: New Game opens the interlude before the farm
+PASS  chance: the road starts at the farm notice
+PASS  chance: the clock hasn't started (no farm)
+PASS  chance: the origin choice shows all five reasons
+PASS  chance: the road reached the door by pad alone
+PASS  chance: its own scene showed, and no other origin's
+PASS  chance: the farm is built after the door
+PASS  chance: the clock is held while the farm fades in
+PASS  chance: the interlude is gone and the clock runs
+PASS  chance: the origin record is complete and is exactly the road taken
+PASS  chance: Day 1 begins exactly as before (pack, purse, meters, skills, tools, place, guide, story): []
+PASS  chance: no in-game minutes were lost (06:01 after the fade-in)
+PASS  chance: the slot holds the arrived record until the first save
+PASS  back: 'stored' leads to its own page
+PASS  back: Backspace returns to the choice with the answer marked
+PASS  back: B goes back again, to the origin choice
+PASS  back: Back stops at the first page
+PASS  back: the same answer keeps the answers after it
+PASS  back: a different origin drops every later answer
+PASS  back: the new road shows the work scene
+PASS  back: the saved record is consistent
+PASS  pause: Esc pauses, with Resume in focus
+PASS  pause: the footer names the keys
+PASS  pause: Resume returns to the same page
+PASS  pause: Start pauses
+PASS  pause: B resumes
+PASS  pause: the slot holds the road, at this page
+PASS  pause: the slot reads 'on the road'
+PASS  resume: Continue reopens the road on the same page
+PASS  resume: with the same answers
+PASS  saves: an arrived slot starts Day 1 with its record and no interlude
+PASS  saves: the farm's save holds the origin
+PASS  saves: loading keeps every origin choice
+PASS  saves: the queries answer from it
+PASS  old save: loads with no interlude
+PASS  old save: its past is 'legacy', with nothing chosen for it
+PASS  old save: saved again, it stays legacy
+PASS: 0 failure(s)
+ERROR: 5 RID allocations of type 'PN13RendererDummy14TextureStorage12DummyTextureE' were leaked at exit.
+WARNING: 1 RID of type "Canvas" was leaked.
+   at: _free_rids (servers/rendering/renderer_canvas_cull.cpp:2733)
+WARNING: 40 ObjectDB instances were leaked at exit (run with `--verbose` for details).
+   at: cleanup (core/object/object.cpp:2536)
+ERROR: 8 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:822)

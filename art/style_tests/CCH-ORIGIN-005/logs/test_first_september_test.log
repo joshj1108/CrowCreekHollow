@@ -1,0 +1,123 @@
+Godot Engine v4.7.2.stable.steam.ed1daf0bf - https://godotengine.org
+
+PASS  date: nothing before September 24 (day 358): no page, no desk row, no note
+PASS  date: September 24 (day 359): one morning note and the new-page dot
+PASS  date: the page is in the diary's own section
+PASS  date: and at the desk's Diary tab, with closing lines to choose
+PASS  date: the note is said once
+PASS  date: ignored into the second autumn, it is still there to write
+PASS  date: just after the year turns, it says so
+PASS  date: far into Year Two, still writable, and says it was meant for September
+PASS  date: nothing on the Harvest Moon's morning
+PASS  origins: five origins open with five different passages
+PASS  origins: no origin's sentence is another's with a word swapped in
+PASS  A: the spring's line, as it happened
+PASS  A: the rent notices, from the road
+PASS  A: the deed is never claimed when unpaid
+PASS  A: the house as it is (patched, not restored)
+PASS  A shut: boxes that came and were never opened are not called unpacked
+PASS  A shut: an untouched house is said to be untouched
+PASS  A shut: nothing out of the field
+PASS  A coming: boxes paid for but not here are 'with the carrier', never unpacked
+PASS  A coming: the shipment is an open matter
+PASS  A arrived: once opened, the route's own line
+PASS  A send on: the summer's arrangement is told as said, and as over
+PASS  A deposit unsigned: the money is still on the account, not settled
+PASS  A deposit unsigned: the deed paid in part is said as such
+PASS  A forward road: its own opening
+PASS  A deposit signed: settled
+PASS  B paid: the work they paid for
+PASS  B: the boundary they set, from the road
+PASS  B: planks from the workbench's own count
+PASS  B: Edith's paid repair, because it was done
+PASS  B declined: someone else took it
+PASS  B: no Edith without the repair
+PASS  B method: sent back, and the later letter that it worked
+PASS  C more time: pending until the end of September, as said
+PASS  C: the relation and change, told because the player told them
+PASS  C: the keepsake as the road described it
+PASS  C: a walker's errand, without calling them a friend
+PASS  C more time: an open matter
+PASS  C more time: after September, told as what they said, not as kept
+PASS  C private: the relation stays private
+PASS  C private: no reason given when none was told
+PASS  C closed: the clock and the books decided
+PASS  C boxes came but shut: said so
+PASS  C boxes opened: the route's line
+PASS  D contact: what was written about, as told
+PASS  D: the photograph and the hope, from the road
+PASS  D: the photograph against the house now, not called better
+PASS  D: the walker's errand outranks the village in the farm's half
+PASS  D no contact: complete without letters
+PASS  D no contact: no Wicker Cove when never visited
+PASS  D no contact, untouched: the photograph is still in the desk
+PASS  D: the woods' edge, and no further
+PASS  E for collection: kept at the shop until the end of September (before the date)
+PASS  E for collection: after the date, never 'is kept'
+PASS  E storage: came, opened, some given away
+PASS  E: the Wednesday and the Thursday, from the road
+PASS  E storage shut: came, never opened, not called kept-and-sorted
+PASS  E meeting closed: never met, they moved
+PASS  E list: the August letter left unanswered, said so
+PASS  farm: a restored house is said to be restored
+PASS  farm: boards mended, and the rest as found
+PASS  farm: one crop is one crop
+PASS  farm: no Edith, no Cove, no woods: stayed close
+PASS  farm: the Cove once is once
+PASS  farm: Edith's repair, only with its record
+PASS  farm: a walker's errands, as errands
+PASS  legacy: a page from the farm only
+PASS  legacy: no 'keep my old life' closing
+PASS  closing finish: written as chosen ("There is still work on this house I want to finish.")
+PASS  closing finish: nothing given, no time passed
+PASS  closing keep: written as chosen ("I want to keep some part of my old life.")
+PASS  closing keep: nothing given, no time passed
+PASS  closing unknown: written as chosen ("I don't know what next year will bring.")
+PASS  closing unknown: nothing given, no time passed
+PASS  closing unsettled: written as chosen ("There are things from before that I haven't settled yet.")
+PASS  closing unsettled: nothing given, no time passed
+PASS  closing stay: written as chosen ("I want to see what happens if I stay.")
+PASS  closing stay: nothing given, no time passed
+PASS  closing: written once only
+PASS  closing: no options once written; the desk says it is written
+PASS  closing: reading again adds nothing
+PASS  closing: the 'unsettled' wording follows what is open
+PASS  closing: 'finish' follows the house
+PASS  save: unwritten, the page loads the same
+PASS  save: written, the record and the page load exactly
+PASS  save: later changes on the farm never alter the written page
+PASS  save: the record keeps what Year Two needs
+PASS  save: a v20 save loads with no page written
+PASS  save: and can write it
+PASS  save: garbage is dropped
+PASS  save: an unknown closing is dropped
+PASS  save: a written record with no words is dropped (the note kept)
+PASS  save: a legacy save loads; its page has no past
+PASS  real day: no note on the Harvest Moon or the meeting's morning
+PASS  real day: the note comes with the morning on September 24
+PASS  real day: once
+PASS  real day: the meeting still falls on its own (day 358)
+PASS  real day: writing takes no time
+PASS  real day: the year turns into the second autumn
+PASS  real day: the story's dates are untouched
+PASS  real day: nothing in the story reads the page (the endings' conditions unchanged)
+   (the original story on this save, as it ran: meeting lost, davy_day -1, endings ["hollow"], playing false)
+PASS  input: the desk opens with focus
+PASS  input: Space on a closing line writes it
+PASS  input: nothing disabled takes focus
+PASS  input: Esc closes the desk
+PASS  input: Xbox A writes it
+PASS  input: B closes the desk (back one level at a time)
+PASS  input: a mouse click on the line, then its button
+PASS  input: J opens the diary and its 'One year' section is there
+PASS  input: the section's pages end with the chosen words
+PASS  fit: the longest entry (6 pages) fits every page, none scrolls
+PASS  fit: no blank page inside the entry
+PASS  fit: every sentence appears once, in order
+PASS  fit: every origin's written page (20 cases, worked and bare farms) fits, none scrolls
+PASS: 0 failure(s)
+ERROR: 5 RID allocations of type 'PN13RendererDummy14TextureStorage12DummyTextureE' were leaked at exit.
+WARNING: 15 ObjectDB instances were leaked at exit (run with `--verbose` for details).
+   at: cleanup (core/object/object.cpp:2536)
+ERROR: 7 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:822)
