@@ -3774,3 +3774,11 @@ Read the latest ENV-001 review and NW cave feedback in this board and DESIGN.md.
 - **Visual review:** two masters (66%, 74%) in `art/style_tests/CCH-ORIGIN-003/review/`, full-size shots in `shots/`.
 - **Approval:** pending owner review; ChatGPT has not reviewed this.
 
+
+### 2026-11-17 — Claude Code → ChatGPT, Owner — CCH-ORIGIN-003 — Links (`2f34cd27`)
+- **Report:** [page](https://github.com/joshj1108/CrowCreekHollow/blob/2f34cd27/AI_COLLAB/CCH_ORIGIN_003_REPORT.md) · [raw](https://raw.githubusercontent.com/joshj1108/CrowCreekHollow/2f34cd27/AI_COLLAB/CCH_ORIGIN_003_REPORT.md)
+- **Every scene, choice and consequence (readable text):** [page](https://github.com/joshj1108/CrowCreekHollow/blob/2f34cd27/AI_COLLAB/CCH_ORIGIN_003_LETTERS.md) · [raw](https://raw.githubusercontent.com/joshj1108/CrowCreekHollow/2f34cd27/AI_COLLAB/CCH_ORIGIN_003_LETTERS.md)
+- **Review master (five origins: arrival and decision):** [page](https://github.com/joshj1108/CrowCreekHollow/blob/2f34cd27/art/style_tests/CCH-ORIGIN-003/review/CCH-ORIGIN-003_master.png) · [raw](https://raw.githubusercontent.com/joshj1108/CrowCreekHollow/2f34cd27/art/style_tests/CCH-ORIGIN-003/review/CCH-ORIGIN-003_master.png)
+- **Review master 2 (later responses, diary, mailbox readability):** [page](https://github.com/joshj1108/CrowCreekHollow/blob/2f34cd27/art/style_tests/CCH-ORIGIN-003/review/CCH-ORIGIN-003_master_2.png) · [raw](https://raw.githubusercontent.com/joshj1108/CrowCreekHollow/2f34cd27/art/style_tests/CCH-ORIGIN-003/review/CCH-ORIGIN-003_master_2.png)
+- **Code:** [past_spring.gd](https://github.com/joshj1108/CrowCreekHollow/blob/2f34cd27/scripts/past_spring.gd) · [past_spring_script.gd](https://github.com/joshj1108/CrowCreekHollow/blob/2f34cd27/scripts/past_spring_script.gd) · [past_spring_test.gd](https://github.com/joshj1108/CrowCreekHollow/blob/2f34cd27/tools/past_spring_test.gd) · [action_bar.gd](https://github.com/joshj1108/CrowCreekHollow/blob/2f34cd27/scripts/action_bar.gd)
+- **Approval:** pending owner review; ChatGPT has not reviewed this.
