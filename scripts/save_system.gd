@@ -3,7 +3,7 @@ extends RefCounted
 
 # Bumped when a save's keys change shape. Saves from before the number was written count as 1.
 # _migrate lifts an older save one version at a time, so every old save still loads.
-const SAVE_VERSION := 19
+const SAVE_VERSION := 20
 # Keys a save must hold with the right type, or it isn't read: the loader would trip over anything else.
 const DICT_KEYS := ["inventory", "materials", "skill_xp", "stats", "equipment", "quests_done", "achievements_done",
 	"tool_tier", "trek_walked", "night_seen"]
@@ -107,6 +107,7 @@ func _save_game() -> void:
 		"nearwood": m.nearwood._to_save(),      # CCH-WOODWORK-001: the Nearwood's felled trees
 		"origin": m.origin.to_save(),           # CCH-ORIGIN-001: the life before, from the opening interlude
 		"past_post": m.past_post.to_save(),     # CCH-ORIGIN-002: the first winter's post from that life
+		"past_spring": m.past_spring.to_save(), # CCH-ORIGIN-003: its spring and summer
 		"act": m.act._to_save(),
 		"estate": m.estate._to_save(),
 		"stand_glut": m.stall.glut,
@@ -280,6 +281,7 @@ func _load_game() -> bool:
 	m.act._from_save(data.get("act", {}))
 	m.origin = OriginState.new(data.get("origin", null))   # a save from before the interlude: "legacy", nothing made up
 	m.past_post.from_save(data.get("past_post", null))    # after the origin: the record is checked against it
+	m.past_spring.from_save(data.get("past_spring", null))   # after the winter: the route is checked against it
 	m.trek.works.clear()
 	for id in data.get("trek_works", []):
 		if TrekSystem.WORKS.has(str(id)):
@@ -614,6 +616,12 @@ static func _migrate(data: Dictionary) -> Dictionary:
 		# past the winter's letter days never gets a winter letter late (PastPost.LAST_DELIVER).
 		if typeof(data.get("past_post", null)) != TYPE_DICTIONARY:
 			data["past_post"] = {}
+	if v < 20:
+		# Version 20 added the spring and summer of that post (CCH-ORIGIN-003, `past_spring`). An older save has none:
+		# it is made the first morning the save's winter is settled, from the winter's own outcome, so a winter payment
+		# or deposit is never made again, a legacy past still gets nothing, and a "missed" winter has no spring.
+		if typeof(data.get("past_spring", null)) != TYPE_DICTIONARY:
+			data["past_spring"] = {}
 	# A save from a newer build keeps its number; keys this build doesn't know are ignored.
 	data["save_version"] = maxi(v, SAVE_VERSION)
 	return data

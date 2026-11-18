@@ -155,6 +155,12 @@ extends SceneTree
 #                   pans=ID answers it, pans2=ID answers a follow-up (the order book's page); pflow=written (left for
 #                   the post), sent, answered (the sender's answer in) or lapsed (nothing sent by February 28).
 #                   mpick=ACTION (or mpick=#N) focuses that Mailbox entry, with mailopen mailpanel, so its detail shows
+#   spring=STEPS    CCH-ORIGIN-003: after past= (and pans=, pflow=answered or lapsed), play on into the spring, one
+#                   morning at a time (both posts). Steps, comma-separated: spring (on to the spring's first scene),
+#                   to:N (to day N), go:N (N more days), ans:ID (answer the open stage), post (on to the sender's
+#                   answer), parcel (on until a sent parcel arrives), open:PID (open a parcel), read (read the post),
+#                   town (a visit to Wicker Cove), harvest:N (N crops harvested), tidy (take the winter's letters out). dspring opens the diary at its page;
+#                   tpick=ACTION focuses that entry in the panel opened with tab= (e.g. the desk's work row).
 #   combatlog       with hold, print COMBAT lines: each swing's press, its contact frame and hit, each blow and the guard
 
 func _initialize() -> void:
@@ -441,6 +447,8 @@ func _initialize() -> void:
 		main.mail.flag = 1.0 if main.mail._flag_up() else 0.0
 	if opt.has("past") and main.get("past_post") != null:
 		_past_post(main, opt)
+	if opt.has("spring") and main.get("past_spring") != null:
+		_past_spring(main, opt)
 	if opt.has("mailopen"):
 		# Check the mailbox: its door stays open for the shot; mailpanel keeps the Mailbox panel open too.
 		main.mail._open_mailbox()
@@ -579,6 +587,14 @@ func _initialize() -> void:
 		if opt.has("dpage"):
 			var at: PackedStringArray = opt["dpage"].split(",")
 			main.action_bar.open_book_at(int(at[0]), int(at[1]) if at.size() > 1 else 0)
+		if opt.has("dspring"):
+			# CCH-ORIGIN-003: open the book at the spring post's page in Notes.
+			var ssecs: Array = main.panels._diary_sections()
+			for si in ssecs.size():
+				var spages: Array = ssecs[si]["pages"]
+				for pi in spages.size():
+					if str(spages[pi].get("title", "")).begins_with(str(main.past_spring.script().get("title", "~"))):
+						main.action_bar.open_book_at(si, pi)   # the last of its pages
 		if opt.has("dpost"):
 			# CCH-ORIGIN-002: open the book at the winter post's page in Notes.
 			var secs: Array = main.panels._diary_sections()
@@ -717,6 +733,12 @@ func _initialize() -> void:
 		main._toggle_tab(str(opt["tab"]).replace("_", " "))
 		await process_frame
 		await process_frame
+		if opt.has("tpick"):
+			for e in main.action_bar.list_box.get_children():
+				if e is Button and str(e.get_meta("action", "")) == str(opt["tpick"]):
+					e.grab_focus()
+			for f in 3:
+				await process_frame
 		if opt.has("focus"):
 			# Move the keyboard/pad focus to the open section's Nth button (counting from 0, in tree order:
 			# a grid's tiles first, then the rows' buttons), as the D-pad would.
@@ -1074,3 +1096,56 @@ func _past_post(main, opt: Dictionary) -> void:
 				l["unread"] = false
 	main.mail.flag = 1.0 if main.mail._flag_up() else 0.0
 	main.diary_new = [PastPost.DIARY_ID]
+
+
+# CCH-ORIGIN-003: play on from the winter into the spring, one morning at a time (see spring= above).
+func _past_spring(main, opt: Dictionary) -> void:
+	var ps: PastSpring = main.past_spring
+	var step_day := func() -> void:
+		main.day += 1
+		main.past_post._morning()
+		ps._morning()
+	var read := func() -> void:
+		for l in main.desk_mail:
+			if l.has("post"):
+				main.past_post.read(str(l["post"]))
+				ps.read(str(l["post"]))
+			l["unread"] = false
+	for step in str(opt["spring"]).split(",", false):
+		var kv := step.split(":")
+		match kv[0]:
+			"spring":
+				for i in 400:
+					if ps.active():
+						break
+					step_day.call()
+			"to":
+				while main.day < int(kv[1]):
+					step_day.call()
+			"go":
+				for i in int(kv[1]):
+					step_day.call()
+			"ans":
+				read.call()
+				ps.answer(kv[1])
+			"post":
+				var out: Dictionary = ps.outgoing()
+				if not out.is_empty():
+					while main.day < int(out["written"]) + 1 + PastSpring.ACK_DAYS:
+						step_day.call()
+			"parcel":
+				for i in PastSpringScript.PARCEL_DAYS:
+					step_day.call()
+			"open":
+				ps.open_parcel(kv[1])
+			"read":
+				read.call()
+			"town":
+				main.town.visits = maxi(1, main.town.visits)
+			"tidy":
+				# The winter's letters taken out, as Clear would once they are read.
+				main.desk_mail = main.desk_mail.filter(func(l: Dictionary) -> bool: return str(l.get("post", "")).begins_with("s_"))
+			"harvest":
+				main.stats["harvested"] = int(kv[1])
+	main.mail.flag = 1.0 if main.mail._flag_up() else 0.0
+	main.diary_new = [PastSpring.DIARY_ID]

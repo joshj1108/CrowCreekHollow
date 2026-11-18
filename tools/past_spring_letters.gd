@@ -1,0 +1,157 @@
+extends SceneTree
+
+# CCH-ORIGIN-003: writes every spring and summer scene, choice, answer, parcel, later letter and "no answer"
+# outcome, straight from PastSpringScript, to AI_COLLAB/CCH_ORIGIN_003_LETTERS.md, so the writing can be reviewed
+# without screenshots. Run headless:  godot --path . --headless -s tools/past_spring_letters.gd
+# Placeholders the farm fills in are shown as an example in [brackets]; {by} is the stage's date.
+
+const OUT := "res://AI_COLLAB/CCH_ORIGIN_003_LETTERS.md"
+const EXAMPLE := {"crops": "[kale]", "Crops": "[Kale]", "repair": "[I've patched the holes in the farmhouse walls and boarded over the broken windows.]",
+	"repair_short": "[the holes in the farmhouse walls are patched and the broken windows boarded]",
+	"repair_ack": "[So the house is getting the work it needed. The picture made it look as if no one had touched it in years. / for the inn roof: A roof in the village. So there are neighbours, then. The picture didn't show any.]",
+	"place": "[There's a fishing village at the bottom of the hill road, half an hour's walk down. It's called Wicker Cove. I've been down there. / or the woods line]",
+	"place_short": "[the village down the hill road, Wicker Cove]",
+	"place_ack": "[A village half an hour down the road. So you're not as far from everything as I thought.]",
+	"compare": "[the holes in the farmhouse walls are patched and the broken windows boarded; the open ground has grown kale]",
+	"more": "[4]"}
+
+# [letter, road, winter outcome (as PastPost records it), what the winter was, winter facts]
+const ROUTES := [
+	["A", {"origin": "security", "security_exit": "stored", "contact": "friend"}, {"boxes": "to_ship"}, "winter: asked them to ship the boxes (30 coins paid)", {}],
+	["A", {"origin": "security", "security_exit": "stored"}, {"boxes": "held"}, "winter: asked for more time (to April 30)", {}],
+	["A", {"origin": "security", "security_exit": "stored"}, {"boxes": "held_unanswered"}, "winter: no answer (held to April 30 on the sender's terms)", {}],
+	["A", {"origin": "security", "security_exit": "stored"}, {"boxes": "released"}, "winter: told them the boxes could go", {}],
+	["A", {"origin": "security", "security_exit": "forward"}, {"forwarding": "ended"}, "forward road (renewed, ended or lapsed: only the opening line differs; extension road: the letting office, see note)", {}],
+	["B", {"origin": "work"}, {"order_book": "explained"}, "winter: explained (declined / sorted without me: only the opening differs)", {}],
+	["C", {"origin": "household", "household_relation": "partner"}, {"key": "to_send"}, "winter: asked for the key (it comes with this letter)", {}],
+	["C", {"origin": "household", "household_relation": "private"}, {"key": "kept_by_them"}, "winter: asked them to keep it (let_go / unanswered: only the opening differs)", {}],
+	["D", {"origin": "curiosity", "contact": "friend"}, {"told": "crops"}, "contact; winter: wrote about the crops (each winter answer has its own opening)", {"crops": "pumpkins"}],
+	["D", {"origin": "curiosity", "contact": "none"}, {"noted": "kept"}, "no contact: at the desk, no letters", {}],
+	["E", {"origin": "chance", "chance_loose_end": "work_offer"}, {"offer": "closed"}, "seasonal place; winter: closed (or never answered: the opening differs)", {}],
+	["E", {"origin": "chance", "chance_loose_end": "work_offer"}, {"offer": "on_list", "until_day": 305}, "seasonal place; winter: stayed on next season's list", {}],
+	["E", {"origin": "chance", "chance_loose_end": "storage"}, {"storage": "to_ship", "paid": 30}, "storage; winter: paid 30 to send the contents", {}],
+	["E", {"origin": "chance", "chance_loose_end": "storage"}, {"storage": "renewed", "until_day": 243}, "storage; winter: renewed to May 31", {}],
+	["E", {"origin": "chance", "chance_loose_end": "storage"}, {"storage": "held_unanswered", "until_day": 181}, "storage; winter: no answer (held to March 30)", {}],
+	["E", {"origin": "chance", "chance_loose_end": "storage"}, {"storage": "cleared"}, "storage; winter: cleared", {}],
+	["E", {"origin": "chance", "chance_loose_end": "order"}, {"order": "to_ship", "paid": 24}, "order; winter: paid 24 to send it", {}],
+	["E", {"origin": "chance", "chance_loose_end": "order"}, {"order": "refunded", "returned": 12}, "order; winter: cancelled, deposit 12 returned", {}],
+	["E", {"origin": "chance", "chance_loose_end": "order"}, {"order": "held", "until_day": 212}, "order; winter: held to April 30 (asked, or no answer: the opening differs)", {}],
+	["E", {"origin": "chance", "chance_loose_end": "meeting"}, {"meeting": "spring"}, "meeting; winter: asked to try again in spring", {}],
+	["E", {"origin": "chance", "chance_loose_end": "meeting"}, {"meeting": "lapsed"}, "meeting; winter: no answer", {}],
+	["E", {"origin": "chance", "chance_loose_end": "meeting"}, {"meeting": "closed"}, "meeting; winter: closed it", {}],
+]
+
+
+func _initialize() -> void:
+	var md := "# CCH-ORIGIN-003 — every spring and summer scene, as the game has it\n\n"
+	md += "Generated by `tools/past_spring_letters.gd` from `scripts/past_spring_script.gd`; do not edit by hand. "
+	md += "A route is chosen once, from what the winter actually settled. Letters arrive in the farm mailbox (a desk scene has no letter); "
+	md += "a reply goes with the next morning's post and the sender's answer comes 6 days later; a parcel the answer sends arrives %d days after that. " % PastSpringScript.PARCEL_DAYS
+	md += "A stage's date is given as a day (fixed) or \"within N days\" of the stage opening (at least 7). Nothing arrives or lapses on day 240, the parish letter's morning (it moves to the next day). "
+	md += "Text in [brackets] is filled from what the farm has really done. Coins: *cost* is paid when the reply is written (given back if it is taken back before the post); *pay* comes once with the sender's answer.\n"
+	for r in ROUTES:
+		var o := OriginState.new(_road(r[1]))
+		var v := PastSpringScript.variant(o, {"outcome": r[2], "facts": r[4]})
+		md += "\n---\n\n## %s: \"%s\" (`%s`)\n\n*%s. Arrives day %d (%s)%s.*\n\n" % [OriginState.ORIGIN_TITLES[o.origin()], v["title"], v["id"], r[3],
+			int(v["deliver"]), _date(int(v["deliver"])), "; at the desk, no letter" if str(v.get("medium", "mail")) == "desk" else ""]
+		if str(v.get("sender", "")) != "":
+			md += "**%s.**\n\n" % v["sender"]
+		md += "%s\n\n" % _quote(_fill(str(v["body"])))
+		if str(v.get("carrier", "")) != "":
+			md += "*Comes with it (paid in the winter, nothing more to pay):* **%s**.\n\n" % v["parcels"][v["carrier"]]["title"]
+		for pid in v["parcels"]:
+			var p: Dictionary = v["parcels"][pid]
+			md += "*Parcel `%s`:* %s *Open:* \"%s\" *Diary:* %s / %s%s\n\n" % [pid, p.get("note", ""), p["open_text"], p["diary_came"], p["diary_opened"],
+				(" *September:* " + str(p["sept"])) if p.has("sept") else ""]
+		for st in v["stages"]:
+			var stage: Dictionary = v["stages"][st]
+			var when := ("by day %d (%s)" % [int(stage["by"]), _date(int(stage["by"]))]) if stage.has("by") else "within %d days" % int(stage.get("within", 30))
+			if st != "first":
+				md += "### Stage `%s`: \"%s\" (%s, %s)\n\n" % [st, stage.get("title", ""), when, stage.get("where", "mail")]
+				if str(stage.get("body", "")) != "":
+					md += "%s\n\n" % _quote(_fill(str(stage["body"])))
+			else:
+				md += "### First stage (%s%s). %s\n\n" % [when, ", at the desk" if str(stage.get("where", v.get("medium", "mail"))) == "desk" else "", stage.get("late", "")]
+			md += "| Choice | Writes / does | Coins, time | What comes back | Then | Outcome (saved) | Diary | September line |\n|---|---|---|---|---|---|---|---|\n"
+			for c in stage["choices"]:
+				var kind := str(c.get("kind", "reply"))
+				var label := str(c["label"])
+				if c.has("needs"):
+					label += " *(only if: %s)*" % c["needs"]
+				var writes := _fill(str(c.get("reply", "")))
+				if kind == "note":
+					writes = ("*(diary note)* " + writes) if writes != "" else "*(nothing written)* " + str(c.get("about", ""))
+				var money := []
+				if int(c.get("cost", 0)) > 0:
+					money.append("cost %d" % int(c["cost"]))
+				if int(c.get("pay", 0)) > 0:
+					money.append("pay %d" % int(c["pay"]))
+				if float(c.get("hours", 0.0)) > 0.0:
+					money.append("%d hours" % int(c["hours"]))
+				var back := _fill(str(c.get("ack", ""))) if kind in ["reply", "work"] else "—"
+				var then := []
+				if str(c.get("next", "")) != "":
+					back = "*(their letter opens stage `%s`)*" % c["next"]
+				if str(c.get("parcel", "")) != "":
+					then.append("parcel `%s` sent" % c["parcel"])
+				if str(c.get("parcel_state", "")) != "":
+					then.append("parcel %s" % c["parcel_state"])
+				var fd: Dictionary = c.get("follow", {})
+				if not fd.is_empty():
+					if str(fd.get("next", "")) != "":
+						then.append("%d days later, stage `%s` opens at the desk" % [int(fd["days"]), fd["next"]])
+					else:
+						then.append("%d days later, \"%s\": %s *Diary:* %s" % [int(fd["days"]), fd.get("title", ""), _fill(str(fd["text"])), fd.get("diary", "")])
+				md += "| %s | %s | %s | %s | %s | `%s` · %s | %s | %s |\n" % [label, writes, ", ".join(money), back, "; ".join(then).replace("\n\n", " "),
+					JSON.stringify(c.get("outcome", {})), c.get("matter", ""), _fill(str(c.get("diary", ""))), _fill(str(c.get("sept", "")))]
+			md += "\n"
+			var lp: Dictionary = (v["lapse"] as Dictionary).get(st, {})
+			if not lp.is_empty():
+				md += "**Nothing done by the date:** %s Outcome `%s` · %s%s. Diary: %s%s\n\n" % [
+					("\"" + str(lp["text"]) + "\"") if str(lp.get("text", "")) != "" else "nothing more comes.",
+					JSON.stringify(lp.get("outcome", {})), lp.get("matter", ""), (", %d coins enclosed (once)" % int(lp["pay"])) if int(lp.get("pay", 0)) > 0 else "",
+					str(lp.get("diary", "")) if str(lp.get("diary", "")) != "" else "nothing.",
+					(" *September:* " + str(lp["sept"])) if str(lp.get("sept", "")) != "" else ""]
+				if str(lp.get("next", "")) != "":
+					md += "*(That letter opens stage `%s`.)*\n\n" % lp["next"]
+	var f := FileAccess.open(OUT, FileAccess.WRITE)
+	f.store_string(md.replace("\n>\n> \n", "\n"))
+	f.close()
+	print("wrote ", OUT)
+	quit()
+
+
+func _road(wants: Dictionary) -> Dictionary:
+	var choices := {}
+	var order := []
+	for i in 40:
+		var next := RoadScript.next_choice(choices)
+		if next.is_empty():
+			break
+		var ids: Array = RoadScript.option_ids(next)
+		var pick := str(wants.get(str(next["key"]), ids[0]))
+		choices[str(next["key"])] = pick if ids.has(pick) else ids[0]
+		order.append(str(next["key"]))
+	return {"v": 1, "status": "complete", "choices": choices, "order": order, "day": 1}
+
+
+# Day 1 is October 1; months have their real lengths (as MainGame._calendar_date).
+func _date(day: int) -> String:
+	var names := ["October", "November", "December", "January", "February", "March", "April", "May", "June", "July", "August", "September"]
+	var lens := [31, 30, 31, 31, 28, 31, 30, 31, 30, 31, 31, 30]
+	var d := (day - 1) % 365
+	var i := 0
+	while d >= lens[i]:
+		d -= lens[i]
+		i += 1
+	return "%s %d" % [names[i], d + 1]
+
+
+func _fill(t: String) -> String:
+	for k in EXAMPLE:
+		t = t.replace("{%s}" % k, EXAMPLE[k])
+	return t.replace("|", "/")
+
+
+func _quote(t: String) -> String:
+	return "> " + t.replace("\n\n", "\n>\n> ")

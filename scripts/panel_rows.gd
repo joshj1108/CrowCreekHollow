@@ -120,6 +120,9 @@ func _diary_sections() -> Array:
 	# The winter's post from the life before (CCH-ORIGIN-002), from what was really received, written and sent.
 	for p in m.past_post.diary_pages():
 		notes.append({"title": str(p["title"]), "text": str(p["text"]), "new": is_new.call(str(p["id"]))})
+	# Its spring and summer (CCH-ORIGIN-003): what came, what was opened, written, sent and answered.
+	for p in m.past_spring.diary_pages():
+		notes.append({"title": str(p["title"]), "text": str(p["text"]), "new": is_new.call(str(p["id"]))})
 	if not notes.is_empty():
 		sections.append({"name": "Notes", "heading": "Notes", "pages": notes})
 	return sections + m.mystery._sections(is_new)
@@ -833,6 +836,7 @@ func _mailbox_rows() -> Array:
 		rows.append({"name": str(letter["title"]), "status": "New" if bool(letter["unread"]) else "Read",
 			"status_kind": "ok" if bool(letter["unread"]) else "done", "value": str(letter["text"])})
 		rows.append_array(m.past_post.rows_for(letter))   # CCH-ORIGIN-002: answers to a letter from before
+		rows.append_array(m.past_spring.rows_for(letter))   # CCH-ORIGIN-003: its spring answers, and parcels to open
 	if m.desk_mail.is_empty():
 		rows.append({"note": "The mailbox is empty. The post comes in the morning, with any catalog orders."})
 	else:
@@ -847,6 +851,7 @@ func _desk_rows() -> Array:
 	rows.append({"name": "Your diary", "status": "New page" if diary_new else "", "status_kind": "ok",
 		"value": "a new page to read" if diary_new else "what you have learned, and what to do next",
 		"button": "Read", "action": "diary", "enabled": true})
+	rows.append_array(m.past_spring.desk_rows())   # CCH-ORIGIN-003: a photograph, or paid work on papers by post
 	rows.append({"note": "The post comes to the mailbox by the east gate, beside the farm stand."})
 
 	rows.append({"tab": "Tax", "icon": "coins"})

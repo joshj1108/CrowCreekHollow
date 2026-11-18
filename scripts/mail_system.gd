@@ -61,7 +61,7 @@ func _clear_read_mail() -> void:
 	var kept: Array = []
 	for letter in m.desk_mail:
 		# A letter from before still waiting on an answer (PastPost) stays with its reply rows.
-		if bool(letter["unread"]) or m.past_post.keeps(str(letter.get("post", ""))):
+		if bool(letter["unread"]) or m.past_post.keeps(str(letter.get("post", ""))) or m.past_spring.keeps(str(letter.get("post", ""))):
 			kept.append(letter)
 	m.desk_mail = kept
 	m._show_message("You take the read letters out of the mailbox and keep them.")
@@ -97,6 +97,7 @@ func _open_mailbox() -> void:
 	for letter in m.desk_mail:
 		if bool(letter["unread"]) and letter.has("post"):
 			m.past_post.read(str(letter["post"]))
+			m.past_spring.read(str(letter["post"]))
 		letter["unread"] = false
 	m._toggle_tab("Mailbox")
 

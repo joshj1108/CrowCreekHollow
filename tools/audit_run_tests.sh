@@ -10,7 +10,7 @@ GODOT="${GODOT:-C:/Program Files (x86)/Steam/steamapps/common/Godot Engine/godot
 SCRATCH="${1:-${TMP:-/tmp}/cch_audit_profiles}"
 OUT="${OUT:-art/style_tests/CCH-PLAYABLE-001/logs}"
 mkdir -p "$OUT"
-TESTS="save_test menu_test interior_test mail_test debug_menu_test diary_test wheel_test layout_test farmer_test creature_test aoh2_e2_check aoh2_e3_check aoh2_e5_check aoh_cave_check aoh_trek_check diary_fit town_test orders_test evening_test playable002_test woodwork_test inn_repair_test interlude_test past_post_test"
+TESTS="save_test menu_test interior_test mail_test debug_menu_test diary_test wheel_test layout_test farmer_test creature_test aoh2_e2_check aoh2_e3_check aoh2_e5_check aoh_cave_check aoh_trek_check diary_fit town_test orders_test evening_test playable002_test woodwork_test inn_repair_test interlude_test past_post_test past_spring_test"
 run() {
   local t=$1 prof="$SCRATCH/$1"
   mkdir -p "$prof"

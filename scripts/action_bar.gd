@@ -104,6 +104,9 @@ var tab_strip: HBoxContainer
 var list_scroll: ScrollContainer
 var list_box: VBoxContainer
 var detail_box: VBoxContainer
+var detail_scroll: ScrollContainer   # CCH-ORIGIN-003: the detail page's text scrolls; its button row stays put
+var detail_text: VBoxContainer       # the detail page's text, inside detail_scroll
+var _detail_more := false            # the detail page's text is longer than the page (a Scroll prompt shows)
 var prompt_bar: HBoxContainer
 var close_button: Button
 var ledger_tabs := {}             # panel -> the open tab's index, kept until the game closes
@@ -1393,6 +1396,19 @@ func _build_ledger_frame() -> Control:
 	detail_box = VBoxContainer.new()
 	detail_box.add_theme_constant_override("separation", 8)
 	page.add_child(detail_box)
+	# CCH-ORIGIN-003: a long letter scrolls inside the page instead of growing the panel off the screen. The mouse
+	# wheel scrolls it where it is; PgUp/PgDn and the right stick scroll it from anywhere (see _scroll_detail).
+	detail_scroll = ScrollContainer.new()
+	detail_scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	detail_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	detail_scroll.focus_mode = Control.FOCUS_NONE
+	detail_scroll.add_theme_stylebox_override("panel", StyleBoxEmpty.new())   # the page shows through
+	detail_scroll.get_v_scroll_bar().focus_mode = Control.FOCUS_NONE
+	detail_box.add_child(detail_scroll)
+	detail_text = VBoxContainer.new()
+	detail_text.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	detail_text.add_theme_constant_override("separation", 8)
+	detail_scroll.add_child(detail_text)
 	return ledger
 
 
@@ -1591,10 +1607,43 @@ func _kind_color(kind: String) -> Color:
 
 
 func _pick_entry(index: int) -> void:
-	if index == _ledger_pick and detail_box.get_child_count() > 0:
+	# The last entry shows the tab's notes under it too (they take no focus), so a pad or keys can read them.
+	if index == _ledger_entries.size() - 1 and index > 0:
+		_scroll_list_end.call_deferred()
+	if index == _ledger_pick and detail_text.get_child_count() > 0:
 		return
 	_ledger_pick = index
 	_show_detail()
+
+
+func _scroll_list_end() -> void:
+	await get_tree().process_frame
+	if is_instance_valid(list_scroll):
+		list_scroll.scroll_vertical = int(list_scroll.get_v_scroll_bar().max_value)
+
+
+# CCH-ORIGIN-003: the detail page's text is longer than the page.
+func _detail_overflows() -> bool:
+	return ledger != null and ledger.visible and detail_text.size.y > detail_scroll.size.y + 2.0
+
+
+# After the page is laid out: show or hide the Scroll prompt.
+func _check_detail_more() -> void:
+	await get_tree().process_frame
+	if not is_instance_valid(detail_scroll):
+		return
+	var more := _detail_overflows()
+	if more != _detail_more:
+		_detail_more = more
+		if panel.visible and prompt_bar.visible:
+			_refresh_prompts()
+
+
+# PgUp/PgDn (a page) or the right stick (smoothly) scroll the detail page when it is longer than the page,
+# otherwise the list. Scrolling never presses anything.
+func _scroll_detail(pixels: int) -> void:
+	var target: ScrollContainer = detail_scroll if _detail_overflows() else list_scroll
+	target.scroll_vertical += pixels
 
 
 func _focus_entry(index: int) -> void:
@@ -1680,29 +1729,36 @@ func _poll_amount(delta: float) -> void:
 
 # The focused entry in full: what it is, what it needs (have or short), and its button.
 func _show_detail() -> void:
-	_clear(detail_box)
+	# The text goes in the scrolling part; the button row (and an amount line) below it, always in view.
+	_clear(detail_text)
+	for child in detail_box.get_children():
+		if child != detail_scroll:
+			detail_box.remove_child(child)
+			child.queue_free()
+	detail_scroll.scroll_vertical = 0
+	_check_detail_more.call_deferred()
 	if _ledger_entries.is_empty():
 		return
 	var row: Dictionary = _ledger_entries[clampi(_ledger_pick, 0, _ledger_entries.size() - 1)]
-	detail_box.add_child(_detail_text(str(row.get("name", "")), COL_ACCENT, 20))
+	detail_text.add_child(_detail_text(str(row.get("name", "")), COL_ACCENT, 20))
 	var status: Array = _entry_status(row)
 	if str(row.get("status", "")) != "":
-		detail_box.add_child(_detail_text(str(status[0]), _kind_color(str(status[1])), 14))
+		detail_text.add_child(_detail_text(str(status[0]), _kind_color(str(status[1])), 14))
 	if str(row.get("about", "")) != "":
-		detail_box.add_child(_detail_text(str(row["about"]), COL_TEXT, 15))
+		detail_text.add_child(_detail_text(str(row["about"]), COL_TEXT, 15))
 	var needs: Array = row.get("needs", [])
 	if needs.is_empty():
 		if str(row.get("value", "")) != "" and str(row.get("value", "")) != str(row.get("status", "")):
-			detail_box.add_child(_detail_text(str(row["value"]), COL_TEXT, 15))
+			detail_text.add_child(_detail_text(str(row["value"]), COL_TEXT, 15))
 	else:
-		detail_box.add_child(_detail_text("NEEDS", COL_MUTED, 12))
+		detail_text.add_child(_detail_text("NEEDS", COL_MUTED, 12))
 		for need in needs:
 			var ok := bool(need.get("ok", false))
 			# Plain ASCII boxes: the default font has no tick or cross.
 			var text := "%s  %s" % ["[x]" if ok else "[  ]", str(need["text"])]
 			if need.has("have") and not ok:
 				text += "  (have %d)" % int(need["have"])
-			detail_box.add_child(_detail_text(text, COL_OK if ok else COL_SHORT, 15))
+			detail_text.add_child(_detail_text(text, COL_OK if ok else COL_SHORT, 15))
 	if row.has("progress"):
 		var bar := ProgressBar.new()
 		bar.show_percentage = false
@@ -1713,12 +1769,9 @@ func _show_detail() -> void:
 		else:
 			bar.add_theme_stylebox_override("background", _box(COL_TRACK, COL_TRACK, 0, 4, 0))
 			bar.add_theme_stylebox_override("fill", _box(COL_ACCENT, COL_ACCENT, 0, 4, 0))
-		detail_box.add_child(bar)
+		detail_text.add_child(bar)
 	if str(row.get("note", "")) != "":
-		detail_box.add_child(_detail_text(str(row["note"]), COL_MUTED, 13))
-	var spacer := Control.new()
-	spacer.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	detail_box.add_child(spacer)
+		detail_text.add_child(_detail_text(str(row["note"]), COL_MUTED, 13))
 	if row.has("button"):
 		var bottom := HBoxContainer.new()
 		bottom.alignment = BoxContainer.ALIGNMENT_END
@@ -1852,6 +1905,8 @@ func _refresh_prompts() -> void:
 		prompts = [["< >", "Turn page"], ["B" if pad else "Esc", back]]
 	if _ledger_tab_count > 1:
 		prompts.append(["LB RB" if pad else "Q E", "Tabs"])
+	if ledger.visible and _detail_more:
+		prompts.append(["RS" if pad else "PgUp PgDn", "Scroll"])
 	if not active_tab in ["Pause", "Settings", "Controls"]:
 		prompts.append(["L3" if pad else "Shift", "Sections"])
 	for prompt in prompts:
@@ -1927,8 +1982,10 @@ func _process(delta: float) -> void:
 		return
 	var stick := Input.get_joy_axis(pads[0], JOY_AXIS_RIGHT_Y)
 	if absf(stick) > 0.25:
-		var target := list_scroll if ledger.visible else scroll
-		target.scroll_vertical += int(stick * 900.0 * delta)
+		if ledger.visible:
+			_scroll_detail(int(stick * 900.0 * delta))
+		else:
+			scroll.scroll_vertical += int(stick * 900.0 * delta)
 
 
 func _input(event: InputEvent) -> void:
@@ -1951,6 +2008,11 @@ func _input(event: InputEvent) -> void:
 	# The mouse wheel turns the diary's pages too.
 	if book.visible and event is InputEventMouseButton and event.pressed and event.button_index in [MOUSE_BUTTON_WHEEL_UP, MOUSE_BUTTON_WHEEL_DOWN]:
 		_turn_page(-1 if event.button_index == MOUSE_BUTTON_WHEEL_UP else 1)
+		get_viewport().set_input_as_handled()
+		return
+	# PgUp and PgDn scroll a long detail page (or the list), a page at a time.
+	if ledger.visible and event is InputEventKey and event.pressed and event.physical_keycode in [KEY_PAGEUP, KEY_PAGEDOWN]:
+		_scroll_detail(int(detail_scroll.size.y * 0.8) * (-1 if event.physical_keycode == KEY_PAGEUP else 1))
 		get_viewport().set_input_as_handled()
 		return
 	if _ledger_tab_count < 2 or not event.is_pressed() or event.is_echo():
