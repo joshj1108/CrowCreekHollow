@@ -40,6 +40,14 @@ Target: Windows / Steam, $19.99, a complete single-player **Year One** (see OD-1
   The ledger's detail page now scrolls (mailbox clipping fixed). Report `AI_COLLAB/CCH_ORIGIN_003_REPORT.md`, full
   text `CCH_ORIGIN_003_LETTERS.md`. past_spring_test 145 PASS; suite 25/25. Stopped for owner and ChatGPT review;
   no human play. September passage and Year Two echoes not built.
+- **CCH-ORIGIN-004 (2026-11-17):** the first September, "One Year on the Road": from September 24 (day 359) a diary
+  section in the player's hand built from saved state only (the road's own scenes, the spring's September line checked
+  against parcel states and dated arrangements, the house as it is, the field, one person or place) with distinct lines
+  per origin; the player picks one of five closing lines at the desk (no right one); written once and kept exactly as
+  written (`first_september`, save v21, query API for Year Two). No time, no rewards, no story change. Report
+  `AI_COLLAB/CCH_ORIGIN_004_REPORT.md`, every variant `CCH_ORIGIN_004_SEPTEMBER.md`. first_september_test 114 PASS;
+  suite 25/26 (aoh_trek_check timing, pre-existing; passes alone). Stopped for owner and ChatGPT review; no human play.
+  Year Two callbacks (CCH-ORIGIN-005) not built.
 - **Owner decisions waiting:** OD-1 to OD-6 (section 4), plus the pending CCH-EVENING-002 multipliers.
 
 ## 1. Evidence levels
@@ -81,7 +89,7 @@ implemented · **PL** planned, not implemented · **BB** broken or blocked.
 | Folk on the farm (Maren, Davy, vicar, postman, Mrs Tull) | `folk_system.gd` | NV | sim | No daily routines; resident arcs designed only | Each has a routine and an arc in Year One |
 | Story chapters 1-17, second-year act, 3 endings | `story_act.gd`, `mystery.gd`, `ending_screen.gd` | NV | sim (17/17, all endings) | Act opens day 240, bell from day 396: **two years** (OD-1); never human-played | A human reaches an ending |
 | Agnes's diary + handwriting | `diary_book.gd`, `mystery.gd` | VW | auto `diary_test` 63; UI approved | — | unchanged |
-| Opening interlude + five origins | `road_script.gd`, `road_interlude.gd`, `origin_state.gd` | **PI** | [auto] interlude built and tested (CCH-ORIGIN-001), all five origins; winter letters built (CCH-ORIGIN-002, `past_post.gd`); spring/summer built (CCH-ORIGIN-003, `past_spring.gd`); September and Year Two not built | Owner-mandated, non-skippable; human play pending | Interlude plays, origin saved, ≥3 later consequences per origin |
+| Opening interlude + five origins | `road_script.gd`, `road_interlude.gd`, `origin_state.gd` | **PI** | [auto] interlude built and tested (CCH-ORIGIN-001), all five origins; winter letters built (CCH-ORIGIN-002, `past_post.gd`); spring/summer built (CCH-ORIGIN-003, `past_spring.gd`); September diary page built (CCH-ORIGIN-004, `first_september.gd`); Year Two not built | Owner-mandated, non-skippable; human play pending | Interlude plays, origin saved, ≥3 later consequences per origin |
 | Mid-year decisions, resident arcs, inn room | AI_COLLAB designs | **PL** | docs only | Large; must be scoped (OD-3) | Per scope decision |
 | Achievements / Steam | `achievement_system.gd`, `steam_achievements.gd` | PI | code | GodotSteam not in the project | Unlocks reach Steam in a Steam build |
 | Audio (SFX, ambience, music) | `music_system.gd`, `ambience_system.gd`, `tools/make_*.py` | PI | code | Generated in-house (licence clean); production quality is an owner call (`MUSIC_BRIEF.md`) | Owner accepts the mix and score |
@@ -161,7 +169,7 @@ Status uses section 2's codes plus **done**. Every task's evidence goes in `art/
 | --- | --- | --- | --- | --- | --- |
 | R-P3-01 | Opening interlude, first playable slice: presentation scene + origin choice saved (`origin`) | OD-3 | non-skippable, plays before day 1, kb/controller, saved and migrated | M | **VW** [auto] — CCH-ORIGIN-001, in review |
 | R-P3-02 | All five origins' interlude content | R-P3-01 | each branch complete per screenplay | L | **VW** [auto] — CCH-ORIGIN-001, in review |
-| R-P3-03 | Origin consequences in Year One (diary pages, folk lines, the winter scenes) | R-P3-02, OD-1 | ≥3 visible consequences per origin | L | **PI** [auto] — winter letters (CCH-ORIGIN-002) and spring/summer (CCH-ORIGIN-003) done, in review; September passage next |
+| R-P3-03 | Origin consequences in Year One (diary pages, folk lines, the winter scenes) | R-P3-02, OD-1 | ≥3 visible consequences per origin | L | **PI** [auto] — winter letters (CCH-ORIGIN-002), spring/summer (CCH-ORIGIN-003) and the September page (CCH-ORIGIN-004) done, in review; Year Two callbacks next |
 | R-P3-04 | Story pacing fitted to Year One (OD-1) | OD-1 | a human reaches an ending inside the 1.0 span | M | PL |
 | R-P3-05 | Midyear decisions and resident arcs (scoped by OD-3) | OD-3, R-P2-03 | per scope | XL | PL |
 | R-P3-06 | Narrative QA: every chapter and ending reachable on each origin | R-P3-03..05 | sim + scripted checks per origin | M | PL |
@@ -239,6 +247,7 @@ A green suite is not a polished game: every gate above marked "human" needs a pe
 | Date | Task | What happened | Commit |
 | --- | --- | --- | --- |
 | 2026-11-16 | CCH-ORIGIN-002 | First-winter letters for all five origins, answered in the mailbox, diary record, `past_post` (save v19); past_post_test 192 PASS; suite 22/24 (aoh_trek_check timing, pre-existing; playable002_test intermittent under load, passes alone) | see `MESSAGE_BOARD.md` |
+| 2026-11-17 | CCH-ORIGIN-004 | First September diary page "One Year on the Road" for all five origins and legacy saves, closing line chosen at the desk, `first_september` (save v21); first_september_test 114 PASS; suite 25/26 (aoh_trek_check timing, pre-existing, passes alone) | see `MESSAGE_BOARD.md` |
 | 2026-11-17 | CCH-ORIGIN-003 | Spring/summer for all five origins (21 routes), parcels, paid desk work, later answers, September lines, `past_spring` (save v20); scrolling detail page fixes mailbox clipping; past_spring_test 145 PASS; suite 25/25 | see `MESSAGE_BOARD.md` |
 | 2026-11-16 | CCH-ORIGIN-001 | Opening interlude, five origins, origin record (save v18); interlude_test 101 PASS; suite 22/23 (aoh_trek_check timing, pre-existing) | see `MESSAGE_BOARD.md` |
 | 2026-11-15 | OD-7 | Owner approved committing `project.godot`; rebuilt from a clean checkout with v0.1.0 | `4f651b5c` |

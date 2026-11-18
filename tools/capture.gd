@@ -161,6 +161,12 @@ extends SceneTree
 #                   answer), parcel (on until a sent parcel arrives), open:PID (open a parcel), read (read the post),
 #                   town (a visit to Wicker Cove), harvest:N (N crops harvested), tidy (take the winter's letters out). dspring opens the diary at its page;
 #                   tpick=ACTION focuses that entry in the panel opened with tab= (e.g. the desk's work row).
+#   sept=STEPS      CCH-ORIGIN-004: after past=/spring= (or alone), on to the first September's page. Steps, comma-
+#                   separated: to:N (to day N with both posts' mornings; default 359, September 24), legacy (the save
+#                   has no origin), farm:bare|worked|restored (the house, field, a walker's errand, timber), inn (Edith's
+#                   leak mended in May), cove:N (N visits to Wicker Cove), deed:N (coins paid toward it), note (the
+#                   morning's note), write:ID (finish it with that closing line), reload (save and load slot 8).
+#                   dsept=P with diary opens the book at its section, page P; spick with tab=Desk focuses its page row.
 #   combatlog       with hold, print COMBAT lines: each swing's press, its contact frame and hit, each blow and the guard
 
 func _initialize() -> void:
@@ -449,6 +455,8 @@ func _initialize() -> void:
 		_past_post(main, opt)
 	if opt.has("spring") and main.get("past_spring") != null:
 		_past_spring(main, opt)
+	if opt.has("sept") and main.get("first_september") != null:
+		_first_september(main, opt)
 	if opt.has("mailopen"):
 		# Check the mailbox: its door stays open for the shot; mailpanel keeps the Mailbox panel open too.
 		main.mail._open_mailbox()
@@ -587,6 +595,13 @@ func _initialize() -> void:
 		if opt.has("dpage"):
 			var at: PackedStringArray = opt["dpage"].split(",")
 			main.action_bar.open_book_at(int(at[0]), int(at[1]) if at.size() > 1 else 0)
+		if opt.has("dsept"):
+			# CCH-ORIGIN-004: open the book at the first September's section.
+			var fsecs: Array = main.panels._diary_sections()
+			for si in fsecs.size():
+				if str(fsecs[si]["name"]) == FirstSeptember.SECTION:
+					var last: int = (fsecs[si]["pages"] as Array).size() - 1
+					main.action_bar.open_book_at(si, last if str(opt["dsept"]) == "last" else (int(opt["dsept"]) if str(opt["dsept"]).is_valid_int() else 0))
 		if opt.has("dspring"):
 			# CCH-ORIGIN-003: open the book at the spring post's page in Notes.
 			var ssecs: Array = main.panels._diary_sections()
@@ -733,6 +748,15 @@ func _initialize() -> void:
 		main._toggle_tab(str(opt["tab"]).replace("_", " "))
 		await process_frame
 		await process_frame
+		if opt.has("spick"):
+			# CCH-ORIGIN-004: the desk's page row (the entry just above the first closing line).
+			var es: Array = main.action_bar.list_box.get_children().filter(func(c: Node) -> bool: return c is Button)
+			for i in es.size():
+				if str(es[i].get_meta("action", "")).begins_with("september:") and i > 0:
+					es[i - 1].grab_focus()
+					break
+			for f in 3:
+				await process_frame
 		if opt.has("tpick"):
 			for e in main.action_bar.list_box.get_children():
 				if e is Button and str(e.get_meta("action", "")) == str(opt["tpick"]):
@@ -1096,6 +1120,60 @@ func _past_post(main, opt: Dictionary) -> void:
 				l["unread"] = false
 	main.mail.flag = 1.0 if main.mail._flag_up() else 0.0
 	main.diary_new = [PastPost.DIARY_ID]
+
+
+# CCH-ORIGIN-004: on to the first September's page (see sept= above).
+func _first_september(main, opt: Dictionary) -> void:
+	var fs: FirstSeptember = main.first_september
+	var steps: PackedStringArray = str(opt["sept"]).split(",", false)
+	var go := func(d: int) -> void:
+		while main.day < d:
+			main.day += 1
+			main.past_post._morning()
+			main.past_spring._morning()
+		for l in main.desk_mail:
+			if l.has("post"):
+				main.past_post.read(str(l["post"]))
+				main.past_spring.read(str(l["post"]))
+			l["unread"] = false
+	if not str(opt["sept"]).contains("to:"):
+		go.call(FirstSeptember.FROM)
+	for step in steps:
+		var kv := step.split(":")
+		match kv[0]:
+			"to":
+				go.call(int(kv[1]))
+			"legacy":
+				main.origin = OriginState.new({"v": 1, "status": "legacy"})
+				main.past_post.reset()
+				main.past_spring.reset()
+			"farm":
+				main.house_stage = {"bare": 0, "worked": 2, "restored": 3}.get(kv[1], 0)
+				for i in range(1, main.house_stage + 1):
+					main.woodwork.repairs["house_%d" % i] = {"day": 40 * i, "cost": {}}
+				if kv[1] != "bare":
+					main.stats["harvested"] = 46
+					main.stats["crop_turnip"] = 30
+					main.stats["crop_potato"] = 16
+					main.folk.requests_done["maren_eggs"] = 80
+					main.nearwood.trips = 9
+					main.woodwork.hewn = 24
+				else:
+					main.stats["harvested"] = 0
+			"inn":
+				main.woodwork.repairs["inn_roof"] = {"day": 230, "cost": {}, "paid": 40}
+			"cove":
+				main.town.visits = int(kv[1])
+			"deed":
+				main.estate.deed_paid = int(kv[1])
+			"note":
+				main.morning_report = fs._morning()
+			"write":
+				fs.write(kv[1])
+			"reload":
+				main.saver._save_game()
+				main.saver._load_game()
+	main.diary_new = [FirstSeptember.DIARY_ID]
 
 
 # CCH-ORIGIN-003: play on from the winter into the spring, one morning at a time (see spring= above).

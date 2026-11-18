@@ -125,6 +125,12 @@ func _diary_sections() -> Array:
 		notes.append({"title": str(p["title"]), "text": str(p["text"]), "new": is_new.call(str(p["id"]))})
 	if not notes.is_empty():
 		sections.append({"name": "Notes", "heading": "Notes", "pages": notes})
+	# The first September's page (CCH-ORIGIN-004): the year, from the records, and the last line the player chose.
+	var year: Array = []
+	for p in m.first_september.diary_pages():
+		year.append({"title": str(p["title"]), "text": str(p["text"]), "new": is_new.call(str(p["id"]))})
+	if not year.is_empty():
+		sections.append({"name": FirstSeptember.SECTION, "heading": FirstSeptemberScript.TITLE, "pages": year})
 	return sections + m.mystery._sections(is_new)
 
 
@@ -852,6 +858,7 @@ func _desk_rows() -> Array:
 		"value": "a new page to read" if diary_new else "what you have learned, and what to do next",
 		"button": "Read", "action": "diary", "enabled": true})
 	rows.append_array(m.past_spring.desk_rows())   # CCH-ORIGIN-003: a photograph, or paid work on papers by post
+	rows.append_array(m.first_september.desk_rows())   # CCH-ORIGIN-004: the first September's page and its last line
 	rows.append({"note": "The post comes to the mailbox by the east gate, beside the farm stand."})
 
 	rows.append({"tab": "Tax", "icon": "coins"})
